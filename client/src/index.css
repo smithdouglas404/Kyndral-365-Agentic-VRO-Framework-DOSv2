@@ -4,10 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -42,87 +42,101 @@
   --color-chart-3: hsl(var(--chart-3));
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
-
-  --font-sans: 'Inter', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
   
-  --radius: 0.5rem;
+  --font-sans: 'Helvetica Neue', Arial, system-ui, sans-serif;
+  --font-heading: 'Helvetica Neue', Arial, system-ui, sans-serif;
+
+  --radius: 4px;
 }
 
 :root {
-  /* Modern Corporate Palette - Light Mode */
-  --background: 210 40% 98%; /* Soft cool white */
-  --foreground: 222 47% 11%; /* Deep navy text */
+  /* L&G Enterprise Transformation Team - 2026 Edition */
+  
+  /* Brand Blue (Primary): #005EB8 - HSL(209, 100%, 36%) */
+  /* Brand Teal (Success): #00843D - HSL(148, 100%, 26%) */
+  /* Brand Red (Alerts): #D50032 - HSL(346, 100%, 42%) */
+  /* Accent Yellow: #FFD700 - HSL(51, 100%, 50%) */
+  
+  /* Neutral White: #FFFFFF */
+  /* Neutral Black: #000000 */
+  /* Grey-100: #F5F5F5 - HSL(0, 0%, 96%) */
+  /* Grey-300: #E0E0E0 - HSL(0, 0%, 88%) */
+  /* Grey-500: #757575 - HSL(0, 0%, 46%) */
+  /* Grey-700: #424242 - HSL(0, 0%, 26%) */
 
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --background: 0 0% 96%; /* Grey-100 */
+  --foreground: 0 0% 0%; /* Neutral Black */
+
+  --card: 0 0% 100%; /* Neutral White */
+  --card-foreground: 0 0% 0%; /* Neutral Black */
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 0 0% 0%;
 
-  --primary: 221 83% 53%; /* Vivid corporate blue */
-  --primary-foreground: 210 40% 98%;
+  --primary: 209 100% 36%; /* Brand Blue */
+  --primary-foreground: 0 0% 100%; /* White */
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
+  --secondary: 0 0% 100%; /* White button with blue text */
+  --secondary-foreground: 209 100% 36%; /* Brand Blue */
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 0 0% 96%; /* Grey-100 */
+  --muted-foreground: 0 0% 46%; /* Grey-500 */
 
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222 47% 11.2%;
+  --accent: 0 0% 96%; /* Grey-100 used for subtle highlights */
+  --accent-foreground: 209 100% 36%; /* Brand Blue */
 
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 346 100% 42%; /* Brand Red */
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221 83% 53%;
+  --border: 0 0% 88%; /* Grey-300 */
+  --input: 0 0% 88%; /* Grey-300 */
+  --ring: 209 100% 36%; /* Brand Blue */
 
-  --chart-1: 221 83% 53%; /* Primary Blue */
-  --chart-2: 150 60% 40%; /* Success Green */
-  --chart-3: 340 70% 50%; /* Alert Red/Pink */
-  --chart-4: 35 90% 50%; /* Warning Orange */
-  --chart-5: 260 60% 60%; /* Purple */
+  /* Chart Colors */
+  --chart-1: 209 100% 36%; /* Brand Blue */
+  --chart-2: 148 100% 26%; /* Brand Teal */
+  --chart-3: 346 100% 42%; /* Brand Red */
+  --chart-4: 51 100% 50%; /* Accent Yellow */
+  --chart-5: 0 0% 46%; /* Grey-500 */
 
-  --radius: 0.5rem;
+  --radius: 4px;
 }
 
 .dark {
-  /* Modern Corporate Palette - Dark Mode */
-  --background: 222 47% 11%; /* Deep Navy Background */
-  --foreground: 210 40% 98%;
+  /* Dark mode mappings (Not explicitly defined in guidelines, mapping for robustness) */
+  --background: 0 0% 10%;
+  --foreground: 0 0% 96%;
 
-  --card: 217 33% 17%; /* Lighter Navy Card */
-  --card-foreground: 210 40% 98%;
+  --card: 0 0% 15%;
+  --card-foreground: 0 0% 96%;
 
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 0 0% 15%;
+  --popover-foreground: 0 0% 96%;
 
-  --primary: 217 91% 60%; /* Bright Blue */
-  --primary-foreground: 222 47% 11%;
+  --primary: 209 100% 60%; /* Lighter blue for dark mode */
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 209 100% 60%;
 
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 60%;
 
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 0 0% 20%;
+  --accent-foreground: 209 100% 60%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 346 100% 60%;
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 224.3 76.3% 48%;
+  --border: 0 0% 30%;
+  --input: 0 0% 30%;
+  --ring: 209 100% 60%;
 
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+  --chart-1: 209 100% 60%;
+  --chart-2: 148 100% 50%;
+  --chart-3: 346 100% 60%;
+  --chart-4: 51 100% 50%;
+  --chart-5: 0 0% 60%;
 }
 
 @layer base {
@@ -132,7 +146,16 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-tight;
+  h1 {
+    @apply text-5xl font-bold leading-tight tracking-tight; /* 48px */
+  }
+  h2 {
+    @apply text-3xl font-bold leading-tight; /* 32px */
+  }
+  h3 {
+    @apply text-2xl font-bold leading-tight; /* 24px */
+  }
+  p {
+    @apply text-base leading-normal; /* 16px */
   }
 }
