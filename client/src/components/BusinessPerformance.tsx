@@ -159,7 +159,7 @@ function AUMBreakdownChart() {
             </CardTitle>
             <CardDescription>Key AUM segments (£bn)</CardDescription>
           </div>
-          <Badge variant="outline">£1.1tn Total</Badge>
+          <Badge variant="outline" className="text-xs">£1.1tn Total (vs £1.2tn 2023)</Badge>
         </div>
       </CardHeader>
       <CardContent>

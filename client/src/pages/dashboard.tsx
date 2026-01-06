@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
+import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 
 type DataMode = "VRO" | "PMO";
@@ -458,6 +459,11 @@ export default function Dashboard() {
         {/* Industry Benchmarks Section */}
         <div className="mb-12">
           <IndustryBenchmarksSection />
+        </div>
+
+        {/* Business Performance Section - Annual Report Data */}
+        <div className="mb-12">
+          <BusinessPerformanceSection />
         </div>
 
         {/* Challenge Cards */}

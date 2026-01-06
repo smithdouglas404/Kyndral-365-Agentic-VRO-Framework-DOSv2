@@ -165,6 +165,8 @@ export const lgYearOverYearData = [
 // ============================================================================
 
 // Divisional Operating Profit (£m)
+// Source: L&G Full Year Results 2024, published 12 March 2025
+// Verified against: group.legalandgeneral.com/en/reporting-hub/2024-full-year-results
 export interface DivisionalProfit {
   division: string;
   profit2023: number;
@@ -174,19 +176,20 @@ export interface DivisionalProfit {
 }
 
 export const divisionalProfitData: DivisionalProfit[] = [
-  { division: "Institutional Retirement", profit2023: 1034, profit2024: 1105, change: 7, color: "#005EB8" },
-  { division: "Retail", profit2023: 449, profit2024: 504, change: 12, color: "#00843D" },
-  { division: "Asset Management", profit2023: 448, profit2024: 401, change: -10, color: "#6366f1" },
-  { division: "Corporate Investments", profit2023: 136, profit2024: 95, change: -30, color: "#94a3b8" }
+  { division: "Institutional Retirement", profit2023: 1028, profit2024: 1105, change: 7, color: "#005EB8" },  // Official: +7%
+  { division: "Retail", profit2023: 449, profit2024: 504, change: 12, color: "#00843D" },  // Official: +12%
+  { division: "Asset Management", profit2023: 448, profit2024: 401, change: -10, color: "#6366f1" },  // Official: -10%
+  { division: "Corporate Investments", profit2023: 136, profit2024: 95, change: -30, color: "#94a3b8" }  // Official: -30%
 ];
 
 export const groupFinancials = {
   coreOperatingProfit: { value2023: 1531, value2024: 1616, change: 6, unit: "£m" },
-  totalOperatingProfit: { value2023: 1661, value2024: 1711, change: 3, unit: "£m" },
+  totalOperatingProfit: { value2023: 1667, value2024: 1711, change: 3, unit: "£m" },
   dividendPerShare: { value2023: 20.34, value2024: 21.36, change: 5, unit: "p" },
   coreEPSGrowth: { value2024: 6, unit: "%" },
-  solvencyIICoverage: { value2024: 223, unit: "%" },
+  solvencyIICoverage: { value2024: 232, unit: "%" },  // Official report: 232%
   netSurplusGeneration: { value2023: 1383, value2024: 1342, unit: "£m" },
+  operationalSurplusGeneration: { value2023: 1821, value2024: 1751, unit: "£m" },
   source: "L&G Full Year Results 2024"
 };
 
@@ -199,8 +202,9 @@ export interface AUMSegment {
   color: string;
 }
 
+// Note: Total AUM declined from £1.2tn to £1.1tn due to market conditions
 export const aumBreakdown: AUMSegment[] = [
-  { segment: "Total Group AUM", aum2023: 1100, aum2024: 1100, change: 0, color: "#005EB8" },
+  { segment: "Total Group AUM", aum2023: 1200, aum2024: 1100, change: -8, color: "#005EB8" },
   { segment: "DC (Defined Contribution)", aum2023: 163, aum2024: 183, change: 12, color: "#00843D" },
   { segment: "UK Wholesale", aum2023: 54.2, aum2024: 64.7, change: 19, color: "#6366f1" },
   { segment: "Private Markets", aum2023: 48, aum2024: 57, change: 19, color: "#f59e0b" },
