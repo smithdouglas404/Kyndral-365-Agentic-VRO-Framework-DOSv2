@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
+import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 
 type DataMode = "VRO" | "PMO";
@@ -452,6 +453,11 @@ export default function Dashboard() {
             </div>
           </div>
           <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
+        </div>
+
+        {/* Industry Benchmarks Section */}
+        <div className="mb-12">
+          <IndustryBenchmarksSection />
         </div>
 
         {/* Challenge Cards */}

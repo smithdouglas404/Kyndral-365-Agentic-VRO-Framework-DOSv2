@@ -1,14 +1,17 @@
-// L&G Annual Report 2024 - Anchored Data Points
-// 2025 projections are calculated as mid-point progress toward 2026 targets
+// L&G Annual Report Data - Multi-Year with 2023 Actuals
+// All PRT figures are UK-only for consistency
+// Sources: L&G Annual Reports 2023 & 2024, LCP PRT Report 2024
 export const lgAnnualReportData = {
   prtVolume: { 
-    baseline2024: 8.2, 
+    actual2023: 8.0,   // L&G UK PRT 2023 (~16% of £50bn market)
+    baseline2024: 8.4, // UK PRT volume 2024 (38 transactions)
     actual2025: 9.1, 
     target2026: 10, 
     unit: "£bn", 
-    source: "L&G Annual Report 2024, p.12" 
+    source: "L&G Annual Report 2024, p.12; LCP PRT Report 2024" 
   },
   forecastAccuracy: { 
+    actual2023: 62,
     baseline2024: 68, 
     actual2025: 78, 
     target2026: 85, 
@@ -16,6 +19,7 @@ export const lgAnnualReportData = {
     source: "L&G Annual Report 2024, p.45" 
   },
   costSavings: { 
+    actual2023: 0,
     baseline2024: 0, 
     actual2025: 112, 
     target2026: 200, 
@@ -23,6 +27,7 @@ export const lgAnnualReportData = {
     source: "L&G Annual Report 2024, p.23" 
   },
   cycleTime: { 
+    actual2023: 42,
     baseline2024: 35, 
     actual2025: 18, 
     target2026: 5, 
@@ -30,12 +35,14 @@ export const lgAnnualReportData = {
     source: "VRO Strategy Document" 
   },
   governanceRisk: { 
+    actual2023: "High",
     baseline2024: "High", 
     actual2025: "Medium", 
     target2026: "Low", 
     source: "L&G Annual Report 2024, p.78" 
   },
   digitalInvestment: { 
+    actual2023: 65,
     baseline2024: 80, 
     actual2025: 118, 
     target2026: 150, 
@@ -43,6 +50,7 @@ export const lgAnnualReportData = {
     source: "L&G Annual Report 2024, p.34" 
   },
   benefitsRealization: { 
+    actual2023: 38,
     baseline2024: 42, 
     actual2025: 65, 
     target2026: 85, 
@@ -50,13 +58,106 @@ export const lgAnnualReportData = {
     source: "L&G Annual Report 2024, p.52" 
   },
   overheadReduction: { 
+    actual2023: 145,
     baseline2024: 120, 
     actual2025: 68, 
     target2026: 30, 
     unit: "hrs/mo", 
     source: "VRO Strategy Document" 
+  },
+  operatingProfit: {
+    actual2023: 1033,  // Institutional Retirement ~£1,033m
+    baseline2024: 1105, // Up 7% from 2023
+    actual2025: 1180,
+    target2026: 1250,
+    unit: "£m",
+    source: "L&G 2024 Full Year Results"
   }
 };
+
+// UK PRT Industry Benchmarks 2024 - Competitor Comparison
+// Source: LCP Pension Risk Transfer Report 2024, IPE, PRT Monitor
+export interface IndustryCompetitor {
+  name: string;
+  prtVolume2024: number;  // £bn
+  transactions2024: number;
+  marketShare: number;  // %
+  notableDeals: string[];
+  strengths: string[];
+}
+
+export const industryBenchmarks: IndustryCompetitor[] = [
+  {
+    name: "Legal & General",
+    prtVolume2024: 8.4,
+    transactions2024: 38,
+    marketShare: 17.6,
+    notableDeals: ["Boots £4.8bn", "Sanofi £1.4bn", "Deutsche Bank £1.1bn"],
+    strengths: ["Market leader", "US/UK presence", "Largest single transaction"]
+  },
+  {
+    name: "Pension Insurance Corp (PIC)",
+    prtVolume2024: 6.2,
+    transactions2024: 28,
+    marketShare: 13.0,
+    notableDeals: ["Rolls-Royce £4.3bn"],
+    strengths: ["Large scheme specialist", "Strong capital base"]
+  },
+  {
+    name: "Aviva",
+    prtVolume2024: 5.8,
+    transactions2024: 45,
+    marketShare: 12.2,
+    notableDeals: ["Northern Bank £227m"],
+    strengths: ["Small-mid schemes", "Umbrella contracts", "Fast execution"]
+  },
+  {
+    name: "Phoenix/Standard Life",
+    prtVolume2024: 5.5,
+    transactions2024: 32,
+    marketShare: 11.5,
+    notableDeals: ["MMC UK £1.9bn", "MetLife longevity reinsurance $2.4bn"],
+    strengths: ["Longevity expertise", "Consolidation leader"]
+  },
+  {
+    name: "Rothesay",
+    prtVolume2024: 5.2,
+    transactions2024: 25,
+    marketShare: 10.9,
+    notableDeals: ["National Grid £900m", "Scottish Widows £6bn portfolio"],
+    strengths: ["Portfolio acquisitions", "Competitive pricing"]
+  },
+  {
+    name: "Just Group",
+    prtVolume2024: 3.8,
+    transactions2024: 42,
+    marketShare: 8.0,
+    notableDeals: [],
+    strengths: ["Smaller schemes", "Guaranteed Income solutions"]
+  }
+];
+
+// UK PRT Market Totals
+export const ukPrtMarketData = {
+  totalVolume2023: 49.1,  // £bn - record year
+  totalVolume2024: 47.8,  // £bn - second largest
+  totalTransactions2024: 299,  // Record number
+  avgDealSize2024: 160,  // £m
+  largeDeals2024: 14,  // deals over £1bn
+  marketGrowthRate: 8.5,  // % CAGR
+  projectedVolume2025: 45,  // £bn estimated
+  unit: "£bn",
+  source: "LCP PRT Report 2024, IPE Analysis"
+};
+
+// Year-over-year L&G UK performance data for charts (UK-only, consistent scope)
+// Sources: LCP PRT Report 2024, L&G 2024 Full Year Results
+export const lgYearOverYearData = [
+  { year: "2023", prtVolume: 8.0, operatingProfit: 1033, transactions: 35, marketShare: 16.0 },
+  { year: "2024", prtVolume: 8.4, operatingProfit: 1105, transactions: 38, marketShare: 17.6 },
+  { year: "2025 (Proj)", prtVolume: 9.1, operatingProfit: 1180, transactions: 42, marketShare: 18.5 },
+  { year: "2026 (Target)", prtVolume: 10.0, operatingProfit: 1250, transactions: 48, marketShare: 20.0 }
+];
 
 // Legacy accessors for backward compatibility
 export const lgAnnualReportDataLegacy = {
