@@ -1,7 +1,7 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Theme } from "@/lib/data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
@@ -359,6 +360,7 @@ export default function Dashboard() {
   const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const filteredChallenges = activeTheme === "All" 
     ? challenges 
@@ -439,39 +441,89 @@ export default function Dashboard() {
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} />
 
-        {/* Design → Activate → Measure Value Section */}
-        <div className="mb-12 border-b border-border pb-8">
-          <ScenarioWorkflow onScenarioChange={handleScenarioChange} />
-        </div>
+        {/* Tab Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50 p-1 rounded-lg mb-8">
+            <TabsTrigger 
+              value="overview" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-overview"
+            >
+              <BarChart3 size={16} />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="ai-insights" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-ai-insights"
+            >
+              <Brain size={16} />
+              <span className="hidden sm:inline">AI Insights</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="benchmarks" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-benchmarks"
+            >
+              <TrendingUp size={16} />
+              <span className="hidden sm:inline">Benchmarks</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="performance" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-performance"
+            >
+              <Building2 size={16} />
+              <span className="hidden sm:inline">Performance</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="challenges" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-challenges"
+            >
+              <AlertCircle size={16} />
+              <span className="hidden sm:inline">Challenges</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Scenario-Driven Charts */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-            <div>
-              <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
-              <p className="text-muted-foreground">
-                KPIs for <span className="font-semibold text-[hsl(209,100%,36%)]">{selectedScenario.name}</span> scenario
-              </p>
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-8">
+            {/* Design → Activate → Measure Value Section */}
+            <div className="border-b border-border pb-8">
+              <ScenarioWorkflow onScenarioChange={handleScenarioChange} />
             </div>
-          </div>
-          <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
-        </div>
 
-        {/* AI Proactive Insights Section - VRO Differentiator */}
-        <div className="mb-12">
-          <AIProactiveInsightsSection />
-        </div>
+            {/* Scenario-Driven Charts */}
+            <div>
+              <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                <div>
+                  <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
+                  <p className="text-muted-foreground">
+                    KPIs for <span className="font-semibold text-[hsl(209,100%,36%)]">{selectedScenario.name}</span> scenario
+                  </p>
+                </div>
+              </div>
+              <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
+            </div>
+          </TabsContent>
 
-        {/* Industry Benchmarks Section */}
-        <div className="mb-12">
-          <IndustryBenchmarksSection />
-        </div>
+          {/* AI Insights Tab */}
+          <TabsContent value="ai-insights">
+            <AIProactiveInsightsSection />
+          </TabsContent>
 
-        {/* Business Performance Section - Annual Report Data */}
-        <div className="mb-12">
-          <BusinessPerformanceSection />
-        </div>
+          {/* Industry Benchmarks Tab */}
+          <TabsContent value="benchmarks">
+            <IndustryBenchmarksSection />
+          </TabsContent>
 
+          {/* Business Performance Tab */}
+          <TabsContent value="performance">
+            <BusinessPerformanceSection />
+          </TabsContent>
+
+          {/* Challenges Tab */}
+          <TabsContent value="challenges">
         {/* Challenge Cards */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row justify-between items-center border-b border-border pb-4 gap-4">
@@ -581,6 +633,8 @@ export default function Dashboard() {
             </motion.div>
           </AnimatePresence>
         </div>
+          </TabsContent>
+        </Tabs>
       </main>
       
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
