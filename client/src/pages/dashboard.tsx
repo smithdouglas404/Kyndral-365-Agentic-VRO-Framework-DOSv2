@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
@@ -351,7 +351,6 @@ function NavBar() {
 export default function Dashboard() {
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
   const [isLive, setIsLive] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [selectedScenario, setSelectedScenario] = useState<Scenario>(scenarios[0]);
   const [activeStage, setActiveStage] = useState<StageId>("design");
   const [exportOpen, setExportOpen] = useState(false);
@@ -369,16 +368,7 @@ export default function Dashboard() {
     setActiveStage(stage);
   }, []);
 
-  useEffect(() => {
-    if (!isLive) return;
-    
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [isLive]);
-
+  
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
@@ -404,17 +394,7 @@ export default function Dashboard() {
           
           <div className="flex items-center gap-3">
             <LiveIndicator isLive={isLive} onToggle={() => setIsLive(!isLive)} />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setRefreshKey(prev => prev + 1)}
-              className="gap-2"
-              data-testid="button-refresh"
-            >
-              <RefreshCw size={14} className={isLive ? "animate-spin" : ""} />
-              Refresh
-            </Button>
-            
+                        
             <Dialog open={exportOpen} onOpenChange={setExportOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2" data-testid="button-export">
@@ -471,7 +451,7 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} refreshKey={refreshKey} />
+          <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
         </div>
 
         {/* Challenge Cards */}

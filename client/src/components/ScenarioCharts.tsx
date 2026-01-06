@@ -374,10 +374,22 @@ export function ScenarioGovernanceChart({ scenario, stage, refreshKey }: Scenari
 interface ScenarioChartsGridProps {
   scenario: Scenario;
   stage: StageId;
-  refreshKey: number;
+  isLive: boolean;
 }
 
-export function ScenarioChartsGrid({ scenario, stage, refreshKey }: ScenarioChartsGridProps) {
+export function ScenarioChartsGrid({ scenario, stage, isLive }: ScenarioChartsGridProps) {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (!isLive) return;
+    
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isLive]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
