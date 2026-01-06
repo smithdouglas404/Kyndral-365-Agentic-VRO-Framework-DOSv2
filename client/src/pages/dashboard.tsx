@@ -356,6 +356,7 @@ export default function Dashboard() {
   const [activeStage, setActiveStage] = useState<StageId>("design");
   const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const [relationshipsOpen, setRelationshipsOpen] = useState(false);
 
   const filteredChallenges = activeTheme === "All" 
     ? challenges 
@@ -508,9 +509,63 @@ export default function Dashboard() {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" className="gap-2 bg-white rounded-[4px]" data-testid="button-relationships">
-                <LinkIcon className="h-4 w-4" /> View Relationships
-              </Button>
+              <Dialog open={relationshipsOpen} onOpenChange={setRelationshipsOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2 bg-white rounded-[4px]" data-testid="button-relationships">
+                    <LinkIcon className="h-4 w-4" /> View Relationships
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Challenge → Scenario Relationships</DialogTitle>
+                    <DialogDescription>How the 8 client challenges map to VRO scenarios and the Design → Activate → Measure Value workflow</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    {scenarios.map((scenario) => (
+                      <div key={scenario.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-full bg-[hsl(209,100%,36%)] flex items-center justify-center text-white">
+                            {scenario.id === "accelerate-prt" ? "⚡" : scenario.id === "digitize-operations" ? "📊" : "🛡️"}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{scenario.name}</h4>
+                            <p className="text-xs text-muted-foreground">{scenario.strategicFocus}</p>
+                          </div>
+                        </div>
+                        <div className="mb-3">
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Addresses these challenges:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {scenario.challenges.map((challengeId) => {
+                              const challenge = challenges.find(c => c.id === challengeId);
+                              return (
+                                <Badge key={challengeId} variant="outline" className="capitalize">
+                                  {challenge?.title || challengeId.replace(/-/g, ' ')}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="px-2 py-1 rounded bg-[hsl(209,100%,36%)]/10 text-[hsl(209,100%,36%)]">Design</span>
+                          <ArrowRight size={12} className="text-muted-foreground" />
+                          <span className="px-2 py-1 rounded bg-[hsl(148,100%,26%)]/10 text-[hsl(148,100%,26%)]">Activate</span>
+                          <ArrowRight size={12} className="text-muted-foreground" />
+                          <span className="px-2 py-1 rounded bg-[hsl(51,100%,40%)]/10 text-[hsl(51,100%,40%)]">Measure Value</span>
+                          <span className="ml-2 text-muted-foreground">→ {scenario.expectedROI}</span>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold text-sm mb-2">Workflow Integration</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Each scenario follows the VRO methodology: <strong>Design</strong> strategic interventions, 
+                        <strong> Activate</strong> through automation and process changes, then 
+                        <strong> Measure Value</strong> against L&G Annual Report 2024 benchmarks.
+                      </p>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
