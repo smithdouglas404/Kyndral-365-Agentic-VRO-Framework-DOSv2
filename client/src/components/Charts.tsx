@@ -18,58 +18,28 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-
-// Synthetic Data based on VRO Outcomes & L&G Context
-const cycleTimeData = [
-  { month: 'Jan', time: 30, benchmark: 25 },
-  { month: 'Feb', time: 28, benchmark: 25 },
-  { month: 'Mar', time: 22, benchmark: 25 },
-  { month: 'Apr', time: 18, benchmark: 20 },
-  { month: 'May', time: 12, benchmark: 15 },
-  { month: 'Jun', time: 5, benchmark: 8 },
-];
-
-const benefitsData = [
-  { quarter: 'Q1', forecasted: 45, realized: 18 },
-  { quarter: 'Q2', forecasted: 55, realized: 28 },
-  { quarter: 'Q3', forecasted: 65, realized: 58 },
-  { quarter: 'Q4', forecasted: 80, realized: 75 },
-];
-
-const riskDistributionData = [
-  { name: 'Low Risk', value: 65, color: 'hsl(148, 100%, 26%)' }, // Brand Teal
-  { name: 'Medium Risk', value: 25, color: 'hsl(51, 100%, 50%)' }, // Accent Yellow
-  { name: 'High Risk (Requires Governance)', value: 10, color: 'hsl(346, 100%, 42%)' }  // Brand Red
-];
-
-const fteEfficiencyData = [
-  { month: 'Jan', manual: 120, automated: 0 },
-  { month: 'Feb', manual: 100, automated: 20 },
-  { month: 'Mar', manual: 80, automated: 40 },
-  { month: 'Apr', manual: 60, automated: 60 },
-  { month: 'May', manual: 40, automated: 80 },
-  { month: 'Jun', manual: 30, automated: 90 },
-];
-
-const governanceData = [
-  { category: 'Policy Alignment', score: 95, fullMark: 100 },
-  { category: 'Audit Trail', score: 98, fullMark: 100 },
-  { category: 'Decision Speed', score: 90, fullMark: 100 },
-  { category: 'Risk Mitigation', score: 85, fullMark: 100 },
-  { category: 'Stakeholder Review', score: 88, fullMark: 100 },
-];
+import { useMemo } from "react";
+import { 
+  generateCycleTimeData, 
+  generateBenefitsData, 
+  generateRiskDistribution, 
+  generateEfficiencyData, 
+  generateGovernanceHealth 
+} from "@/lib/simulation";
 
 export function CycleTimeChart() {
+  const data = useMemo(() => generateCycleTimeData(), []);
+
   return (
     <Card className="h-full border border-border bg-white rounded-[4px] shadow-sm">
       <CardHeader>
         <CardTitle className="text-lg font-bold text-[hsl(209,100%,36%)]">Velocity: Cycle Time Reduction</CardTitle>
-        <CardDescription>Average days from intake to approval (Target: &lt;7 days)</CardDescription>
+        <CardDescription>Average days from intake to approval (12 Month Trend)</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={cycleTimeData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorTime" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(209, 100%, 36%)" stopOpacity={0.1}/>
@@ -111,6 +81,8 @@ export function CycleTimeChart() {
 }
 
 export function ValueRealizationChart() {
+  const data = useMemo(() => generateBenefitsData(), []);
+
   return (
     <Card className="h-full border border-border bg-white rounded-[4px] shadow-sm">
       <CardHeader>
@@ -120,7 +92,7 @@ export function ValueRealizationChart() {
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={benefitsData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e0e0e0" />
               <XAxis dataKey="quarter" stroke="#757575" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#757575" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `£${value}m`} />
@@ -140,6 +112,8 @@ export function ValueRealizationChart() {
 }
 
 export function RiskProfileChart() {
+  const data = useMemo(() => generateRiskDistribution(), []);
+
   return (
     <Card className="h-full border border-border bg-white rounded-[4px] shadow-sm">
       <CardHeader>
@@ -150,13 +124,15 @@ export function RiskProfileChart() {
         <div className="h-[300px] w-full relative">
            {/* Center Text Overlay */}
            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-3xl font-bold text-[hsl(209,100%,36%)]">90%</span>
+              <span className="text-3xl font-bold text-[hsl(209,100%,36%)]">
+                {data.find(d => d.name === 'Low Risk')?.value}%
+              </span>
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Predictable</span>
            </div>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={riskDistributionData}
+                data={data}
                 cx="50%"
                 cy="50%"
                 innerRadius={80}
@@ -165,7 +141,7 @@ export function RiskProfileChart() {
                 dataKey="value"
                 stroke="none"
               >
-                {riskDistributionData.map((entry, index) => (
+                {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -183,6 +159,8 @@ export function RiskProfileChart() {
 }
 
 export function EfficiencyChart() {
+  const data = useMemo(() => generateEfficiencyData(), []);
+
   return (
     <Card className="h-full border border-border bg-white rounded-[4px] shadow-sm">
       <CardHeader>
@@ -192,7 +170,7 @@ export function EfficiencyChart() {
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={fteEfficiencyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e0e0e0" />
               <XAxis dataKey="month" stroke="#757575" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#757575" fontSize={12} tickLine={false} axisLine={false} />
@@ -227,6 +205,8 @@ export function EfficiencyChart() {
 }
 
 export function GovernanceHealthChart() {
+  const data = useMemo(() => generateGovernanceHealth(), []);
+
   return (
     <Card className="h-full border border-border bg-white rounded-[4px] shadow-sm">
       <CardHeader>
@@ -236,7 +216,7 @@ export function GovernanceHealthChart() {
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart layout="vertical" data={governanceData} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+            <BarChart layout="vertical" data={data} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e0e0e0" />
               <XAxis type="number" domain={[0, 100]} stroke="#757575" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis type="category" dataKey="category" stroke="#757575" fontSize={12} tickLine={false} axisLine={false} width={100} />
