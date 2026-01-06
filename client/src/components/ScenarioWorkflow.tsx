@@ -134,40 +134,55 @@ export function ScenarioWorkflow({ onScenarioChange }: ScenarioWorkflowProps) {
               
               return (
                 <div key={stage.id} className="flex items-center flex-1">
-                  <button
+                  <motion.button
                     onClick={() => setActiveStage(stage.id)}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     className={cn(
                       "flex flex-col items-center gap-2 p-4 rounded-lg transition-all flex-1 mx-2",
                       isActive 
-                        ? "bg-white shadow-lg border-2" 
+                        ? "bg-white shadow-xl border-2" 
                         : isPast 
-                          ? "bg-white/50 border border-green-200" 
-                          : "hover:bg-white/50"
+                          ? "bg-white/50 border border-green-200 hover:shadow-md" 
+                          : "hover:bg-white/70 hover:shadow-md border border-transparent"
                     )}
                     style={{ 
                       borderColor: isActive ? stage.color : undefined,
+                      boxShadow: isActive ? `0 0 0 3px ${stage.color}30` : undefined,
                     }}
                     data-testid={`stage-button-${stage.id}`}
                   >
-                    <div 
+                    <motion.div 
                       className={cn(
-                        "w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg",
+                        "w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl",
                         isPast && !isActive && "opacity-70"
                       )}
                       style={{ backgroundColor: stage.color }}
+                      animate={isActive ? { scale: [1, 1.1, 1] } : {}}
+                      transition={{ duration: 0.3 }}
                     >
-                      {isPast && !isActive ? <Check size={24} /> : index + 1}
-                    </div>
+                      {isPast && !isActive ? <Check size={28} /> : index + 1}
+                    </motion.div>
                     <span className={cn(
-                      "font-semibold text-sm",
+                      "font-bold text-base",
                       isActive ? "text-foreground" : "text-muted-foreground"
                     )}>
                       {stage.name}
                     </span>
+                    {isActive && (
+                      <motion.span
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs font-medium px-2 py-1 rounded-full"
+                        style={{ backgroundColor: `${stage.color}20`, color: stage.color }}
+                      >
+                        Active Stage
+                      </motion.span>
+                    )}
                     <span className="text-xs text-muted-foreground text-center max-w-[150px]">
                       {stage.description}
                     </span>
-                  </button>
+                  </motion.button>
                   {index < stages.length - 1 && (
                     <ChevronRight size={24} className="text-muted-foreground/30 flex-shrink-0" />
                   )}
