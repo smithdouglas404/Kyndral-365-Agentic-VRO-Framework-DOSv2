@@ -277,6 +277,130 @@ export const shareholderReturns = {
   source: "L&G Full Year Results 2024"
 };
 
+// ============================================================================
+// AI PROACTIVE INSIGHTS - VRO Differentiator
+// Demonstrating shift from reactive PMO to proactive VRO monitoring
+// ============================================================================
+
+export interface ProactiveAlert {
+  id: string;
+  type: "anomaly" | "threshold" | "prediction" | "risk";
+  severity: "low" | "medium" | "high" | "critical";
+  title: string;
+  description: string;
+  kpi: string;
+  detectedAt: string;
+  predictedImpact: string;
+  actionRecommended: string;
+  status: "active" | "acknowledged" | "resolved";
+  timeToDetect: string;  // VRO detection time
+  pmoDetectTime: string;  // Traditional PMO would detect
+  valueSaved: string;
+  valueSavedMillions?: number;  // Numeric value for calculations (monetary only)
+}
+
+// Simulated live alerts that demonstrate proactive monitoring
+export const proactiveAlerts: ProactiveAlert[] = [
+  {
+    id: "ALERT-001",
+    type: "anomaly",
+    severity: "high",
+    title: "PRT Pipeline Velocity Drop Detected",
+    description: "AI detected 15% reduction in pipeline velocity - 3 deals progressing slower than historical baseline",
+    kpi: "Deal Cycle Time",
+    detectedAt: "2 hours ago",
+    predictedImpact: "£45m revenue delay if not addressed",
+    actionRecommended: "Review bottleneck at underwriting stage - suggest resource reallocation",
+    status: "active",
+    timeToDetect: "2 hours",
+    pmoDetectTime: "2-3 weeks",
+    valueSaved: "£45m",
+    valueSavedMillions: 45
+  },
+  {
+    id: "ALERT-002",
+    type: "prediction",
+    severity: "medium",
+    title: "Q3 Capacity Constraint Predicted",
+    description: "ML model predicts 23% increase in deal flow in Q3 - current capacity insufficient",
+    kpi: "Resource Utilization",
+    detectedAt: "Yesterday",
+    predictedImpact: "12 deals at risk of delay without intervention",
+    actionRecommended: "Pre-approve contractor budget, initiate hiring for 3 senior analysts",
+    status: "acknowledged",
+    timeToDetect: "8 weeks early",
+    pmoDetectTime: "When capacity exceeded",
+    valueSaved: "£120m deal protection",
+    valueSavedMillions: 120
+  },
+  {
+    id: "ALERT-003",
+    type: "threshold",
+    severity: "low",
+    title: "Governance Approval Rate Trending Down",
+    description: "First-pass approval rate declined from 78% to 71% over past 30 days",
+    kpi: "Governance Efficiency",
+    detectedAt: "3 days ago",
+    predictedImpact: "Additional 2-3 days per deal if trend continues",
+    actionRecommended: "Review recent rejection reasons, update submission templates",
+    status: "resolved",
+    timeToDetect: "Real-time",
+    pmoDetectTime: "Monthly review",
+    valueSaved: "40 hours/month saved"
+    // No valueSavedMillions - this is efficiency gain, not monetary
+  },
+  {
+    id: "ALERT-004",
+    type: "risk",
+    severity: "critical",
+    title: "Longevity Model Variance Outside Tolerance",
+    description: "Actual vs expected mortality deviation exceeding 2σ threshold on 3 recent deals",
+    kpi: "Pricing Accuracy",
+    detectedAt: "4 hours ago",
+    predictedImpact: "Potential £8m reserve adjustment if pattern continues",
+    actionRecommended: "Engage actuarial team for deep-dive, pause similar profile deals",
+    status: "active",
+    timeToDetect: "4 hours",
+    pmoDetectTime: "Quarterly actuarial review",
+    valueSaved: "£8m reserve protection",
+    valueSavedMillions: 8
+  }
+];
+
+// Value propositions for AI proactive monitoring
+export const aiMonitoringValue = {
+  reactiveVsProactive: {
+    reactive: {
+      label: "Traditional PMO",
+      detectionTime: "Days to Weeks",
+      responseTime: "Hours to Days",
+      issueVisibility: "Post-incident",
+      valueAtRisk: "Unquantified until loss"
+    },
+    proactive: {
+      label: "VRO AI Insights",
+      detectionTime: "Minutes to Hours",
+      responseTime: "Immediate",
+      issueVisibility: "Predictive",
+      valueAtRisk: "Quantified & Protected"
+    }
+  },
+  industryStats: [
+    { stat: "67%", description: "improvement in risk assessment accuracy with AI", source: "Capgemini 2024" },
+    { stat: "50-70%", description: "faster claims/deal processing with automation", source: "McKinsey 2024" },
+    { stat: "30%", description: "reduction in operational costs", source: "PwC Insurance Trends" },
+    { stat: "23 days", description: "faster issue resolution (Aviva case study)", source: "Aviva AI Report" },
+    { stat: "£60m+", description: "saved annually through proactive monitoring", source: "Aviva 2024" }
+  ],
+  capabilities: [
+    { name: "Anomaly Detection", description: "ML identifies deviations from normal patterns", icon: "alert-triangle" },
+    { name: "Predictive Analytics", description: "Forecast issues 4-8 weeks before they occur", icon: "trending-up" },
+    { name: "Automated Triage", description: "AI prioritizes alerts by business impact", icon: "layers" },
+    { name: "Root Cause Analysis", description: "Correlates signals to identify underlying issues", icon: "search" },
+    { name: "Continuous Learning", description: "Models improve with each resolved incident", icon: "brain" }
+  ]
+};
+
 // Legacy accessors for backward compatibility
 export const lgAnnualReportDataLegacy = {
   prtVolume: { baseline: 8.2, target: 10, unit: "£bn", source: "L&G Annual Report 2024, p.12" },

@@ -16,6 +16,7 @@ import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
+import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 
 type DataMode = "VRO" | "PMO";
@@ -454,6 +455,11 @@ export default function Dashboard() {
             </div>
           </div>
           <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
+        </div>
+
+        {/* AI Proactive Insights Section - VRO Differentiator */}
+        <div className="mb-12">
+          <AIProactiveInsightsSection />
         </div>
 
         {/* Industry Benchmarks Section */}
