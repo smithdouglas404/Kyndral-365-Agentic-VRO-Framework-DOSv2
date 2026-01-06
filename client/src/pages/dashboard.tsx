@@ -1,20 +1,19 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, Settings } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
-import { StrategicImpactSection } from "@/components/Charts";
-import { generateVROStats, generatePMOStats, citations } from "@/lib/simulation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-
-type DataMode = "VRO" | "PMO";
+import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
+import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
+import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 
 function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
   return (
@@ -48,45 +47,49 @@ function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => 
   );
 }
 
-function StatsOverview({ mode, stats }: { mode: DataMode; stats: ReturnType<typeof generateVROStats> }) {
-  const statItems = [
+function LGReportStats() {
+  const stats = [
     { 
-      label: "Cycle Time", 
-      value: `${stats.cycleTime.value}${stats.cycleTime.unit}`, 
-      change: stats.cycleTime.change,
-      icon: Clock, 
+      label: "PRT Volume Target", 
+      value: `${lgAnnualReportData.prtVolume.target}`,
+      unit: lgAnnualReportData.prtVolume.unit,
+      baseline: `${lgAnnualReportData.prtVolume.baseline}${lgAnnualReportData.prtVolume.unit}`,
+      icon: Target, 
       color: "text-[hsl(209,100%,36%)]",
-      citation: citations.forecastAccuracy
+      source: lgAnnualReportData.prtVolume.source
     },
     { 
       label: "Forecast Accuracy", 
-      value: `${stats.forecastAccuracy.value}${stats.forecastAccuracy.unit}`, 
-      change: stats.forecastAccuracy.change,
-      icon: Target, 
-      color: "text-[hsl(148,100%,26%)]",
-      citation: citations.forecastAccuracy
-    },
-    { 
-      label: "Cost Variance", 
-      value: `${stats.costVariance.unit}${stats.costVariance.value}`, 
-      change: stats.costVariance.change,
+      value: `${lgAnnualReportData.forecastAccuracy.target}`,
+      unit: lgAnnualReportData.forecastAccuracy.unit,
+      baseline: `${lgAnnualReportData.forecastAccuracy.baseline}${lgAnnualReportData.forecastAccuracy.unit}`,
       icon: Activity, 
-      color: "text-[hsl(51,100%,50%)]",
-      citation: citations.costEfficiency
+      color: "text-[hsl(148,100%,26%)]",
+      source: lgAnnualReportData.forecastAccuracy.source
     },
     { 
-      label: "Overhead Reduction", 
-      value: `${stats.overheadReduction.value}${stats.overheadReduction.unit}`, 
-      change: stats.overheadReduction.change,
+      label: "Cost Savings Target", 
+      value: `${lgAnnualReportData.costSavings.target}`,
+      unit: lgAnnualReportData.costSavings.unit,
+      baseline: `${lgAnnualReportData.costSavings.baseline}${lgAnnualReportData.costSavings.unit}`,
       icon: TrendingUp, 
+      color: "text-[hsl(51,100%,50%)]",
+      source: lgAnnualReportData.costSavings.source
+    },
+    { 
+      label: "Cycle Time Target", 
+      value: `${lgAnnualReportData.cycleTime.target}`,
+      unit: lgAnnualReportData.cycleTime.unit,
+      baseline: `${lgAnnualReportData.cycleTime.baseline}${lgAnnualReportData.cycleTime.unit}`,
+      icon: Clock, 
       color: "text-[hsl(209,100%,36%)]",
-      citation: citations.costEfficiency
+      source: lgAnnualReportData.cycleTime.source
     },
   ];
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-      {statItems.map((stat, i) => {
+      {stats.map((stat, i) => {
         const Icon = stat.icon;
         return (
           <motion.div
@@ -101,21 +104,14 @@ function StatsOverview({ mode, stats }: { mode: DataMode; stats: ReturnType<type
               <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
               <Icon className={stat.color} size={20} strokeWidth={1.5} />
             </div>
-            <div className="flex items-end gap-2 w-full">
-              <motion.div 
-                key={stat.value}
-                initial={{ scale: 1.1, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="text-4xl font-bold text-foreground tracking-tight"
-              >
-                {stat.value}
-              </motion.div>
-              <div className={cn(
-                "text-xs font-medium mb-1",
-                stat.change > 0 ? "text-green-600" : "text-green-600"
-              )}>
-                {stat.change > 0 ? '↑' : '↓'} {Math.abs(stat.change)}%
-              </div>
+            <div className="flex items-baseline gap-1 w-full">
+              <span className="text-4xl font-bold text-foreground tracking-tight">{stat.value}</span>
+              <span className="text-lg text-muted-foreground">{stat.unit}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs text-muted-foreground line-through">{stat.baseline}</span>
+              <ArrowRight size={12} className="text-[hsl(148,100%,26%)]" />
+              <span className="text-xs font-medium text-[hsl(148,100%,26%)]">{stat.value}{stat.unit}</span>
             </div>
             <TooltipProvider>
               <Tooltip>
@@ -125,8 +121,7 @@ function StatsOverview({ mode, stats }: { mode: DataMode; stats: ReturnType<type
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-xs bg-white border shadow-lg p-3">
-                  <p className="text-xs text-muted-foreground">{stat.citation.context}</p>
-                  <p className="text-xs text-[hsl(209,100%,36%)] mt-1 font-medium">{stat.citation.source}</p>
+                  <p className="text-xs text-[hsl(209,100%,36%)] font-medium">{stat.source}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -137,7 +132,7 @@ function StatsOverview({ mode, stats }: { mode: DataMode; stats: ReturnType<type
   );
 }
 
-function NavBar({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: DataMode) => void }) {
+function NavBar() {
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
 
@@ -158,15 +153,15 @@ function NavBar({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: D
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Active Projects</DialogTitle>
-                <DialogDescription>Current transformation initiatives in the {mode} portfolio</DialogDescription>
+                <DialogDescription>Current transformation initiatives aligned to VRO scenarios</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 mt-4">
                 {[
-                  { name: "PRT Platform Modernization", status: "On Track", progress: 78 },
-                  { name: "Governance Automation", status: "On Track", progress: 65 },
-                  { name: "Data Lake Integration", status: "At Risk", progress: 42 },
-                  { name: "Customer Portal Refresh", status: "On Track", progress: 91 },
-                  { name: "Regulatory Compliance Update", status: "Complete", progress: 100 },
+                  { name: "PRT Pipeline Acceleration", status: "On Track", progress: 78, scenario: "Accelerate PRT" },
+                  { name: "Governance Automation Platform", status: "On Track", progress: 65, scenario: "Governance Uplift" },
+                  { name: "Real-time Reporting Engine", status: "At Risk", progress: 42, scenario: "Digitize Operations" },
+                  { name: "Benefits Tracking System", status: "On Track", progress: 91, scenario: "Accelerate PRT" },
+                  { name: "Compliance Automation", status: "Complete", progress: 100, scenario: "Governance Uplift" },
                 ].map((project, i) => (
                   <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" data-testid={`project-item-${i}`}>
                     <div className="flex justify-between items-center mb-2">
@@ -174,6 +169,10 @@ function NavBar({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: D
                       <Badge variant={project.status === "On Track" ? "default" : project.status === "At Risk" ? "destructive" : "secondary"} className="text-xs">
                         {project.status}
                       </Badge>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs text-muted-foreground">Scenario: {project.scenario}</span>
+                      <span className="text-xs font-medium">{project.progress}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
@@ -197,15 +196,15 @@ function NavBar({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: D
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Available Reports</DialogTitle>
-                <DialogDescription>Download or view strategic reports</DialogDescription>
+                <DialogDescription>Download strategic reports with L&G benchmarks</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 mt-4">
                 {[
-                  { name: "Q4 2025 Executive Summary", type: "PDF", date: "Dec 2025" },
-                  { name: "VRO Impact Assessment", type: "PDF", date: "Nov 2025" },
-                  { name: "Governance Health Report", type: "Excel", date: "Dec 2025" },
+                  { name: "Q4 2025 VRO Executive Summary", type: "PDF", date: "Dec 2025" },
+                  { name: "L&G Annual Report 2024 Extract", type: "PDF", date: "Mar 2024" },
+                  { name: "Scenario Impact Assessment", type: "Excel", date: "Dec 2025" },
                   { name: "Benefits Realization Tracker", type: "Excel", date: "Weekly" },
-                  { name: "Risk Register", type: "PDF", date: "Dec 2025" },
+                  { name: "Governance Health Report", type: "PDF", date: "Dec 2025" },
                 ].map((report, i) => (
                   <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" data-testid={`report-item-${i}`}>
                     <div>
@@ -224,32 +223,6 @@ function NavBar({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: D
         </nav>
       </div>
       <div className="flex items-center gap-4">
-        <div className="flex bg-gray-100 rounded-lg p-1">
-          <Button
-            variant={mode === "VRO" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => onModeChange("VRO")}
-            className={cn(
-              "rounded-md transition-all",
-              mode === "VRO" ? "bg-[hsl(209,100%,36%)] text-white shadow-sm" : "text-muted-foreground"
-            )}
-            data-testid="button-mode-vro"
-          >
-            VRO
-          </Button>
-          <Button
-            variant={mode === "PMO" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => onModeChange("PMO")}
-            className={cn(
-              "rounded-md transition-all",
-              mode === "PMO" ? "bg-gray-600 text-white shadow-sm" : "text-muted-foreground"
-            )}
-            data-testid="button-mode-pmo"
-          >
-            PMO
-          </Button>
-        </div>
         <Link href="/value-proposition">
           <Button variant="outline" size="sm" className="hidden lg:flex gap-2 text-[hsl(209,100%,36%)] border-[hsl(209,100%,36%)]/30 hover:bg-[hsl(209,100%,36%)]/5" data-testid="button-value-proposition">
             <FileText size={16} />
@@ -274,43 +247,36 @@ function NavBar({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: D
 
 export default function Dashboard() {
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
-  const [mode, setMode] = useState<DataMode>("VRO");
   const [isLive, setIsLive] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [stats, setStats] = useState(() => generateVROStats());
-  const [scenarioOpen, setScenarioOpen] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState<Scenario>(scenarios[0]);
+  const [activeStage, setActiveStage] = useState<StageId>("design");
   const [exportOpen, setExportOpen] = useState(false);
 
-  const currentChallenges = mode === "VRO" ? challenges : pmoChallenges;
   const filteredChallenges = activeTheme === "All" 
-    ? currentChallenges 
-    : currentChallenges.filter(c => c.themes.includes(activeTheme));
+    ? challenges 
+    : challenges.filter(c => c.themes.includes(activeTheme));
 
   const themes: Theme[] = ["Automation", "Governance", "Data & Insights", "Value", "Speed"];
 
-  const refreshData = useCallback(() => {
-    setRefreshKey(prev => prev + 1);
-    setStats(mode === "VRO" ? generateVROStats() : generatePMOStats());
-  }, [mode]);
-
-  useEffect(() => {
-    setStats(mode === "VRO" ? generateVROStats() : generatePMOStats());
-    setRefreshKey(prev => prev + 1);
-  }, [mode]);
+  const handleScenarioChange = useCallback((scenario: Scenario, stage: StageId) => {
+    setSelectedScenario(scenario);
+    setActiveStage(stage);
+  }, []);
 
   useEffect(() => {
     if (!isLive) return;
     
     const interval = setInterval(() => {
-      refreshData();
+      setRefreshKey(prev => prev + 1);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isLive, refreshData]);
+  }, [isLive]);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <NavBar mode={mode} onModeChange={setMode} />
+      <NavBar />
 
       <main className="container mx-auto px-8 py-8 max-w-[1400px]">
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -319,21 +285,11 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-                {mode} Strategy Dashboard
-              </h1>
-              <Badge variant={mode === "VRO" ? "default" : "secondary"} className={cn(
-                "text-lg px-3 py-1",
-                mode === "VRO" ? "bg-[hsl(148,100%,26%)]" : "bg-gray-600"
-              )}>
-                {mode === "VRO" ? "Value Realization Office" : "Project Management Office"}
-              </Badge>
-            </div>
+            <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
+              VRO Strategy Dashboard
+            </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">
-              {mode === "VRO" 
-                ? "Real-time insights on efficiency, speed, and certainty through agentic automation."
-                : "Traditional project management metrics and governance oversight."}
+              Strategic transformation powered by L&G Annual Report 2024 benchmarks and VRO methodology.
             </p>
           </motion.div>
           
@@ -342,13 +298,44 @@ export default function Dashboard() {
             <Button
               variant="outline"
               size="sm"
-              onClick={refreshData}
+              onClick={() => setRefreshKey(prev => prev + 1)}
               className="gap-2"
               data-testid="button-refresh"
             >
               <RefreshCw size={14} className={isLive ? "animate-spin" : ""} />
               Refresh
             </Button>
+            
+            <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2" data-testid="button-export">
+                  <Download size={16} />
+                  Export
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[400px]">
+                <DialogHeader>
+                  <DialogTitle>Export Dashboard</DialogTitle>
+                  <DialogDescription>Download current view with L&G benchmarks</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 mt-4">
+                  {[
+                    { format: "PDF Executive Summary", desc: "Full report with citations" },
+                    { format: "Excel Workbook", desc: "Raw data for analysis" },
+                    { format: "PowerPoint", desc: "Presentation-ready slides" },
+                  ].map((option, i) => (
+                    <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" data-testid={`export-option-${i}`}>
+                      <div>
+                        <span className="font-medium text-sm">{option.format}</span>
+                        <p className="text-xs text-muted-foreground">{option.desc}</p>
+                      </div>
+                      <Download size={16} className="text-muted-foreground" />
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
             <Link href="/value-proposition">
               <Button className="gap-2 bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white shadow-sm transition-all hover:-translate-y-0.5" data-testid="button-executive-brief">
                 Read Executive Brief <ArrowRight size={16} />
@@ -357,90 +344,32 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <StatsOverview mode={mode} stats={stats} />
+        {/* L&G Report Anchored Stats */}
+        <LGReportStats />
 
-        <div className="mb-12">
-          <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-            <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
-            <div className="flex items-center gap-2">
-              <Dialog open={scenarioOpen} onOpenChange={setScenarioOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2" data-testid="button-scenario">
-                    <Settings size={16} />
-                    Scenario Builder
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px]">
-                  <DialogHeader>
-                    <DialogTitle>Scenario Builder</DialogTitle>
-                    <DialogDescription>Model different transformation scenarios and compare outcomes</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 border rounded-lg bg-blue-50 border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors" data-testid="scenario-aggressive">
-                        <h4 className="font-semibold text-blue-900">Aggressive Automation</h4>
-                        <p className="text-sm text-blue-700 mt-1">Maximum automation investment, fastest ROI</p>
-                        <p className="text-xs text-blue-600 mt-2">Est. savings: £45m/year</p>
-                      </div>
-                      <div className="p-4 border rounded-lg bg-green-50 border-green-200 cursor-pointer hover:bg-green-100 transition-colors" data-testid="scenario-balanced">
-                        <h4 className="font-semibold text-green-900">Balanced Growth</h4>
-                        <p className="text-sm text-green-700 mt-1">Steady transformation with risk mitigation</p>
-                        <p className="text-xs text-green-600 mt-2">Est. savings: £28m/year</p>
-                      </div>
-                      <div className="p-4 border rounded-lg bg-yellow-50 border-yellow-200 cursor-pointer hover:bg-yellow-100 transition-colors" data-testid="scenario-conservative">
-                        <h4 className="font-semibold text-yellow-900">Conservative</h4>
-                        <p className="text-sm text-yellow-700 mt-1">Minimal disruption, focus on governance</p>
-                        <p className="text-xs text-yellow-600 mt-2">Est. savings: £12m/year</p>
-                      </div>
-                      <div className="p-4 border rounded-lg bg-gray-50 border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors" data-testid="scenario-custom">
-                        <h4 className="font-semibold text-gray-900">Custom Scenario</h4>
-                        <p className="text-sm text-gray-700 mt-1">Build your own parameters</p>
-                        <p className="text-xs text-gray-600 mt-2">Configure →</p>
-                      </div>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={exportOpen} onOpenChange={setExportOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2" data-testid="button-export">
-                    <Download size={16} />
-                    Export
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[400px]">
-                  <DialogHeader>
-                    <DialogTitle>Export Dashboard</DialogTitle>
-                    <DialogDescription>Download current view in your preferred format</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-3 mt-4">
-                    {[
-                      { format: "PDF Report", desc: "Full executive summary with charts" },
-                      { format: "Excel Workbook", desc: "Raw data for analysis" },
-                      { format: "PowerPoint", desc: "Presentation-ready slides" },
-                      { format: "CSV Data", desc: "Plain data export" },
-                    ].map((option, i) => (
-                      <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" data-testid={`export-option-${i}`}>
-                        <div>
-                          <span className="font-medium text-sm">{option.format}</span>
-                          <p className="text-xs text-muted-foreground">{option.desc}</p>
-                        </div>
-                        <Download size={16} className="text-muted-foreground" />
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-          <StrategicImpactSection mode={mode} refreshKey={refreshKey} />
+        {/* Design → Activate → Measure Value Section */}
+        <div className="mb-12 border-b border-border pb-8">
+          <ScenarioWorkflow onScenarioChange={handleScenarioChange} />
         </div>
 
+        {/* Scenario-Driven Charts */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+            <div>
+              <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
+              <p className="text-muted-foreground">
+                KPIs for <span className="font-semibold text-[hsl(209,100%,36%)]">{selectedScenario.name}</span> scenario
+              </p>
+            </div>
+          </div>
+          <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} refreshKey={refreshKey} />
+        </div>
+
+        {/* Challenge Cards */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row justify-between items-center border-b border-border pb-4 gap-4">
             <div className="flex items-center gap-4">
-              <h2 className="text-[32px] font-bold text-foreground">Challenge Responses</h2>
+              <h2 className="text-[32px] font-bold text-foreground">8 Client Challenges</h2>
               <div className="hidden md:flex h-6 w-px bg-border" />
               <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
                 <Button 
@@ -450,10 +379,10 @@ export default function Dashboard() {
                   className={activeTheme === "All" ? "bg-[hsl(209,100%,36%)] text-white" : "text-muted-foreground"}
                   data-testid="filter-all"
                 >
-                  All ({currentChallenges.length})
+                  All ({challenges.length})
                 </Button>
                 {themes.map(theme => {
-                  const count = currentChallenges.filter(c => c.themes.includes(theme)).length;
+                  const count = challenges.filter(c => c.themes.includes(theme)).length;
                   return (
                     <Button
                       key={theme}
@@ -471,9 +400,6 @@ export default function Dashboard() {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" className="gap-2 bg-white rounded-[4px]" data-testid="button-filter-advanced">
-                <Filter className="h-4 w-4" /> Advanced Filter
-              </Button>
               <Button variant="outline" className="gap-2 bg-white rounded-[4px]" data-testid="button-relationships">
                 <LinkIcon className="h-4 w-4" /> View Relationships
               </Button>
@@ -482,7 +408,7 @@ export default function Dashboard() {
 
           <AnimatePresence mode="wait">
             <motion.div 
-              key={activeTheme + mode}
+              key={activeTheme}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -502,15 +428,18 @@ export default function Dashboard() {
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Data Sources & Citations</p>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p>† Forecast accuracy targets: L&G Annual Report 2024, Strategic Objectives (p.45)</p>
-                <p>† PRT volume metrics: L&G Annual Report 2024, Business Review (p.12)</p>
+                <p>† PRT volume target (£10bn): L&G Annual Report 2024, p.12</p>
+                <p>† Forecast accuracy target (85%): L&G Annual Report 2024, p.45</p>
+                <p>† Cost savings target (£200m): L&G Annual Report 2024, p.23</p>
                 <p>† Transformation risk: L&G Annual Report 2024, Principal Risks (p.78)</p>
-                <p>† Cost efficiency targets: L&G Annual Report 2024, Operating Review (p.23)</p>
+                <p>† Digital investment (£150m): L&G Annual Report 2024, p.34</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground mt-1">Data refreshes every 4 seconds when LIVE</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isLive ? "Data refreshes every 4 seconds (LIVE)" : "Live updates paused"}
+              </p>
             </div>
           </div>
           <div className="flex justify-between items-center text-sm text-muted-foreground border-t border-border pt-4">
@@ -518,7 +447,6 @@ export default function Dashboard() {
             <div className="flex gap-4">
               <Link href="/value-proposition" className="hover:text-primary">Value Proposition</Link>
               <a href="#" className="hover:text-primary">Privacy Policy</a>
-              <a href="#" className="hover:text-primary">Terms of Use</a>
             </div>
           </div>
         </div>
