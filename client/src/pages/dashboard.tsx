@@ -15,6 +15,39 @@ import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 
+type DataMode = "VRO" | "PMO";
+
+function VROPMOToggle({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: DataMode) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => onModeChange("VRO")}
+        className={cn(
+          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
+          mode === "VRO" 
+            ? "bg-[hsl(209,100%,36%)] text-white shadow-md" 
+            : "bg-gray-100 text-[hsl(209,100%,36%)] hover:bg-gray-200"
+        )}
+        data-testid="toggle-vro"
+      >
+        Value Realization Office
+      </button>
+      <button
+        onClick={() => onModeChange("PMO")}
+        className={cn(
+          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
+          mode === "PMO" 
+            ? "bg-[hsl(220,15%,60%)] text-[hsl(209,100%,36%)] shadow-md" 
+            : "bg-gray-100 text-[hsl(209,100%,36%)] hover:bg-gray-200"
+        )}
+        data-testid="toggle-pmo"
+      >
+        Project Management Office
+      </button>
+    </div>
+  );
+}
+
 function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
   return (
     <Button
@@ -47,8 +80,8 @@ function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => 
   );
 }
 
-function LGReportStats() {
-  const stats = [
+function LGReportStats({ mode }: { mode: DataMode }) {
+  const vroStats = [
     { 
       label: "PRT Volume Target", 
       value: `${lgAnnualReportData.prtVolume.target}`,
@@ -86,6 +119,47 @@ function LGReportStats() {
       source: lgAnnualReportData.cycleTime.source
     },
   ];
+
+  const pmoStats = [
+    { 
+      label: "PRT Volume", 
+      value: `${(lgAnnualReportData.prtVolume.baseline + (lgAnnualReportData.prtVolume.target - lgAnnualReportData.prtVolume.baseline) * 0.35).toFixed(1)}`,
+      unit: lgAnnualReportData.prtVolume.unit,
+      baseline: `${lgAnnualReportData.prtVolume.baseline} ${lgAnnualReportData.prtVolume.unit}`,
+      icon: Target, 
+      color: "text-[hsl(220,15%,60%)]",
+      source: `PMO estimate: 35% of VRO target (${lgAnnualReportData.prtVolume.source})`
+    },
+    { 
+      label: "Forecast Accuracy", 
+      value: `${Math.round(lgAnnualReportData.forecastAccuracy.baseline + (lgAnnualReportData.forecastAccuracy.target - lgAnnualReportData.forecastAccuracy.baseline) * 0.25)}`,
+      unit: lgAnnualReportData.forecastAccuracy.unit,
+      baseline: `${lgAnnualReportData.forecastAccuracy.baseline} ${lgAnnualReportData.forecastAccuracy.unit}`,
+      icon: Activity, 
+      color: "text-[hsl(220,15%,60%)]",
+      source: `PMO estimate: 25% of VRO improvement (${lgAnnualReportData.forecastAccuracy.source})`
+    },
+    { 
+      label: "Cost Savings", 
+      value: `${Math.round(lgAnnualReportData.costSavings.target * 0.42)}`,
+      unit: lgAnnualReportData.costSavings.unit,
+      baseline: `${lgAnnualReportData.costSavings.baseline} ${lgAnnualReportData.costSavings.unit}`,
+      icon: TrendingUp, 
+      color: "text-[hsl(220,15%,60%)]",
+      source: `PMO estimate: 42% of VRO target (${lgAnnualReportData.costSavings.source})`
+    },
+    { 
+      label: "Cycle Time", 
+      value: `${Math.round(lgAnnualReportData.cycleTime.baseline - (lgAnnualReportData.cycleTime.baseline - lgAnnualReportData.cycleTime.target) * 0.35)}`,
+      unit: lgAnnualReportData.cycleTime.unit,
+      baseline: `${lgAnnualReportData.cycleTime.baseline} ${lgAnnualReportData.cycleTime.unit}`,
+      icon: Clock, 
+      color: "text-[hsl(220,15%,60%)]",
+      source: `PMO estimate: 35% of VRO improvement (${lgAnnualReportData.cycleTime.source})`
+    },
+  ];
+
+  const stats = mode === "VRO" ? vroStats : pmoStats;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
@@ -252,6 +326,7 @@ export default function Dashboard() {
   const [selectedScenario, setSelectedScenario] = useState<Scenario>(scenarios[0]);
   const [activeStage, setActiveStage] = useState<StageId>("design");
   const [exportOpen, setExportOpen] = useState(false);
+  const [dataMode, setDataMode] = useState<DataMode>("VRO");
 
   const filteredChallenges = activeTheme === "All" 
     ? challenges 
@@ -286,12 +361,16 @@ export default function Dashboard() {
             transition={{ duration: 0.3 }}
           >
             <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-              VRO Strategy Dashboard
+              {dataMode === "VRO" ? "VRO Strategy Dashboard" : "PMO Strategy Dashboard"}
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">
-              Strategic transformation powered by L&G Annual Report 2024 benchmarks and VRO methodology.
+              {dataMode === "VRO" 
+                ? "Strategic transformation powered by L&G Annual Report 2024 benchmarks and VRO methodology."
+                : "Traditional project management approach with standard governance and oversight."}
             </p>
           </motion.div>
+          
+          <VROPMOToggle mode={dataMode} onModeChange={setDataMode} />
           
           <div className="flex items-center gap-3">
             <LiveIndicator isLive={isLive} onToggle={() => setIsLive(!isLive)} />
@@ -345,7 +424,7 @@ export default function Dashboard() {
         </div>
 
         {/* L&G Report Anchored Stats */}
-        <LGReportStats />
+        <LGReportStats mode={dataMode} />
 
         {/* Design → Activate → Measure Value Section */}
         <div className="mb-12 border-b border-border pb-8">
