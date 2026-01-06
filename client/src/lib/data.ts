@@ -9,6 +9,8 @@ import {
   ListFilter 
 } from "lucide-react";
 
+export type Theme = "Automation" | "Governance" | "Data & Insights" | "Value" | "Speed" | "Efficiency";
+
 export interface Challenge {
   id: string;
   number: number;
@@ -23,6 +25,8 @@ export interface Challenge {
     value?: string;
   }[];
   icon: any;
+  themes: Theme[];
+  relatedIds: string[];
 }
 
 export const challenges: Challenge[] = [
@@ -36,7 +40,9 @@ export const challenges: Challenge[] = [
     metrics: [
       { label: "Cycle Time", before: "30 days", after: "5 days" }
     ],
-    icon: Zap
+    icon: Zap,
+    themes: ["Speed", "Automation", "Governance"],
+    relatedIds: ["agility", "efficiency"]
   },
   {
     id: "planning",
@@ -49,7 +55,9 @@ export const challenges: Challenge[] = [
       { label: "Forecast Accuracy", before: "60%", after: "85%" },
       { label: "Benefits Realization", before: "40%", after: "75%" }
     ],
-    icon: Target
+    icon: Target,
+    themes: ["Value", "Data & Insights"],
+    relatedIds: ["certainty", "prioritization"]
   },
   {
     id: "agility",
@@ -61,7 +69,9 @@ export const challenges: Challenge[] = [
     metrics: [
       { label: "Governance Overhead", before: "40 hrs/mo", after: "10 hrs/mo" }
     ],
-    icon: Scale
+    icon: Scale,
+    themes: ["Governance", "Speed", "Automation"],
+    relatedIds: ["speed", "consistency"]
   },
   {
     id: "certainty",
@@ -74,7 +84,9 @@ export const challenges: Challenge[] = [
       { label: "On-time Delivery", before: "60%", after: "85%" },
       { label: "Cost Variance", before: "±25%", after: "±10%" }
     ],
-    icon: ShieldCheck
+    icon: ShieldCheck,
+    themes: ["Value", "Data & Insights"],
+    relatedIds: ["planning", "visibility"]
   },
   {
     id: "visibility",
@@ -87,7 +99,9 @@ export const challenges: Challenge[] = [
       { label: "Decision Cycle", before: "30 days", after: "3 days" },
       { label: "Issue Discovery", before: "4 wks late", after: "1 wk early" }
     ],
-    icon: Eye
+    icon: Eye,
+    themes: ["Data & Insights", "Speed"],
+    relatedIds: ["certainty", "consistency"]
   },
   {
     id: "consistency",
@@ -100,7 +114,9 @@ export const challenges: Challenge[] = [
       { label: "Portfolio Comparability", before: "0%", after: "100%" },
       { label: "Ways of Working", before: "12", after: "1" }
     ],
-    icon: Network
+    icon: Network,
+    themes: ["Governance", "Data & Insights"],
+    relatedIds: ["efficiency", "visibility"]
   },
   {
     id: "efficiency",
@@ -113,7 +129,9 @@ export const challenges: Challenge[] = [
       { label: "Overhead", before: "120 hrs", after: "30 hrs" },
       { label: "FTE Requirements", before: "3", after: "1" }
     ],
-    icon: TrendingDown
+    icon: TrendingDown,
+    themes: ["Efficiency", "Automation", "Value"],
+    relatedIds: ["speed", "agility"]
   },
   {
     id: "prioritization",
@@ -126,6 +144,8 @@ export const challenges: Challenge[] = [
       { label: "Scope Creep Incidents", before: "60%", after: "10%" },
       { label: "Value per Project", value: "+35%" }
     ],
-    icon: ListFilter
+    icon: ListFilter,
+    themes: ["Value", "Governance"],
+    relatedIds: ["planning", "efficiency"]
   }
 ];

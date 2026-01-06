@@ -1,9 +1,14 @@
 import { challenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion } from "framer-motion";
-import { Activity, BarChart3, Clock, TrendingUp, Filter, Search, User, Target } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "wouter";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Theme } from "@/lib/data";
+import { StrategicImpactSection } from "@/components/Charts";
 
 function StatsOverview() {
   return (
@@ -39,23 +44,23 @@ function NavBar() {
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
-        <div className="font-bold text-2xl text-[hsl(209,100%,36%)] tracking-tight">Legal & General</div>
+        <Link href="/">
+          <div className="font-bold text-2xl text-[hsl(209,100%,36%)] tracking-tight cursor-pointer">Legal & General</div>
+        </Link>
         <nav className="hidden md:flex gap-6">
-          {["Dashboard", "Projects", "Reports", "Settings"].map((item, i) => (
-            <a 
-              key={item} 
-              href="#" 
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-[hsl(209,100%,36%)]",
-                i === 0 ? "text-[hsl(209,100%,36%)]" : "text-muted-foreground"
-              )}
-            >
-              {item}
-            </a>
-          ))}
+          <Link href="/dashboard" className="text-sm font-medium text-[hsl(209,100%,36%)]">Dashboard</Link>
+          <Link href="/value-proposition" className="text-sm font-medium text-muted-foreground hover:text-[hsl(209,100%,36%)] transition-colors">Strategic Value</Link>
+          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-[hsl(209,100%,36%)] transition-colors">Projects</a>
+          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-[hsl(209,100%,36%)] transition-colors">Reports</a>
         </nav>
       </div>
       <div className="flex items-center gap-4">
+        <Link href="/value-proposition">
+          <Button variant="outline" size="sm" className="hidden lg:flex gap-2 text-[hsl(209,100%,36%)] border-[hsl(209,100%,36%)]/30 hover:bg-[hsl(209,100%,36%)]/5">
+            <FileText size={16} />
+            Value Proposition
+          </Button>
+        </Link>
         <div className="relative w-64 hidden md:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -71,16 +76,22 @@ function NavBar() {
   );
 }
 
-import { cn } from "@/lib/utils";
-
 export default function Dashboard() {
+  const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
+
+  const filteredChallenges = activeTheme === "All" 
+    ? challenges 
+    : challenges.filter(c => c.themes.includes(activeTheme));
+
+  const themes: Theme[] = ["Automation", "Governance", "Data & Insights", "Value", "Speed"];
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
 
       <main className="container mx-auto px-8 py-8 max-w-[1400px]">
         {/* Header Section */}
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -92,25 +103,61 @@ export default function Dashboard() {
               Real-time insights on efficiency, speed, and certainty.
             </p>
           </motion.div>
+          
+          <Link href="/value-proposition">
+            <Button className="gap-2 bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white shadow-sm transition-all hover:-translate-y-0.5">
+              Read Executive Brief <ArrowRight size={16} />
+            </Button>
+          </Link>
         </div>
 
         <StatsOverview />
 
+        <div className="mb-12">
+           <h2 className="text-[32px] font-bold text-foreground mb-6 border-b border-border pb-4">Strategic Impact Analysis</h2>
+           <StrategicImpactSection />
+        </div>
+
         <div className="flex flex-col gap-6">
-           <div className="flex justify-between items-center border-b border-border pb-4">
-              <h2 className="text-[32px] font-bold text-foreground">Challenge Responses</h2>
+           <div className="flex flex-col md:flex-row justify-between items-center border-b border-border pb-4 gap-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-[32px] font-bold text-foreground">Challenge Responses</h2>
+                <div className="hidden md:flex h-6 w-px bg-border" />
+                <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
+                  <Button 
+                    variant={activeTheme === "All" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setActiveTheme("All")}
+                    className={activeTheme === "All" ? "bg-[hsl(209,100%,36%)] text-white" : "text-muted-foreground"}
+                  >
+                    All
+                  </Button>
+                  {themes.map(theme => (
+                    <Button
+                      key={theme}
+                      variant={activeTheme === theme ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setActiveTheme(theme)}
+                      className={activeTheme === theme ? "bg-[hsl(209,100%,36%)] text-white" : "text-muted-foreground"}
+                    >
+                      {theme}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
               <div className="flex gap-2">
                  <Button variant="outline" className="gap-2 bg-white rounded-[4px]">
                     <Filter className="h-4 w-4" /> Filter
                  </Button>
-                 <Button className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white rounded-[4px]">
-                    Download Report
+                 <Button variant="outline" className="gap-2 bg-white rounded-[4px]">
+                    <LinkIcon className="h-4 w-4" /> View Relationships
                  </Button>
               </div>
            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {challenges.map((challenge, index) => (
+            {filteredChallenges.map((challenge, index) => (
               <ChallengeCard key={challenge.id} challenge={challenge} index={index} />
             ))}
           </div>
