@@ -1,19 +1,27 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, CheckCircle2, TrendingUp, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function ValueProposition() {
+  const [, navigate] = useLocation();
+  
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* Navigation */}
       <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
         <div className="flex items-center gap-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> Back to Home
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" className="gap-2" onClick={handleBack} data-testid="button-back">
+            <ArrowLeft className="h-4 w-4" /> Back
+          </Button>
           <div className="h-6 w-px bg-border mx-2" />
           <div className="font-bold text-lg text-[hsl(209,100%,36%)]">VRO Strategic Value</div>
         </div>
