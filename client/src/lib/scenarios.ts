@@ -159,6 +159,120 @@ export const lgYearOverYearData = [
   { year: "2026 (Target)", prtVolume: 10.0, operatingProfit: 1250, transactions: 48, marketShare: 20.0 }
 ];
 
+// ============================================================================
+// L&G BUSINESS PERFORMANCE DATA - Annual Report 2024
+// Source: L&G Full Year Results 2024, published March 12, 2025
+// ============================================================================
+
+// Divisional Operating Profit (£m)
+export interface DivisionalProfit {
+  division: string;
+  profit2023: number;
+  profit2024: number;
+  change: number;  // percentage
+  color: string;
+}
+
+export const divisionalProfitData: DivisionalProfit[] = [
+  { division: "Institutional Retirement", profit2023: 1034, profit2024: 1105, change: 7, color: "#005EB8" },
+  { division: "Retail", profit2023: 449, profit2024: 504, change: 12, color: "#00843D" },
+  { division: "Asset Management", profit2023: 448, profit2024: 401, change: -10, color: "#6366f1" },
+  { division: "Corporate Investments", profit2023: 136, profit2024: 95, change: -30, color: "#94a3b8" }
+];
+
+export const groupFinancials = {
+  coreOperatingProfit: { value2023: 1531, value2024: 1616, change: 6, unit: "£m" },
+  totalOperatingProfit: { value2023: 1661, value2024: 1711, change: 3, unit: "£m" },
+  dividendPerShare: { value2023: 20.34, value2024: 21.36, change: 5, unit: "p" },
+  coreEPSGrowth: { value2024: 6, unit: "%" },
+  solvencyIICoverage: { value2024: 223, unit: "%" },
+  netSurplusGeneration: { value2023: 1383, value2024: 1342, unit: "£m" },
+  source: "L&G Full Year Results 2024"
+};
+
+// Assets Under Management breakdown
+export interface AUMSegment {
+  segment: string;
+  aum2023: number;
+  aum2024: number;
+  change: number;
+  color: string;
+}
+
+export const aumBreakdown: AUMSegment[] = [
+  { segment: "Total Group AUM", aum2023: 1100, aum2024: 1100, change: 0, color: "#005EB8" },
+  { segment: "DC (Defined Contribution)", aum2023: 163, aum2024: 183, change: 12, color: "#00843D" },
+  { segment: "UK Wholesale", aum2023: 54.2, aum2024: 64.7, change: 19, color: "#6366f1" },
+  { segment: "Private Markets", aum2023: 48, aum2024: 57, change: 19, color: "#f59e0b" },
+  { segment: "Responsible Investment", aum2023: 400, aum2024: 424.6, change: 6, color: "#10b981" }
+];
+
+// Global PRT volumes
+export const globalPRTData = {
+  totalGlobal2024: 10.7,  // £bn
+  ukPRT2024: 8.4,  // £bn
+  usPRT2024: 1.7,  // £bn (converted from $2.2bn)
+  canadaPRT2024: 0.6,  // £bn (converted from CAD $1.0bn)
+  ukSolvencyMargin2024: 5.3,  // %
+  ifrsNewBusinessMargin2024: 7.1,  // %
+  source: "L&G Annual Report 2024"
+};
+
+// 2028 Strategic Targets
+export interface StrategicTarget {
+  metric: string;
+  current2024: number;
+  target2028: string;
+  unit: string;
+  progress: number;  // percentage toward target
+}
+
+export const strategicTargets2028: StrategicTarget[] = [
+  { metric: "Private Markets AUM", current2024: 57, target2028: "85+", unit: "£bn", progress: 67 },
+  { metric: "Asset Management Profit", current2024: 401, target2028: "500-600", unit: "£m", progress: 73 },
+  { metric: "Fee-Related Earnings CAGR", current2024: 9, target2028: "9-15", unit: "%", progress: 60 },
+  { metric: "Core Operating EPS Growth", current2024: 6, target2028: "6-9", unit: "%", progress: 67 }
+];
+
+// Climate & ESG Metrics (from Climate Report 2024)
+export const climateMetrics = {
+  ghgIntensityReduction: { current: 37, target2030: 50, unit: "%" },
+  temperatureAlignment: { current: 2.5, target: 1.5, unit: "°C" },
+  transitionFinance: { current: 4.0, unit: "£bn" },
+  climateImpactPledgeCoverage: { current: 82, target: 100, unit: "%" },
+  environmentEngagements: { current: 3617, unit: "count" },
+  scope1Emissions: { current: 9665, unit: "tCO2e" },
+  scope2Emissions: { current: 3652, unit: "tCO2e" },  // market-based
+  portfolioCarbonIntensity: { current: 51, unit: "tCO2e/£m" },
+  renewableElectricity: { target2025: 100, unit: "%" },
+  coalPhaseOut: { target: 2030 },
+  netZeroTarget: { target: 2050 },
+  source: "L&G Climate and Nature Report 2024"
+};
+
+// Risk Governance Framework (from Risk Management Supplement 2024)
+export const riskGovernance = {
+  threeLines: [
+    { line: 1, name: "Business Divisions", role: "Risk taking within appetite parameters" },
+    { line: 2, name: "Risk Functions (CRO)", role: "Objective challenge and guidance" },
+    { line: 3, name: "Internal Audit", role: "Independent assurance" }
+  ],
+  keyRiskExposures: ["Credit", "Longevity"],
+  riskAppetiteDashboard: true,
+  emergingRisksDashboard: true,
+  source: "L&G Risk Management Supplement 2024"
+};
+
+// Shareholder Returns & Capital Allocation
+export const shareholderReturns = {
+  buyback2024Completed: 200,  // £m
+  buybackAnnounced: 500,  // £m
+  additionalBuybackPostUSSale: 1000,  // £m
+  totalReturnTarget2024_27: 5000,  // £m (40% of market cap)
+  dividendGrowth2025Plus: 2,  // % per annum
+  source: "L&G Full Year Results 2024"
+};
+
 // Legacy accessors for backward compatibility
 export const lgAnnualReportDataLegacy = {
   prtVolume: { baseline: 8.2, target: 10, unit: "£bn", source: "L&G Annual Report 2024, p.12" },
