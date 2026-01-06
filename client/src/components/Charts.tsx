@@ -39,8 +39,47 @@ const benefitsData = [
 const riskDistributionData = [
   { name: 'Low Risk', value: 65, color: 'hsl(148, 100%, 26%)' }, // Brand Teal
   { name: 'Medium Risk', value: 25, color: 'hsl(51, 100%, 50%)' }, // Accent Yellow
-  { name: 'High Risk', value: 10, color: 'hsl(346, 100%, 42%)' }  // Brand Red
+  { name: 'High Risk (Requires Governance)', value: 10, color: 'hsl(346, 100%, 42%)' }  // Brand Red
 ];
+
+// ... (keep previous charts)
+
+export function GovernanceHealthChart() {
+  const governanceData = [
+    { category: 'Policy Alignment', score: 95, fullMark: 100 },
+    { category: 'Audit Trail', score: 98, fullMark: 100 },
+    { category: 'Decision Speed', score: 90, fullMark: 100 },
+    { category: 'Risk Mitigation', score: 85, fullMark: 100 },
+    { category: 'Stakeholder Review', score: 88, fullMark: 100 },
+  ];
+
+  return (
+    <Card className="h-full border border-border bg-white rounded-[4px] shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-lg font-bold text-[hsl(209,100%,36%)]">Governance Health & Assurance</CardTitle>
+        <CardDescription>Compliance scores across key control gates (Ongoing Concern: Transformation Risk)</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart layout="vertical" data={governanceData} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e0e0e0" />
+              <XAxis type="number" domain={[0, 100]} stroke="#757575" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis type="category" dataKey="category" stroke="#757575" fontSize={12} tickLine={false} axisLine={false} width={100} />
+              <Tooltip 
+                cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                contentStyle={{ backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}
+              />
+              <Bar dataKey="score" name="Health Score" fill="hsl(148, 100%, 26%)" radius={[0, 4, 4, 0]} barSize={20} />
+              <Legend />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 const fteEfficiencyData = [
   { month: 'Jan', manual: 120, automated: 0 },
@@ -232,6 +271,9 @@ export function StrategicImpactSection() {
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <RiskProfileChart />
+      </motion.div>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="md:col-span-2">
+        <GovernanceHealthChart />
       </motion.div>
     </div>
   );

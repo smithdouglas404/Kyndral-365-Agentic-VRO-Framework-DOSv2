@@ -52,6 +52,11 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
 
           <div className="mt-auto space-y-4 pt-4">
             <div className="flex flex-wrap gap-2">
+              {challenge.strategicAlignment && challenge.strategicAlignment.map((align, i) => (
+                <Badge key={`align-${i}`} variant="outline" className="text-xs font-medium text-[hsl(209,100%,36%)] border-[hsl(209,100%,36%)]/20 bg-[hsl(209,100%,36%)]/5">
+                  {align}
+                </Badge>
+              ))}
               {challenge.mechanism.slice(0, 3).map((mech, i) => (
                 <Badge key={i} variant="secondary" className="text-xs font-normal bg-background text-foreground border border-border rounded-[4px]">
                   {mech}

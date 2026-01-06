@@ -27,6 +27,7 @@ export interface Challenge {
   icon: any;
   themes: Theme[];
   relatedIds: string[];
+  strategicAlignment: string[];
 }
 
 export const challenges: Challenge[] = [
@@ -42,7 +43,8 @@ export const challenges: Challenge[] = [
     ],
     icon: Zap,
     themes: ["Speed", "Automation", "Governance"],
-    relatedIds: ["agility", "efficiency"]
+    relatedIds: ["agility", "efficiency"],
+    strategicAlignment: ["Simplification", "International Growth"]
   },
   {
     id: "planning",
@@ -57,7 +59,8 @@ export const challenges: Challenge[] = [
     ],
     icon: Target,
     themes: ["Value", "Data & Insights"],
-    relatedIds: ["certainty", "prioritization"]
+    relatedIds: ["certainty", "prioritization"],
+    strategicAlignment: ["Simplification", "Asset Management"]
   },
   {
     id: "agility",
@@ -71,7 +74,8 @@ export const challenges: Challenge[] = [
     ],
     icon: Scale,
     themes: ["Governance", "Speed", "Automation"],
-    relatedIds: ["speed", "consistency"]
+    relatedIds: ["speed", "consistency"],
+    strategicAlignment: ["Simplification", "Governance"]
   },
   {
     id: "certainty",
@@ -86,7 +90,8 @@ export const challenges: Challenge[] = [
     ],
     icon: ShieldCheck,
     themes: ["Value", "Data & Insights"],
-    relatedIds: ["planning", "visibility"]
+    relatedIds: ["planning", "visibility"],
+    strategicAlignment: ["PRT Pipeline", "Asset Management"]
   },
   {
     id: "visibility",
@@ -101,7 +106,8 @@ export const challenges: Challenge[] = [
     ],
     icon: Eye,
     themes: ["Data & Insights", "Speed"],
-    relatedIds: ["certainty", "consistency"]
+    relatedIds: ["certainty", "consistency"],
+    strategicAlignment: ["Simplification", "Digitisation"]
   },
   {
     id: "consistency",
@@ -116,7 +122,8 @@ export const challenges: Challenge[] = [
     ],
     icon: Network,
     themes: ["Governance", "Data & Insights"],
-    relatedIds: ["efficiency", "visibility"]
+    relatedIds: ["efficiency", "visibility"],
+    strategicAlignment: ["Simplification", "Governance"]
   },
   {
     id: "efficiency",
@@ -131,7 +138,8 @@ export const challenges: Challenge[] = [
     ],
     icon: TrendingDown,
     themes: ["Efficiency", "Automation", "Value"],
-    relatedIds: ["speed", "agility"]
+    relatedIds: ["speed", "agility"],
+    strategicAlignment: ["Simplification", "Cost Efficiency"]
   },
   {
     id: "prioritization",
@@ -146,6 +154,7 @@ export const challenges: Challenge[] = [
     ],
     icon: ListFilter,
     themes: ["Value", "Governance"],
-    relatedIds: ["planning", "efficiency"]
+    relatedIds: ["planning", "efficiency"],
+    strategicAlignment: ["Capital Allocation", "Simplification"]
   }
 ];
