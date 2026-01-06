@@ -158,3 +158,133 @@ export const challenges: Challenge[] = [
     strategicAlignment: ["Capital Allocation", "Simplification"]
   }
 ];
+
+// PMO Challenges - Traditional approach with worse metrics
+export const pmoChallenges: Challenge[] = [
+  {
+    id: "pmo-speed",
+    number: 1,
+    title: "Speed vs Quality Trade-off",
+    problem: "Manual processes create bottlenecks; rushing leads to quality issues and rework.",
+    solution: "Incremental process improvements with additional review stages.",
+    mechanism: ["Manual intake", "Escalation paths", "Quality gates", "Extended approvals"],
+    metrics: [
+      { label: "Cycle Time", before: "30 days", after: "25 days" }
+    ],
+    icon: Zap,
+    themes: ["Speed", "Governance"],
+    relatedIds: ["pmo-agility", "pmo-efficiency"],
+    strategicAlignment: ["Process Improvement"]
+  },
+  {
+    id: "pmo-planning",
+    number: 2,
+    title: "Planning and Estimation",
+    problem: "Optimistic estimates persist; benefits tracking is manual and incomplete.",
+    solution: "Enhanced templates and quarterly review cycles.",
+    mechanism: ["Better templates", "Quarterly reviews", "Manual tracking"],
+    metrics: [
+      { label: "Forecast Accuracy", before: "55%", after: "62%" },
+      { label: "Benefits Realization", before: "35%", after: "45%" }
+    ],
+    icon: Target,
+    themes: ["Value", "Data & Insights"],
+    relatedIds: ["pmo-certainty", "pmo-prioritization"],
+    strategicAlignment: ["Planning Improvement"]
+  },
+  {
+    id: "pmo-agility",
+    number: 3,
+    title: "Governance Burden",
+    problem: "Heavy governance requirements slow delivery without clear value-add.",
+    solution: "Streamlined templates and reduced mandatory checkpoints.",
+    mechanism: ["Fewer templates", "Reduced meetings", "Exception-based reviews"],
+    metrics: [
+      { label: "Governance Overhead", before: "45 hrs/mo", after: "35 hrs/mo" }
+    ],
+    icon: Scale,
+    themes: ["Governance", "Speed"],
+    relatedIds: ["pmo-speed", "pmo-consistency"],
+    strategicAlignment: ["Process Simplification"]
+  },
+  {
+    id: "pmo-certainty",
+    number: 4,
+    title: "Delivery Predictability",
+    problem: "Projects frequently miss deadlines and budgets; surprises are common.",
+    solution: "More frequent status reporting and earlier escalation.",
+    mechanism: ["Weekly status reports", "RAG dashboards", "Management escalation"],
+    metrics: [
+      { label: "On-time Delivery", before: "55%", after: "62%" },
+      { label: "Cost Variance", before: "±30%", after: "±22%" }
+    ],
+    icon: ShieldCheck,
+    themes: ["Value", "Data & Insights"],
+    relatedIds: ["pmo-planning", "pmo-visibility"],
+    strategicAlignment: ["Delivery Improvement"]
+  },
+  {
+    id: "pmo-visibility",
+    number: 5,
+    title: "Reporting Delays",
+    problem: "Monthly reports are stale; issues discovered weeks after they occur.",
+    solution: "More frequent reporting cycles and dashboards.",
+    mechanism: ["Weekly reports", "Excel dashboards", "Email alerts"],
+    metrics: [
+      { label: "Decision Cycle", before: "30 days", after: "21 days" },
+      { label: "Issue Discovery", before: "4 wks late", after: "3 wks late" }
+    ],
+    icon: Eye,
+    themes: ["Data & Insights", "Speed"],
+    relatedIds: ["pmo-certainty", "pmo-consistency"],
+    strategicAlignment: ["Reporting Enhancement"]
+  },
+  {
+    id: "pmo-consistency",
+    number: 6,
+    title: "Standardization Challenges",
+    problem: "Each team uses different tools and templates; comparison is difficult.",
+    solution: "Mandated templates and centralized tooling.",
+    mechanism: ["Template library", "Tool standardization", "Training programs"],
+    metrics: [
+      { label: "Portfolio Comparability", before: "0%", after: "40%" },
+      { label: "Ways of Working", before: "12", after: "6" }
+    ],
+    icon: Network,
+    themes: ["Governance", "Data & Insights"],
+    relatedIds: ["pmo-efficiency", "pmo-visibility"],
+    strategicAlignment: ["Standardization"]
+  },
+  {
+    id: "pmo-efficiency",
+    number: 7,
+    title: "Resource Overhead",
+    problem: "Manual data collation consumes significant PMO capacity.",
+    solution: "Better templates and some spreadsheet automation.",
+    mechanism: ["Excel macros", "Template consolidation"],
+    metrics: [
+      { label: "Overhead", before: "130 hrs", after: "100 hrs" },
+      { label: "FTE Requirements", before: "3.5", after: "2.5" }
+    ],
+    icon: TrendingDown,
+    themes: ["Efficiency", "Value"],
+    relatedIds: ["pmo-speed", "pmo-agility"],
+    strategicAlignment: ["Cost Reduction"]
+  },
+  {
+    id: "pmo-prioritization",
+    number: 8,
+    title: "Priority Management",
+    problem: "Ad-hoc requests disrupt planned work; scope creep is endemic.",
+    solution: "Change control boards and formal prioritization meetings.",
+    mechanism: ["Change control", "Prioritization committees", "Impact assessments"],
+    metrics: [
+      { label: "Scope Creep Incidents", before: "65%", after: "45%" },
+      { label: "Value per Project", value: "+8%" }
+    ],
+    icon: ListFilter,
+    themes: ["Value", "Governance"],
+    relatedIds: ["pmo-planning", "pmo-efficiency"],
+    strategicAlignment: ["Priority Management"]
+  }
+];

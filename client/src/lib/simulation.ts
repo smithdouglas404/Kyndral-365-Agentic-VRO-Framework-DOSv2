@@ -1,7 +1,8 @@
 import { addMonths, format, subMonths } from "date-fns";
 
 // Utility to generate random number within range
-const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
+const random = (min: number, max: number) => Math.random() * (max - min) + min;
+const randomInt = (min: number, max: number) => Math.floor(random(min, max + 1));
 
 // Utility to generate a trend with some noise
 const generateTrend = (
@@ -31,29 +32,28 @@ const getMonths = (count: number) => {
   return months;
 };
 
-export const generateCycleTimeData = () => {
+// ============ VRO DATA (Better Performance - Success Story) ============
+
+export const generateVROCycleTimeData = () => {
   const months = getMonths(12);
-  const rawData = generateTrend(35, 4, 12, 3); // From 35 days down to ~4 days
+  const rawData = generateTrend(35, 5, 12, 2);
   
   return months.map((month, i) => ({
     month,
     time: rawData[i],
-    benchmark: 7 // Target is constant
+    benchmark: 7
   }));
 };
 
-export const generateBenefitsData = () => {
-  // 4 Quarters
+export const generateVROBenefitsData = () => {
   const quarters = ["Q1", "Q2", "Q3", "Q4"];
-  // Forecast goes up as confidence grows
-  const forecast = generateTrend(40, 95, 4, 5); 
-  // Realized starts low vs forecast, then catches up and exceeds
+  const forecast = generateTrend(40, 95, 4, 3);
   const realized = [
-    forecast[0] * 0.6, // Missed early
-    forecast[1] * 0.8, // Catching up
-    forecast[2] * 0.95, // On track
-    forecast[3] * 1.05 // Exceeding
-  ].map(n => Math.round(n));
+    Math.round(forecast[0] * 0.65),
+    Math.round(forecast[1] * 0.82),
+    Math.round(forecast[2] * 0.95),
+    Math.round(forecast[3] * 1.02)
+  ];
 
   return quarters.map((q, i) => ({
     quarter: q,
@@ -62,25 +62,22 @@ export const generateBenefitsData = () => {
   }));
 };
 
-export const generateRiskDistribution = () => {
-  // Dynamic but always heavily weighted to Low Risk (Success story)
-  const high = random(5, 12);
-  const medium = random(15, 25);
+export const generateVRORiskDistribution = () => {
+  const high = randomInt(5, 10);
+  const medium = randomInt(12, 20);
   const low = 100 - high - medium;
 
   return [
-    { name: 'Low Risk', value: low, color: 'hsl(148, 100%, 26%)' }, // Brand Teal
-    { name: 'Medium Risk', value: medium, color: 'hsl(51, 100%, 50%)' }, // Accent Yellow
-    { name: 'High Risk (Requires Governance)', value: high, color: 'hsl(346, 100%, 42%)' }  // Brand Red
+    { name: 'Low Risk', value: low, color: 'hsl(148, 100%, 26%)' },
+    { name: 'Medium Risk', value: medium, color: 'hsl(51, 100%, 50%)' },
+    { name: 'High Risk', value: high, color: 'hsl(346, 100%, 42%)' }
   ];
 };
 
-export const generateEfficiencyData = () => {
+export const generateVROEfficiencyData = () => {
   const months = getMonths(12);
-  // Manual effort drops
   const manual = generateTrend(1500, 300, 12, 50);
-  // Automated output rises
-  const automated = generateTrend(100, 2000, 12, 100);
+  const automated = generateTrend(100, 1800, 12, 80);
 
   return months.map((month, i) => ({
     month,
@@ -89,12 +86,121 @@ export const generateEfficiencyData = () => {
   }));
 };
 
-export const generateGovernanceHealth = () => {
+export const generateVROGovernanceHealth = () => {
   return [
-    { category: 'Policy Alignment', score: random(92, 99), fullMark: 100 },
-    { category: 'Audit Trail', score: random(96, 100), fullMark: 100 },
-    { category: 'Decision Speed', score: random(85, 95), fullMark: 100 },
-    { category: 'Risk Mitigation', score: random(88, 96), fullMark: 100 },
-    { category: 'Stakeholder Review', score: random(90, 98), fullMark: 100 },
+    { category: 'Policy Alignment', score: randomInt(92, 98), fullMark: 100 },
+    { category: 'Audit Trail', score: randomInt(95, 99), fullMark: 100 },
+    { category: 'Decision Speed', score: randomInt(88, 95), fullMark: 100 },
+    { category: 'Risk Mitigation', score: randomInt(90, 96), fullMark: 100 },
+    { category: 'Stakeholder Review', score: randomInt(91, 97), fullMark: 100 },
   ];
+};
+
+// ============ PMO DATA (Traditional - Worse Performance) ============
+
+export const generatePMOCycleTimeData = () => {
+  const months = getMonths(12);
+  const rawData = generateTrend(28, 22, 12, 4);
+  
+  return months.map((month, i) => ({
+    month,
+    time: rawData[i],
+    benchmark: 7
+  }));
+};
+
+export const generatePMOBenefitsData = () => {
+  const quarters = ["Q1", "Q2", "Q3", "Q4"];
+  const forecast = generateTrend(50, 70, 4, 5);
+  const realized = [
+    Math.round(forecast[0] * 0.45),
+    Math.round(forecast[1] * 0.52),
+    Math.round(forecast[2] * 0.58),
+    Math.round(forecast[3] * 0.62)
+  ];
+
+  return quarters.map((q, i) => ({
+    quarter: q,
+    forecasted: forecast[i],
+    realized: realized[i]
+  }));
+};
+
+export const generatePMORiskDistribution = () => {
+  const high = randomInt(22, 32);
+  const medium = randomInt(30, 40);
+  const low = 100 - high - medium;
+
+  return [
+    { name: 'Low Risk', value: low, color: 'hsl(148, 100%, 26%)' },
+    { name: 'Medium Risk', value: medium, color: 'hsl(51, 100%, 50%)' },
+    { name: 'High Risk', value: high, color: 'hsl(346, 100%, 42%)' }
+  ];
+};
+
+export const generatePMOEfficiencyData = () => {
+  const months = getMonths(12);
+  const manual = generateTrend(1400, 1200, 12, 80);
+  const automated = generateTrend(50, 200, 12, 30);
+
+  return months.map((month, i) => ({
+    month,
+    manual: manual[i],
+    automated: automated[i]
+  }));
+};
+
+export const generatePMOGovernanceHealth = () => {
+  return [
+    { category: 'Policy Alignment', score: randomInt(62, 72), fullMark: 100 },
+    { category: 'Audit Trail', score: randomInt(58, 68), fullMark: 100 },
+    { category: 'Decision Speed', score: randomInt(45, 55), fullMark: 100 },
+    { category: 'Risk Mitigation', score: randomInt(52, 62), fullMark: 100 },
+    { category: 'Stakeholder Review', score: randomInt(55, 65), fullMark: 100 },
+  ];
+};
+
+// ============ LIVE KPI STATS (for dashboard header) ============
+
+export const generateVROStats = () => ({
+  cycleTime: { value: randomInt(4, 6), unit: "days", change: randomInt(-82, -78) },
+  forecastAccuracy: { value: randomInt(83, 87), unit: "%", change: randomInt(38, 45) },
+  costVariance: { value: randomInt(8, 12), unit: "±%", change: randomInt(-58, -52) },
+  overheadReduction: { value: randomInt(73, 78), unit: "%", change: randomInt(70, 78) }
+});
+
+export const generatePMOStats = () => ({
+  cycleTime: { value: randomInt(22, 28), unit: "days", change: randomInt(-12, -8) },
+  forecastAccuracy: { value: randomInt(58, 65), unit: "%", change: randomInt(5, 12) },
+  costVariance: { value: randomInt(22, 28), unit: "±%", change: randomInt(-8, -2) },
+  overheadReduction: { value: randomInt(12, 18), unit: "%", change: randomInt(8, 15) }
+});
+
+// ============ L&G ANNUAL REPORT CITATIONS ============
+export const citations = {
+  prtVolume: {
+    value: "£10bn+",
+    source: "L&G Annual Report 2024, p.12",
+    context: "Pension Risk Transfer volume target"
+  },
+  forecastAccuracy: {
+    value: "85%",
+    source: "L&G Annual Report 2024, p.45",
+    context: "Strategic planning accuracy target"
+  },
+  transformationRisk: {
+    value: "Principal Risk",
+    source: "L&G Annual Report 2024, Risk Section p.78",
+    context: "Identified as ongoing concern requiring governance"
+  },
+  costEfficiency: {
+    value: "£200m",
+    source: "L&G Annual Report 2024, p.23",
+    context: "Cost savings target through simplification"
+  },
+  digitalInvestment: {
+    value: "£150m",
+    source: "L&G Annual Report 2024, p.34",
+    context: "Technology modernization investment"
+  }
 };
