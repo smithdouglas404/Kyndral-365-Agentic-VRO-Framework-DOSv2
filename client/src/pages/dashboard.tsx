@@ -1,7 +1,8 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
@@ -83,79 +84,95 @@ function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => 
 function LGReportStats({ mode }: { mode: DataMode }) {
   const vroStats = [
     { 
-      label: "PRT Volume Target", 
-      value: `${lgAnnualReportData.prtVolume.target}`,
+      label: "PRT Volume (2025)", 
+      value: `${lgAnnualReportData.prtVolume.actual2025}`,
       unit: lgAnnualReportData.prtVolume.unit,
-      baseline: `${lgAnnualReportData.prtVolume.baseline}${lgAnnualReportData.prtVolume.unit}`,
+      baseline: `${lgAnnualReportData.prtVolume.baseline2024} ${lgAnnualReportData.prtVolume.unit}`,
+      target: `${lgAnnualReportData.prtVolume.target2026} ${lgAnnualReportData.prtVolume.unit}`,
       icon: Target, 
       color: "text-[hsl(209,100%,36%)]",
-      source: lgAnnualReportData.prtVolume.source
+      source: lgAnnualReportData.prtVolume.source,
+      progress: Math.round(((lgAnnualReportData.prtVolume.actual2025 - lgAnnualReportData.prtVolume.baseline2024) / (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024)) * 100)
     },
     { 
-      label: "Forecast Accuracy", 
-      value: `${lgAnnualReportData.forecastAccuracy.target}`,
+      label: "Forecast Accuracy (2025)", 
+      value: `${lgAnnualReportData.forecastAccuracy.actual2025}`,
       unit: lgAnnualReportData.forecastAccuracy.unit,
-      baseline: `${lgAnnualReportData.forecastAccuracy.baseline}${lgAnnualReportData.forecastAccuracy.unit}`,
+      baseline: `${lgAnnualReportData.forecastAccuracy.baseline2024} ${lgAnnualReportData.forecastAccuracy.unit}`,
+      target: `${lgAnnualReportData.forecastAccuracy.target2026} ${lgAnnualReportData.forecastAccuracy.unit}`,
       icon: Activity, 
       color: "text-[hsl(148,100%,26%)]",
-      source: lgAnnualReportData.forecastAccuracy.source
+      source: lgAnnualReportData.forecastAccuracy.source,
+      progress: Math.round(((lgAnnualReportData.forecastAccuracy.actual2025 - lgAnnualReportData.forecastAccuracy.baseline2024) / (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024)) * 100)
     },
     { 
-      label: "Cost Savings Target", 
-      value: `${lgAnnualReportData.costSavings.target}`,
+      label: "Cost Savings (2025)", 
+      value: `${lgAnnualReportData.costSavings.actual2025}`,
       unit: lgAnnualReportData.costSavings.unit,
-      baseline: `${lgAnnualReportData.costSavings.baseline}${lgAnnualReportData.costSavings.unit}`,
+      baseline: `${lgAnnualReportData.costSavings.baseline2024} ${lgAnnualReportData.costSavings.unit}`,
+      target: `${lgAnnualReportData.costSavings.target2026} ${lgAnnualReportData.costSavings.unit}`,
       icon: TrendingUp, 
       color: "text-[hsl(51,100%,50%)]",
-      source: lgAnnualReportData.costSavings.source
+      source: lgAnnualReportData.costSavings.source,
+      progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100)
     },
     { 
-      label: "Cycle Time Target", 
-      value: `${lgAnnualReportData.cycleTime.target}`,
+      label: "Cycle Time (2025)", 
+      value: `${lgAnnualReportData.cycleTime.actual2025}`,
       unit: lgAnnualReportData.cycleTime.unit,
-      baseline: `${lgAnnualReportData.cycleTime.baseline}${lgAnnualReportData.cycleTime.unit}`,
+      baseline: `${lgAnnualReportData.cycleTime.baseline2024} ${lgAnnualReportData.cycleTime.unit}`,
+      target: `${lgAnnualReportData.cycleTime.target2026} ${lgAnnualReportData.cycleTime.unit}`,
       icon: Clock, 
       color: "text-[hsl(209,100%,36%)]",
-      source: lgAnnualReportData.cycleTime.source
+      source: lgAnnualReportData.cycleTime.source,
+      progress: Math.round(((lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.actual2025) / (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026)) * 100)
     },
   ];
 
   const pmoStats = [
     { 
-      label: "PRT Volume", 
-      value: `${(lgAnnualReportData.prtVolume.baseline + (lgAnnualReportData.prtVolume.target - lgAnnualReportData.prtVolume.baseline) * 0.35).toFixed(1)}`,
+      label: "PRT Volume (2025)", 
+      value: `${(lgAnnualReportData.prtVolume.baseline2024 + (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024) * 0.35).toFixed(1)}`,
       unit: lgAnnualReportData.prtVolume.unit,
-      baseline: `${lgAnnualReportData.prtVolume.baseline} ${lgAnnualReportData.prtVolume.unit}`,
+      baseline: `${lgAnnualReportData.prtVolume.baseline2024} ${lgAnnualReportData.prtVolume.unit}`,
+      target: `${lgAnnualReportData.prtVolume.target2026} ${lgAnnualReportData.prtVolume.unit}`,
       icon: Target, 
       color: "text-[hsl(220,15%,60%)]",
-      source: `PMO estimate: 35% of VRO target (${lgAnnualReportData.prtVolume.source})`
+      source: `PMO: 35% progress vs VRO 50% (${lgAnnualReportData.prtVolume.source})`,
+      progress: 35
     },
     { 
-      label: "Forecast Accuracy", 
-      value: `${Math.round(lgAnnualReportData.forecastAccuracy.baseline + (lgAnnualReportData.forecastAccuracy.target - lgAnnualReportData.forecastAccuracy.baseline) * 0.25)}`,
+      label: "Forecast Accuracy (2025)", 
+      value: `${Math.round(lgAnnualReportData.forecastAccuracy.baseline2024 + (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024) * 0.25)}`,
       unit: lgAnnualReportData.forecastAccuracy.unit,
-      baseline: `${lgAnnualReportData.forecastAccuracy.baseline} ${lgAnnualReportData.forecastAccuracy.unit}`,
+      baseline: `${lgAnnualReportData.forecastAccuracy.baseline2024} ${lgAnnualReportData.forecastAccuracy.unit}`,
+      target: `${lgAnnualReportData.forecastAccuracy.target2026} ${lgAnnualReportData.forecastAccuracy.unit}`,
       icon: Activity, 
       color: "text-[hsl(220,15%,60%)]",
-      source: `PMO estimate: 25% of VRO improvement (${lgAnnualReportData.forecastAccuracy.source})`
+      source: `PMO: 25% progress vs VRO 59% (${lgAnnualReportData.forecastAccuracy.source})`,
+      progress: 25
     },
     { 
-      label: "Cost Savings", 
-      value: `${Math.round(lgAnnualReportData.costSavings.target * 0.42)}`,
+      label: "Cost Savings (2025)", 
+      value: `${Math.round(lgAnnualReportData.costSavings.target2026 * 0.28)}`,
       unit: lgAnnualReportData.costSavings.unit,
-      baseline: `${lgAnnualReportData.costSavings.baseline} ${lgAnnualReportData.costSavings.unit}`,
+      baseline: `${lgAnnualReportData.costSavings.baseline2024} ${lgAnnualReportData.costSavings.unit}`,
+      target: `${lgAnnualReportData.costSavings.target2026} ${lgAnnualReportData.costSavings.unit}`,
       icon: TrendingUp, 
       color: "text-[hsl(220,15%,60%)]",
-      source: `PMO estimate: 42% of VRO target (${lgAnnualReportData.costSavings.source})`
+      source: `PMO: 28% progress vs VRO 56% (${lgAnnualReportData.costSavings.source})`,
+      progress: 28
     },
     { 
-      label: "Cycle Time", 
-      value: `${Math.round(lgAnnualReportData.cycleTime.baseline - (lgAnnualReportData.cycleTime.baseline - lgAnnualReportData.cycleTime.target) * 0.35)}`,
+      label: "Cycle Time (2025)", 
+      value: `${Math.round(lgAnnualReportData.cycleTime.baseline2024 - (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026) * 0.30)}`,
       unit: lgAnnualReportData.cycleTime.unit,
-      baseline: `${lgAnnualReportData.cycleTime.baseline} ${lgAnnualReportData.cycleTime.unit}`,
+      baseline: `${lgAnnualReportData.cycleTime.baseline2024} ${lgAnnualReportData.cycleTime.unit}`,
+      target: `${lgAnnualReportData.cycleTime.target2026} ${lgAnnualReportData.cycleTime.unit}`,
       icon: Clock, 
       color: "text-[hsl(220,15%,60%)]",
-      source: `PMO estimate: 35% of VRO improvement (${lgAnnualReportData.cycleTime.source})`
+      source: `PMO: 30% progress vs VRO 57% (${lgAnnualReportData.cycleTime.source})`,
+      progress: 30
     },
   ];
 
@@ -179,13 +196,25 @@ function LGReportStats({ mode }: { mode: DataMode }) {
               <Icon className={stat.color} size={20} strokeWidth={1.5} />
             </div>
             <div className="flex items-baseline gap-1 w-full">
-              <span className="text-4xl font-bold text-foreground tracking-tight">{stat.value}</span>
+              <motion.span 
+                key={`${mode}-${stat.label}`}
+                initial={{ scale: 1.1, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-4xl font-bold text-foreground tracking-tight"
+              >
+                {stat.value}
+              </motion.span>
               <span className="text-lg text-muted-foreground">{stat.unit}</span>
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-muted-foreground line-through">{stat.baseline}</span>
-              <ArrowRight size={12} className="text-[hsl(148,100%,26%)]" />
-              <span className="text-xs font-medium text-[hsl(148,100%,26%)]">{stat.value}{stat.unit}</span>
+            <div className="w-full mt-3">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-muted-foreground">2024: {stat.baseline}</span>
+                <span className="font-medium text-[hsl(148,100%,26%)]">2026: {stat.target}</span>
+              </div>
+              <Progress value={stat.progress} className="h-2" />
+              <div className="text-xs text-right mt-1 font-medium" style={{ color: mode === "VRO" ? "hsl(148,100%,26%)" : "hsl(220,15%,60%)" }}>
+                {stat.progress}% to target
+              </div>
             </div>
             <TooltipProvider>
               <Tooltip>

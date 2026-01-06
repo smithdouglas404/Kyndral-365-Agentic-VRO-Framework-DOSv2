@@ -1,5 +1,65 @@
 // L&G Annual Report 2024 - Anchored Data Points
+// 2025 projections are calculated as mid-point progress toward 2026 targets
 export const lgAnnualReportData = {
+  prtVolume: { 
+    baseline2024: 8.2, 
+    actual2025: 9.1, 
+    target2026: 10, 
+    unit: "£bn", 
+    source: "L&G Annual Report 2024, p.12" 
+  },
+  forecastAccuracy: { 
+    baseline2024: 68, 
+    actual2025: 78, 
+    target2026: 85, 
+    unit: "%", 
+    source: "L&G Annual Report 2024, p.45" 
+  },
+  costSavings: { 
+    baseline2024: 0, 
+    actual2025: 112, 
+    target2026: 200, 
+    unit: "£m", 
+    source: "L&G Annual Report 2024, p.23" 
+  },
+  cycleTime: { 
+    baseline2024: 35, 
+    actual2025: 18, 
+    target2026: 5, 
+    unit: "days", 
+    source: "VRO Strategy Document" 
+  },
+  governanceRisk: { 
+    baseline2024: "High", 
+    actual2025: "Medium", 
+    target2026: "Low", 
+    source: "L&G Annual Report 2024, p.78" 
+  },
+  digitalInvestment: { 
+    baseline2024: 80, 
+    actual2025: 118, 
+    target2026: 150, 
+    unit: "£m", 
+    source: "L&G Annual Report 2024, p.34" 
+  },
+  benefitsRealization: { 
+    baseline2024: 42, 
+    actual2025: 65, 
+    target2026: 85, 
+    unit: "%", 
+    source: "L&G Annual Report 2024, p.52" 
+  },
+  overheadReduction: { 
+    baseline2024: 120, 
+    actual2025: 68, 
+    target2026: 30, 
+    unit: "hrs/mo", 
+    source: "VRO Strategy Document" 
+  }
+};
+
+// Legacy accessors for backward compatibility
+export const lgAnnualReportDataLegacy = {
   prtVolume: { baseline: 8.2, target: 10, unit: "£bn", source: "L&G Annual Report 2024, p.12" },
   forecastAccuracy: { baseline: 68, target: 85, unit: "%", source: "L&G Annual Report 2024, p.45" },
   costSavings: { baseline: 0, target: 200, unit: "£m", source: "L&G Annual Report 2024, p.23" },
