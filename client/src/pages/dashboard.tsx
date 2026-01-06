@@ -239,9 +239,28 @@ function LGReportStats({ mode }: { mode: DataMode }) {
   );
 }
 
-function NavBar() {
+interface NavBarProps {
+  onProjectSelect?: (scenarioId: string) => void;
+}
+
+function NavBar({ onProjectSelect }: NavBarProps) {
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
+
+  const projectData = [
+    { name: "PRT Pipeline Acceleration", status: "On Track", progress: 78, scenarioId: "accelerate-prt" },
+    { name: "Governance Automation Platform", status: "On Track", progress: 65, scenarioId: "governance-uplift" },
+    { name: "Real-time Reporting Engine", status: "At Risk", progress: 42, scenarioId: "digitize-operations" },
+    { name: "Benefits Tracking System", status: "On Track", progress: 91, scenarioId: "accelerate-prt" },
+    { name: "Compliance Automation", status: "Complete", progress: 100, scenarioId: "governance-uplift" },
+  ];
+
+  const handleProjectClick = (scenarioId: string) => {
+    if (onProjectSelect) {
+      onProjectSelect(scenarioId);
+    }
+    setProjectsOpen(false);
+  };
 
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
@@ -263,35 +282,40 @@ function NavBar() {
                 <DialogDescription>Current transformation initiatives aligned to VRO scenarios</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 mt-4">
-                {[
-                  { name: "PRT Pipeline Acceleration", status: "On Track", progress: 78, scenario: "Accelerate PRT" },
-                  { name: "Governance Automation Platform", status: "On Track", progress: 65, scenario: "Governance Uplift" },
-                  { name: "Real-time Reporting Engine", status: "At Risk", progress: 42, scenario: "Digitize Operations" },
-                  { name: "Benefits Tracking System", status: "On Track", progress: 91, scenario: "Accelerate PRT" },
-                  { name: "Compliance Automation", status: "Complete", progress: 100, scenario: "Governance Uplift" },
-                ].map((project, i) => (
-                  <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" data-testid={`project-item-${i}`}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-sm">{project.name}</span>
-                      <Badge variant={project.status === "On Track" ? "default" : project.status === "At Risk" ? "destructive" : "secondary"} className="text-xs">
-                        {project.status}
-                      </Badge>
+                {projectData.map((project, i) => {
+                  const scenarioName = scenarios.find(s => s.id === project.scenarioId)?.name || project.scenarioId;
+                  return (
+                    <div 
+                      key={i} 
+                      className="p-3 border rounded-lg hover:bg-[hsl(209,100%,36%)]/5 hover:border-[hsl(209,100%,36%)]/30 cursor-pointer transition-all" 
+                      onClick={() => handleProjectClick(project.scenarioId)}
+                      data-testid={`project-item-${i}`}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium text-sm">{project.name}</span>
+                        <Badge variant={project.status === "On Track" ? "default" : project.status === "At Risk" ? "destructive" : "secondary"} className="text-xs">
+                          {project.status}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-muted-foreground">Scenario: {scenarioName}</span>
+                        <span className="text-xs font-medium">{project.progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={cn(
+                            "h-2 rounded-full transition-all",
+                            project.status === "At Risk" ? "bg-yellow-500" : "bg-[hsl(148,100%,26%)]"
+                          )}
+                          style={{ width: `${project.progress}%` }}
+                        ></div>
+                      </div>
+                      <div className="mt-2 text-xs text-[hsl(209,100%,36%)] font-medium">
+                        Click to view scenario →
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs text-muted-foreground">Scenario: {project.scenario}</span>
-                      <span className="text-xs font-medium">{project.progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={cn(
-                          "h-2 rounded-full transition-all",
-                          project.status === "At Risk" ? "bg-yellow-500" : "bg-[hsl(148,100%,26%)]"
-                        )}
-                        style={{ width: `${project.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </DialogContent>
           </Dialog>
@@ -373,10 +397,18 @@ export default function Dashboard() {
     setActiveStage(stage);
   }, []);
 
+  const handleProjectSelect = useCallback((scenarioId: string) => {
+    const scenario = scenarios.find(s => s.id === scenarioId);
+    if (scenario) {
+      setSelectedScenario(scenario);
+      setActiveTab("overview");
+    }
+  }, []);
+
   
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <NavBar />
+      <NavBar onProjectSelect={handleProjectSelect} />
 
       <main className="container mx-auto px-8 py-8 max-w-[1400px]">
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -490,7 +522,11 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-8">
             {/* Design → Activate → Measure Value Section */}
             <div className="border-b border-border pb-8">
-              <ScenarioWorkflow onScenarioChange={handleScenarioChange} />
+              <ScenarioWorkflow 
+                onScenarioChange={handleScenarioChange} 
+                initialScenario={selectedScenario}
+                initialStage={activeStage}
+              />
             </div>
 
             {/* Scenario-Driven Charts */}

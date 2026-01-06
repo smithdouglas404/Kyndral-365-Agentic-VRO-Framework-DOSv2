@@ -11,11 +11,25 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface ScenarioWorkflowProps {
   onScenarioChange: (scenario: Scenario, stage: StageId) => void;
+  initialScenario?: Scenario;
+  initialStage?: StageId;
 }
 
-export function ScenarioWorkflow({ onScenarioChange }: ScenarioWorkflowProps) {
-  const [selectedScenario, setSelectedScenario] = useState<Scenario>(scenarios[0]);
-  const [activeStage, setActiveStage] = useState<StageId>("design");
+export function ScenarioWorkflow({ onScenarioChange, initialScenario, initialStage }: ScenarioWorkflowProps) {
+  const [selectedScenario, setSelectedScenario] = useState<Scenario>(initialScenario || scenarios[0]);
+  const [activeStage, setActiveStage] = useState<StageId>(initialStage || "design");
+
+  useEffect(() => {
+    if (initialScenario && initialScenario.id !== selectedScenario.id) {
+      setSelectedScenario(initialScenario);
+    }
+  }, [initialScenario]);
+
+  useEffect(() => {
+    if (initialStage && initialStage !== activeStage) {
+      setActiveStage(initialStage);
+    }
+  }, [initialStage]);
 
   useEffect(() => {
     onScenarioChange(selectedScenario, activeStage);
