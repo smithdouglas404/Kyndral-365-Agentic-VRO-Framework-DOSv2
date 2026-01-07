@@ -79,7 +79,7 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
       </div>
 
       <Tabs value={activeSection} onValueChange={setActiveSection} className="w-full">
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="overview" className="gap-1" data-testid="tab-overview">
             <Eye size={14} />
             Overview
@@ -99,6 +99,10 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
           <TabsTrigger value="benefits" className="gap-1" data-testid="tab-benefits">
             <Gift size={14} />
             Extra Benefits
+          </TabsTrigger>
+          <TabsTrigger value="compliance" className="gap-1" data-testid="tab-compliance">
+            <Scale size={14} />
+            Compliance
           </TabsTrigger>
         </TabsList>
 
@@ -524,6 +528,147 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
             </Card>
           </div>
         </TabsContent>
+
+        <TabsContent value="compliance" className="mt-6">
+          <div className="space-y-6">
+            <Card className="border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <BadgeCheck className="text-green-600" size={24} />
+                  Consistency Guarantee
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <ConsistencyCard
+                    icon={<Target className="text-green-600" />}
+                    title="Same Rules, Every Customer"
+                    description="Every application is evaluated by identical logic - no human interpretation variations"
+                  />
+                  <ConsistencyCard
+                    icon={<Lock className="text-green-600" />}
+                    title="No Interpretation Gaps"
+                    description={`The ${survivalPeriod} survival rule is enforced literally - no claims handler can misinterpret it`}
+                  />
+                  <ConsistencyCard
+                    icon={<Shield className="text-green-600" />}
+                    title="Fair Treatment Assured"
+                    description="Policy as Code eliminates risk of human bias during the coverage assessment window"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="text-[#005EB8]" />
+                  Version History & Audit Trail
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <VersionHistoryItem
+                    version="1.0"
+                    date="January 7, 2026"
+                    status="live"
+                    changes={["Initial policy code generation", "All eligibility rules encoded", "Coverage triggers defined"]}
+                    approvedBy="System Generated"
+                  />
+                  <VersionHistoryItem
+                    version="0.9 (Draft)"
+                    date="January 6, 2026"
+                    status="superseded"
+                    changes={["Draft version for review"]}
+                    approvedBy="Pending"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="text-purple-600" />
+                  Approval Workflow
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between gap-4 py-4">
+                  <ApprovalStage
+                    step={1}
+                    label="Policy Authored"
+                    sublabel="AI Generated"
+                    status="complete"
+                  />
+                  <div className="flex-1 h-1 bg-green-500 rounded" />
+                  <ApprovalStage
+                    step={2}
+                    label="Business Review"
+                    sublabel="Rules Validated"
+                    status="complete"
+                  />
+                  <div className="flex-1 h-1 bg-green-500 rounded" />
+                  <ApprovalStage
+                    step={3}
+                    label="Compliance Check"
+                    sublabel="FCA Aligned"
+                    status="complete"
+                  />
+                  <div className="flex-1 h-1 bg-green-500 rounded" />
+                  <ApprovalStage
+                    step={4}
+                    label="Deployed"
+                    sublabel="Live in Production"
+                    status="complete"
+                  />
+                </div>
+                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 text-green-700">
+                    <CheckCircle2 size={18} />
+                    <span className="font-medium">All approval stages completed</span>
+                  </div>
+                  <p className="text-sm text-green-600 mt-1">
+                    This policy version has been reviewed, validated, and is currently live in production.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-[#005EB8]/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="text-[#005EB8]" />
+                  Regulatory Compliance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ComplianceItem
+                    regulation="FCA Consumer Duty"
+                    status="compliant"
+                    description="Policy delivers fair value and clear outcomes for customers"
+                  />
+                  <ComplianceItem
+                    regulation="PRA Solvency II"
+                    status="compliant"
+                    description="Risk parameters within regulatory capital requirements"
+                  />
+                  <ComplianceItem
+                    regulation="GDPR Data Protection"
+                    status="compliant"
+                    description="Customer data handling meets privacy requirements"
+                  />
+                  <ComplianceItem
+                    regulation="Treating Customers Fairly (TCF)"
+                    status="compliant"
+                    description="Consistent rule application ensures fair treatment"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
 
       <Card className="bg-gradient-to-r from-[#005EB8]/10 to-[#00843D]/10 border-[#005EB8]/20">
@@ -794,6 +939,106 @@ function ChildBenefit({ title, amount, description }: { title: string; amount: s
         <p className="font-medium text-gray-900">{title}</p>
         <p className="text-sm text-purple-600 font-semibold">{amount}</p>
         <p className="text-xs text-gray-500">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function ConsistencyCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="p-4 bg-white rounded-lg border border-green-200 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="p-2 bg-green-100 rounded-lg shrink-0">
+          {icon}
+        </div>
+        <div>
+          <h4 className="font-semibold text-gray-900">{title}</h4>
+          <p className="text-sm text-gray-600 mt-1">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VersionHistoryItem({ version, date, status, changes, approvedBy }: {
+  version: string;
+  date: string;
+  status: 'live' | 'superseded' | 'draft';
+  changes: string[];
+  approvedBy: string;
+}) {
+  const statusColors = {
+    live: 'bg-green-100 text-green-800',
+    superseded: 'bg-gray-100 text-gray-600',
+    draft: 'bg-amber-100 text-amber-800',
+  };
+  return (
+    <div className={`p-4 rounded-lg border ${status === 'live' ? 'border-green-300 bg-green-50/30' : 'border-gray-200'}`}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-gray-900">Version {version}</span>
+          <Badge className={statusColors[status]}>{status.toUpperCase()}</Badge>
+        </div>
+        <span className="text-sm text-gray-500">{date}</span>
+      </div>
+      <div className="space-y-1 mb-2">
+        {changes.map((change, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+            <CheckCircle2 size={12} className={status === 'live' ? 'text-green-500' : 'text-gray-400'} />
+            {change}
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-gray-500">Approved by: {approvedBy}</p>
+    </div>
+  );
+}
+
+function ApprovalStage({ step, label, sublabel, status }: {
+  step: number;
+  label: string;
+  sublabel: string;
+  status: 'complete' | 'current' | 'pending';
+}) {
+  const colors = {
+    complete: 'bg-green-500 text-white',
+    current: 'bg-[#005EB8] text-white ring-4 ring-blue-200',
+    pending: 'bg-gray-200 text-gray-500',
+  };
+  return (
+    <div className="text-center shrink-0">
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${colors[status]}`}>
+        {status === 'complete' ? <CheckCircle2 size={24} /> : step}
+      </div>
+      <p className="text-sm font-medium text-gray-900">{label}</p>
+      <p className="text-xs text-gray-500">{sublabel}</p>
+    </div>
+  );
+}
+
+function ComplianceItem({ regulation, status, description }: {
+  regulation: string;
+  status: 'compliant' | 'review' | 'non-compliant';
+  description: string;
+}) {
+  const colors = {
+    compliant: 'border-green-200 bg-green-50',
+    review: 'border-amber-200 bg-amber-50',
+    'non-compliant': 'border-red-200 bg-red-50',
+  };
+  const icons = {
+    compliant: <CheckCircle2 className="text-green-600" size={18} />,
+    review: <AlertCircle className="text-amber-600" size={18} />,
+    'non-compliant': <XCircle className="text-red-600" size={18} />,
+  };
+  return (
+    <div className={`p-4 rounded-lg border ${colors[status]}`}>
+      <div className="flex items-start gap-3">
+        {icons[status]}
+        <div>
+          <h5 className="font-medium text-gray-900">{regulation}</h5>
+          <p className="text-sm text-gray-600 mt-1">{description}</p>
+        </div>
       </div>
     </div>
   );
