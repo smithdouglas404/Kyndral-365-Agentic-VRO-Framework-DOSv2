@@ -11,6 +11,11 @@ import {
 
 export type Theme = "Automation" | "Governance" | "Data & Insights" | "Value" | "Speed" | "Efficiency";
 
+export interface VROMetric {
+  name: string;
+  cadence: "Weekly" | "Monthly" | "Bi-weekly" | "Quarterly" | "Real-time" | "On demand";
+}
+
 export interface Challenge {
   id: string;
   number: number;
@@ -24,6 +29,8 @@ export interface Challenge {
     after?: string;
     value?: string;
   }[];
+  vroMetrics: VROMetric[];
+  coreTrackingFields: string[];
   icon: any;
   themes: Theme[];
   relatedIds: string[];
@@ -39,7 +46,18 @@ export const challenges: Challenge[] = [
     solution: "Agentic automation removes manual bottlenecks while maintaining governance quality.",
     mechanism: ["Automated intake", "Smart classification", "Policy alignment", "Faster approvals"],
     metrics: [
-      { label: "Cycle Time", before: "30 days", after: "5 days" }
+      { label: "Time-to-Value (TTV)", before: "30 days", after: "5 days" }
+    ],
+    vroMetrics: [
+      { name: "Time-to-Value (TTV)", cadence: "Weekly" },
+      { name: "Rework Rate", cadence: "Weekly" },
+      { name: "Quality Defect Escape", cadence: "Monthly" }
+    ],
+    coreTrackingFields: [
+      "Planned vs actual TTV",
+      "Rework % by phase",
+      "Defect severity",
+      "Regulatory impact"
     ],
     icon: Zap,
     themes: ["Speed", "Automation", "Governance"],
@@ -55,7 +73,18 @@ export const challenges: Challenge[] = [
     mechanism: ["Better estimates", "Linked benefits", "Continuous monitoring", "Predictive warnings"],
     metrics: [
       { label: "Forecast Accuracy", before: "60%", after: "85%" },
-      { label: "Benefits Realization", before: "40%", after: "75%" }
+      { label: "Benefits Realization %", before: "40%", after: "75%" }
+    ],
+    vroMetrics: [
+      { name: "Benefits Realization %", cadence: "Monthly" },
+      { name: "Forecast Accuracy", cadence: "Monthly" },
+      { name: "Value Leakage", cadence: "Monthly" }
+    ],
+    coreTrackingFields: [
+      "Approved benefits baseline",
+      "Realised benefits to date",
+      "Forecast vs actual",
+      "Value owner"
     ],
     icon: Target,
     themes: ["Value", "Data & Insights"],
@@ -65,12 +94,22 @@ export const challenges: Challenge[] = [
   {
     id: "agility",
     number: 3,
-    title: "Agility with Governance Balance",
+    title: "Agility vs Governance",
     problem: "Traditional governance is rigid and time-consuming; Agile approaches lack oversight.",
     solution: "Agentic automation reduces governance burden while maintaining decision authority.",
     mechanism: ["Automated data collection", "Automated compliance checks", "Streamlined reviews"],
     metrics: [
-      { label: "Governance Overhead", before: "40 hrs/mo", after: "10 hrs/mo" }
+      { label: "Decision Cycle Time", before: "14 days", after: "3 days" }
+    ],
+    vroMetrics: [
+      { name: "Decision Cycle Time", cadence: "Bi-weekly" },
+      { name: "Exception-Based Escalations", cadence: "Bi-weekly" }
+    ],
+    coreTrackingFields: [
+      "Decision request date",
+      "Decision outcome",
+      "Threshold breached",
+      "Escalation reason"
     ],
     icon: Scale,
     themes: ["Governance", "Speed", "Automation"],
@@ -85,8 +124,18 @@ export const challenges: Challenge[] = [
     solution: "Realistic estimates (benchmarking) + Early warnings + Continuous validation.",
     mechanism: ["Variance monitoring", "Early escalation", "Corrective action"],
     metrics: [
-      { label: "On-time Delivery", before: "60%", after: "85%" },
-      { label: "Cost Variance", before: "±25%", after: "±10%" }
+      { label: "Cost Variance", before: "±25%", after: "±10%" },
+      { label: "Schedule Confidence", before: "60%", after: "85%" }
+    ],
+    vroMetrics: [
+      { name: "Cost Variance", cadence: "Weekly" },
+      { name: "Schedule Confidence Bands", cadence: "Weekly" }
+    ],
+    coreTrackingFields: [
+      "Budget baseline",
+      "Actuals to date",
+      "Forecast at completion",
+      "Confidence range"
     ],
     icon: ShieldCheck,
     themes: ["Value", "Data & Insights"],
@@ -101,8 +150,17 @@ export const challenges: Challenge[] = [
     solution: "Automated data ingestion + Real-time monitoring + Instant alerts.",
     mechanism: ["Continuous data collection", "Drift detection", "Automated escalation"],
     metrics: [
-      { label: "Decision Cycle", before: "30 days", after: "3 days" },
+      { label: "Portfolio Health Index", before: "Manual", after: "Real-time" },
       { label: "Issue Discovery", before: "4 wks late", after: "1 wk early" }
+    ],
+    vroMetrics: [
+      { name: "Portfolio Health Index (Value, Risk, Delivery)", cadence: "Real-time" }
+    ],
+    coreTrackingFields: [
+      "Value score",
+      "Risk score",
+      "Delivery score",
+      "Trend indicator"
     ],
     icon: Eye,
     themes: ["Data & Insights", "Speed"],
@@ -112,13 +170,22 @@ export const challenges: Challenge[] = [
   {
     id: "consistency",
     number: 6,
-    title: "Consistency Across the Group",
+    title: "Consistency Across Group",
     problem: "Each business unit has different processes; Data is incomparable.",
     solution: "Unified governance rules + Standardized classification + Normalized narratives.",
     mechanism: ["Clear definitions", "Automated classification", "Standardized data"],
     metrics: [
-      { label: "Portfolio Comparability", before: "0%", after: "100%" },
-      { label: "Ways of Working", before: "12", after: "1" }
+      { label: "Standard KPI Adoption %", before: "20%", after: "95%" },
+      { label: "Value Stream Coverage", before: "30%", after: "100%" }
+    ],
+    vroMetrics: [
+      { name: "Standard KPI Adoption %", cadence: "Monthly" },
+      { name: "Value Stream Coverage", cadence: "Quarterly" }
+    ],
+    coreTrackingFields: [
+      "KPI compliance %",
+      "Initiatives mapped to value streams",
+      "Data quality score"
     ],
     icon: Network,
     themes: ["Governance", "Data & Insights"],
@@ -128,13 +195,22 @@ export const challenges: Challenge[] = [
   {
     id: "efficiency",
     number: 7,
-    title: "Efficiency and Cost Reduction",
+    title: "Portfolio Efficiency",
     problem: "Manual portfolio management is labor-intensive; Data collation takes weeks.",
     solution: "Automated data collection + Automated classification + Automated reporting.",
     mechanism: ["Automation of routine tasks", "Reallocation of effort"],
     metrics: [
-      { label: "Overhead", before: "120 hrs", after: "30 hrs" },
-      { label: "FTE Requirements", before: "3", after: "1" }
+      { label: "Cost of Portfolio Management", before: "£2.4M", after: "£0.8M" },
+      { label: "Automation Rate", before: "15%", after: "85%" }
+    ],
+    vroMetrics: [
+      { name: "Cost of Portfolio Management", cadence: "Quarterly" },
+      { name: "Automation Rate", cadence: "Quarterly" }
+    ],
+    coreTrackingFields: [
+      "PMO/VRO run cost",
+      "Reporting effort hours",
+      "% automated reporting"
     ],
     icon: TrendingDown,
     themes: ["Efficiency", "Automation", "Value"],
@@ -144,13 +220,24 @@ export const challenges: Challenge[] = [
   {
     id: "prioritization",
     number: 8,
-    title: "Clear Prioritization",
+    title: "Clear Prioritisation",
     problem: "Major changes are not clearly defined; Scope creep is common; Ad-hoc prioritization.",
     solution: "Clear definitions + Automated detection + Capacity-aware prioritization.",
     mechanism: ["Define thresholds", "Detect major changes", "Assess capacity"],
     metrics: [
-      { label: "Scope Creep Incidents", before: "60%", after: "10%" },
-      { label: "Value per Project", value: "+35%" }
+      { label: "Value-at-Risk", before: "Unknown", after: "Quantified" },
+      { label: "ROI Velocity", before: "18 months", after: "6 months" }
+    ],
+    vroMetrics: [
+      { name: "Value-at-Risk", cadence: "Monthly" },
+      { name: "Dependency Impact Score", cadence: "Monthly" },
+      { name: "ROI Velocity", cadence: "On demand" }
+    ],
+    coreTrackingFields: [
+      "Value exposure",
+      "Dependency count",
+      "Critical path risk",
+      "Time to breakeven"
     ],
     icon: ListFilter,
     themes: ["Value", "Governance"],
@@ -159,7 +246,7 @@ export const challenges: Challenge[] = [
   }
 ];
 
-// PMO Challenges - Traditional approach with worse metrics
+// PMO Challenges - Traditional approach with worse metrics (no VRO metrics - that's the point)
 export const pmoChallenges: Challenge[] = [
   {
     id: "pmo-speed",
@@ -171,6 +258,8 @@ export const pmoChallenges: Challenge[] = [
     metrics: [
       { label: "Cycle Time", before: "30 days", after: "25 days" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: Zap,
     themes: ["Speed", "Governance"],
     relatedIds: ["pmo-agility", "pmo-efficiency"],
@@ -187,6 +276,8 @@ export const pmoChallenges: Challenge[] = [
       { label: "Forecast Accuracy", before: "55%", after: "62%" },
       { label: "Benefits Realization", before: "35%", after: "45%" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: Target,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["pmo-certainty", "pmo-prioritization"],
@@ -202,6 +293,8 @@ export const pmoChallenges: Challenge[] = [
     metrics: [
       { label: "Governance Overhead", before: "45 hrs/mo", after: "35 hrs/mo" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: Scale,
     themes: ["Governance", "Speed"],
     relatedIds: ["pmo-speed", "pmo-consistency"],
@@ -218,6 +311,8 @@ export const pmoChallenges: Challenge[] = [
       { label: "On-time Delivery", before: "55%", after: "62%" },
       { label: "Cost Variance", before: "±30%", after: "±22%" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: ShieldCheck,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["pmo-planning", "pmo-visibility"],
@@ -234,6 +329,8 @@ export const pmoChallenges: Challenge[] = [
       { label: "Decision Cycle", before: "30 days", after: "21 days" },
       { label: "Issue Discovery", before: "4 wks late", after: "3 wks late" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: Eye,
     themes: ["Data & Insights", "Speed"],
     relatedIds: ["pmo-certainty", "pmo-consistency"],
@@ -250,6 +347,8 @@ export const pmoChallenges: Challenge[] = [
       { label: "Portfolio Comparability", before: "0%", after: "40%" },
       { label: "Ways of Working", before: "12", after: "6" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: Network,
     themes: ["Governance", "Data & Insights"],
     relatedIds: ["pmo-efficiency", "pmo-visibility"],
@@ -266,6 +365,8 @@ export const pmoChallenges: Challenge[] = [
       { label: "Overhead", before: "130 hrs", after: "100 hrs" },
       { label: "FTE Requirements", before: "3.5", after: "2.5" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: TrendingDown,
     themes: ["Efficiency", "Value"],
     relatedIds: ["pmo-speed", "pmo-agility"],
@@ -282,6 +383,8 @@ export const pmoChallenges: Challenge[] = [
       { label: "Scope Creep Incidents", before: "65%", after: "45%" },
       { label: "Value per Project", value: "+8%" }
     ],
+    vroMetrics: [],
+    coreTrackingFields: [],
     icon: ListFilter,
     themes: ["Value", "Governance"],
     relatedIds: ["pmo-planning", "pmo-efficiency"],

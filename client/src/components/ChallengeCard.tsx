@@ -181,6 +181,36 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
               </div>
             </div>
 
+            {challenge.vroMetrics && challenge.vroMetrics.length > 0 && (
+              <div className="p-4 bg-[hsl(209,100%,36%)]/5 border border-[hsl(209,100%,36%)]/20 rounded-lg">
+                <h4 className="text-sm font-bold text-[hsl(209,100%,36%)] uppercase tracking-wide mb-3">VRO Metrics (Tracked Continuously)</h4>
+                <div className="space-y-2">
+                  {challenge.vroMetrics.map((metric, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <span className="text-foreground font-medium">{metric.name}</span>
+                      <Badge variant="outline" className="text-xs border-[hsl(209,100%,36%)]/30 text-[hsl(209,100%,36%)]">
+                        {metric.cadence}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {challenge.coreTrackingFields && challenge.coreTrackingFields.length > 0 && (
+              <div className="p-4 bg-[hsl(148,100%,26%)]/5 border border-[hsl(148,100%,26%)]/20 rounded-lg">
+                <h4 className="text-sm font-bold text-[hsl(148,100%,26%)] uppercase tracking-wide mb-3">Core Tracking Fields</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {challenge.coreTrackingFields.map((field, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-foreground">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[hsl(148,100%,26%)]" />
+                      {field}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {challenge.relatedIds && challenge.relatedIds.length > 0 && (
               <div>
                 <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Related Challenges</h4>
