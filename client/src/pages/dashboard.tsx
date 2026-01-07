@@ -673,41 +673,12 @@ export default function Dashboard() {
             <BUProgramsSection dataMode={dataMode} />
           </TabsContent>
 
-          {/* AI Insights Tab */}
+          {/* AI Insights Tab - Available in both PMO and VRO modes */}
           <TabsContent value="ai-insights">
-            {dataMode === "VRO" ? (
-              <div className="space-y-8">
-                <AICommandCenter />
-                <AIProactiveInsightsSection />
-              </div>
-            ) : (
-              <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-center">
-                  <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-500 mb-2">AI Insights Not Available in PMO Mode</h3>
-                  <p className="text-gray-400 max-w-md mx-auto mb-4">
-                    Traditional PMO approach relies on manual reporting cycles and periodic reviews. 
-                    AI-powered proactive insights are exclusive to the VRO methodology.
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto mt-6">
-                    <div className="p-4 bg-white rounded border">
-                      <p className="text-xs text-gray-500 mb-1">PMO Reporting Cycle</p>
-                      <p className="text-2xl font-bold text-gray-600">Monthly</p>
-                    </div>
-                    <div className="p-4 bg-white rounded border">
-                      <p className="text-xs text-gray-500 mb-1">VRO AI Alerts</p>
-                      <p className="text-2xl font-bold text-[#005EB8]">Real-time</p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={() => setDataMode("VRO")} 
-                    className="mt-6 bg-[#005EB8]"
-                  >
-                    Switch to VRO for AI Insights
-                  </Button>
-                </div>
-              </div>
-            )}
+            <div className="space-y-8">
+              <AICommandCenter />
+              <AIProactiveInsightsSection />
+            </div>
           </TabsContent>
 
           {/* Industry Benchmarks Tab */}
