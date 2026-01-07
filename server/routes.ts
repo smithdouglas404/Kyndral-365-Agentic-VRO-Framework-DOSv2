@@ -46,9 +46,9 @@ const upload = multer({
 
 const parsePolicyRequestSchema = z.object({
   text: z.string().min(1, "Policy text is required"),
-  name: z.string().optional(),
-  provider: z.string().optional(),
-  documentId: z.string().optional(),
+  name: z.string().optional().nullable(),
+  provider: z.string().optional().nullable(),
+  documentId: z.string().optional().nullable(),
 });
 
 export async function registerRoutes(
