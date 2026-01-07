@@ -6,14 +6,13 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
@@ -26,7 +25,7 @@ import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
 import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
-import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
+import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight } from "lucide-react";
@@ -291,8 +290,7 @@ function NavBar() {
 export default function Dashboard() {
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
   const [isLive, setIsLive] = useState(true);
-  const [selectedScenario, setSelectedScenario] = useState<Scenario>(scenarios[0]);
-  const [activeStage, setActiveStage] = useState<StageId>("design");
+  const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
@@ -304,10 +302,6 @@ export default function Dashboard() {
 
   const themes: Theme[] = ["Automation", "Governance", "Data & Insights", "Value", "Speed"];
 
-  const handleScenarioChange = useCallback((scenario: Scenario, stage: StageId) => {
-    setSelectedScenario(scenario);
-    setActiveStage(stage);
-  }, []);
 
 
   
@@ -551,27 +545,17 @@ export default function Dashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Design → Activate → Measure Value Section */}
-            <div className="border-b border-border pb-8">
-              <ScenarioWorkflow 
-                onScenarioChange={handleScenarioChange} 
-                initialScenario={selectedScenario}
-                initialStage={activeStage}
-              />
-            </div>
-
-
-            {/* Scenario-Driven Charts */}
+            {/* Strategic Impact Analysis */}
             <div>
               <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
                 <div>
                   <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
                   <p className="text-muted-foreground">
-                    KPIs for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span> scenario
+                    Key performance indicators for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span>
                   </p>
                 </div>
               </div>
-              <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
+              <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={isLive} />
             </div>
           </TabsContent>
 
