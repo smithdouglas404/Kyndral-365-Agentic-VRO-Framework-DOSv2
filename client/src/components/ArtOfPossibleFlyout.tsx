@@ -54,10 +54,41 @@ export function ArtOfPossibleFlyout({ open, onOpenChange }: ArtOfPossibleFlyoutP
   const [isListening, setIsListening] = useState(false);
   const [currentScreen, setCurrentScreen] = useState(0);
   const [showPersonaFeed, setShowPersonaFeed] = useState(true);
+  const [voiceResponse, setVoiceResponse] = useState("");
 
   const phase = transformationPhases[currentPhase];
   const scenario = scenarioMode === "asIs" ? phase.asIs : phase.toBe;
   const phaseAlerts = sampleAIAlerts.filter(a => a.phase === phase.id);
+
+  // Voice command handler
+  const handleVoiceCommand = () => {
+    if (!isListening) {
+      setIsListening(true);
+      setVoiceResponse("Listening...");
+      
+      // Simulate voice recognition
+      setTimeout(() => {
+        const commands = [
+          { text: "Next phase", action: () => { if (currentPhase < transformationPhases.length - 1) { setCurrentPhase(p => p + 1); setCurrentScreen(0); } }},
+          { text: "Show AS-IS scenario", action: () => setScenarioMode("asIs") },
+          { text: "Show TO-BE scenario", action: () => setScenarioMode("toBe") },
+          { text: "Start auto-play", action: () => setIsPlaying(true) },
+          { text: "Go to phase 1", action: () => { setCurrentPhase(0); setCurrentScreen(0); }},
+        ];
+        const cmd = commands[Math.floor(Math.random() * commands.length)];
+        setVoiceResponse(`"${cmd.text}" - Executing...`);
+        cmd.action();
+        
+        setTimeout(() => {
+          setIsListening(false);
+          setVoiceResponse("");
+        }, 2000);
+      }, 1500);
+    } else {
+      setIsListening(false);
+      setVoiceResponse("");
+    }
+  };
 
   useEffect(() => {
     if (isPlaying) {
@@ -189,7 +220,7 @@ export function ArtOfPossibleFlyout({ open, onOpenChange }: ArtOfPossibleFlyoutP
               <Button
                 size="sm"
                 variant={isListening ? "default" : "outline"}
-                onClick={() => setIsListening(!isListening)}
+                onClick={handleVoiceCommand}
                 style={{ backgroundColor: isListening ? MOBILE.red : undefined }}
                 data-testid="button-voice"
               >
@@ -198,22 +229,31 @@ export function ArtOfPossibleFlyout({ open, onOpenChange }: ArtOfPossibleFlyoutP
             </div>
 
             {/* Voice Commands */}
-            {isListening && (
+            {(isListening || voiceResponse) && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 className="mb-4 p-3 rounded-lg border-2 border-dashed"
                 style={{ borderColor: MOBILE.red }}
               >
-                <p className="text-xs font-medium mb-2 flex items-center gap-1">
-                  <Volume2 size={12} style={{ color: MOBILE.red }} />
-                  Listening... Try saying:
-                </p>
-                <div className="space-y-1">
-                  {voiceCommands.slice(0, 3).map((cmd, i) => (
-                    <p key={i} className="text-xs text-gray-600 italic">"{cmd}"</p>
-                  ))}
-                </div>
+                {voiceResponse ? (
+                  <div className="flex items-center gap-2">
+                    <Brain size={14} style={{ color: MOBILE.red }} className="animate-pulse" />
+                    <p className="text-xs font-medium" style={{ color: MOBILE.red }}>{voiceResponse}</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1">
+                      <Volume2 size={12} style={{ color: MOBILE.red }} />
+                      Listening... Try saying:
+                    </p>
+                    <div className="space-y-1">
+                      {voiceCommands.slice(0, 3).map((cmd, i) => (
+                        <p key={i} className="text-xs text-gray-600 italic">"{cmd}"</p>
+                      ))}
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 
