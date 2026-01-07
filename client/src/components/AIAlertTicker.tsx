@@ -1,90 +1,58 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, AlertTriangle, TrendingUp, Sparkles, Zap, Activity, ChevronLeft, ChevronRight } from "lucide-react";
-import { pmoProjects, vroPrograms, riskIssues } from "@/lib/buPrograms";
+import { Brain, AlertTriangle, TrendingUp, Lightbulb, Zap, Activity, ChevronLeft, ChevronRight, GitBranch, Target } from "lucide-react";
+import { useSimulation } from "@/contexts/SimulationContext";
+import { SimulationEvent, SimulationEventType } from "@/lib/liveSimulation";
 
-interface TickerAlert {
-  id: string;
-  type: "warning" | "opportunity" | "insight" | "prediction" | "action";
-  message: string;
-  source: string;
-  timestamp: Date;
-}
-
-const icons: Record<TickerAlert["type"], React.ReactNode> = {
-  warning: <AlertTriangle size={14} className="text-amber-500" />,
-  opportunity: <TrendingUp size={14} className="text-green-500" />,
-  insight: <Brain size={14} className="text-purple-500" />,
-  prediction: <Sparkles size={14} className="text-blue-500" />,
-  action: <Zap size={14} className="text-emerald-500" />
+const typeIcons: Record<SimulationEventType, React.ReactNode> = {
+  ai_alert: <Brain size={14} className="text-purple-500" />,
+  risk_warning: <AlertTriangle size={14} className="text-red-500" />,
+  opportunity: <Lightbulb size={14} className="text-green-500" />,
+  prediction: <TrendingUp size={14} className="text-blue-500" />,
+  safe_anomaly: <GitBranch size={14} className="text-amber-500" />,
+  value_milestone: <Target size={14} className="text-teal-500" />,
+  action_required: <Zap size={14} className="text-orange-500" />
 };
 
-function generateAlerts(): TickerAlert[] {
-  const alerts: TickerAlert[] = [];
-  
-  pmoProjects.forEach(project => {
-    project.aiSignals.forEach((signal, i) => {
-      alerts.push({
-        id: `pmo-${project.id}-${i}`,
-        type: signal.type,
-        message: signal.message,
-        source: project.name,
-        timestamp: new Date(Date.now() - Math.random() * 3600000)
-      });
-    });
-  });
-  
-  vroPrograms.forEach(program => {
-    program.aiSignals.forEach((signal, i) => {
-      alerts.push({
-        id: `vro-${program.id}-${i}`,
-        type: signal.type,
-        message: signal.message,
-        source: program.name,
-        timestamp: new Date(Date.now() - Math.random() * 3600000)
-      });
-    });
-  });
-  
-  riskIssues.filter(r => r.aiAlert).forEach(risk => {
-    alerts.push({
-      id: `risk-${risk.id}`,
-      type: risk.severity === "critical" ? "warning" : "insight",
-      message: risk.aiAlert!,
-      source: risk.name,
-      timestamp: new Date(Date.now() - Math.random() * 3600000)
-    });
-  });
-  
-  return alerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-}
-
 export function AIAlertTicker() {
+  const { events, setSelectedEvent, isRunning, latestEvent, unreadCount } = useSimulation();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const alerts = useMemo(() => generateAlerts(), []);
   const [isLive, setIsLive] = useState(true);
   const [animationKey, setAnimationKey] = useState(0);
   
   useEffect(() => {
-    if (!isLive) return;
+    if (latestEvent && isLive) {
+      setCurrentIndex(0);
+      setAnimationKey(k => k + 1);
+    }
+  }, [latestEvent, isLive]);
+  
+  useEffect(() => {
+    if (!isLive || events.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % alerts.length);
+      setCurrentIndex(prev => (prev + 1) % events.length);
       setAnimationKey(k => k + 1);
     }, 4000);
     return () => clearInterval(interval);
-  }, [alerts.length, isLive]);
+  }, [events.length, isLive]);
   
-  const currentAlert = alerts[currentIndex];
-  const totalAlerts = alerts.length;
+  const currentEvent = events[currentIndex];
+  const totalEvents = events.length;
   
   const goNext = () => {
-    setCurrentIndex(prev => (prev + 1) % totalAlerts);
+    setCurrentIndex(prev => (prev + 1) % totalEvents);
     setAnimationKey(k => k + 1);
   };
   
   const goPrev = () => {
-    setCurrentIndex(prev => (prev - 1 + totalAlerts) % totalAlerts);
+    setCurrentIndex(prev => (prev - 1 + totalEvents) % totalEvents);
     setAnimationKey(k => k + 1);
+  };
+
+  const handleEventClick = () => {
+    if (currentEvent) {
+      setSelectedEvent(currentEvent);
+    }
   };
   
   return (
@@ -94,30 +62,40 @@ export function AIAlertTicker() {
       <div className="flex items-center gap-3 p-3 relative">
         <motion.div
           className="flex items-center gap-2 px-2 py-1 bg-purple-600 text-white rounded text-xs font-medium"
-          animate={isLive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
-          transition={{ duration: 2, repeat: isLive ? Infinity : 0 }}
+          animate={isRunning && isLive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+          transition={{ duration: 2, repeat: isRunning && isLive ? Infinity : 0 }}
         >
           <Activity size={12} />
           AI LIVE
+          {unreadCount > 0 && (
+            <span className="bg-red-500 text-white text-[10px] px-1.5 rounded-full">{unreadCount}</span>
+          )}
         </motion.div>
         
-        <div className="flex-1 min-w-0 h-6 overflow-hidden relative">
+        <div 
+          className="flex-1 min-w-0 h-6 overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={handleEventClick}
+          data-testid="alert-ticker-content"
+        >
           <AnimatePresence mode="wait">
             <motion.div
-              key={currentAlert?.id}
+              key={currentEvent?.id}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="flex items-center gap-2 absolute inset-0"
             >
-              {currentAlert && (
+              {currentEvent && (
                 <>
-                  {icons[currentAlert.type]}
+                  {typeIcons[currentEvent.type]}
                   <span className="text-sm text-white truncate">
-                    <span className="text-slate-400 font-medium">{currentAlert.source}:</span>{" "}
-                    {currentAlert.message}
+                    <span className="text-slate-400 font-medium">{currentEvent.relatedEntity?.name || currentEvent.source}:</span>{" "}
+                    {currentEvent.message}
                   </span>
+                  {!currentEvent.read && (
+                    <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                  )}
                 </>
               )}
             </motion.div>
@@ -129,18 +107,20 @@ export function AIAlertTicker() {
             onClick={goPrev}
             className="p-1 rounded hover:bg-slate-700 transition-colors"
             aria-label="Previous alert"
+            data-testid="alert-prev"
           >
             <ChevronLeft size={14} className="text-slate-400" />
           </button>
           
           <span className="text-xs text-slate-400 min-w-[40px] text-center">
-            {currentIndex + 1}/{totalAlerts}
+            {totalEvents > 0 ? `${currentIndex + 1}/${totalEvents}` : '0/0'}
           </span>
           
           <button
             onClick={goNext}
             className="p-1 rounded hover:bg-slate-700 transition-colors"
             aria-label="Next alert"
+            data-testid="alert-next"
           >
             <ChevronRight size={14} className="text-slate-400" />
           </button>
@@ -153,6 +133,7 @@ export function AIAlertTicker() {
             className={`text-xs px-2 py-0.5 rounded transition-colors ${
               isLive ? "bg-green-500/20 text-green-400" : "bg-slate-600 text-slate-400"
             }`}
+            data-testid="alert-toggle-live"
           >
             {isLive ? "LIVE" : "PAUSED"}
           </button>

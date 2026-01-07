@@ -23,12 +23,12 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 export function FloatingAlertBanner() {
-  const { latestEvent, setSelectedEvent, unreadCount } = useSimulation();
+  const { latestEvent, setSelectedEvent, unreadCount, markAsRead } = useSimulation();
   const [showBanner, setShowBanner] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
 
   useEffect(() => {
-    if (latestEvent && latestEvent.priority === 'critical' || latestEvent?.priority === 'high') {
+    if (latestEvent && (latestEvent.priority === 'critical' || latestEvent.priority === 'high')) {
       setCurrentEvent(latestEvent);
       setShowBanner(true);
       
@@ -42,6 +42,7 @@ export function FloatingAlertBanner() {
 
   const handleClick = () => {
     if (currentEvent) {
+      markAsRead(currentEvent.id);
       setSelectedEvent(currentEvent);
       setShowBanner(false);
     }
@@ -135,7 +136,10 @@ export function FloatingAlertBanner() {
             whileTap={{ scale: 0.95 }}
             className="p-4 rounded-full bg-purple-600 text-white shadow-lg flex items-center gap-2"
             onClick={() => {
-              if (latestEvent) setSelectedEvent(latestEvent);
+              if (latestEvent) {
+                markAsRead(latestEvent.id);
+                setSelectedEvent(latestEvent);
+              }
             }}
             animate={{ 
               boxShadow: [

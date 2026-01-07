@@ -1,4 +1,4 @@
-import { pmoProjects, vroPrograms, riskIssues } from './buPrograms';
+import { pmoProjects, vroPrograms, riskIssues, buPortfolios } from './buPrograms';
 
 export type SimulationEventType = 
   | 'ai_alert' 
@@ -232,10 +232,25 @@ export function generateSimulationEvent(): SimulationEvent {
   const eventCategory = getRandomItem(EVENT_TEMPLATES);
   const template = getRandomItem(eventCategory.templates);
   
-  const useProject = Math.random() > 0.5;
-  const entity = useProject 
-    ? getRandomItem(pmoProjects) 
-    : getRandomItem(vroPrograms);
+  const roll = Math.random();
+  let entity: { id: string; name: string; bu: string };
+  let entityType: 'project' | 'program' | 'portfolio' | 'risk';
+  
+  if (roll < 0.4) {
+    entity = getRandomItem(pmoProjects);
+    entityType = 'project';
+  } else if (roll < 0.7) {
+    entity = getRandomItem(vroPrograms);
+    entityType = 'program';
+  } else if (roll < 0.85) {
+    const portfolio = getRandomItem(buPortfolios);
+    entity = { id: portfolio.id, name: portfolio.name, bu: portfolio.id };
+    entityType = 'portfolio';
+  } else {
+    const risk = getRandomItem(riskIssues);
+    entity = { id: risk.id, name: risk.name, bu: risk.affectedBU };
+    entityType = 'risk';
+  }
   
   const message = template.message.replace('{entity}', entity.name);
   
@@ -253,7 +268,7 @@ export function generateSimulationEvent(): SimulationEvent {
     confidence: Math.floor(Math.random() * 20) + 75,
     source: template.source,
     relatedEntity: {
-      type: useProject ? 'project' : 'program',
+      type: entityType,
       id: entity.id,
       name: entity.name,
       bu: entity.bu
