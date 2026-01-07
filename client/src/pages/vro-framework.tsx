@@ -448,18 +448,14 @@ export default function VROFramework() {
               <h2 className="text-2xl font-bold mb-4">Phased Implementation Roadmap</h2>
               <div className="space-y-6">
                 {[
-                  { phase: 'Phase 1', title: 'Foundation', status: 'Complete', items: ['Core agent deployment', 'Basic MCP implementation', 'Dashboard integration'] },
-                  { phase: 'Phase 2', title: 'Intelligence', status: 'In Progress', items: ['Predictive analytics', 'Cross-agent learning', 'Advanced risk models'] },
-                  { phase: 'Phase 3', title: 'Autonomy', status: 'Planned', items: ['Self-healing workflows', 'Autonomous decision execution', 'Full A2A orchestration'] },
-                  { phase: 'Phase 4', title: 'Scale', status: 'Future', items: ['Multi-portfolio support', 'Enterprise-wide rollout', 'Partner ecosystem'] }
+                  { phase: 'Phase 1', title: 'Foundation', items: ['Core agent deployment', 'Basic MCP implementation', 'Dashboard integration'] },
+                  { phase: 'Phase 2', title: 'Intelligence', items: ['Predictive analytics', 'Cross-agent learning', 'Advanced risk models'] },
+                  { phase: 'Phase 3', title: 'Autonomy', items: ['Self-healing workflows', 'Autonomous decision execution', 'Full A2A orchestration'] },
+                  { phase: 'Phase 4', title: 'Scale', items: ['Multi-portfolio support', 'Enterprise-wide rollout', 'Partner ecosystem'] }
                 ].map((phase, i) => (
                   <div key={i} className="flex gap-4">
                     <div className="flex flex-col items-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                        phase.status === 'Complete' ? 'bg-green-500' :
-                        phase.status === 'In Progress' ? 'bg-blue-500' :
-                        'bg-gray-300'
-                      }`}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-[#005EB8]">
                         {i + 1}
                       </div>
                       {i < 3 && <div className="w-0.5 h-16 bg-gray-200 mt-2" />}
@@ -468,18 +464,11 @@ export default function VROFramework() {
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-sm font-medium text-gray-500">{phase.phase}</span>
                         <h3 className="text-lg font-semibold">{phase.title}</h3>
-                        <Badge variant={
-                          phase.status === 'Complete' ? 'default' :
-                          phase.status === 'In Progress' ? 'secondary' :
-                          'outline'
-                        }>
-                          {phase.status}
-                        </Badge>
                       </div>
                       <ul className="space-y-1">
                         {phase.items.map((item, j) => (
                           <li key={j} className="text-sm text-gray-600 flex items-center gap-2">
-                            <CheckCircle2 size={14} className={phase.status === 'Complete' ? 'text-green-500' : 'text-gray-300'} />
+                            <CheckCircle2 size={14} className="text-[#005EB8]" />
                             {item}
                           </li>
                         ))}
