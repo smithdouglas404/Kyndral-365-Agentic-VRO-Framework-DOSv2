@@ -32,14 +32,14 @@ import {
   X
 } from "lucide-react";
 
-// Mobile-only colors (L&G Design System - Art of the Possible section only)
+// STRICT Mobile-only colors (L&G Design System - Art of the Possible section only)
+// NO OTHER COLORS ALLOWED in mobile prototype
 const MOBILE = {
   red: "#C50B30",
   blue: "#007FAA",
   grey: "#F6F6F6",
   white: "#FFFFFF",
   dark: "#1a1a1a",
-  teal: "#00843D",
 };
 
 type MobileTab = "home" | "alerts" | "voice" | "sentiment";
@@ -51,8 +51,8 @@ interface MobileAICockpitProps {
 function getSeverityColor(severity: AIAlert["severity"]) {
   switch (severity) {
     case "critical": return MOBILE.red;
-    case "warning": return "#FFC107";
-    case "info": return MOBILE.blue;
+    case "warning": return MOBILE.blue;
+    case "info": return MOBILE.dark;
   }
 }
 
@@ -156,8 +156,8 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           onClick={() => setActiveTab("voice")}
           data-testid="mobile-stat-voice"
         >
-          <Mic size={16} style={{ color: MOBILE.teal }} className="mx-auto mb-1" />
-          <p className="font-bold text-sm" style={{ color: MOBILE.teal }}>Ready</p>
+          <Mic size={16} style={{ color: MOBILE.blue }} className="mx-auto mb-1" />
+          <p className="font-bold text-sm" style={{ color: MOBILE.blue }}>Ready</p>
           <p className="text-[10px] text-gray-500">Voice</p>
         </div>
       </div>
@@ -205,7 +205,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
             onClick={() => setActiveTab("sentiment")}
             data-testid="mobile-quick-sentiment"
           >
-            <Sparkles size={18} style={{ color: MOBILE.teal }} />
+            <Sparkles size={18} style={{ color: MOBILE.blue }} />
             <span className="text-sm font-medium">Analyze Sentiment</span>
           </button>
         </div>
@@ -279,7 +279,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
                         <div key={i} className="p-1 rounded text-center" style={{ backgroundColor: MOBILE.grey }}>
                           <div className="flex items-center justify-center gap-0.5">
                             {dp.trend === "up" ? (
-                              <TrendingUp size={8} style={{ color: MOBILE.teal }} />
+                              <TrendingUp size={8} style={{ color: MOBILE.blue }} />
                             ) : dp.trend === "down" ? (
                               <TrendingDown size={8} style={{ color: MOBILE.red }} />
                             ) : null}
@@ -317,7 +317,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
 
         {pendingAlerts.length === 0 && (
           <div className="text-center py-8">
-            <CheckCircle size={32} style={{ color: MOBILE.teal }} className="mx-auto mb-2" />
+            <CheckCircle size={32} style={{ color: MOBILE.blue }} className="mx-auto mb-2" />
             <p className="text-xs text-gray-500">All alerts have been actioned!</p>
           </div>
         )}
@@ -413,7 +413,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
 
       <button
         className="w-full py-2 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-2"
-        style={{ backgroundColor: MOBILE.teal }}
+        style={{ backgroundColor: MOBILE.blue }}
         onClick={handleSentimentAnalysis}
         data-testid="mobile-sentiment-analyze"
       >
@@ -434,8 +434,8 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
             <Badge 
               className="text-[10px] text-white"
               style={{ 
-                backgroundColor: sentimentResult.score > 0.2 ? MOBILE.teal : 
-                                sentimentResult.score < -0.2 ? MOBILE.red : "#757575" 
+                backgroundColor: sentimentResult.score > 0.2 ? MOBILE.blue : 
+                                sentimentResult.score < -0.2 ? MOBILE.red : MOBILE.dark 
               }}
             >
               {sentimentResult.score > 0.2 ? "Positive" : 
@@ -448,7 +448,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
               className="absolute h-full rounded-full transition-all"
               style={{ 
                 width: `${(sentimentResult.score + 1) * 50}%`,
-                backgroundColor: sentimentResult.score > 0 ? MOBILE.teal : MOBILE.red
+                backgroundColor: sentimentResult.score > 0 ? MOBILE.blue : MOBILE.red
               }}
             />
           </div>
@@ -532,7 +532,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         <button
           className="flex flex-col items-center gap-0.5 p-2"
           onClick={() => setActiveTab("home")}
-          style={{ color: activeTab === "home" ? MOBILE.blue : "#9ca3af" }}
+          style={{ color: activeTab === "home" ? MOBILE.blue : "#1a1a1a60" }}
           data-testid="mobile-nav-home"
         >
           <Home size={18} />
@@ -541,7 +541,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         <button
           className="flex flex-col items-center gap-0.5 p-2 relative"
           onClick={() => setActiveTab("alerts")}
-          style={{ color: activeTab === "alerts" ? MOBILE.blue : "#9ca3af" }}
+          style={{ color: activeTab === "alerts" ? MOBILE.blue : "#1a1a1a60" }}
           data-testid="mobile-nav-alerts"
         >
           <Bell size={18} />
@@ -558,7 +558,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         <button
           className="flex flex-col items-center gap-0.5 p-2"
           onClick={() => setActiveTab("voice")}
-          style={{ color: activeTab === "voice" ? MOBILE.blue : "#9ca3af" }}
+          style={{ color: activeTab === "voice" ? MOBILE.blue : "#1a1a1a60" }}
           data-testid="mobile-nav-voice"
         >
           <Mic size={18} />
@@ -567,7 +567,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         <button
           className="flex flex-col items-center gap-0.5 p-2"
           onClick={() => setActiveTab("sentiment")}
-          style={{ color: activeTab === "sentiment" ? MOBILE.blue : "#9ca3af" }}
+          style={{ color: activeTab === "sentiment" ? MOBILE.blue : "#1a1a1a60" }}
           data-testid="mobile-nav-sentiment"
         >
           <Sparkles size={18} />
