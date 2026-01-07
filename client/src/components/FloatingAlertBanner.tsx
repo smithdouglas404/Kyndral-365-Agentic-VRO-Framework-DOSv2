@@ -66,7 +66,7 @@ export function FloatingAlertBanner({ onOpenFlyout }: FloatingAlertBannerProps) 
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 cursor-pointer max-w-2xl w-[90%]"
+            className="fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] cursor-pointer max-w-2xl w-[90%]"
             onClick={handleClick}
             data-testid="floating-alert-banner"
           >
