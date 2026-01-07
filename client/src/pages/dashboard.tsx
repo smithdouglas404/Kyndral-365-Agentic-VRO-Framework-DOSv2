@@ -25,6 +25,11 @@ import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
 import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
+import { AgentSidebar } from "@/components/AgentSidebar";
+import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
+import { AIRecommendations } from "@/components/AIRecommendations";
+import { ScenarioParameters } from "@/components/ScenarioParameters";
+import { RiskConfidenceMetrics } from "@/components/RiskConfidenceMetrics";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -309,9 +314,12 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
 
-      <main className="container mx-auto px-8 py-8 max-w-[1400px]">
-        {/* Office Toggle Buttons */}
-        <div className="flex gap-3 mb-6">
+      <div className="flex">
+        <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
+        
+        <main className="flex-1 px-8 py-8 max-w-[1400px]">
+          {/* Office Toggle Buttons */}
+          <div className="flex gap-3 mb-6">
           <div 
             onClick={() => setDataMode("VRO")}
             className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
@@ -564,6 +572,26 @@ export default function Dashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
+            {/* AI Recommendations and Cross-Agent Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIRecommendations />
+              </div>
+              <div>
+                <RiskConfidenceMetrics />
+              </div>
+            </div>
+
+            {/* Scenario Parameters and Cross-Agent Collaboration */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div>
+                <ScenarioParameters />
+              </div>
+              <div className="lg:col-span-2">
+                <CrossAgentCollaboration />
+              </div>
+            </div>
+
             {/* Strategic Impact Analysis */}
             <div>
               <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
@@ -731,7 +759,7 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      
+      </div>
       
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
         <div className="container mx-auto">
