@@ -28,7 +28,7 @@ import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
-import { Leaf, Shield, Sparkles, Building, ChevronRight } from "lucide-react";
+import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -465,6 +465,35 @@ export default function Dashboard() {
           </div>
         </Link>
 
+        {/* VRO Agentic Framework Banner */}
+        <Link href="/vro-framework">
+          <div className="mt-4 p-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl text-white hover:shadow-lg transition-all cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-lg">
+                  <Bot className="h-8 w-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" /> VRO Agentic Framework
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    Explore our AI agents, architecture, and see where AI is applied in this dashboard
+                  </p>
+                </div>
+              </div>
+              <Button 
+                size="lg" 
+                className="bg-white text-purple-600 hover:bg-white/90 font-semibold gap-2"
+                data-testid="button-vro-framework"
+              >
+                <Bot className="h-5 w-5" />
+                Explore Framework
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Link>
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
