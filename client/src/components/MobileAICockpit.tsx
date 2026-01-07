@@ -88,6 +88,11 @@ const VOICE_SCENARIOS = [
 
 interface MobileAICockpitProps {
   onAlertAction?: (alertId: string) => void;
+  currentPhase?: number;
+  scenarioMode?: "asIs" | "toBe";
+  externalVoiceActive?: boolean;
+  externalVoiceResponse?: string;
+  onTabChange?: (tab: MobileTab) => void;
 }
 
 function getSeverityColor(severity: AIAlert["severity"]) {
@@ -111,7 +116,23 @@ function getTypeIcon(type: AIAlert["type"]) {
 
 type ScenarioFilter = "all" | "critical" | "opportunities" | "climate" | "risk";
 
-export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
+// Phase-specific content for the mobile experience
+const PHASE_CONTENT = [
+  { title: "Strategic Alignment", highlight: "Baseline capture complete", metric: "£2.4B under management" },
+  { title: "Value Discovery", highlight: "12 opportunities identified", metric: "£180M potential value" },
+  { title: "Delivery Excellence", highlight: "4 programs on track", metric: "92% milestone hit rate" },
+  { title: "Continuous Improvement", highlight: "AI insights active", metric: "37% efficiency gain" },
+  { title: "Value Realization", highlight: "Benefits captured", metric: "£156M realized" },
+];
+
+export function MobileAICockpit({ 
+  onAlertAction, 
+  currentPhase = 0, 
+  scenarioMode = "toBe",
+  externalVoiceActive,
+  externalVoiceResponse,
+  onTabChange
+}: MobileAICockpitProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("home");
   const [isListening, setIsListening] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
@@ -124,6 +145,18 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
   const [voiceScenarioIndex, setVoiceScenarioIndex] = useState(0);
   const [swipedAlerts, setSwipedAlerts] = useState<Set<string>>(new Set());
   const [scenarioFilter, setScenarioFilter] = useState<ScenarioFilter>("all");
+  const [pulseActive, setPulseActive] = useState(true);
+  
+  // Sync external voice state
+  const effectiveListening = externalVoiceActive !== undefined ? externalVoiceActive : isListening;
+  const effectiveVoiceResponse = externalVoiceResponse || voiceResponse;
+
+  const handleTabChange = (tab: MobileTab) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
+
+  const phaseContent = PHASE_CONTENT[currentPhase] || PHASE_CONTENT[0];
 
   const baseAlerts = liveAIAlerts.filter(a => !alertActions[a.id] && !swipedAlerts.has(a.id));
   
@@ -140,7 +173,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
   const criticalCount = baseAlerts.filter(a => a.severity === "critical").length;
 
   const handleVoiceCommand = () => {
-    if (!isListening) {
+    if (!effectiveListening) {
       setIsListening(true);
       setVoiceTranscript("Listening...");
       setVoiceResponse("");
@@ -151,7 +184,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         setVoiceResponse(scenario.response);
         
         setTimeout(() => {
-          setActiveTab(scenario.action);
+          handleTabChange(scenario.action);
           setIsListening(false);
           setVoiceScenarioIndex((voiceScenarioIndex + 1) % VOICE_SCENARIOS.length);
         }, 1500);
@@ -175,13 +208,13 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
       setAlertActions(prev => ({ ...prev, [alertId]: true }));
       onAlertAction?.(alertId);
     } else {
-      setSwipedAlerts(prev => new Set([...prev, alertId]));
+      setSwipedAlerts(prev => new Set(Array.from(prev).concat(alertId)));
     }
   };
 
   const handleScenarioJump = (scenarioId: string) => {
     setScenarioFilter(scenarioId as ScenarioFilter);
-    setActiveTab("alerts");
+    handleTabChange("alerts");
     setCurrentNoteIndex(0);
   };
 
@@ -229,6 +262,18 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
 
   const renderHome = () => (
     <div className="space-y-3">
+      {/* Phase Indicator Banner */}
+      <motion.div
+        key={`phase-${currentPhase}`}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-2 rounded-lg text-center"
+        style={{ backgroundColor: scenarioMode === "toBe" ? MOBILE.blue : "#757575" }}
+      >
+        <p className="text-[10px] text-white/80">Phase {currentPhase + 1}: {phaseContent.title}</p>
+        <p className="text-xs font-bold text-white">{phaseContent.highlight}</p>
+      </motion.div>
+
       {/* Hero Stats */}
       <div 
         className="p-4 rounded-xl shadow-sm"
@@ -238,15 +283,28 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         }}
       >
         <div className="flex items-center gap-3 mb-3">
-          <div 
-            className="w-12 h-12 rounded-full flex items-center justify-center"
+          <motion.div 
+            className="w-12 h-12 rounded-full flex items-center justify-center relative"
             style={{ backgroundColor: MOBILE.blue }}
+            animate={pulseActive ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 2 }}
           >
             <Brain size={24} color={MOBILE.white} />
-          </div>
+            {/* Live pulse indicator */}
+            <motion.div
+              className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
+              style={{ backgroundColor: "#00843D" }}
+              animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            />
+          </motion.div>
           <div>
-            <h2 className="font-bold text-base" style={{ color: MOBILE.dark }}>Good morning</h2>
-            <p className="text-xs text-gray-500">Your AI briefing is ready</p>
+            <h2 className="font-bold text-base" style={{ color: MOBILE.dark }}>
+              {scenarioMode === "toBe" ? "AI-Powered View" : "Traditional View"}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {scenarioMode === "toBe" ? "Your AI briefing is ready" : "Manual dashboard mode"}
+            </p>
           </div>
         </div>
         
@@ -254,7 +312,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           <div 
             className="p-3 rounded-lg text-center cursor-pointer transition-transform active:scale-95"
             style={{ backgroundColor: criticalCount > 0 ? MOBILE.red : MOBILE.grey }}
-            onClick={() => setActiveTab("alerts")}
+            onClick={() => handleTabChange("alerts")}
             data-testid="mobile-stat-critical"
           >
             <p className="font-bold text-xl" style={{ color: criticalCount > 0 ? MOBILE.white : MOBILE.red }}>
@@ -265,7 +323,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           <div 
             className="p-3 rounded-lg text-center cursor-pointer transition-transform active:scale-95"
             style={{ backgroundColor: MOBILE.white }}
-            onClick={() => setActiveTab("alerts")}
+            onClick={() => handleTabChange("alerts")}
           >
             <p className="font-bold text-xl" style={{ color: MOBILE.blue }}>{pendingAlerts.length}</p>
             <p className="text-[10px] text-gray-500">Alerts</p>
@@ -273,7 +331,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           <div 
             className="p-3 rounded-lg text-center cursor-pointer transition-transform active:scale-95"
             style={{ backgroundColor: MOBILE.white }}
-            onClick={() => setActiveTab("voice")}
+            onClick={() => handleTabChange("voice")}
           >
             <p className="font-bold text-xl" style={{ color: MOBILE.blue }}>AI</p>
             <p className="text-[10px] text-gray-500">Ready</p>
@@ -370,7 +428,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         <button
           className="p-4 rounded-xl flex flex-col items-center gap-2 transition-transform active:scale-95 shadow-sm"
           style={{ backgroundColor: MOBILE.white }}
-          onClick={() => setActiveTab("sentiment")}
+          onClick={() => handleTabChange("sentiment")}
           data-testid="mobile-quick-sentiment"
         >
           <Sparkles size={24} style={{ color: MOBILE.blue }} />
@@ -523,11 +581,11 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
       <div className="flex-1 flex flex-col items-center justify-center">
         <motion.div
           className="relative"
-          animate={isListening ? { scale: [1, 1.05, 1] } : {}}
+          animate={effectiveListening ? { scale: [1, 1.05, 1] } : {}}
           transition={{ repeat: Infinity, duration: 1.5 }}
         >
           {/* Pulse rings */}
-          {isListening && (
+          {effectiveListening && (
             <>
               <motion.div
                 className="absolute inset-0 rounded-full"
@@ -545,11 +603,11 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           )}
           <button
             className="relative w-28 h-28 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95"
-            style={{ backgroundColor: isListening ? MOBILE.red : MOBILE.blue }}
+            style={{ backgroundColor: effectiveListening ? MOBILE.red : MOBILE.blue }}
             onClick={handleVoiceCommand}
             data-testid="mobile-voice-button"
           >
-            {isListening ? (
+            {effectiveListening ? (
               <MicOff size={44} color={MOBILE.white} />
             ) : (
               <Mic size={44} color={MOBILE.white} />
@@ -558,7 +616,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
         </motion.div>
 
         <p className="text-sm font-medium mt-4 mb-2" style={{ color: MOBILE.dark }}>
-          {isListening ? "Listening..." : "Tap to speak"}
+          {effectiveListening ? "Listening..." : "Tap to speak"}
         </p>
 
         {voiceTranscript && voiceTranscript !== "Listening..." && (
@@ -576,7 +634,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           </motion.div>
         )}
 
-        {voiceResponse && (
+        {effectiveVoiceResponse && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -587,7 +645,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
               <Brain size={14} style={{ color: MOBILE.blue }} />
               <span className="text-xs font-medium" style={{ color: MOBILE.blue }}>AI Response:</span>
             </div>
-            <p className="text-sm" style={{ color: MOBILE.blue }}>{voiceResponse}</p>
+            <p className="text-sm" style={{ color: MOBILE.blue }}>{effectiveVoiceResponse}</p>
           </motion.div>
         )}
       </div>
@@ -622,11 +680,10 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
       </div>
 
       <textarea
-        className="w-full p-4 border rounded-xl text-sm resize-none shadow-sm focus:outline-none focus:ring-2"
+        className="w-full p-4 border rounded-xl text-sm resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         style={{ 
           backgroundColor: MOBILE.white,
-          borderColor: MOBILE.grey,
-          focusRing: MOBILE.blue
+          borderColor: MOBILE.grey
         }}
         rows={4}
         placeholder="Paste meeting notes, emails, stakeholder feedback..."
@@ -783,7 +840,7 @@ export function MobileAICockpit({ onAlertAction }: MobileAICockpitProps) {
           <button
             key={item.id}
             className="flex flex-col items-center gap-1 p-2 relative transition-transform active:scale-95"
-            onClick={() => { setActiveTab(item.id); setCurrentNoteIndex(0); }}
+            onClick={() => { handleTabChange(item.id); setCurrentNoteIndex(0); }}
             style={{ color: activeTab === item.id ? MOBILE.blue : "#1a1a1a60" }}
             data-testid={`mobile-nav-${item.id}`}
           >

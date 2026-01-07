@@ -308,7 +308,12 @@ export function ArtOfPossibleFlyout({ open, onOpenChange }: ArtOfPossibleFlyoutP
                   className="w-full h-full rounded-[32px] overflow-hidden relative"
                   style={{ backgroundColor: MOBILE.grey }}
                 >
-                  <MobileAICockpit />
+                  <MobileAICockpit 
+                    currentPhase={currentPhase}
+                    scenarioMode={scenarioMode}
+                    externalVoiceActive={isListening}
+                    externalVoiceResponse={voiceResponse}
+                  />
                 </div>
               </div>
 
