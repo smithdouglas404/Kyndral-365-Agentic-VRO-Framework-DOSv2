@@ -69,7 +69,17 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Could not extract meaningful text from PDF" });
       }
 
-      const metadata = await extractPolicyMetadata(extractedText, req.file.originalname);
+      let metadata = {
+        policyName: req.file.originalname.replace('.pdf', '').replace(/_/g, ' '),
+        provider: '',
+        documentId: '',
+      };
+      
+      try {
+        metadata = await extractPolicyMetadata(extractedText, req.file.originalname);
+      } catch (metadataError) {
+        console.warn("Failed to extract metadata with AI, using defaults:", metadataError);
+      }
 
       res.json({
         text: extractedText,
