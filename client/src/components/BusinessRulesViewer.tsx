@@ -95,25 +95,25 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="business-rules-viewer">
       <div className="bg-gradient-to-r from-[#005EB8]/10 to-[#00843D]/10 rounded-xl p-6 border border-[#005EB8]/20">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2" data-testid="text-policy-name">
               <Scale className="text-[#005EB8]" />
               {policyName}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 mt-1" data-testid="text-single-source-truth">
               Single Source of Truth - These rules are exactly what the system executes
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200" data-testid="badge-policy-status">
               <CheckCircle2 size={12} className="mr-1" />
               Active
             </Badge>
             {rules.policy_metadata?.document_id && (
-              <Badge variant="outline">
+              <Badge variant="outline" data-testid="badge-document-id">
                 <FileText size={12} className="mr-1" />
                 {rules.policy_metadata.document_id}
               </Badge>
@@ -135,18 +135,21 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
                 label="Minimum Age" 
                 value={`${rules.eligibility_rules.age_limits.minimum_age || 18} years`}
                 icon={<Calendar size={14} />}
+                testId="text-rule-eligibility-min-age"
               />
               <RuleItem 
                 label="Maximum Age at Start" 
                 value={`${rules.eligibility_rules.age_limits.maximum_age || 'N/A'} years`}
                 icon={<Calendar size={14} />}
                 highlight
+                testId="text-rule-eligibility-max-age"
               />
               {rules.eligibility_rules.age_limits.policy_end_before_age && (
                 <RuleItem 
                   label="Policy Must End Before Age" 
                   value={`${rules.eligibility_rules.age_limits.policy_end_before_age} years`}
                   icon={<Clock size={14} />}
+                  testId="text-rule-eligibility-end-age"
                 />
               )}
             </div>
@@ -154,9 +157,9 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
           {rules.eligibility_rules?.requirements && rules.eligibility_rules.requirements.length > 0 && (
             <div className="mt-4">
               <p className="text-xs font-medium text-gray-500 mb-2">REQUIREMENTS</p>
-              <ul className="space-y-1">
+              <ul className="space-y-1" data-testid="list-requirements">
                 {rules.eligibility_rules.requirements.map((req, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
+                  <li key={i} className="flex items-start gap-2 text-sm" data-testid={`text-requirement-${i}`}>
                     <CheckCircle2 size={14} className="text-green-600 mt-0.5 shrink-0" />
                     <span>{req}</span>
                   </li>
@@ -363,15 +366,20 @@ function RuleItem({
   label, 
   value, 
   icon, 
-  highlight 
+  highlight,
+  testId
 }: { 
   label: string; 
   value: string; 
   icon?: React.ReactNode;
   highlight?: boolean;
+  testId?: string;
 }) {
   return (
-    <div className={`flex items-center justify-between p-2 rounded ${highlight ? 'bg-amber-50 border border-amber-200' : 'bg-white'}`}>
+    <div 
+      className={`flex items-center justify-between p-2 rounded ${highlight ? 'bg-amber-50 border border-amber-200' : 'bg-white'}`}
+      data-testid={testId}
+    >
       <div className="flex items-center gap-2 text-sm text-gray-600">
         {icon}
         <span>{label}</span>
