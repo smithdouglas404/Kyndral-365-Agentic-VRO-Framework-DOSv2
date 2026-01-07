@@ -376,8 +376,7 @@ export default function Dashboard() {
             </p>
           </motion.div>
           
-          <VROPMOToggle mode={dataMode} onModeChange={setDataMode} />
-          
+                    
           <div className="flex items-center gap-3">
             <LiveIndicator isLive={isLive} onToggle={() => setIsLive(!isLive)} />
                         
