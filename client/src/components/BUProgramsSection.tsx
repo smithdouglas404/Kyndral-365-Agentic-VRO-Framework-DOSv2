@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   pmoProjects, vroPrograms, riskIssues,
   pmoSummary, vroSummary, riskSummary,
@@ -14,9 +15,10 @@ import {
   Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, 
   DollarSign, Brain, Users, Target, Sparkles, Shield,
   ChevronDown, ChevronUp, Zap, AlertCircle, RotateCcw,
-  Rocket, Search, ArrowUpRight, Activity
+  Rocket, Search, ArrowUpRight, Activity, ExternalLink,
+  FileText, ChevronRight, Play, MessageSquare
 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
+import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis } from "recharts";
 
 type DataMode = "VRO" | "PMO";
 
@@ -99,6 +101,326 @@ function MiniSparkline({ data }: { data: { week: string; value: number }[] }) {
   );
 }
 
+// ============================================================================
+// PROJECT DETAIL MODAL - Full AI Briefing with Charts and Insights
+// ============================================================================
+function ProjectDetailModal({ 
+  project, 
+  program,
+  open, 
+  onClose,
+  mode
+}: { 
+  project?: PMOProject; 
+  program?: VROProgram;
+  open: boolean; 
+  onClose: () => void;
+  mode: DataMode;
+}) {
+  const [actionsTaken, setActionsTaken] = useState<string[]>([]);
+  
+  const item = project || program;
+  if (!item) return null;
+  
+  const isPMO = mode === "PMO" && project;
+  const isVRO = mode === "VRO" && program;
+  
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <Badge 
+              className="text-white"
+              style={{ backgroundColor: BU_COLORS[item.bu] || "#005EB8" }}
+            >
+              {item.bu}
+            </Badge>
+            <Badge variant="outline" className={isPMO ? "border-gray-500" : "border-teal-500 text-teal-700"}>
+              {isPMO ? "PMO DELIVERY VIEW" : "VRO VALUE VIEW"}
+            </Badge>
+          </div>
+          <DialogTitle className="text-xl mt-2">{item.name}</DialogTitle>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <FileText size={12} />
+            Source: L&G Annual Report 2024, Climate & Nature Report 2024
+          </p>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+          {/* Left Column - Metrics & Status */}
+          <div className="space-y-4">
+            {isPMO && project && (
+              <>
+                <Card className="border-l-4" style={{ borderLeftColor: project.status === "green" ? "#00843D" : project.status === "amber" ? "#f59e0b" : "#D50032" }}>
+                  <CardContent className="py-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <DollarSign size={16} /> Delivery Metrics
+                    </h4>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Budget</span>
+                          <span className={project.budget.spent > project.budget.total ? "text-red-600 font-medium" : ""}>
+                            {project.budget.spent.toFixed(1)} / {project.budget.total}{project.budget.unit}
+                          </span>
+                        </div>
+                        <Progress value={Math.min((project.budget.spent / project.budget.total) * 100, 100)} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Timeline</span>
+                          <span>{project.timeline.elapsed} / {project.timeline.total} {project.timeline.unit}</span>
+                        </div>
+                        <Progress value={(project.timeline.elapsed / project.timeline.total) * 100} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Deliverables</span>
+                          <span>{project.deliverables.completed} / {project.deliverables.total}</span>
+                        </div>
+                        <Progress value={(project.deliverables.completed / project.deliverables.total) * 100} className="h-2" />
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t">
+                      <p className="text-sm text-muted-foreground">Next Milestone:</p>
+                      <p className="font-medium">{project.nextMilestone}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {project.risks.length > 0 && (
+                  <Card>
+                    <CardContent className="py-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-amber-500" /> Project Risks
+                      </h4>
+                      <ul className="space-y-2">
+                        {project.risks.map((risk, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2" />
+                            {risk}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+            
+            {isVRO && program && (
+              <>
+                <Card className="border-l-4 border-teal-500">
+                  <CardContent className="py-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Target size={16} className="text-teal-600" /> Value Metrics
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center p-3 bg-teal-50 rounded-lg">
+                        <p className="text-2xl font-bold text-teal-700">{program.expectedROI}</p>
+                        <p className="text-xs text-teal-600">Expected ROI</p>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-700">£{program.valueRealized}m</p>
+                        <p className="text-xs text-green-600">Value Realized</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {program.keyOutcomes.map((outcome, i) => (
+                        <div key={i}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>{outcome.outcome}</span>
+                            <span className="font-medium">{outcome.progress} / {outcome.target} {outcome.unit}</span>
+                          </div>
+                          <Progress value={(outcome.progress / outcome.target) * 100} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="py-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Users size={16} /> Collaborators
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {program.collaborators.map((c, i) => (
+                        <Badge key={i} variant="outline">{c}</Badge>
+                      ))}
+                    </div>
+                    <div className="mt-4 pt-3 border-t">
+                      <p className="text-sm text-muted-foreground">Risk Mitigation:</p>
+                      <p className="text-sm">{program.riskMitigation}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+            
+            {/* Trend Chart */}
+            <Card>
+              <CardContent className="py-4">
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Activity size={16} /> Progress Trend
+                </h4>
+                <div className="h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={(project || program)?.trendData}>
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="week" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip contentStyle={{ fontSize: 12 }} />
+                      <Area type="monotone" dataKey="value" stroke={isPMO ? "#005EB8" : "#00843D"} fillOpacity={1} fill="url(#colorValue)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Right Column - AI Intelligence */}
+          <div className="space-y-4">
+            <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+              <CardContent className="py-4">
+                <h4 className="font-semibold mb-3 flex items-center gap-2 text-purple-700">
+                  <Brain size={16} /> AI Intelligence Briefing
+                </h4>
+                
+                {isVRO && program && (
+                  <div className="space-y-3 mb-4">
+                    <div className="p-3 bg-white/80 rounded-lg border border-purple-100">
+                      <p className="text-xs font-medium text-purple-600 mb-1">AI INSIGHT</p>
+                      <p className="text-sm">{program.aiInsight}</p>
+                    </div>
+                    <div className="p-3 bg-white/80 rounded-lg border border-blue-100">
+                      <p className="text-xs font-medium text-blue-600 mb-1">PREDICTION</p>
+                      <p className="text-sm">{program.prediction}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-purple-600">AI SIGNALS ({(project || program)?.aiSignals.length})</p>
+                  {(project || program)?.aiSignals.map((signal, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="p-3 bg-white/80 rounded-lg border border-purple-100"
+                    >
+                      <div className="flex items-start gap-2">
+                        {signalIcons[signal.type]}
+                        <div className="flex-1">
+                          <p className="text-sm">{signal.message}</p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="flex items-center gap-1">
+                              <div className="w-16 h-1.5 bg-purple-100 rounded-full overflow-hidden">
+                                <motion.div 
+                                  className="h-full bg-purple-600 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${signal.confidence}%` }}
+                                  transition={{ duration: 0.8, delay: 0.3 }}
+                                />
+                              </div>
+                              <span className="text-xs text-purple-600">{signal.confidence}% confidence</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{signal.dataSource}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-green-200">
+              <CardContent className="py-4">
+                <h4 className="font-semibold mb-3 flex items-center gap-2 text-green-700">
+                  <Zap size={16} /> Proactive Actions
+                </h4>
+                <p className="text-xs text-muted-foreground mb-3">Click to initiate action workflow</p>
+                <div className="space-y-2">
+                  {(project || program)?.proactiveActions.map((action) => {
+                    const taken = actionsTaken.includes(action.id);
+                    return (
+                      <motion.button
+                        key={action.id}
+                        className="w-full text-left p-3 rounded-lg border-2 transition-all"
+                        style={{ 
+                          borderColor: taken ? "#00843D" : actionTypeColors[action.type],
+                          backgroundColor: taken ? "#dcfce7" : "white"
+                        }}
+                        whileHover={{ scale: 1.02, x: 4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => !taken && setActionsTaken(prev => [...prev, action.id])}
+                        data-testid={`modal-action-${action.id}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div 
+                            className="p-1.5 rounded text-white"
+                            style={{ backgroundColor: taken ? "#00843D" : actionTypeColors[action.type] }}
+                          >
+                            {taken ? <CheckCircle size={14} /> : actionTypeIcons[action.type]}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{action.action}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs"
+                                style={{ borderColor: actionTypeColors[action.type], color: actionTypeColors[action.type] }}
+                              >
+                                {action.urgency}
+                              </Badge>
+                              <span className="text-xs text-green-600 font-medium">{action.impact}</span>
+                            </div>
+                          </div>
+                          {!taken && <ChevronRight size={16} className="text-muted-foreground" />}
+                          {taken && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="text-green-600"
+                            >
+                              <CheckCircle size={18} />
+                            </motion.div>
+                          )}
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                
+                {actionsTaken.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-3 bg-green-100 rounded-lg border border-green-200"
+                  >
+                    <p className="text-sm text-green-700 font-medium flex items-center gap-2">
+                      <CheckCircle size={14} />
+                      {actionsTaken.length} action(s) initiated - notifications sent to stakeholders
+                    </p>
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ProactiveActionButton({ action, onAction }: { action: ProactiveAction; onAction: (a: ProactiveAction) => void }) {
   const [clicked, setClicked] = useState(false);
   
@@ -152,8 +474,10 @@ function ProactiveActionButton({ action, onAction }: { action: ProactiveAction; 
   );
 }
 
-function PMOFlipCard({ project }: { project: PMOProject }) {
-  const [isFlipped, setIsFlipped] = useState(false);
+// ============================================================================
+// NEW INTERACTIVE PROJECT CARD - AI insights visible on front
+// ============================================================================
+function PMOProjectCard({ project, onViewDetails }: { project: PMOProject; onViewDetails: () => void }) {
   const [actionTaken, setActionTaken] = useState<string[]>([]);
   
   const statusColors = {
@@ -163,32 +487,23 @@ function PMOFlipCard({ project }: { project: PMOProject }) {
   };
   
   const budgetPercent = (project.budget.spent / project.budget.total) * 100;
-  const timelinePercent = (project.timeline.elapsed / project.timeline.total) * 100;
-  const deliverablePercent = (project.deliverables.completed / project.deliverables.total) * 100;
-
-  const handleAction = (action: ProactiveAction) => {
-    setActionTaken(prev => [...prev, action.id]);
-  };
+  const topSignal = project.aiSignals[0];
+  const topAction = project.proactiveActions[0];
 
   return (
-    <div 
-      className="relative h-[380px] cursor-pointer perspective-1000"
-      style={{ perspective: "1000px" }}
-      data-testid={`card-${project.id}`}
-      onClick={() => setIsFlipped(!isFlipped)}
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
+      transition={{ duration: 0.2 }}
     >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+      <Card 
+        className="h-full border-l-4 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden" 
+        style={{ borderLeftColor: statusColors[project.status] }}
+        data-testid={`card-${project.id}`}
       >
-        {/* Front Face */}
-        <motion.div
-          className="absolute inset-0 backface-hidden"
-          style={{ backfaceVisibility: "hidden" }}
-        >
-          <Card className="h-full border-l-4 hover:shadow-lg transition-shadow" style={{ borderLeftColor: statusColors[project.status] }}>
+        {/* PMO Label Banner */}
+        <div className="absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-gray-600 rounded-bl">
+          PMO DELIVERY
+        </div>
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div>
