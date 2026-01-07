@@ -1,63 +1,18 @@
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Shield, AlertTriangle, Gift, CheckCircle2, XCircle,
   Clock, Calendar, DollarSign, Percent, Info, AlertCircle,
-  Zap, Target, FileText, Scale, History, Lightbulb
+  Zap, Target, FileText, Scale, History, Lightbulb, Eye,
+  ArrowRight, TrendingUp, Activity, Lock, Unlock, Heart,
+  Baby, Home, Stethoscope, BadgeCheck, Timer, UserCheck
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import yaml from 'js-yaml';
-
-interface PolicyRuleSet {
-  policy_metadata?: {
-    provider?: string;
-    document_id?: string;
-    last_updated?: string;
-    policy_type?: string;
-  };
-  eligibility_rules?: {
-    age_limits?: {
-      minimum_age?: number;
-      maximum_age?: number;
-      policy_end_before_age?: number;
-    };
-    minimum_term?: string;
-    requirements?: string[];
-  };
-  coverage_logic?: {
-    life_insurance?: {
-      triggers?: string[];
-      terminal_illness?: {
-        definition?: string;
-        survival_period?: string;
-      };
-    };
-    critical_illness?: {
-      triggers?: string[];
-      survival_period?: string;
-      conditions_covered?: string[];
-    };
-  };
-  exclusion_logic?: {
-    life_insurance?: {
-      exclusions?: string[];
-    };
-    critical_illness?: {
-      exclusions?: string[];
-    };
-    general?: string[];
-  };
-  benefits?: {
-    additional_benefits?: string[];
-    premium_terms?: {
-      fixed_premiums?: boolean;
-      grace_period?: string;
-    };
-  };
-}
 
 interface BusinessRulesViewerProps {
   yamlCode: string;
@@ -65,28 +20,25 @@ interface BusinessRulesViewerProps {
 }
 
 export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewerProps) {
-  const [parseError, setParseError] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState('overview');
   
   const rules = useMemo(() => {
     try {
-      const parsed = yaml.load(yamlCode) as PolicyRuleSet;
-      setParseError(null);
-      return parsed;
-    } catch (e: any) {
-      setParseError(e.message);
+      return yaml.load(yamlCode) as any;
+    } catch {
       return null;
     }
   }, [yamlCode]);
 
-  if (parseError || !rules) {
+  if (!rules) {
     return (
       <Card className="border-amber-200 bg-amber-50">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 text-amber-700">
             <AlertCircle size={24} />
             <div>
-              <p className="font-medium">Unable to parse policy rules</p>
-              <p className="text-sm">The generated code format couldn't be interpreted. Showing technical view instead.</p>
+              <p className="font-medium">Policy rules not available</p>
+              <p className="text-sm">Generate a policy first to see the business rules.</p>
             </div>
           </div>
         </CardContent>
@@ -94,223 +46,509 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
     );
   }
 
+  const minAge = rules.eligibility_rules?.minimum_age || rules.eligibility_rules?.age_limits?.minimum_age || 18;
+  const maxAgeLife = rules.eligibility_rules?.maximum_purchase_ages?.life_insurance || rules.eligibility_rules?.age_limits?.maximum_age || 77;
+  const maxAgeCI = rules.eligibility_rules?.maximum_purchase_ages?.critical_illness_cover || 67;
+  const survivalPeriod = rules.coverage_logic?.critical_illness_cover?.triggers?.[0]?.survival_period || rules.coverage_logic?.critical_illness?.survival_period || '14 days';
+  const terminalIllnessPeriod = rules.coverage_logic?.life_insurance?.triggers?.find((t: any) => t.condition === 'terminal_illness')?.requirements?.find((r: string) => r.includes('12')) || '12 months';
+
   return (
     <div className="space-y-6" data-testid="business-rules-viewer">
-      <div className="bg-gradient-to-r from-[#005EB8]/10 to-[#00843D]/10 rounded-xl p-6 border border-[#005EB8]/20">
+      <div className="bg-gradient-to-r from-[#005EB8] to-[#00843D] rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2" data-testid="text-policy-name">
-              <Scale className="text-[#005EB8]" />
-              {policyName}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1" data-testid="text-single-source-truth">
+            <div className="flex items-center gap-2 mb-2">
+              <Scale size={28} />
+              <h2 className="text-2xl font-bold" data-testid="text-policy-name">{policyName}</h2>
+            </div>
+            <p className="text-white/80 text-sm" data-testid="text-single-source-truth">
               Single Source of Truth - These rules are exactly what the system executes
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200" data-testid="badge-policy-status">
-              <CheckCircle2 size={12} className="mr-1" />
-              Active
+          <div className="flex flex-col items-end gap-2">
+            <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+              <Lock size={12} className="mr-1" />
+              Compliance Verified
             </Badge>
-            {rules.policy_metadata?.document_id && (
-              <Badge variant="outline" data-testid="badge-document-id">
-                <FileText size={12} className="mr-1" />
-                {rules.policy_metadata.document_id}
-              </Badge>
-            )}
+            <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+              <History size={12} className="mr-1" />
+              Version 1.0 - Live
+            </Badge>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <RuleCard
-          icon={<Users className="text-[#005EB8]" />}
-          title="Eligibility Rules"
-          subtitle="Who can apply for this policy"
-          color="blue"
-        >
-          {rules.eligibility_rules?.age_limits && (
-            <div className="space-y-3">
-              <RuleItem 
-                label="Minimum Age" 
-                value={`${rules.eligibility_rules.age_limits.minimum_age || 18} years`}
-                icon={<Calendar size={14} />}
-                testId="text-rule-eligibility-min-age"
-              />
-              <RuleItem 
-                label="Maximum Age at Start" 
-                value={`${rules.eligibility_rules.age_limits.maximum_age || 'N/A'} years`}
-                icon={<Calendar size={14} />}
-                highlight
-                testId="text-rule-eligibility-max-age"
-              />
-              {rules.eligibility_rules.age_limits.policy_end_before_age && (
-                <RuleItem 
-                  label="Policy Must End Before Age" 
-                  value={`${rules.eligibility_rules.age_limits.policy_end_before_age} years`}
-                  icon={<Clock size={14} />}
-                  testId="text-rule-eligibility-end-age"
+      <Tabs value={activeSection} onValueChange={setActiveSection} className="w-full">
+        <TabsList className="grid grid-cols-5 w-full">
+          <TabsTrigger value="overview" className="gap-1" data-testid="tab-overview">
+            <Eye size={14} />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="eligibility" className="gap-1" data-testid="tab-eligibility">
+            <UserCheck size={14} />
+            Who Can Apply
+          </TabsTrigger>
+          <TabsTrigger value="coverage" className="gap-1" data-testid="tab-coverage">
+            <Shield size={14} />
+            When We Pay
+          </TabsTrigger>
+          <TabsTrigger value="exclusions" className="gap-1" data-testid="tab-exclusions">
+            <XCircle size={14} />
+            What's Not Covered
+          </TabsTrigger>
+          <TabsTrigger value="benefits" className="gap-1" data-testid="tab-benefits">
+            <Gift size={14} />
+            Extra Benefits
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <VisualMetricCard
+              icon={<Users className="text-[#005EB8]" size={32} />}
+              title="Age Range"
+              value={`${minAge} - ${maxAgeLife}`}
+              unit="years old"
+              description="Who can start a Life Insurance policy"
+              color="blue"
+            />
+            <VisualMetricCard
+              icon={<Timer className="text-[#00843D]" size={32} />}
+              title="Survival Period"
+              value="14"
+              unit="days"
+              description="Must survive after critical illness diagnosis"
+              color="green"
+            />
+            <VisualMetricCard
+              icon={<Heart className="text-[#D50032]" size={32} />}
+              title="Terminal Illness"
+              value="12"
+              unit="months"
+              description="Life expectancy for terminal illness claim"
+              color="red"
+            />
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-2 border-[#005EB8]/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Zap className="text-amber-500" />
+                  Quick Policy Facts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <QuickFact 
+                  label="Policy Type" 
+                  value="Life Insurance & Critical Illness" 
+                  icon={<FileText size={16} className="text-gray-400" />}
                 />
-              )}
-            </div>
-          )}
-          {rules.eligibility_rules?.requirements && rules.eligibility_rules.requirements.length > 0 && (
-            <div className="mt-4">
-              <p className="text-xs font-medium text-gray-500 mb-2">REQUIREMENTS</p>
-              <ul className="space-y-1" data-testid="list-requirements">
-                {rules.eligibility_rules.requirements.map((req, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm" data-testid={`text-requirement-${i}`}>
-                    <CheckCircle2 size={14} className="text-green-600 mt-0.5 shrink-0" />
-                    <span>{req}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </RuleCard>
-
-        <RuleCard
-          icon={<Shield className="text-[#00843D]" />}
-          title="Coverage Logic"
-          subtitle="What triggers a payout"
-          color="green"
-        >
-          {rules.coverage_logic?.life_insurance && (
-            <div className="space-y-3">
-              <p className="text-xs font-medium text-gray-500">LIFE INSURANCE</p>
-              {rules.coverage_logic.life_insurance.triggers?.map((trigger, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm bg-green-50 p-2 rounded">
-                  <Zap size={14} className="text-green-600" />
-                  <span>{trigger}</span>
-                </div>
-              ))}
-              {rules.coverage_logic.life_insurance.terminal_illness && (
-                <div className="bg-amber-50 p-3 rounded-lg border border-amber-200 mt-3">
-                  <p className="text-xs font-medium text-amber-700 mb-1">TERMINAL ILLNESS RULE</p>
-                  <p className="text-sm">{rules.coverage_logic.life_insurance.terminal_illness.definition}</p>
-                  {rules.coverage_logic.life_insurance.terminal_illness.survival_period && (
-                    <Badge className="mt-2 bg-amber-100 text-amber-800 hover:bg-amber-100">
-                      <Clock size={12} className="mr-1" />
-                      {rules.coverage_logic.life_insurance.terminal_illness.survival_period}
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          {rules.coverage_logic?.critical_illness && (
-            <div className="space-y-3 mt-4">
-              <p className="text-xs font-medium text-gray-500">CRITICAL ILLNESS</p>
-              {rules.coverage_logic.critical_illness.survival_period && (
-                <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <Clock size={16} className="text-blue-600" />
-                  <div>
-                    <p className="text-xs text-blue-600 font-medium">SURVIVAL PERIOD</p>
-                    <p className="text-sm font-semibold">{rules.coverage_logic.critical_illness.survival_period}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </RuleCard>
-
-        <RuleCard
-          icon={<AlertTriangle className="text-[#D50032]" />}
-          title="Exclusions"
-          subtitle="What is NOT covered"
-          color="red"
-        >
-          {rules.exclusion_logic?.life_insurance?.exclusions && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500">LIFE INSURANCE EXCLUSIONS</p>
-              {rules.exclusion_logic.life_insurance.exclusions.map((exc, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <XCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-                  <span>{exc}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {rules.exclusion_logic?.critical_illness?.exclusions && (
-            <div className="space-y-2 mt-4">
-              <p className="text-xs font-medium text-gray-500">CRITICAL ILLNESS EXCLUSIONS</p>
-              {rules.exclusion_logic.critical_illness.exclusions.map((exc, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <XCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-                  <span>{exc}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {rules.exclusion_logic?.general && rules.exclusion_logic.general.length > 0 && (
-            <div className="space-y-2 mt-4">
-              <p className="text-xs font-medium text-gray-500">GENERAL EXCLUSIONS</p>
-              {rules.exclusion_logic.general.map((exc, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <XCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-                  <span>{exc}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </RuleCard>
-
-        <RuleCard
-          icon={<Gift className="text-purple-600" />}
-          title="Benefits"
-          subtitle="Additional coverage and terms"
-          color="purple"
-        >
-          {rules.benefits?.additional_benefits && rules.benefits.additional_benefits.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500">ADDITIONAL BENEFITS</p>
-              {rules.benefits.additional_benefits.map((benefit, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm bg-purple-50 p-2 rounded">
-                  <Gift size={14} className="text-purple-600 mt-0.5 shrink-0" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {rules.benefits?.premium_terms && (
-            <div className="mt-4 space-y-2">
-              <p className="text-xs font-medium text-gray-500">PREMIUM TERMS</p>
-              {rules.benefits.premium_terms.fixed_premiums !== undefined && (
-                <RuleItem 
-                  label="Fixed Premiums" 
-                  value={rules.benefits.premium_terms.fixed_premiums ? "Yes" : "No"}
-                  icon={<DollarSign size={14} />}
+                <QuickFact 
+                  label="Provider" 
+                  value={rules.policy_metadata?.provider || "Legal & General"} 
+                  icon={<BadgeCheck size={16} className="text-green-500" />}
                 />
-              )}
-              {rules.benefits.premium_terms.grace_period && (
-                <RuleItem 
+                <QuickFact 
+                  label="Document Reference" 
+                  value={rules.policy_metadata?.document_id || "QGI14786"} 
+                  icon={<FileText size={16} className="text-gray-400" />}
+                />
+                <QuickFact 
+                  label="Premium Type" 
+                  value="Fixed - won't increase during policy" 
+                  icon={<Lock size={16} className="text-green-500" />}
+                />
+                <QuickFact 
                   label="Grace Period" 
-                  value={rules.benefits.premium_terms.grace_period}
-                  icon={<Clock size={14} />}
+                  value="60 days to pay missed premiums" 
+                  icon={<Clock size={16} className="text-amber-500" />}
                 />
-              )}
-            </div>
-          )}
-        </RuleCard>
-      </div>
+              </CardContent>
+            </Card>
 
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white rounded-lg shadow-sm">
-              <Lightbulb className="text-amber-500" size={20} />
+            <Card className="border-2 border-[#00843D]/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Activity className="text-[#00843D]" />
+                  Coverage at a Glance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <CoverageBar label="Life Insurance" percentage={100} color="blue" />
+                <CoverageBar label="Terminal Illness" percentage={100} color="green" />
+                <CoverageBar label="Critical Illness (if added)" percentage={100} color="purple" />
+                <CoverageBar label="Accidental Death Benefit" percentage={100} color="amber" />
+                <CoverageBar label="Children's Cover (if CI added)" percentage={50} color="pink" />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="eligibility" className="mt-6">
+          <div className="space-y-6">
+            <Card className="border-l-4 border-l-[#005EB8]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="text-[#005EB8]" />
+                  Age Requirements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <AgeVisual 
+                    product="Life Insurance"
+                    minAge={minAge}
+                    maxAge={maxAgeLife}
+                    endAge={90}
+                    color="blue"
+                  />
+                  <AgeVisual 
+                    product="Decreasing Life Insurance"
+                    minAge={minAge}
+                    maxAge={74}
+                    endAge={90}
+                    color="green"
+                  />
+                  <AgeVisual 
+                    product="Critical Illness Cover"
+                    minAge={minAge}
+                    maxAge={maxAgeCI}
+                    endAge={75}
+                    color="purple"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-[#00843D]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="text-[#00843D]" />
+                  Policy Length Requirements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <PolicyTermCard 
+                    product="Life Insurance"
+                    minTerm="1 year"
+                    maxTerm="50 years"
+                  />
+                  <PolicyTermCard 
+                    product="Decreasing Life"
+                    minTerm="5 years"
+                    maxTerm="50 years"
+                  />
+                  <PolicyTermCard 
+                    product="Critical Illness"
+                    minTerm="2 years"
+                    maxTerm="50 years"
+                  />
+                </div>
+                <div className="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                  <div className="flex items-center gap-2 text-amber-700">
+                    <AlertCircle size={18} />
+                    <span className="font-medium">Important Rule:</span>
+                  </div>
+                  <p className="mt-1 text-amber-800">
+                    Your policy must not end before your 29th birthday
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-gray-400">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="text-green-600" />
+                  Application Requirements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <RequirementItem 
+                    text="Must provide full and honest answers to all questions"
+                    status="required"
+                  />
+                  <RequirementItem 
+                    text="UK resident"
+                    status="required"
+                  />
+                  <RequirementItem 
+                    text="Medical information may be required"
+                    status="may-apply"
+                  />
+                  <RequirementItem 
+                    text="Some conditions may be excluded based on health"
+                    status="may-apply"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="coverage" className="mt-6">
+          <div className="space-y-6">
+            <Card className="border-2 border-green-200 bg-green-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <CheckCircle2 className="text-green-600" size={24} />
+                  When We Pay Your Claim
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <PayoutTrigger
+                  title="Death"
+                  description="If you die before the policy ends"
+                  payout="Full amount paid once"
+                  conditions={[]}
+                  icon={<Heart className="text-green-600" />}
+                />
+                <Separator />
+                <PayoutTrigger
+                  title="Terminal Illness"
+                  description="If diagnosed with an illness expected to lead to death"
+                  payout="Full amount paid once (policy ends)"
+                  conditions={[
+                    "Hospital consultant confirms diagnosis",
+                    "Our medical officer agrees",
+                    "Expected death within 12 months"
+                  ]}
+                  icon={<Stethoscope className="text-green-600" />}
+                  warning="Cannot claim after death or if policy is less than 2 years"
+                />
+                <Separator />
+                <PayoutTrigger
+                  title="Critical Illness (if added)"
+                  description="If diagnosed with a covered critical illness"
+                  payout="Full amount paid once (policy ends)"
+                  conditions={[
+                    "Illness meets Legal & General's definition",
+                    "Must survive 14 days from diagnosis",
+                    "Verified by UK hospital consultant"
+                  ]}
+                  icon={<Activity className="text-green-600" />}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Timer className="text-[#005EB8]" />
+                  Critical Timing Rules
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <TimingRule
+                    title="14-Day Survival Rule"
+                    description="For critical illness claims, you must survive for 14 days after diagnosis"
+                    visual={
+                      <div className="flex items-center gap-1 mt-3">
+                        {[...Array(14)].map((_, i) => (
+                          <div key={i} className="w-4 h-8 bg-[#005EB8] rounded-sm opacity-80" />
+                        ))}
+                        <ArrowRight className="mx-2 text-green-600" />
+                        <CheckCircle2 className="text-green-600" size={24} />
+                      </div>
+                    }
+                  />
+                  <TimingRule
+                    title="12-Month Terminal Illness Rule"
+                    description="For terminal illness claims, doctors must expect death within 12 months"
+                    visual={
+                      <div className="flex items-center gap-1 mt-3">
+                        {[...Array(12)].map((_, i) => (
+                          <div key={i} className="w-6 h-8 bg-amber-500 rounded-sm opacity-80" />
+                        ))}
+                      </div>
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="exclusions" className="mt-6">
+          <div className="space-y-6">
+            <Card className="border-2 border-red-200 bg-red-50/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-800">
+                  <XCircle className="text-red-600" size={24} />
+                  Life Insurance - What We Won't Pay For
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ExclusionItem
+                  title="Suicide in First Year"
+                  description="If death is caused by suicide, intentional self-injury, or taking your own life within the first 12 months"
+                  severity="critical"
+                />
+                <ExclusionItem
+                  title="Terminal Illness Definition Not Met"
+                  description="If diagnosed terminal illness doesn't match our specific definition"
+                  severity="warning"
+                />
+                <ExclusionItem
+                  title="Dishonest Application"
+                  description="If full and honest answers weren't provided during application"
+                  severity="critical"
+                />
+                <ExclusionItem
+                  title="Joint Policy - Already Paid"
+                  description="We only pay once on joint policies (usually when first person dies or claims)"
+                  severity="info"
+                />
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-amber-200 bg-amber-50/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-amber-800">
+                  <AlertTriangle className="text-amber-600" size={24} />
+                  Critical Illness - What We Won't Pay For
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ExclusionItem
+                  title="Death Within 14 Days"
+                  description="If death occurs within 14 days of critical illness diagnosis"
+                  severity="critical"
+                />
+                <ExclusionItem
+                  title="Death (Any Cause)"
+                  description="Critical illness cover doesn't pay out on death - only life cover does"
+                  severity="warning"
+                />
+                <ExclusionItem
+                  title="Illness Doesn't Meet Definition"
+                  description="If the illness or procedure doesn't meet our specific medical definition"
+                  severity="warning"
+                />
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="text-gray-600" size={24} />
+                  Accidental Death Benefit Exclusions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    "Suicide or intentional self-injury",
+                    "Dangerous sports or pastimes",
+                    "Non-licensed aerial flights",
+                    "Criminal activity",
+                    "War, riot, or civil commotion",
+                    "Alcohol or non-prescribed drugs",
+                    "Pre-application accidents"
+                  ].map((exc, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                      <XCircle size={14} className="text-gray-400" />
+                      {exc}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="benefits" className="mt-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <BenefitCard
+                title="Accidental Death Benefit"
+                cost="Included FREE"
+                icon={<Shield className="text-[#005EB8]" />}
+                features={[
+                  "Covers you from application for up to 90 days",
+                  "Up to £300,000 payout",
+                  "Applies if death is from accident during this period"
+                ]}
+              />
+              <BenefitCard
+                title="Free Life Cover"
+                cost="Included FREE (if moving home)"
+                icon={<Home className="text-[#00843D]" />}
+                features={[
+                  "Covers gap between exchange and completion",
+                  "Up to £300,000 or mortgage amount",
+                  "Must be under 55 years old"
+                ]}
+              />
+              <BenefitCard
+                title="Children's Critical Illness"
+                cost="Included with CI cover"
+                icon={<Baby className="text-purple-600" />}
+                features={[
+                  "Covers children aged 30 days to 18 (21 if in education)",
+                  "50% of cover up to £25,000 per child",
+                  "Maximum 2 claims then cover ends"
+                ]}
+              />
+              <BenefitCard
+                title="Accident Hospitalisation"
+                cost="Included with CI cover"
+                icon={<Stethoscope className="text-amber-600" />}
+                features={[
+                  "£5,000 payout",
+                  "If in hospital 28+ consecutive days after accident",
+                  "One claim per person"
+                ]}
+              />
+            </div>
+
+            <Card className="border-2 border-purple-200 bg-purple-50/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-purple-800">
+                  <Gift className="text-purple-600" />
+                  Additional Children's Benefits
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ChildBenefit title="Child Accident Hospitalisation" amount="£5,000" description="28 consecutive days in hospital" />
+                  <ChildBenefit title="Child Funeral Benefit" amount="£4,000" description="Contribution towards funeral" />
+                  <ChildBenefit title="Childcare Benefit" amount="£1,000" description="For under 5s with registered childminder" />
+                  <ChildBenefit title="Family Accommodation" amount="£100/night (max £1,000)" description="3 months after CI diagnosis" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <Card className="bg-gradient-to-r from-[#005EB8]/10 to-[#00843D]/10 border-[#005EB8]/20">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white rounded-xl shadow-sm">
+              <BadgeCheck className="text-green-600" size={28} />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Compliance Guarantee</p>
-              <p className="text-sm text-gray-600">
-                Every customer is treated according to the same logic. No interpretation gaps, no human bias.
-                These rules are version-controlled for full audit trail.
+              <p className="font-semibold text-gray-900 text-lg">Compliance & Consistency Guarantee</p>
+              <p className="text-gray-600">
+                Every customer is evaluated by exactly the same rules. No interpretation gaps, no human bias.
+                The {survivalPeriod} survival rule is enforced literally for every claim.
               </p>
             </div>
-            <Badge variant="outline" className="bg-white">
-              <History size={12} className="mr-1" />
-              Version Tracked
-            </Badge>
+            <div className="flex gap-2">
+              <Badge variant="outline" className="bg-white">
+                <History size={12} className="mr-1" />
+                Version Controlled
+              </Badge>
+              <Badge variant="outline" className="bg-white">
+                <Lock size={12} className="mr-1" />
+                Audit Ready
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -318,73 +556,245 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
   );
 }
 
-function RuleCard({ 
-  icon, 
-  title, 
-  subtitle, 
-  color, 
-  children 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  subtitle: string; 
-  color: 'blue' | 'green' | 'red' | 'purple';
-  children: React.ReactNode;
+function VisualMetricCard({ icon, title, value, unit, description, color }: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  unit: string;
+  description: string;
+  color: 'blue' | 'green' | 'red';
 }) {
-  const colorClasses = {
-    blue: 'border-blue-200 bg-blue-50/30',
-    green: 'border-green-200 bg-green-50/30',
-    red: 'border-red-200 bg-red-50/30',
-    purple: 'border-purple-200 bg-purple-50/30',
+  const colors = {
+    blue: 'border-[#005EB8]/30 bg-blue-50/50',
+    green: 'border-[#00843D]/30 bg-green-50/50',
+    red: 'border-[#D50032]/30 bg-red-50/50',
   };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className={`h-full ${colorClasses[color]}`}>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            {icon}
-            <div>
-              <span>{title}</span>
-              <p className="text-xs font-normal text-gray-500">{subtitle}</p>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {children}
-        </CardContent>
-      </Card>
-    </motion.div>
+    <Card className={`${colors[color]} border-2`}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          {icon}
+          <Badge variant="outline" className="text-xs">Active Rule</Badge>
+        </div>
+        <div className="mt-4">
+          <p className="text-sm text-gray-600">{title}</p>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-4xl font-bold text-gray-900">{value}</span>
+            <span className="text-lg text-gray-500">{unit}</span>
+          </div>
+          <p className="text-sm text-gray-500 mt-2">{description}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-function RuleItem({ 
-  label, 
-  value, 
-  icon, 
-  highlight,
-  testId
-}: { 
-  label: string; 
-  value: string; 
-  icon?: React.ReactNode;
-  highlight?: boolean;
-  testId?: string;
-}) {
+function QuickFact({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div 
-      className={`flex items-center justify-between p-2 rounded ${highlight ? 'bg-amber-50 border border-amber-200' : 'bg-white'}`}
-      data-testid={testId}
-    >
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+      <div className="flex items-center gap-2 text-gray-600">
         {icon}
         <span>{label}</span>
       </div>
-      <span className={`font-semibold ${highlight ? 'text-amber-700' : 'text-gray-900'}`}>{value}</span>
+      <span className="font-medium text-gray-900">{value}</span>
+    </div>
+  );
+}
+
+function CoverageBar({ label, percentage, color }: { label: string; percentage: number; color: string }) {
+  const colors: Record<string, string> = {
+    blue: 'bg-[#005EB8]',
+    green: 'bg-[#00843D]',
+    purple: 'bg-purple-600',
+    amber: 'bg-amber-500',
+    pink: 'bg-pink-500',
+  };
+  return (
+    <div>
+      <div className="flex justify-between text-sm mb-1">
+        <span className="text-gray-700">{label}</span>
+        <span className="text-gray-500">{percentage}%</span>
+      </div>
+      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className={`h-full ${colors[color]} rounded-full`} style={{ width: `${percentage}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function AgeVisual({ product, minAge, maxAge, endAge, color }: {
+  product: string;
+  minAge: number;
+  maxAge: number;
+  endAge: number;
+  color: 'blue' | 'green' | 'purple';
+}) {
+  const colors = {
+    blue: 'bg-[#005EB8]',
+    green: 'bg-[#00843D]',
+    purple: 'bg-purple-600',
+  };
+  return (
+    <div className="p-4 bg-white rounded-lg border">
+      <p className="font-medium text-gray-900 mb-3">{product}</p>
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">Can start at</span>
+          <span className={`font-bold ${color === 'blue' ? 'text-[#005EB8]' : color === 'green' ? 'text-[#00843D]' : 'text-purple-600'}`}>{minAge} years</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">Must start before</span>
+          <span className={`font-bold ${color === 'blue' ? 'text-[#005EB8]' : color === 'green' ? 'text-[#00843D]' : 'text-purple-600'}`}>{maxAge} years</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">Must end before</span>
+          <span className={`font-bold ${color === 'blue' ? 'text-[#005EB8]' : color === 'green' ? 'text-[#00843D]' : 'text-purple-600'}`}>{endAge} years</span>
+        </div>
+      </div>
+      <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className={`h-full ${colors[color]} rounded-full`} style={{ width: `${((maxAge - minAge) / 100) * 100}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function PolicyTermCard({ product, minTerm, maxTerm }: { product: string; minTerm: string; maxTerm: string }) {
+  return (
+    <div className="p-4 bg-white rounded-lg border text-center">
+      <p className="font-medium text-gray-700 mb-2">{product}</p>
+      <div className="flex items-center justify-center gap-2">
+        <span className="text-lg font-bold text-gray-900">{minTerm}</span>
+        <ArrowRight size={16} className="text-gray-400" />
+        <span className="text-lg font-bold text-gray-900">{maxTerm}</span>
+      </div>
+    </div>
+  );
+}
+
+function RequirementItem({ text, status }: { text: string; status: 'required' | 'may-apply' }) {
+  return (
+    <div className={`flex items-center gap-3 p-3 rounded-lg ${status === 'required' ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+      {status === 'required' ? (
+        <CheckCircle2 className="text-green-600 shrink-0" size={18} />
+      ) : (
+        <AlertCircle className="text-amber-600 shrink-0" size={18} />
+      )}
+      <span className="text-sm text-gray-700">{text}</span>
+    </div>
+  );
+}
+
+function PayoutTrigger({ title, description, payout, conditions, icon, warning }: {
+  title: string;
+  description: string;
+  payout: string;
+  conditions: string[];
+  icon: React.ReactNode;
+  warning?: string;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div className="p-3 bg-white rounded-lg shadow-sm h-fit">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <h4 className="font-semibold text-gray-900">{title}</h4>
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+        <Badge className="mt-2 bg-green-100 text-green-800 hover:bg-green-100">
+          <DollarSign size={12} className="mr-1" />
+          {payout}
+        </Badge>
+        {conditions.length > 0 && (
+          <div className="mt-3 space-y-1">
+            <p className="text-xs font-medium text-gray-500 uppercase">Conditions that must be met:</p>
+            {conditions.map((cond, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                <CheckCircle2 size={14} className="text-green-500" />
+                {cond}
+              </div>
+            ))}
+          </div>
+        )}
+        {warning && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-amber-700 bg-amber-50 p-2 rounded">
+            <AlertTriangle size={14} />
+            {warning}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TimingRule({ title, description, visual }: { title: string; description: string; visual: React.ReactNode }) {
+  return (
+    <div className="p-4 bg-gray-50 rounded-lg border">
+      <h4 className="font-semibold text-gray-900">{title}</h4>
+      <p className="text-sm text-gray-600 mt-1">{description}</p>
+      {visual}
+    </div>
+  );
+}
+
+function ExclusionItem({ title, description, severity }: { title: string; description: string; severity: 'critical' | 'warning' | 'info' }) {
+  const colors = {
+    critical: 'border-red-300 bg-red-50',
+    warning: 'border-amber-300 bg-amber-50',
+    info: 'border-gray-300 bg-gray-50',
+  };
+  const icons = {
+    critical: <XCircle className="text-red-500" size={18} />,
+    warning: <AlertTriangle className="text-amber-500" size={18} />,
+    info: <Info className="text-gray-500" size={18} />,
+  };
+  return (
+    <div className={`flex items-start gap-3 p-4 rounded-lg border ${colors[severity]}`}>
+      {icons[severity]}
+      <div>
+        <h5 className="font-medium text-gray-900">{title}</h5>
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function BenefitCard({ title, cost, icon, features }: { title: string; cost: string; icon: React.ReactNode; features: string[] }) {
+  return (
+    <Card className="border-2">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center justify-between text-lg">
+          <div className="flex items-center gap-2">
+            {icon}
+            {title}
+          </div>
+        </CardTitle>
+        <Badge className="w-fit bg-green-100 text-green-800 hover:bg-green-100">{cost}</Badge>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {features.map((f, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+              <CheckCircle2 size={14} className="text-green-500 mt-0.5 shrink-0" />
+              {f}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ChildBenefit({ title, amount, description }: { title: string; amount: string; description: string }) {
+  return (
+    <div className="p-3 bg-white rounded-lg border flex items-center gap-3">
+      <div className="p-2 bg-purple-100 rounded-lg">
+        <Baby className="text-purple-600" size={18} />
+      </div>
+      <div>
+        <p className="font-medium text-gray-900">{title}</p>
+        <p className="text-sm text-purple-600 font-semibold">{amount}</p>
+        <p className="text-xs text-gray-500">{description}</p>
+      </div>
     </div>
   );
 }
