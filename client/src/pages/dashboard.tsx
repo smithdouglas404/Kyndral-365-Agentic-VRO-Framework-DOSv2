@@ -22,6 +22,7 @@ import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
 import { AICommandCenter } from "@/components/AICommandCenter";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
+import { ExecutiveCommandCenter } from "@/components/ExecutiveCommandCenter";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
@@ -567,6 +568,7 @@ export default function Dashboard() {
           {/* AI Insights Tab - Available in both PMO and VRO modes */}
           <TabsContent value="ai-insights">
             <div className="space-y-8">
+              <ExecutiveCommandCenter />
               <AICommandCenter />
               <AIProactiveInsightsSection />
             </div>
