@@ -360,7 +360,9 @@ export function AICommandCenter() {
       setTimeout(() => {
         setVoiceTranscript("Show me the risk alerts");
         const command = parseVoiceCommand("Show me the risk alerts");
-        console.log("Voice command:", command);
+        if (command.entity === "risk") {
+          setSelectedPersona("cro");
+        }
       }, 2000);
     } else {
       setVoiceTranscript("");
@@ -491,6 +493,7 @@ export function AICommandCenter() {
                   variant={isListening ? "destructive" : "default"}
                   onClick={toggleVoice}
                   style={{ backgroundColor: isListening ? LG.red : LG.blue }}
+                  data-testid="button-voice-toggle"
                 >
                   {isListening ? <MicOff /> : <Mic />}
                   {isListening ? "Stop Listening" : "Start Voice Command"}
@@ -533,11 +536,13 @@ export function AICommandCenter() {
                   placeholder="Enter text to analyze (e.g., meeting notes, email content, stakeholder feedback)..."
                   value={sentimentInput}
                   onChange={(e) => setSentimentInput(e.target.value)}
+                  data-testid="input-sentiment-text"
                 />
                 <Button 
                   className="w-full mt-3 gap-2"
                   onClick={handleSentimentAnalysis}
                   style={{ backgroundColor: LG.teal }}
+                  data-testid="button-analyze-sentiment"
                 >
                   <Send size={14} />
                   Analyze Sentiment
