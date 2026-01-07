@@ -585,7 +585,7 @@ export default function Dashboard() {
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50 p-1 rounded-lg mb-8">
+          <TabsList className="grid w-full grid-cols-6 h-12 bg-muted/50 p-1 rounded-lg mb-8">
             <TabsTrigger 
               value="overview" 
               className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
@@ -593,6 +593,14 @@ export default function Dashboard() {
             >
               <BarChart3 size={16} />
               <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="portfolios" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-portfolios"
+            >
+              <Building2 size={16} />
+              <span className="hidden sm:inline">Portfolios</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-insights" 
@@ -615,7 +623,7 @@ export default function Dashboard() {
               className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
               data-testid="tab-performance"
             >
-              <Building2 size={16} />
+              <Target size={16} />
               <span className="hidden sm:inline">Performance</span>
             </TabsTrigger>
             <TabsTrigger 
@@ -639,11 +647,6 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* BU Programs - Differentiated by PMO vs VRO */}
-            <div className="border-b border-border pb-8">
-              <BUProgramsSection dataMode={dataMode} />
-            </div>
-
             {/* VRO Metrics Framework Table - Only show in VRO mode */}
             {dataMode === "VRO" && (
               <div className="border-b border-border pb-8">
@@ -663,6 +666,11 @@ export default function Dashboard() {
               </div>
               <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
             </div>
+          </TabsContent>
+
+          {/* Portfolios Tab - BU Programs with drill-down */}
+          <TabsContent value="portfolios">
+            <BUProgramsSection dataMode={dataMode} />
           </TabsContent>
 
           {/* AI Insights Tab */}
