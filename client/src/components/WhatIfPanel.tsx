@@ -476,11 +476,14 @@ export function WhatIfPanel({ yamlCode, policyName }: WhatIfPanelProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Based on analysis of {HISTORICAL_DATA.totalApplications.toLocaleString()} historical applications over the past 3 years:
+                  </p>
                   <div className="grid grid-cols-3 gap-6">
                     <ImpactCard
-                      title="Previously Rejected Now Eligible"
+                      title="Previously Rejected Customers Who Would Now Qualify"
                       value={scenarioResult.historicalImpact.wouldHaveBeenEligible.toLocaleString()}
-                      description="Customers who were rejected for age but would now qualify"
+                      description={`Out of ${HISTORICAL_DATA.rejectedAge.toLocaleString()} age-related rejections, this many would now be eligible`}
                       trend={scenarioResult.historicalImpact.wouldHaveBeenEligible > 0 ? 'up' : 'neutral'}
                     />
                     <ImpactCard
