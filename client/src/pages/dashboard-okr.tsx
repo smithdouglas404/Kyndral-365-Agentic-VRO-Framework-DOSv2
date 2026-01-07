@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, CheckCircle2, Clock, TrendingUp, AlertTriangle,
-  ChevronRight, ChevronDown, BarChart3, Bot, DollarSign,
+  ChevronRight, BarChart3, Bot, DollarSign,
   Building2, Repeat, Zap
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type DataMode = "VRO" | "PMO";
 
@@ -215,74 +216,108 @@ function NavBar() {
   );
 }
 
-function ObjectiveCard({ objective }: { objective: Objective }) {
-  const [expanded, setExpanded] = useState(false);
-
+function ObjectiveRow({ objective, onClick }: { objective: Objective; onClick: () => void }) {
+  const initiativeCount = objective.keyResults.reduce((sum, kr) => sum + kr.linkedInitiatives.length, 0);
+  
   return (
-    <Card className="overflow-hidden" data-testid={`objective-card-${objective.id}`}>
-      <div 
-        className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`objective-toggle-${objective.id}`}
-      >
+    <Card 
+      className="cursor-pointer hover:shadow-md hover:border-orange-200 transition-all"
+      onClick={onClick}
+      data-testid={`objective-row-${objective.id}`}
+    >
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${
               objective.status === 'ahead' ? 'bg-green-500' :
               objective.status === 'on-track' ? 'bg-blue-500' : 'bg-amber-500'
             }`}>
               {objective.progress}%
             </div>
-            <div>
-              <h3 className="font-semibold text-base">{objective.title}</h3>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm truncate">{objective.title}</h3>
               <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
                 <span className="flex items-center gap-1">
                   <Building2 className="h-3 w-3" />
                   {objective.division}
                 </span>
-                <span>{objective.owner}</span>
                 <span className="flex items-center gap-1 text-green-600">
                   <DollarSign className="h-3 w-3" />
-                  £{objective.totalValueImpact.costSavings + objective.totalValueImpact.revenueImpact}M value
+                  £{objective.totalValueImpact.costSavings + objective.totalValueImpact.revenueImpact}M
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+              <span className="flex items-center gap-1">
+                <Target className="h-3 w-3" />
+                {objective.keyResults.length} KRs
+              </span>
+              <span className="flex items-center gap-1">
+                <Repeat className="h-3 w-3" />
+                {initiativeCount}
+              </span>
+            </div>
             <Badge variant={
               objective.status === 'ahead' ? 'default' :
               objective.status === 'on-track' ? 'secondary' : 'destructive'
-            }>
+            } className="text-[10px]">
               {objective.status}
             </Badge>
-            {expanded ? (
-              <ChevronDown className="h-5 w-5 text-gray-400" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            )}
+            <ChevronRight className="h-4 w-4 text-gray-400" />
           </div>
         </div>
-      </div>
-      
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <div className="bg-white p-3 rounded-lg border flex items-center gap-3">
+      </CardContent>
+    </Card>
+  );
+}
+
+function ObjectiveDrawer({ objective, open, onClose }: { objective: Objective | null; open: boolean; onClose: () => void }) {
+  if (!objective) return null;
+
+  return (
+    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <SheetContent className="w-full sm:max-w-xl overflow-hidden p-0" data-testid="objective-drawer">
+        <ScrollArea className="h-full">
+          <div className="p-6">
+            <SheetHeader className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                  objective.status === 'ahead' ? 'bg-green-500' :
+                  objective.status === 'on-track' ? 'bg-blue-500' : 'bg-amber-500'
+                }`}>
+                  {objective.progress}%
+                </div>
+                <Badge variant={
+                  objective.status === 'ahead' ? 'default' :
+                  objective.status === 'on-track' ? 'secondary' : 'destructive'
+                }>
+                  {objective.status}
+                </Badge>
+              </div>
+              <SheetTitle className="text-xl">{objective.title}</SheetTitle>
+              <SheetDescription>
+                <span className="flex items-center gap-3 mt-1">
+                  <span className="flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    {objective.division}
+                  </span>
+                  <span>Owner: {objective.owner}</span>
+                </span>
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-100 flex items-center gap-3">
                   <DollarSign className="h-5 w-5 text-green-500" />
                   <div>
                     <p className="text-xs text-gray-500">Cost Savings</p>
                     <p className="font-bold text-green-600">£{objective.totalValueImpact.costSavings}M</p>
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded-lg border flex items-center gap-3">
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 flex items-center gap-3">
                   <TrendingUp className="h-5 w-5 text-blue-500" />
                   <div>
                     <p className="text-xs text-gray-500">Revenue Impact</p>
@@ -291,82 +326,90 @@ function ObjectiveCard({ objective }: { objective: Objective }) {
                 </div>
               </div>
 
-              <h4 className="font-semibold text-sm mb-3">Key Results & Linked Initiatives</h4>
-              <div className="space-y-4">
-                {objective.keyResults.map((kr, i) => (
-                  <div key={i} className="bg-white p-4 rounded-lg border">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">{kr.title}</span>
-                      <span className="text-sm font-bold text-orange-600">{kr.progress}%</span>
-                    </div>
-                    <Progress value={kr.progress} className="h-1.5 mb-2" />
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                      <span>Current: {kr.current}</span>
-                      <span>Target: {kr.target}</span>
-                    </div>
-                    
-                    {kr.linkedInitiatives.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
-                          <Repeat className="h-3 w-3" />
-                          Contributing Initiatives
-                        </p>
-                        <div className="space-y-2">
-                          {kr.linkedInitiatives.map((init, j) => (
-                            <div key={j} className="flex items-center justify-between p-2 bg-orange-50 rounded border border-orange-100">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm text-orange-800">{init.name}</span>
-                                  <Badge variant={
-                                    init.status === 'complete' ? 'default' :
-                                    init.status === 'at-risk' ? 'destructive' : 'secondary'
-                                  } className="text-[10px]">
-                                    {init.status}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-                                  <span>{init.division}</span>
-                                  <span>Phase: {init.phase}</span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-lg font-bold text-orange-600">+{init.contribution}%</span>
-                                <p className="text-[10px] text-green-600">{init.valueImpact}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-sm mb-3">Key Results & Linked Initiatives</h4>
+                <div className="space-y-4">
+                  {objective.keyResults.map((kr, i) => (
+                    <div key={i} className="bg-white p-3 rounded-lg border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">{kr.title}</span>
+                        <span className="text-sm font-bold text-orange-600">{kr.progress}%</span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <Progress value={kr.progress} className="h-1.5 mb-2" />
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span>Current: {kr.current}</span>
+                        <span>Target: {kr.target}</span>
+                      </div>
+                      
+                      {kr.linkedInitiatives.length > 0 && (
+                        <div className="pt-2 border-t border-gray-100">
+                          <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
+                            <Repeat className="h-3 w-3" />
+                            Contributing Initiatives
+                          </p>
+                          <div className="space-y-2">
+                            {kr.linkedInitiatives.map((init, j) => (
+                              <div key={j} className="flex items-center justify-between p-2 bg-orange-50 rounded border border-orange-100">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-xs text-orange-800 truncate">{init.name}</span>
+                                    <Badge variant={
+                                      init.status === 'complete' ? 'default' :
+                                      init.status === 'at-risk' ? 'destructive' : 'secondary'
+                                    } className="text-[9px] shrink-0">
+                                      {init.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-0.5">
+                                    <span>{init.division}</span>
+                                    <span>• {init.phase}</span>
+                                  </div>
+                                </div>
+                                <div className="text-right shrink-0 ml-2">
+                                  <span className="text-base font-bold text-orange-600">+{init.contribution}%</span>
+                                  <p className="text-[9px] text-green-600">{init.valueImpact}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="bg-gray-50 p-4 rounded-lg border">
                 <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <Bot className="h-4 w-4 text-purple-500" />
                   Collaborating Agents
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-2">
                   {objective.collaboratingAgents.map((agent, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2 bg-purple-50 rounded-lg border border-purple-100">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      <span className="font-medium text-sm text-purple-800">{agent.agentName}</span>
-                      <span className="text-xs text-gray-500">{agent.lastSync}</span>
+                    <div key={i} className="flex items-center justify-between p-2 bg-white rounded border">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        <div>
+                          <p className="font-medium text-sm">{agent.agentName}</p>
+                          <p className="text-xs text-gray-500">{agent.contribution}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-400">{agent.lastSync}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 export default function OKRDashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const [selectedObjective, setSelectedObjective] = useState<Objective | null>(null);
 
   const avgProgress = Math.round(objectives.reduce((sum, o) => sum + o.progress, 0) / objectives.length);
   const totalValue = objectives.reduce((sum, o) => sum + o.totalValueImpact.costSavings + o.totalValueImpact.revenueImpact, 0);
@@ -457,19 +500,29 @@ export default function OKRDashboard() {
             </Card>
           </div>
 
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3 mb-8">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Strategic Objectives</h2>
-              <Badge variant="outline" className="text-xs">Click to expand for initiative details</Badge>
+              <Badge variant="outline" className="text-xs font-normal">Click for details</Badge>
             </div>
             {objectives.map((objective) => (
-              <ObjectiveCard key={objective.id} objective={objective} />
+              <ObjectiveRow 
+                key={objective.id} 
+                objective={objective} 
+                onClick={() => setSelectedObjective(objective)}
+              />
             ))}
           </div>
 
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <ObjectiveDrawer 
+        objective={selectedObjective} 
+        open={!!selectedObjective} 
+        onClose={() => setSelectedObjective(null)} 
+      />
     </div>
   );
 }

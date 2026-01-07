@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Repeat, Users, TrendingUp, Target, CheckCircle2, 
   AlertTriangle, ArrowRight, BarChart3, Clock, Sparkles,
-  ChevronDown, ChevronRight, DollarSign, Building2, Bot,
-  MessageSquare, Zap, Shield, Calendar
+  ChevronRight, DollarSign, Building2, Bot,
+  MessageSquare, Zap, Shield, Calendar, X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type DataMode = "VRO" | "PMO";
 
@@ -240,198 +241,195 @@ function NavBar() {
   );
 }
 
-function InitiativeCard({ initiative }: { initiative: Initiative }) {
-  const [expanded, setExpanded] = useState(false);
-
+function InitiativeRow({ initiative, onClick }: { initiative: Initiative; onClick: () => void }) {
   return (
     <div 
-      className="border rounded-lg bg-white overflow-hidden transition-all hover:shadow-md"
-      data-testid={`initiative-card-${initiative.id}`}
+      className="p-3 border rounded-lg bg-white hover:shadow-md hover:border-teal-200 transition-all cursor-pointer"
+      onClick={onClick}
+      data-testid={`initiative-row-${initiative.id}`}
     >
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`initiative-toggle-${initiative.id}`}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            {expanded ? (
-              <ChevronDown className="h-5 w-5 text-gray-400" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            )}
-            <span className="font-semibold text-base">{initiative.name}</span>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <span className="font-medium text-sm truncate">{initiative.name}</span>
           <Badge variant={
             initiative.status === 'complete' ? 'default' :
             initiative.status === 'at-risk' ? 'destructive' : 'secondary'
-          }>
+          } className="text-[10px] shrink-0">
             {initiative.status}
           </Badge>
         </div>
-        <div className="flex items-center gap-4 text-xs text-gray-500 ml-8">
-          <span>Phase: {initiative.phase}</span>
-          <span>{initiative.impactedUsers.toLocaleString()} users</span>
-          <span className="flex items-center gap-1">
-            <Target className="h-3 w-3" />
-            {initiative.okrMappings.length} OKRs linked
-          </span>
-          <span className="flex items-center gap-1">
-            <Bot className="h-3 w-3" />
-            {initiative.collaboratingAgents.length} agents
-          </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <Target className="h-3 w-3" />
+              {initiative.okrMappings.length}
+            </span>
+            <span className="flex items-center gap-1">
+              <Bot className="h-3 w-3" />
+              {initiative.collaboratingAgents.length}
+            </span>
+          </div>
+          <div className="w-16">
+            <Progress value={initiative.progress} className="h-1.5" />
+          </div>
+          <span className="text-xs font-medium text-teal-600 w-8">{initiative.progress}%</span>
+          <ChevronRight className="h-4 w-4 text-gray-400" />
         </div>
-        <Progress value={initiative.progress} className="h-1.5 mt-3 ml-8" />
       </div>
+    </div>
+  );
+}
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <p className="text-sm text-gray-600 mb-4">{initiative.description}</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-white p-3 rounded-lg border">
+function InitiativeDrawer({ initiative, open, onClose }: { initiative: Initiative | null; open: boolean; onClose: () => void }) {
+  if (!initiative) return null;
+
+  return (
+    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <SheetContent className="w-full sm:max-w-xl overflow-hidden p-0" data-testid="initiative-drawer">
+        <ScrollArea className="h-full">
+          <div className="p-6">
+            <SheetHeader className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant={
+                  initiative.status === 'complete' ? 'default' :
+                  initiative.status === 'at-risk' ? 'destructive' : 'secondary'
+                }>
+                  {initiative.status}
+                </Badge>
+                <span className="text-xs text-gray-500">Phase: {initiative.phase}</span>
+              </div>
+              <SheetTitle className="text-xl">{initiative.name}</SheetTitle>
+              <SheetDescription>{initiative.description}</SheetDescription>
+            </SheetHeader>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-100">
                   <p className="text-xs text-gray-500 mb-1">Cost Savings</p>
                   <p className="text-lg font-bold text-green-600">£{initiative.valueImpact.costSavings}M</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500 mb-1">Revenue Impact</p>
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <p className="text-xs text-gray-500 mb-1">Revenue</p>
                   <p className="text-lg font-bold text-blue-600">£{initiative.valueImpact.revenueImpact}M</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500 mb-1">Efficiency Gain</p>
+                <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                  <p className="text-xs text-gray-500 mb-1">Efficiency</p>
                   <p className="text-lg font-bold text-purple-600">{initiative.valueImpact.efficiencyGain}%</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-lg border">
-                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <Target className="h-4 w-4 text-orange-500" />
-                    OKR Mappings
-                  </h4>
-                  <div className="space-y-3">
-                    {initiative.okrMappings.map((okr, i) => (
-                      <div key={i} className="p-2 bg-orange-50 rounded border border-orange-100">
-                        <p className="font-medium text-sm text-orange-800">{okr.objectiveName}</p>
-                        <div className="mt-2 space-y-1">
-                          {okr.keyResults.map((kr, j) => (
-                            <div key={j} className="flex items-center justify-between text-xs">
-                              <span className="text-gray-600">{kr.name}</span>
-                              <span className="font-bold text-orange-600">+{kr.contribution}%</span>
-                            </div>
-                          ))}
-                        </div>
-                        <p className="text-xs text-green-600 font-medium mt-2">{okr.valueImpact}</p>
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-orange-500" />
+                  OKR Mappings
+                </h4>
+                <div className="space-y-3">
+                  {initiative.okrMappings.map((okr, i) => (
+                    <div key={i} className="p-3 bg-white rounded border">
+                      <p className="font-medium text-sm text-orange-700 mb-2">{okr.objectiveName}</p>
+                      <div className="space-y-1">
+                        {okr.keyResults.map((kr, j) => (
+                          <div key={j} className="flex items-center justify-between text-xs">
+                            <span className="text-gray-600">{kr.name}</span>
+                            <span className="font-bold text-orange-600">+{kr.contribution}%</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-lg border">
-                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <Bot className="h-4 w-4 text-purple-500" />
-                    Collaborating Agents
-                  </h4>
-                  <div className="space-y-2">
-                    {initiative.collaboratingAgents.map((agent, i) => (
-                      <div key={i} className="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
-                        <div>
-                          <p className="font-medium text-sm text-purple-800">{agent.agentName}</p>
-                          <p className="text-xs text-gray-500">{agent.role}</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={
-                            agent.status === 'active' ? 'default' :
-                            agent.status === 'complete' ? 'secondary' : 'outline'
-                          } className="text-[10px]">
-                            {agent.status}
-                          </Badge>
-                          <p className="text-[10px] text-gray-400 mt-1">{agent.lastSync}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      <p className="text-xs text-green-600 font-medium mt-2">{okr.valueImpact}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-                <div className="bg-white p-4 rounded-lg border">
-                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-indigo-500" />
-                    Milestones
-                  </h4>
-                  <div className="space-y-2">
-                    {initiative.milestones.map((milestone, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          milestone.status === 'complete' ? 'bg-green-500' :
-                          milestone.status === 'in-progress' ? 'bg-blue-500' : 'bg-gray-300'
-                        }`} />
-                        <span className="text-sm flex-1">{milestone.name}</span>
-                        <span className="text-xs text-gray-500">{milestone.date}</span>
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-purple-500" />
+                  Collaborating Agents
+                </h4>
+                <div className="space-y-2">
+                  {initiative.collaboratingAgents.map((agent, i) => (
+                    <div key={i} className="flex items-center justify-between p-2 bg-white rounded border">
+                      <div>
+                        <p className="font-medium text-sm">{agent.agentName}</p>
+                        <p className="text-xs text-gray-500">{agent.role}</p>
+                      </div>
+                      <div className="text-right">
                         <Badge variant={
-                          milestone.status === 'complete' ? 'default' :
-                          milestone.status === 'in-progress' ? 'secondary' : 'outline'
+                          agent.status === 'active' ? 'default' :
+                          agent.status === 'complete' ? 'secondary' : 'outline'
                         } className="text-[10px]">
-                          {milestone.status}
+                          {agent.status}
+                        </Badge>
+                        <p className="text-[10px] text-gray-400 mt-1">{agent.lastSync}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-indigo-500" />
+                  Milestones
+                </h4>
+                <div className="space-y-2">
+                  {initiative.milestones.map((milestone, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${
+                        milestone.status === 'complete' ? 'bg-green-500' :
+                        milestone.status === 'in-progress' ? 'bg-blue-500' : 'bg-gray-300'
+                      }`} />
+                      <span className="text-sm flex-1">{milestone.name}</span>
+                      <span className="text-xs text-gray-500">{milestone.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-red-500" />
+                  Risks & Mitigations
+                </h4>
+                <div className="space-y-2">
+                  {initiative.risks.map((risk, i) => (
+                    <div key={i} className="p-2 bg-white rounded border">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm">{risk.description}</span>
+                        <Badge variant={
+                          risk.severity === 'high' ? 'destructive' :
+                          risk.severity === 'medium' ? 'secondary' : 'outline'
+                        } className="text-[10px] shrink-0">
+                          {risk.severity}
                         </Badge>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-lg border">
-                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-red-500" />
-                    Risks & Mitigations
-                  </h4>
-                  <div className="space-y-2">
-                    {initiative.risks.map((risk, i) => (
-                      <div key={i} className="p-2 bg-red-50 rounded border border-red-100">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm text-red-800">{risk.description}</span>
-                          <Badge variant={
-                            risk.severity === 'high' ? 'destructive' :
-                            risk.severity === 'medium' ? 'secondary' : 'outline'
-                          } className="text-[10px]">
-                            {risk.severity}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-gray-600">Mitigation: {risk.mitigation}</p>
-                      </div>
-                    ))}
-                  </div>
+                      <p className="text-xs text-gray-600">Mitigation: {risk.mitigation}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                <div className="flex items-center gap-4">
+              <div className="pt-4 border-t text-xs text-gray-500 space-y-1">
+                <div className="flex justify-between">
                   <span><strong>Division:</strong> {initiative.division}</span>
                   <span><strong>Owner:</strong> {initiative.owner}</span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex justify-between">
                   <span>Started: {initiative.startDate}</span>
                   <span>Target: {initiative.targetDate}</span>
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 export default function TMODashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const [selectedInitiative, setSelectedInitiative] = useState<Initiative | null>(null);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -533,13 +531,17 @@ export default function TMODashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Active Change Initiatives</span>
-                  <Badge variant="outline" className="text-xs">Click to expand</Badge>
+                  <Badge variant="outline" className="text-xs font-normal">Click for details</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {changeInitiatives.map((initiative) => (
-                    <InitiativeCard key={initiative.id} initiative={initiative} />
+                    <InitiativeRow 
+                      key={initiative.id} 
+                      initiative={initiative} 
+                      onClick={() => setSelectedInitiative(initiative)}
+                    />
                   ))}
                 </div>
               </CardContent>
@@ -549,6 +551,12 @@ export default function TMODashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <InitiativeDrawer 
+        initiative={selectedInitiative} 
+        open={!!selectedInitiative} 
+        onClose={() => setSelectedInitiative(null)} 
+      />
     </div>
   );
 }
