@@ -4,11 +4,33 @@ import { storage } from "./storage";
 import { parsePolicyDocument } from "./anthropic";
 import { z } from "zod";
 import multer from "multer";
-import { createRequire } from "module";
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 
-const require = createRequire(import.meta.url);
-const pdfParseModule = require("pdf-parse");
-const pdfParse = pdfParseModule.default || pdfParseModule;
+async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string; numpages: number; info: any }> {
+  const data = new Uint8Array(buffer);
+  const doc = await pdfjs.getDocument({ data, verbosity: 0 }).promise;
+  
+  let fullText = '';
+  const numPages = doc.numPages;
+  
+  for (let i = 1; i <= numPages; i++) {
+    const page = await doc.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item: any) => item.str)
+      .join(' ');
+    fullText += pageText + '\n\n';
+  }
+  
+  const metadata = await doc.getMetadata().catch(() => null);
+  await doc.destroy();
+  
+  return {
+    text: fullText.trim(),
+    numpages: numPages,
+    info: metadata?.info || {}
+  };
+}
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -40,7 +62,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "No PDF file uploaded" });
       }
 
-      const pdfData = await pdfParse(req.file.buffer);
+      const pdfData = await parsePdfBuffer(req.file.buffer);
       const extractedText = pdfData.text;
       
       if (!extractedText || extractedText.trim().length < 50) {
