@@ -337,16 +337,18 @@ export class SimulationEngine {
     return Math.floor(randomMinutes * 60 * 1000);
   }
   
-  private scheduleNextEvent() {
+  private scheduleNextEvent(initialDelay?: number) {
     if (!this.isRunning) return;
     
-    const delay = this.getRandomInterval();
+    const delay = initialDelay ?? this.getRandomInterval();
     this.timeoutId = setTimeout(() => {
+      // When we have 13+ events, drop oldest 3 to make room for continuous flow
+      if (this.events.length >= 13) {
+        this.events = this.events.slice(0, this.events.length - 3);
+      }
+      
       const newEvent = generateSimulationEvent();
       this.events.unshift(newEvent);
-      if (this.events.length > 15) {
-        this.events = this.events.slice(0, 15);
-      }
       this.notifySubscribers(newEvent);
       this.scheduleNextEvent();
     }, delay);
@@ -355,7 +357,9 @@ export class SimulationEngine {
   start(_intervalMs?: number) {
     if (this.isRunning) return;
     this.isRunning = true;
-    this.scheduleNextEvent();
+    // Fire first event quickly (5-15 seconds) so user sees activity immediately
+    const quickStart = Math.floor(Math.random() * 10000) + 5000;
+    this.scheduleNextEvent(quickStart);
   }
   
   stop() {
