@@ -6,6 +6,26 @@
 // PMO = Traditional Project Management: timelines, budgets, deliverables
 // VRO = Value Realization Office: outcomes, ROI, strategic impact, predictions
 
+export interface ProactiveAction {
+  id: string;
+  action: string;
+  impact: string;
+  urgency: "immediate" | "this-week" | "this-month";
+  type: "mitigate" | "accelerate" | "investigate" | "escalate";
+}
+
+export interface AISignal {
+  type: "warning" | "opportunity" | "insight" | "prediction";
+  message: string;
+  confidence: number; // 0-100
+  dataSource: string;
+}
+
+export interface TrendPoint {
+  week: string;
+  value: number;
+}
+
 export interface PMOProject {
   id: string;
   name: string;
@@ -16,6 +36,10 @@ export interface PMOProject {
   deliverables: { completed: number; total: number };
   risks: string[];
   nextMilestone: string;
+  // AI Enhancement fields
+  aiSignals: AISignal[];
+  proactiveActions: ProactiveAction[];
+  trendData: TrendPoint[];
 }
 
 export interface VROProgram {
@@ -32,6 +56,10 @@ export interface VROProgram {
   keyOutcomes: { outcome: string; progress: number; target: number; unit: string }[];
   collaborators: string[];
   riskMitigation: string;
+  // AI Enhancement fields
+  aiSignals: AISignal[];
+  proactiveActions: ProactiveAction[];
+  trendData: TrendPoint[];
 }
 
 // ============================================================================
@@ -49,7 +77,16 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 8, total: 12, unit: "months" },
     deliverables: { completed: 6, total: 14 },
     risks: ["Integration delays with legacy systems", "Resource constraints in Q3"],
-    nextMilestone: "UAT Phase 2 - Week 34"
+    nextMilestone: "UAT Phase 2 - Week 34",
+    aiSignals: [
+      { type: "warning", message: "Legacy API response times degrading 23% - integration risk increasing", confidence: 87, dataSource: "System monitoring" },
+      { type: "opportunity", message: "Cloud migration could reduce integration complexity by 40%", confidence: 72, dataSource: "Architecture review" }
+    ],
+    proactiveActions: [
+      { id: "pa-001", action: "Schedule API performance review with legacy team", impact: "Prevent 2-week delay", urgency: "immediate", type: "mitigate" },
+      { id: "pa-002", action: "Request additional contractor resources for Q3", impact: "Maintain delivery pace", urgency: "this-week", type: "escalate" }
+    ],
+    trendData: [{ week: "W28", value: 42 }, { week: "W29", value: 45 }, { week: "W30", value: 43 }, { week: "W31", value: 48 }, { week: "W32", value: 52 }]
   },
   {
     id: "pmo-ir-002",
@@ -60,7 +97,14 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 5, total: 6, unit: "months" },
     deliverables: { completed: 8, total: 10 },
     risks: ["Actuarial sign-off pending"],
-    nextMilestone: "Go-live - Week 28"
+    nextMilestone: "Go-live - Week 28",
+    aiSignals: [
+      { type: "insight", message: "Model accuracy improved 12% with new mortality tables", confidence: 94, dataSource: "Actuarial analytics" }
+    ],
+    proactiveActions: [
+      { id: "pa-003", action: "Fast-track actuarial review to accelerate go-live", impact: "Save 1 week", urgency: "this-week", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 78 }, { week: "W29", value: 82 }, { week: "W30", value: 85 }, { week: "W31", value: 88 }, { week: "W32", value: 92 }]
   },
   
   // Asset Management
@@ -73,7 +117,18 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 14, total: 18, unit: "months" },
     deliverables: { completed: 12, total: 22 },
     risks: ["Budget overrun by 5%", "Key vendor dependency", "Scope creep from stakeholders"],
-    nextMilestone: "Executive Steering - Week 32"
+    nextMilestone: "Executive Steering - Week 32",
+    aiSignals: [
+      { type: "warning", message: "Vendor showing financial stress signals - backup plan needed", confidence: 78, dataSource: "Vendor risk monitoring" },
+      { type: "warning", message: "Scope creep adding £800k unless controlled now", confidence: 91, dataSource: "Change request analysis" },
+      { type: "prediction", message: "Timeline likely to slip 6 weeks without intervention", confidence: 85, dataSource: "Delivery analytics" }
+    ],
+    proactiveActions: [
+      { id: "pa-004", action: "Escalate to Eric Adler - executive decision required", impact: "Unblock critical path", urgency: "immediate", type: "escalate" },
+      { id: "pa-005", action: "Freeze non-essential scope changes", impact: "Contain budget overrun", urgency: "immediate", type: "mitigate" },
+      { id: "pa-006", action: "Identify alternative vendor for backup", impact: "Reduce single-vendor risk", urgency: "this-week", type: "investigate" }
+    ],
+    trendData: [{ week: "W28", value: 52 }, { week: "W29", value: 50 }, { week: "W30", value: 48 }, { week: "W31", value: 45 }, { week: "W32", value: 42 }]
   },
   {
     id: "pmo-am-002",
@@ -84,7 +139,14 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 4, total: 8, unit: "months" },
     deliverables: { completed: 5, total: 11 },
     risks: ["Data quality from third parties"],
-    nextMilestone: "Beta release - Week 26"
+    nextMilestone: "Beta release - Week 26",
+    aiSignals: [
+      { type: "opportunity", message: "Add TNFD metrics to gain first-mover advantage", confidence: 82, dataSource: "Regulatory scanner" }
+    ],
+    proactiveActions: [
+      { id: "pa-007", action: "Expand scope to include nature-risk metrics", impact: "Industry leadership", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 45 }, { week: "W29", value: 52 }, { week: "W30", value: 58 }, { week: "W31", value: 62 }, { week: "W32", value: 68 }]
   },
 
   // Retail
@@ -97,7 +159,16 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 6, total: 10, unit: "months" },
     deliverables: { completed: 7, total: 16 },
     risks: ["Mobile app testing delays", "Accessibility compliance gaps"],
-    nextMilestone: "Customer pilot - Week 30"
+    nextMilestone: "Customer pilot - Week 30",
+    aiSignals: [
+      { type: "warning", message: "WCAG 2.1 compliance at 78% - needs 95% for launch", confidence: 96, dataSource: "Accessibility scanner" },
+      { type: "insight", message: "Drop-off rate highest at step 3 - simplification would increase conversion 15%", confidence: 88, dataSource: "User analytics" }
+    ],
+    proactiveActions: [
+      { id: "pa-008", action: "Engage accessibility specialist contractor", impact: "Close compliance gap", urgency: "this-week", type: "mitigate" },
+      { id: "pa-009", action: "Redesign step 3 to reduce friction", impact: "+15% conversion", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 38 }, { week: "W29", value: 42 }, { week: "W30", value: 44 }, { week: "W31", value: 48 }, { week: "W32", value: 52 }]
   },
   {
     id: "pmo-rt-002",
@@ -108,7 +179,15 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 3, total: 5, unit: "months" },
     deliverables: { completed: 4, total: 7 },
     risks: ["Training data quality"],
-    nextMilestone: "Soft launch - Week 24"
+    nextMilestone: "Soft launch - Week 24",
+    aiSignals: [
+      { type: "insight", message: "Current accuracy 89% - exceeds 85% target", confidence: 95, dataSource: "ML model metrics" },
+      { type: "opportunity", message: "Voice capability could handle 30% more queries", confidence: 76, dataSource: "Customer research" }
+    ],
+    proactiveActions: [
+      { id: "pa-010", action: "Plan Phase 2 with voice capability", impact: "30% more automation", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 55 }, { week: "W29", value: 62 }, { week: "W30", value: 70 }, { week: "W31", value: 78 }, { week: "W32", value: 85 }]
   },
 
   // Corporate Investments
@@ -121,7 +200,15 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 4, total: 6, unit: "months" },
     deliverables: { completed: 6, total: 9 },
     risks: ["Sensor integration with older properties"],
-    nextMilestone: "Phase 2 rollout - Week 27"
+    nextMilestone: "Phase 2 rollout - Week 27",
+    aiSignals: [
+      { type: "insight", message: "Energy savings 42% better than projected in pilot sites", confidence: 92, dataSource: "IoT telemetry" },
+      { type: "prediction", message: "Q4 rollout to 500 properties feasible ahead of schedule", confidence: 81, dataSource: "Capacity model" }
+    ],
+    proactiveActions: [
+      { id: "pa-011", action: "Accelerate rollout to 500 properties by Q4", impact: "Earlier carbon savings", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 62 }, { week: "W29", value: 68 }, { week: "W30", value: 72 }, { week: "W31", value: 78 }, { week: "W32", value: 82 }]
   },
 
   // Risk & Compliance
@@ -134,7 +221,16 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 7, total: 9, unit: "months" },
     deliverables: { completed: 9, total: 15 },
     risks: ["Data lineage documentation incomplete", "Regulatory changes pending"],
-    nextMilestone: "CRO sign-off - Week 29"
+    nextMilestone: "CRO sign-off - Week 29",
+    aiSignals: [
+      { type: "warning", message: "PRA consultation may require 3 additional metrics", confidence: 74, dataSource: "Regulatory intelligence" },
+      { type: "insight", message: "Data lineage gaps concentrated in 2 legacy systems", confidence: 88, dataSource: "Data quality scan" }
+    ],
+    proactiveActions: [
+      { id: "pa-012", action: "Engage with PRA to clarify requirements", impact: "Avoid rework", urgency: "this-week", type: "investigate" },
+      { id: "pa-013", action: "Focus data lineage sprint on 2 priority systems", impact: "Close 80% of gaps", urgency: "immediate", type: "mitigate" }
+    ],
+    trendData: [{ week: "W28", value: 58 }, { week: "W29", value: 60 }, { week: "W30", value: 62 }, { week: "W31", value: 64 }, { week: "W32", value: 66 }]
   },
   {
     id: "pmo-rc-002",
@@ -145,7 +241,15 @@ export const pmoProjects: PMOProject[] = [
     timeline: { elapsed: 5, total: 8, unit: "months" },
     deliverables: { completed: 6, total: 10 },
     risks: ["User adoption in Business Lines"],
-    nextMilestone: "Pilot in Retail - Week 26"
+    nextMilestone: "Pilot in Retail - Week 26",
+    aiSignals: [
+      { type: "insight", message: "Retail division showing 92% adoption in pilot - highest across BUs", confidence: 94, dataSource: "Usage analytics" },
+      { type: "opportunity", message: "Success playbook from Retail can accelerate other BU rollouts", confidence: 86, dataSource: "Change management" }
+    ],
+    proactiveActions: [
+      { id: "pa-014", action: "Create Retail playbook for other BU adoption", impact: "Faster enterprise rollout", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 58 }, { week: "W29", value: 65 }, { week: "W30", value: 72 }, { week: "W31", value: 78 }, { week: "W32", value: 85 }]
   }
 ];
 
@@ -172,7 +276,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Pricing accuracy", progress: 94, target: 98, unit: "%" }
     ],
     collaborators: ["Andrew Kail", "Actuary Team", "Risk"],
-    riskMitigation: "Longevity variance monitoring active - 2.3% deviation flagged for review"
+    riskMitigation: "Longevity variance monitoring active - 2.3% deviation flagged for review",
+    aiSignals: [
+      { type: "opportunity", message: "3 deals showing pricing anomalies - £12m reserve gap preventable", confidence: 92, dataSource: "ML pricing model" },
+      { type: "prediction", message: "Q3 deal volume up 15% - capacity planning needed now", confidence: 87, dataSource: "Pipeline analytics" }
+    ],
+    proactiveActions: [
+      { id: "vpa-001", action: "Intervene on 3 flagged deals immediately", impact: "Prevent £12m reserve gap", urgency: "immediate", type: "mitigate" },
+      { id: "vpa-002", action: "Pre-position underwriting capacity for Q3 surge", impact: "Capture 15% more deals", urgency: "this-week", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 28 }, { week: "W29", value: 32 }, { week: "W30", value: 38 }, { week: "W31", value: 45 }, { week: "W32", value: 52 }]
   },
   {
     id: "vro-ir-002",
@@ -191,7 +304,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Reinsurance optimization", progress: 4.2, target: 6, unit: "£m savings" }
     ],
     collaborators: ["Chris Knight (CRO)", "Actuarial", "Finance"],
-    riskMitigation: "AI monitoring 847 longevity cohorts in real-time"
+    riskMitigation: "AI monitoring 847 longevity cohorts in real-time",
+    aiSignals: [
+      { type: "insight", message: "Mortality 1.2% favorable - potential reserve release", confidence: 89, dataSource: "Actuarial AI" },
+      { type: "warning", message: "North-West cohort demographic shift detected", confidence: 76, dataSource: "Population analytics" }
+    ],
+    proactiveActions: [
+      { id: "vpa-003", action: "Commission reserve release review with actuaries", impact: "Unlock £8m capital", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-004", action: "Engage reinsurance broker for 2026 renewals", impact: "Hedge demographic risk", urgency: "this-month", type: "mitigate" }
+    ],
+    trendData: [{ week: "W28", value: 15 }, { week: "W29", value: 18 }, { week: "W30", value: 22 }, { week: "W31", value: 28 }, { week: "W32", value: 35 }]
   },
 
   // Asset Management - Eric Adler
@@ -212,7 +334,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Fee-related earnings", progress: 9, target: 15, unit: "% CAGR" }
     ],
     collaborators: ["Eric Adler", "Sustainability", "Distribution"],
-    riskMitigation: "Market volatility hedging through diversified vintage years"
+    riskMitigation: "Market volatility hedging through diversified vintage years",
+    aiSignals: [
+      { type: "opportunity", message: "ESG demand up 340% - accelerate clean power fund launch", confidence: 94, dataSource: "Investor sentiment AI" },
+      { type: "prediction", message: "£18bn DC consolidation market emerging - first-mover wins", confidence: 88, dataSource: "Market intelligence" }
+    ],
+    proactiveActions: [
+      { id: "vpa-005", action: "Fast-track clean power fund to market", impact: "Capture £800m inflows", urgency: "immediate", type: "accelerate" },
+      { id: "vpa-006", action: "Target top 5 consolidating DC schemes", impact: "£4bn AUM potential", urgency: "this-week", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 750 }, { week: "W29", value: 790 }, { week: "W30", value: 820 }, { week: "W31", value: 860 }, { week: "W32", value: 890 }]
   },
   {
     id: "vro-am-002",
@@ -231,7 +362,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Supplier SBT coverage", progress: 65, target: 100, unit: "%" }
     ],
     collaborators: ["Carl Moxley", "Investment Stewardship", "Legal"],
-    riskMitigation: "Greenwashing risk mitigated through TCFD-aligned disclosures"
+    riskMitigation: "Greenwashing risk mitigated through TCFD-aligned disclosures",
+    aiSignals: [
+      { type: "insight", message: "78% positive reception on engagements - momentum building", confidence: 91, dataSource: "Sentiment analysis" },
+      { type: "opportunity", message: "EU taxonomy early adoption creates competitive edge", confidence: 85, dataSource: "Regulatory intelligence" }
+    ],
+    proactiveActions: [
+      { id: "vpa-007", action: "Accelerate TNFD framework implementation", impact: "First-mover advantage", urgency: "this-month", type: "accelerate" },
+      { id: "vpa-008", action: "Publish engagement success stories externally", impact: "Attract ESG mandates", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 780 }, { week: "W29", value: 800 }, { week: "W30", value: 820 }, { week: "W31", value: 835 }, { week: "W32", value: 847 }]
   },
 
   // Retail - Bernie Hickman
@@ -252,7 +392,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "NPS score", progress: 48, target: 55, unit: "" }
     ],
     collaborators: ["Bernie Hickman", "Digital", "Customer Service"],
-    riskMitigation: "Accessibility compliance automated - 98% WCAG 2.1 AA compliance"
+    riskMitigation: "Accessibility compliance automated - 98% WCAG 2.1 AA compliance",
+    aiSignals: [
+      { type: "insight", message: "Voice analysis: call queue frustration detected - chatbot expansion would help", confidence: 88, dataSource: "Voice analytics AI" },
+      { type: "prediction", message: "NPS on track for 55 by Q4 - maintain momentum", confidence: 82, dataSource: "Customer analytics" }
+    ],
+    proactiveActions: [
+      { id: "vpa-009", action: "Expand chatbot to handle queue overflow", impact: "Reduce frustration by 40%", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-010", action: "Launch digital-first marketing campaign", impact: "Accelerate adoption 15%", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 8 }, { week: "W29", value: 9 }, { week: "W30", value: 10 }, { week: "W31", value: 11 }, { week: "W32", value: 12 }]
   },
   {
     id: "vro-rt-002",
@@ -271,7 +420,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Protection APE", progress: 850, target: 920, unit: "£m" }
     ],
     collaborators: ["Workplace Team", "Distribution", "Finance"],
-    riskMitigation: "Persistency monitoring active - early lapse detection saving £3.2m annually"
+    riskMitigation: "Persistency monitoring active - early lapse detection saving £3.2m annually",
+    aiSignals: [
+      { type: "opportunity", message: "5 large DC schemes in acquisition pipeline - act now", confidence: 79, dataSource: "Market intelligence" },
+      { type: "prediction", message: "12% AUM growth projected from auto-enrollment trends", confidence: 86, dataSource: "Contribution analytics" }
+    ],
+    proactiveActions: [
+      { id: "vpa-011", action: "Prioritize top 3 acquisition targets for outreach", impact: "£2bn potential AUM", urgency: "immediate", type: "accelerate" },
+      { id: "vpa-012", action: "Scale infrastructure for 12% growth", impact: "Avoid capacity constraints", urgency: "this-month", type: "mitigate" }
+    ],
+    trendData: [{ week: "W28", value: 5.05 }, { week: "W29", value: 5.08 }, { week: "W30", value: 5.12 }, { week: "W31", value: 5.16 }, { week: "W32", value: 5.2 }]
   },
 
   // Corporate Investments - Laura Mason
@@ -292,7 +450,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Clean energy investment", progress: 2.3, target: 3.0, unit: "£bn" }
     ],
     collaborators: ["Laura Mason", "Sustainability", "Planning"],
-    riskMitigation: "Supply chain risk monitored - ground source heat pump delivery on track via Kensa partnership"
+    riskMitigation: "Supply chain risk monitored - ground source heat pump delivery on track via Kensa partnership",
+    aiSignals: [
+      { type: "insight", message: "Millfield Green: 40% energy savings - scale model proven", confidence: 95, dataSource: "IoT monitoring" },
+      { type: "opportunity", message: "85% planning approval sentiment in target councils", confidence: 83, dataSource: "Sentiment analysis" }
+    ],
+    proactiveActions: [
+      { id: "vpa-013", action: "Replicate Millfield Green model at 5 new sites", impact: "£90m additional value", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-014", action: "Accelerate land acquisition in favorable councils", impact: "First-mover on sites", urgency: "immediate", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 35 }, { week: "W29", value: 38 }, { week: "W30", value: 40 }, { week: "W31", value: 43 }, { week: "W32", value: 45 }]
   },
 
   // Risk & Compliance - Chris Knight
@@ -313,7 +480,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Three Lines coverage", progress: 78, target: 95, unit: "%" }
     ],
     collaborators: ["Chris Knight", "IT Security", "Internal Audit"],
-    riskMitigation: "Emerging risks dashboard monitoring 47 risk indicators in real-time"
+    riskMitigation: "Emerging risks dashboard monitoring 47 risk indicators in real-time",
+    aiSignals: [
+      { type: "warning", message: "BBB cohort showing 0.3% deterioration - act before downgrades", confidence: 91, dataSource: "Credit AI" },
+      { type: "prediction", message: "23% increase in insurance-sector cyber attacks expected", confidence: 84, dataSource: "Threat intelligence" }
+    ],
+    proactiveActions: [
+      { id: "vpa-015", action: "Execute sector rotation from at-risk BBB issuers", impact: "Avoid £15m credit losses", urgency: "immediate", type: "mitigate" },
+      { id: "vpa-016", action: "Expand SOC coverage for enhanced monitoring", impact: "Reduce cyber exposure", urgency: "this-week", type: "mitigate" }
+    ],
+    trendData: [{ week: "W28", value: 15 }, { week: "W29", value: 17 }, { week: "W30", value: 19 }, { week: "W31", value: 21 }, { week: "W32", value: 22 }]
   },
   {
     id: "vro-rc-002",
@@ -332,7 +508,16 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "TNFD readiness", progress: 65, target: 100, unit: "%" }
     ],
     collaborators: ["Carl Moxley", "Investment", "Regulatory"],
-    riskMitigation: "Physical climate risk mapped for 100% of real estate portfolio"
+    riskMitigation: "Physical climate risk mapped for 100% of real estate portfolio",
+    aiSignals: [
+      { type: "insight", message: "1.5°C pathway achievable with £2.1bn reallocation", confidence: 88, dataSource: "Climate model" },
+      { type: "warning", message: "TCFD+ requirements in 2026 - readiness gap exists", confidence: 90, dataSource: "Regulatory intelligence" }
+    ],
+    proactiveActions: [
+      { id: "vpa-017", action: "Commission £2.1bn transition pathway analysis", impact: "Achieve 1.5°C alignment", urgency: "this-month", type: "accelerate" },
+      { id: "vpa-018", action: "Accelerate TNFD disclosure preparation", impact: "Regulatory compliance", urgency: "this-week", type: "mitigate" }
+    ],
+    trendData: [{ week: "W28", value: 3 }, { week: "W29", value: 3.5 }, { week: "W30", value: 4 }, { week: "W31", value: 4.5 }, { week: "W32", value: 5 }]
   }
 ];
 
