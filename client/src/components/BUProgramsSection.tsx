@@ -82,23 +82,29 @@ function ProjectDetailModal({
   const isPMO = mode === "PMO" && project;
   const isVRO = mode === "VRO" && program;
   
-  // Generate SAFe metrics for display
+  // Use actual SAFe metrics from project/program
+  const safeData = (project || program)?.safe;
   const safeMetrics = {
-    piNumber: "PI 24.4",
-    velocity: Math.floor(Math.random() * 30) + 40,
-    predictability: Math.floor(Math.random() * 15) + 80,
-    flowEfficiency: Math.floor(Math.random() * 20) + 60,
-    wip: Math.floor(Math.random() * 5) + 3,
-    leadTime: Math.floor(Math.random() * 10) + 8
+    piNumber: safeData?.currentPI || "PI 24.4",
+    velocity: safeData?.velocity || 45,
+    predictability: safeData?.predictability || 82,
+    flowEfficiency: safeData?.flowEfficiency || 68,
+    wip: 4,
+    leadTime: Math.round((100 - (safeData?.flowEfficiency || 68)) * 0.15 + 8)
   };
 
   const epicData = [
-    { name: "Completed", value: Math.floor(Math.random() * 5) + 3 },
-    { name: "In Progress", value: Math.floor(Math.random() * 4) + 2 },
-    { name: "Planned", value: Math.floor(Math.random() * 3) + 1 }
+    { name: "Completed", value: Math.round((safeData?.epicProgress || 60) / 10) },
+    { name: "In Progress", value: Math.round((100 - (safeData?.epicProgress || 60)) / 15) },
+    { name: "Planned", value: 2 }
   ];
 
-  const piTrendData = [
+  // Use actual PI trend data from project/program
+  const piTrendData = safeData?.piTrend?.map(t => ({
+    pi: t.pi,
+    planned: t.predictability + 3,
+    actual: t.predictability
+  })) || [
     { pi: "PI 24.1", planned: 85, actual: 82 },
     { pi: "PI 24.2", planned: 90, actual: 88 },
     { pi: "PI 24.3", planned: 88, actual: 91 },
@@ -320,21 +326,27 @@ function ProjectDetailModal({
                   <GitBranch size={16} /> Current PI Objectives (OKRs)
                 </h4>
                 <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">Accelerate Digital Transformation</span>
-                      <Badge className="bg-green-600 text-white">On Track</Badge>
+                  {safeData?.okr && (
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">{safeData.okr.objective}</span>
+                        <Badge className={safeData.okr.progress >= 70 ? "bg-green-600 text-white" : safeData.okr.progress >= 50 ? "bg-amber-500 text-white" : "bg-red-500 text-white"}>
+                          {safeData.okr.progress >= 70 ? "On Track" : safeData.okr.progress >= 50 ? "At Risk" : "Behind"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">KR: {safeData.okr.keyResult}</p>
+                      <Progress value={safeData.okr.progress} className="h-1.5" />
+                      <p className="text-xs text-muted-foreground mt-1">{safeData.okr.progress}% complete</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">KR: Complete 80% of platform migration by PI end</p>
-                    <Progress value={75} className="h-1.5" />
-                  </div>
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  )}
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">Improve Customer Experience</span>
-                      <Badge className="bg-amber-500 text-white">At Risk</Badge>
+                      <span className="font-medium text-sm">{safeData?.epicName || "EPIC Progress"}</span>
+                      <Badge className="bg-blue-600 text-white">{safeData?.epicId}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">KR: Reduce onboarding time by 40%</p>
-                    <Progress value={55} className="h-1.5" />
+                    <p className="text-xs text-muted-foreground mb-2">EPIC Completion</p>
+                    <Progress value={safeData?.epicProgress || 60} className="h-1.5" />
+                    <p className="text-xs text-muted-foreground mt-1">{safeData?.epicProgress || 60}% complete</p>
                   </div>
                 </div>
               </CardContent>
@@ -666,6 +678,30 @@ function PMOProjectCard({ project, onViewDetails }: { project: PMOProject; onVie
             </div>
           </div>
           
+          {/* SAFe 6.0 Metrics Row */}
+          <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[9px] font-semibold text-blue-700 flex items-center gap-1">
+                <GitBranch size={10} /> SAFe 6.0 | {project.safe.currentPI}
+              </span>
+              <Badge className="text-[8px] bg-blue-600 text-white">{project.safe.epicId}</Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-center">
+              <div>
+                <p className="text-sm font-bold text-blue-700">{project.safe.velocity}</p>
+                <p className="text-[8px] text-muted-foreground">Velocity</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-blue-700">{project.safe.predictability}%</p>
+                <p className="text-[8px] text-muted-foreground">Predict.</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-blue-700">{project.safe.flowEfficiency}%</p>
+                <p className="text-[8px] text-muted-foreground">Flow</p>
+              </div>
+            </div>
+          </div>
+          
           {/* AI SIGNAL - Visible on front! */}
           {topSignal && (
             <motion.div 
@@ -809,6 +845,30 @@ function VROProgramCard({ program, onViewDetails }: { program: VROProgram; onVie
               <Progress value={valuePercent} className="h-1.5" />
             </div>
           )}
+          
+          {/* SAFe 6.0 Metrics Row */}
+          <div className="p-2 bg-teal-50 rounded-lg border border-teal-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[9px] font-semibold text-teal-700 flex items-center gap-1">
+                <GitBranch size={10} /> SAFe 6.0 | {program.safe.currentPI}
+              </span>
+              <Badge className="text-[8px] bg-teal-600 text-white">{program.safe.epicId}</Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-center">
+              <div>
+                <p className="text-sm font-bold text-teal-700">{program.safe.velocity}</p>
+                <p className="text-[8px] text-muted-foreground">Velocity</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-teal-700">{program.safe.predictability}%</p>
+                <p className="text-[8px] text-muted-foreground">Predict.</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-teal-700">{program.safe.flowEfficiency}%</p>
+                <p className="text-[8px] text-muted-foreground">Flow</p>
+              </div>
+            </div>
+          </div>
           
           {/* AI Insight - Visible on front! */}
           <motion.div 
