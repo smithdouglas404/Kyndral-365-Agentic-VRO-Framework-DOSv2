@@ -195,9 +195,7 @@ export default function VROFramework() {
           </div>
           
           <p className="text-gray-600 mb-6 max-w-3xl">
-            A state-of-the-art, fully autonomous enterprise framework supporting VRO, PMO, and TMO 
-            functions with real-time stakeholder engagement and predictive insights. Our agentic 
-            architecture enables AI agents to communicate, monitor, and inform each other continuously.
+            Our Kyndryl Agentic Framework brings our State of the Art concept to life. Showing the vision for a fully autonomous enterprise framework supporting VRO, PMO, and TMO functions with real-time stakeholder engagement and predictive insights.
           </p>
 
           <div className="flex flex-wrap items-center gap-6 mb-6">
