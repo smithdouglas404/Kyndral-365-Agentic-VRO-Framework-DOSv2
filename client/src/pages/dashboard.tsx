@@ -257,29 +257,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
   );
 }
 
-interface NavBarProps {
-  onProjectSelect?: (scenarioId: string) => void;
-}
-
-function NavBar({ onProjectSelect }: NavBarProps) {
-  const [projectsOpen, setProjectsOpen] = useState(false);
-  const [reportsOpen, setReportsOpen] = useState(false);
-
-  const projectData = [
-    { name: "PRT Pipeline Acceleration", status: "On Track", progress: 78, scenarioId: "accelerate-prt" },
-    { name: "Governance Automation Platform", status: "On Track", progress: 65, scenarioId: "governance-uplift" },
-    { name: "Real-time Reporting Engine", status: "At Risk", progress: 42, scenarioId: "digitize-operations" },
-    { name: "Benefits Tracking System", status: "On Track", progress: 91, scenarioId: "accelerate-prt" },
-    { name: "Compliance Automation", status: "Complete", progress: 100, scenarioId: "governance-uplift" },
-  ];
-
-  const handleProjectClick = (scenarioId: string) => {
-    if (onProjectSelect) {
-      onProjectSelect(scenarioId);
-    }
-    setProjectsOpen(false);
-  };
-
+function NavBar() {
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
@@ -288,86 +266,6 @@ function NavBar({ onProjectSelect }: NavBarProps) {
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]" data-testid="link-dashboard">Dashboard</Link>
-          
-          <Dialog open={projectsOpen} onOpenChange={setProjectsOpen}>
-            <DialogTrigger asChild>
-              <button className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="button-projects">Projects</button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Active Projects</DialogTitle>
-                <DialogDescription>Current transformation initiatives aligned to VRO scenarios</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 mt-4">
-                {projectData.map((project, i) => {
-                  const scenarioName = scenarios.find(s => s.id === project.scenarioId)?.name || project.scenarioId;
-                  return (
-                    <div 
-                      key={i} 
-                      className="p-3 border rounded-lg hover:bg-[#005EB8]/5 hover:border-[#005EB8]/30 cursor-pointer transition-all" 
-                      onClick={() => handleProjectClick(project.scenarioId)}
-                      data-testid={`project-item-${i}`}
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium text-sm">{project.name}</span>
-                        <Badge variant={project.status === "On Track" ? "default" : project.status === "At Risk" ? "destructive" : "secondary"} className="text-xs">
-                          {project.status}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-muted-foreground">Scenario: {scenarioName}</span>
-                        <span className="text-xs font-medium">{project.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={cn(
-                            "h-2 rounded-full transition-all",
-                            project.status === "At Risk" ? "bg-[#FFC107]" : "bg-[#00843D]"
-                          )}
-                          style={{ width: `${project.progress}%` }}
-                        ></div>
-                      </div>
-                      <div className="mt-2 text-xs text-[#005EB8] font-medium">
-                        Click to view scenario →
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={reportsOpen} onOpenChange={setReportsOpen}>
-            <DialogTrigger asChild>
-              <button className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="button-reports">Reports</button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Available Reports</DialogTitle>
-                <DialogDescription>Download strategic reports with L&G benchmarks</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 mt-4">
-                {[
-                  { name: "Q4 2025 VRO Executive Summary", type: "PDF", date: "Dec 2025" },
-                  { name: "L&G Annual Report 2024 Extract", type: "PDF", date: "Mar 2024" },
-                  { name: "Scenario Impact Assessment", type: "Excel", date: "Dec 2025" },
-                  { name: "Benefits Realization Tracker", type: "Excel", date: "Weekly" },
-                  { name: "Governance Health Report", type: "PDF", date: "Dec 2025" },
-                ].map((report, i) => (
-                  <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" data-testid={`report-item-${i}`}>
-                    <div>
-                      <span className="font-medium text-sm">{report.name}</span>
-                      <p className="text-xs text-muted-foreground">{report.date}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">{report.type}</Badge>
-                      <Download size={16} className="text-muted-foreground" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
         </nav>
       </div>
       <div className="flex items-center gap-4">
@@ -409,18 +307,11 @@ export default function Dashboard() {
     setActiveStage(stage);
   }, []);
 
-  const handleProjectSelect = useCallback((scenarioId: string) => {
-    const scenario = scenarios.find(s => s.id === scenarioId);
-    if (scenario) {
-      setSelectedScenario(scenario);
-      setActiveTab("overview");
-    }
-  }, []);
 
   
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <NavBar onProjectSelect={handleProjectSelect} />
+      <NavBar />
 
       <main className="container mx-auto px-8 py-8 max-w-[1400px]">
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
