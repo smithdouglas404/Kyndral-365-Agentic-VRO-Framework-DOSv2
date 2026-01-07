@@ -18,7 +18,6 @@ import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
-import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
 import { AICommandCenter } from "@/components/AICommandCenter";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
@@ -30,7 +29,7 @@ import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
-import { Leaf, Shield, Sparkles, Smartphone, Building, ChevronRight } from "lucide-react";
+import { Leaf, Shield, Sparkles, Building, ChevronRight } from "lucide-react";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -298,7 +297,6 @@ export default function Dashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [artOfPossibleOpen, setArtOfPossibleOpen] = useState(false);
 
   const filteredChallenges = activeTheme === "All" 
     ? challenges 
@@ -473,40 +471,6 @@ export default function Dashboard() {
           </div>
         </Link>
 
-        {/* Art of the Possible Button */}
-        <div className="mt-4 p-4 bg-gradient-to-r from-[#C50B30] to-[#007FAA] rounded-xl text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <Smartphone className="h-8 w-8" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" /> Art of the Possible
-                </h3>
-                <p className="text-white/80 text-sm">
-                  Experience the 5-phase transformation journey with AI-powered mobile insights
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right text-sm">
-                <p className="text-white/80">Active AI Alerts</p>
-                <p className="text-2xl font-bold">{aiAlerts.length}</p>
-              </div>
-              <Button 
-                size="lg" 
-                className="bg-white text-[#C50B30] hover:bg-white/90 font-semibold gap-2"
-                data-testid="button-art-of-possible"
-                onClick={() => setArtOfPossibleOpen(true)}
-              >
-                <Smartphone className="h-5 w-5" />
-                Launch Mobile Experience
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
@@ -765,10 +729,6 @@ export default function Dashboard() {
         </Tabs>
       </main>
       
-      <ArtOfPossibleFlyout 
-        open={artOfPossibleOpen} 
-        onOpenChange={setArtOfPossibleOpen} 
-      />
       
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
         <div className="container mx-auto">
