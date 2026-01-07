@@ -310,6 +310,56 @@ export default function Dashboard() {
       <NavBar />
 
       <main className="container mx-auto px-8 py-8 max-w-[1400px]">
+        {/* Office Toggle Buttons */}
+        <div className="flex gap-3 mb-6">
+          <div 
+            onClick={() => setDataMode("VRO")}
+            className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
+              dataMode === "VRO" 
+                ? "bg-[#005EB8] text-white shadow-lg" 
+                : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
+            }`}
+            data-testid="toggle-vro"
+          >
+            <p className="font-bold text-center text-lg">Value</p>
+            <p className="font-bold text-center text-lg">Realization</p>
+            <p className="font-bold text-center text-lg">Office</p>
+          </div>
+          <div 
+            onClick={() => setDataMode("PMO")}
+            className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
+              dataMode === "PMO" 
+                ? "bg-[#005EB8] text-white shadow-lg" 
+                : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
+            }`}
+            data-testid="toggle-pmo"
+          >
+            <p className="font-bold text-center text-lg">Project</p>
+            <p className="font-bold text-center text-lg">Management</p>
+            <p className="font-bold text-center text-lg">Office</p>
+          </div>
+          <Link href="/policy-generator">
+            <div 
+              className="px-8 py-6 rounded-lg cursor-pointer transition-all bg-white border-2 border-gray-200 text-[#00843D] hover:border-[#00843D] hover:shadow-md"
+              data-testid="toggle-policy-generator"
+            >
+              <p className="font-bold text-center text-lg">Policy</p>
+              <p className="font-bold text-center text-lg">as Code</p>
+              <p className="font-bold text-center text-lg">Generator</p>
+            </div>
+          </Link>
+          <Link href="/vro-framework">
+            <div 
+              className="px-8 py-6 rounded-lg cursor-pointer transition-all bg-white border-2 border-gray-200 text-purple-600 hover:border-purple-600 hover:shadow-md"
+              data-testid="toggle-vro-framework"
+            >
+              <p className="font-bold text-center text-lg">VRO</p>
+              <p className="font-bold text-center text-lg">Agentic</p>
+              <p className="font-bold text-center text-lg">Framework</p>
+            </div>
+          </Link>
+        </div>
+
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -435,65 +485,6 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Policy as Code Generator Banner */}
-        <Link href="/policy-generator">
-          <div className="mt-6 p-4 bg-gradient-to-r from-[#005EB8] to-[#00843D] rounded-xl text-white hover:shadow-lg transition-all cursor-pointer">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-white/20 rounded-lg">
-                  <FileCode className="h-8 w-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" /> Policy as Code Generator
-                  </h3>
-                  <p className="text-white/80 text-sm">
-                    Transform policy documents into machine-readable code using Claude AI
-                  </p>
-                </div>
-              </div>
-              <Button 
-                size="lg" 
-                className="bg-white text-[#005EB8] hover:bg-white/90 font-semibold gap-2"
-                data-testid="button-policy-generator"
-              >
-                <FileCode className="h-5 w-5" />
-                Launch Generator
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </Link>
-
-        {/* VRO Agentic Framework Banner */}
-        <Link href="/vro-framework">
-          <div className="mt-4 p-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl text-white hover:shadow-lg transition-all cursor-pointer">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-white/20 rounded-lg">
-                  <Bot className="h-8 w-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" /> VRO Agentic Framework
-                  </h3>
-                  <p className="text-white/80 text-sm">
-                    Explore our AI agents, architecture, and see where AI is applied in this dashboard
-                  </p>
-                </div>
-              </div>
-              <Button 
-                size="lg" 
-                className="bg-white text-purple-600 hover:bg-white/90 font-semibold gap-2"
-                data-testid="button-vro-framework"
-              >
-                <Bot className="h-5 w-5" />
-                Explore Framework
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </Link>
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
