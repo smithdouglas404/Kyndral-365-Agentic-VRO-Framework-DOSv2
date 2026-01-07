@@ -566,12 +566,6 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* VRO Metrics Framework Table - Only show in VRO mode */}
-            {dataMode === "VRO" && (
-              <div className="border-b border-border pb-8">
-                <VROMetricsTable />
-              </div>
-            )}
 
             {/* Scenario-Driven Charts */}
             <div>
