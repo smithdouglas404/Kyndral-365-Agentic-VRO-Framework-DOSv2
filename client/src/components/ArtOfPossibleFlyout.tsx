@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
+import { MobileAICockpit } from "./MobileAICockpit";
 import { 
   transformationPhases, 
   personas, 
@@ -302,136 +303,12 @@ export function ArtOfPossibleFlyout({ open, onOpenChange }: ArtOfPossibleFlyoutP
                 {/* Phone Notch */}
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-10" />
                 
-                {/* Phone Screen */}
+                {/* Phone Screen - Interactive AI Cockpit */}
                 <div 
                   className="w-full h-full rounded-[32px] overflow-hidden relative"
                   style={{ backgroundColor: MOBILE.grey }}
                 >
-                  {/* Status Bar */}
-                  <div className="h-10 px-6 flex items-center justify-between text-xs" style={{ backgroundColor: MOBILE.red, color: MOBILE.white }}>
-                    <span>9:41</span>
-                    <span className="font-medium">L&G TMO</span>
-                    <div className="flex items-center gap-1">
-                      <Bell size={12} />
-                      <span>●●●</span>
-                    </div>
-                  </div>
-
-                  {/* Screen Content */}
-                  <div className="p-4 h-[calc(100%-40px)] overflow-y-auto">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={`${currentPhase}-${currentScreen}-${scenarioMode}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {/* Phase Header */}
-                        <div className="mb-4">
-                          <Badge 
-                            className="mb-2 text-white"
-                            style={{ backgroundColor: scenarioMode === "toBe" ? MOBILE.blue : "#757575" }}
-                          >
-                            Phase {phase.id}: {phase.shortName}
-                          </Badge>
-                          <h3 className="font-bold text-lg" style={{ color: MOBILE.dark }}>
-                            {scenario.title}
-                          </h3>
-                          <p className="text-xs text-gray-600">{phase.duration}</p>
-                        </div>
-
-                        {/* Metrics Cards */}
-                        <div className="grid grid-cols-3 gap-2 mb-4">
-                          {scenario.metrics.map((m, i) => (
-                            <div 
-                              key={i} 
-                              className="p-2 rounded-lg text-center"
-                              style={{ backgroundColor: MOBILE.white }}
-                            >
-                              <div className="flex items-center justify-center gap-1">
-                                {m.trend === "up" ? (
-                                  <TrendingUp size={12} style={{ color: "#00843D" }} />
-                                ) : m.trend === "down" ? (
-                                  <TrendingDown size={12} style={{ color: MOBILE.red }} />
-                                ) : null}
-                              </div>
-                              <p className="font-bold text-sm" style={{ color: scenarioMode === "toBe" ? MOBILE.blue : "#757575" }}>
-                                {m.value}
-                              </p>
-                              <p className="text-[10px] text-gray-500">{m.label}</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Current Screen */}
-                        {phase.screens[currentScreen] && (
-                          <div 
-                            className="p-3 rounded-lg mb-4"
-                            style={{ backgroundColor: MOBILE.white }}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge 
-                                variant="outline" 
-                                className="text-[10px]"
-                                style={{ borderColor: MOBILE.blue, color: MOBILE.blue }}
-                              >
-                                {phase.screens[currentScreen].type}
-                              </Badge>
-                              <span className="font-medium text-sm">{phase.screens[currentScreen].title}</span>
-                            </div>
-                            <p className="text-xs text-gray-600 mb-2">{phase.screens[currentScreen].content}</p>
-                            {phase.screens[currentScreen].aiAction && (
-                              <div 
-                                className="p-2 rounded text-xs flex items-center gap-2"
-                                style={{ backgroundColor: MOBILE.blue + "15", color: MOBILE.blue }}
-                              >
-                                <Brain size={14} />
-                                <span>{phase.screens[currentScreen].aiAction}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Process Steps */}
-                        <div className="mb-4">
-                          <p className="text-xs font-medium mb-2" style={{ color: MOBILE.dark }}>Process Flow</p>
-                          <div className="space-y-2">
-                            {scenario.process.map((step, i) => (
-                              <div 
-                                key={i}
-                                className="flex items-center gap-2 text-xs"
-                              >
-                                <div 
-                                  className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-                                  style={{ backgroundColor: scenarioMode === "toBe" ? MOBILE.blue : "#757575" }}
-                                >
-                                  {i + 1}
-                                </div>
-                                <span>{step}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Screen Navigation Dots */}
-                        <div className="flex justify-center gap-2">
-                          {phase.screens.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setCurrentScreen(i)}
-                              className={`w-2 h-2 rounded-full transition-all ${
-                                i === currentScreen ? "w-4" : ""
-                              }`}
-                              style={{ 
-                                backgroundColor: i === currentScreen ? MOBILE.red : "#ccc" 
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
+                  <MobileAICockpit />
                 </div>
               </div>
 
