@@ -178,7 +178,7 @@ export default function PolicyGenerator() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-4">
             <Link href="/">
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 gap-2">
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 gap-2" data-testid="button-back-dashboard">
                 <ArrowLeft size={16} />
                 Back to Dashboard
               </Button>
@@ -197,11 +197,11 @@ export default function PolicyGenerator() {
       <div className="max-w-7xl mx-auto p-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="generate" className="gap-2">
+            <TabsTrigger value="generate" className="gap-2" data-testid="tab-generate">
               <Sparkles size={16} />
               Generate
             </TabsTrigger>
-            <TabsTrigger value="library" className="gap-2">
+            <TabsTrigger value="library" className="gap-2" data-testid="tab-library">
               <Library size={16} />
               Library ({policies.length})
             </TabsTrigger>
@@ -375,6 +375,7 @@ export default function PolicyGenerator() {
                           selectedPolicy?.id === policy.id ? 'ring-2 ring-[#005EB8]' : ''
                         }`}
                         onClick={() => setSelectedPolicy(policy)}
+                        data-testid={`card-policy-${policy.id}`}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
@@ -413,6 +414,7 @@ export default function PolicyGenerator() {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleCopy(selectedPolicy.generatedCode)}
+                            data-testid="button-library-copy"
                           >
                             <Copy size={14} className="mr-1" />
                             Copy
@@ -421,6 +423,7 @@ export default function PolicyGenerator() {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleDownload(selectedPolicy)}
+                            data-testid="button-library-download"
                           >
                             <Download size={14} className="mr-1" />
                             Download
@@ -430,6 +433,7 @@ export default function PolicyGenerator() {
                             size="sm"
                             className="text-red-600 hover:bg-red-50"
                             onClick={() => handleDelete(selectedPolicy.id)}
+                            data-testid="button-library-delete"
                           >
                             <Trash2 size={14} />
                           </Button>

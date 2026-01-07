@@ -2,6 +2,14 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { parsePolicyDocument } from "./anthropic";
+import { z } from "zod";
+
+const parsePolicyRequestSchema = z.object({
+  text: z.string().min(1, "Policy text is required"),
+  name: z.string().optional(),
+  provider: z.string().optional(),
+  documentId: z.string().optional(),
+});
 
 export async function registerRoutes(
   httpServer: Server,
@@ -31,11 +39,12 @@ export async function registerRoutes(
 
   app.post("/api/policies/parse", async (req, res) => {
     try {
-      const { text, name, provider, documentId } = req.body;
-      if (!text) {
-        return res.status(400).json({ error: "Policy text is required" });
+      const parsed = parsePolicyRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.errors[0].message });
       }
 
+      const { text, name, provider, documentId } = parsed.data;
       const generatedCode = await parsePolicyDocument(text);
       
       const policy = await storage.createPolicy({
