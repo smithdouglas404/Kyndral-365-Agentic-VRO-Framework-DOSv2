@@ -1,7 +1,7 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -443,8 +443,38 @@ export default function Dashboard() {
           </Link>
         </div>
 
+        {/* Policy as Code Generator Banner */}
+        <Link href="/policy-generator">
+          <div className="mt-6 p-4 bg-gradient-to-r from-[#005EB8] to-[#00843D] rounded-xl text-white hover:shadow-lg transition-all cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-lg">
+                  <FileCode className="h-8 w-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" /> Policy as Code Generator
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    Transform policy documents into machine-readable code using Claude AI
+                  </p>
+                </div>
+              </div>
+              <Button 
+                size="lg" 
+                className="bg-white text-[#005EB8] hover:bg-white/90 font-semibold gap-2"
+                data-testid="button-policy-generator"
+              >
+                <FileCode className="h-5 w-5" />
+                Launch Generator
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Link>
+
         {/* Art of the Possible Button */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-[#C50B30] to-[#007FAA] rounded-xl text-white">
+        <div className="mt-4 p-4 bg-gradient-to-r from-[#C50B30] to-[#007FAA] rounded-xl text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-lg">
