@@ -19,6 +19,7 @@ import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
+import { AICommandCenter } from "@/components/AICommandCenter";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -652,7 +653,10 @@ export default function Dashboard() {
           {/* AI Insights Tab */}
           <TabsContent value="ai-insights">
             {dataMode === "VRO" ? (
-              <AIProactiveInsightsSection />
+              <div className="space-y-8">
+                <AICommandCenter />
+                <AIProactiveInsightsSection />
+              </div>
             ) : (
               <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="text-center">
