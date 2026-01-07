@@ -1,0 +1,394 @@
+import { useParams, Link } from "wouter";
+import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
+
+export default function DivisionPage() {
+  const params = useParams<{ id: string }>();
+  const division = divisions.find(d => d.id === params.id);
+  
+  if (!division) {
+    return (
+      <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
+        <Card className="p-8">
+          <h1 className="text-2xl font-bold text-[#C50B30]">Division not found</h1>
+          <Link href="/dashboard">
+            <Button className="mt-4" data-testid="link-back-dashboard">Return to Dashboard</Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  const divisionAlerts = aiAlerts.filter(a => a.division === division.name);
+  
+  const kpiChartData = division.kpis.slice(0, 4).map(kpi => ({
+    name: kpi.name.length > 15 ? kpi.name.slice(0, 15) + "..." : kpi.name,
+    "2023": typeof kpi.value2023 === "number" ? kpi.value2023 : 0,
+    "2024": typeof kpi.value2024 === "number" ? kpi.value2024 : 0,
+    "Target": typeof kpi.target2025 === "number" ? kpi.target2025 : 0
+  }));
+
+  const profitTrend = [
+    { year: "2023", profit: division.profit2023 },
+    { year: "2024", profit: division.profit2024 },
+    { year: "2025 (Proj)", profit: Math.round(division.profit2024 * (1 + (division.changePercent > 0 ? 0.08 : 0.05))) }
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#F6F6F6]">
+      <header className="bg-white shadow-sm border-b-4" style={{ borderColor: division.color }}>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="icon" data-testid="button-back">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold" style={{ color: division.color }} data-testid="text-division-name">
+                  {division.name}
+                </h1>
+                <Badge 
+                  variant={division.changePercent >= 0 ? "default" : "destructive"}
+                  className="text-sm"
+                  data-testid="badge-change-percent"
+                >
+                  {division.changePercent >= 0 ? "+" : ""}{division.changePercent}% YoY
+                </Badge>
+              </div>
+              <p className="text-gray-600 mt-1">CEO: {division.ceo}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">Operating Profit 2024</p>
+              <p className="text-3xl font-bold" style={{ color: division.color }} data-testid="text-profit">
+                £{division.profit2024}m
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-white shadow-sm">
+            <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+            <TabsTrigger value="kpis" data-testid="tab-kpis">KPIs & Metrics</TabsTrigger>
+            <TabsTrigger value="okrs" data-testid="tab-okrs">OKRs</TabsTrigger>
+            <TabsTrigger value="projects" data-testid="tab-projects">AI Projects</TabsTrigger>
+            <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
+            <TabsTrigger value="alerts" data-testid="tab-alerts">AI Alerts ({divisionAlerts.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Division Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 mb-6" data-testid="text-description">{division.description}</p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {division.kpis.slice(0, 4).map((kpi, i) => (
+                      <div key={i} className="p-4 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-500">{kpi.name}</p>
+                        <p className="text-2xl font-bold" style={{ color: division.color }}>
+                          {kpi.value2024}{kpi.unit}
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          {kpi.trend === "up" ? (
+                            <TrendingUp className="h-4 w-4 text-green-600" />
+                          ) : kpi.trend === "down" ? (
+                            <TrendingDown className="h-4 w-4 text-red-600" />
+                          ) : null}
+                          <span className={`text-xs ${kpi.status === "on-track" ? "text-green-600" : kpi.status === "at-risk" ? "text-amber-600" : "text-red-600"}`}>
+                            {kpi.status.replace("-", " ")}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" style={{ color: division.color }} />
+                    Profit Trend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={profitTrend}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="year" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip formatter={(value) => [`£${value}m`, "Profit"]} />
+                      <Line type="monotone" dataKey="profit" stroke={division.color} strokeWidth={3} dot={{ fill: division.color, strokeWidth: 2, r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {divisionAlerts.length > 0 && (
+              <Card className="border-l-4" style={{ borderLeftColor: division.color }}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5 text-amber-500" />
+                    AI Insights for {division.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {divisionAlerts.slice(0, 2).map(alert => (
+                      <div key={alert.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <AlertTriangle className={`h-5 w-5 mt-0.5 ${alert.severity === "critical" ? "text-red-500" : alert.severity === "warning" ? "text-amber-500" : "text-blue-500"}`} />
+                        <div className="flex-1">
+                          <p className="font-medium">{alert.title}</p>
+                          <p className="text-sm text-gray-600 mt-1">{alert.description}</p>
+                          <div className="flex gap-2 mt-2">
+                            {alert.actions.map((action, i) => (
+                              <Button key={i} size="sm" variant={action.type === "primary" ? "default" : "outline"} style={action.type === "primary" ? { backgroundColor: division.color } : {}}>
+                                {action.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        <Badge variant="outline">{alert.confidence}% confidence</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="kpis" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>KPI Performance 2023 vs 2024 vs Target</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={kpiChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="2023" fill="#94a3b8" name="2023" />
+                      <Bar dataKey="2024" fill={division.color} name="2024" />
+                      <Bar dataKey="Target" fill="#10b981" name="2025 Target" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>All KPIs</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-[350px] overflow-y-auto">
+                    {division.kpis.map((kpi, i) => (
+                      <div key={i} className="p-3 border rounded-lg">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium">{kpi.name}</span>
+                          <Badge variant={kpi.status === "on-track" ? "default" : kpi.status === "at-risk" ? "secondary" : "destructive"}>
+                            {kpi.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">2023:</span> {kpi.value2023}{kpi.unit}
+                          </div>
+                          <div>
+                            <span className="text-gray-500">2024:</span> <span className="font-medium">{kpi.value2024}{kpi.unit}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Target:</span> {kpi.target2025}{kpi.unit}
+                          </div>
+                        </div>
+                        {typeof kpi.value2024 === "number" && typeof kpi.target2025 === "number" && (
+                          <Progress 
+                            value={Math.min(100, (kpi.value2024 / kpi.target2025) * 100)} 
+                            className="mt-2 h-2"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="okrs" className="space-y-6">
+            {division.okrs.map((okr, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5" style={{ color: division.color }} />
+                        {okr.objective}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        Owner: {okr.owner} | Due: {okr.dueDate}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {okr.keyResults.map((kr, j) => (
+                      <div key={j} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">{kr.result}</span>
+                          <span className="text-sm font-medium" style={{ color: division.color }}>
+                            {kr.progress} / {kr.target} {kr.unit}
+                          </span>
+                        </div>
+                        <Progress 
+                          value={Math.min(100, (kr.progress / kr.target) * 100)} 
+                          className="h-3"
+                        />
+                        <p className="text-sm text-gray-500 mt-1">
+                          {Math.round((kr.progress / kr.target) * 100)}% complete
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="projects" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {division.potentialProjects.map((project, i) => (
+                <Card key={i} className={`border-l-4 ${project.priority === "high" ? "border-l-red-500" : project.priority === "medium" ? "border-l-amber-500" : "border-l-gray-300"}`}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{project.name}</CardTitle>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant={project.priority === "high" ? "destructive" : "secondary"}>
+                            {project.priority} priority
+                          </Badge>
+                          <Badge variant="outline">{project.status}</Badge>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">{project.expectedROI}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4">{project.description}</p>
+                    {project.aiRecommendation && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="h-5 w-5 text-blue-600 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-medium text-blue-800">AI Recommendation</p>
+                            <p className="text-sm text-blue-700 mt-1">{project.aiRecommendation}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex gap-2 mt-4">
+                      <Button size="sm" style={{ backgroundColor: division.color }}>
+                        View Details
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        Start Project
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="risks" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {division.risks.map((risk, i) => (
+                <Card key={i} className={`border-t-4 ${risk.level === "high" ? "border-t-red-500" : risk.level === "medium" ? "border-t-amber-500" : "border-t-green-500"}`}>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-base">{risk.type}</CardTitle>
+                      <Badge variant={risk.level === "high" ? "destructive" : risk.level === "medium" ? "secondary" : "default"}>
+                        {risk.level}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-700 mb-3">{risk.description}</p>
+                    <div className="p-2 bg-gray-50 rounded">
+                      <p className="text-xs text-gray-500">Mitigation</p>
+                      <p className="text-sm">{risk.mitigation}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="alerts" className="space-y-4">
+            {divisionAlerts.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <p className="text-gray-500">No active AI alerts for this division</p>
+                </CardContent>
+              </Card>
+            ) : (
+              divisionAlerts.map(alert => (
+                <Card key={alert.id} className={`border-l-4 ${alert.severity === "critical" ? "border-l-red-500" : alert.severity === "warning" ? "border-l-amber-500" : alert.severity === "success" ? "border-l-green-500" : "border-l-blue-500"}`}>
+                  <CardContent className="py-4">
+                    <div className="flex items-start gap-4">
+                      <div className={`p-2 rounded-full ${alert.severity === "critical" ? "bg-red-100" : alert.severity === "warning" ? "bg-amber-100" : alert.severity === "success" ? "bg-green-100" : "bg-blue-100"}`}>
+                        <AlertTriangle className={`h-5 w-5 ${alert.severity === "critical" ? "text-red-600" : alert.severity === "warning" ? "text-amber-600" : alert.severity === "success" ? "text-green-600" : "text-blue-600"}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{alert.title}</h3>
+                          <Badge variant="outline">{alert.type}</Badge>
+                        </div>
+                        <p className="text-gray-700">{alert.description}</p>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                          <span>Target: {alert.targetPersona}</span>
+                          <span>Confidence: {alert.confidence}%</span>
+                          <span>Source: {alert.source}</span>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg mt-3">
+                          <p className="text-sm font-medium">AI Recommendation:</p>
+                          <p className="text-sm text-gray-700">{alert.recommendation}</p>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          {alert.actions.map((action, i) => (
+                            <Button key={i} size="sm" variant={action.type === "primary" ? "default" : "outline"} style={action.type === "primary" ? { backgroundColor: division.color } : {}}>
+                              {action.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+}

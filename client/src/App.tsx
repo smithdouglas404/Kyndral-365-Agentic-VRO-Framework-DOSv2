@@ -7,6 +7,9 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Home from "@/pages/home";
 import ValueProposition from "@/pages/value-proposition";
+import DivisionPage from "@/pages/DivisionPage";
+import ClimatePage from "@/pages/ClimatePage";
+import RiskCenter from "@/pages/RiskCenter";
 
 function Router() {
   return (
@@ -14,6 +17,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/value-proposition" component={ValueProposition} />
+      <Route path="/division/:id" component={DivisionPage} />
+      <Route path="/climate" component={ClimatePage} />
+      <Route path="/risk" component={RiskCenter} />
       <Route component={NotFound} />
     </Switch>
   );

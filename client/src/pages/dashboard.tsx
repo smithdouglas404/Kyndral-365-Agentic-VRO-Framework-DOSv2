@@ -19,6 +19,19 @@ import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
+import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
+import { colors } from "@/lib/designTokens";
+import { Leaf, Shield, Sparkles, Smartphone, Building, ChevronRight } from "lucide-react";
+
+// L&G Design System Colors (Enterprise Transformation Team 2026)
+const LG = {
+  blue: colors.brand.blue,      // #005EB8 - Primary actions, links, navigation
+  teal: colors.brand.teal,      // #00843D - Positive trends, success states
+  red: colors.brand.red,        // #D50032 - Alerts, errors, negative trends
+  yellow: colors.brand.yellow,  // #FFD700 - Subtle highlights
+  grey500: colors.neutral.grey500, // #757575 - Secondary text
+  grey700: colors.neutral.grey700, // #424242 - Icons
+};
 
 type DataMode = "VRO" | "PMO";
 
@@ -30,8 +43,8 @@ function VROPMOToggle({ mode, onModeChange }: { mode: DataMode; onModeChange: (m
         className={cn(
           "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
           mode === "VRO" 
-            ? "bg-[hsl(209,100%,36%)] text-white shadow-md" 
-            : "bg-gray-100 text-[hsl(209,100%,36%)] hover:bg-gray-200"
+            ? "bg-[#005EB8] text-white shadow-md" 
+            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
         )}
         data-testid="toggle-vro"
       >
@@ -42,8 +55,8 @@ function VROPMOToggle({ mode, onModeChange }: { mode: DataMode; onModeChange: (m
         className={cn(
           "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
           mode === "PMO" 
-            ? "bg-[hsl(220,15%,60%)] text-[hsl(209,100%,36%)] shadow-md" 
-            : "bg-gray-100 text-[hsl(209,100%,36%)] hover:bg-gray-200"
+            ? "bg-[#757575] text-white shadow-md" 
+            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
         )}
         data-testid="toggle-pmo"
       >
@@ -61,7 +74,7 @@ function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => 
       onClick={onToggle}
       className={cn(
         "gap-2 transition-all",
-        isLive ? "border-green-500 text-green-600 bg-green-50" : "border-gray-300"
+        isLive ? "border-[#00843D] text-[#00843D] bg-[#00843D]/10" : "border-gray-300"
       )}
       data-testid="button-live-toggle"
     >
@@ -94,7 +107,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.prtVolume.baseline2024} ${lgAnnualReportData.prtVolume.unit}`,
       target: `${lgAnnualReportData.prtVolume.target2026} ${lgAnnualReportData.prtVolume.unit}`,
       icon: Target, 
-      color: "text-[hsl(209,100%,36%)]",
+      color: "text-[#005EB8]",
       source: lgAnnualReportData.prtVolume.source,
       progress: Math.round(((lgAnnualReportData.prtVolume.actual2025 - lgAnnualReportData.prtVolume.baseline2024) / (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024)) * 100)
     },
@@ -105,7 +118,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.forecastAccuracy.baseline2024} ${lgAnnualReportData.forecastAccuracy.unit}`,
       target: `${lgAnnualReportData.forecastAccuracy.target2026} ${lgAnnualReportData.forecastAccuracy.unit}`,
       icon: Activity, 
-      color: "text-[hsl(148,100%,26%)]",
+      color: "text-[#00843D]",
       source: lgAnnualReportData.forecastAccuracy.source,
       progress: Math.round(((lgAnnualReportData.forecastAccuracy.actual2025 - lgAnnualReportData.forecastAccuracy.baseline2024) / (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024)) * 100)
     },
@@ -116,7 +129,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.costSavings.baseline2024} ${lgAnnualReportData.costSavings.unit}`,
       target: `${lgAnnualReportData.costSavings.target2026} ${lgAnnualReportData.costSavings.unit}`,
       icon: TrendingUp, 
-      color: "text-[hsl(51,100%,50%)]",
+      color: "text-[#FFD700]",
       source: lgAnnualReportData.costSavings.source,
       progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100)
     },
@@ -127,7 +140,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.cycleTime.baseline2024} ${lgAnnualReportData.cycleTime.unit}`,
       target: `${lgAnnualReportData.cycleTime.target2026} ${lgAnnualReportData.cycleTime.unit}`,
       icon: Clock, 
-      color: "text-[hsl(209,100%,36%)]",
+      color: "text-[#005EB8]",
       source: lgAnnualReportData.cycleTime.source,
       progress: Math.round(((lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.actual2025) / (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026)) * 100)
     },
@@ -141,7 +154,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.prtVolume.baseline2024} ${lgAnnualReportData.prtVolume.unit}`,
       target: `${lgAnnualReportData.prtVolume.target2026} ${lgAnnualReportData.prtVolume.unit}`,
       icon: Target, 
-      color: "text-[hsl(220,15%,60%)]",
+      color: "text-[#757575]",
       source: `PMO: 35% progress vs VRO 50% (${lgAnnualReportData.prtVolume.source})`,
       progress: 35
     },
@@ -152,7 +165,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.forecastAccuracy.baseline2024} ${lgAnnualReportData.forecastAccuracy.unit}`,
       target: `${lgAnnualReportData.forecastAccuracy.target2026} ${lgAnnualReportData.forecastAccuracy.unit}`,
       icon: Activity, 
-      color: "text-[hsl(220,15%,60%)]",
+      color: "text-[#757575]",
       source: `PMO: 25% progress vs VRO 59% (${lgAnnualReportData.forecastAccuracy.source})`,
       progress: 25
     },
@@ -163,7 +176,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.costSavings.baseline2024} ${lgAnnualReportData.costSavings.unit}`,
       target: `${lgAnnualReportData.costSavings.target2026} ${lgAnnualReportData.costSavings.unit}`,
       icon: TrendingUp, 
-      color: "text-[hsl(220,15%,60%)]",
+      color: "text-[#757575]",
       source: `PMO: 28% progress vs VRO 56% (${lgAnnualReportData.costSavings.source})`,
       progress: 28
     },
@@ -174,7 +187,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       baseline: `${lgAnnualReportData.cycleTime.baseline2024} ${lgAnnualReportData.cycleTime.unit}`,
       target: `${lgAnnualReportData.cycleTime.target2026} ${lgAnnualReportData.cycleTime.unit}`,
       icon: Clock, 
-      color: "text-[hsl(220,15%,60%)]",
+      color: "text-[#757575]",
       source: `PMO: 30% progress vs VRO 57% (${lgAnnualReportData.cycleTime.source})`,
       progress: 30
     },
@@ -213,10 +226,10 @@ function LGReportStats({ mode }: { mode: DataMode }) {
             <div className="w-full mt-3">
               <div className="flex justify-between text-xs mb-1">
                 <span className="text-muted-foreground">2024: {stat.baseline}</span>
-                <span className="font-medium text-[hsl(148,100%,26%)]">2026: {stat.target}</span>
+                <span className="font-medium text-[#00843D]">2026: {stat.target}</span>
               </div>
               <Progress value={stat.progress} className="h-2" />
-              <div className="text-xs text-right mt-1 font-medium" style={{ color: mode === "VRO" ? "hsl(148,100%,26%)" : "hsl(220,15%,60%)" }}>
+              <div className="text-xs text-right mt-1 font-medium" style={{ color: mode === "VRO" ? "#00843D" : "#757575" }}>
                 {stat.progress}% to target
               </div>
             </div>
@@ -228,7 +241,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-xs bg-white border shadow-lg p-3">
-                  <p className="text-xs text-[hsl(209,100%,36%)] font-medium">{stat.source}</p>
+                  <p className="text-xs text-[#005EB8] font-medium">{stat.source}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -266,15 +279,15 @@ function NavBar({ onProjectSelect }: NavBarProps) {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[hsl(209,100%,36%)] tracking-tight cursor-pointer whitespace-nowrap" data-testid="link-home">Legal & General</div>
+          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap" data-testid="link-home">Legal & General</div>
         </Link>
         <nav className="hidden md:flex gap-6">
-          <Link href="/dashboard" className="text-sm font-medium text-[hsl(209,100%,36%)]" data-testid="link-dashboard">Dashboard</Link>
-          <Link href="/value-proposition" className="text-sm font-medium text-muted-foreground hover:text-[hsl(209,100%,36%)] transition-colors" data-testid="link-value-proposition">Strategic Value</Link>
+          <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]" data-testid="link-dashboard">Dashboard</Link>
+          <Link href="/value-proposition" className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="link-value-proposition">Strategic Value</Link>
           
           <Dialog open={projectsOpen} onOpenChange={setProjectsOpen}>
             <DialogTrigger asChild>
-              <button className="text-sm font-medium text-muted-foreground hover:text-[hsl(209,100%,36%)] transition-colors" data-testid="button-projects">Projects</button>
+              <button className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="button-projects">Projects</button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
@@ -287,7 +300,7 @@ function NavBar({ onProjectSelect }: NavBarProps) {
                   return (
                     <div 
                       key={i} 
-                      className="p-3 border rounded-lg hover:bg-[hsl(209,100%,36%)]/5 hover:border-[hsl(209,100%,36%)]/30 cursor-pointer transition-all" 
+                      className="p-3 border rounded-lg hover:bg-[#005EB8]/5 hover:border-[#005EB8]/30 cursor-pointer transition-all" 
                       onClick={() => handleProjectClick(project.scenarioId)}
                       data-testid={`project-item-${i}`}
                     >
@@ -305,12 +318,12 @@ function NavBar({ onProjectSelect }: NavBarProps) {
                         <div 
                           className={cn(
                             "h-2 rounded-full transition-all",
-                            project.status === "At Risk" ? "bg-yellow-500" : "bg-[hsl(148,100%,26%)]"
+                            project.status === "At Risk" ? "bg-[#FFC107]" : "bg-[#00843D]"
                           )}
                           style={{ width: `${project.progress}%` }}
                         ></div>
                       </div>
-                      <div className="mt-2 text-xs text-[hsl(209,100%,36%)] font-medium">
+                      <div className="mt-2 text-xs text-[#005EB8] font-medium">
                         Click to view scenario →
                       </div>
                     </div>
@@ -322,7 +335,7 @@ function NavBar({ onProjectSelect }: NavBarProps) {
 
           <Dialog open={reportsOpen} onOpenChange={setReportsOpen}>
             <DialogTrigger asChild>
-              <button className="text-sm font-medium text-muted-foreground hover:text-[hsl(209,100%,36%)] transition-colors" data-testid="button-reports">Reports</button>
+              <button className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="button-reports">Reports</button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
@@ -355,7 +368,7 @@ function NavBar({ onProjectSelect }: NavBarProps) {
       </div>
       <div className="flex items-center gap-4">
         <Link href="/value-proposition">
-          <Button variant="outline" size="sm" className="hidden lg:flex gap-2 text-[hsl(209,100%,36%)] border-[hsl(209,100%,36%)]/30 hover:bg-[hsl(209,100%,36%)]/5" data-testid="button-value-proposition">
+          <Button variant="outline" size="sm" className="hidden lg:flex gap-2 text-[#005EB8] border-[#005EB8]/30 hover:bg-[#005EB8]/5" data-testid="button-value-proposition">
             <FileText size={16} />
             Value Proposition
           </Button>
@@ -463,7 +476,7 @@ export default function Dashboard() {
             </Dialog>
             
             <Link href="/value-proposition">
-              <Button className="gap-2 bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white shadow-sm transition-all hover:-translate-y-0.5" data-testid="button-executive-brief">
+              <Button className="gap-2 bg-[#005EB8] hover:bg-[#004494] text-white shadow-sm transition-all hover:-translate-y-0.5" data-testid="button-executive-brief">
                 Read Executive Brief <ArrowRight size={16} />
               </Button>
             </Link>
@@ -472,6 +485,96 @@ export default function Dashboard() {
 
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} />
+
+        {/* Quick Navigation - Division Pages, Climate, Risk, Art of the Possible */}
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {divisions.map((division) => (
+            <Link key={division.id} href={`/division/${division.id}`}>
+              <div 
+                className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
+                style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                data-testid={`link-division-${division.id}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
+                    <p className="text-lg font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
+                    <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
+                      {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
+                    </Badge>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                </div>
+              </div>
+            </Link>
+          ))}
+          
+          <Link href="/climate">
+            <div className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" data-testid="link-climate">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-1">
+                    <Leaf className="h-4 w-4 text-green-600" />
+                    <p className="text-xs text-green-700 font-medium">Climate</p>
+                  </div>
+                  <p className="text-lg font-bold text-green-600">-37%</p>
+                  <p className="text-xs text-green-600">emissions</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
+              </div>
+            </div>
+          </Link>
+          
+          <Link href="/risk">
+            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:shadow-md transition-all cursor-pointer group" data-testid="link-risk">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-1">
+                    <Shield className="h-4 w-4 text-slate-600" />
+                    <p className="text-xs text-slate-700 font-medium">Risk Center</p>
+                  </div>
+                  <p className="text-lg font-bold text-slate-600">5 Categories</p>
+                  <p className="text-xs text-slate-500">3 Lines</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Art of the Possible Button */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-[#C50B30] to-[#007FAA] rounded-xl text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Smartphone className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" /> Art of the Possible
+                </h3>
+                <p className="text-white/80 text-sm">
+                  Experience the 5-phase transformation journey with AI-powered mobile insights
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right text-sm">
+                <p className="text-white/80">Active AI Alerts</p>
+                <p className="text-2xl font-bold">{aiAlerts.length}</p>
+              </div>
+              <Button 
+                size="lg" 
+                className="bg-white text-[#C50B30] hover:bg-white/90 font-semibold gap-2"
+                data-testid="button-art-of-possible"
+              >
+                <Smartphone className="h-5 w-5" />
+                Launch Mobile Experience
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
@@ -535,7 +638,7 @@ export default function Dashboard() {
                 <div>
                   <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
                   <p className="text-muted-foreground">
-                    KPIs for <span className="font-semibold text-[hsl(209,100%,36%)]">{selectedScenario.name}</span> scenario
+                    KPIs for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span> scenario
                   </p>
                 </div>
               </div>
@@ -545,7 +648,36 @@ export default function Dashboard() {
 
           {/* AI Insights Tab */}
           <TabsContent value="ai-insights">
-            <AIProactiveInsightsSection />
+            {dataMode === "VRO" ? (
+              <AIProactiveInsightsSection />
+            ) : (
+              <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-center">
+                  <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-500 mb-2">AI Insights Not Available in PMO Mode</h3>
+                  <p className="text-gray-400 max-w-md mx-auto mb-4">
+                    Traditional PMO approach relies on manual reporting cycles and periodic reviews. 
+                    AI-powered proactive insights are exclusive to the VRO methodology.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto mt-6">
+                    <div className="p-4 bg-white rounded border">
+                      <p className="text-xs text-gray-500 mb-1">PMO Reporting Cycle</p>
+                      <p className="text-2xl font-bold text-gray-600">Monthly</p>
+                    </div>
+                    <div className="p-4 bg-white rounded border">
+                      <p className="text-xs text-gray-500 mb-1">VRO AI Alerts</p>
+                      <p className="text-2xl font-bold text-[#005EB8]">Real-time</p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setDataMode("VRO")} 
+                    className="mt-6 bg-[#005EB8]"
+                  >
+                    Switch to VRO for AI Insights
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Industry Benchmarks Tab */}
@@ -555,7 +687,7 @@ export default function Dashboard() {
 
           {/* Business Performance Tab */}
           <TabsContent value="performance">
-            <BusinessPerformanceSection />
+            <BusinessPerformanceSection mode={dataMode} />
           </TabsContent>
 
           {/* Challenges Tab */}
@@ -571,7 +703,7 @@ export default function Dashboard() {
                   variant={activeTheme === "All" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setActiveTheme("All")}
-                  className={activeTheme === "All" ? "bg-[hsl(209,100%,36%)] text-white" : "text-muted-foreground"}
+                  className={activeTheme === "All" ? "bg-[#005EB8] text-white" : "text-muted-foreground"}
                   data-testid="filter-all"
                 >
                   All ({challenges.length})
@@ -584,7 +716,7 @@ export default function Dashboard() {
                       variant={activeTheme === theme ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveTheme(theme)}
-                      className={activeTheme === theme ? "bg-[hsl(209,100%,36%)] text-white" : "text-muted-foreground"}
+                      className={activeTheme === theme ? "bg-[#005EB8] text-white" : "text-muted-foreground"}
                       data-testid={`filter-${theme.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {theme} ({count})
@@ -610,7 +742,7 @@ export default function Dashboard() {
                     {scenarios.map((scenario) => (
                       <div key={scenario.id} className="p-4 border rounded-lg">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-[hsl(209,100%,36%)] flex items-center justify-center text-white">
+                          <div className="w-10 h-10 rounded-full bg-[#005EB8] flex items-center justify-center text-white">
                             {scenario.id === "accelerate-prt" ? "⚡" : scenario.id === "digitize-operations" ? "📊" : "🛡️"}
                           </div>
                           <div>
@@ -632,11 +764,11 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="px-2 py-1 rounded bg-[hsl(209,100%,36%)]/10 text-[hsl(209,100%,36%)]">Design</span>
+                          <span className="px-2 py-1 rounded bg-[#005EB8]/10 text-[#005EB8]">Design</span>
                           <ArrowRight size={12} className="text-muted-foreground" />
-                          <span className="px-2 py-1 rounded bg-[hsl(148,100%,26%)]/10 text-[hsl(148,100%,26%)]">Activate</span>
+                          <span className="px-2 py-1 rounded bg-[#00843D]/10 text-[#00843D]">Activate</span>
                           <ArrowRight size={12} className="text-muted-foreground" />
-                          <span className="px-2 py-1 rounded bg-[hsl(51,100%,40%)]/10 text-[hsl(51,100%,40%)]">Measure Value</span>
+                          <span className="px-2 py-1 rounded bg-[#FFD700]/10 text-[#B8860B]">Measure Value</span>
                           <span className="ml-2 text-muted-foreground">→ {scenario.expectedROI}</span>
                         </div>
                       </div>

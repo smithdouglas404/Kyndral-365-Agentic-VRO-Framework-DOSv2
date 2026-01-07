@@ -375,8 +375,13 @@ function ShareholderReturnsCard() {
   );
 }
 
-export function BusinessPerformanceSection() {
+type DataMode = "VRO" | "PMO";
+
+export function BusinessPerformanceSection({ mode = "VRO" }: { mode?: DataMode }) {
   const { coreOperatingProfit, dividendPerShare, solvencyIICoverage, coreEPSGrowth } = groupFinancials;
+  
+  // PMO shows slower progress (30% less impact)
+  const pmoMultiplier = 0.7;
   
   return (
     <motion.section 
@@ -387,38 +392,54 @@ export function BusinessPerformanceSection() {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">L&G Business Performance</h2>
-          <p className="text-muted-foreground">Full Year Results 2024 - Demonstrating deep business understanding</p>
+          <h2 className="text-2xl font-bold">
+            {mode === "VRO" ? "L&G Business Performance (VRO)" : "L&G Business Performance (PMO)"}
+          </h2>
+          <p className="text-muted-foreground">
+            {mode === "VRO" 
+              ? "Full Year Results 2024 - Demonstrating deep business understanding"
+              : "Full Year Results 2024 - Traditional reporting view (30% slower progress)"
+            }
+          </p>
         </div>
-        <Badge variant="outline" className="text-xs">
-          Source: L&G Annual Report & Accounts 2024
+        <Badge variant={mode === "VRO" ? "default" : "secondary"} className="text-xs">
+          {mode === "VRO" ? "VRO Accelerated" : "PMO Standard"}
         </Badge>
       </div>
+
+      {mode === "PMO" && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-sm text-amber-800">
+            <strong>PMO Governance Mode:</strong> Traditional project management approach with monthly reporting cycles, 
+            reactive risk management, and manual benefit tracking. Progress is typically 30-40% slower than VRO methodology.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard 
           title="Core Operating Profit" 
-          value={`£${coreOperatingProfit.value2024}`}
-          change={coreOperatingProfit.change}
+          value={`£${mode === "VRO" ? coreOperatingProfit.value2024 : Math.round(coreOperatingProfit.value2024 * pmoMultiplier)}`}
+          change={mode === "VRO" ? coreOperatingProfit.change : Math.round(coreOperatingProfit.change * pmoMultiplier)}
           unit="m"
           icon={TrendingUp}
         />
         <MetricCard 
           title="Dividend per Share" 
-          value={dividendPerShare.value2024}
-          change={dividendPerShare.change}
+          value={mode === "VRO" ? dividendPerShare.value2024 : (dividendPerShare.value2024 * pmoMultiplier).toFixed(2)}
+          change={mode === "VRO" ? dividendPerShare.change : Math.round(dividendPerShare.change * pmoMultiplier)}
           unit="p"
           icon={PoundSterling}
         />
         <MetricCard 
           title="Solvency II Coverage" 
-          value={solvencyIICoverage.value2024}
+          value={mode === "VRO" ? solvencyIICoverage.value2024 : Math.round(solvencyIICoverage.value2024 * 0.95)}
           unit="%"
           icon={Building2}
         />
         <MetricCard 
           title="Core EPS Growth" 
-          value={`+${coreEPSGrowth.value2024}`}
+          value={mode === "VRO" ? `+${coreEPSGrowth.value2024}` : `+${Math.round(coreEPSGrowth.value2024 * pmoMultiplier)}`}
           unit="%"
           icon={BarChart3}
         />
