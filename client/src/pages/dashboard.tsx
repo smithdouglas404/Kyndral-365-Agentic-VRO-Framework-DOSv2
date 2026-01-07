@@ -22,6 +22,7 @@ import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
 import { AICommandCenter } from "@/components/AICommandCenter";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
+import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -642,6 +643,13 @@ export default function Dashboard() {
             <div className="border-b border-border pb-8">
               <BUProgramsSection dataMode={dataMode} />
             </div>
+
+            {/* VRO Metrics Framework Table - Only show in VRO mode */}
+            {dataMode === "VRO" && (
+              <div className="border-b border-border pb-8">
+                <VROMetricsTable />
+              </div>
+            )}
 
             {/* Scenario-Driven Charts */}
             <div>

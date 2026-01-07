@@ -9,6 +9,7 @@ import {
   pmoSummary, vroSummary, riskSummary,
   PMOProject, VROProgram, RiskIssue, ProactiveAction, AISignal
 } from "@/lib/buPrograms";
+import { challenges, VROMetric } from "@/lib/data";
 import { 
   Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, 
   DollarSign, Brain, Users, Target, Sparkles, Shield,
@@ -50,6 +51,30 @@ const actionTypeIcons: Record<ProactiveAction["type"], React.ReactNode> = {
   accelerate: <Rocket size={12} />,
   investigate: <Search size={12} />,
   escalate: <ArrowUpRight size={12} />
+};
+
+const getRelevantVROMetrics = (projectType: string): { metrics: VROMetric[], trackingFields: string[] } => {
+  const typeMapping: Record<string, string[]> = {
+    "Institutional Retirement": ["planning", "certainty", "visibility"],
+    "Asset Management": ["planning", "efficiency", "prioritization"],
+    "Retail": ["speed", "visibility", "consistency"],
+    "Corporate Investments": ["planning", "certainty", "prioritization"],
+    "Risk & Compliance": ["agility", "visibility", "consistency"]
+  };
+  
+  const relevantChallenges = typeMapping[projectType] || ["planning", "visibility"];
+  const metrics: VROMetric[] = [];
+  const trackingFields: string[] = [];
+  
+  relevantChallenges.slice(0, 2).forEach(id => {
+    const challenge = challenges.find(c => c.id === id);
+    if (challenge) {
+      metrics.push(...challenge.vroMetrics.slice(0, 2));
+      trackingFields.push(...challenge.coreTrackingFields.slice(0, 2));
+    }
+  });
+  
+  return { metrics: metrics.slice(0, 4), trackingFields: trackingFields.slice(0, 4) };
 };
 
 function MiniSparkline({ data }: { data: { week: string; value: number }[] }) {
@@ -355,6 +380,28 @@ function PMOFlipCard({ project }: { project: PMOProject }) {
                   </p>
                 </motion.div>
               )}
+
+              <div className="pt-2 border-t border-purple-200">
+                <p className="text-[10px] font-medium text-blue-700 mb-1.5 flex items-center gap-1">
+                  <Target size={10} /> VRO METRICS & TRACKING
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  {getRelevantVROMetrics(project.bu).metrics.slice(0, 2).map((metric, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[9px] text-blue-700 bg-blue-50 rounded px-1 py-0.5">
+                      <div className="w-1 h-1 rounded-full bg-blue-500" />
+                      {metric.name.split(' ').slice(0, 3).join(' ')}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-1 mt-1">
+                  {getRelevantVROMetrics(project.bu).trackingFields.slice(0, 2).map((field, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[9px] text-muted-foreground">
+                      <div className="w-1 h-1 rounded-full bg-green-500" />
+                      {field}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -586,6 +633,28 @@ function VROFlipCard({ program }: { program: VROProgram }) {
                   </p>
                 </motion.div>
               )}
+
+              <div className="pt-2 border-t border-green-200">
+                <p className="text-[10px] font-medium text-blue-700 mb-1.5 flex items-center gap-1">
+                  <Target size={10} /> VRO METRICS & TRACKING
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  {getRelevantVROMetrics(program.bu).metrics.slice(0, 2).map((metric, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[9px] text-blue-700 bg-blue-50 rounded px-1 py-0.5">
+                      <div className="w-1 h-1 rounded-full bg-blue-500" />
+                      {metric.name.split(' ').slice(0, 3).join(' ')}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-1 mt-1">
+                  {getRelevantVROMetrics(program.bu).trackingFields.slice(0, 2).map((field, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[9px] text-muted-foreground">
+                      <div className="w-1 h-1 rounded-full bg-green-500" />
+                      {field}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
