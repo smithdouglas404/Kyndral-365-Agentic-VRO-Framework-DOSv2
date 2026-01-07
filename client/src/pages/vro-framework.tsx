@@ -416,7 +416,7 @@ export default function VROFramework() {
             <div className="bg-white rounded-xl border border-gray-200 p-8">
               <h2 className="text-2xl font-bold mb-4">Integration Points</h2>
               <p className="text-gray-600 mb-6">
-                The VRO Framework integrates with enterprise systems to provide comprehensive transformation visibility.
+                The VRO Framework is a guide that VRO teams can reference for ideas and innovative approaches.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
