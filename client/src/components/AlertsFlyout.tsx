@@ -28,6 +28,31 @@ interface AlertsFlyoutProps {
   onClose: () => void;
 }
 
+type AlertCategory = 'PMO' | 'VRO' | 'Other';
+
+function categorizeEvent(event: SimulationEvent): AlertCategory {
+  if (!event.relatedEntity) return 'Other';
+  
+  if (event.relatedEntity.type === 'project') {
+    return 'PMO';
+  } else if (event.relatedEntity.type === 'program' || event.relatedEntity.type === 'portfolio') {
+    return 'VRO';
+  }
+  return 'Other';
+}
+
+const categoryColors: Record<AlertCategory, { bg: string; border: string; text: string }> = {
+  PMO: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
+  VRO: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700' },
+  Other: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700' }
+};
+
+const categoryDescriptions: Record<AlertCategory, string> = {
+  PMO: 'Project Management Office',
+  VRO: 'Value Realization Office',
+  Other: 'Risks & Issues'
+};
+
 export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
   const { events, setSelectedEvent, markAsRead, unreadCount } = useSimulation();
 
@@ -45,6 +70,15 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
     if (mins < 60) return `${mins}m ago`;
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+  
+  const categorizedEvents = events.reduce((acc, event) => {
+    const category = categorizeEvent(event);
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(event);
+    return acc;
+  }, {} as Record<AlertCategory, SimulationEvent[]>);
+  
+  const categoryOrder: AlertCategory[] = ['PMO', 'VRO', 'Other'];
 
   return (
     <AnimatePresence>
@@ -87,7 +121,7 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
             </div>
 
             <ScrollArea className="flex-1">
-              <div className="p-4 space-y-3">
+              <div className="p-4 space-y-4">
                 {events.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Brain size={48} className="mx-auto mb-4 opacity-30" />
@@ -95,68 +129,87 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
                     <p className="text-sm">AI is analyzing your portfolio...</p>
                   </div>
                 ) : (
-                  events.map((event) => (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      whileHover={{ scale: 1.01, x: 4 }}
-                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                        !event.read 
-                          ? 'bg-purple-50 border-purple-200' 
-                          : 'bg-white border-gray-100 hover:border-gray-200'
-                      }`}
-                      style={{ borderLeftColor: priorityColors[event.priority], borderLeftWidth: 4 }}
-                      onClick={() => handleEventClick(event)}
-                      data-testid={`alert-item-${event.id}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div 
-                          className="p-2 rounded-lg text-white flex-shrink-0 mt-0.5"
-                          style={{ backgroundColor: priorityColors[event.priority] }}
-                        >
-                          {typeIcons[event.type]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge 
-                              className="text-white text-[10px]"
-                              style={{ backgroundColor: priorityColors[event.priority] }}
-                            >
-                              {event.priority.toUpperCase()}
-                            </Badge>
-                            {!event.read && (
-                              <span className="w-2 h-2 rounded-full bg-blue-500" />
-                            )}
-                            <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1">
-                              <Clock size={10} />
-                              {formatTime(event.timestamp)}
-                            </span>
+                  categoryOrder.map((category) => {
+                    const categoryEvents = categorizedEvents[category];
+                    if (!categoryEvents || categoryEvents.length === 0) return null;
+                    
+                    const colors = categoryColors[category];
+                    
+                    return (
+                      <div key={category} className="space-y-2">
+                        <div className={`px-3 py-2 rounded-lg ${colors.bg} ${colors.border} border`}>
+                          <div className="flex items-center justify-between">
+                            <span className={`font-semibold text-sm ${colors.text}`}>{category}</span>
+                            <span className={`text-xs ${colors.text}`}>{categoryDescriptions[category]}</span>
                           </div>
-                          <p className="font-semibold text-sm leading-tight mb-1">{event.title}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{event.message}</p>
-                          {event.relatedEntity && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <Badge variant="outline" className="text-[10px]">
-                                {event.relatedEntity.bu}
-                              </Badge>
-                              <span className="text-[10px] text-muted-foreground truncate">
-                                {event.relatedEntity.name}
-                              </span>
-                            </div>
-                          )}
+                          <span className="text-xs text-muted-foreground">{categoryEvents.length} alert{categoryEvents.length !== 1 ? 's' : ''}</span>
                         </div>
-                        <ChevronRight size={16} className="text-muted-foreground flex-shrink-0 mt-2" />
+                        
+                        {categoryEvents.map((event) => (
+                          <motion.div
+                            key={event.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileHover={{ scale: 1.01, x: 4 }}
+                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all ml-2 ${
+                              !event.read 
+                                ? 'bg-purple-50 border-purple-200' 
+                                : 'bg-white border-gray-100 hover:border-gray-200'
+                            }`}
+                            style={{ borderLeftColor: priorityColors[event.priority], borderLeftWidth: 4 }}
+                            onClick={() => handleEventClick(event)}
+                            data-testid={`alert-item-${event.id}`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div 
+                                className="p-2 rounded-lg text-white flex-shrink-0 mt-0.5"
+                                style={{ backgroundColor: priorityColors[event.priority] }}
+                              >
+                                {typeIcons[event.type]}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Badge 
+                                    className="text-white text-[10px]"
+                                    style={{ backgroundColor: priorityColors[event.priority] }}
+                                  >
+                                    {event.priority.toUpperCase()}
+                                  </Badge>
+                                  {!event.read && (
+                                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                  )}
+                                  <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1">
+                                    <Clock size={10} />
+                                    {formatTime(event.timestamp)}
+                                  </span>
+                                </div>
+                                <p className="font-semibold text-sm leading-tight mb-1">{event.title}</p>
+                                <p className="text-xs text-muted-foreground line-clamp-2">{event.message}</p>
+                                {event.relatedEntity && (
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <Badge variant="outline" className="text-[10px]">
+                                      {event.relatedEntity.bu}
+                                    </Badge>
+                                    <span className="text-[10px] text-muted-foreground truncate">
+                                      {event.relatedEntity.name}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <ChevronRight size={16} className="text-muted-foreground flex-shrink-0 mt-2" />
+                            </div>
+                          </motion.div>
+                        ))}
                       </div>
-                    </motion.div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </ScrollArea>
 
             <div className="p-4 border-t bg-gray-50">
               <p className="text-xs text-center text-muted-foreground">
-                Alerts refresh every 5 seconds. Click any alert for details.
+                New alerts appear every 3-7 minutes. Click any alert for details.
               </p>
             </div>
           </motion.div>

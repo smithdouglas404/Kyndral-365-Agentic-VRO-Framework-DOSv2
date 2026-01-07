@@ -41,144 +41,174 @@ export interface SimulationEvent {
   read: boolean;
 }
 
-const EVENT_TEMPLATES: {
+type EventSentiment = 'positive' | 'cautionary';
+
+interface EventTemplate {
   type: SimulationEventType;
   priority: EventPriority;
+  sentiment: EventSentiment;
   templates: { title: string; message: string; detail: string; source: string }[];
-}[] = [
-  {
-    type: 'ai_alert',
-    priority: 'high',
-    templates: [
-      {
-        title: 'Pattern Detected',
-        message: 'ML model detecting anomaly in {entity} performance metrics',
-        detail: 'Our AI has identified a deviation from expected patterns. Historical analysis suggests intervention within 48 hours could prevent escalation. Confidence based on 847 similar patterns across the portfolio.',
-        source: 'Pattern Recognition AI'
-      },
-      {
-        title: 'Sentiment Shift',
-        message: 'Stakeholder sentiment declining 15% for {entity}',
-        detail: 'NLP analysis of recent communications shows increasing concern. Key themes: timeline uncertainty, resource constraints. Recommend proactive stakeholder engagement.',
-        source: 'Sentiment Analysis Engine'
-      },
-      {
-        title: 'Cross-Portfolio Correlation',
-        message: '{entity} showing correlation with 3 other initiatives',
-        detail: 'Dependency mapping reveals shared resources and timeline conflicts. AI recommends portfolio-level review to optimize sequencing and prevent bottlenecks.',
-        source: 'Portfolio Intelligence'
-      }
-    ]
-  },
-  {
-    type: 'risk_warning',
-    priority: 'critical',
-    templates: [
-      {
-        title: 'Risk Threshold Breach',
-        message: '{entity} approaching critical risk threshold',
-        detail: 'Predictive model indicates 78% probability of risk materialization within 2 weeks. Early warning triggered based on leading indicators. Immediate review recommended.',
-        source: 'Risk Prediction Model'
-      },
-      {
-        title: 'Emerging Risk',
-        message: 'New risk vector detected for {entity}',
-        detail: 'AI has identified a previously untracked risk factor from external data sources. Market conditions and regulatory changes contributing to elevated exposure.',
-        source: 'External Risk Scanner'
-      }
-    ]
-  },
+}
+
+const POSITIVE_EVENTS: EventTemplate[] = [
   {
     type: 'opportunity',
     priority: 'medium',
+    sentiment: 'positive',
     templates: [
       {
-        title: 'Value Acceleration',
+        title: 'Value Acceleration Opportunity',
         message: '{entity} positioned for 20% faster value realization',
         detail: 'Analysis shows favorable conditions for acceleration. Similar initiatives achieved breakthrough by reallocating resources during this phase. Window of opportunity: 3 weeks.',
         source: 'Value Optimization AI'
       },
       {
-        title: 'Synergy Opportunity',
+        title: 'Synergy Opportunity Identified',
         message: 'Potential £2.5m synergy identified with {entity}',
         detail: 'Cross-functional analysis reveals shared capabilities that could be leveraged. Collaboration between teams could unlock significant efficiency gains.',
         source: 'Synergy Detection'
       },
       {
-        title: 'Market Advantage',
-        message: 'First-mover opportunity for {entity}',
-        detail: 'Competitive analysis shows gap in market. Accelerating delivery could capture significant market share before competitors respond.',
-        source: 'Market Intelligence'
-      }
-    ]
-  },
-  {
-    type: 'prediction',
-    priority: 'medium',
-    templates: [
-      {
-        title: 'Trajectory Forecast',
-        message: '{entity} projected to exceed targets by Q4',
-        detail: 'Based on current velocity and historical patterns, AI predicts successful delivery with 15% margin. Confidence interval: 85-92%. Key assumption: no major scope changes.',
-        source: 'Predictive Analytics'
-      },
-      {
-        title: 'Resource Prediction',
-        message: 'Resource constraint predicted for {entity} in 6 weeks',
-        detail: 'Workforce planning AI detects upcoming capacity gap. Proactive resource acquisition or scope adjustment recommended to maintain momentum.',
-        source: 'Capacity Planning AI'
-      }
-    ]
-  },
-  {
-    type: 'safe_anomaly',
-    priority: 'high',
-    templates: [
-      {
-        title: 'Velocity Deviation',
-        message: '{entity} velocity dropped 18% from baseline',
-        detail: 'SAFe metrics indicate delivery slowdown. Root cause analysis suggests impediment accumulation. PI planning review recommended.',
-        source: 'SAFe Metrics Engine'
-      },
-      {
-        title: 'Flow Efficiency Alert',
-        message: '{entity} flow efficiency below PI target',
-        detail: 'Work item cycle time increasing. Bottleneck analysis points to handoff delays between teams. Value stream mapping recommended.',
-        source: 'Flow Analytics'
+        title: 'Cost Savings Detected',
+        message: '{entity} showing potential for £1.8m operational savings',
+        detail: 'AI analysis of vendor contracts and operational metrics indicates optimization opportunities. Quick wins available within current PI.',
+        source: 'Cost Intelligence'
       }
     ]
   },
   {
     type: 'value_milestone',
     priority: 'low',
+    sentiment: 'positive',
     templates: [
       {
-        title: 'Value Realized',
-        message: '{entity} achieved £5m value milestone',
+        title: 'Value Milestone Achieved',
+        message: '{entity} achieved £5m value milestone ahead of schedule',
         detail: 'Cumulative value realization has crossed significant threshold. ROI tracking shows 23% above initial projections. Success pattern captured for replication.',
         source: 'Value Tracking'
+      },
+      {
+        title: 'Customer Satisfaction Improved',
+        message: '{entity} NPS score increased by 12 points',
+        detail: 'Customer feedback analysis shows significant improvement in satisfaction metrics. Key drivers: faster response times and improved service quality.',
+        source: 'Customer Analytics'
+      },
+      {
+        title: 'Efficiency Gains Realized',
+        message: '{entity} delivered 15% process efficiency improvement',
+        detail: 'Automation and process optimization have yielded measurable results. Team productivity metrics show sustained improvement over 6 weeks.',
+        source: 'Performance Analytics'
+      }
+    ]
+  },
+  {
+    type: 'prediction',
+    priority: 'medium',
+    sentiment: 'positive',
+    templates: [
+      {
+        title: 'Positive Trajectory Forecast',
+        message: '{entity} projected to exceed targets by Q4',
+        detail: 'Based on current velocity and historical patterns, AI predicts successful delivery with 15% margin. Confidence interval: 85-92%. Key assumption: no major scope changes.',
+        source: 'Predictive Analytics'
+      },
+      {
+        title: 'Strong Performance Predicted',
+        message: '{entity} on track for early completion',
+        detail: 'Current momentum suggests delivery 2-3 weeks ahead of schedule. Team velocity stable at 118% of baseline. Recommend locking in gains.',
+        source: 'Delivery Forecasting'
+      }
+    ]
+  }
+];
+
+const CAUTIONARY_EVENTS: EventTemplate[] = [
+  {
+    type: 'ai_alert',
+    priority: 'high',
+    sentiment: 'cautionary',
+    templates: [
+      {
+        title: 'Pattern Anomaly Detected',
+        message: 'ML model detecting deviation in {entity} performance metrics',
+        detail: 'Our AI has identified a pattern that warrants attention. Historical analysis suggests early intervention could prevent escalation. Confidence based on 847 similar patterns.',
+        source: 'Pattern Recognition AI'
+      },
+      {
+        title: 'Stakeholder Engagement Needed',
+        message: 'Communication frequency declining for {entity}',
+        detail: 'NLP analysis of recent communications suggests stakeholder engagement may need attention. Recommend proactive outreach to maintain alignment.',
+        source: 'Sentiment Analysis Engine'
+      }
+    ]
+  },
+  {
+    type: 'risk_warning',
+    priority: 'high',
+    sentiment: 'cautionary',
+    templates: [
+      {
+        title: 'Risk Indicator Elevated',
+        message: '{entity} risk score trending upward',
+        detail: 'Predictive model indicates increasing risk exposure. Early warning triggered based on leading indicators. Proactive review recommended within 2 weeks.',
+        source: 'Risk Prediction Model'
+      },
+      {
+        title: 'External Factor Alert',
+        message: 'Market conditions may impact {entity}',
+        detail: 'AI monitoring external factors that could influence delivery. Regulatory changes and market shifts being tracked. Contingency planning advised.',
+        source: 'External Risk Scanner'
+      }
+    ]
+  },
+  {
+    type: 'prediction',
+    priority: 'medium',
+    sentiment: 'cautionary',
+    templates: [
+      {
+        title: 'Resource Planning Alert',
+        message: 'Capacity review suggested for {entity} in 6 weeks',
+        detail: 'Workforce planning AI suggests reviewing resource allocation. Proactive planning can prevent bottlenecks and maintain momentum.',
+        source: 'Capacity Planning AI'
+      }
+    ]
+  },
+  {
+    type: 'safe_anomaly',
+    priority: 'medium',
+    sentiment: 'cautionary',
+    templates: [
+      {
+        title: 'Velocity Trend Notice',
+        message: '{entity} velocity showing slight variation from baseline',
+        detail: 'SAFe metrics indicate minor delivery variation. May be temporary. Recommend monitoring during next sprint and addressing if trend continues.',
+        source: 'SAFe Metrics Engine'
+      },
+      {
+        title: 'Flow Review Suggested',
+        message: '{entity} cycle time trending above target',
+        detail: 'Work item flow showing minor delays. Root cause may be handoff coordination. Value stream review can identify quick improvements.',
+        source: 'Flow Analytics'
       }
     ]
   },
   {
     type: 'action_required',
-    priority: 'critical',
+    priority: 'high',
+    sentiment: 'cautionary',
     templates: [
       {
-        title: 'Decision Required',
-        message: 'Executive decision needed for {entity}',
-        detail: 'Critical path decision point reached. Options analysis complete. Delay beyond 48 hours impacts delivery timeline. Stakeholder alignment session recommended.',
+        title: 'Decision Point Approaching',
+        message: 'Strategic decision needed for {entity}',
+        detail: 'Key decision point on the horizon. Options analysis prepared. Timely decision will help maintain delivery timeline.',
         source: 'Decision Intelligence'
-      },
-      {
-        title: 'Escalation Triggered',
-        message: 'Automated escalation for {entity}',
-        detail: 'Issue has exceeded resolution timeframe. AI has compiled briefing for leadership review. Escalation matrix activated per governance framework.',
-        source: 'Escalation Engine'
       }
     ]
   }
 ];
+
+const EVENT_TEMPLATES: EventTemplate[] = [...POSITIVE_EVENTS, ...CAUTIONARY_EVENTS];
 
 const ACTIONS_BY_TYPE: Record<SimulationEventType, { id: string; label: string; type: 'mitigate' | 'accelerate' | 'investigate' | 'escalate' }[]> = {
   ai_alert: [
@@ -229,7 +259,9 @@ function generateEventId(): string {
 }
 
 export function generateSimulationEvent(): SimulationEvent {
-  const eventCategory = getRandomItem(EVENT_TEMPLATES);
+  const isPositive = Math.random() < 0.45;
+  const eventPool = isPositive ? POSITIVE_EVENTS : CAUTIONARY_EVENTS;
+  const eventCategory = getRandomItem(eventPool);
   const template = getRandomItem(eventCategory.templates);
   
   const roll = Math.random();
@@ -248,7 +280,7 @@ export function generateSimulationEvent(): SimulationEvent {
     entityType = 'portfolio';
   } else {
     const risk = getRandomItem(riskIssues);
-    entity = { id: risk.id, name: risk.name, bu: risk.affectedBU };
+    entity = { id: risk.id, name: risk.name, bu: risk.category };
     entityType = 'risk';
   }
   
@@ -289,33 +321,47 @@ export function generateBatchEvents(count: number): SimulationEvent[] {
 }
 
 export class SimulationEngine {
-  private intervalId: NodeJS.Timeout | null = null;
+  private timeoutId: NodeJS.Timeout | null = null;
   private subscribers: ((event: SimulationEvent) => void)[] = [];
   private events: SimulationEvent[] = [];
   private isRunning = false;
   
   constructor() {
-    this.events = generateBatchEvents(5);
+    this.events = generateBatchEvents(2);
   }
   
-  start(intervalMs: number = 4000) {
-    if (this.isRunning) return;
-    this.isRunning = true;
+  private getRandomInterval(): number {
+    const minMinutes = 3;
+    const maxMinutes = 7;
+    const randomMinutes = Math.random() * (maxMinutes - minMinutes) + minMinutes;
+    return Math.floor(randomMinutes * 60 * 1000);
+  }
+  
+  private scheduleNextEvent() {
+    if (!this.isRunning) return;
     
-    this.intervalId = setInterval(() => {
+    const delay = this.getRandomInterval();
+    this.timeoutId = setTimeout(() => {
       const newEvent = generateSimulationEvent();
       this.events.unshift(newEvent);
-      if (this.events.length > 50) {
-        this.events = this.events.slice(0, 50);
+      if (this.events.length > 15) {
+        this.events = this.events.slice(0, 15);
       }
       this.notifySubscribers(newEvent);
-    }, intervalMs);
+      this.scheduleNextEvent();
+    }, delay);
+  }
+  
+  start(_intervalMs?: number) {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.scheduleNextEvent();
   }
   
   stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
     }
     this.isRunning = false;
   }
