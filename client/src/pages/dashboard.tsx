@@ -47,37 +47,6 @@ const LG = {
 
 type DataMode = "VRO" | "PMO";
 
-function VROPMOToggle({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: DataMode) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => onModeChange("VRO")}
-        className={cn(
-          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
-          mode === "VRO" 
-            ? "bg-[#005EB8] text-white shadow-md" 
-            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
-        )}
-        data-testid="toggle-vro"
-      >
-        Value Realization Office
-      </button>
-      <button
-        onClick={() => onModeChange("PMO")}
-        className={cn(
-          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
-          mode === "PMO" 
-            ? "bg-[#757575] text-white shadow-md" 
-            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
-        )}
-        data-testid="toggle-pmo"
-      >
-        Project Management Office
-      </button>
-    </div>
-  );
-}
-
 function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
   return (
     <Button
@@ -318,36 +287,6 @@ export default function Dashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
-          {/* Office Toggle Buttons */}
-          <div className="flex gap-3 mb-6">
-          <div 
-            onClick={() => setDataMode("VRO")}
-            className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
-              dataMode === "VRO" 
-                ? "bg-[#005EB8] text-white shadow-lg" 
-                : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
-            }`}
-            data-testid="toggle-vro"
-          >
-            <p className="font-bold text-center text-lg">Value</p>
-            <p className="font-bold text-center text-lg">Realization</p>
-            <p className="font-bold text-center text-lg">Office</p>
-          </div>
-          <div 
-            onClick={() => setDataMode("PMO")}
-            className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
-              dataMode === "PMO" 
-                ? "bg-[#005EB8] text-white shadow-lg" 
-                : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
-            }`}
-            data-testid="toggle-pmo"
-          >
-            <p className="font-bold text-center text-lg">Project</p>
-            <p className="font-bold text-center text-lg">Management</p>
-            <p className="font-bold text-center text-lg">Office</p>
-          </div>
-        </div>
-
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
