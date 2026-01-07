@@ -62,7 +62,7 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-[420px] bg-white shadow-2xl z-50 flex flex-col"
+            className="fixed right-0 top-0 h-screen w-[420px] max-w-[90vw] bg-white shadow-2xl z-50 flex flex-col overflow-hidden"
             data-testid="alerts-flyout"
           >
             <div className="p-4 border-b bg-gradient-to-r from-purple-600 to-blue-600 text-white">

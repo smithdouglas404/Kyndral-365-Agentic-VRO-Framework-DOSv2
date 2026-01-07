@@ -8,8 +8,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Brain, AlertTriangle, TrendingUp, Lightbulb, GitBranch, Zap, 
   Clock, Target, FileText, ChevronRight, Shield, Rocket, Search, 
-  ArrowUpRight, CheckCircle, XCircle, BarChart3
+  ArrowUpRight, CheckCircle, XCircle, BarChart3, Mail, Calendar, 
+  MessageSquare, Users, Send, Sparkles, Bot, ThumbsUp, ThumbsDown
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { SimulationEvent } from "@/lib/liveSimulation";
 import { useSimulation } from "@/contexts/SimulationContext";
 
@@ -44,9 +46,102 @@ const actionColors: Record<string, string> = {
   escalate: "#f59e0b"
 };
 
+interface AgentAction {
+  id: string;
+  question: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  status: 'pending' | 'accepted' | 'declined';
+}
+
+function generateAgentActions(event: SimulationEvent): AgentAction[] {
+  const entityName = event.relatedEntity?.name || 'the initiative';
+  const ownerTitle = event.relatedEntity?.type === 'project' ? 'Project Owner' : 
+                     event.relatedEntity?.type === 'program' ? 'Program Director' : 'Portfolio Lead';
+  
+  const baseActions: AgentAction[] = [];
+  
+  if (event.type === 'risk_warning' || event.priority === 'critical') {
+    baseActions.push({
+      id: 'notify-owner',
+      question: `Shall I send an urgent notification to the ${ownerTitle}?`,
+      description: `I'll draft a priority alert email highlighting the risk and requesting immediate review of ${entityName}.`,
+      icon: <Mail size={18} />,
+      color: '#D50032',
+      status: 'pending'
+    });
+    baseActions.push({
+      id: 'schedule-meeting',
+      question: 'Would you like me to schedule an emergency risk review meeting?',
+      description: `I can find the next available slot for key stakeholders and send calendar invites for a 30-minute risk assessment.`,
+      icon: <Calendar size={18} />,
+      color: '#f59e0b',
+      status: 'pending'
+    });
+  }
+  
+  if (event.type === 'ai_alert' || event.type === 'prediction') {
+    baseActions.push({
+      id: 'request-update',
+      question: `Should I request a status update from the ${ownerTitle}?`,
+      description: `I'll send a friendly request for the latest progress update and any blockers they're facing on ${entityName}.`,
+      icon: <MessageSquare size={18} />,
+      color: '#005EB8',
+      status: 'pending'
+    });
+  }
+  
+  if (event.type === 'opportunity') {
+    baseActions.push({
+      id: 'accelerate-notify',
+      question: 'Want me to notify the team about this acceleration opportunity?',
+      description: `I'll share this insight with the delivery team and suggest a quick sync to capture the value window.`,
+      icon: <Rocket size={18} />,
+      color: '#00843D',
+      status: 'pending'
+    });
+  }
+  
+  baseActions.push({
+    id: 'stakeholder-brief',
+    question: 'Shall I prepare a stakeholder briefing document?',
+    description: `I'll generate a concise executive summary with key facts, AI insights, and recommended next steps for ${entityName}.`,
+    icon: <FileText size={18} />,
+    color: '#7c3aed',
+    status: 'pending'
+  });
+  
+  baseActions.push({
+    id: 'track-action',
+    question: 'Would you like me to add this to your action tracker?',
+    description: `I'll create a follow-up task with a reminder to check back on this in 48 hours.`,
+    icon: <Target size={18} />,
+    color: '#0891b2',
+    status: 'pending'
+  });
+  
+  return baseActions.slice(0, 4);
+}
+
 export function LiveEventDrawer() {
   const { selectedEvent, setSelectedEvent, markAsRead } = useSimulation();
-
+  const [agentActions, setAgentActions] = useState<AgentAction[]>([]);
+  
+  useEffect(() => {
+    if (selectedEvent) {
+      setAgentActions(generateAgentActions(selectedEvent));
+    } else {
+      setAgentActions([]);
+    }
+  }, [selectedEvent?.id]);
+  
+  const handleActionResponse = (actionId: string, accepted: boolean) => {
+    setAgentActions(prev => prev.map(a => 
+      a.id === actionId ? { ...a, status: accepted ? 'accepted' : 'declined' } : a
+    ));
+  };
+  
   if (!selectedEvent) return null;
 
   const handleClose = () => {
@@ -254,44 +349,104 @@ export function LiveEventDrawer() {
           </TabsContent>
 
           <TabsContent value="actions" className="space-y-4">
-            <Card className="border-green-200">
+            <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
               <CardContent className="py-4">
-                <h4 className="font-semibold mb-3 flex items-center gap-2 text-green-700">
-                  <Zap size={16} /> Recommended Actions
-                </h4>
-                <div className="space-y-2">
-                  {selectedEvent.actions?.map((action) => (
-                    <motion.button
+                <div className="flex items-center gap-3 mb-4">
+                  <motion.div 
+                    className="p-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Bot size={20} />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-bold text-purple-900">AI Agent Recommendations</h4>
+                    <p className="text-xs text-purple-600">I've analyzed this alert and have some suggestions for you</p>
+                  </div>
+                  <Sparkles className="ml-auto text-purple-400" size={20} />
+                </div>
+                
+                <div className="space-y-3">
+                  {agentActions.map((action, index) => (
+                    <motion.div
                       key={action.id}
-                      whileHover={{ x: 4, scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full p-3 rounded-lg border-2 flex items-center gap-3 text-left transition-colors"
-                      style={{ 
-                        borderColor: actionColors[action.type], 
-                        backgroundColor: `${actionColors[action.type]}10` 
-                      }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        action.status === 'accepted' 
+                          ? 'bg-green-50 border-green-300' 
+                          : action.status === 'declined'
+                          ? 'bg-gray-50 border-gray-200 opacity-60'
+                          : 'bg-white border-gray-200 hover:border-purple-300 hover:shadow-md'
+                      }`}
                     >
-                      <div 
-                        className="p-2 rounded text-white"
-                        style={{ backgroundColor: actionColors[action.type] }}
-                      >
-                        {actionIcons[action.type]}
+                      <div className="flex items-start gap-3">
+                        <div 
+                          className="p-2 rounded-lg text-white flex-shrink-0"
+                          style={{ backgroundColor: action.color }}
+                        >
+                          {action.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 mb-1">{action.question}</p>
+                          <p className="text-sm text-gray-600 mb-3">{action.description}</p>
+                          
+                          {action.status === 'pending' ? (
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                                onClick={() => handleActionResponse(action.id, true)}
+                              >
+                                <ThumbsUp size={14} className="mr-1" />
+                                Yes, please
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleActionResponse(action.id, false)}
+                              >
+                                <ThumbsDown size={14} className="mr-1" />
+                                Not now
+                              </Button>
+                            </div>
+                          ) : action.status === 'accepted' ? (
+                            <motion.div 
+                              initial={{ scale: 0.8 }}
+                              animate={{ scale: 1 }}
+                              className="flex items-center gap-2 text-green-600"
+                            >
+                              <CheckCircle size={16} />
+                              <span className="text-sm font-medium">Got it! I'll take care of this.</span>
+                            </motion.div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-gray-500">
+                              <XCircle size={16} />
+                              <span className="text-sm">Noted - skipping this action</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{action.label}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{action.type} action</p>
-                      </div>
-                      <ChevronRight size={16} className="text-muted-foreground" />
-                    </motion.button>
+                    </motion.div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-blue-200">
+              <CardContent className="py-3">
+                <div className="flex items-center gap-3 text-sm text-blue-700">
+                  <MessageSquare size={16} />
+                  <span>Want something else? Just ask me and I'll help!</span>
                 </div>
               </CardContent>
             </Card>
 
             <div className="flex gap-3">
-              <Button className="flex-1 bg-[#00843D]" onClick={handleClose}>
-                <CheckCircle size={16} className="mr-2" />
-                Acknowledge & Close
+              <Button className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700" onClick={handleClose}>
+                <Send size={16} className="mr-2" />
+                Execute & Close
               </Button>
               <Button variant="outline" className="flex-1" onClick={handleClose}>
                 Dismiss
