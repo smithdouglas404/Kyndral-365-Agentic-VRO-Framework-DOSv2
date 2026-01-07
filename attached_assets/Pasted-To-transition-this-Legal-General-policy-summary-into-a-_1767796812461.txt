@@ -1,0 +1,81 @@
+To transition this Legal & General policy summary into a "policy as code" (PaC) framework, you need to structure the natural language rules into a machine-readable format—typically JSON or YAML—that a logic engine can evaluate.
+
+Below is a structured approach to codifying this document.
+
+1. Define the Data Schema
+First, categorize the text into logical entities: Eligibility, Coverage, Exclusions, and Benefits. Each of these will be represented as a variable or a function in your code.
+
+2. Implementation Example (JSON/YAML Structure)
+This format allows an automated system to check if a specific applicant or claim meets the policy's criteria.
+
+YAML
+
+policy_metadata:
+  [cite_start]provider: "Legal & General Assurance Society Limited" [cite: 5]
+  [cite_start]document_id: "QGI14786" [cite: 242]
+  [cite_start]last_updated: "2025-04" [cite: 242]
+
+eligibility_rules:
+  [cite_start]minimum_age: 18 [cite: 60]
+  maximum_age_at_purchase:
+    [cite_start]life_insurance: 77 [cite: 59]
+    [cite_start]critical_illness: 67 [cite: 59]
+  maximum_end_age:
+    [cite_start]life_insurance: 90 [cite: 59]
+    [cite_start]critical_illness: 75 [cite: 59]
+  [cite_start]minimum_policy_term_years: 2 # Required for Terminal Illness/CI [cite: 39, 59]
+
+coverage_logic:
+  life_insurance:
+    [cite_start]triggers: ["death", "terminal_illness_diagnosis"] [cite: 14, 15]
+    [cite_start]terminal_illness_requirement: "survival_expectation_less_than_12_months" [cite: 15]
+  critical_illness:
+    [cite_start]survival_period_days: 14 [cite: 19]
+    covered_conditions:
+      - [cite_start]"Alzheimer's disease" [cite: 135]
+      - [cite_start]"Cancer (excluding less advanced cases)" [cite: 128]
+      - [cite_start]"Heart attack (specified severity)" [cite: 137]
+      # ... (Total of 30+ conditions)
+
+exclusion_logic:
+  [cite_start]suicide_exclusion_period_months: 12 [cite: 31]
+  [cite_start]premium_grace_period_days: 60 [cite: 52]
+  [cite_start]non_disclosure_penalty: "void_policy" [cite: 27]
+3. Key Logic Segments for Automation
+When writing the actual code (e.g., in Python, JavaScript, or Rego), focus on these three primary automated checks derived from the document:
+
+A. The Claim Eligibility Engine
+For a Critical Illness claim to be valid, the code must verify:
+
+The diagnosis date is before the policy end date.
+
+The applicant survived at least 14 days after diagnosis.
+
+The specific illness matches the defined list (e.g., Aplastic anaemia must include permanent bone marrow failure).
+
+B. The "Free Life Cover" Logic Gate
+If your system is processing a home purchase, the code should check:
+
+
+Age Check: Is the user < 55 years old? 
+
+
+Event Check: Is the current date between "exchange of contracts" and "completion"? 
+
+
+Cap Check: Limit the payout to the lower of the cover amount or mortgage amount, capped at £300,000.
+
+C. The Premium and Term Validation
+Ensure the policy term is between 1 and 50 years.
+
+Flag any policy that is set to end before the user's 29th birthday as "Invalid".
+
+4. Integration with Claims Systems
+To make this code "active," you would create an API endpoint where a claim object is sent. The code would return a boolean:
+
+Input: {claim_type: "death", policy_age_months: 8, cause: "suicide"}
+
+
+Logic: if policy_age_months < 12 and cause == "suicide": return REJECT_CLAIM.
+
+Would you like me to generate a specific Python script or a Rego (Open Policy Agent) file based on these rules?
