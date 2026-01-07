@@ -21,6 +21,7 @@ import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
 import { AICommandCenter } from "@/components/AICommandCenter";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
+import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -484,6 +485,11 @@ export default function Dashboard() {
 
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} />
+
+        {/* AI Alert Ticker - Living Dashboard */}
+        <div className="mt-6">
+          <AIAlertTicker />
+        </div>
 
         {/* Quick Navigation - Division Pages, Climate, Risk, Art of the Possible */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
