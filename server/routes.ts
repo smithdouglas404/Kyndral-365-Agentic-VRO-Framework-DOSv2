@@ -137,5 +137,119 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/business-units", async (_req, res) => {
+    try {
+      const units = await storage.getBusinessUnits();
+      res.json(units);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch business units" });
+    }
+  });
+
+  app.get("/api/projects", async (_req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch projects" });
+    }
+  });
+
+  app.get("/api/policies/:id/business-units", async (req, res) => {
+    try {
+      const units = await storage.getBusinessUnitsForPolicy(req.params.id);
+      res.json(units);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch linked business units" });
+    }
+  });
+
+  app.post("/api/policies/:id/business-units", async (req, res) => {
+    try {
+      const { businessUnitId } = req.body;
+      if (!businessUnitId) {
+        return res.status(400).json({ error: "businessUnitId is required" });
+      }
+      const link = await storage.linkPolicyToBusinessUnit({
+        policyId: req.params.id,
+        businessUnitId,
+      });
+      res.json(link);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to link policy to business unit" });
+    }
+  });
+
+  app.delete("/api/policies/:id/business-units/:buId", async (req, res) => {
+    try {
+      await storage.unlinkPolicyFromBusinessUnit(req.params.id, req.params.buId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to unlink policy from business unit" });
+    }
+  });
+
+  app.get("/api/policies/:id/projects", async (req, res) => {
+    try {
+      const projects = await storage.getProjectsForPolicy(req.params.id);
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch linked projects" });
+    }
+  });
+
+  app.post("/api/policies/:id/projects", async (req, res) => {
+    try {
+      const { projectId, impactLevel } = req.body;
+      if (!projectId) {
+        return res.status(400).json({ error: "projectId is required" });
+      }
+      const link = await storage.linkPolicyToProject({
+        policyId: req.params.id,
+        projectId,
+        impactLevel: impactLevel || 'medium',
+      });
+      res.json(link);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to link policy to project" });
+    }
+  });
+
+  app.delete("/api/policies/:id/projects/:projId", async (req, res) => {
+    try {
+      await storage.unlinkPolicyFromProject(req.params.id, req.params.projId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to unlink policy from project" });
+    }
+  });
+
+  app.get("/api/policies/:id/impact-analysis", async (req, res) => {
+    try {
+      const policy = await storage.getPolicy(req.params.id);
+      if (!policy) {
+        return res.status(404).json({ error: "Policy not found" });
+      }
+      
+      const businessUnits = await storage.getBusinessUnitsForPolicy(req.params.id);
+      const linkedProjects = await storage.getProjectsForPolicy(req.params.id);
+      
+      const allProjects = await storage.getProjects();
+      const potentialImpact = allProjects.filter(p => 
+        businessUnits.some(bu => bu.id === p.businessUnitId) &&
+        !linkedProjects.some(lp => lp.id === p.id)
+      );
+
+      res.json({
+        policy: { id: policy.id, name: policy.name },
+        businessUnits,
+        linkedProjects,
+        potentialImpact,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to perform impact analysis" });
+    }
+  });
+
   return httpServer;
 }
