@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimulationProvider } from "@/contexts/SimulationContext";
 import { LiveEventDrawer } from "@/components/LiveEventDrawer";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
+import { AlertsFlyout } from "@/components/AlertsFlyout";
+import { useState } from "react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
@@ -29,12 +31,15 @@ function Router() {
 }
 
 function App() {
+  const [alertsFlyoutOpen, setAlertsFlyoutOpen] = useState(false);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <SimulationProvider>
         <TooltipProvider>
           <Toaster />
-          <FloatingAlertBanner />
+          <FloatingAlertBanner onOpenFlyout={() => setAlertsFlyoutOpen(true)} />
+          <AlertsFlyout isOpen={alertsFlyoutOpen} onClose={() => setAlertsFlyoutOpen(false)} />
           <LiveEventDrawer />
           <Router />
         </TooltipProvider>

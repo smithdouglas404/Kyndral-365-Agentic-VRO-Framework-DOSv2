@@ -22,7 +22,11 @@ const typeIcons: Record<string, React.ReactNode> = {
   action_required: <Zap size={16} />
 };
 
-export function FloatingAlertBanner() {
+interface FloatingAlertBannerProps {
+  onOpenFlyout?: () => void;
+}
+
+export function FloatingAlertBanner({ onOpenFlyout }: FloatingAlertBannerProps) {
   const { latestEvent, setSelectedEvent, unreadCount, markAsRead } = useSimulation();
   const [showBanner, setShowBanner] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
@@ -136,7 +140,9 @@ export function FloatingAlertBanner() {
             whileTap={{ scale: 0.95 }}
             className="p-4 rounded-full bg-purple-600 text-white shadow-lg flex items-center gap-2"
             onClick={() => {
-              if (latestEvent) {
+              if (onOpenFlyout) {
+                onOpenFlyout();
+              } else if (latestEvent) {
                 markAsRead(latestEvent.id);
                 setSelectedEvent(latestEvent);
               }
