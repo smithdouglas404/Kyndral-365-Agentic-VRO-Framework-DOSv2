@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter';
 import { 
   DollarSign, GitBranch, Repeat, Calculator, Target, 
-  Shield, Calendar, Users, Sparkles, ChevronRight
+  Shield, Calendar, Users, Sparkles, ChevronRight, FileCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -89,6 +89,15 @@ const agents: Agent[] = [
     href: '/dashboard/ocm',
     color: 'bg-pink-500',
     description: 'Organizational change'
+  },
+  {
+    id: 'policy',
+    name: 'Policy as Code',
+    shortName: 'POL',
+    icon: FileCode,
+    href: '/policy-generator',
+    color: 'bg-emerald-500',
+    description: 'Transform policies to code'
   }
 ];
 

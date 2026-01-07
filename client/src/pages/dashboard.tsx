@@ -346,26 +346,6 @@ export default function Dashboard() {
             <p className="font-bold text-center text-lg">Management</p>
             <p className="font-bold text-center text-lg">Office</p>
           </div>
-          <Link href="/policy-generator">
-            <div 
-              className="px-8 py-6 rounded-lg cursor-pointer transition-all bg-white border-2 border-gray-200 text-[#00843D] hover:border-[#00843D] hover:shadow-md"
-              data-testid="toggle-policy-generator"
-            >
-              <p className="font-bold text-center text-lg">Policy</p>
-              <p className="font-bold text-center text-lg">as Code</p>
-              <p className="font-bold text-center text-lg">Generator</p>
-            </div>
-          </Link>
-          <Link href="/vro-framework">
-            <div 
-              className="px-8 py-6 rounded-lg cursor-pointer transition-all bg-white border-2 border-gray-200 text-purple-600 hover:border-purple-600 hover:shadow-md"
-              data-testid="toggle-vro-framework"
-            >
-              <p className="font-bold text-center text-lg">VRO</p>
-              <p className="font-bold text-center text-lg">Agentic</p>
-              <p className="font-bold text-center text-lg">Framework</p>
-            </div>
-          </Link>
         </div>
 
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">

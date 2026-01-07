@@ -221,10 +221,6 @@ export default function VROFramework() {
               <FileText size={16} />
               Full Documentation (50+ Pages)
             </Button>
-            <Button variant="outline" className="gap-2" data-testid="button-explore-agents">
-              <ArrowLeft size={16} className="rotate-180" />
-              Explore Live Agents
-            </Button>
           </div>
         </div>
 
