@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileCode, Upload, Sparkles, Library, Copy, Download, 
   Trash2, ChevronRight, FileText, Clock, Building2,
-  CheckCircle2, Loader2, AlertCircle, ArrowLeft, Users, Eye
+  CheckCircle2, Loader2, AlertCircle, ArrowLeft, Users, Eye,
+  FileUp, X, File
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { BusinessRulesViewer } from '@/components/BusinessRulesViewer';
 import { WhatIfPanel } from '@/components/WhatIfPanel';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Policy {
   id: string;
@@ -75,6 +78,10 @@ export default function PolicyGenerator() {
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<'technical' | 'business'>('technical');
+  const [isUploading, setIsUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState<{ text: string; filename: string; pages: number } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -175,6 +182,70 @@ export default function PolicyGenerator() {
     setDocumentId('QGI14786');
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      setError('Please upload a PDF file');
+      return;
+    }
+
+    setIsUploading(true);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      const res = await fetch('/api/policies/upload-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to process PDF');
+      }
+
+      const data = await res.json();
+      setPreviewData({
+        text: data.text,
+        filename: data.filename,
+        pages: data.pages,
+      });
+      setShowPreview(true);
+      
+      const baseName = file.name.replace('.pdf', '').replace(/_/g, ' ');
+      setPolicyName(baseName);
+      
+      toast({
+        title: "PDF Uploaded",
+        description: `Extracted ${data.pages} page(s) from ${file.name}`,
+      });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const confirmPreview = () => {
+    if (previewData) {
+      setPolicyText(previewData.text);
+      setShowPreview(false);
+      setPreviewData(null);
+    }
+  };
+
+  const cancelPreview = () => {
+    setShowPreview(false);
+    setPreviewData(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-to-r from-[#005EB8] to-[#00843D] text-white py-6 px-8">
@@ -228,9 +299,34 @@ export default function PolicyGenerator() {
                       <Upload size={20} />
                       Policy Document Input
                     </span>
-                    <Button variant="outline" size="sm" onClick={loadExample} data-testid="button-load-example">
-                      Load L&G Example
-                    </Button>
+                    <div className="flex gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        data-testid="input-pdf-upload"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        data-testid="button-upload-pdf"
+                        className="gap-1"
+                      >
+                        {isUploading ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <FileUp size={14} />
+                        )}
+                        Upload PDF
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={loadExample} data-testid="button-load-example">
+                        Load L&G Example
+                      </Button>
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -266,7 +362,7 @@ export default function PolicyGenerator() {
                   <div>
                     <label className="text-sm font-medium mb-1 block">Policy Text</label>
                     <Textarea 
-                      placeholder="Paste the policy document text here..."
+                      placeholder="Paste the policy document text here, or upload a PDF..."
                       className="min-h-[300px] font-mono text-sm"
                       value={policyText}
                       onChange={(e) => setPolicyText(e.target.value)}
@@ -562,6 +658,61 @@ export default function PolicyGenerator() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <File className="text-[#005EB8]" />
+              PDF Preview - {previewData?.filename}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <Badge variant="outline" className="gap-1">
+                <FileText size={12} />
+                {previewData?.pages} page(s)
+              </Badge>
+              <span className="text-green-600 flex items-center gap-1">
+                <CheckCircle2 size={14} />
+                Text extracted successfully
+              </span>
+            </div>
+            
+            <div className="border rounded-lg">
+              <div className="bg-muted/50 px-4 py-2 border-b">
+                <span className="text-sm font-medium">Extracted Content Preview</span>
+              </div>
+              <ScrollArea className="h-[400px] p-4">
+                <pre className="text-sm whitespace-pre-wrap font-mono text-gray-700">
+                  {previewData?.text.slice(0, 5000)}
+                  {(previewData?.text.length || 0) > 5000 && (
+                    <span className="text-muted-foreground">
+                      {'\n\n... [Content truncated for preview. Full text will be used for generation.] ...'}
+                    </span>
+                  )}
+                </pre>
+              </ScrollArea>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={cancelPreview} data-testid="button-cancel-preview">
+              <X size={14} className="mr-1" />
+              Cancel
+            </Button>
+            <Button 
+              className="bg-[#005EB8] hover:bg-[#004a93] gap-2"
+              onClick={confirmPreview}
+              data-testid="button-confirm-preview"
+            >
+              <CheckCircle2 size={14} />
+              Use This Text
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

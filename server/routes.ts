@@ -3,6 +3,23 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { parsePolicyDocument } from "./anthropic";
 import { z } from "zod";
+import multer from "multer";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
+
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  }
+});
 
 const parsePolicyRequestSchema = z.object({
   text: z.string().min(1, "Policy text is required"),
@@ -15,6 +32,31 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  app.post("/api/policies/upload-pdf", upload.single('pdf'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No PDF file uploaded" });
+      }
+
+      const pdfData = await pdfParse(req.file.buffer);
+      const extractedText = pdfData.text;
+      
+      if (!extractedText || extractedText.trim().length < 50) {
+        return res.status(400).json({ error: "Could not extract meaningful text from PDF" });
+      }
+
+      res.json({
+        text: extractedText,
+        filename: req.file.originalname,
+        pages: pdfData.numpages,
+        info: pdfData.info,
+      });
+    } catch (error: any) {
+      console.error("PDF upload error:", error);
+      res.status(500).json({ error: error.message || "Failed to process PDF" });
+    }
+  });
   
   app.get("/api/policies", async (_req, res) => {
     try {
