@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   pmoProjects, vroPrograms, riskIssues,
   pmoSummary, vroSummary, riskSummary,
-  PMOProject, VROProgram, RiskIssue, ProactiveAction, AISignal
+  PMOProject, VROProgram, RiskIssue, ProactiveAction, AISignal,
+  buPortfolios, BUPortfolio
 } from "@/lib/buPrograms";
 import { challenges, VROMetric } from "@/lib/data";
 import { 
@@ -16,9 +18,10 @@ import {
   DollarSign, Brain, Users, Target, Sparkles, Shield,
   ChevronDown, ChevronUp, Zap, AlertCircle, RotateCcw,
   Rocket, Search, ArrowUpRight, Activity, ExternalLink,
-  FileText, ChevronRight, Play, MessageSquare
+  FileText, ChevronRight, ChevronLeft, Play, MessageSquare, Layers,
+  GitBranch, Calendar, BarChart3, Eye
 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis } from "recharts";
+import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, BarChart, Bar } from "recharts";
 
 type DataMode = "VRO" | "PMO";
 
@@ -55,54 +58,8 @@ const actionTypeIcons: Record<ProactiveAction["type"], React.ReactNode> = {
   escalate: <ArrowUpRight size={12} />
 };
 
-const getRelevantVROMetrics = (projectType: string): { metrics: VROMetric[], trackingFields: string[] } => {
-  const typeMapping: Record<string, string[]> = {
-    "Institutional Retirement": ["planning", "certainty", "visibility"],
-    "Asset Management": ["planning", "efficiency", "prioritization"],
-    "Retail": ["speed", "visibility", "consistency"],
-    "Corporate Investments": ["planning", "certainty", "prioritization"],
-    "Risk & Compliance": ["agility", "visibility", "consistency"]
-  };
-  
-  const relevantChallenges = typeMapping[projectType] || ["planning", "visibility"];
-  const metrics: VROMetric[] = [];
-  const trackingFields: string[] = [];
-  
-  relevantChallenges.slice(0, 2).forEach(id => {
-    const challenge = challenges.find(c => c.id === id);
-    if (challenge) {
-      metrics.push(...challenge.vroMetrics.slice(0, 2));
-      trackingFields.push(...challenge.coreTrackingFields.slice(0, 2));
-    }
-  });
-  
-  return { metrics: metrics.slice(0, 4), trackingFields: trackingFields.slice(0, 4) };
-};
-
-function MiniSparkline({ data }: { data: { week: string; value: number }[] }) {
-  return (
-    <div className="h-8 w-20">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <Line 
-            type="monotone" 
-            dataKey="value" 
-            stroke="#005EB8" 
-            strokeWidth={1.5}
-            dot={false}
-          />
-          <Tooltip 
-            contentStyle={{ fontSize: 10, padding: "2px 6px" }}
-            formatter={(v: number) => [v, ""]}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
 // ============================================================================
-// PROJECT DETAIL MODAL - Full AI Briefing with Charts and Insights
+// PROJECT DETAIL MODAL - Full AI Briefing with SAFe 6.0 Metrics
 // ============================================================================
 function ProjectDetailModal({ 
   project, 
@@ -125,19 +82,45 @@ function ProjectDetailModal({
   const isPMO = mode === "PMO" && project;
   const isVRO = mode === "VRO" && program;
   
+  // Generate SAFe metrics for display
+  const safeMetrics = {
+    piNumber: "PI 24.4",
+    velocity: Math.floor(Math.random() * 30) + 40,
+    predictability: Math.floor(Math.random() * 15) + 80,
+    flowEfficiency: Math.floor(Math.random() * 20) + 60,
+    wip: Math.floor(Math.random() * 5) + 3,
+    leadTime: Math.floor(Math.random() * 10) + 8
+  };
+
+  const epicData = [
+    { name: "Completed", value: Math.floor(Math.random() * 5) + 3 },
+    { name: "In Progress", value: Math.floor(Math.random() * 4) + 2 },
+    { name: "Planned", value: Math.floor(Math.random() * 3) + 1 }
+  ];
+
+  const piTrendData = [
+    { pi: "PI 24.1", planned: 85, actual: 82 },
+    { pi: "PI 24.2", planned: 90, actual: 88 },
+    { pi: "PI 24.3", planned: 88, actual: 91 },
+    { pi: "PI 24.4", planned: 92, actual: 89 }
+  ];
+  
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Badge 
               className="text-white"
               style={{ backgroundColor: BU_COLORS[item.bu] || "#005EB8" }}
             >
               {item.bu}
             </Badge>
-            <Badge variant="outline" className={isPMO ? "border-gray-500" : "border-teal-500 text-teal-700"}>
+            <Badge variant="outline" className={isPMO ? "border-gray-500 bg-gray-50" : "border-teal-500 text-teal-700 bg-teal-50"}>
               {isPMO ? "PMO DELIVERY VIEW" : "VRO VALUE VIEW"}
+            </Badge>
+            <Badge variant="outline" className="border-blue-500 text-blue-700">
+              {safeMetrics.piNumber}
             </Badge>
           </div>
           <DialogTitle className="text-xl mt-2">{item.name}</DialogTitle>
@@ -147,11 +130,18 @@ function ProjectDetailModal({
           </p>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-          {/* Left Column - Metrics & Status */}
-          <div className="space-y-4">
-            {isPMO && project && (
-              <>
+        <Tabs defaultValue="overview" className="mt-4">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+            <TabsTrigger value="safe" data-testid="tab-safe">SAFe Metrics</TabsTrigger>
+            <TabsTrigger value="ai" data-testid="tab-ai">AI Briefing</TabsTrigger>
+            <TabsTrigger value="actions" data-testid="tab-actions">Actions</TabsTrigger>
+          </TabsList>
+          
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {isPMO && project && (
                 <Card className="border-l-4" style={{ borderLeftColor: project.status === "green" ? "#00843D" : project.status === "amber" ? "#f59e0b" : "#D50032" }}>
                   <CardContent className="py-4">
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -188,29 +178,9 @@ function ProjectDetailModal({
                     </div>
                   </CardContent>
                 </Card>
-                
-                {project.risks.length > 0 && (
-                  <Card>
-                    <CardContent className="py-4">
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <AlertTriangle size={16} className="text-amber-500" /> Project Risks
-                      </h4>
-                      <ul className="space-y-2">
-                        {project.risks.map((risk, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2" />
-                            {risk}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-              </>
-            )}
-            
-            {isVRO && program && (
-              <>
+              )}
+              
+              {isVRO && program && (
                 <Card className="border-l-4 border-teal-500">
                   <CardContent className="py-4">
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -239,54 +209,140 @@ function ProjectDetailModal({
                     </div>
                   </CardContent>
                 </Card>
-                
-                <Card>
-                  <CardContent className="py-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Users size={16} /> Collaborators
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {program.collaborators.map((c, i) => (
-                        <Badge key={i} variant="outline">{c}</Badge>
-                      ))}
-                    </div>
-                    <div className="mt-4 pt-3 border-t">
-                      <p className="text-sm text-muted-foreground">Risk Mitigation:</p>
-                      <p className="text-sm">{program.riskMitigation}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
+              )}
+              
+              {/* Trend Chart */}
+              <Card>
+                <CardContent className="py-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Activity size={16} /> Progress Trend
+                  </h4>
+                  <div className="h-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={(project || program)?.trendData}>
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="week" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip contentStyle={{ fontSize: 12 }} />
+                        <Area type="monotone" dataKey="value" stroke={isPMO ? "#005EB8" : "#00843D"} fillOpacity={1} fill="url(#colorValue)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          {/* SAFe 6.0 Metrics Tab */}
+          <TabsContent value="safe" className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="py-3 text-center">
+                  <p className="text-2xl font-bold text-blue-700">{safeMetrics.velocity}</p>
+                  <p className="text-xs text-blue-600">Velocity (pts/sprint)</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="py-3 text-center">
+                  <p className="text-2xl font-bold text-green-700">{safeMetrics.predictability}%</p>
+                  <p className="text-xs text-green-600">Predictability</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-purple-50 border-purple-200">
+                <CardContent className="py-3 text-center">
+                  <p className="text-2xl font-bold text-purple-700">{safeMetrics.flowEfficiency}%</p>
+                  <p className="text-xs text-purple-600">Flow Efficiency</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-amber-50 border-amber-200">
+                <CardContent className="py-3 text-center">
+                  <p className="text-2xl font-bold text-amber-700">{safeMetrics.leadTime}d</p>
+                  <p className="text-xs text-amber-600">Lead Time</p>
+                </CardContent>
+              </Card>
+            </div>
             
-            {/* Trend Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="py-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Layers size={16} /> EPICs Status
+                  </h4>
+                  <div className="space-y-2">
+                    {epicData.map((epic, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <span className="text-sm">{epic.name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full rounded-full"
+                              style={{ backgroundColor: i === 0 ? "#00843D" : i === 1 ? "#005EB8" : "#9ca3af" }}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(epic.value / 10) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium w-6">{epic.value}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="py-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Calendar size={16} /> PI Predictability Trend
+                  </h4>
+                  <div className="h-32">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={piTrendData}>
+                        <XAxis dataKey="pi" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} domain={[70, 100]} />
+                        <Tooltip contentStyle={{ fontSize: 12 }} />
+                        <Bar dataKey="planned" fill="#93c5fd" name="Planned" />
+                        <Bar dataKey="actual" fill="#005EB8" name="Actual" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
             <Card>
               <CardContent className="py-4">
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Activity size={16} /> Progress Trend
+                  <GitBranch size={16} /> Current PI Objectives (OKRs)
                 </h4>
-                <div className="h-32">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={(project || program)?.trendData}>
-                      <defs>
-                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="week" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip contentStyle={{ fontSize: 12 }} />
-                      <Area type="monotone" dataKey="value" stroke={isPMO ? "#005EB8" : "#00843D"} fillOpacity={1} fill="url(#colorValue)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">Accelerate Digital Transformation</span>
+                      <Badge className="bg-green-600 text-white">On Track</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">KR: Complete 80% of platform migration by PI end</p>
+                    <Progress value={75} className="h-1.5" />
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">Improve Customer Experience</span>
+                      <Badge className="bg-amber-500 text-white">At Risk</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">KR: Reduce onboarding time by 40%</p>
+                    <Progress value={55} className="h-1.5" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
           
-          {/* Right Column - AI Intelligence */}
-          <div className="space-y-4">
+          {/* AI Briefing Tab */}
+          <TabsContent value="ai" className="space-y-4">
             <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
               <CardContent className="py-4">
                 <h4 className="font-semibold mb-3 flex items-center gap-2 text-purple-700">
@@ -341,7 +397,10 @@ function ProjectDetailModal({
                 </div>
               </CardContent>
             </Card>
-            
+          </TabsContent>
+          
+          {/* Actions Tab */}
+          <TabsContent value="actions" className="space-y-4">
             <Card className="border-green-200">
               <CardContent className="py-4">
                 <h4 className="font-semibold mb-3 flex items-center gap-2 text-green-700">
@@ -359,8 +418,8 @@ function ProjectDetailModal({
                           borderColor: taken ? "#00843D" : actionTypeColors[action.type],
                           backgroundColor: taken ? "#dcfce7" : "white"
                         }}
-                        whileHover={{ scale: 1.02, x: 4 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.01, x: 4 }}
+                        whileTap={{ scale: 0.99 }}
                         onClick={() => !taken && setActionsTaken(prev => [...prev, action.id])}
                         data-testid={`modal-action-${action.id}`}
                       >
@@ -385,15 +444,7 @@ function ProjectDetailModal({
                             </div>
                           </div>
                           {!taken && <ChevronRight size={16} className="text-muted-foreground" />}
-                          {taken && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="text-green-600"
-                            >
-                              <CheckCircle size={18} />
-                            </motion.div>
-                          )}
+                          {taken && <CheckCircle size={18} className="text-green-600" />}
                         </div>
                       </motion.button>
                     );
@@ -414,72 +465,140 @@ function ProjectDetailModal({
                 )}
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
 }
 
-function ProactiveActionButton({ action, onAction }: { action: ProactiveAction; onAction: (a: ProactiveAction) => void }) {
-  const [clicked, setClicked] = useState(false);
+// ============================================================================
+// PORTFOLIO CARD - BU-level with macro KPIs and drill-down
+// ============================================================================
+function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfolio; onDrillDown: () => void; mode: DataMode }) {
+  const healthColor = portfolio.healthScore >= 80 ? "#00843D" : portfolio.healthScore >= 60 ? "#f59e0b" : "#D50032";
+  const isPMO = mode === "PMO";
   
+  const BU_COLORS: Record<string, string> = {
+    "Institutional Retirement": "#005EB8",
+    "Asset Management": "#00843D",
+    "Retail": "#005EB8",
+    "Corporate Investments": "#424242",
+    "Risk & Compliance": "#D50032"
+  };
+
   return (
-    <motion.button
-      className="w-full text-left p-2 rounded-lg border transition-all"
-      style={{ 
-        borderColor: actionTypeColors[action.type],
-        backgroundColor: clicked ? `${actionTypeColors[action.type]}15` : "white"
-      }}
-      whileHover={{ scale: 1.02, x: 4 }}
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
       whileTap={{ scale: 0.98 }}
-      onClick={(e) => {
-        e.stopPropagation();
-        setClicked(true);
-        onAction(action);
-      }}
-      data-testid={`action-${action.id}`}
+      transition={{ duration: 0.2 }}
     >
-      <div className="flex items-start gap-2">
-        <div 
-          className="p-1 rounded text-white"
-          style={{ backgroundColor: actionTypeColors[action.type] }}
-        >
-          {actionTypeIcons[action.type]}
+      <Card 
+        className="h-full hover:shadow-xl transition-all cursor-pointer relative overflow-hidden border-l-4"
+        style={{ borderLeftColor: BU_COLORS[portfolio.name] || "#005EB8" }}
+        onClick={onDrillDown}
+        data-testid={`portfolio-${portfolio.id}`}
+      >
+        {/* Mode Badge */}
+        <div className={`absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white rounded-bl ${isPMO ? "bg-gray-600" : "bg-teal-600"}`}>
+          {isPMO ? "PMO PORTFOLIO" : "VRO PORTFOLIO"}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium truncate">{action.action}</p>
-          <div className="flex items-center gap-2 mt-0.5">
-            <Badge 
-              variant="outline" 
-              className="text-[9px] px-1 py-0"
-              style={{ borderColor: actionTypeColors[action.type], color: actionTypeColors[action.type] }}
-            >
-              {action.urgency}
-            </Badge>
-            <span className="text-[10px] text-muted-foreground">{action.impact}</span>
+        
+        <CardHeader className="pb-2 pt-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-lg">{portfolio.name}</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{portfolio.description}</p>
+            </div>
           </div>
-        </div>
-        {clicked && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="text-green-500"
+        </CardHeader>
+        
+        <CardContent className="space-y-3">
+          {/* Macro KPIs */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="p-2 rounded" style={{ backgroundColor: `${healthColor}15` }}>
+              <p className="text-xl font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</p>
+              <p className="text-[9px] text-muted-foreground">Health</p>
+            </div>
+            <div className="p-2 bg-blue-50 rounded">
+              <p className="text-xl font-bold text-blue-700">{portfolio.projectCount}</p>
+              <p className="text-[9px] text-muted-foreground">Projects</p>
+            </div>
+            <div className="p-2 bg-purple-50 rounded">
+              <p className="text-xl font-bold text-purple-700">{portfolio.activeEpics}</p>
+              <p className="text-[9px] text-muted-foreground">EPICs</p>
+            </div>
+          </div>
+          
+          {/* SAFe Metrics Row */}
+          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="p-1.5 bg-gray-50 rounded">
+              <p className="font-bold">{portfolio.velocity}</p>
+              <p className="text-[9px] text-muted-foreground">Velocity</p>
+            </div>
+            <div className="p-1.5 bg-gray-50 rounded">
+              <p className="font-bold">{portfolio.predictability}%</p>
+              <p className="text-[9px] text-muted-foreground">Predictability</p>
+            </div>
+            <div className="p-1.5 bg-gray-50 rounded">
+              <p className="font-bold">{portfolio.currentPI}</p>
+              <p className="text-[9px] text-muted-foreground">Current PI</p>
+            </div>
+          </div>
+          
+          {/* OKR Progress */}
+          {portfolio.okrs[0] && (
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium truncate flex-1">{portfolio.okrs[0].objective}</span>
+                <Badge 
+                  className="text-[9px] ml-2"
+                  variant={portfolio.okrs[0].status === "on-track" ? "default" : "outline"}
+                  style={{ 
+                    backgroundColor: portfolio.okrs[0].status === "on-track" ? "#00843D" : undefined,
+                    color: portfolio.okrs[0].status === "on-track" ? "white" : portfolio.okrs[0].status === "at-risk" ? "#f59e0b" : "#D50032"
+                  }}
+                >
+                  {portfolio.okrs[0].status}
+                </Badge>
+              </div>
+              <Progress value={portfolio.okrs[0].progress} className="h-1.5" />
+            </div>
+          )}
+          
+          {/* AI Signal */}
+          <motion.div 
+            className="p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200"
+            animate={{ borderColor: ["#e9d5ff", "#a855f7", "#e9d5ff"] }}
+            transition={{ duration: 2, repeat: Infinity }}
           >
-            <CheckCircle size={14} />
+            <div className="flex items-start gap-2">
+              <Brain size={12} className="text-purple-600 mt-0.5" />
+              <p className="text-[10px] text-purple-900 leading-tight line-clamp-2">{portfolio.topAISignal.message}</p>
+            </div>
           </motion.div>
-        )}
-      </div>
-    </motion.button>
+          
+          {/* Drill Down CTA */}
+          <motion.div 
+            className="flex items-center justify-center gap-2 text-xs font-medium pt-2 border-t"
+            style={{ color: isPMO ? "#005EB8" : "#00843D" }}
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Layers size={12} />
+            <span>View {portfolio.projectCount} Projects</span>
+            <ChevronRight size={14} />
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
 // ============================================================================
-// NEW INTERACTIVE PROJECT CARD - AI insights visible on front
+// PMO PROJECT CARD - AI insights visible on front, clickable for details
 // ============================================================================
 function PMOProjectCard({ project, onViewDetails }: { project: PMOProject; onViewDetails: () => void }) {
-  const [actionTaken, setActionTaken] = useState<string[]>([]);
-  
   const statusColors = {
     green: "#00843D",
     amber: "#f59e0b",
@@ -487,248 +606,136 @@ function PMOProjectCard({ project, onViewDetails }: { project: PMOProject; onVie
   };
   
   const budgetPercent = (project.budget.spent / project.budget.total) * 100;
+  const timelinePercent = (project.timeline.elapsed / project.timeline.total) * 100;
   const topSignal = project.aiSignals[0];
   const topAction = project.proactiveActions[0];
 
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
     >
       <Card 
         className="h-full border-l-4 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden" 
         style={{ borderLeftColor: statusColors[project.status] }}
-        data-testid={`card-${project.id}`}
+        data-testid={`card-pmo-${project.id}`}
+        onClick={onViewDetails}
       >
         {/* PMO Label Banner */}
         <div className="absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-gray-600 rounded-bl">
           PMO DELIVERY
         </div>
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Badge 
-                    className="mb-2 text-white text-xs"
-                    style={{ backgroundColor: BU_COLORS[project.bu] || "#005EB8" }}
-                  >
-                    {project.bu}
-                  </Badge>
-                  <CardTitle className="text-base">{project.name}</CardTitle>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <Badge 
-                    className="text-white uppercase text-xs"
-                    style={{ backgroundColor: statusColors[project.status] }}
-                  >
-                    {project.status}
-                  </Badge>
-                  {project.aiSignals.length > 0 && (
-                    <motion.div 
-                      className="flex items-center gap-1 text-[10px] text-purple-600"
-                      animate={{ opacity: [1, 0.5, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <Brain size={10} />
-                      <span>{project.aiSignals.length} AI signals</span>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="flex items-center gap-1"><DollarSign size={12} /> Budget</span>
-                    <span className={budgetPercent > 100 ? "text-red-600 font-medium" : ""}>
-                      {project.budget.spent.toFixed(1)}/{project.budget.total}{project.budget.unit}
-                    </span>
-                  </div>
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.8, delay: 0.1 }}
-                    style={{ originX: 0 }}
-                  >
-                    <Progress value={Math.min(budgetPercent, 100)} className="h-1.5" />
-                  </motion.div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="flex items-center gap-1"><Clock size={12} /> Timeline</span>
-                    <span>{project.timeline.elapsed}/{project.timeline.total} {project.timeline.unit}</span>
-                  </div>
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    style={{ originX: 0 }}
-                  >
-                    <Progress value={timelinePercent} className="h-1.5" />
-                  </motion.div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="flex items-center gap-1"><CheckCircle size={12} /> Deliverables</span>
-                    <span>{project.deliverables.completed}/{project.deliverables.total}</span>
-                  </div>
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
-                    style={{ originX: 0 }}
-                  >
-                    <Progress value={deliverablePercent} className="h-1.5" />
-                  </motion.div>
-                </div>
-                
-                <div className="pt-2 border-t flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Next Milestone:</p>
-                    <p className="text-sm font-medium">{project.nextMilestone}</p>
-                  </div>
-                  <MiniSparkline data={project.trendData} />
-                </div>
-                
-                <motion.div 
-                  className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2 border-t"
-                  animate={{ y: [0, -2, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <RotateCcw size={12} />
-                  <span>Click to flip for AI insights</span>
-                </motion.div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Back Face */}
-        <motion.div
-          className="absolute inset-0 backface-hidden"
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-        >
-          <Card className="h-full border-l-4 bg-gradient-to-br from-purple-50 to-blue-50" style={{ borderLeftColor: "#7c3aed" }}>
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Badge className="mb-1 text-white text-xs bg-purple-600">
-                    AI Intelligence
-                  </Badge>
-                  <CardTitle className="text-sm">{project.name}</CardTitle>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); setIsFlipped(false); }}
-                  className="h-6 w-6 p-0"
-                >
-                  <RotateCcw size={14} />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-[10px] font-medium text-purple-700 mb-2 flex items-center gap-1">
-                  <Brain size={10} /> AI SIGNALS
-                </p>
-                <div className="space-y-2">
-                  {project.aiSignals.map((signal, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="flex items-start gap-2 p-2 bg-white/80 rounded-lg border border-purple-100"
-                    >
-                      {signalIcons[signal.type]}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] leading-tight">{signal.message}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center gap-1">
-                            <div 
-                              className="h-1 rounded-full bg-purple-200"
-                              style={{ width: 40 }}
-                            >
-                              <motion.div 
-                                className="h-full rounded-full bg-purple-600"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${signal.confidence}%` }}
-                                transition={{ duration: 0.8, delay: 0.3 }}
-                              />
-                            </div>
-                            <span className="text-[9px] text-purple-600">{signal.confidence}%</span>
-                          </div>
-                          <span className="text-[9px] text-muted-foreground">{signal.dataSource}</span>
-                        </div>
+        
+        <CardHeader className="pb-2 pt-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <Badge 
+                className="mb-2 text-white text-xs"
+                style={{ backgroundColor: BU_COLORS[project.bu] || "#005EB8" }}
+              >
+                {project.bu}
+              </Badge>
+              <CardTitle className="text-base leading-tight">{project.name}</CardTitle>
+            </div>
+            <Badge 
+              className="text-white uppercase text-xs"
+              style={{ backgroundColor: statusColors[project.status] }}
+            >
+              {project.status}
+            </Badge>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-3">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="p-2 bg-gray-50 rounded">
+              <p className="text-lg font-bold" style={{ color: budgetPercent > 100 ? "#D50032" : "#005EB8" }}>
+                {Math.round(budgetPercent)}%
+              </p>
+              <p className="text-[10px] text-muted-foreground">Budget</p>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+              <p className="text-lg font-bold text-blue-700">{Math.round(timelinePercent)}%</p>
+              <p className="text-[10px] text-muted-foreground">Timeline</p>
+            </div>
+            <div className="p-2 bg-gray-50 rounded">
+              <p className="text-lg font-bold text-green-700">{project.deliverables.completed}/{project.deliverables.total}</p>
+              <p className="text-[10px] text-muted-foreground">Done</p>
+            </div>
+          </div>
+          
+          {/* AI SIGNAL - Visible on front! */}
+          {topSignal && (
+            <motion.div 
+              className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200"
+              animate={{ borderColor: ["#e9d5ff", "#a855f7", "#e9d5ff"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <div className="flex items-start gap-2">
+                <Brain size={14} className="text-purple-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-[10px] font-semibold text-purple-700 mb-1">AI INSIGHT</p>
+                  <p className="text-xs text-purple-900 leading-tight line-clamp-2">{topSignal.message}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1">
+                      <div className="w-12 h-1.5 bg-purple-200 rounded-full overflow-hidden">
+                        <motion.div 
+                          className="h-full bg-purple-600 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${topSignal.confidence}%` }}
+                          transition={{ duration: 0.8 }}
+                        />
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] font-medium text-green-700 mb-2 flex items-center gap-1">
-                  <Zap size={10} /> PROACTIVE ACTIONS
-                </p>
-                <div className="space-y-1.5">
-                  {project.proactiveActions.map((action) => (
-                    <ProactiveActionButton
-                      key={action.id}
-                      action={action}
-                      onAction={handleAction}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {actionTaken.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="p-2 bg-green-100 rounded-lg border border-green-200"
-                >
-                  <p className="text-[10px] text-green-700 font-medium flex items-center gap-1">
-                    <CheckCircle size={10} /> {actionTaken.length} action(s) initiated
-                  </p>
-                </motion.div>
-              )}
-
-              <div className="pt-2 border-t border-purple-200">
-                <p className="text-[10px] font-medium text-blue-700 mb-1.5 flex items-center gap-1">
-                  <Target size={10} /> VRO METRICS & TRACKING
-                </p>
-                <div className="grid grid-cols-2 gap-1">
-                  {getRelevantVROMetrics(project.bu).metrics.slice(0, 2).map((metric, i) => (
-                    <div key={i} className="flex items-center gap-1 text-[9px] text-blue-700 bg-blue-50 rounded px-1 py-0.5">
-                      <div className="w-1 h-1 rounded-full bg-blue-500" />
-                      {metric.name.split(' ').slice(0, 3).join(' ')}
+                      <span className="text-[9px] text-purple-600 font-medium">{topSignal.confidence}%</span>
                     </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-1 mt-1">
-                  {getRelevantVROMetrics(project.bu).trackingFields.slice(0, 2).map((field, i) => (
-                    <div key={i} className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                      <div className="w-1 h-1 rounded-full bg-green-500" />
-                      {field}
-                    </div>
-                  ))}
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-    </div>
+            </motion.div>
+          )}
+          
+          {/* Proactive Action - Clickable */}
+          {topAction && (
+            <motion.div 
+              className="p-2 rounded-lg border-2 flex items-center gap-2"
+              style={{ borderColor: actionTypeColors[topAction.type], backgroundColor: `${actionTypeColors[topAction.type]}10` }}
+              whileHover={{ x: 4 }}
+            >
+              <div 
+                className="p-1.5 rounded text-white"
+                style={{ backgroundColor: actionTypeColors[topAction.type] }}
+              >
+                <Zap size={12} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{topAction.action}</p>
+                <p className="text-[10px] text-green-600 font-medium">{topAction.impact}</p>
+              </div>
+              <ChevronRight size={14} className="text-muted-foreground" />
+            </motion.div>
+          )}
+          
+          {/* View Details CTA */}
+          <motion.div 
+            className="flex items-center justify-center gap-2 text-xs font-medium text-blue-600 pt-2 border-t"
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Eye size={12} />
+            <span>Click for Full AI Briefing</span>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
-function VROFlipCard({ program }: { program: VROProgram }) {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [actionTaken, setActionTaken] = useState<string[]>([]);
-  
+// ============================================================================
+// VRO PROGRAM CARD - Value-focused with AI insights on front
+// ============================================================================
+function VROProgramCard({ program, onViewDetails }: { program: VROProgram; onViewDetails: () => void }) {
   const statusColors = {
     accelerating: "#00843D",
     "on-track": "#005EB8",
@@ -736,263 +743,143 @@ function VROFlipCard({ program }: { program: VROProgram }) {
     blocked: "#D50032"
   };
   
-  const valuePercent = program.roiValue > 0 ? (program.valueRealized / program.roiValue) * 100 : 0;
-
-  const handleAction = (action: ProactiveAction) => {
-    setActionTaken(prev => [...prev, action.id]);
-  };
+  const valuePercent = program.roiValue > 0 && program.roiValue < 10000 
+    ? (program.valueRealized / program.roiValue) * 100 
+    : 0;
+  const topSignal = program.aiSignals[0];
+  const topAction = program.proactiveActions[0];
 
   return (
-    <div 
-      className="relative h-[420px] cursor-pointer"
-      style={{ perspective: "1000px" }}
-      data-testid={`card-${program.id}`}
-      onClick={() => setIsFlipped(!isFlipped)}
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
     >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+      <Card 
+        className="h-full border-l-4 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden" 
+        style={{ borderLeftColor: statusColors[program.valueStatus] }}
+        data-testid={`card-vro-${program.id}`}
+        onClick={onViewDetails}
       >
-        {/* Front Face */}
-        <motion.div
-          className="absolute inset-0"
-          style={{ backfaceVisibility: "hidden" }}
-        >
-          <Card className="h-full border-l-4 hover:shadow-lg transition-shadow" style={{ borderLeftColor: statusColors[program.valueStatus] }}>
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Badge 
-                    className="mb-2 text-white text-xs"
-                    style={{ backgroundColor: BU_COLORS[program.bu] || "#005EB8" }}
-                  >
-                    {program.bu}
-                  </Badge>
-                  <CardTitle className="text-base">{program.name}</CardTitle>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <Badge 
-                    className="text-white capitalize text-xs"
-                    style={{ backgroundColor: statusColors[program.valueStatus] }}
-                  >
-                    {program.valueStatus === "on-track" ? "On Track" : program.valueStatus}
-                  </Badge>
-                  <motion.div 
-                    className="flex items-center gap-1 text-[10px] text-purple-600"
-                    animate={{ opacity: [1, 0.5, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Zap size={10} />
-                    <span>{program.proactiveActions.length} actions</span>
-                  </motion.div>
-                </div>
+        {/* VRO Label Banner */}
+        <div className="absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-teal-600 rounded-bl">
+          VRO VALUE
+        </div>
+        
+        <CardHeader className="pb-2 pt-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <Badge 
+                className="mb-2 text-white text-xs"
+                style={{ backgroundColor: BU_COLORS[program.bu] || "#005EB8" }}
+              >
+                {program.bu}
+              </Badge>
+              <CardTitle className="text-base leading-tight">{program.name}</CardTitle>
+            </div>
+            <Badge 
+              className="text-white capitalize text-xs"
+              style={{ backgroundColor: statusColors[program.valueStatus] }}
+            >
+              {program.valueStatus === "on-track" ? "On Track" : program.valueStatus}
+            </Badge>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-3">
+          {/* Value Stats */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="p-2 bg-teal-50 rounded text-center">
+              <p className="text-lg font-bold text-teal-700">{program.expectedROI}</p>
+              <p className="text-[10px] text-teal-600">Expected ROI</p>
+            </div>
+            <div className="p-2 bg-green-50 rounded text-center">
+              <p className="text-lg font-bold text-green-700">£{program.valueRealized}m</p>
+              <p className="text-[10px] text-green-600">Realized</p>
+            </div>
+          </div>
+          
+          {/* Value Progress */}
+          {valuePercent > 0 && (
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="flex items-center gap-1"><TrendingUp size={12} /> Value Realization</span>
+                <span className="font-medium">{Math.round(valuePercent)}%</span>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <motion.div 
-                    className="p-2 bg-green-50 rounded"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <p className="text-[10px] text-muted-foreground">Expected ROI</p>
-                    <p className="text-sm font-bold text-green-700">{program.expectedROI}</p>
-                  </motion.div>
-                  <motion.div 
-                    className="p-2 bg-blue-50 rounded"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <p className="text-[10px] text-muted-foreground">Alignment</p>
-                    <p className="text-sm font-bold text-blue-700">{program.strategicAlignment}%</p>
-                  </motion.div>
-                </div>
-                
-                {program.roiValue > 0 && program.roiValue < 10000 && (
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="flex items-center gap-1"><TrendingUp size={12} /> Value Realized</span>
-                      <span className="font-medium">£{program.valueRealized}m / £{program.roiValue}m</span>
-                    </div>
-                    <motion.div
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.8 }}
-                      style={{ originX: 0 }}
-                    >
-                      <Progress value={valuePercent} className="h-1.5" />
-                    </motion.div>
-                  </div>
-                )}
-                
-                <motion.div 
-                  className="p-2 bg-purple-50 rounded border border-purple-100"
-                  whileHover={{ scale: 1.01, borderColor: "#a855f7" }}
-                >
-                  <div className="flex items-start gap-2">
-                    <Brain size={14} className="text-purple-600 mt-0.5" />
-                    <div>
-                      <p className="text-[10px] text-purple-600 font-medium">AI INSIGHT</p>
-                      <p className="text-[11px] line-clamp-2">{program.aiInsight}</p>
-                    </div>
-                  </div>
-                </motion.div>
-                
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <div className="flex items-center gap-1">
-                    <Users size={12} className="text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground">
-                      {program.collaborators.length} collaborators
-                    </span>
-                  </div>
-                  <MiniSparkline data={program.trendData} />
-                </div>
-                
-                <motion.div 
-                  className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2 border-t"
-                  animate={{ y: [0, -2, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <RotateCcw size={12} />
-                  <span>Click to flip for actions</span>
-                </motion.div>
+              <Progress value={valuePercent} className="h-1.5" />
+            </div>
+          )}
+          
+          {/* AI Insight - Visible on front! */}
+          <motion.div 
+            className="p-3 bg-gradient-to-r from-purple-50 to-teal-50 rounded-lg border border-purple-200"
+            animate={{ borderColor: ["#e9d5ff", "#14b8a6", "#e9d5ff"] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="flex items-start gap-2">
+              <Brain size={14} className="text-purple-600 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-[10px] font-semibold text-purple-700 mb-1">AI PREDICTION</p>
+                <p className="text-xs text-purple-900 leading-tight line-clamp-2">{program.prediction}</p>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Back Face */}
-        <motion.div
-          className="absolute inset-0"
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-        >
-          <Card className="h-full border-l-4 bg-gradient-to-br from-green-50 to-blue-50" style={{ borderLeftColor: "#00843D" }}>
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Badge className="mb-1 text-white text-xs bg-green-600">
-                    Take Action
-                  </Badge>
-                  <CardTitle className="text-sm">{program.name}</CardTitle>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); setIsFlipped(false); }}
-                  className="h-6 w-6 p-0"
-                >
-                  <RotateCcw size={14} />
-                </Button>
+            </div>
+          </motion.div>
+          
+          {/* Proactive Action */}
+          {topAction && (
+            <motion.div 
+              className="p-2 rounded-lg border-2 flex items-center gap-2"
+              style={{ borderColor: actionTypeColors[topAction.type], backgroundColor: `${actionTypeColors[topAction.type]}10` }}
+              whileHover={{ x: 4 }}
+            >
+              <div 
+                className="p-1.5 rounded text-white"
+                style={{ backgroundColor: actionTypeColors[topAction.type] }}
+              >
+                <Zap size={12} />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-[10px] font-medium text-purple-700 mb-2 flex items-center gap-1">
-                  <Brain size={10} /> AI SIGNALS
-                </p>
-                <div className="space-y-1.5">
-                  {program.aiSignals.map((signal, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="flex items-start gap-2 p-2 bg-white/80 rounded-lg border border-purple-100"
-                    >
-                      {signalIcons[signal.type]}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] leading-tight">{signal.message}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center gap-1">
-                            <div className="h-1 rounded-full bg-purple-200" style={{ width: 40 }}>
-                              <motion.div 
-                                className="h-full rounded-full bg-purple-600"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${signal.confidence}%` }}
-                                transition={{ duration: 0.8, delay: 0.3 }}
-                              />
-                            </div>
-                            <span className="text-[9px] text-purple-600">{signal.confidence}%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{topAction.action}</p>
+                <p className="text-[10px] text-green-600 font-medium">{topAction.impact}</p>
               </div>
-
-              <div>
-                <p className="text-[10px] font-medium text-green-700 mb-2 flex items-center gap-1">
-                  <Zap size={10} /> PROACTIVE ACTIONS
-                </p>
-                <div className="space-y-1.5">
-                  {program.proactiveActions.map((action) => (
-                    <ProactiveActionButton
-                      key={action.id}
-                      action={action}
-                      onAction={handleAction}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {actionTaken.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="p-2 bg-green-100 rounded-lg border border-green-200"
-                >
-                  <p className="text-[10px] text-green-700 font-medium flex items-center gap-1">
-                    <CheckCircle size={10} /> {actionTaken.length} action(s) initiated
-                  </p>
-                </motion.div>
-              )}
-
-              <div className="pt-2 border-t border-green-200">
-                <p className="text-[10px] font-medium text-blue-700 mb-1.5 flex items-center gap-1">
-                  <Target size={10} /> VRO METRICS & TRACKING
-                </p>
-                <div className="grid grid-cols-2 gap-1">
-                  {getRelevantVROMetrics(program.bu).metrics.slice(0, 2).map((metric, i) => (
-                    <div key={i} className="flex items-center gap-1 text-[9px] text-blue-700 bg-blue-50 rounded px-1 py-0.5">
-                      <div className="w-1 h-1 rounded-full bg-blue-500" />
-                      {metric.name.split(' ').slice(0, 3).join(' ')}
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-1 mt-1">
-                  {getRelevantVROMetrics(program.bu).trackingFields.slice(0, 2).map((field, i) => (
-                    <div key={i} className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                      <div className="w-1 h-1 rounded-full bg-green-500" />
-                      {field}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-    </div>
+              <ChevronRight size={14} className="text-muted-foreground" />
+            </motion.div>
+          )}
+          
+          {/* View Details CTA */}
+          <motion.div 
+            className="flex items-center justify-center gap-2 text-xs font-medium text-teal-600 pt-2 border-t"
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Eye size={12} />
+            <span>Click for Full AI Briefing</span>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
-  const [selectedBU, setSelectedBU] = useState<string>("All");
+  const [selectedBU, setSelectedBU] = useState<string | null>(null);
   const [pulseActive, setPulseActive] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<PMOProject | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<VROProgram | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   
-  const businessUnits = ["All", "Institutional Retirement", "Asset Management", "Retail", "Corporate Investments", "Risk & Compliance"];
-  
-  const filteredPMO = selectedBU === "All" 
-    ? pmoProjects 
-    : pmoProjects.filter(p => p.bu === selectedBU);
+  // Get projects/programs for selected BU
+  const filteredPMO = selectedBU 
+    ? pmoProjects.filter(p => p.bu === selectedBU)
+    : [];
     
-  const filteredVRO = selectedBU === "All" 
-    ? vroPrograms 
-    : vroPrograms.filter(p => p.bu === selectedBU);
+  const filteredVRO = selectedBU 
+    ? vroPrograms.filter(p => p.bu === selectedBU)
+    : [];
 
-  // Pulse effect
   useEffect(() => {
     const interval = setInterval(() => {
       setPulseActive(p => !p);
@@ -1000,12 +887,43 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
     return () => clearInterval(interval);
   }, []);
 
+  const handleViewProjectDetails = (project: PMOProject) => {
+    setSelectedProject(project);
+    setSelectedProgram(null);
+    setModalOpen(true);
+  };
+
+  const handleViewProgramDetails = (program: VROProgram) => {
+    setSelectedProgram(program);
+    setSelectedProject(null);
+    setModalOpen(true);
+  };
+
+  const handleDrillDown = (buName: string) => {
+    setSelectedBU(buName);
+  };
+
+  const handleBackToPortfolios = () => {
+    setSelectedBU(null);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            {dataMode === "PMO" ? "Project Delivery Status" : "Value Realization Programs"}
+            {dataMode === "PMO" ? (
+              <>
+                <Building2 size={24} className="text-gray-600" />
+                {selectedBU ? `${selectedBU} Projects` : "Business Unit Portfolios"}
+              </>
+            ) : (
+              <>
+                <Target size={24} className="text-teal-600" />
+                {selectedBU ? `${selectedBU} Programs` : "Value Portfolios"}
+              </>
+            )}
             <motion.div
               animate={{ scale: pulseActive ? [1, 1.2, 1] : 1, opacity: pulseActive ? [0.7, 1, 0.7] : 0.7 }}
               transition={{ duration: 1.5, repeat: pulseActive ? Infinity : 0 }}
@@ -1014,13 +932,25 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
             </motion.div>
           </h2>
           <p className="text-muted-foreground text-sm">
-            {dataMode === "PMO" 
-              ? "Click any card to reveal AI signals and proactive actions" 
-              : "Click cards to access AI-powered insights and take action"}
+            {selectedBU 
+              ? "Click any project card to access full AI briefing, SAFe metrics, and proactive actions"
+              : "Click a portfolio to drill down to individual projects and programs"
+            }
           </p>
         </div>
         
         <div className="flex items-center gap-3">
+          {selectedBU && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBackToPortfolios}
+              data-testid="back-to-portfolios"
+            >
+              <ChevronLeft size={14} className="mr-1" />
+              Back to Portfolios
+            </Button>
+          )}
           {dataMode === "PMO" ? (
             <div className="flex gap-2">
               <Badge className="bg-green-600 text-white">{pmoSummary.green} Green</Badge>
@@ -1039,58 +969,80 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {businessUnits.map(bu => (
-          <motion.div key={bu} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              variant={selectedBU === bu ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedBU(bu)}
-              style={selectedBU === bu && bu !== "All" ? { backgroundColor: BU_COLORS[bu] } : undefined}
-              data-testid={`filter-bu-${bu.toLowerCase().replace(/\s+/g, '-')}`}
-            >
-              {bu}
-            </Button>
-          </motion.div>
-        ))}
-      </div>
+      {/* Portfolio Grid (when no BU selected) */}
+      {!selectedBU && (
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          layout
+        >
+          <AnimatePresence mode="popLayout">
+            {buPortfolios.map((portfolio, i) => (
+              <motion.div
+                key={portfolio.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: i * 0.05 }}
+                layout
+              >
+                <PortfolioCard 
+                  portfolio={portfolio} 
+                  onDrillDown={() => handleDrillDown(portfolio.name)}
+                  mode={dataMode}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
 
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-        layout
-      >
-        <AnimatePresence mode="popLayout">
-          {dataMode === "PMO" ? (
-            filteredPMO.map((project, i) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: i * 0.05 }}
-                layout
-              >
-                <PMOFlipCard project={project} />
-              </motion.div>
-            ))
-          ) : (
-            filteredVRO.map((program, i) => (
-              <motion.div
-                key={program.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: i * 0.05 }}
-                layout
-              >
-                <VROFlipCard program={program} />
-              </motion.div>
-            ))
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {/* Project/Program Grid (when BU selected) */}
+      {selectedBU && (
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <AnimatePresence mode="popLayout">
+            {dataMode === "PMO" ? (
+              filteredPMO.map((project, i) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: i * 0.05 }}
+                  layout
+                >
+                  <PMOProjectCard 
+                    project={project} 
+                    onViewDetails={() => handleViewProjectDetails(project)} 
+                  />
+                </motion.div>
+              ))
+            ) : (
+              filteredVRO.map((program, i) => (
+                <motion.div
+                  key={program.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: i * 0.05 }}
+                  layout
+                >
+                  <VROProgramCard 
+                    program={program} 
+                    onViewDetails={() => handleViewProgramDetails(program)} 
+                  />
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
       
-      {/* Risk Issues Section - From Risk Management Supplement */}
+      {/* Risk Section for VRO mode */}
       {dataMode === "VRO" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -1107,22 +1059,16 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
               <Badge className="bg-red-600 text-white">{riskSummary.critical} Critical</Badge>
               <Badge className="bg-amber-500 text-white">{riskSummary.high} High</Badge>
               <Badge className="bg-blue-600 text-white">{riskSummary.medium} Medium</Badge>
-              <Badge variant="outline">{riskSummary.withAIAlerts} AI Alerts</Badge>
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {riskIssues.map((risk, i) => {
+            {riskIssues.slice(0, 4).map((risk, i) => {
               const severityColors = {
                 critical: "#D50032",
                 high: "#f59e0b",
                 medium: "#005EB8",
                 low: "#00843D"
-              };
-              const trendIcons = {
-                improving: <TrendingUp size={12} className="text-green-600" />,
-                stable: <div className="w-3 h-0.5 bg-gray-400" />,
-                worsening: <AlertTriangle size={12} className="text-red-600" />
               };
               
               return (
@@ -1145,19 +1091,11 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
                               {risk.severity}
                             </Badge>
                             <Badge variant="outline" className="text-[10px] capitalize">{risk.category}</Badge>
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                              {trendIcons[risk.trend]}
-                              <span className="capitalize">{risk.trend}</span>
-                            </div>
                           </div>
                           <p className="font-medium text-sm">{risk.name}</p>
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">{risk.description}</p>
-                      <div className="flex justify-between text-[10px] mb-2">
-                        <span className="text-muted-foreground">Exposure: {risk.exposure}</span>
-                        <span className="text-muted-foreground">Owner: {risk.owner}</span>
-                      </div>
                       {risk.aiAlert && (
                         <motion.div 
                           className="p-2 bg-purple-50 rounded border border-purple-100 text-xs"
@@ -1170,7 +1108,6 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
                           </div>
                         </motion.div>
                       )}
-                      <p className="text-[10px] text-muted-foreground mt-2 italic">Source: {risk.source}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -1180,6 +1117,7 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
         </div>
       )}
 
+      {/* PMO Limitation Notice */}
       {dataMode === "PMO" && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -1202,6 +1140,15 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
           </Card>
         </motion.div>
       )}
+
+      {/* Detail Modal */}
+      <ProjectDetailModal
+        project={selectedProject || undefined}
+        program={selectedProgram || undefined}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mode={dataMode}
+      />
     </div>
   );
 }

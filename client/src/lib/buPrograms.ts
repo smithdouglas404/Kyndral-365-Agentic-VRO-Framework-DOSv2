@@ -670,6 +670,163 @@ export const pmoSummary = {
   totalSpent: pmoProjects.reduce((sum, p) => sum + p.budget.spent, 0)
 };
 
+// ============================================================================
+// PORTFOLIO-LEVEL DATA - Business Unit Portfolios with SAFe 6.0 Metrics
+// ============================================================================
+export interface BUPortfolio {
+  id: string;
+  name: string;
+  description: string;
+  projectCount: number;
+  programCount: number;
+  totalBudget: number;
+  budgetSpent: number;
+  valueRealized: number;
+  expectedValue: number;
+  healthScore: number; // 0-100
+  strategicAlignment: number; // 0-100
+  activeEpics: number;
+  completedEpics: number;
+  currentPI: string;
+  velocity: number;
+  predictability: number;
+  flowEfficiency: number;
+  topAISignal: AISignal;
+  topAction: ProactiveAction;
+  okrs: { objective: string; progress: number; status: "on-track" | "at-risk" | "behind" }[];
+}
+
+const getBUProjects = (bu: string) => pmoProjects.filter(p => p.bu === bu);
+const getBUPrograms = (bu: string) => vroPrograms.filter(p => p.bu === bu);
+
+export const buPortfolios: BUPortfolio[] = [
+  {
+    id: "portfolio-ir",
+    name: "Institutional Retirement",
+    description: "PRT deals, longevity risk management, and pension scheme solutions - £335bn AUM",
+    projectCount: getBUProjects("Institutional Retirement").length,
+    programCount: getBUPrograms("Institutional Retirement").length,
+    totalBudget: getBUProjects("Institutional Retirement").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Institutional Retirement").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Institutional Retirement").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Institutional Retirement").reduce((s, p) => s + p.roiValue, 0),
+    healthScore: 78,
+    strategicAlignment: 92,
+    activeEpics: 8,
+    completedEpics: 14,
+    currentPI: "PI 24.4",
+    velocity: 52,
+    predictability: 87,
+    flowEfficiency: 72,
+    topAISignal: { type: "opportunity", message: "PRT pipeline expansion could accelerate value realization by 35%", confidence: 88, dataSource: "Market analysis" },
+    topAction: { id: "port-ir-001", action: "Fast-track PRT digital intake to capture Q1 pipeline", impact: "+£2.5m value", urgency: "immediate", type: "accelerate" },
+    okrs: [
+      { objective: "Expand PRT market share to 25%", progress: 72, status: "on-track" },
+      { objective: "Reduce processing time by 40%", progress: 55, status: "at-risk" }
+    ]
+  },
+  {
+    id: "portfolio-am",
+    name: "Asset Management",
+    description: "LGIM investment strategies, ESG integration, and private markets expansion - £1.1tn AUM",
+    projectCount: getBUProjects("Asset Management").length,
+    programCount: getBUPrograms("Asset Management").length,
+    totalBudget: getBUProjects("Asset Management").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Asset Management").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Asset Management").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Asset Management").reduce((s, p) => s + p.roiValue, 0),
+    healthScore: 65,
+    strategicAlignment: 88,
+    activeEpics: 12,
+    completedEpics: 9,
+    currentPI: "PI 24.4",
+    velocity: 48,
+    predictability: 75,
+    flowEfficiency: 68,
+    topAISignal: { type: "warning", message: "Private Markets platform budget overrun requires steering committee decision", confidence: 91, dataSource: "Financial tracking" },
+    topAction: { id: "port-am-001", action: "Convene steering committee on Private Markets scope", impact: "Prevent £800k overrun", urgency: "immediate", type: "escalate" },
+    okrs: [
+      { objective: "Launch 5 new ESG fund products", progress: 60, status: "on-track" },
+      { objective: "Grow private markets AUM by 20%", progress: 35, status: "behind" }
+    ]
+  },
+  {
+    id: "portfolio-retail",
+    name: "Retail",
+    description: "Consumer protection, insurance products, and direct-to-customer digital services",
+    projectCount: getBUProjects("Retail").length,
+    programCount: getBUPrograms("Retail").length,
+    totalBudget: getBUProjects("Retail").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Retail").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Retail").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Retail").reduce((s, p) => s + p.roiValue, 0),
+    healthScore: 82,
+    strategicAlignment: 85,
+    activeEpics: 6,
+    completedEpics: 11,
+    currentPI: "PI 24.4",
+    velocity: 58,
+    predictability: 91,
+    flowEfficiency: 78,
+    topAISignal: { type: "insight", message: "Digital adoption rate exceeding projections - scale opportunity identified", confidence: 85, dataSource: "Customer analytics" },
+    topAction: { id: "port-retail-001", action: "Accelerate mobile app feature rollout", impact: "+15% customer satisfaction", urgency: "this-week", type: "accelerate" },
+    okrs: [
+      { objective: "Achieve 50% digital policy adoption", progress: 68, status: "on-track" },
+      { objective: "Reduce customer service calls by 30%", progress: 42, status: "at-risk" }
+    ]
+  },
+  {
+    id: "portfolio-ci",
+    name: "Corporate Investments",
+    description: "Alternative investments, real estate, infrastructure, and clean energy projects - Millfield Green",
+    projectCount: getBUProjects("Corporate Investments").length,
+    programCount: getBUPrograms("Corporate Investments").length,
+    totalBudget: getBUProjects("Corporate Investments").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Corporate Investments").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Corporate Investments").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Corporate Investments").reduce((s, p) => s + p.roiValue, 0),
+    healthScore: 88,
+    strategicAlignment: 95,
+    activeEpics: 5,
+    completedEpics: 8,
+    currentPI: "PI 24.4",
+    velocity: 45,
+    predictability: 89,
+    flowEfficiency: 75,
+    topAISignal: { type: "prediction", message: "Net Zero Housing scheme on track for early completion - case study value high", confidence: 92, dataSource: "Project analytics" },
+    topAction: { id: "port-ci-001", action: "Prepare Millfield Green case study for COP presentation", impact: "Brand value +£5m", urgency: "this-month", type: "accelerate" },
+    okrs: [
+      { objective: "Deploy £500m in clean energy infrastructure", progress: 78, status: "on-track" },
+      { objective: "Achieve carbon neutral portfolio by 2030", progress: 45, status: "on-track" }
+    ]
+  },
+  {
+    id: "portfolio-rc",
+    name: "Risk & Compliance",
+    description: "Enterprise risk management, regulatory compliance, and operational resilience",
+    projectCount: getBUProjects("Risk & Compliance").length,
+    programCount: getBUPrograms("Risk & Compliance").length,
+    totalBudget: getBUProjects("Risk & Compliance").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Risk & Compliance").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Risk & Compliance").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Risk & Compliance").reduce((s, p) => s + p.roiValue, 0),
+    healthScore: 75,
+    strategicAlignment: 90,
+    activeEpics: 7,
+    completedEpics: 5,
+    currentPI: "PI 24.4",
+    velocity: 42,
+    predictability: 83,
+    flowEfficiency: 65,
+    topAISignal: { type: "warning", message: "Regulatory change pipeline accelerating - resource planning needed", confidence: 86, dataSource: "Regulatory monitoring" },
+    topAction: { id: "port-rc-001", action: "Request additional compliance analyst resources", impact: "Maintain regulatory readiness", urgency: "this-week", type: "escalate" },
+    okrs: [
+      { objective: "Zero regulatory breaches", progress: 100, status: "on-track" },
+      { objective: "Complete operational resilience framework", progress: 62, status: "at-risk" }
+    ]
+  }
+];
+
 export const vroSummary = {
   totalPrograms: vroPrograms.length,
   accelerating: vroPrograms.filter(p => p.valueStatus === "accelerating").length,
