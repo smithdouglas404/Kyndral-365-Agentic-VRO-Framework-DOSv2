@@ -14,11 +14,6 @@ export default function Home() {
             Legal & General
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/value-proposition">
-              <Button variant="ghost" className="text-foreground hover:text-[hsl(209,100%,36%)]">
-                Strategic Vision
-              </Button>
-            </Link>
             <Link href="/dashboard">
               <Button className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white px-6">
                 Enter Dashboard
@@ -67,11 +62,6 @@ export default function Home() {
               <Link href="/dashboard">
                 <Button size="lg" className="h-14 px-8 text-lg bg-white text-[hsl(209,100%,36%)] hover:bg-blue-50 border-0">
                   Explore The Dashboard <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/value-proposition">
-                <Button size="lg" variant="outline" className="h-14 px-8 text-lg text-white border-white/30 hover:bg-white/10 hover:text-white">
-                  Read The Strategy
                 </Button>
               </Link>
             </div>

@@ -286,7 +286,6 @@ function NavBar({ onProjectSelect }: NavBarProps) {
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]" data-testid="link-dashboard">Dashboard</Link>
-          <Link href="/value-proposition" className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="link-value-proposition">Strategic Value</Link>
           
           <Dialog open={projectsOpen} onOpenChange={setProjectsOpen}>
             <DialogTrigger asChild>
@@ -370,12 +369,6 @@ function NavBar({ onProjectSelect }: NavBarProps) {
         </nav>
       </div>
       <div className="flex items-center gap-4">
-        <Link href="/value-proposition">
-          <Button variant="outline" size="sm" className="hidden lg:flex gap-2 text-[#005EB8] border-[#005EB8]/30 hover:bg-[#005EB8]/5" data-testid="button-value-proposition">
-            <FileText size={16} />
-            Value Proposition
-          </Button>
-        </Link>
         <div className="relative w-64 hidden md:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -848,7 +841,6 @@ export default function Dashboard() {
           <div className="flex justify-between items-center text-sm text-muted-foreground border-t border-border pt-4">
             <p>© 2026 Legal & General. Internal Use Only.</p>
             <div className="flex gap-4">
-              <Link href="/value-proposition" className="hover:text-primary">Value Proposition</Link>
               <a href="#" className="hover:text-primary">Privacy Policy</a>
             </div>
           </div>
