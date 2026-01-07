@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { parsePolicyDocument } from "./anthropic";
+import { parsePolicyDocument, extractPolicyMetadata } from "./anthropic";
 import { z } from "zod";
 import multer from "multer";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
@@ -69,11 +69,16 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Could not extract meaningful text from PDF" });
       }
 
+      const metadata = await extractPolicyMetadata(extractedText, req.file.originalname);
+
       res.json({
         text: extractedText,
         filename: req.file.originalname,
         pages: pdfData.numpages,
         info: pdfData.info,
+        suggestedName: metadata.policyName,
+        suggestedProvider: metadata.provider,
+        suggestedDocumentId: metadata.documentId,
       });
     } catch (error: any) {
       console.error("PDF upload error:", error);

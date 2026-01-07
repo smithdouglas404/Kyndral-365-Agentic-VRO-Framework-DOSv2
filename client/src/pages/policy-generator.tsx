@@ -216,12 +216,22 @@ export default function PolicyGenerator() {
       });
       setShowPreview(true);
       
-      const baseName = file.name.replace('.pdf', '').replace(/_/g, ' ');
-      setPolicyName(baseName);
+      if (data.suggestedName) {
+        setPolicyName(data.suggestedName);
+      } else {
+        const baseName = file.name.replace('.pdf', '').replace(/_/g, ' ');
+        setPolicyName(baseName);
+      }
+      if (data.suggestedProvider) {
+        setProvider(data.suggestedProvider);
+      }
+      if (data.suggestedDocumentId) {
+        setDocumentId(data.suggestedDocumentId);
+      }
       
       toast({
-        title: "PDF Uploaded",
-        description: `Extracted ${data.pages} page(s) from ${file.name}`,
+        title: "PDF Analyzed",
+        description: `Extracted ${data.pages} page(s) and identified policy metadata`,
       });
     } catch (err: any) {
       setError(err.message);

@@ -49,6 +49,66 @@ Output ONLY valid YAML code with no additional explanation. Include comments in 
   throw new Error('Unexpected response format from Claude');
 }
 
+export interface ExtractedPolicyMetadata {
+  policyName: string;
+  provider: string;
+  documentId: string;
+}
+
+export async function extractPolicyMetadata(policyText: string, filename?: string): Promise<ExtractedPolicyMetadata> {
+  const message = await anthropic.messages.create({
+    model: DEFAULT_MODEL_STR,
+    max_tokens: 512,
+    system: `You are an expert at extracting metadata from insurance and legal policy documents. 
+Extract the following information and return ONLY a JSON object with these exact keys:
+- policyName: A clear, descriptive name for this policy (e.g., "Life Insurance and Critical Illness Cover")
+- provider: The company/organization that provides this policy (e.g., "Legal & General")
+- documentId: Any document reference number, policy number, or version identifier found in the text. If none exists, generate a plausible one based on the provider and policy type (e.g., "LG-LICI-2024-001")
+
+Return ONLY valid JSON, no additional text.`,
+    messages: [
+      {
+        role: 'user',
+        content: `Extract metadata from this policy document${filename ? ` (filename: ${filename})` : ''}:\n\n${policyText.slice(0, 3000)}`
+      }
+    ],
+  });
+
+  const content = message.content[0];
+  if (content.type === 'text') {
+    try {
+      let jsonText = content.text.trim();
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.slice(7);
+      }
+      if (jsonText.startsWith('```')) {
+        jsonText = jsonText.slice(3);
+      }
+      if (jsonText.endsWith('```')) {
+        jsonText = jsonText.slice(0, -3);
+      }
+      const parsed = JSON.parse(jsonText.trim());
+      return {
+        policyName: parsed.policyName || 'Untitled Policy',
+        provider: parsed.provider || '',
+        documentId: parsed.documentId || '',
+      };
+    } catch (e) {
+      return {
+        policyName: filename?.replace('.pdf', '').replace(/_/g, ' ') || 'Untitled Policy',
+        provider: '',
+        documentId: '',
+      };
+    }
+  }
+  
+  return {
+    policyName: 'Untitled Policy',
+    provider: '',
+    documentId: '',
+  };
+}
+
 export async function suggestPolicyImprovements(policyCode: string): Promise<string> {
   const message = await anthropic.messages.create({
     model: DEFAULT_MODEL_STR,
