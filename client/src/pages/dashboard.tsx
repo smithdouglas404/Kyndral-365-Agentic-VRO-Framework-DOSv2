@@ -20,6 +20,7 @@ import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
 import { AICommandCenter } from "@/components/AICommandCenter";
+import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -634,6 +635,11 @@ export default function Dashboard() {
                 initialScenario={selectedScenario}
                 initialStage={activeStage}
               />
+            </div>
+
+            {/* BU Programs - Differentiated by PMO vs VRO */}
+            <div className="border-b border-border pb-8">
+              <BUProgramsSection dataMode={dataMode} />
             </div>
 
             {/* Scenario-Driven Charts */}
