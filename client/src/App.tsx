@@ -3,6 +3,9 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SimulationProvider } from "@/contexts/SimulationContext";
+import { LiveEventDrawer } from "@/components/LiveEventDrawer";
+import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
@@ -28,10 +31,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <SimulationProvider>
+        <TooltipProvider>
+          <Toaster />
+          <FloatingAlertBanner />
+          <LiveEventDrawer />
+          <Router />
+        </TooltipProvider>
+      </SimulationProvider>
     </QueryClientProvider>
   );
 }
