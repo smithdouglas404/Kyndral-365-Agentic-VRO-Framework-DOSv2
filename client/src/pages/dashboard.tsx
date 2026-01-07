@@ -1,7 +1,7 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,9 @@ import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { ExecutiveCommandCenter } from "@/components/ExecutiveCommandCenter";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
+import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
+import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
+import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -477,7 +480,7 @@ export default function Dashboard() {
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid w-full grid-cols-6 h-12 bg-muted/50 p-1 rounded-lg mb-8">
+          <TabsList className="flex flex-wrap gap-1 h-auto bg-muted/50 p-1 rounded-lg mb-8">
             <TabsTrigger 
               value="overview" 
               className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
@@ -493,6 +496,30 @@ export default function Dashboard() {
             >
               <Building2 size={16} />
               <span className="hidden sm:inline">Portfolios</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="business-cases" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-business-cases"
+            >
+              <Briefcase size={16} />
+              <span className="hidden sm:inline">Business Cases</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="early-warning" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-early-warning"
+            >
+              <AlertOctagon size={16} />
+              <span className="hidden sm:inline">Early Warning</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="kpi-tracking" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-kpi-tracking"
+            >
+              <PieChart size={16} />
+              <span className="hidden sm:inline">KPIs</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-insights" 
@@ -563,6 +590,21 @@ export default function Dashboard() {
           {/* Portfolios Tab - BU Programs with drill-down */}
           <TabsContent value="portfolios">
             <BUProgramsSection dataMode={dataMode} />
+          </TabsContent>
+
+          {/* Business Cases Tab */}
+          <TabsContent value="business-cases">
+            <BusinessCaseAssessment />
+          </TabsContent>
+
+          {/* Early Warning Tab */}
+          <TabsContent value="early-warning">
+            <EarlyWarningDashboard />
+          </TabsContent>
+
+          {/* KPI Tracking Tab */}
+          <TabsContent value="kpi-tracking">
+            <KPIAttributionPanel />
           </TabsContent>
 
           {/* AI Insights Tab - Available in both PMO and VRO modes */}
