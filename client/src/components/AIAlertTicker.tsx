@@ -56,7 +56,7 @@ export function AIAlertTicker() {
   };
   
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg border border-slate-700">
+    <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg border-2 border-purple-500/50 shadow-lg shadow-purple-500/20 ring-1 ring-purple-400/30">
       <div className="absolute inset-0 opacity-50" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)", backgroundSize: "20px 20px" }} />
       
       <div className="flex items-center gap-3 p-3 relative">
