@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileCode, Upload, Sparkles, Library, Copy, Download, 
   Trash2, ChevronRight, FileText, Clock, Building2,
-  CheckCircle2, Loader2, AlertCircle, ArrowLeft
+  CheckCircle2, Loader2, AlertCircle, ArrowLeft, Users, Eye
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { BusinessRulesViewer } from '@/components/BusinessRulesViewer';
+import { WhatIfPanel } from '@/components/WhatIfPanel';
 
 interface Policy {
   id: string;
@@ -72,6 +74,7 @@ export default function PolicyGenerator() {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState<'technical' | 'business'>('technical');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -200,6 +203,15 @@ export default function PolicyGenerator() {
             <TabsTrigger value="generate" className="gap-2" data-testid="tab-generate">
               <Sparkles size={16} />
               Generate
+            </TabsTrigger>
+            <TabsTrigger 
+              value="business" 
+              className="gap-2" 
+              data-testid="tab-business"
+              disabled={!generatedCode && !selectedPolicy}
+            >
+              <Users size={16} />
+              Business View
             </TabsTrigger>
             <TabsTrigger value="library" className="gap-2" data-testid="tab-library">
               <Library size={16} />
@@ -349,6 +361,81 @@ export default function PolicyGenerator() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="business">
+            {(generatedCode || selectedPolicy) ? (
+              <div className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Users className="text-[#005EB8]" size={24} />
+                    <div>
+                      <h2 className="text-xl font-bold">Business User Lens</h2>
+                      <p className="text-sm text-muted-foreground">
+                        View policy rules as a business user - no code syntax, just the rules that matter
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={viewMode === 'business' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode('business')}
+                      className={viewMode === 'business' ? 'bg-[#005EB8]' : ''}
+                      data-testid="button-view-business"
+                    >
+                      <Users size={14} className="mr-1" />
+                      Rules View
+                    </Button>
+                    <Button
+                      variant={viewMode === 'technical' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode('technical')}
+                      className={viewMode === 'technical' ? 'bg-[#005EB8]' : ''}
+                      data-testid="button-view-technical"
+                    >
+                      <FileCode size={14} className="mr-1" />
+                      Code View
+                    </Button>
+                  </div>
+                </div>
+
+                {viewMode === 'business' ? (
+                  <div className="space-y-8">
+                    <BusinessRulesViewer 
+                      yamlCode={selectedPolicy?.generatedCode || generatedCode}
+                      policyName={selectedPolicy?.name || policyName || 'Generated Policy'}
+                    />
+                    <WhatIfPanel 
+                      yamlCode={selectedPolicy?.generatedCode || generatedCode}
+                      policyName={selectedPolicy?.name || policyName || 'Generated Policy'}
+                    />
+                  </div>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileCode size={20} />
+                        Technical YAML Code
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto max-h-[600px] text-sm font-mono">
+                        {selectedPolicy?.generatedCode || generatedCode}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center text-muted-foreground">
+                  <Users size={48} className="mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">No policy available</p>
+                  <p className="text-sm">Generate a policy first or select one from the library</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="library">
