@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, AlertTriangle, Lightbulb, TrendingUp, GitBranch, Zap, Target, X, Bell } from 'lucide-react';
+import { Brain, AlertTriangle, Lightbulb, TrendingUp, GitBranch, Zap, Target, X } from 'lucide-react';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { SimulationEvent } from '@/lib/liveSimulation';
 import { Badge } from '@/components/ui/badge';
@@ -22,11 +22,7 @@ const typeIcons: Record<string, React.ReactNode> = {
   action_required: <Zap size={16} />
 };
 
-interface FloatingAlertBannerProps {
-  onOpenFlyout?: () => void;
-}
-
-export function FloatingAlertBanner({ onOpenFlyout }: FloatingAlertBannerProps) {
+export function FloatingAlertBanner() {
   const { latestEvent, setSelectedEvent, unreadCount, markAsRead } = useSimulation();
   const [showBanner, setShowBanner] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
@@ -129,39 +125,6 @@ export function FloatingAlertBanner({ onOpenFlyout }: FloatingAlertBannerProps) 
         )}
       </AnimatePresence>
 
-      {unreadCount > 0 && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="fixed bottom-6 right-6 z-40"
-        >
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-4 rounded-full bg-purple-600 text-white shadow-lg flex items-center gap-2"
-            onClick={() => {
-              if (onOpenFlyout) {
-                onOpenFlyout();
-              } else if (latestEvent) {
-                markAsRead(latestEvent.id);
-                setSelectedEvent(latestEvent);
-              }
-            }}
-            animate={{ 
-              boxShadow: [
-                "0 4px 20px rgba(147, 51, 234, 0.4)",
-                "0 4px 40px rgba(147, 51, 234, 0.6)",
-                "0 4px 20px rgba(147, 51, 234, 0.4)"
-              ]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-            data-testid="alert-fab"
-          >
-            <Bell size={20} />
-            <Badge className="bg-red-500 text-white text-xs">{unreadCount}</Badge>
-          </motion.button>
-        </motion.div>
-      )}
     </>
   );
 }
