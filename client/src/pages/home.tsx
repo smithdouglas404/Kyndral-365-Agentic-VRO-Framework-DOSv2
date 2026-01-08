@@ -61,7 +61,7 @@ export default function Home() {
                   onClick={() => navigate('/dashboard')}
                   data-testid="button-explore-dashboard"
                 >
-                  Explore The Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                  Come Explore <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
