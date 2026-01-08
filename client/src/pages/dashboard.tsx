@@ -38,7 +38,10 @@ import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { PMOPipeline } from "@/components/PMOPipeline";
 import { PMOGuidance } from "@/components/PMOGuidance";
-import { GitBranch } from "lucide-react";
+import { PMOProjectWorkspace } from "@/components/PMOProjectWorkspace";
+import { PMOKnowledgeHub } from "@/components/PMOKnowledgeHub";
+import { PMOCoPilotWorkspace } from "@/components/PMOCoPilotWorkspace";
+import { GitBranch, BookOpen, Compass } from "lucide-react";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -703,14 +706,32 @@ export default function Dashboard() {
               <span className="hidden sm:inline">Challenges</span>
             </TabsTrigger>
             {dataMode === "PMO" && (
-              <TabsTrigger 
-                value="pipeline" 
-                className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                data-testid="tab-pipeline"
-              >
-                <GitBranch size={16} />
-                <span className="hidden sm:inline">Pipeline</span>
-              </TabsTrigger>
+              <>
+                <TabsTrigger 
+                  value="pipeline" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                  data-testid="tab-pipeline"
+                >
+                  <GitBranch size={16} />
+                  <span className="hidden sm:inline">Pipeline</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="workspace" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                  data-testid="tab-workspace"
+                >
+                  <Compass size={16} />
+                  <span className="hidden sm:inline">Co-Pilot</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="knowledge" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                  data-testid="tab-knowledge"
+                >
+                  <BookOpen size={16} />
+                  <span className="hidden sm:inline">Knowledge</span>
+                </TabsTrigger>
+              </>
             )}
           </TabsList>
 
@@ -920,6 +941,16 @@ export default function Dashboard() {
           {/* Pipeline Tab - PMO Only */}
           <TabsContent value="pipeline" className="space-y-6">
             <PMOPipeline />
+          </TabsContent>
+
+          {/* Workspace Tab - PMO Co-Pilot */}
+          <TabsContent value="workspace" className="space-y-6">
+            <PMOCoPilotWorkspace />
+          </TabsContent>
+
+          {/* Knowledge Hub Tab - PMO Only */}
+          <TabsContent value="knowledge" className="space-y-6">
+            <PMOKnowledgeHub />
           </TabsContent>
         </Tabs>
       </main>
