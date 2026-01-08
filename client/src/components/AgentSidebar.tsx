@@ -1,14 +1,16 @@
 import { Link, useLocation } from 'wouter';
 import { 
   DollarSign, GitBranch, Repeat, Calculator, Target, 
-  Shield, Calendar, Users, Sparkles, ChevronRight, FileCode
+  Shield, Calendar, Users, Sparkles, ChevronRight, FileCode, AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAllAgentsSummary } from '@/hooks/useAgentData';
+import { AgentType } from '@/lib/dataHub';
 
 type DataMode = "VRO" | "PMO";
 
 interface Agent {
-  id: string;
+  id: AgentType | 'policy';
   name: string;
   shortName: string;
   icon: React.ElementType;
@@ -109,11 +111,18 @@ interface AgentSidebarProps {
 
 export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: AgentSidebarProps) {
   const [location] = useLocation();
+  const agentSummary = useAllAgentsSummary();
 
   const isActive = (href: string) => {
     if (href === '/dashboard' && location === '/dashboard') return true;
     if (href !== '/dashboard' && location.startsWith(href)) return true;
     return false;
+  };
+
+  const getAgentMetrics = (agentId: string) => {
+    if (agentId === 'policy') return null;
+    const metrics = agentSummary[agentId as AgentType];
+    return metrics;
   };
 
   return (
@@ -132,6 +141,9 @@ export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: Agen
         {agents.map((agent) => {
           const Icon = agent.icon;
           const active = isActive(agent.href);
+          const metrics = getAgentMetrics(agent.id);
+          const hasAlerts = metrics && metrics.activeAlerts > 0;
+          const hasActions = metrics && metrics.pendingActions > 0;
           
           return (
             <Link key={agent.id} href={agent.href}>
@@ -141,16 +153,26 @@ export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: Agen
                   if (agent.id === 'pmo') onModeChange('PMO');
                 }}
                 className={cn(
-                  "mx-2 mb-1 px-3 py-2.5 rounded-lg cursor-pointer transition-all group",
+                  "mx-2 mb-1 px-3 py-2.5 rounded-lg cursor-pointer transition-all group relative",
                   active 
                     ? "bg-[#005EB8] text-white" 
                     : "hover:bg-gray-100 text-gray-700"
                 )}
                 data-testid={`sidebar-agent-${agent.id}`}
               >
+                {(hasAlerts || hasActions) && !collapsed && (
+                  <div className="absolute -top-1 -right-1 flex gap-0.5">
+                    {hasAlerts && (
+                      <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                    )}
+                    {hasActions && (
+                      <span className="w-2 h-2 bg-red-500 rounded-full" />
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-3">
                   <div className={cn(
-                    "p-1.5 rounded-md",
+                    "p-1.5 rounded-md relative",
                     active ? "bg-white/20" : agent.color
                   )}>
                     <Icon className={cn("h-4 w-4", active ? "text-white" : "text-white")} />
@@ -159,19 +181,39 @@ export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: Agen
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-sm truncate">{agent.name}</span>
-                        <span className={cn(
-                          "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                          active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
-                        )}>
-                          {agent.shortName}
-                        </span>
+                        {metrics && (
+                          <span className={cn(
+                            "text-[10px] font-bold px-1.5 py-0.5 rounded",
+                            active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
+                          )}>
+                            {metrics.avgConfidence}%
+                          </span>
+                        )}
+                        {!metrics && (
+                          <span className={cn(
+                            "text-[10px] font-bold px-1.5 py-0.5 rounded",
+                            active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+                          )}>
+                            {agent.shortName}
+                          </span>
+                        )}
                       </div>
-                      <p className={cn(
-                        "text-xs truncate",
-                        active ? "text-white/70" : "text-gray-500"
-                      )}>
-                        {agent.description}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className={cn(
+                          "text-xs truncate",
+                          active ? "text-white/70" : "text-gray-500"
+                        )}>
+                          {agent.description}
+                        </p>
+                        {metrics && metrics.totalProjects > 0 && (
+                          <span className={cn(
+                            "text-[9px] ml-1",
+                            active ? "text-white/60" : "text-gray-400"
+                          )}>
+                            {metrics.totalProjects} items
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
                   {!collapsed && (

@@ -236,6 +236,7 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 
 export default function OCMDashboard() {
   const { dataMode, setDataMode } = useSimulation();
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   
   const readinessMetrics = getChangeReadinessFromDivisions(dataMode);
   const stakeholderGroups = getStakeholderGroupsFromDivisions(dataMode);
@@ -258,13 +259,41 @@ export default function OCMDashboard() {
         
         <main className="flex-1 px-8 py-8">
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-pink-500 rounded-lg">
-                <Users className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-pink-500 rounded-lg">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground">Change Readiness Command</h1>
+                  <p className="text-muted-foreground">OCM Intelligence & Adoption Operations</p>
+                </div>
+                <Badge className="ml-4 bg-green-100 text-green-700 gap-1">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                  </span>
+                  Live
+                </Badge>
+                <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">OCM Agent</h1>
-                <p className="text-muted-foreground">Organizational Change Management</p>
+              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('realtime')}
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${viewMode === 'realtime' ? 'bg-white shadow-sm text-green-700' : 'text-gray-500'}`}
+                  data-testid="btn-realtime"
+                >
+                  Real-time
+                </button>
+                <button
+                  onClick={() => setViewMode('snapshot')}
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${viewMode === 'snapshot' ? 'bg-white shadow-sm text-blue-700' : 'text-gray-500'}`}
+                  data-testid="btn-snapshot"
+                >
+                  30-Day Snapshot
+                </button>
+              </div>
+            </div>
               </div>
               <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
               <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
