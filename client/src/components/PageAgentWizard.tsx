@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, ChevronDown, ChevronUp, Loader2, Zap } from 'lucide-react';
+import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, ChevronDown, ChevronUp, Loader2, Zap, X, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 interface PageContext {
   pageName: string;
@@ -85,10 +87,47 @@ function generateLocalInsights(context: PageContext): WizardInsights {
 }
 
 export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }: PageAgentWizardProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [insights, setInsights] = useState<WizardInsights | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatQuestion, setChatQuestion] = useState('');
+  const [chatResponse, setChatResponse] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [userInput, setUserInput] = useState('');
+
+  const handleQuestionClick = async (question: string) => {
+    setChatQuestion(question);
+    setChatOpen(true);
+    setChatLoading(true);
+    setChatResponse('');
+    
+    try {
+      const response = await fetch('/api/copilot/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, context }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setChatResponse(data.response);
+      } else {
+        setChatResponse(`I'd be happy to help you explore that. Based on the current ${context.pageName} data, I recommend reviewing the metrics displayed and drilling into any areas showing concerning trends. Would you like me to highlight specific areas?`);
+      }
+    } catch {
+      setChatResponse(`I'd be happy to help you explore that. Based on the current ${context.pageName} data, I recommend reviewing the metrics displayed and drilling into any areas showing concerning trends.`);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!userInput.trim()) return;
+    await handleQuestionClick(userInput);
+    setUserInput('');
+  };
 
   useEffect(() => {
     async function fetchInsights() {
@@ -140,13 +179,21 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
             </div>
             
             <div className="flex-1">
-              <div className="flex items-center justify-between mb-3">
+              <div 
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-lg text-purple-800">{agentName}</span>
-                  <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
-                    <Sparkles size={12} className="mr-1" />
-                    Page Summary
-                  </Badge>
+                  {!isExpanded && !isLoading && (
+                    <span className="text-purple-600 italic animate-pulse">Hey... I have something to say</span>
+                  )}
+                  {isExpanded && (
+                    <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
+                      <Sparkles size={12} className="mr-1" />
+                      Page Summary
+                    </Badge>
+                  )}
                   {isLoading && (
                     <span className="text-sm text-purple-500 animate-pulse">Analyzing page...</span>
                   )}
@@ -154,7 +201,7 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => setIsExpanded(!isExpanded)}
+                  onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
                   className="text-purple-600 hover:text-purple-800 hover:bg-purple-100"
                   data-testid="wizard-toggle"
                 >
@@ -190,7 +237,7 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 className="flex items-start gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors"
-                                onClick={() => onDrillDown?.('concern', `concern-${i}`)}
+                                onClick={() => handleQuestionClick(`Tell me more about this concern: ${concern}`)}
                                 data-testid={`concern-${i}`}
                               >
                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2" />
@@ -214,7 +261,7 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: i * 0.1 + 0.2 }}
                               className="flex items-start gap-2 p-2 bg-green-50 rounded-lg border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
-                              onClick={() => onDrillDown?.('recommendation', `rec-${i}`)}
+                              onClick={() => handleQuestionClick(`How do I implement this recommendation: ${rec}`)}
                               data-testid={`recommendation-${i}`}
                             >
                               <Zap size={14} className="text-green-600 mt-0.5" />
@@ -251,13 +298,26 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
                                 variant="outline"
                                 size="sm"
                                 className="w-full justify-start text-left text-purple-700 border-purple-200 hover:bg-purple-50"
-                                onClick={() => onDrillDown?.('question', question)}
+                                onClick={() => handleQuestionClick(question)}
                                 data-testid={`question-${i}`}
                               >
                                 <MessageCircle size={14} className="mr-2 flex-shrink-0" />
                                 {question}
                               </Button>
                             ))}
+                            <div className="flex gap-2 mt-2">
+                              <Input
+                                placeholder="Ask me anything..."
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                className="flex-1 border-purple-200"
+                                data-testid="wizard-input"
+                              />
+                              <Button size="sm" onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700">
+                                <Send size={14} />
+                              </Button>
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -269,6 +329,47 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={chatOpen} onOpenChange={setChatOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-600" />
+              {agentName}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+              <p className="text-sm text-purple-800 font-medium">Your Question:</p>
+              <p className="text-sm text-gray-700 mt-1">{chatQuestion}</p>
+            </div>
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 min-h-[100px]">
+              {chatLoading ? (
+                <div className="flex items-center gap-2 text-purple-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Thinking...</span>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-800 whitespace-pre-wrap">{chatResponse}</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ask a follow-up question..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                className="flex-1"
+                data-testid="chat-input"
+              />
+              <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700">
+                <Send size={14} className="mr-1" />
+                Ask
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

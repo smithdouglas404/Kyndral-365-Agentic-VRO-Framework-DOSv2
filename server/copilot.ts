@@ -166,4 +166,42 @@ Analyze the overall state of this page. Identify any concerns (alerts, risks, at
       res.json({ fallback: true });
     }
   });
+
+  app.post('/api/copilot/chat', async (req, res) => {
+    try {
+      const { question, context } = req.body;
+      
+      const systemPrompt = `You are an AI co-pilot assistant for a Legal & General Transformation Office application. You are helpful, knowledgeable, and provide actionable advice.
+
+Context:
+- Page: ${context?.pageName || 'Unknown'}
+- Type: ${context?.pageType || 'Unknown'}
+
+Metrics available:
+${context?.metrics ? Object.entries(context.metrics).map(([k, v]) => `- ${k}: ${v}`).join('\n') : 'No specific metrics'}
+
+Respond conversationally but professionally. Be specific and actionable. Keep responses concise (2-4 paragraphs max).`;
+
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: [
+          { role: 'user', content: question }
+        ],
+        system: systemPrompt,
+      });
+
+      const content = message.content[0];
+      if (content.type === 'text') {
+        res.json({ response: content.text });
+      } else {
+        res.json({ response: 'I apologize, I could not generate a response at this time.' });
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      res.status(500).json({ 
+        response: 'I apologize, but I encountered an error processing your request. Please try again.' 
+      });
+    }
+  });
 }

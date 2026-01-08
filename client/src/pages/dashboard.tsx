@@ -35,6 +35,7 @@ import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -80,9 +81,10 @@ function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => 
   );
 }
 
-function LGReportStats({ mode }: { mode: DataMode }) {
+function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (type: string, id: string) => void }) {
   const vroStats = [
     { 
+      id: "prt-volume",
       label: "PRT Volume (2025)", 
       value: `${lgAnnualReportData.prtVolume.actual2025}`,
       unit: lgAnnualReportData.prtVolume.unit,
@@ -94,6 +96,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       progress: Math.round(((lgAnnualReportData.prtVolume.actual2025 - lgAnnualReportData.prtVolume.baseline2024) / (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024)) * 100)
     },
     { 
+      id: "forecast-accuracy",
       label: "Forecast Accuracy (2025)", 
       value: `${lgAnnualReportData.forecastAccuracy.actual2025}`,
       unit: lgAnnualReportData.forecastAccuracy.unit,
@@ -105,6 +108,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       progress: Math.round(((lgAnnualReportData.forecastAccuracy.actual2025 - lgAnnualReportData.forecastAccuracy.baseline2024) / (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024)) * 100)
     },
     { 
+      id: "cost-savings",
       label: "Cost Savings (2025)", 
       value: `${lgAnnualReportData.costSavings.actual2025}`,
       unit: lgAnnualReportData.costSavings.unit,
@@ -116,6 +120,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
       progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100)
     },
     { 
+      id: "cycle-time",
       label: "Cycle Time (2025)", 
       value: `${lgAnnualReportData.cycleTime.actual2025}`,
       unit: lgAnnualReportData.cycleTime.unit,
@@ -270,6 +275,13 @@ export default function Dashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
+
+  const handleDrillDown = (type: string, id: string) => {
+    setDrillDownEntity({ type, id });
+    setDrillDownOpen(true);
+  };
 
   const filteredChallenges = activeTheme === "All" 
     ? challenges 

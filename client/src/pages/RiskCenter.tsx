@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link } from "wouter";
 import { ArrowLeft, Shield, AlertTriangle, TrendingUp, CreditCard, Droplets, Settings, Eye, Users } from "lucide-react";
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,9 @@ import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, Cell } from "recharts";
 
 export default function RiskCenter() {
+  const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
+  const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
+
   const riskAlerts = aiAlerts.filter(a => 
     a.title.toLowerCase().includes("risk") || 
     a.title.toLowerCase().includes("credit") || 
@@ -86,7 +91,7 @@ export default function RiskCenter() {
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('governance', 'three-lines-defence')} data-testid="card-three-lines-defence">
             <CardHeader>
               <CardTitle>Three Lines of Defence</CardTitle>
               <CardDescription>Risk governance model</CardDescription>
@@ -94,7 +99,12 @@ export default function RiskCenter() {
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
                 {riskData.threeLines.map((line) => (
-                  <div key={line.line} className={`p-4 rounded-lg ${line.line === 1 ? "bg-blue-50 border-blue-200" : line.line === 2 ? "bg-amber-50 border-amber-200" : "bg-green-50 border-green-200"} border`}>
+                  <div 
+                    key={line.line} 
+                    className={`p-4 rounded-lg cursor-pointer hover:ring-2 hover:ring-blue-300 transition-all ${line.line === 1 ? "bg-blue-50 border-blue-200" : line.line === 2 ? "bg-amber-50 border-amber-200" : "bg-green-50 border-green-200"} border`}
+                    onClick={(e) => { e.stopPropagation(); handleDrillDown('defence-line', `line-${line.line}`); }}
+                    data-testid={`card-defence-line-${line.line}`}
+                  >
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${line.line === 1 ? "bg-blue-600" : line.line === 2 ? "bg-amber-600" : "bg-green-600"}`}>
                         {line.line}
@@ -109,7 +119,7 @@ export default function RiskCenter() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('risk-profile', 'radar-overview')} data-testid="card-risk-profile-radar">
             <CardHeader>
               <CardTitle>Risk Profile Radar</CardTitle>
             </CardHeader>
@@ -137,7 +147,13 @@ export default function RiskCenter() {
           <TabsContent value="categories" className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               {riskData.categories.map((category) => (
-                <Card key={category.id} className="border-l-4" style={{ borderLeftColor: category.color }}>
+                <Card 
+                  key={category.id} 
+                  className="border-l-4 cursor-pointer hover:shadow-md transition-shadow" 
+                  style={{ borderLeftColor: category.color }}
+                  onClick={() => handleDrillDown('risk-category', category.id)}
+                  data-testid={`card-risk-category-${category.id}`}
+                >
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg" style={{ backgroundColor: `${category.color}20` }}>
@@ -152,7 +168,12 @@ export default function RiskCenter() {
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {category.subRisks.map((risk, i) => (
-                        <div key={i} className={`p-4 rounded-lg border ${risk.severity === "high" ? "border-red-200 bg-red-50" : risk.severity === "medium" ? "border-amber-200 bg-amber-50" : "border-green-200 bg-green-50"}`}>
+                        <div 
+                          key={i} 
+                          className={`p-4 rounded-lg border cursor-pointer hover:ring-2 hover:ring-blue-300 transition-all ${risk.severity === "high" ? "border-red-200 bg-red-50" : risk.severity === "medium" ? "border-amber-200 bg-amber-50" : "border-green-200 bg-green-50"}`}
+                          onClick={(e) => { e.stopPropagation(); handleDrillDown('sub-risk', `${category.id}-${i}`); }}
+                          data-testid={`card-sub-risk-${category.id}-${i}`}
+                        >
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-medium text-sm">{risk.name}</span>
                             <div className="flex gap-1">
@@ -176,7 +197,7 @@ export default function RiskCenter() {
 
           <TabsContent value="emerging" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('emerging-risk', 'radar-analysis')} data-testid="card-emerging-risk-radar">
                 <CardHeader>
                   <CardTitle>Emerging Risk Radar</CardTitle>
                   <CardDescription>Impact vs Probability Analysis</CardDescription>
@@ -212,14 +233,19 @@ export default function RiskCenter() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('emerging-risk', 'key-risks-list')} data-testid="card-key-emerging-risks">
                 <CardHeader>
                   <CardTitle>Key Emerging Risks</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {riskData.emergingRisks.keyEmergingRisks.map((risk, i) => (
-                      <div key={i} className={`p-4 rounded-lg border ${risk.impact === "high" && risk.probability === "high" ? "border-red-300 bg-red-50" : risk.impact === "high" || risk.probability === "high" ? "border-amber-300 bg-amber-50" : "border-gray-200"}`}>
+                      <div 
+                        key={i} 
+                        className={`p-4 rounded-lg border cursor-pointer hover:ring-2 hover:ring-blue-300 transition-all ${risk.impact === "high" && risk.probability === "high" ? "border-red-300 bg-red-50" : risk.impact === "high" || risk.probability === "high" ? "border-amber-300 bg-amber-50" : "border-gray-200"}`}
+                        onClick={(e) => { e.stopPropagation(); handleDrillDown('emerging-risk', `emerging-${i}`); }}
+                        data-testid={`card-emerging-risk-${i}`}
+                      >
                         <div className="flex justify-between items-start">
                           <span className="font-medium">{risk.name}</span>
                           <div className="flex gap-1">
@@ -243,7 +269,12 @@ export default function RiskCenter() {
           <TabsContent value="climate" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {riskData.climateRiskCategories.map((cat, i) => (
-                <Card key={i} className={`border-t-4 ${cat.type === "Transition Risk" ? "border-t-blue-500" : cat.type === "Physical Risk" ? "border-t-amber-500" : "border-t-purple-500"}`}>
+                <Card 
+                  key={i} 
+                  className={`border-t-4 cursor-pointer hover:shadow-md transition-shadow ${cat.type === "Transition Risk" ? "border-t-blue-500" : cat.type === "Physical Risk" ? "border-t-amber-500" : "border-t-purple-500"}`}
+                  onClick={() => handleDrillDown('climate-risk', `climate-${i}`)}
+                  data-testid={`card-climate-risk-${i}`}
+                >
                   <CardHeader>
                     <CardTitle className="text-lg">{cat.type}</CardTitle>
                   </CardHeader>
@@ -251,7 +282,12 @@ export default function RiskCenter() {
                     <p className="text-sm text-gray-600 mb-4">{cat.description}</p>
                     <div className="space-y-2">
                       {cat.examples.map((ex, j) => (
-                        <div key={j} className="flex items-center gap-2">
+                        <div 
+                          key={j} 
+                          className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors"
+                          onClick={(e) => { e.stopPropagation(); handleDrillDown('climate-example', `climate-${i}-example-${j}`); }}
+                          data-testid={`card-climate-example-${i}-${j}`}
+                        >
                           <AlertTriangle className={`h-4 w-4 ${cat.type === "Transition Risk" ? "text-blue-500" : cat.type === "Physical Risk" ? "text-amber-500" : "text-purple-500"}`} />
                           <span className="text-sm">{ex}</span>
                         </div>
@@ -262,7 +298,7 @@ export default function RiskCenter() {
               ))}
             </div>
 
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('climate-statement', 'climate-overview')} data-testid="card-climate-statement">
               <CardHeader>
                 <CardTitle>Climate Risk Statement</CardTitle>
               </CardHeader>
@@ -279,7 +315,7 @@ export default function RiskCenter() {
 
           <TabsContent value="alerts" className="space-y-4">
             {riskAlerts.length === 0 ? (
-              <Card>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('alerts', 'no-alerts')} data-testid="card-no-alerts">
                 <CardContent className="py-12 text-center">
                   <Shield className="h-12 w-12 text-green-500 mx-auto mb-4" />
                   <p className="text-gray-500">No active risk alerts</p>
@@ -287,7 +323,12 @@ export default function RiskCenter() {
               </Card>
             ) : (
               riskAlerts.map(alert => (
-                <Card key={alert.id} className={`border-l-4 ${alert.severity === "critical" ? "border-l-red-500" : alert.severity === "warning" ? "border-l-amber-500" : "border-l-blue-500"}`}>
+                <Card 
+                  key={alert.id} 
+                  className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${alert.severity === "critical" ? "border-l-red-500" : alert.severity === "warning" ? "border-l-amber-500" : "border-l-blue-500"}`}
+                  onClick={() => handleDrillDown('risk-alert', alert.id)}
+                  data-testid={`card-risk-alert-${alert.id}`}
+                >
                   <CardContent className="py-4">
                     <div className="flex items-start gap-4">
                       <div className={`p-2 rounded-full ${alert.severity === "critical" ? "bg-red-100" : "bg-amber-100"}`}>
@@ -304,13 +345,23 @@ export default function RiskCenter() {
                           <span>Target: {alert.targetPersona}</span>
                           <span>Confidence: {alert.confidence}%</span>
                         </div>
-                        <div className="p-3 bg-gray-50 rounded-lg mt-3">
+                        <div 
+                          className="p-3 bg-gray-50 rounded-lg mt-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); handleDrillDown('recommendation', `rec-${alert.id}`); }}
+                          data-testid={`card-recommendation-${alert.id}`}
+                        >
                           <p className="text-sm font-medium">Recommendation:</p>
                           <p className="text-sm text-gray-700">{alert.recommendation}</p>
                         </div>
                         <div className="flex gap-2 mt-3">
                           {alert.actions.map((action, i) => (
-                            <Button key={i} size="sm" variant={action.type === "primary" ? "default" : "outline"}>
+                            <Button 
+                              key={i} 
+                              size="sm" 
+                              variant={action.type === "primary" ? "default" : "outline"}
+                              onClick={(e) => { e.stopPropagation(); handleDrillDown('action', `${alert.id}-action-${i}`); }}
+                              data-testid={`button-alert-action-${alert.id}-${i}`}
+                            >
                               {action.label}
                             </Button>
                           ))}
@@ -324,6 +375,13 @@ export default function RiskCenter() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <DrillDownDrawer
+        isOpen={selectedEntity !== null}
+        onClose={() => setSelectedEntity(null)}
+        entityType={selectedEntity?.type || ''}
+        entityId={selectedEntity?.id || ''}
+      />
     </div>
   );
 }

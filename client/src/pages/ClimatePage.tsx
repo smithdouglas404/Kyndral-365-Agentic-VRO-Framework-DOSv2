@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link } from "wouter";
 import { ArrowLeft, Leaf, TrendingDown, Target, AlertTriangle, Thermometer, Factory, Home, Building2, Globe2 } from "lucide-react";
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,9 @@ import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, RadialBarChart, RadialBar } from "recharts";
 
 export default function ClimatePage() {
+  const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
+  const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
+
   const emissionsTrajectory = [
     { year: "2019", emissions: 100, target: 100 },
     { year: "2020", emissions: 92, target: 95 },
@@ -85,7 +90,7 @@ export default function ClimatePage() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="border-t-4 border-t-green-600">
+          <Card className="border-t-4 border-t-green-600 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('operational-reduction', 'op-reduction-001')} data-testid="card-operational-reduction">
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
@@ -102,7 +107,7 @@ export default function ClimatePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-t-4 border-t-blue-600">
+          <Card className="border-t-4 border-t-blue-600 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('financed-emissions', 'financed-001')} data-testid="card-financed-emissions">
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -119,7 +124,7 @@ export default function ClimatePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-t-4 border-t-amber-500">
+          <Card className="border-t-4 border-t-amber-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('portfolio-temperature', 'temp-001')} data-testid="card-portfolio-temperature">
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-amber-100 rounded-lg">
@@ -136,7 +141,7 @@ export default function ClimatePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-t-4 border-t-purple-600">
+          <Card className="border-t-4 border-t-purple-600 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('transition-finance', 'finance-001')} data-testid="card-transition-finance">
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-100 rounded-lg">
@@ -166,7 +171,7 @@ export default function ClimatePage() {
 
           <TabsContent value="emissions" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('emissions-trajectory', 'emissions-chart-001')} data-testid="card-emissions-trajectory">
                 <CardHeader>
                   <CardTitle>Emissions Reduction Trajectory</CardTitle>
                   <CardDescription>Indexed to 2019 baseline (100)</CardDescription>
@@ -186,7 +191,7 @@ export default function ClimatePage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('carbon-footprint', 'footprint-chart-001')} data-testid="card-carbon-footprint">
                 <CardHeader>
                   <CardTitle>Operational Carbon Footprint Breakdown</CardTitle>
                   <CardDescription>Total: {climateData.operational.totalFootprint2024.value.toLocaleString()} tCO2e</CardDescription>
@@ -221,7 +226,7 @@ export default function ClimatePage() {
 
           <TabsContent value="targets" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="border-l-4 border-l-green-500">
+              <Card className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('scope3-occupier', 'scope3-001')} data-testid="card-scope3-occupier">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-green-600" />
@@ -240,7 +245,7 @@ export default function ClimatePage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-blue-500">
+              <Card className="border-l-4 border-l-blue-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('supplier-engagement', 'supplier-001')} data-testid="card-supplier-engagement">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-blue-600" />
@@ -259,7 +264,7 @@ export default function ClimatePage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-amber-500">
+              <Card className="border-l-4 border-l-amber-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('portfolio-temperature-target', 'temp-target-001')} data-testid="card-portfolio-temp-target">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Thermometer className="h-5 w-5 text-amber-600" />
@@ -278,25 +283,25 @@ export default function ClimatePage() {
               </Card>
             </div>
 
-            <Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('key-commitments', 'commitments-001')} data-testid="card-key-commitments">
               <CardHeader>
                 <CardTitle>Key Commitments</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 bg-green-50 rounded-lg text-center">
+                  <div className="p-4 bg-green-50 rounded-lg text-center cursor-pointer hover:bg-green-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('commitment-netzero', 'netzero-2050'); }} data-testid="metric-netzero-target">
                     <p className="text-3xl font-bold text-green-700">2050</p>
                     <p className="text-sm text-green-600">Net Zero Target</p>
                   </div>
-                  <div className="p-4 bg-blue-50 rounded-lg text-center">
+                  <div className="p-4 bg-blue-50 rounded-lg text-center cursor-pointer hover:bg-blue-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('commitment-scope3', 'scope3-2030'); }} data-testid="metric-scope3-reduction">
                     <p className="text-3xl font-bold text-blue-700">55%</p>
                     <p className="text-sm text-blue-600">Scope 3 Reduction by 2030</p>
                   </div>
-                  <div className="p-4 bg-purple-50 rounded-lg text-center">
+                  <div className="p-4 bg-purple-50 rounded-lg text-center cursor-pointer hover:bg-purple-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('commitment-supplier', 'supplier-2026'); }} data-testid="metric-supplier-sbts">
                     <p className="text-3xl font-bold text-purple-700">100%</p>
                     <p className="text-sm text-purple-600">Supplier SBTs by 2026</p>
                   </div>
-                  <div className="p-4 bg-amber-50 rounded-lg text-center">
+                  <div className="p-4 bg-amber-50 rounded-lg text-center cursor-pointer hover:bg-amber-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('commitment-alignment', 'alignment-1-5c'); }} data-testid="metric-portfolio-alignment">
                     <p className="text-3xl font-bold text-amber-700">1.5°C</p>
                     <p className="text-sm text-amber-600">Portfolio Alignment Goal</p>
                   </div>
@@ -307,26 +312,26 @@ export default function ClimatePage() {
 
           <TabsContent value="operations" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('digital-infrastructure', 'infrastructure-001')} data-testid="card-digital-infrastructure">
                 <CardHeader>
                   <CardTitle>Digital Infrastructure</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('meter-readers', 'amr-001'); }} data-testid="metric-meter-readers">
                     <div className="flex justify-between items-center">
                       <span>Automatic Meter Readers</span>
                       <Badge variant="outline">{climateData.operational.automaticMeterReaders.value} assets</Badge>
                     </div>
                     <p className="text-sm text-green-600 mt-1">+{climateData.operational.automaticMeterReaders.changeFrom2023}% from 2023</p>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('vizta-platform', 'vizta-001'); }} data-testid="metric-vizta-platform">
                     <div className="flex justify-between items-center">
                       <span>Vizta Platform Coverage</span>
                       <Badge variant="outline">{climateData.operational.viztaPlatformAssets.value} assets</Badge>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">Occupier engagement platform</p>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('ies-projects', 'ies-001'); }} data-testid="metric-ies-projects">
                     <div className="flex justify-between items-center">
                       <span>IES Projects</span>
                       <Badge variant="outline">{climateData.operational.iesProjects.value} assets</Badge>
@@ -336,24 +341,24 @@ export default function ClimatePage() {
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('operational-achievements', 'achievements-001')} data-testid="card-operational-achievements">
                 <CardHeader>
                   <CardTitle>Operational Achievements</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 border rounded-lg">
+                    <div className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('scope1-2-reduction', 'scope12-001'); }} data-testid="metric-scope12-reduction">
                       <p className="text-sm text-gray-500">Scope 1 & 2 Reduction (Housing)</p>
                       <p className="text-3xl font-bold text-green-600">{climateData.operational.scope1And2Reduction.value}%</p>
                       <p className="text-sm text-gray-400">vs {climateData.operational.scope1And2Reduction.vsYear}</p>
                     </div>
-                    <div className="p-4 border rounded-lg">
+                    <div className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('total-footprint', 'footprint-2024'); }} data-testid="metric-total-footprint">
                       <p className="text-sm text-gray-500">Total Footprint 2024</p>
                       <p className="text-3xl font-bold">{(climateData.operational.totalFootprint2024.value / 1000).toFixed(1)}k</p>
                       <p className="text-sm text-gray-400">tCO2e</p>
                     </div>
                   </div>
-                  <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('ies-initiative', 'ies-key-001'); }} data-testid="metric-ies-initiative">
                     <p className="font-medium text-green-800">Key Initiative: Integrated Energy Solutions (IES)</p>
                     <p className="text-sm text-green-700 mt-1">Holistic approach integrating on-site renewables, EV charging, microgrid and battery storage across 27 assets</p>
                   </div>
@@ -363,7 +368,7 @@ export default function ClimatePage() {
           </TabsContent>
 
           <TabsContent value="housing" className="space-y-6">
-            <Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('netzero-homes', 'housing-001')} data-testid="card-netzero-homes">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Home className="h-5 w-5 text-green-600" />
@@ -375,7 +380,7 @@ export default function ClimatePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     {housingProgress.map((item, i) => (
-                      <div key={i} className="p-4 bg-gray-50 rounded-lg">
+                      <div key={i} className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('housing-progress', `housing-${item.category.toLowerCase().replace(/\s+/g, '-')}`); }} data-testid={`metric-housing-${i}`}>
                         <div className="flex justify-between mb-2">
                           <span className="font-medium">{item.category}</span>
                           <span className="text-green-600 font-bold">{item.current}%</span>
@@ -385,16 +390,16 @@ export default function ClimatePage() {
                     ))}
                   </div>
                   <div className="space-y-4">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('millfield-green', 'millfield-001'); }} data-testid="metric-millfield-green">
                       <h4 className="font-semibold text-green-800">Millfield Green</h4>
                       <p className="text-sm text-green-700 mt-1">{climateData.housing.millfieldGreen.description}</p>
                       <Badge className="mt-2 bg-green-600">Opened {climateData.housing.millfieldGreen.opened}</Badge>
                     </div>
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('heat-pumps', 'heatpump-001'); }} data-testid="metric-heat-pumps">
                       <h4 className="font-semibold text-blue-800">Ground Source Heat Pumps</h4>
                       <p className="text-sm text-blue-700 mt-1">Supplied by {climateData.housing.groundSourceHeatPumps.supplier}</p>
                     </div>
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('hvo-deployment', 'hvo-001'); }} data-testid="metric-hvo-deployment">
                       <h4 className="font-semibold text-amber-800">HVO Deployment</h4>
                       <p className="text-sm text-amber-700 mt-1">CALA Group successfully deploying Hydrotreated Vegetable Oil as diesel replacement</p>
                     </div>
@@ -406,7 +411,7 @@ export default function ClimatePage() {
 
           <TabsContent value="nature" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-l-4 border-l-green-500">
+              <Card className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('ecuador-debt', 'ecuador-001')} data-testid="card-ecuador-debt">
                 <CardHeader>
                   <CardTitle>Ecuador Debt Conversion</CardTitle>
                 </CardHeader>
@@ -420,16 +425,16 @@ export default function ClimatePage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-blue-500">
+              <Card className="border-l-4 border-l-blue-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('nature-framework', 'nature-001')} data-testid="card-nature-framework">
                 <CardHeader>
                   <CardTitle>Nature Framework</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('tnfd-adopter', 'tnfd-001'); }} data-testid="metric-tnfd-adopter">
                     <Badge className="bg-blue-600">TNFD Adopter</Badge>
                     <span className="text-sm">Task Force on Nature-related Financial Disclosures</span>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('bng-aligned', 'bng-001'); }} data-testid="metric-bng-aligned">
                     <Badge className="bg-green-600">BNG Aligned</Badge>
                     <span className="text-sm">Biodiversity Net Gain planning requirements</span>
                   </div>
@@ -442,7 +447,7 @@ export default function ClimatePage() {
           </TabsContent>
 
           <TabsContent value="context" className="space-y-6">
-            <Card className="border-l-4 border-l-red-500">
+            <Card className="border-l-4 border-l-red-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('climate-reality', 'reality-2024')} data-testid="card-climate-reality">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -451,29 +456,29 @@ export default function ClimatePage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 bg-red-50 rounded-lg text-center">
+                  <div className="p-4 bg-red-50 rounded-lg text-center cursor-pointer hover:bg-red-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('warmest-year', 'warmest-2024'); }} data-testid="metric-warmest-year">
                     <p className="text-3xl font-bold text-red-600">{climateData.context.warmestYearOnRecord}</p>
                     <p className="text-sm text-red-700">Warmest Year on Record</p>
                     <p className="text-xs text-gray-500 mt-1">Since records began in 1850</p>
                   </div>
-                  <div className="p-4 bg-amber-50 rounded-lg text-center">
+                  <div className="p-4 bg-amber-50 rounded-lg text-center cursor-pointer hover:bg-amber-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('temperature-breach', 'temp-breach-001'); }} data-testid="metric-temperature-breach">
                     <p className="text-3xl font-bold text-amber-600">{climateData.context.temperatureBreached.value}°C</p>
                     <p className="text-sm text-amber-700">Temperature Breached</p>
                     <p className="text-xs text-gray-500 mt-1">First calendar year above threshold</p>
                   </div>
-                  <div className="p-4 bg-orange-50 rounded-lg text-center">
+                  <div className="p-4 bg-orange-50 rounded-lg text-center cursor-pointer hover:bg-orange-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('permanent-breach', 'breach-probability'); }} data-testid="metric-permanent-breach">
                     <p className="text-3xl font-bold text-orange-600">{climateData.context.probabilityOf1_5Breach.timeframe}</p>
                     <p className="text-sm text-orange-700">Permanent 1.5°C Breach</p>
                     <p className="text-xs text-gray-500 mt-1">{climateData.context.probabilityOf1_5Breach.likelihood}</p>
                   </div>
-                  <div className="p-4 bg-red-100 rounded-lg text-center">
+                  <div className="p-4 bg-red-100 rounded-lg text-center cursor-pointer hover:bg-red-200 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('worst-case', 'worst-warming'); }} data-testid="metric-worst-case">
                     <p className="text-3xl font-bold text-red-700">{climateData.context.worstCaseWarming.value}°C</p>
                     <p className="text-sm text-red-800">Worst Case Warming</p>
                     <p className="text-xs text-gray-500 mt-1">On current trajectory</p>
                   </div>
                 </div>
 
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('lg-response', 'response-001'); }} data-testid="metric-lg-response">
                   <h4 className="font-semibold mb-2">L&G Response</h4>
                   <p className="text-sm text-gray-700">
                     "Climate risk is increasingly financially material to understanding a company's future success and must be an integral part of our investment analysis. While we continue to do what is within our control to decarbonise our business, as a financial organisation the success of our transition is dependent on the companies we invest in delivering on their decarbonisation targets."
@@ -484,6 +489,13 @@ export default function ClimatePage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <DrillDownDrawer
+          isOpen={!!selectedEntity}
+          onClose={() => setSelectedEntity(null)}
+          entityType={selectedEntity?.type || 'entity'}
+          entityId={selectedEntity?.id || ''}
+        />
       </main>
     </div>
   );

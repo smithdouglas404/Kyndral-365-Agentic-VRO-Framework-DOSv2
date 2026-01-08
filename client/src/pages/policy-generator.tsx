@@ -19,6 +19,7 @@ import { WhatIfPanel } from '@/components/WhatIfPanel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 
 interface Policy {
   id: string;
@@ -82,8 +83,11 @@ export default function PolicyGenerator() {
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<{ text: string; filename: string; pages: number } | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
 
   useEffect(() => {
     fetchPolicies();
@@ -316,10 +320,14 @@ export default function PolicyGenerator() {
 
           <TabsContent value="generate">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card data-testid="card-policy-input">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
+                    <span 
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => handleDrillDown('input', 'policy-input')}
+                      data-testid="title-policy-input"
+                    >
                       <Upload size={20} />
                       Policy Document Input
                     </span>
@@ -335,7 +343,10 @@ export default function PolicyGenerator() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => {
+                          fileInputRef.current?.click();
+                          handleDrillDown('upload', 'pdf');
+                        }}
                         disabled={isUploading}
                         data-testid="button-upload-pdf"
                         className="gap-1"
@@ -347,7 +358,15 @@ export default function PolicyGenerator() {
                         )}
                         Upload PDF
                       </Button>
-                      <Button variant="outline" size="sm" onClick={loadExample} data-testid="button-load-example">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          loadExample();
+                          handleDrillDown('template', 'lg-example');
+                        }} 
+                        data-testid="button-load-example"
+                      >
                         Load L&G Example
                       </Button>
                     </div>
@@ -401,7 +420,10 @@ export default function PolicyGenerator() {
                   )}
                   <Button 
                     className="w-full bg-[#005EB8] hover:bg-[#004a93] gap-2"
-                    onClick={handleGenerate}
+                    onClick={() => {
+                      handleGenerate();
+                      handleDrillDown('generate', 'policy-generation');
+                    }}
                     disabled={isGenerating}
                     data-testid="button-generate"
                   >
@@ -420,7 +442,11 @@ export default function PolicyGenerator() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card 
+                className="cursor-pointer"
+                onClick={() => generatedCode && handleDrillDown('generated-code', 'current')}
+                data-testid="card-generated-code"
+              >
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
@@ -431,7 +457,10 @@ export default function PolicyGenerator() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => handleCopy(generatedCode)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(generatedCode);
+                        }}
                         data-testid="button-copy-code"
                       >
                         <Copy size={14} className="mr-1" />
@@ -581,7 +610,10 @@ export default function PolicyGenerator() {
                         className={`cursor-pointer transition-all hover:shadow-md ${
                           selectedPolicy?.id === policy.id ? 'ring-2 ring-[#005EB8]' : ''
                         }`}
-                        onClick={() => setSelectedPolicy(policy)}
+                        onClick={() => {
+                          setSelectedPolicy(policy);
+                          handleDrillDown('policy', policy.id);
+                        }}
                         data-testid={`card-policy-${policy.id}`}
                       >
                         <CardContent className="p-4">
@@ -620,7 +652,10 @@ export default function PolicyGenerator() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleCopy(selectedPolicy.generatedCode)}
+                            onClick={() => {
+                              handleCopy(selectedPolicy.generatedCode);
+                              handleDrillDown('action', 'copy');
+                            }}
                             data-testid="button-library-copy"
                           >
                             <Copy size={14} className="mr-1" />
@@ -629,11 +664,23 @@ export default function PolicyGenerator() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleDownload(selectedPolicy)}
+                            onClick={() => {
+                              handleDownload(selectedPolicy);
+                              handleDrillDown('action', 'download');
+                            }}
                             data-testid="button-library-download"
                           >
                             <Download size={14} className="mr-1" />
                             Download
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDrillDown('policy-detail', selectedPolicy.id)}
+                            data-testid="button-library-view"
+                          >
+                            <Eye size={14} className="mr-1" />
+                            View
                           </Button>
                           <Button 
                             variant="outline" 
@@ -650,18 +697,35 @@ export default function PolicyGenerator() {
                     <CardContent>
                       <div className="flex gap-2 mb-4">
                         {selectedPolicy.provider && (
-                          <Badge variant="outline">
+                          <Badge 
+                            variant="outline" 
+                            className="cursor-pointer hover:bg-muted"
+                            onClick={() => handleDrillDown('provider', selectedPolicy.provider || '')}
+                            data-testid={`badge-provider-${selectedPolicy.id}`}
+                          >
                             <Building2 size={12} className="mr-1" />
                             {selectedPolicy.provider}
                           </Badge>
                         )}
                         {selectedPolicy.documentId && (
-                          <Badge variant="outline">
+                          <Badge 
+                            variant="outline"
+                            className="cursor-pointer hover:bg-muted"
+                            onClick={() => handleDrillDown('document', selectedPolicy.documentId || '')}
+                            data-testid={`badge-document-${selectedPolicy.id}`}
+                          >
                             <FileText size={12} className="mr-1" />
                             {selectedPolicy.documentId}
                           </Badge>
                         )}
-                        <Badge variant="secondary">{selectedPolicy.codeFormat?.toUpperCase()}</Badge>
+                        <Badge 
+                          variant="secondary"
+                          className="cursor-pointer hover:bg-muted"
+                          onClick={() => handleDrillDown('format', selectedPolicy.codeFormat || 'yaml')}
+                          data-testid={`badge-format-${selectedPolicy.id}`}
+                        >
+                          {selectedPolicy.codeFormat?.toUpperCase()}
+                        </Badge>
                       </div>
                       <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto max-h-[500px] text-sm font-mono">
                         {selectedPolicy.generatedCode}
@@ -737,6 +801,13 @@ export default function PolicyGenerator() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <DrillDownDrawer
+        isOpen={selectedEntity !== null}
+        onClose={() => setSelectedEntity(null)}
+        entityType={selectedEntity?.type || ''}
+        entityId={selectedEntity?.id || ''}
+      />
     </div>
   );
 }
