@@ -143,56 +143,320 @@ const agents = [
   }
 ];
 
-const aiFeatures = [
+const mcpAgents = [
   {
-    id: 'alert-ticker',
-    name: 'Live AI Alert Ticker',
-    location: 'Dashboard Header',
-    description: 'Real-time streaming of AI-generated insights, risk warnings, and opportunity alerts from across all portfolios.',
-    value: 'Reduces time to identify critical issues from hours to seconds',
-    icon: Activity
+    id: 'mcp-context',
+    name: 'MCP Context Manager',
+    category: 'Protocol',
+    icon: RefreshCw,
+    color: 'bg-blue-500',
+    description: 'Manages context serialization and sharing between agents using Model Context Protocol standards.',
+    responsibilities: [
+      'Context serialization and deserialization',
+      'Version-controlled context updates',
+      'Conflict resolution protocols'
+    ],
+    dataInputs: ['Agent states', 'Context payloads'],
+    outputs: ['Synchronized context', 'Version history'],
+    integratesWith: ['All Agents', 'A2A Router']
   },
   {
-    id: 'command-center',
-    name: 'AI Command Center',
-    location: 'AI Insights Tab',
-    description: 'Natural language interface for querying portfolio data, generating reports, and executing complex analyses.',
-    value: 'Enables non-technical stakeholders to access deep analytics instantly',
-    icon: Brain
-  },
-  {
-    id: 'proactive-insights',
-    name: 'Proactive Insights Engine',
-    location: 'AI Insights Tab',
-    description: 'Automatically surfaces emerging patterns, risks, and opportunities before they become obvious.',
-    value: 'Shifts from reactive to predictive portfolio management',
-    icon: Sparkles
-  },
-  {
-    id: 'what-if-simulator',
-    name: 'What-If Scenario Simulator',
-    location: 'Policy Generator - Business View',
-    description: 'Simulates policy changes against 245,000 historical applications to predict customer impact.',
-    value: 'De-risks policy changes by showing exact customer impact before implementation',
-    icon: TrendingUp
-  },
-  {
-    id: 'policy-as-code',
-    name: 'Policy as Code Generator',
-    location: 'Policy Generator Page',
-    description: 'Uses Claude AI to transform policy documents into machine-readable YAML rules.',
-    value: 'Reduces policy digitization time from weeks to minutes',
-    icon: FileCode
-  },
-  {
-    id: 'business-rules-viewer',
-    name: 'Business Rules Viewer',
-    location: 'Policy Generator - Business View',
-    description: 'AI-extracted plain English rules from complex policy documents for non-technical review.',
-    value: 'Democratizes policy understanding across all stakeholders',
-    icon: FileText
+    id: 'a2a-router',
+    name: 'A2A Message Router',
+    category: 'Communication',
+    icon: GitBranch,
+    color: 'bg-purple-500',
+    description: 'Routes messages between agents with priority handling, acknowledgment, and retry logic.',
+    responsibilities: [
+      'Priority-based message routing',
+      'Acknowledgment and retry logic',
+      'Cross-agent transaction support'
+    ],
+    dataInputs: ['Agent messages', 'Priority rules'],
+    outputs: ['Routed messages', 'Delivery confirmations'],
+    integratesWith: ['MCP Context Manager', 'All Agents']
   }
 ];
+
+const integrationAgents = [
+  {
+    id: 'jira-connector',
+    name: 'Jira/Azure DevOps Connector',
+    category: 'Project Tools',
+    icon: GitBranch,
+    color: 'bg-blue-500',
+    description: 'Synchronizes project and sprint data with Jira and Azure DevOps for seamless workflow integration.',
+    responsibilities: [
+      'Two-way sprint data synchronization',
+      'Issue and task mapping',
+      'Velocity and burndown tracking'
+    ],
+    dataInputs: ['Sprint data', 'Issue updates'],
+    outputs: ['Synced projects', 'Status updates'],
+    integratesWith: ['PMO Agent', 'Planning Agent']
+  },
+  {
+    id: 'servicenow-connector',
+    name: 'ServiceNow Connector',
+    category: 'ITSM',
+    icon: Shield,
+    color: 'bg-green-500',
+    description: 'Integrates with ServiceNow for ITSM and change management workflows.',
+    responsibilities: [
+      'Change request automation',
+      'Incident correlation',
+      'CMDB synchronization'
+    ],
+    dataInputs: ['Change requests', 'Incidents'],
+    outputs: ['Approved changes', 'Incident reports'],
+    integratesWith: ['Governance Agent', 'TMO Agent']
+  },
+  {
+    id: 'bi-connector',
+    name: 'Power BI/Tableau Connector',
+    category: 'Analytics',
+    icon: BarChart3,
+    color: 'bg-amber-500',
+    description: 'Exports data to BI platforms for advanced visualization and executive reporting.',
+    responsibilities: [
+      'Automated data refresh',
+      'Dashboard embedding',
+      'Report distribution'
+    ],
+    dataInputs: ['Portfolio metrics', 'KPI data'],
+    outputs: ['BI datasets', 'Embedded reports'],
+    integratesWith: ['Value Realization Agent', 'FinOps Agent']
+  },
+  {
+    id: 'comms-connector',
+    name: 'Slack/Teams Connector',
+    category: 'Communication',
+    icon: Users,
+    color: 'bg-purple-500',
+    description: 'Delivers notifications and alerts to collaboration platforms with actionable buttons.',
+    responsibilities: [
+      'Real-time alert delivery',
+      'Interactive notifications',
+      'Channel-based routing'
+    ],
+    dataInputs: ['Alert events', 'User preferences'],
+    outputs: ['Notifications', 'Action responses'],
+    integratesWith: ['All Agents', 'OCM Agent']
+  }
+];
+
+const roadmapPhases = [
+  {
+    id: 'phase-1',
+    name: 'Phase 1: Foundation',
+    category: 'Q1 2025',
+    icon: Layers,
+    color: 'bg-blue-500',
+    description: 'Establish core agent infrastructure and basic communication protocols.',
+    responsibilities: [
+      'Core agent deployment',
+      'Basic MCP implementation',
+      'Dashboard integration'
+    ],
+    dataInputs: ['Requirements', 'Architecture specs'],
+    outputs: ['Deployed agents', 'Basic dashboards'],
+    integratesWith: ['IT Infrastructure', 'Security Team']
+  },
+  {
+    id: 'phase-2',
+    name: 'Phase 2: Intelligence',
+    category: 'Q2 2025',
+    icon: Brain,
+    color: 'bg-purple-500',
+    description: 'Add predictive analytics and cross-agent learning capabilities.',
+    responsibilities: [
+      'Predictive analytics integration',
+      'Cross-agent learning models',
+      'Advanced risk modeling'
+    ],
+    dataInputs: ['Historical data', 'ML models'],
+    outputs: ['Predictions', 'Risk scores'],
+    integratesWith: ['Data Science Team', 'Phase 1 Agents']
+  },
+  {
+    id: 'phase-3',
+    name: 'Phase 3: Autonomy',
+    category: 'Q3 2025',
+    icon: Zap,
+    color: 'bg-amber-500',
+    description: 'Enable self-healing workflows and autonomous decision execution.',
+    responsibilities: [
+      'Self-healing workflows',
+      'Autonomous decision execution',
+      'Full A2A orchestration'
+    ],
+    dataInputs: ['Decision rules', 'Escalation policies'],
+    outputs: ['Automated actions', 'Audit trails'],
+    integratesWith: ['Governance Team', 'Phase 2 Agents']
+  },
+  {
+    id: 'phase-4',
+    name: 'Phase 4: Scale',
+    category: 'Q4 2025',
+    icon: TrendingUp,
+    color: 'bg-green-500',
+    description: 'Enterprise-wide rollout with multi-portfolio support and partner ecosystem.',
+    responsibilities: [
+      'Multi-portfolio support',
+      'Enterprise-wide rollout',
+      'Partner ecosystem integration'
+    ],
+    dataInputs: ['Scale requirements', 'Partner APIs'],
+    outputs: ['Global deployment', 'Partner integrations'],
+    integratesWith: ['All Business Units', 'External Partners']
+  }
+];
+
+const valueAgents = [
+  {
+    id: 'roi-tracker',
+    name: 'ROI Tracking Engine',
+    category: 'Value Measurement',
+    icon: TrendingUp,
+    color: 'bg-green-500',
+    description: 'Tracks return on investment across all transformation initiatives with real-time calculations.',
+    responsibilities: [
+      'Real-time ROI calculation',
+      'Benefit realization tracking',
+      'Value leakage detection'
+    ],
+    dataInputs: ['Investment data', 'Benefit metrics'],
+    outputs: ['ROI reports', 'Value dashboards'],
+    integratesWith: ['Value Realization Agent', 'FinOps Agent']
+  },
+  {
+    id: 'cost-optimizer',
+    name: 'Cost Optimization Agent',
+    category: 'Cost Management',
+    icon: DollarSign,
+    color: 'bg-blue-500',
+    description: 'Identifies cost reduction opportunities and optimizes resource allocation.',
+    responsibilities: [
+      'Cost reduction identification',
+      'Resource optimization',
+      'Vendor spend analysis'
+    ],
+    dataInputs: ['Spend data', 'Resource utilization'],
+    outputs: ['Savings opportunities', 'Optimization plans'],
+    integratesWith: ['FinOps Agent', 'Planning Agent']
+  },
+  {
+    id: 'benefit-realizer',
+    name: 'Benefit Realization Agent',
+    category: 'Benefits',
+    icon: Target,
+    color: 'bg-purple-500',
+    description: 'Ensures planned benefits are achieved and tracks against business case projections.',
+    responsibilities: [
+      'Benefit tracking and validation',
+      'Business case alignment',
+      'Stakeholder value reporting'
+    ],
+    dataInputs: ['Business cases', 'Actuals data'],
+    outputs: ['Benefit reports', 'Variance analysis'],
+    integratesWith: ['Value Realization Agent', 'Governance Agent']
+  },
+  {
+    id: 'efficiency-monitor',
+    name: 'Efficiency Monitor',
+    category: 'Productivity',
+    icon: Activity,
+    color: 'bg-amber-500',
+    description: 'Monitors productivity gains and operational efficiency improvements.',
+    responsibilities: [
+      'Productivity measurement',
+      'Process efficiency tracking',
+      'Automation impact assessment'
+    ],
+    dataInputs: ['Process metrics', 'Automation data'],
+    outputs: ['Efficiency scores', 'Improvement trends'],
+    integratesWith: ['PMO Agent', 'TMO Agent']
+  }
+];
+
+function AgentCard({ agent, index }: { agent: typeof agents[0]; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+    >
+      <Card className="h-full hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-start gap-3">
+            <div className={`p-2.5 ${agent.color} rounded-lg`}>
+              <agent.icon className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <CardTitle className="text-lg">{agent.name}</CardTitle>
+                <Badge variant="secondary" className="text-xs">
+                  {agent.category}
+                </Badge>
+              </div>
+              <p className="text-gray-600 text-sm mt-1">{agent.description}</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-medium text-green-700 flex items-center gap-1 mb-2">
+              <CheckCircle2 size={14} />
+              Key Responsibilities
+            </p>
+            <ul className="space-y-1">
+              {agent.responsibilities.map((resp, i) => (
+                <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                  <span className="text-gray-400 mt-1">›</span>
+                  {resp}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex gap-8 pt-2 border-t">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Data Inputs</p>
+              <div className="flex flex-wrap gap-1">
+                {agent.dataInputs.map((input, i) => (
+                  <Badge key={i} variant="outline" className="text-xs bg-gray-50">
+                    {input}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Outputs</p>
+              <div className="flex flex-wrap gap-1">
+                {agent.outputs.map((output, i) => (
+                  <Badge key={i} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                    {output}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t">
+            <p className="text-xs text-gray-500 mb-1">Integrates with:</p>
+            <div className="flex flex-wrap gap-1">
+              {agent.integratesWith.map((integration, i) => (
+                <Badge key={i} className="text-xs bg-green-100 text-green-700 border-green-200">
+                  {integration}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
 
 export default function VROFramework() {
   const [activeTab, setActiveTab] = useState('agent-lineage');
@@ -243,7 +507,6 @@ export default function VROFramework() {
               <span className="text-gray-500">Recommendations</span>
             </div>
           </div>
-
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -251,290 +514,57 @@ export default function VROFramework() {
             <TabsTrigger value="agent-lineage" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-agent-lineage">
               Agent Lineage
             </TabsTrigger>
-            <TabsTrigger value="architecture" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-architecture">
-              Architecture
-            </TabsTrigger>
             <TabsTrigger value="mcp-a2a" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-mcp-a2a">
               MCP & A2A
             </TabsTrigger>
             <TabsTrigger value="integration" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-integration">
               Integration
             </TabsTrigger>
-            <TabsTrigger value="ai-in-app" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-ai-in-app">
-              <Sparkles size={14} className="mr-1" />
-              AI in This App
+            <TabsTrigger value="roadmap" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-roadmap">
+              Phased Roadmap
+            </TabsTrigger>
+            <TabsTrigger value="value-benefits" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-value-benefits">
+              Value & Benefits
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="agent-lineage">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {agents.map((agent, index) => (
-                <motion.div
-                  key={agent.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="h-full hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2.5 ${agent.color} rounded-lg`}>
-                          <agent.icon className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <CardTitle className="text-lg">{agent.name}</CardTitle>
-                            <Badge variant="secondary" className="text-xs">
-                              {agent.category}
-                            </Badge>
-                          </div>
-                          <p className="text-gray-600 text-sm mt-1">{agent.description}</p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <p className="text-sm font-medium text-green-700 flex items-center gap-1 mb-2">
-                          <CheckCircle2 size={14} />
-                          Key Responsibilities
-                        </p>
-                        <ul className="space-y-1">
-                          {agent.responsibilities.map((resp, i) => (
-                            <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                              <span className="text-gray-400 mt-1">›</span>
-                              {resp}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="flex gap-8 pt-2 border-t">
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Data Inputs</p>
-                          <div className="flex flex-wrap gap-1">
-                            {agent.dataInputs.map((input, i) => (
-                              <Badge key={i} variant="outline" className="text-xs bg-gray-50">
-                                {input}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Outputs</p>
-                          <div className="flex flex-wrap gap-1">
-                            {agent.outputs.map((output, i) => (
-                              <Badge key={i} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                {output}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-gray-500 mb-1">Integrates with:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {agent.integratesWith.map((integration, i) => (
-                            <Badge key={i} className="text-xs bg-green-100 text-green-700 border-green-200">
-                              {integration}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                <AgentCard key={agent.id} agent={agent} index={index} />
               ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="architecture">
-            <div className="bg-white rounded-xl border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold mb-4">Agentic Architecture Overview</h2>
-              <p className="text-gray-600 mb-6">
-                The VRO Agentic Framework is built on a distributed agent architecture where each agent 
-                operates autonomously while maintaining continuous communication with other agents through 
-                the central message bus.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Layers className="text-blue-500" />
-                      Agent Layer
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 text-sm">
-                      Specialized agents handle specific domains (Value, Risk, PMO) with dedicated 
-                      knowledge bases and decision models.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Link2 className="text-purple-500" />
-                      Communication Layer
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 text-sm">
-                      MCP (Model Context Protocol) enables agents to share context and A2A (Agent-to-Agent) 
-                      messaging for coordinated actions.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <BarChart3 className="text-green-500" />
-                      Data Layer
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 text-sm">
-                      Unified data platform aggregating portfolio, project, and financial data for 
-                      cross-agent analysis.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-
           <TabsContent value="mcp-a2a">
-            <div className="bg-white rounded-xl border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold mb-4">MCP & Agent-to-Agent Communication</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <RefreshCw className="text-blue-500" />
-                    Model Context Protocol (MCP)
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    MCP provides a standardized way for agents to share context, including current state, 
-                    historical decisions, and relevant data points.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 size={14} className="text-green-500" />
-                      Context serialization and deserialization
-                    </li>
-                    <li className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 size={14} className="text-green-500" />
-                      Version-controlled context updates
-                    </li>
-                    <li className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 size={14} className="text-green-500" />
-                      Conflict resolution protocols
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <GitBranch className="text-purple-500" />
-                    Agent-to-Agent (A2A)
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    A2A messaging enables direct communication between agents for coordinated decision-making 
-                    and escalation workflows.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 size={14} className="text-green-500" />
-                      Priority-based message routing
-                    </li>
-                    <li className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 size={14} className="text-green-500" />
-                      Acknowledgment and retry logic
-                    </li>
-                    <li className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 size={14} className="text-green-500" />
-                      Cross-agent transaction support
-                    </li>
-                  </ul>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {mcpAgents.map((agent, index) => (
+                <AgentCard key={agent.id} agent={agent} index={index} />
+              ))}
             </div>
           </TabsContent>
 
           <TabsContent value="integration">
-            <div className="bg-white rounded-xl border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold mb-4">Integration Points</h2>
-              <p className="text-gray-600 mb-6">
-                The VRO Framework integrates with enterprise systems for seamless data flow and automation.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { name: 'Jira / Azure DevOps', desc: 'Project and sprint data sync', status: 'Active' },
-                  { name: 'ServiceNow', desc: 'ITSM and change management', status: 'Active' },
-                  { name: 'Power BI / Tableau', desc: 'BI platform integration', status: 'Active' },
-                  { name: 'SAP / Oracle Financials', desc: 'Budget and actuals data', status: 'Planned' },
-                  { name: 'Slack / Teams', desc: 'Notification and alerts', status: 'Active' },
-                  { name: 'SharePoint', desc: 'Document management', status: 'Active' }
-                ].map((integration, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{integration.name}</span>
-                        <Badge variant={integration.status === 'Active' ? 'default' : 'secondary'}>
-                          {integration.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-500">{integration.desc}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {integrationAgents.map((agent, index) => (
+                <AgentCard key={agent.id} agent={agent} index={index} />
+              ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="ai-in-app">
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-2">
-                  <Sparkles size={28} />
-                  <h2 className="text-2xl font-bold">AI Features in This Application</h2>
-                </div>
-                <p className="text-white/80">
-                  This dashboard leverages {aiFeatures.length} AI-powered features to deliver intelligent 
-                  transformation management.
-                </p>
-              </div>
+          <TabsContent value="roadmap">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {roadmapPhases.map((agent, index) => (
+                <AgentCard key={agent.id} agent={agent} index={index} />
+              ))}
+            </div>
+          </TabsContent>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {aiFeatures.map((feature, index) => (
-                  <motion.div
-                    key={feature.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Card className="h-full border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
-                      <CardContent className="p-5">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-purple-100 rounded-lg">
-                            <feature.icon className="h-5 w-5 text-purple-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <h3 className="font-semibold text-gray-900">{feature.name}</h3>
-                              <Badge variant="outline" className="text-xs">
-                                {feature.location}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-2">{feature.description}</p>
-                            <p className="text-xs text-green-600 font-medium">
-                              ✓ {feature.value}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
+          <TabsContent value="value-benefits">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {valueAgents.map((agent, index) => (
+                <AgentCard key={agent.id} agent={agent} index={index} />
+              ))}
             </div>
           </TabsContent>
         </Tabs>
