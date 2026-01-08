@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, FileText, CheckCircle2, TrendingUp, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 export default function ValueProposition() {
   const [, navigate] = useLocation();
@@ -33,6 +34,21 @@ export default function ValueProposition() {
       </header>
 
       <main className="container mx-auto px-8 py-12 max-w-4xl">
+        <PageAgentWizard 
+          context={{
+            pageName: 'Value Proposition',
+            pageType: 'overview',
+            metrics: {
+              'Cycle Time Reduction': '83%',
+              'Speed Improvement': '30 Days → 5 Days',
+              'Forecast Accuracy': '85%',
+              'Overhead Reduction': '75%',
+              'Portfolio Visibility': '100%'
+            }
+          }}
+          agentName="Value Agent"
+        />
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { riskData, aiAlerts } from "@/lib/lgData";
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, Cell } from "recharts";
 
 export default function RiskCenter() {
@@ -67,6 +68,23 @@ export default function RiskCenter() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        <PageAgentWizard 
+          context={{
+            pageName: 'Enterprise Risk Center',
+            pageType: 'tool',
+            metrics: {
+              'Risk Categories': riskData.categories.length,
+              'Emerging Risks': riskData.emergingRisks.keyEmergingRisks.length,
+              'High Severity Risks': riskData.categories.reduce((sum, cat) => sum + cat.subRisks.filter(r => r.severity === 'high').length, 0),
+              'Active Risk Alerts': riskAlerts.length,
+              'Largest Exposures': riskData.overview.largestExposures.join(', ')
+            },
+            alertCount: riskAlerts.length,
+            riskCount: riskData.categories.reduce((sum, cat) => sum + cat.subRisks.filter(r => r.severity === 'high').length, 0)
+          }}
+          agentName="Risk Agent"
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           <Card className="lg:col-span-2">
             <CardHeader>

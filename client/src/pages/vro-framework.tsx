@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 const agents = [
   {
@@ -475,6 +476,21 @@ export default function VROFramework() {
       </header>
 
       <main className="container mx-auto px-8 py-8">
+        <PageAgentWizard 
+          context={{
+            pageName: 'VRO Framework',
+            pageType: 'framework',
+            metrics: {
+              'Core Agents': agents.length,
+              'MCP/A2A Agents': mcpAgents.length,
+              'Integration Connectors': integrationAgents.length,
+              'Roadmap Phases': roadmapPhases.length,
+              'Value Agents': valueAgents.length
+            }
+          }}
+          agentName="Framework Agent"
+        />
+
         <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
           <div className="flex items-start gap-4 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl">

@@ -96,7 +96,7 @@ export default function DivisionPage() {
               'Operating Profit': `£${division.profit2024}m`,
               'YoY Change': `${division.changePercent}%`,
               'KPIs Tracked': division.kpis.length,
-              'At-Risk KPIs': division.kpis.filter(k => k.status === 'at-risk' || k.status === 'behind').length,
+              'At-Risk KPIs': division.kpis.filter(k => k.status === 'at-risk' || k.status === 'off-track').length,
               'OKRs': division.okrs.length,
               'High-Priority Projects': division.potentialProjects.filter(p => p.priority === 'high').length
             }
@@ -448,7 +448,6 @@ export default function DivisionPage() {
         onClose={() => setSelectedEntity(null)}
         entityType={selectedEntity?.type || 'entity'}
         entityId={selectedEntity?.id || ''}
-        agentId="vro"
       />
     </div>
   );

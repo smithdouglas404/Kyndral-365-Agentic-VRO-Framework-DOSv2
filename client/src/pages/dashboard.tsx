@@ -34,6 +34,7 @@ import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -287,6 +288,21 @@ export default function Dashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
+          <PageAgentWizard 
+            context={{
+              pageName: 'VRO Intelligence Hub',
+              pageType: 'dashboard',
+              entityId: 'vro',
+              metrics: {
+                'PRT Volume': lgAnnualReportData.prtVolume.actual2025,
+                'Forecast Accuracy': lgAnnualReportData.forecastAccuracy.actual2025,
+                'Cost Savings': lgAnnualReportData.costSavings.actual2025,
+                'Active Alerts': aiAlerts.length
+              }
+            }}
+            agentName="VRO Agent"
+          />
+
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}

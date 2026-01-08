@@ -22,6 +22,7 @@ import {
   type DataMode,
   type TransformedObjective
 } from '@/lib/agentDataTransformers';
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 function NavBar() {
   return (
@@ -217,6 +218,21 @@ export default function OKRDashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8">
+          <PageAgentWizard 
+            context={{
+              pageName: 'OKR Dashboard',
+              pageType: 'dashboard',
+              entityId: 'okr',
+              metrics: {
+                'Total Projects': liveData.metrics.totalProjects,
+                'At-Risk': liveData.metrics.atRiskProjects,
+                'Active Alerts': liveData.metrics.activeAlerts,
+                'Avg Confidence': liveData.metrics.avgConfidence
+              }
+            }}
+            agentName="OKR Agent"
+          />
+
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">

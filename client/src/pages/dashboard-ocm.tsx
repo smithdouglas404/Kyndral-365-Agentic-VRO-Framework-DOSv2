@@ -25,6 +25,7 @@ import {
   type TransformedStakeholderGroup,
   type TransformedTrainingProgram
 } from '@/lib/agentDataTransformers';
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 function NavBar() {
   return (
@@ -298,6 +299,23 @@ export default function OCMDashboard() {
               </div>
             </div>
           </div>
+
+          <PageAgentWizard 
+            context={{
+              pageName: 'OCM Intelligence Console',
+              pageType: 'dashboard',
+              metrics: {
+                'Change Readiness': `${liveData.metrics.avgConfidence || avgReadiness}%`,
+                'Training Completion': `${Math.round((totalCompleted / totalEnrolled) * 100)}%`,
+                'Positive Stakeholders': `${positiveStakeholders}/${stakeholderGroups.length}`,
+                'Avg Satisfaction': `${avgSatisfaction}/5`,
+                'Impacted Staff': companyMetrics.totalEmployees
+              },
+              alertCount: liveData.metrics.activeAlerts,
+              riskCount: liveData.metrics.atRiskProjects
+            }}
+            agentName="OCM Agent"
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative">

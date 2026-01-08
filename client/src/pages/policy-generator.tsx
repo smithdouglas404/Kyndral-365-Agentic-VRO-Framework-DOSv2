@@ -18,6 +18,7 @@ import { BusinessRulesViewer } from '@/components/BusinessRulesViewer';
 import { WhatIfPanel } from '@/components/WhatIfPanel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 interface Policy {
   id: string;
@@ -279,6 +280,19 @@ export default function PolicyGenerator() {
       </div>
 
       <div className="max-w-7xl mx-auto p-8">
+        <PageAgentWizard 
+          context={{
+            pageName: 'Policy Generator',
+            pageType: 'tool',
+            metrics: {
+              'Policies in Library': policies.length,
+              'Active Generation': isGenerating ? 'In Progress' : 'Ready',
+              'View Mode': viewMode === 'business' ? 'Business Rules' : 'Technical YAML'
+            }
+          }}
+          agentName="Policy Agent"
+        />
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="generate" className="gap-2" data-testid="tab-generate">

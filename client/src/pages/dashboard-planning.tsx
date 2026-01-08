@@ -24,6 +24,7 @@ import {
   type TransformedMilestone,
   type TransformedDeadline
 } from '@/lib/agentDataTransformers';
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 function NavBar() {
   return (
@@ -267,6 +268,23 @@ export default function PlanningDashboard() {
               </div>
             </div>
           </div>
+
+          <PageAgentWizard 
+            context={{
+              pageName: 'Strategic Planning Console',
+              pageType: 'dashboard',
+              metrics: {
+                'Current Phase': `${completedPhases + 1}/${milestones.length}`,
+                'Overall Progress': `${liveData.metrics.avgConfidence || overallProgress}%`,
+                'Budget Spent': `£${liveData.metrics.realizedValue || totalSpent.toFixed(1)}M of £${liveData.metrics.totalValue || totalBudget}M`,
+                'Deadlines On Track': `${onTrackDeadlines}/${deadlines.length}`,
+                'Active Projects': liveData.metrics.totalProjects || inProgressProjects
+              },
+              alertCount: liveData.metrics.activeAlerts,
+              riskCount: liveData.metrics.atRiskProjects || atRiskDeadlines
+            }}
+            agentName="Planning Agent"
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative">

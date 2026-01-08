@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { climateData, lgCompanyOverview } from "@/lib/lgData";
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, RadialBarChart, RadialBar } from "recharts";
 
 export default function ClimatePage() {
@@ -67,6 +68,22 @@ export default function ClimatePage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        <PageAgentWizard 
+          context={{
+            pageName: 'Climate Risk Analysis',
+            pageType: 'tool',
+            metrics: {
+              'Operational Reduction': `${climateData.headline.operationalFootprintReduction.value}%`,
+              'Financed Emissions': `-${climateData.headline.financedEmissionsReduction.value}%`,
+              'Portfolio Temperature': `${climateData.targets.portfolioTemperature.current}°C`,
+              'Paris Target': `${climateData.targets.portfolioTemperature.target}°C`,
+              'Transition Finance': `£${climateData.headline.transitionFinance.value}bn`,
+              'Net Zero Target': '2050'
+            }
+          }}
+          agentName="Climate Agent"
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className="border-t-4 border-t-green-600">
             <CardContent className="pt-4">

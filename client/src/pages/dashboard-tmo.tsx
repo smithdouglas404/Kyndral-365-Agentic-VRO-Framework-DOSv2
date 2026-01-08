@@ -24,6 +24,7 @@ import {
   type TransformedAdoptionMetric,
   type TransformedInitiative
 } from '@/lib/agentDataTransformers';
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 function NavBar() {
   return (
@@ -305,6 +306,20 @@ export default function TMODashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8">
+          <PageAgentWizard 
+            context={{
+              pageName: 'TMO Dashboard',
+              pageType: 'dashboard',
+              entityId: 'tmo',
+              metrics: {
+                'Total Projects': liveData.metrics.totalProjects,
+                'At-Risk': liveData.metrics.atRiskProjects,
+                'Active Alerts': liveData.metrics.activeAlerts
+              }
+            }}
+            agentName="TMO Agent"
+          />
+
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">

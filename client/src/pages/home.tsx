@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageAgentWizard } from "@/components/PageAgentWizard";
 import heroImage from "@assets/generated_images/london_city_skyline_with_digital_data_overlay_corporate_blue.png";
 
 export default function Home() {
@@ -123,6 +124,19 @@ export default function Home() {
       {/* Value Pillars Section */}
       <section className="py-24 bg-background">
         <div className="container mx-auto px-6">
+          <PageAgentWizard 
+            context={{
+              pageName: 'L&G Transformation Hub',
+              pageType: 'overview',
+              metrics: {
+                'Cycle Time': '5 Days',
+                'Cycle Time Reduction': '83%',
+                'Risk Detection': 'Proactive',
+                'Ways of Working': '12 → 1 Unified'
+              }
+            }}
+            agentName="Transformation Agent"
+          />
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl font-bold text-[hsl(209,100%,36%)] mb-4">Strategic Pillars</h2>
             <p className="text-muted-foreground text-lg">
