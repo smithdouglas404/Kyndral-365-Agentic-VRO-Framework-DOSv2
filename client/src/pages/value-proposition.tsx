@@ -27,7 +27,11 @@ export default function ValueProposition() {
           <div className="font-bold text-lg text-[hsl(209,100%,36%)]">VRO Strategic Value</div>
         </div>
         <Link href="/dashboard">
-          <Button className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white">
+          <Button 
+            className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white"
+            onClick={() => navigate('/dashboard')}
+            data-testid="button-access-dashboard"
+          >
             Access Dashboard
           </Button>
         </Link>
@@ -143,7 +147,12 @@ export default function ValueProposition() {
               Dive into the interactive dashboard to see how these strategies are being applied across the 8 core challenge areas.
             </p>
             <Link href="/dashboard">
-              <Button size="lg" className="bg-white text-[hsl(209,100%,36%)] hover:bg-blue-50 font-bold px-8">
+              <Button 
+                size="lg" 
+                className="bg-white text-[hsl(209,100%,36%)] hover:bg-blue-50 font-bold px-8"
+                onClick={() => navigate('/dashboard')}
+                data-testid="button-launch-dashboard"
+              >
                 Launch Dashboard
               </Button>
             </Link>

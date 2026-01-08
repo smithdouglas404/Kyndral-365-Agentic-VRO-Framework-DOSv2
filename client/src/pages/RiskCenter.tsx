@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft, Shield, AlertTriangle, TrendingUp, CreditCard, Droplets, Settings, Eye, Users } from "lucide-react";
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, Cell } from "recharts";
 
 export default function RiskCenter() {
+  const [, navigate] = useLocation();
   const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
   const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
 
@@ -49,7 +50,13 @@ export default function RiskCenter() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700" data-testid="button-back">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-slate-700" 
+                onClick={() => navigate('/dashboard')}
+                data-testid="button-back"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>

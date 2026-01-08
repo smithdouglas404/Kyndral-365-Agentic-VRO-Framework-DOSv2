@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft, Leaf, TrendingDown, Target, AlertTriangle, Thermometer, Factory, Home, Building2, Globe2 } from "lucide-react";
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, RadialBarChart, RadialBar } from "recharts";
 
 export default function ClimatePage() {
+  const [, navigate] = useLocation();
   const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
   const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
 
@@ -52,7 +53,13 @@ export default function ClimatePage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-green-700" data-testid="button-back">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-green-700" 
+                onClick={() => navigate('/dashboard')}
+                data-testid="button-back"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>

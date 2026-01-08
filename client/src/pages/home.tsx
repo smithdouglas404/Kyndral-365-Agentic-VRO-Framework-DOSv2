@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageAgentWizard } from "@/components/PageAgentWizard";
@@ -7,6 +7,8 @@ import { lgAnnualReportData } from "@/lib/scenarios";
 import heroImage from "@assets/generated_images/london_city_skyline_with_digital_data_overlay_corporate_blue.png";
 
 export default function Home() {
+  const [, navigate] = useLocation();
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* Navigation */}
@@ -17,7 +19,11 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
-              <Button className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white px-6">
+              <Button 
+                className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white px-6"
+                onClick={() => navigate('/dashboard')}
+                data-testid="button-enter-dashboard"
+              >
                 Enter Dashboard
               </Button>
             </Link>
@@ -62,7 +68,12 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link href="/dashboard">
-                <Button size="lg" className="h-14 px-8 text-lg bg-white text-[hsl(209,100%,36%)] hover:bg-blue-50 border-0">
+                <Button 
+                  size="lg" 
+                  className="h-14 px-8 text-lg bg-white text-[hsl(209,100%,36%)] hover:bg-blue-50 border-0"
+                  onClick={() => navigate('/dashboard')}
+                  data-testid="button-explore-dashboard"
+                >
                   Explore The Dashboard <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>

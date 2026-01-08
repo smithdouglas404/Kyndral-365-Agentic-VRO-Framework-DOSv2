@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 
 export default function DivisionPage() {
   const params = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
   const division = divisions.find(d => d.id === params.id);
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
   
@@ -26,7 +27,7 @@ export default function DivisionPage() {
         <Card className="p-8">
           <h1 className="text-2xl font-bold text-[#C50B30]">Division not found</h1>
           <Link href="/dashboard">
-            <Button className="mt-4" data-testid="link-back-dashboard">Return to Dashboard</Button>
+            <Button className="mt-4" onClick={() => setLocation('/dashboard')} data-testid="link-back-dashboard">Return to Dashboard</Button>
           </Link>
         </Card>
       </div>
@@ -54,7 +55,7 @@ export default function DivisionPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
-              <Button variant="ghost" size="icon" data-testid="button-back">
+              <Button variant="ghost" size="icon" onClick={() => setLocation('/dashboard')} data-testid="button-back">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>

@@ -264,7 +264,7 @@ function NavBar() {
             data-testid="input-search"
           />
         </div>
-        <Button size="icon" variant="ghost" className="rounded-full" data-testid="button-user">
+        <Button size="icon" variant="ghost" className="rounded-full" data-testid="button-user" onClick={() => alert('User Profile\n\nAccount settings, preferences, and logout options would appear here.')}>
           <User className="h-5 w-5 text-muted-foreground" />
         </Button>
       </div>
@@ -358,7 +358,15 @@ export default function Dashboard() {
                     { format: "Excel Workbook", desc: "Raw data for analysis" },
                     { format: "PowerPoint", desc: "Presentation-ready slides" },
                   ].map((option, i) => (
-                    <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" data-testid={`export-option-${i}`}>
+                    <div 
+                      key={i} 
+                      className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" 
+                      data-testid={`export-option-${i}`}
+                      onClick={() => {
+                        alert(`Exporting ${option.format}...\n\n${option.desc}\n\nYour download will begin shortly.`);
+                        setExportOpen(false);
+                      }}
+                    >
                       <div>
                         <span className="font-medium text-sm">{option.format}</span>
                         <p className="text-xs text-muted-foreground">{option.desc}</p>

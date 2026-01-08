@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Bot, Zap, Brain, RefreshCw, FileText, 
@@ -460,6 +460,7 @@ function AgentCard({ agent, index }: { agent: typeof agents[0]; index: number })
 }
 
 export default function VROFramework() {
+  const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('agent-lineage');
 
   return (
@@ -467,7 +468,13 @@ export default function VROFramework() {
       <header className="bg-white border-b border-gray-200 px-8 py-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => navigate('/dashboard')}
+              data-testid="button-back-to-dashboard"
+            >
               <ArrowLeft size={16} />
               Back to Dashboard
             </Button>
