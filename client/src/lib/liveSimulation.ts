@@ -327,14 +327,14 @@ export class SimulationEngine {
   private isRunning = false;
   
   constructor() {
-    this.events = generateBatchEvents(2);
+    this.events = generateBatchEvents(5);
   }
   
   private getRandomInterval(): number {
-    const minMinutes = 3;
-    const maxMinutes = 7;
-    const randomMinutes = Math.random() * (maxMinutes - minMinutes) + minMinutes;
-    return Math.floor(randomMinutes * 60 * 1000);
+    const minSeconds = 10;
+    const maxSeconds = 30;
+    const randomSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
+    return Math.floor(randomSeconds * 1000);
   }
   
   private scheduleNextEvent(initialDelay?: number) {
@@ -357,8 +357,8 @@ export class SimulationEngine {
   start(_intervalMs?: number) {
     if (this.isRunning) return;
     this.isRunning = true;
-    // Fire first event quickly (5-15 seconds) so user sees activity immediately
-    const quickStart = Math.floor(Math.random() * 10000) + 5000;
+    // Fire first event quickly (2-5 seconds) so user sees activity immediately
+    const quickStart = Math.floor(Math.random() * 3000) + 2000;
     this.scheduleNextEvent(quickStart);
   }
   
