@@ -34,7 +34,7 @@ export function FloatingAlertBanner() {
       
       const timer = setTimeout(() => {
         setShowBanner(false);
-      }, 8000);
+      }, 5000);
       
       return () => clearTimeout(timer);
     }
@@ -58,22 +58,22 @@ export function FloatingAlertBanner() {
       <AnimatePresence>
         {showBanner && currentEvent && (
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-[100] cursor-pointer"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] cursor-pointer w-auto max-w-lg"
             onClick={handleClick}
             data-testid="floating-alert-banner"
           >
             <motion.div
-              className="shadow-2xl bg-white border-t-4"
+              className="shadow-xl bg-white rounded-lg border-l-4"
               style={{ 
                 borderColor: priorityColors[currentEvent.priority],
-                boxShadow: `0 -4px 20px rgba(0,0,0,0.15)`
+                boxShadow: `0 4px 20px rgba(0,0,0,0.15)`
               }}
             >
-              <div className="px-6 py-4 flex items-start gap-4 max-w-5xl mx-auto">
+              <div className="px-4 py-3 flex items-start gap-3">
                 <div
                   className="p-2 rounded-lg text-white flex-shrink-0"
                   style={{ backgroundColor: priorityColors[currentEvent.priority] }}
@@ -104,11 +104,11 @@ export function FloatingAlertBanner() {
               </div>
               
               <motion.div 
-                className="h-1"
+                className="h-1 rounded-b-lg"
                 style={{ backgroundColor: priorityColors[currentEvent.priority] }}
                 initial={{ width: "100%" }}
                 animate={{ width: "0%" }}
-                transition={{ duration: 8, ease: "linear" }}
+                transition={{ duration: 5, ease: "linear" }}
               />
             </motion.div>
           </motion.div>
