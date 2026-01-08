@@ -64,7 +64,7 @@ const AGENT_CONFIG: Record<AgentType, { name: string; category: string; buFilter
     focusAreas: ['ROI', 'value', 'strategic alignment', 'benefits']
   },
   pmo: {
-    name: 'PMO Flow Orchestrator',
+    name: 'PMO WorkFlow Orchestrator',
     category: 'Project Management',
     focusAreas: ['timeline', 'budget', 'deliverables', 'milestones']
   },

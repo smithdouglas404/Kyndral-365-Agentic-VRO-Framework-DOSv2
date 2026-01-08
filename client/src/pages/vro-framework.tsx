@@ -32,7 +32,7 @@ const agents = [
   },
   {
     id: 'pmo-orchestrator',
-    name: 'PMO Flow Orchestrator',
+    name: 'PMO WorkFlow Orchestrator',
     category: 'Project Management',
     icon: GitBranch,
     color: 'bg-green-500',
