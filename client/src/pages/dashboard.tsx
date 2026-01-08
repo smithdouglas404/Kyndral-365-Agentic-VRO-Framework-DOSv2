@@ -540,11 +540,21 @@ export default function Dashboard() {
 
             {/* Scenario Parameters and Cross-Agent Collaboration */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div>
+              <div className="relative">
                 <ScenarioParameters />
+                {/* Connecting line to Strategic Impact Analysis */}
+                <div className="absolute left-1/2 -bottom-8 w-px h-8 bg-gradient-to-b from-purple-300 to-blue-300 opacity-60" />
               </div>
               <div className="lg:col-span-2">
                 <CrossAgentCollaboration />
+              </div>
+            </div>
+
+            {/* Flow indicator arrow */}
+            <div className="flex justify-start ml-[16.67%] -mt-2 mb-2">
+              <div className="flex flex-col items-center">
+                <div className="w-px h-4 bg-gradient-to-b from-blue-300 to-blue-400 opacity-60" />
+                <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-400 opacity-60" />
               </div>
             </div>
 
