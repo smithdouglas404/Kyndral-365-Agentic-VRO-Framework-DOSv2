@@ -82,54 +82,59 @@ function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => 
 }
 
 function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (type: string, id: string) => void }) {
+  // VRO shows value-focused metrics (ROI, NPV, Benefits Realization)
   const vroStats = [
     { 
-      id: "prt-volume",
-      label: "PRT Volume (2025)", 
-      value: `${lgAnnualReportData.prtVolume.actual2025}`,
-      unit: lgAnnualReportData.prtVolume.unit,
-      baseline: `${lgAnnualReportData.prtVolume.baseline2024} ${lgAnnualReportData.prtVolume.unit}`,
-      target: `${lgAnnualReportData.prtVolume.target2026} ${lgAnnualReportData.prtVolume.unit}`,
-      icon: Target, 
-      color: "text-[#005EB8]",
-      source: lgAnnualReportData.prtVolume.source,
-      progress: Math.round(((lgAnnualReportData.prtVolume.actual2025 - lgAnnualReportData.prtVolume.baseline2024) / (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024)) * 100)
-    },
-    { 
-      id: "forecast-accuracy",
-      label: "Forecast Accuracy (2025)", 
-      value: `${lgAnnualReportData.forecastAccuracy.actual2025}`,
-      unit: lgAnnualReportData.forecastAccuracy.unit,
-      baseline: `${lgAnnualReportData.forecastAccuracy.baseline2024} ${lgAnnualReportData.forecastAccuracy.unit}`,
-      target: `${lgAnnualReportData.forecastAccuracy.target2026} ${lgAnnualReportData.forecastAccuracy.unit}`,
-      icon: Activity, 
-      color: "text-[#00843D]",
-      source: lgAnnualReportData.forecastAccuracy.source,
-      progress: Math.round(((lgAnnualReportData.forecastAccuracy.actual2025 - lgAnnualReportData.forecastAccuracy.baseline2024) / (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024)) * 100)
-    },
-    { 
-      id: "cost-savings",
-      label: "Cost Savings (2025)", 
-      value: `${lgAnnualReportData.costSavings.actual2025}`,
-      unit: lgAnnualReportData.costSavings.unit,
-      baseline: `${lgAnnualReportData.costSavings.baseline2024} ${lgAnnualReportData.costSavings.unit}`,
-      target: `${lgAnnualReportData.costSavings.target2026} ${lgAnnualReportData.costSavings.unit}`,
+      id: "current-roi",
+      label: "Current ROI", 
+      value: "64",
+      unit: "%",
+      baseline: "0%",
+      target: "85%",
       icon: TrendingUp, 
-      color: "text-[#FFD700]",
-      source: lgAnnualReportData.costSavings.source,
-      progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100)
+      color: "text-[#D50032]",
+      source: "VRO Financial Analysis",
+      progress: 75,
+      delta: "-74% vs baseline"
     },
     { 
-      id: "cycle-time",
-      label: "Cycle Time (2025)", 
-      value: `${lgAnnualReportData.cycleTime.actual2025}`,
-      unit: lgAnnualReportData.cycleTime.unit,
-      baseline: `${lgAnnualReportData.cycleTime.baseline2024} ${lgAnnualReportData.cycleTime.unit}`,
-      target: `${lgAnnualReportData.cycleTime.target2026} ${lgAnnualReportData.cycleTime.unit}`,
-      icon: Clock, 
+      id: "net-present-value",
+      label: "Net Present Value", 
+      value: "$36.25",
+      unit: "M",
+      baseline: "$0",
+      target: "$50M",
+      icon: Activity, 
       color: "text-[#005EB8]",
-      source: lgAnnualReportData.cycleTime.source,
-      progress: Math.round(((lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.actual2025) / (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026)) * 100)
+      source: "5-year projection",
+      progress: 73,
+      delta: "+$60K"
+    },
+    { 
+      id: "timeline-progress",
+      label: "Timeline Progress", 
+      value: "69",
+      unit: "%",
+      baseline: "Phase 1",
+      target: "Phase 4",
+      icon: Clock, 
+      color: "text-[#00843D]",
+      source: "Value Stream Mapping",
+      progress: 69,
+      delta: "Phase 2 of 4, -6%"
+    },
+    { 
+      id: "budget-utilization",
+      label: "Budget Utilization", 
+      value: "94",
+      unit: "%",
+      baseline: "$0",
+      target: "$41.2M",
+      icon: Target, 
+      color: "text-[#FFD700]",
+      source: "FinOps Tracking",
+      progress: 94,
+      delta: "$41.2M spent, +6% over"
     },
   ];
 
