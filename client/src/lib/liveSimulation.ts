@@ -328,13 +328,13 @@ export class SimulationEngine {
   
   constructor() {
     // Seed with initial batch of events so users see activity immediately
-    this.events = generateBatchEvents(8);
+    this.events = generateBatchEvents(3);
   }
   
   private getRandomInterval(): number {
-    // Generate new events every 20-45 seconds for active streaming feel
-    const minSeconds = 20;
-    const maxSeconds = 45;
+    // Generate new events every 3-5 minutes as requested
+    const minSeconds = 180; // 3 minutes
+    const maxSeconds = 300; // 5 minutes
     const randomSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
     return Math.floor(randomSeconds * 1000);
   }
