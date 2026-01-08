@@ -135,6 +135,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
 
   const pmoStats = [
     { 
+      id: "prt-volume",
       label: "PRT Volume (2025)", 
       value: `${(lgAnnualReportData.prtVolume.baseline2024 + (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024) * 0.35).toFixed(1)}`,
       unit: lgAnnualReportData.prtVolume.unit,
@@ -146,6 +147,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
       progress: 35
     },
     { 
+      id: "forecast-accuracy",
       label: "Forecast Accuracy (2025)", 
       value: `${Math.round(lgAnnualReportData.forecastAccuracy.baseline2024 + (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024) * 0.25)}`,
       unit: lgAnnualReportData.forecastAccuracy.unit,
@@ -157,6 +159,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
       progress: 25
     },
     { 
+      id: "cost-savings",
       label: "Cost Savings (2025)", 
       value: `${Math.round(lgAnnualReportData.costSavings.target2026 * 0.28)}`,
       unit: lgAnnualReportData.costSavings.unit,
@@ -168,6 +171,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
       progress: 28
     },
     { 
+      id: "cycle-time",
       label: "Cycle Time (2025)", 
       value: `${Math.round(lgAnnualReportData.cycleTime.baseline2024 - (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026) * 0.30)}`,
       unit: lgAnnualReportData.cycleTime.unit,
@@ -192,8 +196,9 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.1, duration: 0.3 }}
-            className="bg-white border border-border rounded-[4px] p-6 flex flex-col items-start shadow-sm hover:shadow-md transition-shadow duration-150"
+            className="bg-white border border-border rounded-[4px] p-6 flex flex-col items-start shadow-sm hover:shadow-md transition-shadow duration-150 cursor-pointer"
             data-testid={`stat-card-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}
+            onClick={() => onDrillDown?.("metric", stat.id)}
           >
             <div className="flex items-center justify-between w-full mb-2">
               <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
@@ -376,7 +381,7 @@ export default function Dashboard() {
         </div>
 
         {/* L&G Report Anchored Stats */}
-        <LGReportStats mode={dataMode} />
+        <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
 
         {/* AI Alert Ticker - Living Dashboard */}
         <div className="mt-6">
@@ -386,57 +391,61 @@ export default function Dashboard() {
         {/* Quick Navigation - Division Pages, Climate, Risk, Art of the Possible */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           {divisions.map((division) => (
-            <Link key={division.id} href={`/division/${division.id}`}>
-              <div 
-                className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
-                style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
-                data-testid={`link-division-${division.id}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
-                    <p className="text-lg font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
-                    <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
-                      {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
-                    </Badge>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            <div 
+              key={division.id}
+              className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
+              style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+              data-testid={`card-division-${division.id}`}
+              onClick={() => handleDrillDown("division", division.id)}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
+                  <p className="text-lg font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
+                  <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
+                    {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
+                  </Badge>
                 </div>
+                <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </div>
-            </Link>
+            </div>
           ))}
           
-          <Link href="/climate">
-            <div className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" data-testid="link-climate">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1">
-                    <Leaf className="h-4 w-4 text-green-600" />
-                    <p className="text-xs text-green-700 font-medium">Climate</p>
-                  </div>
-                  <p className="text-lg font-bold text-green-600">-37%</p>
-                  <p className="text-xs text-green-600">emissions</p>
+          <div 
+            className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" 
+            data-testid="card-climate"
+            onClick={() => handleDrillDown("climate", "climate-overview")}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1">
+                  <Leaf className="h-4 w-4 text-green-600" />
+                  <p className="text-xs text-green-700 font-medium">Climate</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
+                <p className="text-lg font-bold text-green-600">-37%</p>
+                <p className="text-xs text-green-600">emissions</p>
               </div>
+              <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
             </div>
-          </Link>
+          </div>
           
-          <Link href="/risk">
-            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:shadow-md transition-all cursor-pointer group" data-testid="link-risk">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4 text-slate-600" />
-                    <p className="text-xs text-slate-700 font-medium">Risk Center</p>
-                  </div>
-                  <p className="text-lg font-bold text-slate-600">5 Categories</p>
-                  <p className="text-xs text-slate-500">3 Lines</p>
+          <div 
+            className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:shadow-md transition-all cursor-pointer group" 
+            data-testid="card-risk"
+            onClick={() => handleDrillDown("risk", "risk-overview")}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1">
+                  <Shield className="h-4 w-4 text-slate-600" />
+                  <p className="text-xs text-slate-700 font-medium">Risk Center</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                <p className="text-lg font-bold text-slate-600">5 Categories</p>
+                <p className="text-xs text-slate-500">3 Lines</p>
               </div>
+              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
             </div>
-          </Link>
+          </div>
         </div>
 
 
@@ -698,7 +707,7 @@ export default function Dashboard() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             >
               {filteredChallenges.map((challenge, index) => (
-                <ChallengeCard key={challenge.id} challenge={challenge} index={index} />
+                <ChallengeCard key={challenge.id} challenge={challenge} index={index} onDrillDown={handleDrillDown} />
               ))}
             </motion.div>
           </AnimatePresence>
@@ -736,6 +745,13 @@ export default function Dashboard() {
           </div>
         </div>
       </footer>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity?.type || ""}
+        entityId={drillDownEntity?.id || ""}
+      />
     </div>
   );
 }

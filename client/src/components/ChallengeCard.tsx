@@ -11,11 +11,20 @@ import { Button } from "@/components/ui/button";
 interface ChallengeCardProps {
   challenge: Challenge;
   index: number;
+  onDrillDown?: (type: string, id: string) => void;
 }
 
-export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
+export function ChallengeCard({ challenge, index, onDrillDown }: ChallengeCardProps) {
   const Icon = challenge.icon;
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleClick = () => {
+    if (onDrillDown) {
+      onDrillDown("challenge", challenge.id);
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   return (
     <>
@@ -27,7 +36,7 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
       >
         <Card 
           className="h-full flex flex-col hover:shadow-lg transition-all duration-150 border border-border bg-white rounded-[4px] cursor-pointer hover:border-[hsl(209,100%,36%)]/30 group"
-          onClick={() => setIsOpen(true)}
+          onClick={handleClick}
           data-testid={`card-challenge-${challenge.id}`}
         >
           <CardHeader className="pb-3 border-b border-border/50 bg-background/30">
