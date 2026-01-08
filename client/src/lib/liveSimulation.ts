@@ -327,7 +327,8 @@ export class SimulationEngine {
   private isRunning = false;
   
   constructor() {
-    this.events = generateBatchEvents(1);
+    // No initial events - alerts come randomly after 3-6 minutes
+    this.events = [];
   }
   
   private getRandomInterval(): number {
@@ -357,9 +358,8 @@ export class SimulationEngine {
   start(_intervalMs?: number) {
     if (this.isRunning) return;
     this.isRunning = true;
-    // Fire first event quickly (2-5 seconds) so user sees activity immediately
-    const quickStart = Math.floor(Math.random() * 3000) + 2000;
-    this.scheduleNextEvent(quickStart);
+    // Wait random 3-6 minutes before first alert - no immediate alerts on page load
+    this.scheduleNextEvent();
   }
   
   stop() {
