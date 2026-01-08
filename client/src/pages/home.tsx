@@ -39,7 +39,7 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[hsl(148,100%,50%)] animate-pulse" />
-              <span className="text-sm font-medium tracking-wide">Enterprise Transformation Office</span>
+              <span className="text-sm font-medium tracking-wide">Enterprise Transformation Co-Pilot</span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight">
