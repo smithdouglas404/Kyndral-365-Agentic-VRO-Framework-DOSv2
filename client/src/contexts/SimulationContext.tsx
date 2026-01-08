@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { SimulationEvent, simulationEngine } from '../lib/liveSimulation';
 
 export type DataMode = "VRO" | "PMO";
@@ -56,9 +56,16 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [unreadCount, setUnreadCount] = useState(simulationEngine.getUnreadCount());
   const [isRunning, setIsRunning] = useState(simulationEngine.getIsRunning());
   const [selectedEvent, setSelectedEvent] = useState<SimulationEvent | null>(null);
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const [dataMode, setDataModeState] = useState<DataMode>("VRO");
   
-  const multipliers = dataMode === "VRO" ? VRO_MULTIPLIERS : PMO_MULTIPLIERS;
+  const multipliers = useMemo(() => 
+    dataMode === "VRO" ? VRO_MULTIPLIERS : PMO_MULTIPLIERS, 
+    [dataMode]
+  );
+
+  const setDataMode = useCallback((mode: DataMode) => {
+    setDataModeState(mode);
+  }, []);
 
   useEffect(() => {
     simulationEngine.start(5000);
@@ -91,21 +98,23 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     setIsRunning(false);
   }, []);
 
+  const contextValue = useMemo(() => ({
+    events,
+    latestEvent,
+    unreadCount,
+    isRunning,
+    selectedEvent,
+    setSelectedEvent,
+    markAsRead,
+    startSimulation,
+    stopSimulation,
+    dataMode,
+    setDataMode,
+    multipliers
+  }), [events, latestEvent, unreadCount, isRunning, selectedEvent, markAsRead, startSimulation, stopSimulation, dataMode, setDataMode, multipliers]);
+
   return (
-    <SimulationContext.Provider value={{
-      events,
-      latestEvent,
-      unreadCount,
-      isRunning,
-      selectedEvent,
-      setSelectedEvent,
-      markAsRead,
-      startSimulation,
-      stopSimulation,
-      dataMode,
-      setDataMode,
-      multipliers
-    }}>
+    <SimulationContext.Provider value={contextValue}>
       {children}
     </SimulationContext.Provider>
   );
