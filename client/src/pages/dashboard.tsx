@@ -9,7 +9,6 @@ import { Link } from "wouter";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
-import { useSimulation } from "@/contexts/SimulationContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -26,11 +25,6 @@ import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
 import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
-import { AgentSidebar } from "@/components/AgentSidebar";
-import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
-import { AIRecommendations } from "@/components/AIRecommendations";
-import { ScenarioParameters } from "@/components/ScenarioParameters";
-import { RiskConfidenceMetrics } from "@/components/RiskConfidenceMetrics";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -47,6 +41,37 @@ const LG = {
 };
 
 type DataMode = "VRO" | "PMO";
+
+function VROPMOToggle({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: DataMode) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => onModeChange("VRO")}
+        className={cn(
+          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
+          mode === "VRO" 
+            ? "bg-[#005EB8] text-white shadow-md" 
+            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
+        )}
+        data-testid="toggle-vro"
+      >
+        Value Realization Office
+      </button>
+      <button
+        onClick={() => onModeChange("PMO")}
+        className={cn(
+          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
+          mode === "PMO" 
+            ? "bg-[#757575] text-white shadow-md" 
+            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
+        )}
+        data-testid="toggle-pmo"
+      >
+        Project Management Office
+      </button>
+    </div>
+  );
+}
 
 function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
   return (
@@ -267,7 +292,7 @@ export default function Dashboard() {
   const [isLive, setIsLive] = useState(true);
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
-  const { dataMode, setDataMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -294,34 +319,47 @@ export default function Dashboard() {
                 ? "bg-[#005EB8] text-white shadow-lg" 
                 : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
             }`}
-            data-testid="toggle-vro-card"
+            data-testid="toggle-vro"
           >
-            <div className="flex items-center gap-3">
-              <Bot className="h-8 w-8" />
-              <div>
-                <h3 className="font-bold text-lg">Value Realization Office</h3>
-                <p className={`text-sm ${dataMode === "VRO" ? "text-white/80" : "text-gray-500"}`}>AI-powered transformation</p>
-              </div>
-            </div>
+            <p className="font-bold text-center text-lg">Value</p>
+            <p className="font-bold text-center text-lg">Realization</p>
+            <p className="font-bold text-center text-lg">Office</p>
           </div>
           <div 
             onClick={() => setDataMode("PMO")}
             className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
               dataMode === "PMO" 
-                ? "bg-[#757575] text-white shadow-lg" 
-                : "bg-white border-2 border-gray-200 text-gray-600 hover:border-gray-400"
+                ? "bg-[#005EB8] text-white shadow-lg" 
+                : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
             }`}
-            data-testid="toggle-pmo-card"
+            data-testid="toggle-pmo"
           >
-            <div className="flex items-center gap-3">
-              <Briefcase className="h-8 w-8" />
-              <div>
-                <h3 className="font-bold text-lg">Project Management Office</h3>
-                <p className={`text-sm ${dataMode === "PMO" ? "text-white/80" : "text-gray-500"}`}>Traditional approach</p>
-              </div>
-            </div>
+            <p className="font-bold text-center text-lg">Project</p>
+            <p className="font-bold text-center text-lg">Management</p>
+            <p className="font-bold text-center text-lg">Office</p>
           </div>
+          <Link href="/policy-generator">
+            <div 
+              className="px-8 py-6 rounded-lg cursor-pointer transition-all bg-white border-2 border-gray-200 text-[#00843D] hover:border-[#00843D] hover:shadow-md"
+              data-testid="toggle-policy-generator"
+            >
+              <p className="font-bold text-center text-lg">Policy</p>
+              <p className="font-bold text-center text-lg">as Code</p>
+              <p className="font-bold text-center text-lg">Generator</p>
+            </div>
+          </Link>
+          <Link href="/vro-framework">
+            <div 
+              className="px-8 py-6 rounded-lg cursor-pointer transition-all bg-white border-2 border-gray-200 text-purple-600 hover:border-purple-600 hover:shadow-md"
+              data-testid="toggle-vro-framework"
+            >
+              <p className="font-bold text-center text-lg">VRO</p>
+              <p className="font-bold text-center text-lg">Agentic</p>
+              <p className="font-bold text-center text-lg">Framework</p>
+            </div>
+          </Link>
         </div>
+
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -526,26 +564,6 @@ export default function Dashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* AI Recommendations and Cross-Agent Panels */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <AIRecommendations />
-              </div>
-              <div>
-                <RiskConfidenceMetrics />
-              </div>
-            </div>
-
-            {/* Scenario Parameters and Cross-Agent Collaboration */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div>
-                <ScenarioParameters />
-              </div>
-              <div className="lg:col-span-2">
-                <CrossAgentCollaboration />
-              </div>
-            </div>
-
             {/* Strategic Impact Analysis */}
             <div>
               <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
@@ -713,6 +731,7 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
+      
       
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
         <div className="container mx-auto">
