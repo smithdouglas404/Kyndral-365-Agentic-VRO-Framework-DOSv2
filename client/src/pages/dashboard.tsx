@@ -36,6 +36,9 @@ import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
+import { PMOPipeline } from "@/components/PMOPipeline";
+import { PMOGuidance } from "@/components/PMOGuidance";
+import { GitBranch } from "lucide-react";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -120,6 +123,72 @@ function CorporateKPIs() {
               </div>
             </div>
             <div className="mt-2 pt-2 border-t border-gray-200">
+              <p className="text-[10px] font-semibold text-[#005EB8]">{kpi.source}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Shared VRO metrics data - Used by both VRO and PMO views (PMO rolls up to VRO)
+const VRO_METRICS_DATA = [
+  { 
+    id: "current-roi",
+    label: "Current ROI", 
+    value: "64",
+    unit: "%",
+    color: "text-[#D50032]",
+    source: "VRO Financial Analysis"
+  },
+  { 
+    id: "net-present-value",
+    label: "Net Present Value", 
+    value: "$36.25",
+    unit: "M",
+    color: "text-[#005EB8]",
+    source: "5-year projection"
+  },
+  { 
+    id: "timeline-progress",
+    label: "Timeline Progress", 
+    value: "69",
+    unit: "%",
+    color: "text-[#00843D]",
+    source: "Value Stream Mapping"
+  },
+  { 
+    id: "budget-utilization",
+    label: "Budget Utilization", 
+    value: "94",
+    unit: "%",
+    color: "text-[#FFD700]",
+    source: "FinOps Tracking"
+  },
+];
+
+// VRO Metrics Summary - Shown in PMO view to show PMO rolls up to VRO
+function VROMetricsSummary() {
+  return (
+    <div className="mt-4">
+      <div className="flex items-center gap-2 mb-3">
+        <TrendingUp className="h-4 w-4 text-[#005EB8]" />
+        <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {VRO_METRICS_DATA.map((kpi, i) => (
+          <div
+            key={kpi.id}
+            className="bg-blue-50 border border-blue-200 rounded-[4px] p-4 flex flex-col"
+            data-testid={`vro-stat-${kpi.id}`}
+          >
+            <span className="text-xs font-medium text-gray-500 mb-1">{kpi.label}</span>
+            <div className="flex items-baseline gap-1">
+              <span className={cn("text-2xl font-bold", kpi.color)}>{kpi.value}</span>
+              <span className="text-sm text-gray-500">{kpi.unit}</span>
+            </div>
+            <div className="mt-2 pt-2 border-t border-blue-200">
               <p className="text-[10px] font-semibold text-[#005EB8]">{kpi.source}</p>
             </div>
           </div>
@@ -485,8 +554,12 @@ export default function Dashboard() {
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
 
-        {/* Corporate KPIs - L&G Annual Report Data */}
-        <CorporateKPIs />
+        {/* VRO Stats Row - VRO shows Corporate KPIs, PMO shows VRO metrics summary (PMO rolls up to VRO) */}
+        {dataMode === "VRO" ? (
+          <CorporateKPIs />
+        ) : (
+          <VROMetricsSummary />
+        )}
 
         {/* AI Alert Ticker - Living Dashboard */}
         <div className="mt-6">
@@ -629,10 +702,25 @@ export default function Dashboard() {
               <AlertCircle size={16} />
               <span className="hidden sm:inline">Challenges</span>
             </TabsTrigger>
+            {dataMode === "PMO" && (
+              <TabsTrigger 
+                value="pipeline" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                data-testid="tab-pipeline"
+              >
+                <GitBranch size={16} />
+                <span className="hidden sm:inline">Pipeline</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
+            {/* PMO Guidance Section - Only in PMO Mode */}
+            {dataMode === "PMO" && (
+              <PMOGuidance />
+            )}
+
             {/* AI Recommendations and Cross-Agent Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -827,6 +915,11 @@ export default function Dashboard() {
             </motion.div>
           </AnimatePresence>
         </div>
+          </TabsContent>
+
+          {/* Pipeline Tab - PMO Only */}
+          <TabsContent value="pipeline" className="space-y-6">
+            <PMOPipeline />
           </TabsContent>
         </Tabs>
       </main>

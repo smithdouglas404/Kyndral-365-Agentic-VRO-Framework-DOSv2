@@ -38,6 +38,9 @@ export interface SAFeMetrics {
   piTrend: { pi: string; velocity: number; predictability: number }[];
 }
 
+// SAFe 6.0 Portfolio Stages
+export type SAFePortfolioStage = "funnel" | "reviewing" | "analyzing" | "portfolio-backlog" | "implementing" | "done";
+
 export interface PMOProject {
   id: string;
   name: string;
@@ -50,6 +53,8 @@ export interface PMOProject {
   nextMilestone: string;
   // SAFe 6.0 Metrics
   safe: SAFeMetrics;
+  // SAFe 6.0 Portfolio Stage
+  safeStage: SAFePortfolioStage;
   // AI Enhancement fields
   aiSignals: AISignal[];
   proactiveActions: ProactiveAction[];
@@ -105,6 +110,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Reduce PRT processing time by 40%", keyResult: "Achieve 3-day turnaround", progress: 45 },
       piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 75 }, { pi: "PI 24.2", velocity: 45, predictability: 78 }, { pi: "PI 24.3", velocity: 46, predictability: 80 }, { pi: "PI 24.4", velocity: 48, predictability: 82 }]
     },
+    safeStage: "implementing",
     aiSignals: [
       { type: "warning", message: "Legacy API response times degrading 23% - integration risk increasing", confidence: 87, dataSource: "System monitoring" },
       { type: "opportunity", message: "Cloud migration could reduce integration complexity by 40%", confidence: 72, dataSource: "Architecture review" }
@@ -136,6 +142,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Improve mortality prediction accuracy", keyResult: "Achieve 95% model accuracy", progress: 82 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 82 }, { pi: "PI 24.2", velocity: 48, predictability: 85 }, { pi: "PI 24.3", velocity: 50, predictability: 88 }, { pi: "PI 24.4", velocity: 52, predictability: 91 }]
     },
+    safeStage: "implementing",
     aiSignals: [
       { type: "insight", message: "Model accuracy improved 12% with new mortality tables", confidence: 94, dataSource: "Actuarial analytics" }
     ],
@@ -167,6 +174,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Grow private markets AUM by 20%", keyResult: "Platform operational for £5bn transactions", progress: 35 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 42, predictability: 72 }, { pi: "PI 24.3", velocity: 40, predictability: 68 }, { pi: "PI 24.4", velocity: 38, predictability: 65 }]
     },
+    safeStage: "implementing",
     aiSignals: [
       { type: "warning", message: "Vendor showing financial stress signals - backup plan needed", confidence: 78, dataSource: "Vendor risk monitoring" },
       { type: "warning", message: "Scope creep adding £800k unless controlled now", confidence: 91, dataSource: "Change request analysis" },
@@ -200,6 +208,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Achieve industry-leading ESG analytics", keyResult: "Cover 100% of portfolio holdings", progress: 58 },
       piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 80 }, { pi: "PI 24.2", velocity: 50, predictability: 82 }, { pi: "PI 24.3", velocity: 52, predictability: 85 }, { pi: "PI 24.4", velocity: 55, predictability: 88 }]
     },
+    safeStage: "portfolio-backlog",
     aiSignals: [
       { type: "opportunity", message: "Add TNFD metrics to gain first-mover advantage", confidence: 82, dataSource: "Regulatory scanner" }
     ],
@@ -231,6 +240,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Achieve 50% digital policy adoption", keyResult: "Reduce onboarding time to under 10 minutes", progress: 52 },
       piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 72 }, { pi: "PI 24.2", velocity: 42, predictability: 74 }, { pi: "PI 24.3", velocity: 44, predictability: 76 }, { pi: "PI 24.4", velocity: 45, predictability: 78 }]
     },
+    safeStage: "implementing",
     aiSignals: [
       { type: "warning", message: "WCAG 2.1 compliance at 78% - needs 95% for launch", confidence: 96, dataSource: "Accessibility scanner" },
       { type: "insight", message: "Drop-off rate highest at step 3 - simplification would increase conversion 15%", confidence: 88, dataSource: "User analytics" }
@@ -262,6 +272,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Reduce customer service calls by 30%", keyResult: "Handle 50% of queries via AI", progress: 65 },
       piTrend: [{ pi: "PI 24.1", velocity: 52, predictability: 85 }, { pi: "PI 24.2", velocity: 55, predictability: 87 }, { pi: "PI 24.3", velocity: 58, predictability: 90 }, { pi: "PI 24.4", velocity: 62, predictability: 92 }]
     },
+    safeStage: "done",
     aiSignals: [
       { type: "insight", message: "Current accuracy 89% - exceeds 85% target", confidence: 95, dataSource: "ML model metrics" },
       { type: "opportunity", message: "Voice capability could handle 30% more queries", confidence: 76, dataSource: "Customer research" }
@@ -294,6 +305,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Achieve carbon neutral portfolio by 2030", keyResult: "Deploy to 1000 properties", progress: 45 },
       piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 82 }, { pi: "PI 24.2", velocity: 44, predictability: 84 }, { pi: "PI 24.3", velocity: 46, predictability: 86 }, { pi: "PI 24.4", velocity: 48, predictability: 88 }]
     },
+    safeStage: "analyzing",
     aiSignals: [
       { type: "insight", message: "Energy savings 42% better than projected in pilot sites", confidence: 92, dataSource: "IoT telemetry" },
       { type: "prediction", message: "Q4 rollout to 500 properties feasible ahead of schedule", confidence: 81, dataSource: "Capacity model" }
@@ -326,6 +338,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Zero regulatory breaches", keyResult: "100% risk appetite coverage", progress: 72 },
       piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.4", velocity: 42, predictability: 75 }]
     },
+    safeStage: "reviewing",
     aiSignals: [
       { type: "warning", message: "PRA consultation may require 3 additional metrics", confidence: 74, dataSource: "Regulatory intelligence" },
       { type: "insight", message: "Data lineage gaps concentrated in 2 legacy systems", confidence: 88, dataSource: "Data quality scan" }
@@ -357,6 +370,7 @@ export const pmoProjects: PMOProject[] = [
       okr: { objective: "Complete operational resilience framework", keyResult: "Automate 80% of controls", progress: 58 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 82 }, { pi: "PI 24.4", velocity: 52, predictability: 85 }]
     },
+    safeStage: "funnel",
     aiSignals: [
       { type: "insight", message: "Retail division showing 92% adoption in pilot - highest across BUs", confidence: 94, dataSource: "Usage analytics" },
       { type: "opportunity", message: "Success playbook from Retail can accelerate other BU rollouts", confidence: 86, dataSource: "Change management" }

@@ -167,39 +167,19 @@ export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: Agen
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-sm truncate">{agent.name}</span>
-                        {metrics && (
-                          <span className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                            active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"
-                          )}>
-                            {metrics.avgConfidence}%
-                          </span>
-                        )}
-                        {!metrics && (
-                          <span className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                            active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
-                          )}>
-                            {agent.shortName}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className={cn(
-                          "text-xs truncate",
-                          active ? "text-white/70" : "text-gray-500"
+                        <span className={cn(
+                          "text-[10px] font-bold px-1.5 py-0.5 rounded",
+                          active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
                         )}>
-                          {agent.description}
-                        </p>
-                        {metrics && metrics.totalProjects > 0 && (
-                          <span className={cn(
-                            "text-[9px] ml-1",
-                            active ? "text-white/60" : "text-gray-400"
-                          )}>
-                            {metrics.totalProjects} items
-                          </span>
-                        )}
+                          {agent.shortName}
+                        </span>
                       </div>
+                      <p className={cn(
+                        "text-xs truncate",
+                        active ? "text-white/70" : "text-gray-500"
+                      )}>
+                        {agent.description}
+                      </p>
                     </div>
                   )}
                   {!collapsed && (
