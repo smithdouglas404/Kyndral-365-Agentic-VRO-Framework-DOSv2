@@ -18,42 +18,83 @@ interface Recommendation {
   impact?: string;
 }
 
-const recommendations: Recommendation[] = [
+type DataMode = 'VRO' | 'PMO';
+
+const vroRecommendations: Recommendation[] = [
   {
     id: '1',
-    title: 'Digital Platform Cost Optimization',
-    confidence: 84,
-    description: 'Technology modernization costs running 12% above baseline at £45.2M. L&G Annual Report indicates £150M digital investment target - recommend phased deployment to stay within budget.',
-    actionLabel: 'Review Cost Model',
-    type: 'risk',
-    impact: '£5.4M at risk'
+    title: 'AI-Driven Cost Optimization',
+    confidence: 92,
+    description: 'VRO predictive analytics identified £8.2M savings through intelligent resource reallocation. Proactive intervention recommended within 2 weeks.',
+    actionLabel: 'Deploy AI Model',
+    type: 'savings',
+    impact: '£8.2M savings'
   },
   {
     id: '2',
-    title: 'PRT Volume Acceleration Opportunity',
-    confidence: 91,
-    description: 'Current PRT volume at £8.2bn tracking ahead of £10bn target. Market conditions favorable for accelerated growth in DB pension transfers.',
-    actionLabel: 'View Growth Analysis',
+    title: 'PRT Volume Acceleration',
+    confidence: 94,
+    description: 'VRO market sensing detects favorable conditions. Automated workflow can accelerate PRT processing by 40%, targeting £12bn volume.',
+    actionLabel: 'Activate Automation',
     type: 'opportunity',
-    impact: '+£1.8bn potential'
+    impact: '+£2.8bn potential'
   },
   {
     id: '3',
-    title: 'Operational Efficiency Savings',
-    confidence: 88,
-    description: 'Cross-divisional synergies identified in Retail and Institutional operations. Projected savings of £45M through shared services consolidation aligned with £200M cost target.',
-    actionLabel: 'Analyze Savings',
-    type: 'savings',
-    impact: '£45M savings'
+    title: 'Proactive Risk Mitigation',
+    confidence: 89,
+    description: 'VRO early warning system flagged 3 emerging risks before impact. AI-recommended interventions have 89% success rate.',
+    actionLabel: 'Review AI Actions',
+    type: 'risk',
+    impact: 'Prevented £3.1M loss'
   },
   {
     id: '4',
-    title: 'Risk Management Enhancement',
-    confidence: 79,
-    description: 'Emerging risk patterns detected in transformation delivery. Recommend enhanced monitoring aligned with L&G Three Lines Model framework.',
-    actionLabel: 'View Risk Details',
+    title: 'Cross-Division Synergy Detection',
+    confidence: 87,
+    description: 'VRO pattern recognition identified untapped synergies between Retail and Institutional. Projected efficiency gain: 35%.',
+    actionLabel: 'View Synergy Map',
+    type: 'opportunity',
+    impact: '35% efficiency gain'
+  }
+];
+
+const pmoRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Digital Platform Cost Overrun',
+    confidence: 68,
+    description: 'Technology modernization costs running 18% above baseline at £52.4M. Manual review required to identify root causes.',
+    actionLabel: 'Schedule Review',
     type: 'risk',
-    impact: 'Medium priority'
+    impact: '£9.4M at risk'
+  },
+  {
+    id: '2',
+    title: 'PRT Volume Tracking',
+    confidence: 72,
+    description: 'Current PRT volume at £7.1bn, below £10bn target. Traditional forecasting shows gap widening without intervention.',
+    actionLabel: 'View Forecast',
+    type: 'risk',
+    impact: '£2.9bn gap'
+  },
+  {
+    id: '3',
+    title: 'Operational Efficiency Review Needed',
+    confidence: 65,
+    description: 'Manual analysis suggests potential savings in Retail operations. Detailed study required - estimated 6-8 weeks.',
+    actionLabel: 'Request Study',
+    type: 'savings',
+    impact: '£28M potential'
+  },
+  {
+    id: '4',
+    title: 'Risk Register Update Required',
+    confidence: 61,
+    description: 'Quarterly risk assessment due. 12 risks pending review. Manual escalation process taking 3-4 weeks on average.',
+    actionLabel: 'View Risks',
+    type: 'risk',
+    impact: 'Review pending'
   }
 ];
 
@@ -78,7 +119,14 @@ const typeConfig = {
   }
 };
 
-export function AIRecommendations() {
+interface AIRecommendationsProps {
+  dataMode?: DataMode;
+}
+
+export function AIRecommendations({ dataMode = 'VRO' }: AIRecommendationsProps) {
+  const recommendations = dataMode === 'VRO' ? vroRecommendations : pmoRecommendations;
+  const modeLabel = dataMode === 'VRO' ? 'VRO AI Analyst' : 'PMO Analyst';
+  
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -86,13 +134,19 @@ export function AIRecommendations() {
           <CardTitle className="text-lg flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-500" />
             AI Recommendations
+            <Badge variant={dataMode === 'VRO' ? 'default' : 'secondary'} className="text-xs ml-2">
+              {dataMode}
+            </Badge>
           </CardTitle>
           <Badge variant="secondary" className="text-xs">
             {recommendations.length} insights
           </Badge>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          Intelligent insights from VRO Financial Analyst based on L&G Annual Report data
+          {dataMode === 'VRO' 
+            ? 'Proactive AI-driven insights with predictive analytics and automated interventions'
+            : 'Traditional analysis requiring manual review and escalation processes'
+          }
         </p>
       </CardHeader>
       
@@ -104,7 +158,7 @@ export function AIRecommendations() {
             
             return (
               <motion.div
-                key={rec.id}
+                key={`${dataMode}-${rec.id}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
