@@ -192,8 +192,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
 }
 
 export default function FinOpsDashboard() {
-  const { dataMode, setDataMode } = useSimulation();
-  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
+  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   
   const costCategories = getCostCategoriesFromDivisions(dataMode);
   const savingsOpportunities = getSavingsOpportunitiesFromProjects(dataMode);

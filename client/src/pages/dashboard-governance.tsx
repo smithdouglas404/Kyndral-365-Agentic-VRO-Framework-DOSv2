@@ -186,8 +186,7 @@ function RiskCategoryCard({ category }: { category: typeof riskData.categories[0
 }
 
 export default function GovernanceDashboard() {
-  const { dataMode, setDataMode } = useSimulation();
-  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
+  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   
   const governanceItems = getGovernanceItemsFromRiskData(dataMode);
   const riskMetrics = getRiskMetricsFromDivisions(dataMode);

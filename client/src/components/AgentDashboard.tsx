@@ -40,7 +40,11 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {}}>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow" 
+          onClick={() => data.projects[0] && handleEntityClick('project', data.projects[0].id)}
+          data-testid="metric-total-projects"
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -58,7 +62,11 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => data.programs[0] && handleEntityClick('program', data.programs[0].id)}
+          data-testid="metric-total-value"
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -77,7 +85,11 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => data.programs[0] && handleEntityClick('program', data.programs[0].id)}
+          data-testid="metric-confidence"
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -92,7 +104,11 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => data.events[0]?.relatedEntity && handleEntityClick(data.events[0].relatedEntity.type as string, data.events[0].relatedEntity.id)}
+          data-testid="metric-active-alerts"
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>

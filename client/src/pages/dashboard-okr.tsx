@@ -192,8 +192,7 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
 }
 
 export default function OKRDashboard() {
-  const { dataMode, setDataMode } = useSimulation();
-  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
+  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   
   const objectives = getObjectivesFromDivisions(dataMode);
 
@@ -249,10 +248,6 @@ export default function OKRDashboard() {
                   30-Day Snapshot
                 </button>
               </div>
-            </div>
-          </div>
-              <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
-              <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
             </div>
           </div>
 

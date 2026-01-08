@@ -235,8 +235,7 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 }
 
 export default function OCMDashboard() {
-  const { dataMode, setDataMode } = useSimulation();
-  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
+  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   
   const readinessMetrics = getChangeReadinessFromDivisions(dataMode);
   const stakeholderGroups = getStakeholderGroupsFromDivisions(dataMode);
@@ -293,10 +292,6 @@ export default function OCMDashboard() {
                   30-Day Snapshot
                 </button>
               </div>
-            </div>
-              </div>
-              <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
-              <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
             </div>
           </div>
 

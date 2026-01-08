@@ -201,8 +201,7 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
 }
 
 export default function PlanningDashboard() {
-  const { dataMode, setDataMode } = useSimulation();
-  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
+  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   
   const milestones = getMilestonesFromProjects(dataMode);
   const deadlines = getDeadlinesFromProjects(dataMode);
@@ -262,14 +261,6 @@ export default function PlanningDashboard() {
                   30-Day Snapshot
                 </button>
               </div>
-            </div>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Planning Agent</h1>
-                <p className="text-muted-foreground">Roadmap, Milestones & Timeline Management</p>
-              </div>
-              <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
-              <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
             </div>
           </div>
 

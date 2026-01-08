@@ -282,8 +282,7 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
 }
 
 export default function TMODashboard() {
-  const { dataMode, setDataMode } = useSimulation();
-  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
+  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   
   const adoptionMetrics = getAdoptionMetricsFromDivisions(dataMode);
   const initiatives = getInitiativesFromDivisions(dataMode);

@@ -33,6 +33,8 @@ const PMO_MULTIPLIERS: SimulationMultipliers = {
   progressBoost: -15
 };
 
+export type ViewMode = 'realtime' | 'snapshot';
+
 interface SimulationContextType {
   events: SimulationEvent[];
   latestEvent: SimulationEvent | null;
@@ -46,6 +48,8 @@ interface SimulationContextType {
   dataMode: DataMode;
   setDataMode: (mode: DataMode) => void;
   multipliers: SimulationMultipliers;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
 }
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -57,6 +61,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [isRunning, setIsRunning] = useState(simulationEngine.getIsRunning());
   const [selectedEvent, setSelectedEvent] = useState<SimulationEvent | null>(null);
   const [dataMode, setDataModeState] = useState<DataMode>("VRO");
+  const [viewMode, setViewModeState] = useState<ViewMode>("realtime");
   
   const multipliers = useMemo(() => 
     dataMode === "VRO" ? VRO_MULTIPLIERS : PMO_MULTIPLIERS, 
@@ -65,6 +70,10 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 
   const setDataMode = useCallback((mode: DataMode) => {
     setDataModeState(mode);
+  }, []);
+
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeState(mode);
   }, []);
 
   useEffect(() => {
@@ -110,8 +119,10 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     stopSimulation,
     dataMode,
     setDataMode,
-    multipliers
-  }), [events, latestEvent, unreadCount, isRunning, selectedEvent, markAsRead, startSimulation, stopSimulation, dataMode, setDataMode, multipliers]);
+    multipliers,
+    viewMode,
+    setViewMode
+  }), [events, latestEvent, unreadCount, isRunning, selectedEvent, markAsRead, startSimulation, stopSimulation, dataMode, setDataMode, multipliers, viewMode, setViewMode]);
 
   return (
     <SimulationContext.Provider value={contextValue}>
