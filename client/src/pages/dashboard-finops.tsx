@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { divisions } from '@/lib/lgData';
+import { useSimulation } from '@/contexts/SimulationContext';
 import { 
   getCostCategoriesFromDivisions, 
   getSavingsOpportunitiesFromProjects,
@@ -191,7 +192,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
 }
 
 export default function FinOpsDashboard() {
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   
   const costCategories = getCostCategoriesFromDivisions(dataMode);
   const savingsOpportunities = getSavingsOpportunitiesFromProjects(dataMode);

@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { divisions } from '@/lib/lgData';
+import { useSimulation } from '@/contexts/SimulationContext';
 import { 
   getObjectivesFromDivisions,
   getCompanyMetrics,
@@ -191,7 +192,7 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
 }
 
 export default function OKRDashboard() {
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   
   const objectives = getObjectivesFromDivisions(dataMode);
 

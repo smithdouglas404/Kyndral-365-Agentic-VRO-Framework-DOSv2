@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { divisions } from '@/lib/lgData';
+import { useSimulation } from '@/contexts/SimulationContext';
 import { 
   getAdoptionMetricsFromDivisions,
   getInitiativesFromDivisions,
@@ -281,7 +282,7 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
 }
 
 export default function TMODashboard() {
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   
   const adoptionMetrics = getAdoptionMetricsFromDivisions(dataMode);
   const initiatives = getInitiativesFromDivisions(dataMode);

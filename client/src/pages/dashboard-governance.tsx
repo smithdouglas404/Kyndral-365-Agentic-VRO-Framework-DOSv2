@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { riskData } from '@/lib/lgData';
+import { useSimulation } from '@/contexts/SimulationContext';
 import { 
   getGovernanceItemsFromRiskData,
   getRiskMetricsFromDivisions,
@@ -185,7 +186,7 @@ function RiskCategoryCard({ category }: { category: typeof riskData.categories[0
 }
 
 export default function GovernanceDashboard() {
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   
   const governanceItems = getGovernanceItemsFromRiskData(dataMode);
   const riskMetrics = getRiskMetricsFromDivisions(dataMode);

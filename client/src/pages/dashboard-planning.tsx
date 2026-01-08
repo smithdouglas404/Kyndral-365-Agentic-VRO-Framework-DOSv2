@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { divisions } from '@/lib/lgData';
+import { useSimulation } from '@/contexts/SimulationContext';
 import { 
   getMilestonesFromProjects,
   getDeadlinesFromProjects,
@@ -200,7 +201,7 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
 }
 
 export default function PlanningDashboard() {
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   
   const milestones = getMilestonesFromProjects(dataMode);
   const deadlines = getDeadlinesFromProjects(dataMode);

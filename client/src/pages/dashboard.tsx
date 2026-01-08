@@ -9,6 +9,7 @@ import { Link } from "wouter";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
+import { useSimulation } from "@/contexts/SimulationContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -266,7 +267,7 @@ export default function Dashboard() {
   const [isLive, setIsLive] = useState(true);
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 

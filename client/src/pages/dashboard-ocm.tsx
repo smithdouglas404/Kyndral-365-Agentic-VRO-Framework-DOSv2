@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { useSimulation } from '@/contexts/SimulationContext';
 import { 
   getChangeReadinessFromDivisions,
   getStakeholderGroupsFromDivisions,
@@ -234,7 +235,7 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 }
 
 export default function OCMDashboard() {
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const { dataMode, setDataMode } = useSimulation();
   
   const readinessMetrics = getChangeReadinessFromDivisions(dataMode);
   const stakeholderGroups = getStakeholderGroupsFromDivisions(dataMode);
