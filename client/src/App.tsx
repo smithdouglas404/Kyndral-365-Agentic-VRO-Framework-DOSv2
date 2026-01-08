@@ -54,7 +54,8 @@ function GlobalAIOverlay() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(() => {
     const saved = localStorage.getItem('ai-overlay-visible');
-    return saved === null ? true : saved === 'true';
+    // Default to hidden - user must explicitly open it
+    return saved === 'true';
   });
   const messages = useCrossAgentFeed();
   const metrics = useLiveMetrics();
