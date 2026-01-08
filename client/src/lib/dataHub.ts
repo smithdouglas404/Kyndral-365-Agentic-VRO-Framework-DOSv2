@@ -44,7 +44,7 @@ export interface CrossAgentMessage {
 }
 
 export interface EntityDrilldown {
-  entityType: 'project' | 'program' | 'risk' | 'portfolio' | 'metric';
+  entityType: 'project' | 'program' | 'risk' | 'portfolio' | 'metric' | 'division' | 'climate' | 'agent-message' | string;
   entityId: string;
   entityName: string;
   bu: string;
