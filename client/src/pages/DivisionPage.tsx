@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "wouter";
 import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,10 +8,17 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
+import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 
 export default function DivisionPage() {
   const params = useParams<{ id: string }>();
   const division = divisions.find(d => d.id === params.id);
+  const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
+  
+  const handleDrillDown = (type: string, id: string) => {
+    setSelectedEntity({ type, id });
+  };
   
   if (!division) {
     return (
@@ -76,6 +84,27 @@ export default function DivisionPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        <PageAgentWizard 
+          context={{
+            pageName: division.name,
+            pageType: 'division',
+            entityId: division.id,
+            alertCount: divisionAlerts.length,
+            riskCount: division.risks.length,
+            projectCount: division.potentialProjects.length,
+            metrics: {
+              'Operating Profit': `£${division.profit2024}m`,
+              'YoY Change': `${division.changePercent}%`,
+              'KPIs Tracked': division.kpis.length,
+              'At-Risk KPIs': division.kpis.filter(k => k.status === 'at-risk' || k.status === 'behind').length,
+              'OKRs': division.okrs.length,
+              'High-Priority Projects': division.potentialProjects.filter(p => p.priority === 'high').length
+            }
+          }}
+          agentName="Division Intelligence Agent"
+          onDrillDown={handleDrillDown}
+        />
+        
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-white shadow-sm">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
@@ -157,7 +186,14 @@ export default function DivisionPage() {
                           <p className="text-sm text-gray-600 mt-1">{alert.description}</p>
                           <div className="flex gap-2 mt-2">
                             {alert.actions.map((action, i) => (
-                              <Button key={i} size="sm" variant={action.type === "primary" ? "default" : "outline"} style={action.type === "primary" ? { backgroundColor: division.color } : {}}>
+                              <Button 
+                                key={i} 
+                                size="sm" 
+                                variant={action.type === "primary" ? "default" : "outline"} 
+                                style={action.type === "primary" ? { backgroundColor: division.color } : {}}
+                                onClick={() => handleDrillDown('alert-action', `${alert.id}-${action.label}`)}
+                                data-testid={`alert-action-${alert.id}-${i}`}
+                              >
                                 {action.label}
                               </Button>
                             ))}
@@ -306,10 +342,20 @@ export default function DivisionPage() {
                       </div>
                     )}
                     <div className="flex gap-2 mt-4">
-                      <Button size="sm" style={{ backgroundColor: division.color }}>
+                      <Button 
+                        size="sm" 
+                        style={{ backgroundColor: division.color }}
+                        onClick={() => handleDrillDown('project', project.name)}
+                        data-testid={`view-project-${i}`}
+                      >
                         View Details
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDrillDown('start-project', project.name)}
+                        data-testid={`start-project-${i}`}
+                      >
                         Start Project
                       </Button>
                     </div>
@@ -375,7 +421,14 @@ export default function DivisionPage() {
                         </div>
                         <div className="flex gap-2 mt-3">
                           {alert.actions.map((action, i) => (
-                            <Button key={i} size="sm" variant={action.type === "primary" ? "default" : "outline"} style={action.type === "primary" ? { backgroundColor: division.color } : {}}>
+                            <Button 
+                              key={i} 
+                              size="sm" 
+                              variant={action.type === "primary" ? "default" : "outline"} 
+                              style={action.type === "primary" ? { backgroundColor: division.color } : {}}
+                              onClick={() => handleDrillDown('alert-action', `${alert.id}-${action.label}`)}
+                              data-testid={`alert-btn-${alert.id}-${i}`}
+                            >
                               {action.label}
                             </Button>
                           ))}
@@ -389,6 +442,14 @@ export default function DivisionPage() {
           </TabsContent>
         </Tabs>
       </main>
+      
+      <DrillDownDrawer
+        isOpen={!!selectedEntity}
+        onClose={() => setSelectedEntity(null)}
+        entityType={selectedEntity?.type || 'entity'}
+        entityId={selectedEntity?.id || ''}
+        agentId="vro"
+      />
     </div>
   );
 }

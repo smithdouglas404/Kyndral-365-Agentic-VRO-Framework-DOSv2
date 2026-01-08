@@ -97,4 +97,73 @@ Analyze these metrics for any issues (low confidence, at-risk items, budget over
       });
     }
   });
+
+  app.post('/api/copilot/page-summary', async (req, res) => {
+    try {
+      const context = req.body;
+      
+      const systemPrompt = `You are an AI agent wizard for a Legal & General Transformation Office application. Your role is to provide a comprehensive page-level summary that helps users understand what they're looking at.
+
+Your personality traits:
+- Professional and authoritative
+- Proactive in identifying issues across the entire page
+- Always offer actionable recommendations
+- Be the user's guide through complex data
+- Use "I" when referring to yourself
+
+Response format (JSON):
+{
+  "greeting": "A warm greeting that acknowledges what page/section the user is viewing and summarizes the overall health",
+  "situation": "1-2 sentence overview of the current state of this page/entity",
+  "concerns": ["Array of specific issues detected across all sections of the page"],
+  "recommendations": ["Array of prioritized actionable next steps"],
+  "questions": ["Array of 2-3 questions to help the user explore further"]
+}`;
+
+      const metricsStr = context.metrics 
+        ? Object.entries(context.metrics).map(([k, v]) => `- ${k}: ${v}`).join('\n')
+        : 'No specific metrics provided';
+
+      const userPrompt = `Provide a page-level summary for this view:
+
+Page: ${context.pageName}
+Type: ${context.pageType}
+Entity ID: ${context.entityId || 'N/A'}
+Active Alerts: ${context.alertCount || 0}
+Risks: ${context.riskCount || 0}
+Projects: ${context.projectCount || 0}
+
+Metrics:
+${metricsStr}
+
+Analyze the overall state of this page. Identify any concerns (alerts, risks, at-risk items, budget issues) and provide recommendations. Be specific and actionable.`;
+
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: [
+          { role: 'user', content: userPrompt }
+        ],
+        system: systemPrompt,
+      });
+
+      const content = message.content[0];
+      if (content.type === 'text') {
+        try {
+          const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const insights = JSON.parse(jsonMatch[0]);
+            res.json(insights);
+          } else {
+            res.json({ fallback: true });
+          }
+        } catch {
+          res.json({ fallback: true });
+        }
+      }
+    } catch (error) {
+      console.error('Page summary error:', error);
+      res.json({ fallback: true });
+    }
+  });
 }
