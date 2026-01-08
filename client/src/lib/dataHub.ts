@@ -301,142 +301,211 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
   };
 }
 
-// Handle top-level VRO/PMO dashboard metrics
+// Project-level breakdown data for full traceability
+const PROJECT_BREAKDOWNS = {
+  claims: { id: 'claims', name: 'Claims', bu: 'Insurance' },
+  workplacePensions: { id: 'workplace-pensions', name: 'Workplace Pensions', bu: 'Workplace' },
+  customer: { id: 'customer', name: 'Customer', bu: 'Group Functions' },
+  aiPoweredPricing: { id: 'ai-powered-pricing', name: 'AI Powered Pricing', bu: 'Insurance' }
+};
+
+// Handle top-level VRO/PMO dashboard metrics with full traceability
 function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[]): EntityDrilldown {
   let entityName = '';
   let metrics: Record<string, number | string> = {};
   let relatedEntities: { type: string; id: string; name: string }[] = [];
   const relatedAgents: AgentType[] = [];
+  let projectBreakdown: { project: string; bu: string; value: string; contribution: string; status: string }[] = [];
+  let calculationMethod = '';
   
   switch (metricId) {
     // VRO Metrics
     case 'current-roi':
-      entityName = 'VRO - Return on Investment';
+      entityName = 'Current ROI - Full Traceability';
       relatedAgents.push('vro', 'finops');
-      metrics = {
-        'Current ROI': '64%',
-        'Target ROI': '75%',
-        'Baseline ROI': '0%',
-        'Gap to Target': '11%',
-        'Trend': '+12% this quarter'
-      };
-      relatedEntities = [
-        { type: 'program', id: 'prog-1', name: 'Digital Transformation' },
-        { type: 'program', id: 'prog-2', name: 'Operational Excellence' },
-        { type: 'program', id: 'prog-3', name: 'Customer Experience' }
+      calculationMethod = 'Weighted average ROI across all active projects based on investment size';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'On Track' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '72%', contribution: '35%', status: 'On Track' },
+        { project: 'Customer', bu: 'Group Functions', value: '45%', contribution: '22%', status: 'At Risk' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '61%', contribution: '15%', status: 'On Track' }
       ];
-      break;
-    case 'net-present-value':
-      entityName = 'VRO - Net Present Value';
-      relatedAgents.push('vro', 'finops');
       metrics = {
-        'Current NPV': '$36.25M',
-        'Target NPV': '$65M',
+        'Aggregate ROI': '64%',
+        'Target ROI': '85%',
+        'Baseline (2024)': '0%',
+        'Target (2026)': '85%',
+        'Gap to Target': '21%',
+        'Calculation': 'Weighted Avg by Investment'
+      };
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+      
+    case 'net-present-value':
+      entityName = 'Net Present Value - Full Traceability';
+      relatedAgents.push('vro', 'finops');
+      calculationMethod = 'Sum of discounted cash flows across all projects (8% discount rate, 5-year horizon)';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '£12.5M', contribution: '34%', status: 'On Track' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '£14.2M', contribution: '39%', status: 'On Track' },
+        { project: 'Customer', bu: 'Group Functions', value: '£5.8M', contribution: '16%', status: 'At Risk' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '£3.75M', contribution: '11%', status: 'On Track' }
+      ];
+      metrics = {
+        'Total NPV': '$36.25M',
+        'Target NPV': '$50M',
+        'Baseline (2024)': '$0',
+        'Target (2026)': '$50M',
         'Discount Rate': '8%',
         'Time Horizon': '5 years',
-        'Confidence': '78%'
+        'Progress to Target': '73%'
       };
-      relatedEntities = [
-        { type: 'program', id: 'prog-1', name: 'PRT Platform Modernization' },
-        { type: 'program', id: 'prog-4', name: 'Cost Optimization Initiative' }
-      ];
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
+      
     case 'timeline-progress':
-      entityName = 'VRO - Timeline Progress';
+      entityName = 'Timeline Progress - Full Traceability';
       relatedAgents.push('vro', 'pmo', 'planning');
+      calculationMethod = 'Average completion percentage across all projects weighted by strategic priority';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '82%', contribution: '30%', status: 'Phase 3' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '75%', contribution: '28%', status: 'Phase 3' },
+        { project: 'Customer', bu: 'Group Functions', value: '48%', contribution: '25%', status: 'Phase 2' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '65%', contribution: '17%', status: 'Phase 2' }
+      ];
       metrics = {
+        'Overall Progress': '69%',
         'Current Phase': 'Phase 2 of 4',
-        'Progress': '69%',
+        'Start (2024)': 'Phase 1',
+        'Target (2026)': 'Phase 4',
         'Days Remaining': '186',
-        'Milestone Completion': '12/18',
+        'Milestones Complete': '12/18',
         'Schedule Variance': '-6%'
       };
-      relatedEntities = [
-        { type: 'milestone', id: 'ms-1', name: 'Phase 1 Complete' },
-        { type: 'milestone', id: 'ms-2', name: 'Phase 2 In Progress' },
-        { type: 'milestone', id: 'ms-3', name: 'Phase 3 Planning' }
-      ];
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
+      
     case 'budget-utilization':
-      entityName = 'VRO - Budget Utilization';
+      entityName = 'Budget Utilization - Full Traceability';
       relatedAgents.push('vro', 'finops');
-      metrics = {
-        'Utilized': '$41.2M',
-        'Total Budget': '$43.8M',
-        'Utilization Rate': '94%',
-        'Remaining': '$2.6M',
-        'Variance': '+6% over baseline'
-      };
-      relatedEntities = [
-        { type: 'project', id: 'proj-1', name: 'Infrastructure Investment' },
-        { type: 'project', id: 'proj-2', name: 'Talent & Training' }
+      calculationMethod = 'Total spend across all projects as percentage of allocated budget';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '£10.8M / £11.2M', contribution: '26%', status: '96%' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '£15.4M / £16.5M', contribution: '37%', status: '93%' },
+        { project: 'Customer', bu: 'Group Functions', value: '£9.2M / £10.0M', contribution: '22%', status: '92%' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '£5.8M / £6.1M', contribution: '14%', status: '95%' }
       ];
+      metrics = {
+        'Total Utilized': '£41.2M',
+        'Total Budget': '£43.8M',
+        'Utilization Rate': '94%',
+        'Baseline (2024)': '£0',
+        'Target (2026)': '£41.2M',
+        'Remaining': '£2.6M',
+        'Variance': '+6% efficiency gain'
+      };
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
     
     // PMO Metrics
     case 'cycle-time':
-      entityName = 'PMO - Cycle Time';
+      entityName = 'Cycle Time - Full Traceability';
       relatedAgents.push('pmo', 'planning');
+      calculationMethod = 'Average time from work item start to completion across all project teams';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '14 days', contribution: '25%', status: 'On Track' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '22 days', contribution: '30%', status: 'At Risk' },
+        { project: 'Customer', bu: 'Group Functions', value: '24 days', contribution: '28%', status: 'At Risk' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '16 days', contribution: '17%', status: 'On Track' }
+      ];
       metrics = {
-        'Current': '19 days',
+        'Average Cycle Time': '19 days',
         'Target': '10 days',
-        'Baseline': '35 days',
-        'Improvement': '46%',
-        'Gap to Target': '+8 days'
+        'Baseline (2024)': '35 days',
+        'Target (2026)': '10 days',
+        'Improvement': '46% from baseline',
+        'Gap to Target': '+9 days'
       };
-      relatedEntities = [
-        { type: 'project', id: 'proj-3', name: 'Sprint Optimization' },
-        { type: 'project', id: 'proj-4', name: 'Process Automation' }
-      ];
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
+      
     case 'flow-efficiency':
-      entityName = 'PMO - Flow Efficiency';
+      entityName = 'Flow Efficiency - Full Traceability';
       relatedAgents.push('pmo', 'planning');
-      metrics = {
-        'Current': '69%',
-        'Target': '50%',
-        'Baseline': '45%',
-        'Wait Time Reduction': '24%',
-        'Status': 'Exceeds Target'
-      };
-      relatedEntities = [
-        { type: 'initiative', id: 'init-1', name: 'Lean Process Review' },
-        { type: 'initiative', id: 'init-2', name: 'Bottleneck Elimination' }
+      calculationMethod = 'Active work time as percentage of total elapsed time (higher is better)';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'Exceeds' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '65%', contribution: '26%', status: 'On Track' },
+        { project: 'Customer', bu: 'Group Functions', value: '58%', contribution: '24%', status: 'On Track' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '72%', contribution: '22%', status: 'Exceeds' }
       ];
-      break;
-    case 'throughput':
-      entityName = 'PMO - Throughput';
-      relatedAgents.push('pmo', 'planning');
       metrics = {
-        'Current': '11 items/week',
+        'Average Flow Efficiency': '69%',
+        'Target': '50%',
+        'Baseline (2024)': '45%',
+        'Target (2026)': '50%',
+        'Wait Time Reduction': '24%',
+        'Status': 'EXCEEDS TARGET'
+      };
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+      
+    case 'throughput':
+      entityName = 'Throughput - Full Traceability';
+      relatedAgents.push('pmo', 'planning');
+      calculationMethod = 'Total work items completed per week across all project teams';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '4 items/week', contribution: '36%', status: 'On Track' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '3 items/week', contribution: '27%', status: 'At Risk' },
+        { project: 'Customer', bu: 'Group Functions', value: '2 items/week', contribution: '18%', status: 'At Risk' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '2 items/week', contribution: '18%', status: 'On Track' }
+      ];
+      metrics = {
+        'Total Throughput': '11 items/week',
         'Target': '25 items/week',
-        'Baseline': '8 items/week',
-        'Weekly Change': '+3 items',
+        'Baseline (2024)': '8 items/week',
+        'Target (2026)': '25 items/week',
+        'Weekly Change': '+3 from baseline',
         'Gap to Target': '14 items/week'
       };
-      relatedEntities = [
-        { type: 'team', id: 'team-1', name: 'Agile Team Alpha' },
-        { type: 'team', id: 'team-2', name: 'Agile Team Beta' }
-      ];
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
+      
     case 'wip-items':
-      entityName = 'PMO - Work In Progress';
+      entityName = 'Work In Progress - Full Traceability';
       relatedAgents.push('pmo', 'governance');
-      metrics = {
-        'Current WIP': '9 items',
-        'WIP Limit': '12 items',
-        'Available Slots': '3',
-        'Blocked Items': '1',
-        'Avg Age': '4.2 days'
-      };
-      relatedEntities = [
-        { type: 'project', id: 'proj-5', name: 'Feature Development' },
-        { type: 'project', id: 'proj-6', name: 'Tech Debt Resolution' }
+      calculationMethod = 'Count of active work items across all project teams vs WIP limits';
+      projectBreakdown = [
+        { project: 'Claims', bu: 'Insurance', value: '2 / 3 limit', contribution: '22%', status: 'Healthy' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '3 / 4 limit', contribution: '33%', status: 'Healthy' },
+        { project: 'Customer', bu: 'Group Functions', value: '3 / 3 limit', contribution: '33%', status: 'At Limit' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '1 / 2 limit', contribution: '11%', status: 'Healthy' }
       ];
+      metrics = {
+        'Total WIP': '9 items',
+        'Total WIP Limit': '12 items',
+        'Utilization': '75%',
+        'Available Capacity': '3 slots',
+        'Blocked Items': '1',
+        'Avg Item Age': '4.2 days'
+      };
+      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
+      
     default:
       entityName = `Metric - ${metricId}`;
       metrics = { 'Status': 'Available' };
+  }
+  
+  // Add project breakdown to metrics for display
+  if (projectBreakdown.length > 0) {
+    metrics['─────────────'] = '─────────────';
+    metrics['PROJECT BREAKDOWN'] = '';
+    projectBreakdown.forEach((p, i) => {
+      metrics[`${i + 1}. ${p.project}`] = `${p.value} (${p.contribution})`;
+    });
+    metrics['────────────'] = '────────────';
+    metrics['Calculation Method'] = calculationMethod;
   }
   
   return {
@@ -447,7 +516,10 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
     relatedAgents,
     events: events.slice(0, 10),
     metrics,
-    actions: [],
+    actions: [
+      { id: 'view-details', label: 'View Full Calculation Details', type: 'analyze' },
+      { id: 'export-data', label: 'Export Traceability Report', type: 'analyze' }
+    ],
     history: events.slice(0, 5).map(e => ({
       timestamp: e.timestamp,
       action: e.title,
