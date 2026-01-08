@@ -144,6 +144,36 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                       </Card>
                     )}
 
+                    {drilldown.relatedEntities && drilldown.relatedEntities.length > 0 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Brain size={16} className="text-purple-500" />
+                            Related Items ({drilldown.relatedEntities.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {drilldown.relatedEntities.map((entity) => (
+                              <div
+                                key={entity.id}
+                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                                data-testid={`related-entity-${entity.id}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Badge variant="outline" className="text-xs">
+                                    {entity.type}
+                                  </Badge>
+                                  <span className="font-medium text-sm">{entity.name}</span>
+                                </div>
+                                <ChevronRight size={16} className="text-gray-400" />
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     {drilldown.events.length > 0 && (
                       <Card>
                         <CardHeader className="pb-2">

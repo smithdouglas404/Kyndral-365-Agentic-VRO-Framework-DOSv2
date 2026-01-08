@@ -42,7 +42,7 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow" 
-          onClick={() => data.projects[0] && handleEntityClick('project', data.projects[0].id)}
+          onClick={() => handleEntityClick('metric', `${agentId}-projects`)}
           data-testid="metric-total-projects"
         >
           <CardContent className="p-4">
@@ -64,7 +64,7 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
 
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => data.programs[0] && handleEntityClick('program', data.programs[0].id)}
+          onClick={() => handleEntityClick('metric', `${agentId}-value`)}
           data-testid="metric-total-value"
         >
           <CardContent className="p-4">
@@ -87,7 +87,7 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
 
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => data.programs[0] && handleEntityClick('program', data.programs[0].id)}
+          onClick={() => handleEntityClick('metric', `${agentId}-confidence`)}
           data-testid="metric-confidence"
         >
           <CardContent className="p-4">
@@ -106,7 +106,7 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
 
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => data.events[0]?.relatedEntity && handleEntityClick(data.events[0].relatedEntity.type as string, data.events[0].relatedEntity.id)}
+          onClick={() => handleEntityClick('metric', `${agentId}-alerts`)}
           data-testid="metric-active-alerts"
         >
           <CardContent className="p-4">

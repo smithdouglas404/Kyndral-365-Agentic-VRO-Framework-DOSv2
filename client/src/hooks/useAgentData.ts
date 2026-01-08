@@ -17,21 +17,13 @@ import {
 } from '@/lib/dataHub';
 
 // Hook to get live data for a specific agent
-// viewMode affects the data: 'realtime' shows current events, 'snapshot' shows 30-day aggregate
+// viewMode affects the data: 'realtime' shows live events, 'snapshot' shows 30-day aggregates
 export function useAgentData(agentId: AgentType): AgentDataSlice {
   const { events, viewMode } = useSimulation();
   
   return useMemo(() => {
-    // In snapshot mode, we could filter events to show 30-day aggregate
-    // For now, we return all events but this hook is viewMode-aware
-    const filteredEvents = viewMode === 'snapshot' 
-      ? events.filter(e => {
-          const now = new Date();
-          const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          return new Date(e.timestamp) >= thirtyDaysAgo;
-        })
-      : events;
-    return getAgentDataSlice(agentId, filteredEvents);
+    // Pass viewMode to getAgentDataSlice which returns different metrics/data based on mode
+    return getAgentDataSlice(agentId, events, viewMode);
   }, [agentId, events, viewMode]);
 }
 

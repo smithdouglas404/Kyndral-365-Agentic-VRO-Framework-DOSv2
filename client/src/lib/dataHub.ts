@@ -44,7 +44,7 @@ export interface CrossAgentMessage {
 }
 
 export interface EntityDrilldown {
-  entityType: 'project' | 'program' | 'risk' | 'portfolio';
+  entityType: 'project' | 'program' | 'risk' | 'portfolio' | 'metric';
   entityId: string;
   entityName: string;
   bu: string;
@@ -53,6 +53,7 @@ export interface EntityDrilldown {
   metrics: Record<string, number | string>;
   actions: { id: string; label: string; type: string }[];
   history: { timestamp: Date; action: string; agent: AgentType }[];
+  relatedEntities?: { type: string; id: string; name: string }[];
 }
 
 // Agent configuration with data mappings
@@ -196,8 +197,33 @@ function calculateAgentMetrics(projects: PMOProject[], programs: VROProgram[], r
   };
 }
 
+// Calculate 30-day snapshot metrics - aggregated historical values with different figures
+function calculateSnapshotMetrics(projects: PMOProject[], programs: VROProgram[], risks: RiskIssue[]): AgentMetrics {
+  // Snapshot shows historical aggregates - slightly different from real-time
+  const healthyProjects = Math.floor(projects.filter(p => p.status === 'green').length * 0.9);
+  const atRiskProjects = Math.floor(projects.filter(p => p.status === 'red' || p.status === 'amber').length * 1.1);
+  const totalValue = Math.round(programs.reduce((sum, p) => sum + p.roiValue, 0) * 0.95);
+  const realizedValue = Math.round(programs.reduce((sum, p) => sum + p.valueRealized, 0) * 0.85);
+  const avgConfidence = programs.length > 0 
+    ? (programs.reduce((sum, p) => sum + p.strategicAlignment, 0) / programs.length) * 0.92
+    : 0;
+  
+  return {
+    totalProjects: projects.length,
+    healthyProjects,
+    atRiskProjects,
+    totalValue,
+    realizedValue,
+    avgConfidence: Math.round(avgConfidence),
+    activeAlerts: Math.floor(risks.filter(r => r.severity === 'high' || r.severity === 'critical').length * 1.2),
+    pendingActions: Math.floor(projects.reduce((sum, p) => sum + p.proactiveActions.filter(a => a.urgency === 'immediate').length, 0) * 1.15)
+  };
+}
+
+export type ViewModeType = 'realtime' | 'snapshot';
+
 // Get data slice for a specific agent
-export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] = []): AgentDataSlice {
+export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] = [], viewMode: ViewModeType = 'realtime'): AgentDataSlice {
   const config = AGENT_CONFIG[agentId];
   
   // Filter projects/programs based on agent focus
@@ -240,6 +266,11 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
     m => m.fromAgent === agentId || m.toAgent === agentId
   );
   
+  // Calculate metrics based on viewMode
+  const metrics = viewMode === 'snapshot'
+    ? calculateSnapshotMetrics(filteredProjects, filteredPrograms, filteredRisks)
+    : calculateAgentMetrics(filteredProjects, filteredPrograms, filteredRisks, relevantEvents);
+
   return {
     agentId,
     agentName: config.name,
@@ -248,14 +279,91 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
     programs: filteredPrograms,
     risks: filteredRisks,
     portfolios: buPortfolios,
-    events: relevantEvents,
-    metrics: calculateAgentMetrics(filteredProjects, filteredPrograms, filteredRisks, relevantEvents),
-    crossAgentMessages
+    events: viewMode === 'realtime' ? relevantEvents : [], // No live events in snapshot mode
+    metrics,
+    crossAgentMessages: viewMode === 'realtime' ? crossAgentMessages : [] // No live messages in snapshot mode
+  };
+}
+
+// Get metric drilldown data - shows contextual data for a specific metric tile
+export function getMetricDrilldown(metricId: string, events: SimulationEvent[] = []): EntityDrilldown | null {
+  const [agentId, metricType] = metricId.split('-') as [AgentType, string];
+  const agentData = getAgentDataSlice(agentId, events);
+  const config = AGENT_CONFIG[agentId];
+  
+  let entityName = '';
+  let metrics: Record<string, number | string> = {};
+  let relatedEntities: { type: string; id: string; name: string }[] = [];
+  
+  switch (metricType) {
+    case 'projects':
+      entityName = `${config.name} - Project Portfolio`;
+      metrics = {
+        'Total Projects': agentData.metrics.totalProjects,
+        'Healthy': agentData.metrics.healthyProjects,
+        'At Risk': agentData.metrics.atRiskProjects,
+        'On Track Rate': `${Math.round((agentData.metrics.healthyProjects / Math.max(agentData.metrics.totalProjects, 1)) * 100)}%`
+      };
+      relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'value':
+      entityName = `${config.name} - Value Portfolio`;
+      metrics = {
+        'Total Value': `£${agentData.metrics.totalValue}m`,
+        'Realized Value': `£${agentData.metrics.realizedValue}m`,
+        'Realization Rate': `${Math.round((agentData.metrics.realizedValue / Math.max(agentData.metrics.totalValue, 1)) * 100)}%`,
+        'Programs Tracked': agentData.programs.length
+      };
+      relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
+      break;
+    case 'confidence':
+      entityName = `${config.name} - Confidence Analysis`;
+      metrics = {
+        'Average Confidence': `${agentData.metrics.avgConfidence}%`,
+        'High Confidence (>80%)': agentData.programs.filter(p => p.strategicAlignment > 80).length,
+        'Medium Confidence (50-80%)': agentData.programs.filter(p => p.strategicAlignment >= 50 && p.strategicAlignment <= 80).length,
+        'Low Confidence (<50%)': agentData.programs.filter(p => p.strategicAlignment < 50).length
+      };
+      relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
+      break;
+    case 'alerts':
+      entityName = `${config.name} - Active Alerts`;
+      metrics = {
+        'Active Alerts': agentData.metrics.activeAlerts,
+        'Pending Actions': agentData.metrics.pendingActions,
+        'Critical Issues': agentData.risks.filter(r => r.severity === 'critical').length,
+        'High Priority': agentData.risks.filter(r => r.severity === 'high').length
+      };
+      relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.title }));
+      break;
+    default:
+      return null;
+  }
+  
+  return {
+    entityType: 'metric',
+    entityId: metricId,
+    entityName,
+    bu: config.category,
+    relatedAgents: [agentId],
+    events: agentData.events,
+    metrics,
+    actions: [],
+    history: agentData.events.slice(0, 10).map(e => ({
+      timestamp: e.timestamp,
+      action: e.title,
+      agent: agentId
+    })),
+    relatedEntities
   };
 }
 
 // Get entity drilldown data
 export function getEntityDrilldown(entityType: string, entityId: string, events: SimulationEvent[] = []): EntityDrilldown | null {
+  // Handle metric drilldowns
+  if (entityType === 'metric') {
+    return getMetricDrilldown(entityId, events);
+  }
   let entity: PMOProject | VROProgram | RiskIssue | BUPortfolio | undefined;
   let relatedAgents: AgentType[] = [];
   let metrics: Record<string, number | string> = {};
