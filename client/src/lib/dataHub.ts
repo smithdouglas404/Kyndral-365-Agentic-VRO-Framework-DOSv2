@@ -301,8 +301,172 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
   };
 }
 
+// Handle top-level VRO/PMO dashboard metrics
+function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[]): EntityDrilldown {
+  let entityName = '';
+  let metrics: Record<string, number | string> = {};
+  let relatedEntities: { type: string; id: string; name: string }[] = [];
+  const relatedAgents: AgentType[] = [];
+  
+  switch (metricId) {
+    // VRO Metrics
+    case 'current-roi':
+      entityName = 'VRO - Return on Investment';
+      relatedAgents.push('vro', 'finops');
+      metrics = {
+        'Current ROI': '64%',
+        'Target ROI': '75%',
+        'Baseline ROI': '0%',
+        'Gap to Target': '11%',
+        'Trend': '+12% this quarter'
+      };
+      relatedEntities = [
+        { type: 'program', id: 'prog-1', name: 'Digital Transformation' },
+        { type: 'program', id: 'prog-2', name: 'Operational Excellence' },
+        { type: 'program', id: 'prog-3', name: 'Customer Experience' }
+      ];
+      break;
+    case 'net-present-value':
+      entityName = 'VRO - Net Present Value';
+      relatedAgents.push('vro', 'finops');
+      metrics = {
+        'Current NPV': '$36.25M',
+        'Target NPV': '$65M',
+        'Discount Rate': '8%',
+        'Time Horizon': '5 years',
+        'Confidence': '78%'
+      };
+      relatedEntities = [
+        { type: 'program', id: 'prog-1', name: 'PRT Platform Modernization' },
+        { type: 'program', id: 'prog-4', name: 'Cost Optimization Initiative' }
+      ];
+      break;
+    case 'timeline-progress':
+      entityName = 'VRO - Timeline Progress';
+      relatedAgents.push('vro', 'pmo', 'planning');
+      metrics = {
+        'Current Phase': 'Phase 2 of 4',
+        'Progress': '69%',
+        'Days Remaining': '186',
+        'Milestone Completion': '12/18',
+        'Schedule Variance': '-6%'
+      };
+      relatedEntities = [
+        { type: 'milestone', id: 'ms-1', name: 'Phase 1 Complete' },
+        { type: 'milestone', id: 'ms-2', name: 'Phase 2 In Progress' },
+        { type: 'milestone', id: 'ms-3', name: 'Phase 3 Planning' }
+      ];
+      break;
+    case 'budget-utilization':
+      entityName = 'VRO - Budget Utilization';
+      relatedAgents.push('vro', 'finops');
+      metrics = {
+        'Utilized': '$41.2M',
+        'Total Budget': '$43.8M',
+        'Utilization Rate': '94%',
+        'Remaining': '$2.6M',
+        'Variance': '+6% over baseline'
+      };
+      relatedEntities = [
+        { type: 'project', id: 'proj-1', name: 'Infrastructure Investment' },
+        { type: 'project', id: 'proj-2', name: 'Talent & Training' }
+      ];
+      break;
+    
+    // PMO Metrics
+    case 'cycle-time':
+      entityName = 'PMO - Cycle Time';
+      relatedAgents.push('pmo', 'planning');
+      metrics = {
+        'Current': '19 days',
+        'Target': '10 days',
+        'Baseline': '35 days',
+        'Improvement': '46%',
+        'Gap to Target': '+8 days'
+      };
+      relatedEntities = [
+        { type: 'project', id: 'proj-3', name: 'Sprint Optimization' },
+        { type: 'project', id: 'proj-4', name: 'Process Automation' }
+      ];
+      break;
+    case 'flow-efficiency':
+      entityName = 'PMO - Flow Efficiency';
+      relatedAgents.push('pmo', 'planning');
+      metrics = {
+        'Current': '69%',
+        'Target': '50%',
+        'Baseline': '45%',
+        'Wait Time Reduction': '24%',
+        'Status': 'Exceeds Target'
+      };
+      relatedEntities = [
+        { type: 'initiative', id: 'init-1', name: 'Lean Process Review' },
+        { type: 'initiative', id: 'init-2', name: 'Bottleneck Elimination' }
+      ];
+      break;
+    case 'throughput':
+      entityName = 'PMO - Throughput';
+      relatedAgents.push('pmo', 'planning');
+      metrics = {
+        'Current': '11 items/week',
+        'Target': '25 items/week',
+        'Baseline': '8 items/week',
+        'Weekly Change': '+3 items',
+        'Gap to Target': '14 items/week'
+      };
+      relatedEntities = [
+        { type: 'team', id: 'team-1', name: 'Agile Team Alpha' },
+        { type: 'team', id: 'team-2', name: 'Agile Team Beta' }
+      ];
+      break;
+    case 'wip-items':
+      entityName = 'PMO - Work In Progress';
+      relatedAgents.push('pmo', 'governance');
+      metrics = {
+        'Current WIP': '9 items',
+        'WIP Limit': '12 items',
+        'Available Slots': '3',
+        'Blocked Items': '1',
+        'Avg Age': '4.2 days'
+      };
+      relatedEntities = [
+        { type: 'project', id: 'proj-5', name: 'Feature Development' },
+        { type: 'project', id: 'proj-6', name: 'Tech Debt Resolution' }
+      ];
+      break;
+    default:
+      entityName = `Metric - ${metricId}`;
+      metrics = { 'Status': 'Available' };
+  }
+  
+  return {
+    entityType: 'metric',
+    entityId: metricId,
+    entityName,
+    bu: 'Transformation Office',
+    relatedAgents,
+    events: events.slice(0, 10),
+    metrics,
+    actions: [],
+    history: events.slice(0, 5).map(e => ({
+      timestamp: e.timestamp,
+      action: e.title,
+      agent: 'vro'
+    })),
+    relatedEntities
+  };
+}
+
 // Get metric drilldown data - shows contextual data for a specific metric tile
 export function getMetricDrilldown(metricId: string, events: SimulationEvent[] = []): EntityDrilldown | null {
+  // Handle top-level VRO and PMO metrics first (not agent-specific)
+  const vroMetrics = ['current-roi', 'net-present-value', 'timeline-progress', 'budget-utilization'];
+  const pmoMetrics = ['cycle-time', 'flow-efficiency', 'throughput', 'wip-items'];
+  
+  if (vroMetrics.includes(metricId) || pmoMetrics.includes(metricId)) {
+    return getTopLevelMetricDrilldown(metricId, events);
+  }
+  
   const [agentId, metricType] = metricId.split('-') as [AgentType, string];
   const config = AGENT_CONFIG[agentId];
   
