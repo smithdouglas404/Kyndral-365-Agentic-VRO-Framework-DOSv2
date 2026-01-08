@@ -130,34 +130,80 @@ export interface TransformedGovernanceItem {
 
 export function getGovernanceItemsFromRiskData(mode: DataMode): TransformedGovernanceItem[] {
   const today = new Date();
-  const types: ('decision' | 'approval' | 'review' | 'compliance')[] = ['decision', 'approval', 'review', 'compliance'];
-  const owners = [lgCompanyOverview.ceo, lgCompanyOverview.cfo, lgCompanyOverview.cro, 'Compliance'];
   
-  return riskData.categories.slice(0, 4).map((category, i) => {
+  const uniqueItemData = [
+    {
+      title: 'Insurance Risk Review',
+      type: 'review' as const,
+      owner: lgCompanyOverview.ceo,
+      priority: 'medium' as const,
+      daysOffset: mode === 'VRO' ? -5 : 10,
+      aiStatusVRO: 'ML model analyzed 2,847 claims patterns, identified 12 emerging risk trends. Solvency II compliance verified automatically with 99.2% accuracy.',
+      aiStatusPMO: 'Manual review of 156 claims files required. Spreadsheet-based tracking with quarterly reporting cycle.',
+      completionVRO: '2 days ahead of schedule',
+      completionPMO: 'On schedule',
+      statusVRO: 'complete' as const,
+      statusPMO: 'in-review' as const,
+      relatedRisks: 3
+    },
+    {
+      title: 'Market Risk Review',
+      type: 'approval' as const,
+      owner: lgCompanyOverview.cfo,
+      priority: 'high' as const,
+      daysOffset: mode === 'VRO' ? -2 : 15,
+      aiStatusVRO: 'Real-time VaR monitoring active. AI detected 3 positions exceeding risk thresholds, auto-escalated to Jeff Davies for immediate review.',
+      aiStatusPMO: 'Monthly VaR report pending manual compilation. Interest rate sensitivity analysis scheduled for next committee meeting.',
+      completionVRO: '1 day ahead of schedule',
+      completionPMO: 'Delayed 6 days',
+      statusVRO: 'complete' as const,
+      statusPMO: 'pending' as const,
+      relatedRisks: 5
+    },
+    {
+      title: 'Credit Risk Review',
+      type: 'compliance' as const,
+      owner: lgCompanyOverview.cro,
+      priority: 'low' as const,
+      daysOffset: mode === 'VRO' ? 1 : 20,
+      aiStatusVRO: 'Counterparty exposure dashboard updated hourly. AI scoring model rates 94% of counterparties as investment grade. 2 watchlist items flagged.',
+      aiStatusPMO: 'Quarterly counterparty review in progress. Credit rating updates awaiting manual verification from rating agencies.',
+      completionVRO: 'On schedule',
+      completionPMO: 'Delayed 9 days',
+      statusVRO: 'complete' as const,
+      statusPMO: 'pending' as const,
+      relatedRisks: 2
+    },
+    {
+      title: 'Liquidity Risk Review',
+      type: 'decision' as const,
+      owner: 'Compliance',
+      priority: 'low' as const,
+      daysOffset: mode === 'VRO' ? 4 : 25,
+      aiStatusVRO: 'Cash flow forecasting model predicting 98% accuracy over 90-day horizon. LCR at 142%, well above regulatory minimum. No stress test breaches detected.',
+      aiStatusPMO: 'Manual cash flow projections being consolidated from 4 business units. LCR calculation pending treasury reconciliation.',
+      completionVRO: 'On schedule',
+      completionPMO: 'Delayed 12 days',
+      statusVRO: 'in-review' as const,
+      statusPMO: 'pending' as const,
+      relatedRisks: 1
+    }
+  ];
+  
+  return uniqueItemData.map((item) => {
     const dueDate = new Date(today);
-    dueDate.setDate(dueDate.getDate() + (mode === 'VRO' ? -5 + i * 3 : 10 + i * 5));
-    
-    const highRisks = category.subRisks?.filter(r => r.severity === 'high').length || 0;
-    const priorities: ('high' | 'medium' | 'low')[] = highRisks > 1 ? ['high', 'high', 'medium', 'medium'] : ['medium', 'medium', 'low', 'low'];
-    
-    const govStatus: 'complete' | 'in-review' | 'pending' = mode === 'VRO' 
-      ? (i < 3 ? 'complete' : 'in-review')
-      : (i === 0 ? 'in-review' : 'pending');
+    dueDate.setDate(dueDate.getDate() + item.daysOffset);
     
     return {
-      title: `${category.name} Review`,
-      type: types[i % 4],
-      status: govStatus,
-      priority: priorities[i],
+      title: item.title,
+      type: item.type,
+      status: mode === 'VRO' ? item.statusVRO : item.statusPMO,
+      priority: item.priority,
       dueDate: dueDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' }),
-      owner: owners[i % 4],
-      aiStatus: mode === 'VRO'
-        ? `AI-assisted ${category.name.toLowerCase()} analysis with ${category.subRisks?.length || 0} sub-risks evaluated`
-        : `Manual ${category.name.toLowerCase()} review of ${category.subRisks?.length || 0} items required`,
-      completionTime: mode === 'VRO' 
-        ? (i < 3 ? `${3 - i} days ahead` : 'On schedule')
-        : (i === 0 ? 'On schedule' : `Delayed ${i * 3} days`),
-      relatedRisks: highRisks
+      owner: item.owner,
+      aiStatus: mode === 'VRO' ? item.aiStatusVRO : item.aiStatusPMO,
+      completionTime: mode === 'VRO' ? item.completionVRO : item.completionPMO,
+      relatedRisks: item.relatedRisks
     };
   });
 }
