@@ -331,10 +331,10 @@ export class SimulationEngine {
   }
   
   private getRandomInterval(): number {
-    const minSeconds = 10;
-    const maxSeconds = 30;
-    const randomSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
-    return Math.floor(randomSeconds * 1000);
+    const minMinutes = 3;
+    const maxMinutes = 6;
+    const randomMinutes = Math.random() * (maxMinutes - minMinutes) + minMinutes;
+    return Math.floor(randomMinutes * 60 * 1000);
   }
   
   private scheduleNextEvent(initialDelay?: number) {

@@ -32,7 +32,7 @@ export function FloatingAlertBanner({ onOpenFlyout }: FloatingAlertBannerProps) 
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
 
   useEffect(() => {
-    if (latestEvent && (latestEvent.priority === 'critical' || latestEvent.priority === 'high')) {
+    if (latestEvent) {
       setCurrentEvent(latestEvent);
       setShowBanner(true);
       
@@ -71,10 +71,10 @@ export function FloatingAlertBanner({ onOpenFlyout }: FloatingAlertBannerProps) 
             data-testid="floating-alert-banner"
           >
             <motion.div
-              className="rounded-xl shadow-2xl border-2 backdrop-blur-sm"
+              className="rounded-xl shadow-2xl border-2 bg-white"
               style={{ 
                 borderColor: priorityColors[currentEvent.priority],
-                backgroundColor: `${priorityColors[currentEvent.priority]}15`
+                boxShadow: `0 8px 32px ${priorityColors[currentEvent.priority]}50`
               }}
               animate={{ 
                 boxShadow: [
