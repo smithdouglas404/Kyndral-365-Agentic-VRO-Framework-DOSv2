@@ -284,10 +284,44 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
 
-      <div className="flex">
-        <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
-        
-        <main className="flex-1 px-8 py-8 max-w-[1400px]">
+      <main className="container mx-auto px-8 py-8 max-w-[1400px]">
+        {/* Office Toggle Buttons */}
+        <div className="flex gap-3 mb-6">
+          <div 
+            onClick={() => setDataMode("VRO")}
+            className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
+              dataMode === "VRO" 
+                ? "bg-[#005EB8] text-white shadow-lg" 
+                : "bg-white border-2 border-gray-200 text-[#005EB8] hover:border-[#005EB8]"
+            }`}
+            data-testid="toggle-vro-card"
+          >
+            <div className="flex items-center gap-3">
+              <Bot className="h-8 w-8" />
+              <div>
+                <h3 className="font-bold text-lg">Value Realization Office</h3>
+                <p className={`text-sm ${dataMode === "VRO" ? "text-white/80" : "text-gray-500"}`}>AI-powered transformation</p>
+              </div>
+            </div>
+          </div>
+          <div 
+            onClick={() => setDataMode("PMO")}
+            className={`px-8 py-6 rounded-lg cursor-pointer transition-all ${
+              dataMode === "PMO" 
+                ? "bg-[#757575] text-white shadow-lg" 
+                : "bg-white border-2 border-gray-200 text-gray-600 hover:border-gray-400"
+            }`}
+            data-testid="toggle-pmo-card"
+          >
+            <div className="flex items-center gap-3">
+              <Briefcase className="h-8 w-8" />
+              <div>
+                <h3 className="font-bold text-lg">Project Management Office</h3>
+                <p className={`text-sm ${dataMode === "PMO" ? "text-white/80" : "text-gray-500"}`}>Traditional approach</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -679,7 +713,6 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      </div>
       
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
         <div className="container mx-auto">
