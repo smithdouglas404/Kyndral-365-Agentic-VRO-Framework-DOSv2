@@ -327,15 +327,16 @@ export class SimulationEngine {
   private isRunning = false;
   
   constructor() {
-    // No initial events - alerts come randomly after 3-6 minutes
-    this.events = [];
+    // Seed with initial batch of events so users see activity immediately
+    this.events = generateBatchEvents(8);
   }
   
   private getRandomInterval(): number {
-    const minMinutes = 3;
-    const maxMinutes = 6;
-    const randomMinutes = Math.random() * (maxMinutes - minMinutes) + minMinutes;
-    return Math.floor(randomMinutes * 60 * 1000);
+    // Generate new events every 20-45 seconds for active streaming feel
+    const minSeconds = 20;
+    const maxSeconds = 45;
+    const randomSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
+    return Math.floor(randomSeconds * 1000);
   }
   
   private scheduleNextEvent(initialDelay?: number) {
@@ -358,8 +359,9 @@ export class SimulationEngine {
   start(_intervalMs?: number) {
     if (this.isRunning) return;
     this.isRunning = true;
-    // Wait random 3-6 minutes before first alert - no immediate alerts on page load
-    this.scheduleNextEvent();
+    // Start streaming new events after a short delay (5-10 seconds)
+    const initialDelay = Math.floor(Math.random() * 5000) + 5000;
+    this.scheduleNextEvent(initialDelay);
   }
   
   stop() {

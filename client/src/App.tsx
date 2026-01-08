@@ -51,9 +51,19 @@ function Router() {
 
 function GlobalAIOverlay() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    // Persist closed state in localStorage so it stays closed
+    const saved = localStorage.getItem('ai-overlay-visible');
+    return saved === null ? true : saved === 'true';
+  });
   const messages = useCrossAgentFeed();
   const metrics = useLiveMetrics();
+  
+  // Save visibility state when it changes
+  const handleSetVisible = (visible: boolean) => {
+    setIsVisible(visible);
+    localStorage.setItem('ai-overlay-visible', String(visible));
+  };
   
   const activeAlerts = metrics.activeAlerts;
   const messageCount = messages.length;
@@ -64,7 +74,7 @@ function GlobalAIOverlay() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         className="fixed bottom-4 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg"
-        onClick={() => setIsVisible(true)}
+        onClick={() => handleSetVisible(true)}
         data-testid="button-show-ai-overlay"
       >
         <Activity size={20} />
@@ -125,7 +135,7 @@ function GlobalAIOverlay() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setIsVisible(false);
+                handleSetVisible(false);
               }}
               className="hover:bg-white/20 rounded p-1 transition-colors"
               data-testid="button-hide-ai-overlay"
