@@ -152,13 +152,8 @@ export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: Agen
                 data-testid={`sidebar-agent-${agent.id}`}
               >
                 {(hasAlerts || hasActions) && !collapsed && (
-                  <div className="absolute -top-1 -right-1 flex gap-0.5">
-                    {hasAlerts && (
-                      <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-                    )}
-                    {hasActions && (
-                      <span className="w-2 h-2 bg-red-500 rounded-full" />
-                    )}
+                  <div className="absolute -top-1 -right-1">
+                    <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse block" />
                   </div>
                 )}
                 <div className="flex items-center gap-3">
