@@ -87,7 +87,7 @@ const BUSINESS_CASES: BusinessCase[] = [
   },
   {
     id: 'bc-004',
-    name: 'Pricing',
+    name: 'AI Powered Pricing',
     bu: 'Insurance',
     status: 'review',
     score: 84,
