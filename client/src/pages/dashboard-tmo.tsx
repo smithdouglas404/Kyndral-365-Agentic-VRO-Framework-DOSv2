@@ -308,7 +308,7 @@ export default function TMODashboard() {
                   <Repeat className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground">Transformation Command</h1>
+                  <h1 className="text-3xl font-bold text-foreground">AI Operations Hub</h1>
                   <p className="text-muted-foreground">Change Management & Adoption Intelligence</p>
                 </div>
                 <Badge className="ml-4 bg-green-100 text-green-700 gap-1">

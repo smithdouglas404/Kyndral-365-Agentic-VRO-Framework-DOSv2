@@ -210,7 +210,7 @@ export default function GovernanceDashboard() {
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground">Governance Control Center</h1>
+                  <h1 className="text-3xl font-bold text-foreground">Risk & Governance Console</h1>
                   <p className="text-muted-foreground">Compliance, Risk & Decision Intelligence</p>
                 </div>
                 <Badge className="ml-4 bg-green-100 text-green-700 gap-1">

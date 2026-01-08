@@ -264,7 +264,7 @@ export default function OCMDashboard() {
                   <Users className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground">Change Readiness Command</h1>
+                  <h1 className="text-3xl font-bold text-foreground">OCM Intelligence Console</h1>
                   <p className="text-muted-foreground">OCM Intelligence & Adoption Operations</p>
                 </div>
                 <Badge className="ml-4 bg-green-100 text-green-700 gap-1">

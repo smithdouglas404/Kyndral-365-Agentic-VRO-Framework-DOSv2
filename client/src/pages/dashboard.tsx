@@ -294,12 +294,12 @@ export default function Dashboard() {
             transition={{ duration: 0.3 }}
           >
             <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-              {dataMode === "VRO" ? "VRO Strategy Dashboard" : "PMO Strategy Dashboard"}
+              {dataMode === "VRO" ? "VRO Intelligence Hub" : "PMO Control Center"}
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">
               {dataMode === "VRO" 
-                ? "Strategic transformation powered by L&G Annual Report 2024 benchmarks and VRO methodology."
-                : "Traditional project management approach with standard governance and oversight."}
+                ? "AI-powered strategic transformation with real-time value realization insights."
+                : "Traditional project management with standard governance and oversight."}
             </p>
           </motion.div>
           
