@@ -17,46 +17,91 @@ interface RiskMetric {
   source?: string;
 }
 
-const riskMetrics: RiskMetric[] = [
+type DataMode = 'VRO' | 'PMO';
+
+const vroRiskMetrics: RiskMetric[] = [
   {
     id: 'market',
     label: 'Market Validation',
     score: 94,
     status: 'high',
-    description: 'Strong demand signals from PRT market growth',
-    source: 'L&G Annual Report 2024, p.12'
+    description: 'AI-validated demand signals from PRT market growth',
+    source: 'VRO Predictive Analytics'
   },
   {
     id: 'technical',
     label: 'Technical Feasibility',
     score: 88,
     status: 'high',
-    description: 'Proven technology stack with internal expertise',
-    source: 'L&G Digital Investment Strategy'
+    description: 'Proven technology stack with AI-assisted assessment',
+    source: 'VRO Tech Assessment Agent'
   },
   {
     id: 'resource',
     label: 'Resource Availability',
-    score: 65,
-    status: 'medium',
-    description: 'Synced with OCM readiness assessment - training at 68%',
-    source: 'OCM Agent Report'
+    score: 82,
+    status: 'high',
+    description: 'AI-optimized resource allocation with OCM sync',
+    source: 'VRO Resource Agent'
   },
   {
     id: 'stakeholder',
     label: 'Stakeholder Alignment',
     score: 91,
     status: 'high',
-    description: 'Strong executive sponsorship across all divisions',
-    source: 'Governance Agent'
+    description: 'Real-time sentiment tracking shows strong support',
+    source: 'VRO Engagement Agent'
   },
   {
     id: 'regulatory',
     label: 'Regulatory Compliance',
-    score: 85,
+    score: 89,
     status: 'high',
-    description: 'Aligned with FCA requirements and Solvency II',
-    source: 'L&G Risk Management Supplement 2024'
+    description: 'Automated compliance monitoring active',
+    source: 'VRO Governance Agent'
+  }
+];
+
+const pmoRiskMetrics: RiskMetric[] = [
+  {
+    id: 'market',
+    label: 'Market Validation',
+    score: 72,
+    status: 'medium',
+    description: 'Manual market analysis pending review',
+    source: 'PMO Quarterly Report'
+  },
+  {
+    id: 'technical',
+    label: 'Technical Feasibility',
+    score: 65,
+    status: 'medium',
+    description: 'Technical review in progress, 3 weeks to complete',
+    source: 'PMO Technical Team'
+  },
+  {
+    id: 'resource',
+    label: 'Resource Availability',
+    score: 48,
+    status: 'low',
+    description: 'Resource conflicts identified, manual resolution needed',
+    source: 'PMO Resource Planning'
+  },
+  {
+    id: 'stakeholder',
+    label: 'Stakeholder Alignment',
+    score: 58,
+    status: 'low',
+    description: 'Stakeholder survey scheduled for next month',
+    source: 'PMO Communications'
+  },
+  {
+    id: 'regulatory',
+    label: 'Regulatory Compliance',
+    score: 71,
+    status: 'medium',
+    description: 'Manual compliance review due in 4 weeks',
+    source: 'PMO Compliance Team'
   }
 ];
 
@@ -81,7 +126,13 @@ const statusConfig = {
   }
 };
 
-export function RiskConfidenceMetrics() {
+interface RiskConfidenceMetricsProps {
+  dataMode?: DataMode;
+}
+
+export function RiskConfidenceMetrics({ dataMode = 'VRO' }: RiskConfidenceMetricsProps) {
+  const riskMetrics = dataMode === 'VRO' ? vroRiskMetrics : pmoRiskMetrics;
+  
   const overallConfidence = Math.round(
     riskMetrics.reduce((sum, m) => sum + m.score, 0) / riskMetrics.length
   );
@@ -95,6 +146,9 @@ export function RiskConfidenceMetrics() {
           <CardTitle className="text-lg flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-500" />
             Risk & Confidence
+            <Badge variant={dataMode === 'VRO' ? 'default' : 'secondary'} className="text-xs ml-2">
+              {dataMode}
+            </Badge>
           </CardTitle>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Overall:</span>
@@ -110,6 +164,12 @@ export function RiskConfidenceMetrics() {
             </Badge>
           </div>
         </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {dataMode === 'VRO' 
+            ? 'AI-powered risk assessment with real-time monitoring'
+            : 'Traditional risk assessment with manual reviews'
+          }
+        </p>
       </CardHeader>
       
       <CardContent className="pt-0">
@@ -138,7 +198,7 @@ export function RiskConfidenceMetrics() {
             
             return (
               <motion.div
-                key={metric.id}
+                key={`${dataMode}-${metric.id}`}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}

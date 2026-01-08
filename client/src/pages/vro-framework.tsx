@@ -18,84 +18,128 @@ const agents = [
     name: 'Value Realization Agent',
     category: 'Value Realization',
     icon: DollarSign,
-    color: 'bg-blue-500',
+    color: 'bg-green-500',
     description: 'Orchestrates outcome-based portfolio governance with real-time ROI tracking, NPV analysis, and investment decision support.',
     responsibilities: [
       'Portfolio investment prioritization and optimization',
       'ROI and NPV calculation with scenario modeling',
-      'Budget variance monitoring and forecasting',
-      'Value stream mapping and optimization'
-    ]
+      'Budget variance monitoring and forecasting'
+    ],
+    dataInputs: ['Project financials', 'Resource costs'],
+    outputs: ['Investment recommendations', 'Budget alerts'],
+    integratesWith: ['PMO Agent', 'Governance Agent', 'OKR Agent']
   },
   {
     id: 'pmo-orchestrator',
     name: 'PMO Flow Orchestrator',
     category: 'Project Management',
     icon: GitBranch,
-    color: 'bg-purple-500',
+    color: 'bg-green-500',
     description: 'Implements Lean/Agile PMO with flow metrics, replacing traditional Gantt charts with cycle time, throughput, and WIP analysis.',
     responsibilities: [
       'Flow metrics management (cycle time, throughput, WIP)',
       'Milestone tracking and critical path analysis',
-      'Resource allocation and capacity planning',
-      'Dependency management and risk identification'
-    ]
+      'Resource allocation and capacity planning'
+    ],
+    dataInputs: ['Task data', 'Resource availability'],
+    outputs: ['Flow metrics', 'Milestone alerts'],
+    integratesWith: ['TMO Agent', 'Value Realization Agent', 'OCM Agent']
   },
   {
-    id: 'risk-sentinel',
-    name: 'Risk Sentinel Agent',
-    category: 'Risk Management',
+    id: 'tmo-agent',
+    name: 'TMO Transformation Agent',
+    category: 'Transformation',
+    icon: RefreshCw,
+    color: 'bg-blue-500',
+    description: 'Manages enterprise transformation initiatives with change impact analysis, adoption tracking, and benefits realization.',
+    responsibilities: [
+      'Transformation roadmap orchestration',
+      'Change impact assessment and tracking',
+      'Benefits realization monitoring'
+    ],
+    dataInputs: ['Initiative status', 'Change requests'],
+    outputs: ['Impact assessments', 'Adoption metrics'],
+    integratesWith: ['OCM Agent', 'PMO Agent', 'Governance Agent']
+  },
+  {
+    id: 'finops-agent',
+    name: 'FinOps Intelligence Agent',
+    category: 'Financial Operations',
+    icon: BarChart3,
+    color: 'bg-purple-500',
+    description: 'Provides financial intelligence with cost optimization, budget forecasting, and spend analytics across portfolios.',
+    responsibilities: [
+      'Cost optimization recommendations',
+      'Budget forecasting and variance analysis',
+      'Spend pattern detection and alerts'
+    ],
+    dataInputs: ['Financial data', 'Budget allocations'],
+    outputs: ['Cost insights', 'Forecast reports'],
+    integratesWith: ['Value Realization Agent', 'Governance Agent', 'Planning Agent']
+  },
+  {
+    id: 'okr-agent',
+    name: 'OKR Alignment Agent',
+    category: 'Strategy Execution',
+    icon: Target,
+    color: 'bg-amber-500',
+    description: 'Ensures strategic alignment through OKR tracking, cascade management, and goal achievement monitoring.',
+    responsibilities: [
+      'OKR cascade and alignment tracking',
+      'Key result progress monitoring',
+      'Strategic initiative linkage'
+    ],
+    dataInputs: ['Strategic goals', 'Initiative outcomes'],
+    outputs: ['Alignment scores', 'Progress alerts'],
+    integratesWith: ['Governance Agent', 'Value Realization Agent', 'TMO Agent']
+  },
+  {
+    id: 'governance-agent',
+    name: 'Governance Guardian Agent',
+    category: 'Governance',
     icon: Shield,
     color: 'bg-red-500',
-    description: 'Proactive risk detection using pattern recognition and predictive analytics to identify issues before they impact delivery.',
+    description: 'Ensures compliance, risk management, and governance standards across all transformation activities.',
     responsibilities: [
-      'Early warning system for project risks',
-      'Pattern-based anomaly detection',
-      'Risk heat mapping and prioritization',
-      'Mitigation recommendation engine'
-    ]
-  },
-  {
-    id: 'stakeholder-engagement',
-    name: 'Stakeholder Engagement Agent',
-    category: 'Communication',
-    icon: Users,
-    color: 'bg-green-500',
-    description: 'Manages stakeholder communications, sentiment analysis, and automated reporting across all transformation initiatives.',
-    responsibilities: [
-      'Automated status report generation',
-      'Stakeholder sentiment tracking',
-      'Communication cadence management',
-      'Executive briefing preparation'
-    ]
-  },
-  {
-    id: 'compliance-guardian',
-    name: 'Compliance Guardian',
-    category: 'Governance',
-    icon: CheckCircle2,
-    color: 'bg-amber-500',
-    description: 'Ensures regulatory compliance and governance standards are maintained across all transformation activities.',
-    responsibilities: [
-      'Regulatory requirement tracking',
-      'Audit trail maintenance',
-      'Policy compliance verification',
+      'Regulatory compliance monitoring',
+      'Risk assessment and mitigation tracking',
       'Governance checkpoint automation'
-    ]
+    ],
+    dataInputs: ['Compliance data', 'Risk registers'],
+    outputs: ['Compliance status', 'Risk alerts'],
+    integratesWith: ['All Agents']
   },
   {
-    id: 'insight-engine',
-    name: 'Insight Engine',
-    category: 'Analytics',
-    icon: Lightbulb,
+    id: 'planning-agent',
+    name: 'Strategic Planning Agent',
+    category: 'Planning',
+    icon: Calendar,
     color: 'bg-teal-500',
-    description: 'Generates actionable insights from cross-portfolio data, identifying patterns, opportunities, and optimization recommendations.',
+    description: 'Coordinates strategic planning with scenario modeling, capacity planning, and resource optimization.',
     responsibilities: [
-      'Cross-portfolio pattern analysis',
-      'Predictive trend identification',
-      'Opportunity discovery and ranking',
-      'Performance benchmark comparisons'
-    ]
+      'Strategic scenario modeling',
+      'Capacity and resource planning',
+      'Dependency management'
+    ],
+    dataInputs: ['Resource data', 'Strategic inputs'],
+    outputs: ['Capacity plans', 'Scenario analyses'],
+    integratesWith: ['PMO Agent', 'FinOps Agent', 'TMO Agent']
+  },
+  {
+    id: 'ocm-agent',
+    name: 'OCM Readiness Agent',
+    category: 'Change Management',
+    icon: Users,
+    color: 'bg-pink-500',
+    description: 'Manages organizational change readiness, stakeholder engagement, and adoption tracking.',
+    responsibilities: [
+      'Change readiness assessment',
+      'Stakeholder engagement tracking',
+      'Training and adoption monitoring'
+    ],
+    dataInputs: ['Stakeholder data', 'Training completion'],
+    outputs: ['Readiness scores', 'Engagement reports'],
+    integratesWith: ['TMO Agent', 'PMO Agent', 'Governance Agent']
   }
 ];
 
@@ -147,22 +191,6 @@ const aiFeatures = [
     description: 'AI-extracted plain English rules from complex policy documents for non-technical review.',
     value: 'Democratizes policy understanding across all stakeholders',
     icon: FileText
-  },
-  {
-    id: 'early-warning',
-    name: 'Early Warning Dashboard',
-    location: 'Early Warning Tab',
-    description: 'AI-powered detection of project health issues using multi-signal analysis.',
-    value: 'Catches 85% of delivery issues 3+ weeks before traditional methods',
-    icon: AlertTriangle
-  },
-  {
-    id: 'metadata-extraction',
-    name: 'Smart Document Analysis',
-    location: 'PDF Upload',
-    description: 'Automatically extracts policy name, provider, and document ID from uploaded PDFs.',
-    value: 'Eliminates manual data entry and reduces errors',
-    icon: Zap
   }
 ];
 
@@ -201,7 +229,7 @@ export default function VROFramework() {
           <div className="flex flex-wrap items-center gap-6 mb-6">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-gray-400" />
-              <span className="font-semibold text-gray-900">6</span>
+              <span className="font-semibold text-gray-900">8</span>
               <span className="text-gray-500">Core Agents</span>
             </div>
             <div className="flex items-center gap-2">
@@ -226,11 +254,11 @@ export default function VROFramework() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white border border-gray-200 p-1 mb-8">
-            <TabsTrigger value="architecture" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-architecture">
-              Architecture
-            </TabsTrigger>
             <TabsTrigger value="agent-lineage" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-agent-lineage">
               Agent Lineage
+            </TabsTrigger>
+            <TabsTrigger value="architecture" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-architecture">
+              Architecture
             </TabsTrigger>
             <TabsTrigger value="mcp-a2a" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-mcp-a2a">
               MCP & A2A
@@ -238,14 +266,93 @@ export default function VROFramework() {
             <TabsTrigger value="integration" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-integration">
               Integration
             </TabsTrigger>
-            <TabsTrigger value="roadmap" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-roadmap">
-              Phased Roadmap
-            </TabsTrigger>
             <TabsTrigger value="ai-in-app" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-ai-in-app">
               <Sparkles size={14} className="mr-1" />
               AI in This App
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="agent-lineage">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {agents.map((agent, index) => (
+                <motion.div
+                  key={agent.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="h-full hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2.5 ${agent.color} rounded-lg`}>
+                          <agent.icon className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <CardTitle className="text-lg">{agent.name}</CardTitle>
+                            <Badge variant="secondary" className="text-xs">
+                              {agent.category}
+                            </Badge>
+                          </div>
+                          <p className="text-gray-600 text-sm mt-1">{agent.description}</p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <p className="text-sm font-medium text-green-700 flex items-center gap-1 mb-2">
+                          <CheckCircle2 size={14} />
+                          Key Responsibilities
+                        </p>
+                        <ul className="space-y-1">
+                          {agent.responsibilities.map((resp, i) => (
+                            <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                              <span className="text-gray-400 mt-1">›</span>
+                              {resp}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex gap-8 pt-2 border-t">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Data Inputs</p>
+                          <div className="flex flex-wrap gap-1">
+                            {agent.dataInputs.map((input, i) => (
+                              <Badge key={i} variant="outline" className="text-xs bg-gray-50">
+                                {input}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Outputs</p>
+                          <div className="flex flex-wrap gap-1">
+                            {agent.outputs.map((output, i) => (
+                              <Badge key={i} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                {output}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t">
+                        <p className="text-xs text-gray-500 mb-1">Integrates with:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {agent.integratesWith.map((integration, i) => (
+                            <Badge key={i} className="text-xs bg-green-100 text-green-700 border-green-200">
+                              {integration}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
 
           <TabsContent value="architecture">
             <div className="bg-white rounded-xl border border-gray-200 p-8">
@@ -299,54 +406,6 @@ export default function VROFramework() {
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="agent-lineage">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {agents.map((agent, index) => (
-                <motion.div
-                  key={agent.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="h-full hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2.5 ${agent.color} rounded-lg`}>
-                          <agent.icon className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <CardTitle className="text-lg">{agent.name}</CardTitle>
-                            <Badge variant="secondary" className="text-xs">
-                              {agent.category}
-                            </Badge>
-                          </div>
-                          <p className="text-gray-600 text-sm mt-1">{agent.description}</p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-green-700 flex items-center gap-1">
-                          <CheckCircle2 size={14} />
-                          Key Responsibilities
-                        </p>
-                        <ul className="space-y-1">
-                          {agent.responsibilities.map((resp, i) => (
-                            <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                              <span className="text-gray-400 mt-1">›</span>
-                              {resp}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
             </div>
           </TabsContent>
 
@@ -410,7 +469,7 @@ export default function VROFramework() {
             <div className="bg-white rounded-xl border border-gray-200 p-8">
               <h2 className="text-2xl font-bold mb-4">Integration Points</h2>
               <p className="text-gray-600 mb-6">
-                The VRO Framework is a guide that VRO teams can reference for ideas and innovative approaches.
+                The VRO Framework integrates with enterprise systems for seamless data flow and automation.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
@@ -437,43 +496,6 @@ export default function VROFramework() {
             </div>
           </TabsContent>
 
-          <TabsContent value="roadmap">
-            <div className="bg-white rounded-xl border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold mb-4">Phased Implementation Roadmap</h2>
-              <div className="space-y-6">
-                {[
-                  { phase: 'Phase 1', title: 'Foundation', items: ['Core agent deployment', 'Basic MCP implementation', 'Dashboard integration'] },
-                  { phase: 'Phase 2', title: 'Intelligence', items: ['Predictive analytics', 'Cross-agent learning', 'Advanced risk models'] },
-                  { phase: 'Phase 3', title: 'Autonomy', items: ['Self-healing workflows', 'Autonomous decision execution', 'Full A2A orchestration'] },
-                  { phase: 'Phase 4', title: 'Scale', items: ['Multi-portfolio support', 'Enterprise-wide rollout', 'Partner ecosystem'] }
-                ].map((phase, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-[#005EB8]">
-                        {i + 1}
-                      </div>
-                      {i < 3 && <div className="w-0.5 h-16 bg-gray-200 mt-2" />}
-                    </div>
-                    <div className="flex-1 pb-6">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-sm font-medium text-gray-500">{phase.phase}</span>
-                        <h3 className="text-lg font-semibold">{phase.title}</h3>
-                      </div>
-                      <ul className="space-y-1">
-                        {phase.items.map((item, j) => (
-                          <li key={j} className="text-sm text-gray-600 flex items-center gap-2">
-                            <CheckCircle2 size={14} className="text-[#005EB8]" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
           <TabsContent value="ai-in-app">
             <div className="space-y-6">
               <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white">
@@ -483,7 +505,7 @@ export default function VROFramework() {
                 </div>
                 <p className="text-white/80">
                   This dashboard leverages {aiFeatures.length} AI-powered features to deliver intelligent 
-                  transformation management. Each feature below shows where it's used and the business value it provides.
+                  transformation management.
                 </p>
               </div>
 
@@ -504,17 +526,14 @@ export default function VROFramework() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
                               <h3 className="font-semibold text-gray-900">{feature.name}</h3>
+                              <Badge variant="outline" className="text-xs">
+                                {feature.location}
+                              </Badge>
                             </div>
-                            <Badge variant="outline" className="mb-2 text-xs">
-                              {feature.location}
-                            </Badge>
-                            <p className="text-sm text-gray-600 mb-3">{feature.description}</p>
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-                              <p className="text-xs text-green-800 flex items-start gap-1">
-                                <TrendingUp size={12} className="mt-0.5 flex-shrink-0" />
-                                <span><strong>Value:</strong> {feature.value}</span>
-                              </p>
-                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{feature.description}</p>
+                            <p className="text-xs text-green-600 font-medium">
+                              ✓ {feature.value}
+                            </p>
                           </div>
                         </div>
                       </CardContent>

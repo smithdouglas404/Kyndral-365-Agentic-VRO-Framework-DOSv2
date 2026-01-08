@@ -497,7 +497,7 @@ export default function Dashboard() {
                 <AIRecommendations dataMode={dataMode} />
               </div>
               <div>
-                <RiskConfidenceMetrics />
+                <RiskConfidenceMetrics dataMode={dataMode} />
               </div>
             </div>
 
