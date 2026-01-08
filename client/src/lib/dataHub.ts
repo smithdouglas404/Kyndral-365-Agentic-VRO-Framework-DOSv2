@@ -226,6 +226,22 @@ export type ViewModeType = 'realtime' | 'snapshot';
 export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] = [], viewMode: ViewModeType = 'realtime'): AgentDataSlice {
   const config = AGENT_CONFIG[agentId];
   
+  // Guard against invalid agentId
+  if (!config) {
+    return {
+      agentId,
+      agentName: 'Unknown',
+      category: 'Monitoring',
+      projects: [],
+      programs: [],
+      risks: [],
+      portfolios: [],
+      events: [],
+      metrics: { totalProjects: 0, healthyProjects: 0, atRiskProjects: 0, totalValue: 0, realizedValue: 0, avgConfidence: 0, activeAlerts: 0, pendingActions: 0 },
+      crossAgentMessages: []
+    };
+  }
+  
   // Filter projects/programs based on agent focus
   let filteredProjects = [...pmoProjects];
   let filteredPrograms = [...vroPrograms];
@@ -288,8 +304,14 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
 // Get metric drilldown data - shows contextual data for a specific metric tile
 export function getMetricDrilldown(metricId: string, events: SimulationEvent[] = []): EntityDrilldown | null {
   const [agentId, metricType] = metricId.split('-') as [AgentType, string];
-  const agentData = getAgentDataSlice(agentId, events);
   const config = AGENT_CONFIG[agentId];
+  
+  // Guard against invalid agentId
+  if (!config) {
+    return null;
+  }
+  
+  const agentData = getAgentDataSlice(agentId, events);
   
   let entityName = '';
   let metrics: Record<string, number | string> = {};
