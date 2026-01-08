@@ -434,15 +434,6 @@ export function LiveEventDrawer() {
               </CardContent>
             </Card>
             
-            <Card className="border-blue-200">
-              <CardContent className="py-3">
-                <div className="flex items-center gap-3 text-sm text-blue-700">
-                  <MessageSquare size={16} />
-                  <span>Want something else? Just ask me and I'll help!</span>
-                </div>
-              </CardContent>
-            </Card>
-
             <div className="flex gap-3">
               <Button className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700" onClick={handleClose}>
                 <Send size={16} className="mr-2" />
