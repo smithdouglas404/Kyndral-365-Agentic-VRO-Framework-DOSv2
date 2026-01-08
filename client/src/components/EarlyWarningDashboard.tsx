@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 interface KanbanMetrics {
   team: string;
@@ -119,6 +120,36 @@ export function EarlyWarningDashboard() {
     return 'text-red-600';
   };
 
+  const handleTeamClick = (team: KanbanMetrics) => {
+    toast.info(`${team.team} Details`, {
+      description: `WIP: ${team.wip}/${team.wipLimit}, Throughput: ${team.throughput} items/week, Cycle Time: ${team.avgCycleTime} days`
+    });
+  };
+
+  const handleDeploymentClick = (env: DeploymentStatus) => {
+    toast.info(`${env.environment} Deployment`, {
+      description: `Version: ${env.version}, Last deployed: ${env.lastDeployment}, Health: ${env.healthScore}%`
+    });
+  };
+
+  const handleHuddleClick = (huddle: HuddleInsight) => {
+    toast.info(`${huddle.team} Huddle Summary`, {
+      description: `Topics: ${huddle.keyTopics.join(', ')}. ${huddle.blockers} blockers, ${huddle.actionItems} action items.`
+    });
+  };
+
+  const handleSentimentClick = (source: SentimentData) => {
+    toast.info(`${source.source} Sentiment`, {
+      description: `Score: ${source.sentiment}%, Trend: ${source.trend}. Keywords: ${source.keywords.join(', ')}`
+    });
+  };
+
+  const handleBugMetricClick = (severity: string, count: number) => {
+    toast.info(`${severity} Priority Bugs`, {
+      description: `${count} ${severity.toLowerCase()} priority bugs currently open. Click to view in bug tracker.`
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -159,7 +190,11 @@ export function EarlyWarningDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {liveMetrics.map((team) => (
               <motion.div key={team.team} layout>
-                <Card className={team.wip > team.wipLimit ? 'border-red-300 bg-red-50' : ''}>
+                <Card 
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${team.wip > team.wipLimit ? 'border-red-300 bg-red-50' : ''}`}
+                  onClick={() => handleTeamClick(team)}
+                  data-testid={`card-team-${team.team.toLowerCase().replace(/\s+/g, '-')}`}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold">{team.team}</h3>
@@ -215,19 +250,35 @@ export function EarlyWarningDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-red-50 rounded-lg">
+                <div 
+                  className="text-center p-3 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors"
+                  onClick={() => handleBugMetricClick('Critical', BUG_METRICS.critical)}
+                  data-testid="card-bug-critical"
+                >
                   <div className="text-2xl font-bold text-red-600">{BUG_METRICS.critical}</div>
                   <div className="text-sm text-muted-foreground">Critical</div>
                 </div>
-                <div className="text-center p-3 bg-amber-50 rounded-lg">
+                <div 
+                  className="text-center p-3 bg-amber-50 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors"
+                  onClick={() => handleBugMetricClick('High', BUG_METRICS.high)}
+                  data-testid="card-bug-high"
+                >
                   <div className="text-2xl font-bold text-amber-600">{BUG_METRICS.high}</div>
                   <div className="text-sm text-muted-foreground">High</div>
                 </div>
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div 
+                  className="text-center p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                  onClick={() => handleBugMetricClick('Medium', BUG_METRICS.medium)}
+                  data-testid="card-bug-medium"
+                >
                   <div className="text-2xl font-bold text-blue-600">{BUG_METRICS.medium}</div>
                   <div className="text-sm text-muted-foreground">Medium</div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div 
+                  className="text-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleBugMetricClick('Low', BUG_METRICS.low)}
+                  data-testid="card-bug-low"
+                >
                   <div className="text-2xl font-bold text-gray-600">{BUG_METRICS.low}</div>
                   <div className="text-sm text-muted-foreground">Low</div>
                 </div>
@@ -256,7 +307,9 @@ export function EarlyWarningDashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleDeploymentClick(env)}
+                    data-testid={`card-deployment-${env.environment.toLowerCase().replace(/\//g, '-')}`}
                   >
                     <div className="flex items-center gap-4">
                       {getStatusIcon(env.status)}
@@ -294,10 +347,14 @@ export function EarlyWarningDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <Card className={
-                  huddle.sentiment === 'negative' ? 'border-red-200 bg-red-50' :
-                  huddle.sentiment === 'positive' ? 'border-green-200 bg-green-50' : ''
-                }>
+                <Card 
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    huddle.sentiment === 'negative' ? 'border-red-200 bg-red-50' :
+                    huddle.sentiment === 'positive' ? 'border-green-200 bg-green-50' : ''
+                  }`}
+                  onClick={() => handleHuddleClick(huddle)}
+                  data-testid={`card-huddle-${huddle.team.toLowerCase().replace(/\s+/g, '-')}`}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div>
@@ -354,7 +411,9 @@ export function EarlyWarningDashboard() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: idx * 0.1 }}
-                    className={`p-4 rounded-lg border ${source.riskIndicator ? 'bg-amber-50 border-amber-200' : 'bg-gray-50'}`}
+                    className={`p-4 rounded-lg border cursor-pointer hover:shadow-sm transition-shadow ${source.riskIndicator ? 'bg-amber-50 border-amber-200' : 'bg-gray-50'}`}
+                    onClick={() => handleSentimentClick(source)}
+                    data-testid={`card-sentiment-${source.source.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">

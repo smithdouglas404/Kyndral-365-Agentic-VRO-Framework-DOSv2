@@ -104,6 +104,29 @@ function AlertCard({ alert, isNew }: { alert: ProactiveAlert; isNew?: boolean })
             </Badge>
             <span className="text-[10px] text-muted-foreground">{alert.detectedAt}</span>
           </div>
+          
+          <div className="mt-3 flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs h-7"
+              onClick={() => window.alert(`View Insights: Detailed analysis for ${alert.title} - showing risk factors, timeline, and recommended actions`)}
+              data-testid={`button-view-insights-${alert.id}`}
+            >
+              <Eye size={12} className="mr-1" />
+              View Insights
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs h-7"
+              onClick={() => window.alert(`Trigger Automation: Initiating automated response workflow for ${alert.title} - notifying stakeholders and creating mitigation tasks`)}
+              data-testid={`button-trigger-automation-${alert.id}`}
+            >
+              <Zap size={12} className="mr-1" />
+              Trigger Automation
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -313,6 +336,28 @@ function ValueSummaryBanner() {
         <div className="text-right">
           <div className="text-3xl font-bold">£{totalValueProtected}m+</div>
           <p className="text-white/80 text-sm">Value at risk identified & protected</p>
+          <div className="mt-2 flex gap-2 justify-end">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="bg-white/20 hover:bg-white/30 text-white text-xs"
+              onClick={() => alert('Share Report: Generating comprehensive AI insights report with all detected risks, value protected, and trend analysis for executive stakeholders')}
+              data-testid="button-share-report"
+            >
+              <ArrowRight size={12} className="mr-1" />
+              Share Report
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="bg-white/20 hover:bg-white/30 text-white text-xs"
+              onClick={() => alert('View All Alerts: Opening full alert dashboard with filtering, sorting, and detailed drill-down capabilities')}
+              data-testid="button-view-all-alerts"
+            >
+              <Eye size={12} className="mr-1" />
+              View All Alerts
+            </Button>
+          </div>
         </div>
       </div>
     </div>
