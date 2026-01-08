@@ -3,10 +3,11 @@ import {
   lgCompanyOverview, 
   riskData 
 } from './lgData';
+import { DataMode, SimulationMultipliers } from '../contexts/SimulationContext';
 
-export type DataMode = "VRO" | "PMO";
+export type { DataMode, SimulationMultipliers };
 
-const VRO_MULTIPLIERS = {
+const VRO_MULTIPLIERS: SimulationMultipliers = {
   forecastEfficiency: 0.96,
   savingsRate: 0.08,
   confidenceBoost: 35,
@@ -16,7 +17,7 @@ const VRO_MULTIPLIERS = {
   progressBoost: 15
 };
 
-const PMO_MULTIPLIERS = {
+const PMO_MULTIPLIERS: SimulationMultipliers = {
   forecastEfficiency: 1.15,
   savingsRate: 0.02,
   confidenceBoost: 0,
@@ -25,6 +26,10 @@ const PMO_MULTIPLIERS = {
   readinessBoost: 0,
   progressBoost: -15
 };
+
+export function getMultipliers(mode: DataMode): SimulationMultipliers {
+  return mode === 'VRO' ? VRO_MULTIPLIERS : PMO_MULTIPLIERS;
+}
 
 export interface TransformedCostCategory {
   name: string;

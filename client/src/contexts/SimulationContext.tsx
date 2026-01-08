@@ -1,6 +1,38 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { SimulationEvent, simulationEngine } from '../lib/liveSimulation';
 
+export type DataMode = "VRO" | "PMO";
+
+export interface SimulationMultipliers {
+  forecastEfficiency: number;
+  savingsRate: number;
+  confidenceBoost: number;
+  completionBoost: number;
+  adoptionBoost: number;
+  readinessBoost: number;
+  progressBoost: number;
+}
+
+const VRO_MULTIPLIERS: SimulationMultipliers = {
+  forecastEfficiency: 0.96,
+  savingsRate: 0.08,
+  confidenceBoost: 35,
+  completionBoost: 30,
+  adoptionBoost: 25,
+  readinessBoost: 20,
+  progressBoost: 15
+};
+
+const PMO_MULTIPLIERS: SimulationMultipliers = {
+  forecastEfficiency: 1.15,
+  savingsRate: 0.02,
+  confidenceBoost: 0,
+  completionBoost: 0,
+  adoptionBoost: 0,
+  readinessBoost: 0,
+  progressBoost: -15
+};
+
 interface SimulationContextType {
   events: SimulationEvent[];
   latestEvent: SimulationEvent | null;
@@ -11,6 +43,9 @@ interface SimulationContextType {
   markAsRead: (eventId: string) => void;
   startSimulation: () => void;
   stopSimulation: () => void;
+  dataMode: DataMode;
+  setDataMode: (mode: DataMode) => void;
+  multipliers: SimulationMultipliers;
 }
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -21,6 +56,9 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [unreadCount, setUnreadCount] = useState(simulationEngine.getUnreadCount());
   const [isRunning, setIsRunning] = useState(simulationEngine.getIsRunning());
   const [selectedEvent, setSelectedEvent] = useState<SimulationEvent | null>(null);
+  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  
+  const multipliers = dataMode === "VRO" ? VRO_MULTIPLIERS : PMO_MULTIPLIERS;
 
   useEffect(() => {
     simulationEngine.start(5000);
@@ -63,7 +101,10 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
       setSelectedEvent,
       markAsRead,
       startSimulation,
-      stopSimulation
+      stopSimulation,
+      dataMode,
+      setDataMode,
+      multipliers
     }}>
       {children}
     </SimulationContext.Provider>
