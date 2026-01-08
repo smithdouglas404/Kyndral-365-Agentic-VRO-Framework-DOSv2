@@ -387,17 +387,7 @@ export function AIProactiveInsightsSection() {
 
       <ValueSummaryBanner />
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <LiveAlertsFeed />
-        <div className="space-y-6">
-          <ReactiveVsProactiveComparison />
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <IndustryStatsCard />
-        <CapabilitiesCard />
-      </div>
+      <LiveAlertsFeed />
     </motion.section>
   );
 }
