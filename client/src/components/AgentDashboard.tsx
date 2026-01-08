@@ -46,10 +46,10 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
           onClick={() => handleEntityClick('metric', `${agentId}-projects`)}
           data-testid="metric-total-projects"
         >
-          {data.metrics.atRiskProjects > 0 && (
+          {data.metrics.atRiskProjects > 2 && (
             <AlertBubble 
               count={data.metrics.atRiskProjects} 
-              severity={data.metrics.atRiskProjects > 2 ? 'critical' : 'warning'}
+              severity="critical"
               onClick={() => handleEntityClick('metric', `${agentId}-projects`)}
             />
           )}
@@ -98,12 +98,6 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
           onClick={() => handleEntityClick('metric', `${agentId}-confidence`)}
           data-testid="metric-confidence"
         >
-          {data.metrics.avgConfidence < 70 && (
-            <AlertBubble 
-              severity="warning"
-              onClick={() => handleEntityClick('metric', `${agentId}-confidence`)}
-            />
-          )}
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
