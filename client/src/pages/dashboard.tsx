@@ -133,54 +133,59 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
     },
   ];
 
+  // PMO shows project delivery metrics (different from VRO's value metrics)
   const pmoStats = [
     { 
-      id: "prt-volume",
-      label: "PRT Volume (2025)", 
-      value: `${lgAnnualReportData.prtVolume.actual2025}`,
-      unit: lgAnnualReportData.prtVolume.unit,
-      baseline: `${lgAnnualReportData.prtVolume.baseline2024} ${lgAnnualReportData.prtVolume.unit}`,
-      target: `${lgAnnualReportData.prtVolume.target2026} ${lgAnnualReportData.prtVolume.unit}`,
-      icon: Target, 
-      color: "text-[#757575]",
-      source: lgAnnualReportData.prtVolume.source,
-      progress: Math.round(((lgAnnualReportData.prtVolume.actual2025 - lgAnnualReportData.prtVolume.baseline2024) / (lgAnnualReportData.prtVolume.target2026 - lgAnnualReportData.prtVolume.baseline2024)) * 100)
-    },
-    { 
-      id: "forecast-accuracy",
-      label: "Forecast Accuracy (2025)", 
-      value: `${lgAnnualReportData.forecastAccuracy.actual2025}`,
-      unit: lgAnnualReportData.forecastAccuracy.unit,
-      baseline: `${lgAnnualReportData.forecastAccuracy.baseline2024} ${lgAnnualReportData.forecastAccuracy.unit}`,
-      target: `${lgAnnualReportData.forecastAccuracy.target2026} ${lgAnnualReportData.forecastAccuracy.unit}`,
-      icon: Activity, 
-      color: "text-[#757575]",
-      source: lgAnnualReportData.forecastAccuracy.source,
-      progress: Math.round(((lgAnnualReportData.forecastAccuracy.actual2025 - lgAnnualReportData.forecastAccuracy.baseline2024) / (lgAnnualReportData.forecastAccuracy.target2026 - lgAnnualReportData.forecastAccuracy.baseline2024)) * 100)
-    },
-    { 
-      id: "cost-savings",
-      label: "Cost Savings (2025)", 
-      value: `${lgAnnualReportData.costSavings.actual2025}`,
-      unit: lgAnnualReportData.costSavings.unit,
-      baseline: `${lgAnnualReportData.costSavings.baseline2024} ${lgAnnualReportData.costSavings.unit}`,
-      target: `${lgAnnualReportData.costSavings.target2026} ${lgAnnualReportData.costSavings.unit}`,
-      icon: TrendingUp, 
-      color: "text-[#757575]",
-      source: lgAnnualReportData.costSavings.source,
-      progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100)
-    },
-    { 
       id: "cycle-time",
-      label: "Cycle Time (2025)", 
-      value: `${lgAnnualReportData.cycleTime.actual2025}`,
-      unit: lgAnnualReportData.cycleTime.unit,
-      baseline: `${lgAnnualReportData.cycleTime.baseline2024} ${lgAnnualReportData.cycleTime.unit}`,
-      target: `${lgAnnualReportData.cycleTime.target2026} ${lgAnnualReportData.cycleTime.unit}`,
+      label: "Cycle Time", 
+      value: "19",
+      unit: "days",
+      baseline: "35 days",
+      target: "10 days",
       icon: Clock, 
-      color: "text-[#757575]",
-      source: `PMO tracking same metric (${lgAnnualReportData.cycleTime.source})`,
-      progress: Math.round(((lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.actual2025) / (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026)) * 100)
+      color: "text-[#005EB8]",
+      source: "PMO Flow Metrics",
+      progress: 64,
+      delta: "+8 days vs target"
+    },
+    { 
+      id: "flow-efficiency",
+      label: "Flow Efficiency", 
+      value: "69",
+      unit: "%",
+      baseline: "45%",
+      target: "50%",
+      icon: Activity, 
+      color: "text-[#D50032]",
+      source: "Lean/Agile Metrics",
+      progress: 138,
+      delta: "-6% vs target"
+    },
+    { 
+      id: "throughput",
+      label: "Throughput", 
+      value: "11",
+      unit: "items/week",
+      baseline: "8 items/week",
+      target: "25 items/week",
+      icon: TrendingUp, 
+      color: "text-[#00843D]",
+      source: "Sprint Analytics",
+      progress: 44,
+      delta: "+3 vs last week"
+    },
+    { 
+      id: "wip-items",
+      label: "WIP Items", 
+      value: "9",
+      unit: "/ 12",
+      baseline: "12 items",
+      target: "8 items",
+      icon: Target, 
+      color: "text-[#005EB8]",
+      source: "Kanban Board",
+      progress: 75,
+      delta: "3 slots available"
     },
   ];
 
