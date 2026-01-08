@@ -4,7 +4,7 @@ import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, ChevronDown, 
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 interface PageContext {
@@ -90,7 +90,7 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [insights, setInsights] = useState<WizardInsights | null>(null);
-  const [showQuestions, setShowQuestions] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatQuestion, setChatQuestion] = useState('');
   const [chatResponse, setChatResponse] = useState('');
@@ -337,6 +337,7 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
               <Brain className="h-5 w-5 text-purple-600" />
               {agentName}
             </DialogTitle>
+            <DialogDescription>AI-powered insights and recommendations for your data</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
