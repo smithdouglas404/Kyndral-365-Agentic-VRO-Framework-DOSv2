@@ -336,8 +336,50 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
       };
       relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.category }));
       break;
+    case 'deadlines':
+      entityName = `${config.name} - Deadline Tracking`;
+      const onTrack = agentData.projects.filter(p => p.status === 'green').length;
+      const total = agentData.projects.length;
+      metrics = {
+        'On Track': onTrack,
+        'Total Deadlines': total,
+        'At Risk': agentData.metrics.atRiskProjects,
+        'Completion Rate': `${Math.round((onTrack / Math.max(total, 1)) * 100)}%`
+      };
+      relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'budget':
+      entityName = `${config.name} - Budget Status`;
+      const totalBudget = agentData.projects.reduce((sum, p) => sum + p.budget.total, 0);
+      const spentBudget = agentData.projects.reduce((sum, p) => sum + p.budget.spent, 0);
+      metrics = {
+        'Total Budget': `£${totalBudget.toFixed(1)}m`,
+        'Spent': `£${spentBudget.toFixed(1)}m`,
+        'Remaining': `£${(totalBudget - spentBudget).toFixed(1)}m`,
+        'Burn Rate': `${Math.round((spentBudget / Math.max(totalBudget, 1)) * 100)}%`
+      };
+      relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'progress':
+      entityName = `${config.name} - Overall Progress`;
+      metrics = {
+        'Avg Confidence': `${agentData.metrics.avgConfidence}%`,
+        'Healthy Projects': agentData.metrics.healthyProjects,
+        'At Risk': agentData.metrics.atRiskProjects,
+        'Value Realized': `£${agentData.metrics.realizedValue}m`
+      };
+      relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
+      break;
     default:
-      return null;
+      entityName = `${config.name} - ${metricType.charAt(0).toUpperCase() + metricType.slice(1)}`;
+      metrics = {
+        'Total Projects': agentData.metrics.totalProjects,
+        'Active Alerts': agentData.metrics.activeAlerts,
+        'Value Realized': `£${agentData.metrics.realizedValue}m`,
+        'Confidence': `${agentData.metrics.avgConfidence}%`
+      };
+      relatedEntities = agentData.projects.slice(0, 3).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
   }
   
   return {
