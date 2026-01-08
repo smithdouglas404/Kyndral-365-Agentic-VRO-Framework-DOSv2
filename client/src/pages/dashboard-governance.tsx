@@ -4,15 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, CheckCircle2, Clock, AlertOctagon,
   Users, ChevronDown, ChevronRight, Bot,
-  TrendingUp, TrendingDown
+  TrendingUp, TrendingDown, Brain
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { AlertBubble } from '@/components/AlertBubble';
 import { riskData } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
+import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getGovernanceItemsFromRiskData,
   getRiskMetricsFromDivisions,
@@ -187,6 +190,7 @@ function RiskCategoryCard({ category }: { category: typeof riskData.categories[0
 
 export default function GovernanceDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const liveData = useAgentData('governance');
   
   const governanceItems = getGovernanceItemsFromRiskData(dataMode);
   const riskMetrics = getRiskMetricsFromDivisions(dataMode);
@@ -242,7 +246,10 @@ export default function GovernanceDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.activeAlerts > 0 && (
+                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -254,16 +261,19 @@ export default function GovernanceDashboard() {
                 <Progress value={(completedCount / governanceItems.length) * 100} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {(liveData.metrics.pendingActions > 0 || pendingCount > 0) && (
+                <AlertBubble count={liveData.metrics.pendingActions || pendingCount} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Pending Actions</p>
-                    <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
+                    <p className="text-2xl font-bold text-amber-600">{liveData.metrics.pendingActions || pendingCount}</p>
                   </div>
                   <Clock className="h-8 w-8 text-amber-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">{pendingCount > 0 ? 'Requires attention' : 'All clear'}</p>
+                <p className="text-xs text-gray-500 mt-2">{(liveData.metrics.pendingActions || pendingCount) > 0 ? 'Requires attention' : 'All clear'}</p>
               </CardContent>
             </Card>
             <Card>
@@ -271,19 +281,22 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Compliance Score</p>
-                    <p className="text-2xl font-bold text-green-600">{riskMetrics.complianceScore}%</p>
+                    <p className="text-2xl font-bold text-green-600">{liveData.metrics.avgConfidence || riskMetrics.complianceScore}%</p>
                   </div>
                   <Shield className="h-8 w-8 text-green-200" />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">FCA aligned</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {(liveData.metrics.atRiskProjects > 0 || riskMetrics.high > 0) && (
+                <AlertBubble count={liveData.metrics.atRiskProjects || riskMetrics.high} severity="critical" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">High Risks</p>
-                    <p className="text-2xl font-bold text-red-600">{riskMetrics.high}</p>
+                    <p className="text-2xl font-bold text-red-600">{liveData.metrics.atRiskProjects || riskMetrics.high}</p>
                   </div>
                   <AlertOctagon className="h-8 w-8 text-red-200" />
                 </div>
@@ -357,6 +370,18 @@ export default function GovernanceDashboard() {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Cross-Agent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CrossAgentActivityFeed maxItems={5} compact />
             </CardContent>
           </Card>
 

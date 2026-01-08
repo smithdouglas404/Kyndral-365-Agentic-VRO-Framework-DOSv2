@@ -4,15 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, CheckCircle2, TrendingUp, AlertTriangle,
   ChevronRight, ChevronDown, Bot, DollarSign,
-  Building2, Repeat
+  Building2, Repeat, Brain
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { AlertBubble } from '@/components/AlertBubble';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
+import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getObjectivesFromDivisions,
   getCompanyMetrics,
@@ -193,6 +196,7 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
 
 export default function OKRDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const liveData = useAgentData('okr');
   
   const objectives = getObjectivesFromDivisions(dataMode);
 
@@ -252,16 +256,19 @@ export default function OKRDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.activeAlerts > 0 && (
+                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Overall Progress</p>
-                    <p className="text-2xl font-bold text-orange-600">{avgProgress}%</p>
+                    <p className="text-2xl font-bold text-orange-600">{liveData.metrics.avgConfidence || avgProgress}%</p>
                   </div>
                   <Target className="h-8 w-8 text-orange-200" />
                 </div>
-                <Progress value={avgProgress} className="h-1.5 mt-2" />
+                <Progress value={liveData.metrics.avgConfidence || avgProgress} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
             <Card>
@@ -269,7 +276,7 @@ export default function OKRDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Total Value</p>
-                    <p className="text-2xl font-bold text-green-600">£{totalValue}M</p>
+                    <p className="text-2xl font-bold text-green-600">£{liveData.metrics.totalValue || totalValue}M</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-green-200" />
                 </div>
@@ -300,12 +307,15 @@ export default function OKRDashboard() {
                 <p className="text-xs text-gray-500 mt-2">meeting targets</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {(liveData.metrics.atRiskProjects > 0 || atRiskCount > 0) && (
+                <AlertBubble count={liveData.metrics.atRiskProjects || atRiskCount} severity="critical" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">At Risk</p>
-                    <p className="text-2xl font-bold text-amber-600">{atRiskCount}</p>
+                    <p className="text-2xl font-bold text-amber-600">{liveData.metrics.atRiskProjects || atRiskCount}</p>
                   </div>
                   <AlertTriangle className="h-8 w-8 text-amber-200" />
                 </div>
@@ -317,7 +327,7 @@ export default function OKRDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Linked Initiatives</p>
-                    <p className="text-2xl font-bold text-purple-600">{totalInitiatives}</p>
+                    <p className="text-2xl font-bold text-purple-600">{liveData.metrics.totalProjects || totalInitiatives}</p>
                   </div>
                   <Repeat className="h-8 w-8 text-purple-200" />
                 </div>
@@ -365,6 +375,18 @@ export default function OKRDashboard() {
                   </Link>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Cross-Agent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CrossAgentActivityFeed maxItems={5} compact />
             </CardContent>
           </Card>
 

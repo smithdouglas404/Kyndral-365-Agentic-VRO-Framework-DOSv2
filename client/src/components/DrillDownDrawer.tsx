@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEntityDrilldown } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
+import { AICoPilot } from './AICoPilot';
 
 interface DrillDownDrawerProps {
   isOpen: boolean;
@@ -77,6 +78,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
             </div>
 
             <div className="p-4">
+              <AICoPilot 
+                drilldown={drilldown} 
+                agentId={drilldown.relatedAgents[0] || 'vro'} 
+              />
+              
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="w-full mb-4">
                   <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>

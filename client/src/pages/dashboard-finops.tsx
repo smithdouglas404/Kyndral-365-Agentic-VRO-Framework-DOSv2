@@ -4,15 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calculator, DollarSign, TrendingUp, PieChart,
   BarChart3, ChevronDown, ChevronRight, Building2, Bot,
-  ArrowUpRight, ArrowDownRight
+  ArrowUpRight, ArrowDownRight, Brain
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { AlertBubble } from '@/components/AlertBubble';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
+import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getCostCategoriesFromDivisions, 
   getSavingsOpportunitiesFromProjects,
@@ -193,6 +196,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
 
 export default function FinOpsDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const liveData = useAgentData('finops');
   
   const costCategories = getCostCategoriesFromDivisions(dataMode);
   const savingsOpportunities = getSavingsOpportunitiesFromProjects(dataMode);
@@ -252,12 +256,15 @@ export default function FinOpsDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.activeAlerts > 0 && (
+                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Total Budget</p>
-                    <p className="text-2xl font-bold text-blue-600">£{totalBudget}M</p>
+                    <p className="text-2xl font-bold text-blue-600">£{liveData.metrics.totalValue || totalBudget}M</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-blue-200" />
                 </div>
@@ -269,14 +276,17 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">YTD Spend</p>
-                    <p className="text-2xl font-bold text-green-600">£{totalSpent}M</p>
+                    <p className="text-2xl font-bold text-green-600">£{liveData.metrics.realizedValue || totalSpent}M</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-green-200" />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{utilizationRate}% utilized</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {forecastVariance > 5 && (
+                <AlertBubble severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -299,10 +309,13 @@ export default function FinOpsDashboard() {
                   </div>
                   <PieChart className="h-8 w-8 text-purple-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">{savingsOpportunities.length} opportunities</p>
+                <p className="text-xs text-gray-500 mt-2">{liveData.metrics.totalProjects || savingsOpportunities.length} opportunities</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.atRiskProjects > 0 && (
+                <AlertBubble count={liveData.metrics.atRiskProjects} severity="critical" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -379,6 +392,18 @@ export default function FinOpsDashboard() {
                   </Link>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Cross-Agent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CrossAgentActivityFeed maxItems={5} compact />
             </CardContent>
           </Card>
 

@@ -4,15 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, CheckCircle2, Flag,
   ChevronRight, ChevronDown, BarChart3, Target, Bot,
-  TrendingUp
+  TrendingUp, Brain
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { AlertBubble } from '@/components/AlertBubble';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
+import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getMilestonesFromProjects,
   getDeadlinesFromProjects,
@@ -202,6 +205,7 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
 
 export default function PlanningDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const liveData = useAgentData('planning');
   
   const milestones = getMilestonesFromProjects(dataMode);
   const deadlines = getDeadlinesFromProjects(dataMode);
@@ -265,7 +269,10 @@ export default function PlanningDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.activeAlerts > 0 && (
+                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -282,11 +289,11 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Overall Progress</p>
-                    <p className="text-2xl font-bold text-green-600">{overallProgress}%</p>
+                    <p className="text-2xl font-bold text-green-600">{liveData.metrics.avgConfidence || overallProgress}%</p>
                   </div>
                   <Target className="h-8 w-8 text-green-200" />
                 </div>
-                <Progress value={overallProgress} className="h-1.5 mt-2" />
+                <Progress value={liveData.metrics.avgConfidence || overallProgress} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
             <Card>
@@ -294,14 +301,17 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Budget Status</p>
-                    <p className="text-2xl font-bold text-blue-600">£{totalSpent.toFixed(1)}M</p>
+                    <p className="text-2xl font-bold text-blue-600">£{liveData.metrics.realizedValue || totalSpent.toFixed(1)}M</p>
                   </div>
                   <BarChart3 className="h-8 w-8 text-blue-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">of £{totalBudget}M planned</p>
+                <p className="text-xs text-gray-500 mt-2">of £{liveData.metrics.totalValue || totalBudget}M planned</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {(liveData.metrics.atRiskProjects > 0 || atRiskDeadlines > 0) && (
+                <AlertBubble count={liveData.metrics.atRiskProjects || atRiskDeadlines} severity="critical" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -310,8 +320,8 @@ export default function PlanningDashboard() {
                   </div>
                   <CheckCircle2 className="h-8 w-8 text-green-200" />
                 </div>
-                {atRiskDeadlines > 0 && (
-                  <p className="text-xs text-red-600 mt-2">{atRiskDeadlines} at risk</p>
+                {(liveData.metrics.atRiskProjects || atRiskDeadlines) > 0 && (
+                  <p className="text-xs text-red-600 mt-2">{liveData.metrics.atRiskProjects || atRiskDeadlines} at risk</p>
                 )}
               </CardContent>
             </Card>
@@ -320,7 +330,7 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Active Projects</p>
-                    <p className="text-2xl font-bold text-purple-600">{inProgressProjects}</p>
+                    <p className="text-2xl font-bold text-purple-600">{liveData.metrics.totalProjects || inProgressProjects}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-purple-200" />
                 </div>
@@ -398,6 +408,18 @@ export default function PlanningDashboard() {
                   </Link>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Cross-Agent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CrossAgentActivityFeed maxItems={5} compact />
             </CardContent>
           </Card>
 

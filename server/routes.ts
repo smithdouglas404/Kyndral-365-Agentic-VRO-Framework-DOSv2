@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { parsePolicyDocument, extractPolicyMetadata } from "./anthropic";
+import { registerCoPilotRoutes } from "./copilot";
 import { z } from "zod";
 import multer from "multer";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
@@ -55,6 +56,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  // Register AI CoPilot routes
+  registerCoPilotRoutes(app);
 
   app.post("/api/policies/upload-pdf", upload.single('pdf'), async (req, res) => {
     try {

@@ -4,15 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Repeat, Users, TrendingUp, Target, CheckCircle2, 
   AlertTriangle, ChevronDown, ChevronRight, Bot,
-  Building2, Calendar, Shield
+  Building2, Calendar, Shield, Brain
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { AlertBubble } from '@/components/AlertBubble';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
+import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getAdoptionMetricsFromDivisions,
   getInitiativesFromDivisions,
@@ -283,6 +286,7 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
 
 export default function TMODashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const liveData = useAgentData('tmo');
   
   const adoptionMetrics = getAdoptionMetricsFromDivisions(dataMode);
   const initiatives = getInitiativesFromDivisions(dataMode);
@@ -340,16 +344,19 @@ export default function TMODashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.activeAlerts > 0 && (
+                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Overall Adoption</p>
-                    <p className="text-2xl font-bold text-teal-600">{avgAdoption}%</p>
+                    <p className="text-2xl font-bold text-teal-600">{liveData.metrics.avgConfidence || avgAdoption}%</p>
                   </div>
                   <Users className="h-8 w-8 text-teal-200" />
                 </div>
-                <Progress value={avgAdoption} className="h-1.5 mt-2" />
+                <Progress value={liveData.metrics.avgConfidence || avgAdoption} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
             <Card>
@@ -369,23 +376,28 @@ export default function TMODashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Active Initiatives</p>
-                    <p className="text-2xl font-bold text-purple-600">{initiatives.length}</p>
+                    <p className="text-2xl font-bold text-purple-600">{liveData.metrics.totalProjects || initiatives.length}</p>
                   </div>
                   <Repeat className="h-8 w-8 text-purple-200" />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{completeInitiatives} complete</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {(liveData.metrics.atRiskProjects > 0 || atRiskInitiatives > 0) && (
+                <AlertBubble count={liveData.metrics.atRiskProjects || atRiskInitiatives} severity="critical" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">At Risk</p>
-                    <p className={`text-2xl font-bold ${atRiskInitiatives > 0 ? 'text-red-600' : 'text-green-600'}`}>{atRiskInitiatives}</p>
+                    <p className={`text-2xl font-bold ${(liveData.metrics.atRiskProjects || atRiskInitiatives) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {liveData.metrics.atRiskProjects || atRiskInitiatives}
+                    </p>
                   </div>
                   <AlertTriangle className="h-8 w-8 text-red-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">{atRiskInitiatives > 0 ? 'Needs attention' : 'All healthy'}</p>
+                <p className="text-xs text-gray-500 mt-2">{(liveData.metrics.atRiskProjects || atRiskInitiatives) > 0 ? 'Needs attention' : 'All healthy'}</p>
               </CardContent>
             </Card>
             <Card>
@@ -435,6 +447,18 @@ export default function TMODashboard() {
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Cross-Agent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CrossAgentActivityFeed maxItems={5} compact />
+            </CardContent>
+          </Card>
 
           <CrossAgentCollaboration />
         </main>

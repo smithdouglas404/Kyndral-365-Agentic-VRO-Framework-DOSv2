@@ -12,6 +12,7 @@ import { useAgentData } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
 import { DrillDownDrawer } from './DrillDownDrawer';
 import { CrossAgentActivityFeed } from './CrossAgentActivityFeed';
+import { AlertBubble } from './AlertBubble';
 
 interface AgentDashboardProps {
   agentId: AgentType;
@@ -41,10 +42,17 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow" 
+          className="cursor-pointer hover:shadow-md transition-shadow relative" 
           onClick={() => handleEntityClick('metric', `${agentId}-projects`)}
           data-testid="metric-total-projects"
         >
+          {data.metrics.atRiskProjects > 0 && (
+            <AlertBubble 
+              count={data.metrics.atRiskProjects} 
+              severity={data.metrics.atRiskProjects > 2 ? 'critical' : 'warning'}
+              onClick={() => handleEntityClick('metric', `${agentId}-projects`)}
+            />
+          )}
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -86,10 +94,16 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow"
+          className="cursor-pointer hover:shadow-md transition-shadow relative"
           onClick={() => handleEntityClick('metric', `${agentId}-confidence`)}
           data-testid="metric-confidence"
         >
+          {data.metrics.avgConfidence < 70 && (
+            <AlertBubble 
+              severity="warning"
+              onClick={() => handleEntityClick('metric', `${agentId}-confidence`)}
+            />
+          )}
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -105,10 +119,17 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow"
+          className="cursor-pointer hover:shadow-md transition-shadow relative"
           onClick={() => handleEntityClick('metric', `${agentId}-alerts`)}
           data-testid="metric-active-alerts"
         >
+          {(data.metrics.activeAlerts > 0 || data.metrics.pendingActions > 0) && (
+            <AlertBubble 
+              count={data.metrics.activeAlerts + data.metrics.pendingActions} 
+              severity="critical"
+              onClick={() => handleEntityClick('metric', `${agentId}-alerts`)}
+            />
+          )}
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>

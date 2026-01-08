@@ -4,14 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, BookOpen, MessageSquare, TrendingUp,
   Award, ChevronDown, ChevronRight,
-  Bot, Building2
+  Bot, Building2, Brain
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { AlertBubble } from '@/components/AlertBubble';
 import { useSimulation } from '@/contexts/SimulationContext';
+import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getChangeReadinessFromDivisions,
   getStakeholderGroupsFromDivisions,
@@ -236,6 +239,7 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 
 export default function OCMDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const liveData = useAgentData('ocm');
   
   const readinessMetrics = getChangeReadinessFromDivisions(dataMode);
   const stakeholderGroups = getStakeholderGroupsFromDivisions(dataMode);
@@ -296,16 +300,19 @@ export default function OCMDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.activeAlerts > 0 && (
+                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Change Readiness</p>
-                    <p className="text-2xl font-bold text-pink-600">{avgReadiness}%</p>
+                    <p className="text-2xl font-bold text-pink-600">{liveData.metrics.avgConfidence || avgReadiness}%</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-pink-200" />
                 </div>
-                <Progress value={avgReadiness} className="h-1.5 mt-2" />
+                <Progress value={liveData.metrics.avgConfidence || avgReadiness} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
             <Card>
@@ -320,7 +327,10 @@ export default function OCMDashboard() {
                 <p className="text-xs text-gray-500 mt-2">{totalCompleted.toLocaleString()} completed</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="relative">
+              {liveData.metrics.atRiskProjects > 0 && (
+                <AlertBubble count={liveData.metrics.atRiskProjects} severity="critical" />
+              )}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -407,6 +417,18 @@ export default function OCMDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Cross-Agent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CrossAgentActivityFeed maxItems={5} compact />
+            </CardContent>
+          </Card>
 
           <CrossAgentCollaboration />
         </main>
