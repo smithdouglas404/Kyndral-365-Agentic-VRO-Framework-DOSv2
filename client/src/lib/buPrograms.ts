@@ -533,7 +533,7 @@ export const vroPrograms: VROProgram[] = [
     trendData: [{ week: "W28", value: 780 }, { week: "W29", value: 800 }, { week: "W30", value: 820 }, { week: "W31", value: 835 }, { week: "W32", value: 847 }]
   },
 
-  // Retail - Bernie Hickman
+  // Retail - Paula Llewellyn
   {
     id: "vro-rt-001",
     name: "Digital Customer Experience",
@@ -550,7 +550,7 @@ export const vroPrograms: VROProgram[] = [
       { outcome: "Call center volume reduction", progress: 25, target: 40, unit: "%" },
       { outcome: "NPS score", progress: 48, target: 55, unit: "" }
     ],
-    collaborators: ["Bernie Hickman", "Digital", "Customer Service"],
+    collaborators: ["Paula Llewellyn", "Digital", "Customer Service"],
     riskMitigation: "Accessibility compliance automated - 98% WCAG 2.1 AA compliance",
     safe: {
       velocity: 58,

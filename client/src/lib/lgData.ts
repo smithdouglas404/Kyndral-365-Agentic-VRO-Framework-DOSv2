@@ -201,7 +201,7 @@ export const divisions: DivisionData[] = [
   {
     id: "retail",
     name: "Retail",
-    ceo: "Bernie Hickman",
+    ceo: "Paula Llewellyn",
     profit2023: 449,
     profit2024: 504,
     changePercent: 12,
@@ -223,7 +223,7 @@ export const divisions: DivisionData[] = [
           { result: "Reduce call center volume", progress: 25, target: 40, unit: "% reduction" },
           { result: "Launch AI chatbot for queries", progress: 60, target: 100, unit: "% deployed" }
         ],
-        owner: "Bernie Hickman",
+        owner: "Paula Llewellyn",
         dueDate: "Q2 2025"
       }
     ],
@@ -707,7 +707,7 @@ export const aiAlerts: AIAlert[] = [
     metric: "Sentiment Score",
     value: "+12%",
     recommendation: "Continue digital transformation momentum. Consider expanding AI chatbot to protection products.",
-    targetPersona: "CEO Retail - Bernie Hickman",
+    targetPersona: "CEO Retail - Paula Llewellyn",
     division: "Retail",
     timestamp: new Date(Date.now() - 5400000),
     confidence: 91,
