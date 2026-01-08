@@ -69,10 +69,9 @@ function GlobalAIOverlay() {
   const activeAlerts = metrics.activeAlerts;
   const messageCount = messages.length;
   
-  // Only show overlay on dashboard and detail pages, not on home or landing pages
-  const showOnPages = ['/dashboard', '/division', '/climate', '/risk'];
-  const shouldShow = showOnPages.some(page => location.startsWith(page));
-  if (!shouldShow) {
+  // Only show overlay on dashboard pages, never on home or other pages
+  // Check for empty string, root path, or paths that don't start with /dashboard
+  if (!location || location === '' || location === '/' || !location.startsWith('/dashboard')) {
     return null;
   }
 

@@ -91,15 +91,6 @@ const agents: Agent[] = [
     href: '/dashboard/ocm',
     color: 'bg-pink-500',
     description: 'Organizational change'
-  },
-  {
-    id: 'policy',
-    name: 'Policy as Code',
-    shortName: 'POL',
-    icon: FileCode,
-    href: '/policy-generator',
-    color: 'bg-emerald-500',
-    description: 'Transform policies to code'
   }
 ];
 
