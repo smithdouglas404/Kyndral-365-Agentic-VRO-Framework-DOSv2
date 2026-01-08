@@ -29,8 +29,10 @@ export function AlertBubble({
       animate={{ scale: 1 }}
       className={baseClasses}
       onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
+        if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
       }}
       data-testid="alert-bubble"
     >
