@@ -135,12 +135,14 @@ export function getGovernanceItemsFromRiskData(mode: DataMode): TransformedGover
     const highRisks = category.subRisks?.filter(r => r.severity === 'high').length || 0;
     const priorities: ('high' | 'medium' | 'low')[] = highRisks > 1 ? ['high', 'high', 'medium', 'medium'] : ['medium', 'medium', 'low', 'low'];
     
+    const govStatus: 'complete' | 'in-review' | 'pending' = mode === 'VRO' 
+      ? (i < 3 ? 'complete' : 'in-review')
+      : (i === 0 ? 'in-review' : 'pending');
+    
     return {
       title: `${category.name} Review`,
       type: types[i % 4],
-      status: mode === 'VRO' 
-        ? (i < 3 ? 'complete' : 'in-review') as const
-        : (i === 0 ? 'in-review' : 'pending') as const,
+      status: govStatus,
       priority: priorities[i],
       dueDate: dueDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' }),
       owner: owners[i % 4],
@@ -317,11 +319,13 @@ export function getMilestonesFromProjects(mode: DataMode): TransformedMilestone[
     const plannedBudget = 15 + i * 12;
     const actualMultiplier = mode === 'VRO' ? 0.92 : (i === 1 ? 1.18 : 1);
     
+    const phaseStatus: 'complete' | 'in-progress' | 'upcoming' | 'at-risk' | 'planned' = mode === 'VRO'
+      ? (progress === 100 ? 'complete' : progress > 0 ? 'in-progress' : 'upcoming')
+      : (progress === 100 ? 'complete' : progress > 0 ? 'at-risk' : 'planned');
+    
     return {
       name: `Phase ${i + 1}: ${phase}`,
-      status: mode === 'VRO'
-        ? (progress === 100 ? 'complete' : progress > 0 ? 'in-progress' : 'upcoming') as const
-        : (progress === 100 ? 'complete' : progress > 0 ? 'at-risk' : 'planned') as const,
+      status: phaseStatus,
       startDate: quarters[i].replace('Q', 'Jan ').replace(' 2', ', 2'),
       endDate: quarters[i].replace('Q', 'Mar ').replace(' 2', ', 2'),
       progress,
@@ -459,7 +463,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
     { agentId: 'okr', agentName: 'OKR Agent', role: 'Alignment tracking' }
   ];
   
-  return allProjects.slice(0, 4).map((project, i) => {
+  return allProjects.map((project, i) => {
     const roiMatch = project.expectedROI.match(/£?(\d+(?:\.\d+)?)/);
     const roiValue = roiMatch ? parseFloat(roiMatch[1]) : 25;
     
@@ -468,6 +472,10 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
     
     const estimatedUsers = Math.round(lgCompanyOverview.employees / divisions.length);
     
+    const initiativeStatus: 'on-track' | 'at-risk' | 'complete' = mode === 'VRO'
+      ? (project.status === 'completed' ? 'complete' : 'on-track')
+      : (project.status === 'completed' ? 'complete' : 'at-risk');
+    
     return {
       id: `init-${i + 1}`,
       name: project.name,
@@ -475,9 +483,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
       phase: project.status === 'completed' ? 'Complete' : project.status === 'in-progress' ? 'Development' : 'Planning',
       progress,
       impactedUsers: estimatedUsers,
-      status: mode === 'VRO'
-        ? (project.status === 'completed' ? 'complete' : 'on-track') as const
-        : (project.status === 'completed' ? 'complete' : 'at-risk') as const,
+      status: initiativeStatus,
       division: project.division,
       owner: project.ceo,
       startDate: 'Oct 2024',
@@ -497,17 +503,17 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
         valueImpact: mode === 'VRO' ? `+£${Math.round(roiValue * 0.3)}M value` : 'TBD'
       })),
       collaboratingAgents: mode === 'VRO' 
-        ? agents.slice(0, 3 + i).map((a, j) => ({
+        ? agents.slice(0, 3 + (i % 3)).map((a, j) => ({
             ...a,
             lastSync: `${5 + j * 3} min ago`,
-            status: 'active' as const
+            status: 'active' as 'active' | 'pending' | 'complete'
           }))
-        : [{ ...agents[1], lastSync: '3 days ago', status: 'pending' as const }],
+        : [{ ...agents[1], lastSync: '3 days ago', status: 'pending' as 'active' | 'pending' | 'complete' }],
       milestones: [
-        { name: 'Requirements', date: 'Nov 2024', status: mode === 'VRO' ? 'complete' as const : 'complete' as const },
-        { name: 'Development', date: 'Feb 2025', status: mode === 'VRO' ? 'complete' as const : 'in-progress' as const },
-        { name: 'Testing', date: 'Apr 2025', status: mode === 'VRO' ? 'in-progress' as const : 'pending' as const },
-        { name: 'Rollout', date: 'Jun 2025', status: 'pending' as const }
+        { name: 'Requirements', date: 'Nov 2024', status: 'complete' as 'complete' | 'in-progress' | 'pending' },
+        { name: 'Development', date: 'Feb 2025', status: (mode === 'VRO' ? 'complete' : 'in-progress') as 'complete' | 'in-progress' | 'pending' },
+        { name: 'Testing', date: 'Apr 2025', status: (mode === 'VRO' ? 'in-progress' : 'pending') as 'complete' | 'in-progress' | 'pending' },
+        { name: 'Rollout', date: 'Jun 2025', status: 'pending' as 'complete' | 'in-progress' | 'pending' }
       ],
       risks: project.divisionRisks.slice(0, 2).map(r => ({
         description: r.description,
@@ -591,17 +597,20 @@ export function getObjectivesFromDivisions(mode: DataMode): TransformedObjective
           progress: Math.round(krProgress),
           target: `${kr.target}${kr.unit}`,
           current: `${kr.progress}${kr.unit}`,
-          linkedInitiatives: relatedProjects.map((p, k) => ({
-            id: `init-${i}-${j}-${k}`,
-            name: p.name,
-            division: okr.division,
-            contribution: mode === 'VRO' ? 25 + j * 10 + k * 5 : 5 + j * 2 + k,
-            status: mode === 'VRO' 
-              ? (p.status === 'completed' ? 'complete' : 'on-track') as const
-              : 'at-risk' as const,
-            valueImpact: p.expectedROI,
-            phase: p.status === 'completed' ? 'Complete' : p.status === 'in-progress' ? 'Development' : 'Planning'
-          }))
+          linkedInitiatives: relatedProjects.map((p, k) => {
+            const initStatus: 'on-track' | 'at-risk' | 'complete' = mode === 'VRO' 
+              ? (p.status === 'completed' ? 'complete' : 'on-track')
+              : 'at-risk';
+            return {
+              id: `init-${i}-${j}-${k}`,
+              name: p.name,
+              division: okr.division,
+              contribution: mode === 'VRO' ? 25 + j * 10 + k * 5 : 5 + j * 2 + k,
+              status: initStatus,
+              valueImpact: p.expectedROI,
+              phase: p.status === 'completed' ? 'Complete' : p.status === 'in-progress' ? 'Development' : 'Planning'
+            };
+          })
         };
       }),
       collaboratingAgents: mode === 'VRO'
