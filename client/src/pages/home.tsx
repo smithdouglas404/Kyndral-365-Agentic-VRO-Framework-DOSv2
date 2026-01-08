@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { lgAnnualReportData } from "@/lib/scenarios";
 import heroImage from "@assets/generated_images/london_city_skyline_with_digital_data_overlay_corporate_blue.png";
 
 export default function Home() {
@@ -129,10 +130,11 @@ export default function Home() {
               pageName: 'L&G Transformation Hub',
               pageType: 'overview',
               metrics: {
-                'Cycle Time': '5 Days',
-                'Cycle Time Reduction': '83%',
-                'Risk Detection': 'Proactive',
-                'Ways of Working': '12 → 1 Unified'
+                'Cycle Time': `${lgAnnualReportData.cycleTime.actual2025} ${lgAnnualReportData.cycleTime.unit}`,
+                'Cycle Time Reduction': `${Math.round(((lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.actual2025) / lgAnnualReportData.cycleTime.baseline2024) * 100)}%`,
+                'PRT Volume': `${lgAnnualReportData.prtVolume.actual2025}${lgAnnualReportData.prtVolume.unit}`,
+                'Forecast Accuracy': `${lgAnnualReportData.forecastAccuracy.actual2025}${lgAnnualReportData.forecastAccuracy.unit}`,
+                'Cost Savings': `£${lgAnnualReportData.costSavings.actual2025}${lgAnnualReportData.costSavings.unit}`
               }
             }}
             agentName="Transformation Agent"
