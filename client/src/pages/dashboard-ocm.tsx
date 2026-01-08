@@ -13,6 +13,7 @@ import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
@@ -241,6 +242,13 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 export default function OCMDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const liveData = useAgentData('ocm');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  const handleDrillDown = (entityType: string, entityId: string) => {
+    setDrillDownEntity({ type: entityType, id: entityId });
+    setDrillDownOpen(true);
+  };
   
   const readinessMetrics = getChangeReadinessFromDivisions(dataMode);
   const stakeholderGroups = getStakeholderGroupsFromDivisions(dataMode);
@@ -318,7 +326,7 @@ export default function OCMDashboard() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-readiness')} data-testid="metric-readiness">
               {liveData.metrics.activeAlerts > 0 && (
                 <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
               )}
@@ -333,7 +341,7 @@ export default function OCMDashboard() {
                 <Progress value={liveData.metrics.avgConfidence || avgReadiness} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-training')} data-testid="metric-training">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -345,7 +353,7 @@ export default function OCMDashboard() {
                 <p className="text-xs text-gray-500 mt-2">{totalCompleted.toLocaleString()} completed</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-sentiment')} data-testid="metric-sentiment">
               {liveData.metrics.atRiskProjects > 0 && (
                 <AlertBubble count={liveData.metrics.atRiskProjects} severity="critical" />
               )}
@@ -360,7 +368,7 @@ export default function OCMDashboard() {
                 <p className="text-xs text-gray-500 mt-2">positive groups</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-satisfaction')} data-testid="metric-satisfaction">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -372,7 +380,7 @@ export default function OCMDashboard() {
                 <p className="text-xs text-gray-500 mt-2">training rating</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-staff')} data-testid="metric-staff">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -451,6 +459,13 @@ export default function OCMDashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity.type}
+        entityId={drillDownEntity.id}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
@@ -207,6 +208,13 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
 export default function PlanningDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const liveData = useAgentData('planning');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  const handleDrillDown = (entityType: string, entityId: string) => {
+    setDrillDownEntity({ type: entityType, id: entityId });
+    setDrillDownOpen(true);
+  };
   
   const milestones = getMilestonesFromProjects(dataMode);
   const deadlines = getDeadlinesFromProjects(dataMode);
@@ -287,7 +295,7 @@ export default function PlanningDashboard() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-phase')} data-testid="metric-phase">
               {liveData.metrics.activeAlerts > 0 && (
                 <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
               )}
@@ -302,7 +310,7 @@ export default function PlanningDashboard() {
                 <p className="text-xs text-gray-500 mt-2">{currentPhase?.name.replace('Phase ', '').split(':')[1]?.trim() || 'Development'}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-progress')} data-testid="metric-progress">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -314,7 +322,7 @@ export default function PlanningDashboard() {
                 <Progress value={liveData.metrics.avgConfidence || overallProgress} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-budget')} data-testid="metric-budget">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -326,7 +334,7 @@ export default function PlanningDashboard() {
                 <p className="text-xs text-gray-500 mt-2">of £{liveData.metrics.totalValue || totalBudget}M planned</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-deadlines')} data-testid="metric-deadlines">
               {(liveData.metrics.atRiskProjects > 0 || atRiskDeadlines > 0) && (
                 <AlertBubble count={liveData.metrics.atRiskProjects || atRiskDeadlines} severity="critical" />
               )}
@@ -343,7 +351,7 @@ export default function PlanningDashboard() {
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-projects')} data-testid="metric-projects">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -444,6 +452,13 @@ export default function PlanningDashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity.type}
+        entityId={drillDownEntity.id}
+      />
     </div>
   );
 }

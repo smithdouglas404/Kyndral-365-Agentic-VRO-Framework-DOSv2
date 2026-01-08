@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +7,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimulationProvider } from "@/contexts/SimulationContext";
 import { LiveEventDrawer } from "@/components/LiveEventDrawer";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
+import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
+import { AlertBubble } from "@/components/AlertBubble";
+import { useLiveMetrics, useCrossAgentFeed } from "@/hooks/useAgentData";
+import { motion, AnimatePresence } from "framer-motion";
+import { Activity, ChevronDown, ChevronUp, X } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
@@ -45,6 +51,106 @@ function Router() {
   );
 }
 
+function GlobalAIOverlay() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const messages = useCrossAgentFeed();
+  const metrics = useLiveMetrics();
+  
+  const activeAlerts = metrics.activeAlerts;
+  const messageCount = messages.length;
+
+  if (!isVisible) {
+    return (
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        className="fixed bottom-4 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg"
+        onClick={() => setIsVisible(true)}
+        data-testid="button-show-ai-overlay"
+      >
+        <Activity size={20} />
+        {activeAlerts > 0 && (
+          <AlertBubble 
+            count={activeAlerts} 
+            severity={activeAlerts > 5 ? 'critical' : 'warning'} 
+          />
+        )}
+      </motion.button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm" data-testid="global-ai-overlay">
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden max-h-[400px] overflow-y-auto"
+          >
+            <CrossAgentActivityFeed compact={false} maxItems={8} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-lg p-3 cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+        data-testid="button-toggle-ai-feed"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Activity size={18} />
+              {activeAlerts > 0 && (
+                <AlertBubble 
+                  count={activeAlerts} 
+                  severity={activeAlerts > 5 ? 'critical' : 'warning'}
+                  className="-top-2 -right-2"
+                />
+              )}
+            </div>
+            <div>
+              <span className="text-sm font-medium">AI Agent Activity</span>
+              <span className="text-xs opacity-80 ml-2">
+                {messageCount} messages
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsVisible(false);
+              }}
+              className="hover:bg-white/20 rounded p-1 transition-colors"
+              data-testid="button-hide-ai-overlay"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+        
+        {!isExpanded && messageCount > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-2 pt-2 border-t border-white/20"
+          >
+            <CrossAgentActivityFeed compact={true} maxItems={3} />
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -53,6 +159,7 @@ function App() {
           <Toaster />
           <FloatingAlertBanner />
           <LiveEventDrawer />
+          <GlobalAIOverlay />
           <Router />
         </TooltipProvider>
       </SimulationProvider>

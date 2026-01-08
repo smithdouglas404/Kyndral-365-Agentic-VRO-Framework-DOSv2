@@ -13,6 +13,7 @@ import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
@@ -198,6 +199,13 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
 export default function FinOpsDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const liveData = useAgentData('finops');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  const handleDrillDown = (entityType: string, entityId: string) => {
+    setDrillDownEntity({ type: entityType, id: entityId });
+    setDrillDownOpen(true);
+  };
   
   const costCategories = getCostCategoriesFromDivisions(dataMode);
   const savingsOpportunities = getSavingsOpportunitiesFromProjects(dataMode);
@@ -272,7 +280,7 @@ export default function FinOpsDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-budget')} data-testid="metric-budget">
               {liveData.metrics.activeAlerts > 0 && (
                 <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
               )}
@@ -287,7 +295,7 @@ export default function FinOpsDashboard() {
                 <p className="text-xs text-gray-500 mt-2">FY 2025 allocation</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-spend')} data-testid="metric-spend">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -299,7 +307,7 @@ export default function FinOpsDashboard() {
                 <p className="text-xs text-gray-500 mt-2">{utilizationRate}% utilized</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-forecast')} data-testid="metric-forecast">
               {forecastVariance > 5 && (
                 <AlertBubble severity="warning" />
               )}
@@ -316,7 +324,7 @@ export default function FinOpsDashboard() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-savings')} data-testid="metric-savings">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -328,7 +336,7 @@ export default function FinOpsDashboard() {
                 <p className="text-xs text-gray-500 mt-2">{liveData.metrics.totalProjects || savingsOpportunities.length} opportunities</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-profit')} data-testid="metric-profit">
               {liveData.metrics.atRiskProjects > 0 && (
                 <AlertBubble count={liveData.metrics.atRiskProjects} severity="critical" />
               )}
@@ -426,6 +434,13 @@ export default function FinOpsDashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity.type}
+        entityId={drillDownEntity.id}
+      />
     </div>
   );
 }

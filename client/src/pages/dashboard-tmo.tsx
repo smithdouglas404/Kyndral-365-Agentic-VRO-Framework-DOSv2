@@ -13,6 +13,7 @@ import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
@@ -288,6 +289,13 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
 export default function TMODashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const liveData = useAgentData('tmo');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  const handleDrillDown = (entityType: string, entityId: string) => {
+    setDrillDownEntity({ type: entityType, id: entityId });
+    setDrillDownOpen(true);
+  };
   
   const adoptionMetrics = getAdoptionMetricsFromDivisions(dataMode);
   const initiatives = getInitiativesFromDivisions(dataMode);
@@ -359,7 +367,7 @@ export default function TMODashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'tmo-adoption')} data-testid="metric-adoption">
               {liveData.metrics.activeAlerts > 0 && (
                 <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
               )}
@@ -374,7 +382,7 @@ export default function TMODashboard() {
                 <Progress value={liveData.metrics.avgConfidence || avgAdoption} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'tmo-users')} data-testid="metric-users">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -386,7 +394,7 @@ export default function TMODashboard() {
                 <p className="text-xs text-gray-500 mt-2">across {divisions.length} divisions</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'tmo-initiatives')} data-testid="metric-initiatives">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -398,7 +406,7 @@ export default function TMODashboard() {
                 <p className="text-xs text-gray-500 mt-2">{completeInitiatives} complete</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'tmo-at-risk')} data-testid="metric-at-risk">
               {(liveData.metrics.atRiskProjects > 0 || atRiskInitiatives > 0) && (
                 <AlertBubble count={liveData.metrics.atRiskProjects || atRiskInitiatives} severity="critical" />
               )}
@@ -415,7 +423,7 @@ export default function TMODashboard() {
                 <p className="text-xs text-gray-500 mt-2">{(liveData.metrics.atRiskProjects || atRiskInitiatives) > 0 ? 'Needs attention' : 'All healthy'}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'tmo-employees')} data-testid="metric-employees">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -478,6 +486,13 @@ export default function TMODashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity.type}
+        entityId={drillDownEntity.id}
+      />
     </div>
   );
 }

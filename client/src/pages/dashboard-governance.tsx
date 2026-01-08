@@ -13,6 +13,7 @@ import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { riskData } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
@@ -192,6 +193,13 @@ function RiskCategoryCard({ category }: { category: typeof riskData.categories[0
 export default function GovernanceDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const liveData = useAgentData('governance');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  const handleDrillDown = (entityType: string, entityId: string) => {
+    setDrillDownEntity({ type: entityType, id: entityId });
+    setDrillDownOpen(true);
+  };
   
   const governanceItems = getGovernanceItemsFromRiskData(dataMode);
   const riskMetrics = getRiskMetricsFromDivisions(dataMode);
@@ -262,7 +270,7 @@ export default function GovernanceDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-decisions')} data-testid="metric-decisions">
               {liveData.metrics.activeAlerts > 0 && (
                 <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
               )}
@@ -277,7 +285,7 @@ export default function GovernanceDashboard() {
                 <Progress value={(completedCount / governanceItems.length) * 100} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-pending')} data-testid="metric-pending">
               {(liveData.metrics.pendingActions > 0 || pendingCount > 0) && (
                 <AlertBubble count={liveData.metrics.pendingActions || pendingCount} severity="warning" />
               )}
@@ -292,7 +300,7 @@ export default function GovernanceDashboard() {
                 <p className="text-xs text-gray-500 mt-2">{(liveData.metrics.pendingActions || pendingCount) > 0 ? 'Requires attention' : 'All clear'}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-compliance')} data-testid="metric-compliance">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -304,7 +312,7 @@ export default function GovernanceDashboard() {
                 <p className="text-xs text-gray-500 mt-2">FCA aligned</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-high-risks')} data-testid="metric-high-risks">
               {(liveData.metrics.atRiskProjects > 0 || riskMetrics.high > 0) && (
                 <AlertBubble count={liveData.metrics.atRiskProjects || riskMetrics.high} severity="critical" />
               )}
@@ -319,7 +327,7 @@ export default function GovernanceDashboard() {
                 <p className="text-xs text-gray-500 mt-2">Actively monitored</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-cro')} data-testid="metric-cro">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -404,6 +412,13 @@ export default function GovernanceDashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity.type}
+        entityId={drillDownEntity.id}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
+import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { divisions } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
@@ -198,6 +199,13 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
 export default function OKRDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const liveData = useAgentData('okr');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  const handleDrillDown = (entityType: string, entityId: string) => {
+    setDrillDownEntity({ type: entityType, id: entityId });
+    setDrillDownOpen(true);
+  };
   
   const objectives = getObjectivesFromDivisions(dataMode);
 
@@ -272,7 +280,7 @@ export default function OKRDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-progress')} data-testid="metric-progress">
               {liveData.metrics.activeAlerts > 0 && (
                 <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
               )}
@@ -287,7 +295,7 @@ export default function OKRDashboard() {
                 <Progress value={liveData.metrics.avgConfidence || avgProgress} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-value')} data-testid="metric-value">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -299,7 +307,7 @@ export default function OKRDashboard() {
                 <p className="text-xs text-gray-500 mt-2">across all OKRs</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-ahead')} data-testid="metric-ahead">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -311,7 +319,7 @@ export default function OKRDashboard() {
                 <p className="text-xs text-gray-500 mt-2">exceeding targets</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-on-track')} data-testid="metric-on-track">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -323,7 +331,7 @@ export default function OKRDashboard() {
                 <p className="text-xs text-gray-500 mt-2">meeting targets</p>
               </CardContent>
             </Card>
-            <Card className="relative">
+            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-at-risk')} data-testid="metric-at-risk">
               {(liveData.metrics.atRiskProjects > 0 || atRiskCount > 0) && (
                 <AlertBubble count={liveData.metrics.atRiskProjects || atRiskCount} severity="critical" />
               )}
@@ -338,7 +346,7 @@ export default function OKRDashboard() {
                 <p className="text-xs text-gray-500 mt-2">needs attention</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-initiatives')} data-testid="metric-initiatives">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -409,6 +417,13 @@ export default function OKRDashboard() {
           <CrossAgentCollaboration />
         </main>
       </div>
+
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={drillDownEntity.type}
+        entityId={drillDownEntity.id}
+      />
     </div>
   );
 }
