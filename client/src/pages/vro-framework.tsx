@@ -244,12 +244,6 @@ export default function VROFramework() {
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <Button className="bg-blue-600 hover:bg-blue-700 gap-2" data-testid="button-documentation">
-              <FileText size={16} />
-              Full Documentation (50+ Pages)
-            </Button>
-          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
