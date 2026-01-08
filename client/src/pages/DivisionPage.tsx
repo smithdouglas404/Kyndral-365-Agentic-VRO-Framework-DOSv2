@@ -133,7 +133,7 @@ export default function DivisionPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>Division Overview</CardTitle>
+                  <CardTitle>Group Function Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-700 mb-6" data-testid="text-description">{division.description}</p>
