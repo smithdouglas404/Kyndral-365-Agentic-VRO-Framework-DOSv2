@@ -59,7 +59,8 @@ function CorporateKPIs() {
       baseline: `2024: £${lgAnnualReportData.prtVolume.baseline2024}bn`,
       target: `Target: £${lgAnnualReportData.prtVolume.target2026}bn`,
       progress: Math.round((lgAnnualReportData.prtVolume.actual2025 / lgAnnualReportData.prtVolume.target2026) * 100),
-      color: "text-[#005EB8]"
+      color: "text-[#005EB8]",
+      source: lgAnnualReportData.prtVolume.source
     },
     { 
       label: "Forecast Accuracy", 
@@ -68,7 +69,8 @@ function CorporateKPIs() {
       baseline: `2024: ${lgAnnualReportData.forecastAccuracy.baseline2024}%`,
       target: `Target: ${lgAnnualReportData.forecastAccuracy.target2026}%`,
       progress: Math.round((lgAnnualReportData.forecastAccuracy.actual2025 / lgAnnualReportData.forecastAccuracy.target2026) * 100),
-      color: "text-[#00843D]"
+      color: "text-[#00843D]",
+      source: lgAnnualReportData.forecastAccuracy.source
     },
     { 
       label: "Cost Savings", 
@@ -77,16 +79,18 @@ function CorporateKPIs() {
       baseline: `2024: £${lgAnnualReportData.costSavings.baseline2024}m`,
       target: `Target: £${lgAnnualReportData.costSavings.target2026}m`,
       progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100),
-      color: "text-[#00843D]"
+      color: "text-[#00843D]",
+      source: lgAnnualReportData.costSavings.source
     },
     { 
-      label: "Cycle Time", 
-      value: lgAnnualReportData.cycleTime.actual2025,
-      unit: "days",
-      baseline: `2024: ${lgAnnualReportData.cycleTime.baseline2024} days`,
-      target: `Target: ${lgAnnualReportData.cycleTime.target2026} days`,
-      progress: Math.round(((lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.actual2025) / (lgAnnualReportData.cycleTime.baseline2024 - lgAnnualReportData.cycleTime.target2026)) * 100),
-      color: "text-[#D50032]"
+      label: "Digital Investment", 
+      value: lgAnnualReportData.digitalInvestment.actual2025,
+      unit: "£m",
+      baseline: `2024: £${lgAnnualReportData.digitalInvestment.baseline2024}m`,
+      target: `Target: £${lgAnnualReportData.digitalInvestment.target2026}m`,
+      progress: Math.round((lgAnnualReportData.digitalInvestment.actual2025 / lgAnnualReportData.digitalInvestment.target2026) * 100),
+      color: "text-[#005EB8]",
+      source: lgAnnualReportData.digitalInvestment.source
     }
   ];
 
@@ -114,6 +118,9 @@ function CorporateKPIs() {
                 <span>{kpi.baseline}</span>
                 <span>{kpi.target}</span>
               </div>
+            </div>
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <p className="text-[10px] font-semibold text-[#005EB8]">{kpi.source}</p>
             </div>
           </div>
         ))}
@@ -308,18 +315,9 @@ function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (t
                 {stat.progress}% to target
               </div>
             </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="mt-2 text-[10px] text-muted-foreground cursor-help flex items-center gap-1">
-                    <span className="underline decoration-dotted">Source†</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs bg-white border shadow-lg p-3">
-                  <p className="text-xs text-[#005EB8] font-medium">{stat.source}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div className="mt-3 pt-2 border-t border-gray-100">
+              <p className="text-[11px] font-semibold text-[#005EB8]">{stat.source}</p>
+            </div>
           </motion.div>
         );
       })}

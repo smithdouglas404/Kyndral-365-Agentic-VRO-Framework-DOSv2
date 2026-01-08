@@ -29,10 +29,10 @@ export const lgAnnualReportData = {
   cycleTime: { 
     actual2023: 42,
     baseline2024: 35, 
-    actual2025: 18, 
+    actual2025: 26, 
     target2026: 5, 
     unit: "days", 
-    source: "VRO Strategy Document" 
+    source: "L&G Transformation Program Metrics Q4 2025" 
   },
   governanceRisk: { 
     actual2023: "High",
