@@ -58,38 +58,28 @@ export function FloatingAlertBanner() {
       <AnimatePresence>
         {showBanner && currentEvent && (
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[100] cursor-pointer max-w-2xl w-[90%]"
+            className="fixed bottom-0 left-0 right-0 z-[100] cursor-pointer"
             onClick={handleClick}
             data-testid="floating-alert-banner"
           >
             <motion.div
-              className="rounded-xl shadow-2xl border-2 bg-white"
+              className="shadow-2xl bg-white border-t-4"
               style={{ 
                 borderColor: priorityColors[currentEvent.priority],
-                boxShadow: `0 8px 32px ${priorityColors[currentEvent.priority]}50`
+                boxShadow: `0 -4px 20px rgba(0,0,0,0.15)`
               }}
-              animate={{ 
-                boxShadow: [
-                  `0 4px 20px ${priorityColors[currentEvent.priority]}40`,
-                  `0 4px 40px ${priorityColors[currentEvent.priority]}60`,
-                  `0 4px 20px ${priorityColors[currentEvent.priority]}40`
-                ]
-              }}
-              transition={{ duration: 1.5, repeat: Infinity }}
             >
-              <div className="p-4 flex items-start gap-3">
-                <motion.div
+              <div className="px-6 py-4 flex items-start gap-4 max-w-5xl mx-auto">
+                <div
                   className="p-2 rounded-lg text-white flex-shrink-0"
                   style={{ backgroundColor: priorityColors[currentEvent.priority] }}
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
                 >
                   {typeIcons[currentEvent.type]}
-                </motion.div>
+                </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -114,7 +104,7 @@ export function FloatingAlertBanner() {
               </div>
               
               <motion.div 
-                className="h-1 rounded-b-xl"
+                className="h-1"
                 style={{ backgroundColor: priorityColors[currentEvent.priority] }}
                 initial={{ width: "100%" }}
                 animate={{ width: "0%" }}
