@@ -327,7 +327,7 @@ export class SimulationEngine {
   private isRunning = false;
   
   constructor() {
-    this.events = generateBatchEvents(5);
+    this.events = generateBatchEvents(1);
   }
   
   private getRandomInterval(): number {
