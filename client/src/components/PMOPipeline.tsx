@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { pmoProjects, SAFePortfolioStage } from '@/lib/buPrograms';
+import { SAFePortfolioStage } from '@/lib/buPrograms';
+import { EXPANDED_PMO_PROJECTS, getStageCounts, getGroupFunctionCounts } from '@/lib/unifiedMetrics';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Lightbulb, Search, BarChart3, ClipboardList, Cog, CheckCircle2 } from 'lucide-react';
+import { Lightbulb, Search, BarChart3, ClipboardList, Cog, CheckCircle2, Building2 } from 'lucide-react';
 
 const SAFE_STAGES: { id: SAFePortfolioStage; label: string; icon: React.ElementType; color: string; bgColor: string }[] = [
   { id: 'funnel', label: 'Funnel', icon: Lightbulb, color: 'text-purple-600', bgColor: 'bg-purple-50 border-purple-200' },
@@ -22,21 +23,27 @@ function getStatusColor(status: 'green' | 'amber' | 'red') {
 }
 
 export function PMOPipeline() {
+  const allProjects = EXPANDED_PMO_PROJECTS;
+  const stageCounts = getStageCounts();
+  const groupFunctionCounts = getGroupFunctionCounts();
+  
   const projectsByStage = SAFE_STAGES.map(stage => ({
     ...stage,
-    projects: pmoProjects.filter(p => p.safeStage === stage.id)
+    projects: allProjects.filter(p => p.safeStage === stage.id)
   }));
 
-  const totalProjects = pmoProjects.length;
-  const implementingCount = pmoProjects.filter(p => p.safeStage === 'implementing').length;
-  const doneCount = pmoProjects.filter(p => p.safeStage === 'done').length;
+  const totalProjects = allProjects.length;
+  const implementingCount = stageCounts['implementing'] || 0;
+  const doneCount = stageCounts['done'] || 0;
+  
+  const groupFunctions = Object.entries(groupFunctionCounts).sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Project Pipeline (SAFe 6.0)</h3>
-          <p className="text-sm text-gray-500">Visual flow of projects across portfolio stages</p>
+          <p className="text-sm text-gray-500">Visual flow of {totalProjects} projects across portfolio stages</p>
         </div>
         <div className="flex gap-4 text-sm">
           <div className="flex items-center gap-2">
@@ -51,6 +58,20 @@ export function PMOPipeline() {
             <span className="font-medium text-gray-600">Complete:</span>
             <Badge className="bg-emerald-100 text-emerald-700">{doneCount}</Badge>
           </div>
+        </div>
+      </div>
+      
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Building2 className="h-4 w-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-700">Coverage by Group Function</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {groupFunctions.map(([fn, count]) => (
+            <Badge key={fn} variant="outline" className="text-xs">
+              {fn}: {count}
+            </Badge>
+          ))}
         </div>
       </div>
 

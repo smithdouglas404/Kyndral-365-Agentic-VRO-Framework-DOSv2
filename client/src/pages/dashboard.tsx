@@ -1,7 +1,7 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode, Zap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,11 @@ import { PMOGuidance } from "@/components/PMOGuidance";
 import { PMOProjectWorkspace } from "@/components/PMOProjectWorkspace";
 import { PMOKnowledgeHub } from "@/components/PMOKnowledgeHub";
 import { PMOCoPilotWorkspace } from "@/components/PMOCoPilotWorkspace";
+import { SimulationProvider } from "@/components/SimulationProvider";
+import { LiveToggle, LiveActivityFeed } from "@/components/LiveIndicator";
+import { VROMetricsGrid } from "@/components/VROMetricCard";
+import { useSimulation } from "@/lib/liveSimulationEngine";
+import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
@@ -171,7 +176,72 @@ const VRO_METRICS_DATA = [
   },
 ];
 
-// VRO Metrics Summary - Shown in PMO view to show PMO rolls up to VRO
+// VRO Metrics Summary - Shown in PMO view to show PMO rolls up to VRO (Uses live simulation data)
+function VROMetricsSummaryLive() {
+  const { state } = useSimulation();
+  const metrics = state.vroMetrics;
+  
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-[#005EB8]" />
+          <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
+          {state.isLive && (
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="flex items-center gap-1"
+            >
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-xs text-green-600 font-medium">LIVE</span>
+            </motion.div>
+          )}
+        </div>
+        <span className="text-xs text-gray-400">Updated: {state.lastUpdate.toLocaleTimeString()}</span>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {metrics.map((metric, i) => {
+          const isPulsing = state.pulsingMetrics.includes(`vro-${metric.id}`);
+          const isOnTarget = metric.currentValue >= metric.targetValue * 0.9;
+          
+          return (
+            <motion.div
+              key={metric.id}
+              animate={isPulsing ? { scale: [1, 1.02, 1], backgroundColor: ['rgba(59, 130, 246, 0)', 'rgba(59, 130, 246, 0.1)', 'rgba(59, 130, 246, 0)'] } : {}}
+              transition={{ duration: 0.5 }}
+              className={cn(
+                "bg-blue-50 border border-blue-200 rounded-[4px] p-3 flex flex-col transition-all",
+                isPulsing && "ring-2 ring-blue-400 ring-opacity-50"
+              )}
+              data-testid={`vro-stat-${metric.id}`}
+            >
+              <span className="text-xs font-medium text-gray-500 mb-1 truncate">{metric.name}</span>
+              <div className="flex items-baseline gap-1">
+                <motion.span 
+                  className={cn("text-xl font-bold", isOnTarget ? "text-green-600" : "text-amber-600")}
+                  animate={isPulsing ? { scale: [1, 1.1, 1] } : {}}
+                >
+                  {metric.currentValue}
+                </motion.span>
+                <span className="text-sm text-gray-500">{metric.unit}</span>
+              </div>
+              <Progress 
+                value={Math.min(100, (metric.currentValue / metric.targetValue) * 100)} 
+                className="h-1 mt-2"
+              />
+              <div className="mt-1 text-[10px] text-gray-400">
+                Target: {metric.targetValue}{metric.unit}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Original static VRO Metrics Summary (fallback)
 function VROMetricsSummary() {
   return (
     <div className="mt-4">
@@ -201,7 +271,7 @@ function VROMetricsSummary() {
   );
 }
 
-function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
+function LiveIndicatorButton({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
   return (
     <Button
       variant="outline"
@@ -425,10 +495,9 @@ function NavBar() {
   );
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const [, navigate] = useLocation();
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
-  const [isLive, setIsLive] = useState(true);
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
@@ -436,6 +505,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
+  
+  const { state, toggleLive, forceUpdate } = useSimulation();
 
   const handleDrillDown = (type: string, id: string) => {
     if (type === 'division') {
@@ -504,7 +575,7 @@ export default function Dashboard() {
           
                     
           <div className="flex items-center gap-3">
-            <LiveIndicator isLive={isLive} onToggle={() => setIsLive(!isLive)} />
+            <LiveToggle />
                         
             <Dialog open={exportOpen} onOpenChange={setExportOpen}>
               <DialogTrigger asChild>
@@ -557,11 +628,14 @@ export default function Dashboard() {
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
 
+        {/* Live Activity Feed - Shows when simulation is running */}
+        <LiveActivityFeed />
+        
         {/* VRO Stats Row - VRO shows Corporate KPIs, PMO shows VRO metrics summary (PMO rolls up to VRO) */}
         {dataMode === "VRO" ? (
           <CorporateKPIs />
         ) : (
-          <VROMetricsSummary />
+          <VROMetricsSummaryLive />
         )}
 
         {/* AI Alert Ticker - Living Dashboard */}
@@ -782,7 +856,7 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={isLive} />
+              <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={state.isLive} />
             </div>
           </TabsContent>
 
@@ -972,7 +1046,7 @@ export default function Dashboard() {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleString()}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {isLive ? "Data refreshes every 4 seconds (LIVE)" : "Live updates paused"}
+                {state.isLive ? "Data refreshes every 4 seconds (LIVE)" : "Live updates paused"}
               </p>
             </div>
           </div>
@@ -992,5 +1066,13 @@ export default function Dashboard() {
         entityId={drillDownEntity?.id || ""}
       />
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <SimulationProvider>
+      <DashboardContent />
+    </SimulationProvider>
   );
 }

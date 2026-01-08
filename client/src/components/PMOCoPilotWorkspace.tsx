@@ -7,7 +7,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { pmoProjects, PMOProject, SAFePortfolioStage } from '@/lib/buPrograms';
+import { PMOProject, SAFePortfolioStage } from '@/lib/buPrograms';
+import { EXPANDED_PMO_PROJECTS } from '@/lib/unifiedMetrics';
 import { PMOProjectWorkspace } from './PMOProjectWorkspace';
 
 const STAGE_LABELS: Record<SAFePortfolioStage, { label: string; color: string }> = {
@@ -32,17 +33,19 @@ export function PMOCoPilotWorkspace() {
   const [stageFilter, setStageFilter] = useState<SAFePortfolioStage | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredProjects = pmoProjects.filter(project => {
+  const allProjects = EXPANDED_PMO_PROJECTS as PMOProject[];
+  
+  const filteredProjects = allProjects.filter(project => {
     const matchesStage = stageFilter === 'all' || project.safeStage === stageFilter;
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           project.bu.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStage && matchesSearch;
   });
 
-  const activeProjectsCount = pmoProjects.filter(p => p.safeStage === 'implementing').length;
-  const totalActionsCount = pmoProjects.reduce((acc, p) => acc + p.proactiveActions.length, 0);
-  const totalRisksCount = pmoProjects.reduce((acc, p) => acc + p.risks.length, 0);
-  const totalSignalsCount = pmoProjects.reduce((acc, p) => acc + p.aiSignals.length, 0);
+  const activeProjectsCount = allProjects.filter(p => p.safeStage === 'implementing').length;
+  const totalActionsCount = allProjects.reduce((acc, p) => acc + p.proactiveActions.length, 0);
+  const totalRisksCount = allProjects.reduce((acc, p) => acc + p.risks.length, 0);
+  const totalSignalsCount = allProjects.reduce((acc, p) => acc + p.aiSignals.length, 0);
 
   if (selectedProject) {
     return (
