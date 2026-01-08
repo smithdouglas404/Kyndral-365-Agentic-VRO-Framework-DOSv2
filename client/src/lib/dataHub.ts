@@ -370,6 +370,58 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
       };
       relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
       break;
+    case 'decisions':
+      entityName = `${config.name} - Decision Tracking`;
+      const completed = agentData.projects.filter(p => p.status === 'green').length;
+      metrics = {
+        'Decisions Complete': completed,
+        'Total Decisions': agentData.projects.length,
+        'Pending Review': agentData.metrics.pendingActions,
+        'Completion Rate': `${Math.round((completed / Math.max(agentData.projects.length, 1)) * 100)}%`
+      };
+      relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'pending':
+      entityName = `${config.name} - Pending Actions`;
+      metrics = {
+        'Pending Actions': agentData.metrics.pendingActions,
+        'Active Alerts': agentData.metrics.activeAlerts,
+        'Requires Attention': agentData.metrics.atRiskProjects,
+        'Avg Resolution Time': '2.5 days'
+      };
+      relatedEntities = agentData.projects.filter(p => p.status === 'amber').slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'compliance':
+      entityName = `${config.name} - Compliance Status`;
+      metrics = {
+        'Compliance Score': `${agentData.metrics.avgConfidence}%`,
+        'FCA Aligned': 'Yes',
+        'Last Audit': 'Q4 2025',
+        'Open Issues': agentData.risks.filter(r => r.severity === 'high').length
+      };
+      relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.category }));
+      break;
+    case 'high-risks':
+      entityName = `${config.name} - High Risk Items`;
+      const highRisks = agentData.risks.filter(r => r.severity === 'high' || r.severity === 'critical');
+      metrics = {
+        'High Risks': highRisks.length,
+        'Critical': agentData.risks.filter(r => r.severity === 'critical').length,
+        'Actively Monitored': highRisks.length,
+        'Mitigation Rate': '78%'
+      };
+      relatedEntities = highRisks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.category }));
+      break;
+    case 'cro':
+      entityName = `${config.name} - CRO Overview`;
+      metrics = {
+        'Risk Appetite': 'Moderate',
+        'Active Risks': agentData.risks.length,
+        'Mitigation Plans': agentData.metrics.pendingActions,
+        'Escalations': agentData.metrics.atRiskProjects
+      };
+      relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.category }));
+      break;
     default:
       entityName = `${config.name} - ${metricType.charAt(0).toUpperCase() + metricType.slice(1)}`;
       metrics = {
