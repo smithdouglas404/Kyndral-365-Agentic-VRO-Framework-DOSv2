@@ -4,6 +4,7 @@ import { Brain, AlertTriangle, Lightbulb, TrendingUp, GitBranch, Zap, Target, X 
 import { useSimulation } from '@/contexts/SimulationContext';
 import { SimulationEvent } from '@/lib/liveSimulation';
 import { Badge } from '@/components/ui/badge';
+import { useLocation } from 'wouter';
 
 const priorityColors: Record<string, string> = {
   critical: "#D50032",
@@ -23,9 +24,13 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 export function FloatingAlertBanner() {
+  const [location] = useLocation();
   const { latestEvent, setSelectedEvent, unreadCount, markAsRead } = useSimulation();
   const [showBanner, setShowBanner] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
+  
+  // Only show on dashboard pages
+  const isDashboardRoute = location && location.startsWith('/dashboard');
 
   useEffect(() => {
     if (latestEvent) {
@@ -52,6 +57,11 @@ export function FloatingAlertBanner() {
     e.stopPropagation();
     setShowBanner(false);
   };
+
+  // Only show on dashboard pages
+  if (!isDashboardRoute) {
+    return null;
+  }
 
   return (
     <>

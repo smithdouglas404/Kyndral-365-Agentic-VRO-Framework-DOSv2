@@ -53,25 +53,29 @@ function GlobalAIOverlay() {
   const [location] = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(() => {
-    // Persist closed state in localStorage so it stays closed
     const saved = localStorage.getItem('ai-overlay-visible');
     return saved === null ? true : saved === 'true';
   });
   const messages = useCrossAgentFeed();
   const metrics = useLiveMetrics();
   
-  // Save visibility state when it changes
+  // Check if we should show on this route
+  const isDashboardRoute = location && location.startsWith('/dashboard');
+  
+  // Handle visibility change - also collapse when hiding
   const handleSetVisible = (visible: boolean) => {
     setIsVisible(visible);
+    if (!visible) {
+      setIsExpanded(false); // Collapse when hiding
+    }
     localStorage.setItem('ai-overlay-visible', String(visible));
   };
   
   const activeAlerts = metrics.activeAlerts;
   const messageCount = messages.length;
   
-  // Only show overlay on dashboard pages, never on home or other pages
-  // Check for empty string, root path, or paths that don't start with /dashboard
-  if (!location || location === '' || location === '/' || !location.startsWith('/dashboard')) {
+  // Only show on dashboard pages
+  if (!isDashboardRoute) {
     return null;
   }
 

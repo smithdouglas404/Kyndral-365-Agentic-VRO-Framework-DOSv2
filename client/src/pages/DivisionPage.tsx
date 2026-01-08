@@ -11,10 +11,23 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 
+// Legacy slug mapping for backward compatibility
+const legacySlugs: Record<string, string> = {
+  'lgim': 'asset-management',
+  'lgc': 'capital',
+  'lgri': 'institutional-retirement',
+  'lgr': 'retail',
+  'lgf': 'fintech',
+  'lgi': 'insurance'
+};
+
 export default function DivisionPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const division = divisions.find(d => d.id === params.id);
+  
+  // Resolve legacy slugs to new IDs
+  const resolvedId = legacySlugs[params.id || ''] || params.id;
+  const division = divisions.find(d => d.id === resolvedId);
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
   
   const handleDrillDown = (type: string, id: string) => {
