@@ -15,17 +15,6 @@ export default function Home() {
           <div className="text-2xl font-bold text-[hsl(209,100%,36%)] tracking-tight">
             Legal & General
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button 
-                className="bg-[hsl(209,100%,36%)] hover:bg-[hsl(209,100%,32%)] text-white px-6"
-                onClick={() => navigate('/dashboard')}
-                data-testid="button-enter-dashboard"
-              >
-                Enter Dashboard
-              </Button>
-            </Link>
-          </div>
         </div>
       </header>
 
