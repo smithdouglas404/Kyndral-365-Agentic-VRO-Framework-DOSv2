@@ -111,7 +111,7 @@ export default function DivisionPage() {
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="kpis" data-testid="tab-kpis">KPIs & Metrics</TabsTrigger>
             <TabsTrigger value="okrs" data-testid="tab-okrs">OKRs</TabsTrigger>
-            <TabsTrigger value="projects" data-testid="tab-projects">AI Projects</TabsTrigger>
+            <TabsTrigger value="projects" data-testid="tab-projects">Projects vs AI Projects</TabsTrigger>
             <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
             <TabsTrigger value="alerts" data-testid="tab-alerts">AI Alerts ({divisionAlerts.length})</TabsTrigger>
           </TabsList>
