@@ -47,7 +47,7 @@ const CORE_KPIS: KPI[] = [
     trend: 'up',
     status: 'on-track',
     attribution: [
-      { initiative: 'Digital Claims Transformation', contribution: 32, confidence: 85 },
+      { initiative: 'Project A', contribution: 32, confidence: 85 },
       { initiative: 'Cost Efficiency Programme', contribution: 45, confidence: 92 },
       { initiative: 'Process Automation', contribution: 23, confidence: 78 }
     ]
@@ -64,7 +64,7 @@ const CORE_KPIS: KPI[] = [
     status: 'on-track',
     attribution: [
       { initiative: 'Customer Portal Upgrade', contribution: 55, confidence: 88 },
-      { initiative: 'Digital Claims Transformation', contribution: 30, confidence: 75 },
+      { initiative: 'Project A', contribution: 30, confidence: 75 },
       { initiative: 'Mobile App Launch', contribution: 15, confidence: 82 }
     ]
   },
@@ -79,7 +79,7 @@ const CORE_KPIS: KPI[] = [
     trend: 'down',
     status: 'at-risk',
     attribution: [
-      { initiative: 'Digital Claims Transformation', contribution: 65, confidence: 90 },
+      { initiative: 'Project A', contribution: 65, confidence: 90 },
       { initiative: 'Process Automation', contribution: 35, confidence: 85 }
     ]
   },
@@ -135,7 +135,7 @@ const CORE_KPIS: KPI[] = [
 
 const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
   {
-    initiative: 'Digital Claims Transformation',
+    initiative: 'Project A',
     kpiImpact: [
       { kpi: 'Operating Profit', contribution: '+£23m', confidence: 85 },
       { kpi: 'Customer NPS', contribution: '+4 pts', confidence: 75 },
@@ -361,7 +361,7 @@ export function KPIAttributionPanel() {
                   <div>
                     <h4 className="font-semibold text-purple-800">AI Attribution Insight</h4>
                     <p className="text-sm text-purple-700 mt-1">
-                      Based on multivariate analysis, the Digital Claims Transformation initiative shows the highest 
+                      Based on multivariate analysis, Project A shows the highest 
                       attribution certainty (85-90%) due to clear temporal correlation between deployment milestones 
                       and KPI improvements. Consider adding leading indicators to strengthen attribution for 
                       Customer Portal Upgrade.

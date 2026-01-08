@@ -33,7 +33,7 @@ interface BusinessCase {
 const BUSINESS_CASES: BusinessCase[] = [
   {
     id: 'bc-001',
-    name: 'Digital Claims Transformation',
+    name: 'Project A',
     bu: 'Insurance',
     status: 'review',
     score: 78,
@@ -51,7 +51,7 @@ const BUSINESS_CASES: BusinessCase[] = [
   },
   {
     id: 'bc-002',
-    name: 'Workplace Pensions Platform Modernisation',
+    name: 'Project B',
     bu: 'Workplace',
     status: 'approved',
     score: 92,
@@ -68,7 +68,7 @@ const BUSINESS_CASES: BusinessCase[] = [
   },
   {
     id: 'bc-003',
-    name: 'Customer 360 Data Platform',
+    name: 'Project C',
     bu: 'Group Functions',
     status: 'draft',
     score: 65,
@@ -87,7 +87,7 @@ const BUSINESS_CASES: BusinessCase[] = [
   },
   {
     id: 'bc-004',
-    name: 'AI-Powered Underwriting',
+    name: 'Project D',
     bu: 'Insurance',
     status: 'review',
     score: 84,
