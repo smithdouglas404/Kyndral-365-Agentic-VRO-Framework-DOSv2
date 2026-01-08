@@ -2,203 +2,22 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Target, CheckCircle2, Clock, TrendingUp, AlertTriangle,
-  ChevronRight, ChevronDown, BarChart3, Bot, DollarSign,
-  Building2, Repeat, Zap
+  Target, CheckCircle2, TrendingUp, AlertTriangle,
+  ChevronRight, ChevronDown, Bot, DollarSign,
+  Building2, Repeat
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-
-type DataMode = "VRO" | "PMO";
-
-interface LinkedInitiative {
-  id: string;
-  name: string;
-  division: string;
-  contribution: number;
-  status: 'on-track' | 'at-risk' | 'complete';
-  valueImpact: string;
-  phase: string;
-}
-
-interface KeyResult {
-  title: string;
-  progress: number;
-  target: string;
-  current: string;
-  linkedInitiatives: LinkedInitiative[];
-}
-
-interface Objective {
-  id: string;
-  title: string;
-  owner: string;
-  division: string;
-  progress: number;
-  status: 'on-track' | 'at-risk' | 'ahead';
-  keyResults: KeyResult[];
-  collaboratingAgents: {
-    agentId: string;
-    agentName: string;
-    contribution: string;
-    lastSync: string;
-  }[];
-  totalValueImpact: {
-    costSavings: number;
-    revenueImpact: number;
-  };
-}
-
-const objectives: Objective[] = [
-  {
-    id: 'okr-prt-001',
-    title: 'Accelerate PRT Market Leadership',
-    owner: 'Andrew Kail',
-    division: 'Institutional Retirement',
-    progress: 82,
-    status: 'on-track',
-    totalValueImpact: {
-      costSavings: 45,
-      revenueImpact: 280
-    },
-    keyResults: [
-      { 
-        title: 'Achieve £10bn PRT volume', 
-        progress: 82, 
-        target: '£10bn', 
-        current: '£8.2bn',
-        linkedInitiatives: [
-          { id: 'init-003', name: 'Data Analytics Transformation', division: 'Group Data', contribution: 8, status: 'complete', valueImpact: 'Enhanced deal analytics', phase: 'Complete' },
-          { id: 'init-004', name: 'AI-Powered Deal Intake', division: 'Institutional Retirement', contribution: 15, status: 'on-track', valueImpact: '£85M annual efficiency', phase: 'Development' }
-        ]
-      },
-      { 
-        title: 'Increase market share to 25%', 
-        progress: 88, 
-        target: '25%', 
-        current: '22%',
-        linkedInitiatives: [
-          { id: 'init-005', name: 'Competitive Intelligence Platform', division: 'Strategy', contribution: 12, status: 'on-track', valueImpact: 'Market insight edge', phase: 'Pilot' }
-        ]
-      },
-      { 
-        title: 'Launch 3 new DB solutions', 
-        progress: 67, 
-        target: '3', 
-        current: '2',
-        linkedInitiatives: [
-          { id: 'init-006', name: 'DB Product Innovation', division: 'Institutional Retirement', contribution: 25, status: 'on-track', valueImpact: '£120M new revenue', phase: 'Development' }
-        ]
-      }
-    ],
-    collaboratingAgents: [
-      { agentId: 'vro', agentName: 'VRO Agent', contribution: 'Value tracking & ROI measurement', lastSync: '2 min ago' },
-      { agentId: 'finops', agentName: 'FinOps Agent', contribution: 'Deal economics analysis', lastSync: '5 min ago' },
-      { agentId: 'planning', agentName: 'Planning Agent', contribution: 'Pipeline management', lastSync: '12 min ago' }
-    ]
-  },
-  {
-    id: 'okr-digital-001',
-    title: 'Digital Transformation Excellence',
-    owner: 'Group CTO',
-    division: 'Group Technology',
-    progress: 68,
-    status: 'at-risk',
-    totalValueImpact: {
-      costSavings: 73,
-      revenueImpact: 185
-    },
-    keyResults: [
-      { 
-        title: 'Complete platform modernization', 
-        progress: 65, 
-        target: '100%', 
-        current: '65%',
-        linkedInitiatives: [
-          { id: 'init-001', name: 'Digital Platform Rollout', division: 'Group Technology', contribution: 40, status: 'on-track', valueImpact: '£120M revenue enablement', phase: 'Adoption' }
-        ]
-      },
-      { 
-        title: 'Achieve 85% digital adoption', 
-        progress: 72, 
-        target: '85%', 
-        current: '61%',
-        linkedInitiatives: [
-          { id: 'init-001', name: 'Digital Platform Rollout', division: 'Group Technology', contribution: 25, status: 'on-track', valueImpact: '+25% adoption', phase: 'Adoption' },
-          { id: 'init-002', name: 'Customer Portal Enhancement', division: 'Retail', contribution: 18, status: 'at-risk', valueImpact: '+18% digital adoption', phase: 'Training' }
-        ]
-      },
-      { 
-        title: 'Reduce manual processes by 40%', 
-        progress: 68, 
-        target: '40%', 
-        current: '27%',
-        linkedInitiatives: [
-          { id: 'init-001', name: 'Digital Platform Rollout', division: 'Group Technology', contribution: 15, status: 'on-track', valueImpact: 'Process automation', phase: 'Adoption' },
-          { id: 'init-007', name: 'RPA Implementation', division: 'Operations', contribution: 22, status: 'on-track', valueImpact: '£28M cost savings', phase: 'Scaling' }
-        ]
-      }
-    ],
-    collaboratingAgents: [
-      { agentId: 'tmo', agentName: 'TMO Agent', contribution: 'Change management & adoption', lastSync: '3 min ago' },
-      { agentId: 'ocm', agentName: 'OCM Agent', contribution: 'Training & readiness', lastSync: '8 min ago' },
-      { agentId: 'governance', agentName: 'Governance Agent', contribution: 'Compliance oversight', lastSync: '15 min ago' }
-    ]
-  },
-  {
-    id: 'okr-efficiency-001',
-    title: 'Operational Efficiency',
-    owner: 'Group COO',
-    division: 'Group Operations',
-    progress: 91,
-    status: 'ahead',
-    totalValueImpact: {
-      costSavings: 184,
-      revenueImpact: 45
-    },
-    keyResults: [
-      { 
-        title: 'Deliver £200M cost savings', 
-        progress: 92, 
-        target: '£200M', 
-        current: '£184M',
-        linkedInitiatives: [
-          { id: 'init-001', name: 'Digital Platform Rollout', division: 'Group Technology', contribution: 22, status: 'on-track', valueImpact: '£45M cost savings', phase: 'Adoption' },
-          { id: 'init-003', name: 'Data Analytics Transformation', division: 'Group Data', contribution: 16, status: 'complete', valueImpact: '£32M cost savings', phase: 'Complete' },
-          { id: 'init-008', name: 'Vendor Consolidation', division: 'Procurement', contribution: 35, status: 'on-track', valueImpact: '£70M savings', phase: 'Execution' }
-        ]
-      },
-      { 
-        title: 'Improve forecast accuracy to 85%', 
-        progress: 89, 
-        target: '85%', 
-        current: '76%',
-        linkedInitiatives: [
-          { id: 'init-003', name: 'Data Analytics Transformation', division: 'Group Data', contribution: 45, status: 'complete', valueImpact: '+45% forecast accuracy', phase: 'Complete' }
-        ]
-      },
-      { 
-        title: 'Reduce cycle time by 30%', 
-        progress: 91, 
-        target: '30%', 
-        current: '27%',
-        linkedInitiatives: [
-          { id: 'init-001', name: 'Digital Platform Rollout', division: 'Group Technology', contribution: 18, status: 'on-track', valueImpact: '-18% cycle time', phase: 'Adoption' },
-          { id: 'init-003', name: 'Data Analytics Transformation', division: 'Group Data', contribution: 12, status: 'complete', valueImpact: 'Real-time insights', phase: 'Complete' }
-        ]
-      }
-    ],
-    collaboratingAgents: [
-      { agentId: 'vro', agentName: 'VRO Agent', contribution: 'Value realization tracking', lastSync: '1 min ago' },
-      { agentId: 'finops', agentName: 'FinOps Agent', contribution: 'Cost optimization', lastSync: '4 min ago' },
-      { agentId: 'pmo', agentName: 'PMO Agent', contribution: 'Delivery tracking', lastSync: '7 min ago' }
-    ]
-  }
-];
+import { divisions } from '@/lib/lgData';
+import { 
+  getObjectivesFromDivisions,
+  getCompanyMetrics,
+  type DataMode,
+  type TransformedObjective
+} from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -215,7 +34,7 @@ function NavBar() {
   );
 }
 
-function ObjectiveCard({ objective }: { objective: Objective }) {
+function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -338,6 +157,12 @@ function ObjectiveCard({ objective }: { objective: Objective }) {
                         </div>
                       </div>
                     )}
+
+                    {kr.linkedInitiatives.length === 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <p className="text-xs text-gray-400 italic">No initiatives linked to this key result</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -350,7 +175,7 @@ function ObjectiveCard({ objective }: { objective: Objective }) {
                 <div className="flex flex-wrap gap-2">
                   {objective.collaboratingAgents.map((agent, i) => (
                     <div key={i} className="flex items-center gap-2 px-3 py-2 bg-purple-50 rounded-lg border border-purple-100">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      <div className={`w-2 h-2 rounded-full ${mode === 'VRO' ? 'bg-green-500' : 'bg-gray-400'}`} />
                       <span className="font-medium text-sm text-purple-800">{agent.agentName}</span>
                       <span className="text-xs text-gray-500">{agent.lastSync}</span>
                     </div>
@@ -367,11 +192,17 @@ function ObjectiveCard({ objective }: { objective: Objective }) {
 
 export default function OKRDashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  
+  const objectives = getObjectivesFromDivisions(dataMode);
 
   const avgProgress = Math.round(objectives.reduce((sum, o) => sum + o.progress, 0) / objectives.length);
   const totalValue = objectives.reduce((sum, o) => sum + o.totalValueImpact.costSavings + o.totalValueImpact.revenueImpact, 0);
   const totalInitiatives = objectives.reduce((sum, o) => 
     sum + o.keyResults.reduce((s, kr) => s + kr.linkedInitiatives.length, 0), 0);
+  
+  const aheadCount = objectives.filter(o => o.status === 'ahead').length;
+  const onTrackCount = objectives.filter(o => o.status === 'on-track').length;
+  const atRiskCount = objectives.filter(o => o.status === 'at-risk').length;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -391,10 +222,11 @@ export default function OKRDashboard() {
                 <p className="text-muted-foreground">Objectives, Key Results & Initiative Alignment</p>
               </div>
               <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
+              <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -423,12 +255,24 @@ export default function OKRDashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
+                    <p className="text-xs text-gray-500">Ahead</p>
+                    <p className="text-2xl font-bold text-green-600">{aheadCount}</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-green-200" />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">exceeding targets</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
                     <p className="text-xs text-gray-500">On Track</p>
-                    <p className="text-2xl font-bold text-blue-600">2</p>
+                    <p className="text-2xl font-bold text-blue-600">{onTrackCount}</p>
                   </div>
                   <CheckCircle2 className="h-8 w-8 text-blue-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">objectives</p>
+                <p className="text-xs text-gray-500 mt-2">meeting targets</p>
               </CardContent>
             </Card>
             <Card>
@@ -436,7 +280,7 @@ export default function OKRDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">At Risk</p>
-                    <p className="text-2xl font-bold text-amber-600">1</p>
+                    <p className="text-2xl font-bold text-amber-600">{atRiskCount}</p>
                   </div>
                   <AlertTriangle className="h-8 w-8 text-amber-200" />
                 </div>
@@ -459,13 +303,45 @@ export default function OKRDashboard() {
 
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Strategic Objectives</h2>
+              <h2 className="text-lg font-semibold">Strategic Objectives from L&G Divisions</h2>
               <Badge variant="outline" className="text-xs">Click to expand for initiative details</Badge>
             </div>
             {objectives.map((objective) => (
-              <ObjectiveCard key={objective.id} objective={objective} />
+              <ObjectiveCard key={objective.id} objective={objective} mode={dataMode} />
             ))}
           </div>
+
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Division OKRs Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {divisions.slice(0, 4).map((division) => (
+                  <Link key={division.id} href={`/division/${division.id}`}>
+                    <div 
+                      className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
+                      style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                    >
+                      <p className="text-sm font-medium text-gray-500">{division.name}</p>
+                      <div className="mt-2 space-y-2">
+                        {division.okrs.slice(0, 2).map((okr, i) => (
+                          <div key={i} className="text-xs">
+                            <p className="font-medium text-gray-700">{okr.objective}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-gray-500">{okr.keyResults.length} KRs</span>
+                              <span className="text-gray-400">•</span>
+                              <span className="text-gray-500">Due: {okr.dueDate}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           <CrossAgentCollaboration />
         </main>

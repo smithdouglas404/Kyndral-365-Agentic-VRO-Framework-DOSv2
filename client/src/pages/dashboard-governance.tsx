@@ -1,61 +1,24 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Shield, CheckCircle2, Clock, AlertTriangle, FileText,
-  Users, Calendar, BarChart3
+  Shield, CheckCircle2, Clock, AlertOctagon,
+  Users, ChevronDown, ChevronRight, Bot,
+  TrendingUp, TrendingDown
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-
-type DataMode = "VRO" | "PMO";
-
-const governanceItems = [
-  { 
-    title: 'Steering Committee Review',
-    type: 'decision',
-    status: 'pending',
-    priority: 'high',
-    dueDate: 'Jan 15, 2025',
-    owner: 'Group CTO'
-  },
-  { 
-    title: 'Budget Variance Approval',
-    type: 'approval',
-    status: 'in-review',
-    priority: 'high',
-    dueDate: 'Jan 12, 2025',
-    owner: 'CFO'
-  },
-  { 
-    title: 'Risk Assessment Update',
-    type: 'review',
-    status: 'complete',
-    priority: 'medium',
-    dueDate: 'Jan 8, 2025',
-    owner: 'CRO'
-  },
-  { 
-    title: 'Regulatory Compliance Check',
-    type: 'compliance',
-    status: 'complete',
-    priority: 'high',
-    dueDate: 'Jan 5, 2025',
-    owner: 'Compliance'
-  }
-];
-
-const riskCategories = [
-  { name: 'Strategic Risk', score: 'Medium', trend: 'stable', items: 4 },
-  { name: 'Operational Risk', score: 'Low', trend: 'improving', items: 8 },
-  { name: 'Financial Risk', score: 'Medium', trend: 'stable', items: 5 },
-  { name: 'Regulatory Risk', score: 'Low', trend: 'stable', items: 3 },
-  { name: 'Technology Risk', score: 'High', trend: 'worsening', items: 6 }
-];
+import { riskData } from '@/lib/lgData';
+import { 
+  getGovernanceItemsFromRiskData,
+  getRiskMetricsFromDivisions,
+  getCompanyMetrics,
+  type DataMode,
+  type TransformedGovernanceItem
+} from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -72,8 +35,164 @@ function NavBar() {
   );
 }
 
+function GovernanceItemCard({ item, mode }: { item: TransformedGovernanceItem, mode: DataMode }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'complete': return 'default';
+      case 'in-review': return 'secondary';
+      case 'pending': return 'outline';
+      default: return 'outline';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'text-red-600 bg-red-50';
+      case 'medium': return 'text-amber-600 bg-amber-50';
+      case 'low': return 'text-green-600 bg-green-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  return (
+    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
+      <div 
+        className="p-4 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+        data-testid={`governance-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+            <span className="font-semibold">{item.title}</span>
+          </div>
+          <Badge variant={getStatusColor(item.status)}>{item.status}</Badge>
+        </div>
+        <div className="flex items-center gap-4 text-xs text-gray-500 ml-6">
+          <span className={`px-2 py-0.5 rounded ${getPriorityColor(item.priority)}`}>{item.priority}</span>
+          <span>Due: {item.dueDate}</span>
+          <span>Owner: {item.owner}</span>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-gray-100"
+          >
+            <div className="p-4 bg-gray-50">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-white p-3 rounded-lg border">
+                  <p className="text-xs text-gray-500">Type</p>
+                  <p className="font-semibold text-sm capitalize">{item.type}</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg border">
+                  <p className="text-xs text-gray-500">Completion Status</p>
+                  <p className={`font-semibold text-sm ${item.completionTime.includes('ahead') ? 'text-green-600' : item.completionTime.includes('Delayed') ? 'text-red-600' : 'text-blue-600'}`}>
+                    {item.completionTime}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white p-3 rounded-lg border mb-4">
+                <p className="text-xs text-gray-500">Related Risks</p>
+                <p className="font-semibold text-sm">{item.relatedRisks} high-severity risks in category</p>
+              </div>
+              
+              <div className={`p-3 rounded-lg border ${mode === 'VRO' ? 'bg-purple-50 border-purple-100' : 'bg-gray-100 border-gray-200'}`}>
+                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                  <Bot className={`h-4 w-4 ${mode === 'VRO' ? 'text-purple-500' : 'text-gray-400'}`} />
+                  {mode === 'VRO' ? 'AI Assistance' : 'Manual Process'}
+                </h4>
+                <p className="text-sm text-gray-700">{item.aiStatus}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function RiskCategoryCard({ category }: { category: typeof riskData.categories[0] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
+      <div 
+        className="p-4 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+        data-testid={`risk-category-${category.id}`}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+            <Shield className="h-5 w-5" style={{ color: category.color }} />
+            <span className="font-semibold">{category.name}</span>
+          </div>
+          <Badge variant="outline">{category.subRisks?.length || 0} sub-risks</Badge>
+        </div>
+        <p className="text-xs text-gray-500 ml-9">{category.subtitle}</p>
+      </div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-gray-100"
+          >
+            <div className="p-4 bg-gray-50">
+              <div className="space-y-3">
+                {category.subRisks?.map((subRisk, i) => (
+                  <div key={i} className="bg-white p-3 rounded-lg border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">{subRisk.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={
+                          subRisk.severity === 'high' ? 'destructive' :
+                          subRisk.severity === 'medium' ? 'secondary' : 'outline'
+                        } className="text-[10px]">
+                          {subRisk.severity}
+                        </Badge>
+                        {subRisk.trend === 'improving' ? (
+                          <TrendingDown className="h-4 w-4 text-green-500" />
+                        ) : subRisk.trend === 'worsening' ? (
+                          <TrendingUp className="h-4 w-4 text-red-500" />
+                        ) : (
+                          <span className="text-xs text-gray-400">stable</span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600">{subRisk.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function GovernanceDashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  
+  const governanceItems = getGovernanceItemsFromRiskData(dataMode);
+  const riskMetrics = getRiskMetricsFromDivisions(dataMode);
+  const companyMetrics = getCompanyMetrics();
+  
+  const completedCount = governanceItems.filter(i => i.status === 'complete').length;
+  const pendingCount = governanceItems.filter(i => i.status === 'pending').length;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -93,20 +212,33 @@ export default function GovernanceDashboard() {
                 <p className="text-muted-foreground">Compliance, Controls & Decision Tracking</p>
               </div>
               <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
+              <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">Pending Decisions</p>
-                    <p className="text-2xl font-bold text-amber-600">3</p>
+                    <p className="text-xs text-gray-500">Decisions Complete</p>
+                    <p className="text-2xl font-bold text-green-600">{completedCount}/{governanceItems.length}</p>
+                  </div>
+                  <CheckCircle2 className="h-8 w-8 text-green-200" />
+                </div>
+                <Progress value={(completedCount / governanceItems.length) * 100} className="h-1.5 mt-2" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">Pending Actions</p>
+                    <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
                   </div>
                   <Clock className="h-8 w-8 text-amber-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">1 high priority</p>
+                <p className="text-xs text-gray-500 mt-2">{pendingCount > 0 ? 'Requires attention' : 'All clear'}</p>
               </CardContent>
             </Card>
             <Card>
@@ -114,9 +246,9 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Compliance Score</p>
-                    <p className="text-2xl font-bold text-green-600">94%</p>
+                    <p className="text-2xl font-bold text-green-600">{riskMetrics.complianceScore}%</p>
                   </div>
-                  <CheckCircle2 className="h-8 w-8 text-green-200" />
+                  <Shield className="h-8 w-8 text-green-200" />
                 </div>
                 <p className="text-xs text-gray-500 mt-2">FCA aligned</p>
               </CardContent>
@@ -125,24 +257,24 @@ export default function GovernanceDashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">Active Risks</p>
-                    <p className="text-2xl font-bold text-red-600">26</p>
+                    <p className="text-xs text-gray-500">High Risks</p>
+                    <p className="text-2xl font-bold text-red-600">{riskMetrics.high}</p>
                   </div>
-                  <AlertTriangle className="h-8 w-8 text-red-200" />
+                  <AlertOctagon className="h-8 w-8 text-red-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">5 categories</p>
+                <p className="text-xs text-gray-500 mt-2">Actively monitored</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">Audit Items</p>
-                    <p className="text-2xl font-bold text-blue-600">12</p>
+                    <p className="text-xs text-gray-500">CRO</p>
+                    <p className="text-lg font-bold text-blue-600">{companyMetrics.cro}</p>
                   </div>
-                  <FileText className="h-8 w-8 text-blue-200" />
+                  <Users className="h-8 w-8 text-blue-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Q1 review</p>
+                <p className="text-xs text-gray-500 mt-2">Chief Risk Officer</p>
               </CardContent>
             </Card>
           </div>
@@ -150,35 +282,15 @@ export default function GovernanceDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Governance Items</CardTitle>
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>Governance Queue</span>
+                  <Badge variant="outline" className="text-xs">Click to expand</Badge>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {governanceItems.map((item, i) => (
-                    <div key={i} className="p-3 bg-gray-50 rounded-lg border-l-4 border-l-transparent hover:border-l-[#005EB8] transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">{item.title}</span>
-                        <Badge variant={
-                          item.status === 'complete' ? 'default' :
-                          item.status === 'in-review' ? 'secondary' : 'outline'
-                        }>
-                          {item.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {item.dueDate}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {item.owner}
-                        </span>
-                        <Badge variant={item.priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px]">
-                          {item.priority}
-                        </Badge>
-                      </div>
-                    </div>
+                    <GovernanceItemCard key={i} item={item} mode={dataMode} />
                   ))}
                 </div>
               </CardContent>
@@ -186,39 +298,42 @@ export default function GovernanceDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  Risk Categories
-                  <span className="text-xs text-gray-500 font-normal">(L&G Three Lines Model)</span>
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>Risk Categories</span>
+                  <Badge variant="outline" className="text-xs">From L&G Risk Framework</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {riskCategories.map((risk, i) => (
-                    <div key={i} className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">{risk.name}</span>
-                        <Badge variant={
-                          risk.score === 'Low' ? 'default' :
-                          risk.score === 'Medium' ? 'secondary' : 'destructive'
-                        }>
-                          {risk.score}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{risk.items} items tracked</span>
-                        <span className={
-                          risk.trend === 'improving' ? 'text-green-600' :
-                          risk.trend === 'worsening' ? 'text-red-600' : 'text-gray-500'
-                        }>
-                          {risk.trend}
-                        </span>
-                      </div>
-                    </div>
+                  {riskData.categories.slice(0, 5).map((category) => (
+                    <RiskCategoryCard key={category.id} category={category} />
                   ))}
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Three Lines of Defence</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {riskData.threeLines.map((line) => (
+                  <div key={line.line} className="p-4 rounded-lg border bg-gray-50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+                        {line.line}
+                      </div>
+                      <h4 className="font-semibold">{line.name}</h4>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{line.role}</p>
+                    <p className="text-xs text-gray-500">{line.accountable}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           <CrossAgentCollaboration />
         </main>

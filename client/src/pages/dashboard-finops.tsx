@@ -2,48 +2,24 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Calculator, DollarSign, TrendingUp, TrendingDown, PieChart,
-  BarChart3, AlertTriangle, CheckCircle2, ArrowUpRight, ArrowDownRight,
-  ChevronDown, ChevronRight, Building2, Target, Bot
+  Calculator, DollarSign, TrendingUp, PieChart,
+  BarChart3, ChevronDown, ChevronRight, Building2, Bot,
+  ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-import { divisions, lgCompanyOverview } from '@/lib/lgData';
-
-type DataMode = "VRO" | "PMO";
-
-const vroCostCategories = [
-  { name: 'Technology & Digital', budget: 150, spent: 142, forecast: 148, variance: -1.3, division: 'Group Technology', savings: 12 },
-  { name: 'People & Training', budget: 45, spent: 38, forecast: 43, variance: -4.4, division: 'HR', savings: 4.2 },
-  { name: 'Infrastructure', budget: 32, spent: 29, forecast: 30, variance: -6.3, division: 'Operations', savings: 3.8 },
-  { name: 'External Services', budget: 28, spent: 24, forecast: 26, variance: -7.1, division: 'Procurement', savings: 5.5 },
-  { name: 'Operations', budget: 25, spent: 21, forecast: 23, variance: -8.0, division: 'Operations', savings: 6.0 }
-];
-
-const pmoCostCategories = [
-  { name: 'Technology & Digital', budget: 150, spent: 142, forecast: 168, variance: 12.0, division: 'Group Technology', savings: 2 },
-  { name: 'People & Training', budget: 45, spent: 38, forecast: 52, variance: 15.6, division: 'HR', savings: 0 },
-  { name: 'Infrastructure', budget: 32, spent: 29, forecast: 38, variance: 18.8, division: 'Operations', savings: 1.2 },
-  { name: 'External Services', budget: 28, spent: 31, forecast: 42, variance: 50.0, division: 'Procurement', savings: 0 },
-  { name: 'Operations', budget: 25, spent: 22, forecast: 28, variance: 12.0, division: 'Operations', savings: 0.8 }
-];
-
-const vroSavingsOpportunities = [
-  { area: 'Cloud Optimization', potential: 8.5, confidence: 92, status: 'validated', aiInsight: 'ML analysis identified 23% unused compute capacity', division: 'Technology' },
-  { area: 'License Consolidation', potential: 4.2, confidence: 88, status: 'validated', aiInsight: 'Duplicate licenses across 12 products identified', division: 'Procurement' },
-  { area: 'Process Automation', potential: 12.0, confidence: 85, status: 'in-progress', aiInsight: 'RPA can automate 340 manual workflows', division: 'Operations' },
-  { area: 'Vendor Renegotiation', potential: 6.8, confidence: 90, status: 'validated', aiInsight: 'Market benchmarking shows 15% below-market opportunity', division: 'Procurement' }
-];
-
-const pmoSavingsOpportunities = [
-  { area: 'Cloud Optimization', potential: 3.2, confidence: 45, status: 'pending', aiInsight: 'Manual review needed', division: 'Technology' },
-  { area: 'License Consolidation', potential: 1.5, confidence: 38, status: 'pending', aiInsight: 'Spreadsheet tracking required', division: 'Procurement' },
-  { area: 'Process Automation', potential: 4.0, confidence: 42, status: 'proposed', aiInsight: 'Business case under development', division: 'Operations' },
-  { area: 'Vendor Renegotiation', potential: 2.0, confidence: 55, status: 'pending', aiInsight: 'Contract review scheduled', division: 'Procurement' }
-];
+import { divisions } from '@/lib/lgData';
+import { 
+  getCostCategoriesFromDivisions, 
+  getSavingsOpportunitiesFromProjects,
+  getCompanyMetrics,
+  type DataMode,
+  type TransformedCostCategory,
+  type TransformedSavingsOpportunity
+} from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -60,7 +36,7 @@ function NavBar() {
   );
 }
 
-function CostCategoryCard({ category, mode }: { category: typeof vroCostCategories[0], mode: DataMode }) {
+function CostCategoryCard({ category, mode }: { category: TransformedCostCategory, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
   const isOverBudget = category.variance > 0;
 
@@ -118,29 +94,12 @@ function CostCategoryCard({ category, mode }: { category: typeof vroCostCategori
                 </div>
               </div>
               
-              <div className="bg-white p-3 rounded-lg border">
+              <div className={`p-3 rounded-lg border ${mode === 'VRO' ? 'bg-purple-50 border-purple-100' : 'bg-gray-100 border-gray-200'}`}>
                 <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Bot className="h-4 w-4 text-purple-500" />
+                  <Bot className={`h-4 w-4 ${mode === 'VRO' ? 'text-purple-500' : 'text-gray-400'}`} />
                   {mode === 'VRO' ? 'AI-Driven Analysis' : 'Manual Analysis'}
                 </h4>
-                {mode === 'VRO' ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Spend pattern anomalies detected</span>
-                      <Badge variant="outline" className="text-[10px]">3 findings</Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Optimization opportunities</span>
-                      <span className="font-bold text-green-600">£{(category.savings * 0.4).toFixed(1)}M additional</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Forecast confidence</span>
-                      <span className="font-bold text-blue-600">94%</span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-gray-500">Manual quarterly review pending. Last analysis: 3 months ago.</p>
-                )}
+                <p className="text-sm text-gray-700">{category.aiInsight}</p>
               </div>
             </div>
           </motion.div>
@@ -150,7 +109,7 @@ function CostCategoryCard({ category, mode }: { category: typeof vroCostCategori
   );
 }
 
-function SavingsOpportunityCard({ opportunity, mode }: { opportunity: typeof vroSavingsOpportunities[0], mode: DataMode }) {
+function SavingsOpportunityCard({ opportunity, mode }: { opportunity: TransformedSavingsOpportunity, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -163,7 +122,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: typeof vro
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
-            <span className="font-semibold">{opportunity.area}</span>
+            <span className="font-semibold text-sm">{opportunity.area}</span>
           </div>
           <Badge variant={
             opportunity.status === 'validated' ? 'default' :
@@ -174,7 +133,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: typeof vro
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold text-green-600">£{opportunity.potential}M</p>
+            <p className="text-xl font-bold text-green-600">£{opportunity.potential.toFixed(1)}M</p>
             <p className="text-xs text-gray-500">potential savings</p>
           </div>
           <div className="text-right">
@@ -200,8 +159,8 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: typeof vro
                   <p className="font-semibold text-sm">{opportunity.division}</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Realization Timeline</p>
-                  <p className="font-semibold text-sm">{mode === 'VRO' ? '3-6 months' : '12-18 months'}</p>
+                  <p className="text-xs text-gray-500">Payback Period</p>
+                  <p className="font-semibold text-sm">{opportunity.paybackMonths} months</p>
                 </div>
               </div>
               
@@ -213,22 +172,16 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: typeof vro
                 <p className="text-sm text-gray-700">{opportunity.aiInsight}</p>
               </div>
 
-              {mode === 'VRO' && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  <div className="bg-white p-2 rounded border text-center">
-                    <p className="text-xs text-gray-500">Implementation</p>
-                    <p className="font-bold text-green-600">Low Risk</p>
-                  </div>
-                  <div className="bg-white p-2 rounded border text-center">
-                    <p className="text-xs text-gray-500">ROI</p>
-                    <p className="font-bold text-blue-600">4.2x</p>
-                  </div>
-                  <div className="bg-white p-2 rounded border text-center">
-                    <p className="text-xs text-gray-500">Payback</p>
-                    <p className="font-bold text-purple-600">8 months</p>
-                  </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="bg-white p-2 rounded border text-center">
+                  <p className="text-xs text-gray-500">ROI</p>
+                  <p className="font-bold text-blue-600">{opportunity.roi.toFixed(1)}x</p>
                 </div>
-              )}
+                <div className="bg-white p-2 rounded border text-center">
+                  <p className="text-xs text-gray-500">Implementation</p>
+                  <p className="font-bold text-green-600">{mode === 'VRO' ? 'Low Risk' : 'Medium Risk'}</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -240,8 +193,9 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: typeof vro
 export default function FinOpsDashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   
-  const costCategories = dataMode === 'VRO' ? vroCostCategories : pmoCostCategories;
-  const savingsOpportunities = dataMode === 'VRO' ? vroSavingsOpportunities : pmoSavingsOpportunities;
+  const costCategories = getCostCategoriesFromDivisions(dataMode);
+  const savingsOpportunities = getSavingsOpportunitiesFromProjects(dataMode);
+  const companyMetrics = getCompanyMetrics();
 
   const totalBudget = costCategories.reduce((sum, c) => sum + c.budget, 0);
   const totalSpent = costCategories.reduce((sum, c) => sum + c.spent, 0);
@@ -249,8 +203,6 @@ export default function FinOpsDashboard() {
   const totalSavings = savingsOpportunities.reduce((sum, s) => sum + s.potential, 0);
   const utilizationRate = Math.round((totalSpent / totalBudget) * 100);
   const forecastVariance = ((totalForecast - totalBudget) / totalBudget) * 100;
-
-  const totalProfit = divisions.reduce((sum, d) => sum + d.profit2024, 0);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -330,7 +282,7 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Group Profit</p>
-                    <p className="text-2xl font-bold text-blue-600">£{totalProfit}M</p>
+                    <p className="text-2xl font-bold text-blue-600">£{companyMetrics.totalProfit}M</p>
                   </div>
                   <Building2 className="h-8 w-8 text-blue-200" />
                 </div>
@@ -343,7 +295,7 @@ export default function FinOpsDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Cost Categories</span>
+                  <span>Division Cost Performance</span>
                   <Badge variant="outline" className="text-xs">Click to expand</Badge>
                 </CardTitle>
               </CardHeader>
@@ -360,7 +312,7 @@ export default function FinOpsDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Savings Opportunities</span>
-                  <Badge variant="outline" className="text-xs">Click to expand</Badge>
+                  <Badge variant="outline" className="text-xs">From Division Projects</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

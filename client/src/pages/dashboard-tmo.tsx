@@ -3,227 +3,23 @@ import { Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Repeat, Users, TrendingUp, Target, CheckCircle2, 
-  AlertTriangle, ArrowRight, BarChart3, Clock, Sparkles,
-  ChevronDown, ChevronRight, DollarSign, Building2, Bot,
-  MessageSquare, Zap, Shield, Calendar
+  AlertTriangle, ChevronDown, ChevronRight, Bot,
+  Building2, Calendar, Shield
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-
-type DataMode = "VRO" | "PMO";
-
-const adoptionMetrics = [
-  { division: 'Institutional Retirement', adoption: 78, target: 85, users: 1240 },
-  { division: 'Retail', adoption: 65, target: 80, users: 890 },
-  { division: 'Capital', adoption: 82, target: 90, users: 456 },
-  { division: 'Asset Management (LGIM)', adoption: 71, target: 85, users: 2100 },
-  { division: 'Affordable Homes', adoption: 88, target: 90, users: 234 }
-];
-
-interface Initiative {
-  id: string;
-  name: string;
-  description: string;
-  phase: string;
-  progress: number;
-  impactedUsers: number;
-  status: 'on-track' | 'at-risk' | 'complete';
-  division: string;
-  owner: string;
-  startDate: string;
-  targetDate: string;
-  valueImpact: {
-    costSavings: number;
-    revenueImpact: number;
-    efficiencyGain: number;
-  };
-  okrMappings: {
-    objectiveId: string;
-    objectiveName: string;
-    keyResults: { name: string; contribution: number }[];
-    valueImpact: string;
-  }[];
-  collaboratingAgents: {
-    agentId: string;
-    agentName: string;
-    role: string;
-    lastSync: string;
-    status: 'active' | 'pending' | 'complete';
-  }[];
-  milestones: {
-    name: string;
-    date: string;
-    status: 'complete' | 'in-progress' | 'pending';
-  }[];
-  risks: { description: string; severity: 'low' | 'medium' | 'high'; mitigation: string }[];
-}
-
-const changeInitiatives: Initiative[] = [
-  { 
-    id: 'init-001',
-    name: 'Digital Platform Rollout', 
-    description: 'Enterprise-wide deployment of the new digital platform across all L&G divisions, enabling streamlined operations and enhanced customer experience.',
-    phase: 'Adoption',
-    progress: 68,
-    impactedUsers: 4500,
-    status: 'on-track',
-    division: 'Group Technology',
-    owner: 'Sarah Mitchell',
-    startDate: 'Oct 2024',
-    targetDate: 'Jun 2025',
-    valueImpact: {
-      costSavings: 45,
-      revenueImpact: 120,
-      efficiencyGain: 35
-    },
-    okrMappings: [
-      {
-        objectiveId: 'okr-digital-001',
-        objectiveName: 'Digital Transformation Excellence',
-        keyResults: [
-          { name: 'Complete platform modernization', contribution: 40 },
-          { name: 'Achieve 85% digital adoption', contribution: 25 },
-          { name: 'Reduce manual processes by 40%', contribution: 15 }
-        ],
-        valueImpact: '+£120M revenue enablement'
-      },
-      {
-        objectiveId: 'okr-efficiency-001',
-        objectiveName: 'Operational Efficiency',
-        keyResults: [
-          { name: 'Deliver £200M cost savings', contribution: 22 },
-          { name: 'Reduce cycle time by 30%', contribution: 18 }
-        ],
-        valueImpact: '+£45M cost savings'
-      }
-    ],
-    collaboratingAgents: [
-      { agentId: 'vro', agentName: 'VRO Agent', role: 'Value tracking & ROI measurement', lastSync: '2 min ago', status: 'active' },
-      { agentId: 'pmo', agentName: 'PMO Agent', role: 'Project delivery oversight', lastSync: '5 min ago', status: 'active' },
-      { agentId: 'ocm', agentName: 'OCM Agent', role: 'Change readiness & adoption', lastSync: '15 min ago', status: 'active' },
-      { agentId: 'finops', agentName: 'FinOps Agent', role: 'Budget monitoring', lastSync: '1 hour ago', status: 'pending' }
-    ],
-    milestones: [
-      { name: 'Platform Selection', date: 'Nov 2024', status: 'complete' },
-      { name: 'Core Development', date: 'Feb 2025', status: 'complete' },
-      { name: 'User Training', date: 'Apr 2025', status: 'in-progress' },
-      { name: 'Full Deployment', date: 'Jun 2025', status: 'pending' }
-    ],
-    risks: [
-      { description: 'Integration complexity with legacy systems', severity: 'medium', mitigation: 'Phased rollout with fallback protocols' },
-      { description: 'User adoption resistance', severity: 'low', mitigation: 'Comprehensive change management program' }
-    ]
-  },
-  { 
-    id: 'init-002',
-    name: 'Customer Portal Enhancement', 
-    description: 'Major upgrade to customer-facing portals improving self-service capabilities, reducing call center volume, and enhancing customer satisfaction scores.',
-    phase: 'Training',
-    progress: 45,
-    impactedUsers: 2800,
-    status: 'at-risk',
-    division: 'Retail',
-    owner: 'James Thompson',
-    startDate: 'Jan 2025',
-    targetDate: 'Aug 2025',
-    valueImpact: {
-      costSavings: 28,
-      revenueImpact: 65,
-      efficiencyGain: 42
-    },
-    okrMappings: [
-      {
-        objectiveId: 'okr-cx-001',
-        objectiveName: 'Customer Experience Excellence',
-        keyResults: [
-          { name: 'Improve NPS by 15 points', contribution: 35 },
-          { name: 'Reduce call center volume by 25%', contribution: 28 },
-          { name: 'Achieve 90% self-service completion', contribution: 20 }
-        ],
-        valueImpact: '+15pts NPS improvement'
-      },
-      {
-        objectiveId: 'okr-digital-001',
-        objectiveName: 'Digital Transformation Excellence',
-        keyResults: [
-          { name: 'Achieve 85% digital adoption', contribution: 18 }
-        ],
-        valueImpact: '+18% digital adoption'
-      }
-    ],
-    collaboratingAgents: [
-      { agentId: 'vro', agentName: 'VRO Agent', role: 'Customer value measurement', lastSync: '8 min ago', status: 'active' },
-      { agentId: 'tmo', agentName: 'TMO Agent', role: 'Training coordination', lastSync: '3 min ago', status: 'active' },
-      { agentId: 'governance', agentName: 'Governance Agent', role: 'Compliance review', lastSync: '2 hours ago', status: 'pending' }
-    ],
-    milestones: [
-      { name: 'Requirements Gathering', date: 'Feb 2025', status: 'complete' },
-      { name: 'UX Design Complete', date: 'Mar 2025', status: 'complete' },
-      { name: 'Development Sprint', date: 'May 2025', status: 'in-progress' },
-      { name: 'UAT Testing', date: 'Jul 2025', status: 'pending' },
-      { name: 'Production Launch', date: 'Aug 2025', status: 'pending' }
-    ],
-    risks: [
-      { description: 'Resource constraints due to competing priorities', severity: 'high', mitigation: 'Escalated to steering committee for resolution' },
-      { description: 'Scope creep from stakeholder requests', severity: 'medium', mitigation: 'Strict change control process implemented' }
-    ]
-  },
-  { 
-    id: 'init-003',
-    name: 'Data Analytics Transformation', 
-    description: 'Implementation of advanced analytics platform enabling real-time insights, predictive modeling, and AI-driven decision support across the enterprise.',
-    phase: 'Pilot',
-    progress: 92,
-    impactedUsers: 890,
-    status: 'complete',
-    division: 'Group Data',
-    owner: 'Dr. Priya Sharma',
-    startDate: 'Jun 2024',
-    targetDate: 'Jan 2025',
-    valueImpact: {
-      costSavings: 32,
-      revenueImpact: 85,
-      efficiencyGain: 48
-    },
-    okrMappings: [
-      {
-        objectiveId: 'okr-efficiency-001',
-        objectiveName: 'Operational Efficiency',
-        keyResults: [
-          { name: 'Improve forecast accuracy to 85%', contribution: 45 },
-          { name: 'Reduce cycle time by 30%', contribution: 12 }
-        ],
-        valueImpact: '+45% forecast accuracy'
-      },
-      {
-        objectiveId: 'okr-prt-001',
-        objectiveName: 'Accelerate PRT Market Leadership',
-        keyResults: [
-          { name: 'Increase market share to 25%', contribution: 8 }
-        ],
-        valueImpact: 'Enhanced deal analytics'
-      }
-    ],
-    collaboratingAgents: [
-      { agentId: 'vro', agentName: 'VRO Agent', role: 'Analytics value realization', lastSync: '1 min ago', status: 'complete' },
-      { agentId: 'finops', agentName: 'FinOps Agent', role: 'Cost optimization insights', lastSync: '5 min ago', status: 'complete' },
-      { agentId: 'okr', agentName: 'OKR Agent', role: 'Performance tracking', lastSync: '10 min ago', status: 'complete' }
-    ],
-    milestones: [
-      { name: 'Platform Architecture', date: 'Jul 2024', status: 'complete' },
-      { name: 'Data Integration', date: 'Sep 2024', status: 'complete' },
-      { name: 'ML Model Deployment', date: 'Nov 2024', status: 'complete' },
-      { name: 'User Onboarding', date: 'Jan 2025', status: 'complete' }
-    ],
-    risks: [
-      { description: 'Data quality issues in source systems', severity: 'low', mitigation: 'Automated data validation pipeline implemented' }
-    ]
-  }
-];
+import { divisions } from '@/lib/lgData';
+import { 
+  getAdoptionMetricsFromDivisions,
+  getInitiativesFromDivisions,
+  getCompanyMetrics,
+  type DataMode,
+  type TransformedAdoptionMetric,
+  type TransformedInitiative
+} from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -240,7 +36,61 @@ function NavBar() {
   );
 }
 
-function InitiativeCard({ initiative }: { initiative: Initiative }) {
+function AdoptionMetricCard({ metric, mode }: { metric: TransformedAdoptionMetric, mode: DataMode }) {
+  const [expanded, setExpanded] = useState(false);
+  const progressPercent = (metric.adoption / metric.target) * 100;
+
+  return (
+    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
+      <div 
+        className="p-3 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+        data-testid={`adoption-${metric.division.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: metric.color }} />
+            <span className="font-medium text-sm">{metric.division}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-teal-600">{metric.adoption}%</span>
+            <span className="text-xs text-gray-400">/ {metric.target}%</span>
+          </div>
+        </div>
+        <Progress value={progressPercent > 100 ? 100 : progressPercent} className="h-1.5" />
+        <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+          <span>{metric.users.toLocaleString()} users</span>
+          <span className={metric.trend.startsWith('+') ? 'text-green-600 font-medium' : 'text-red-600'}>{metric.trend}</span>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-gray-100"
+          >
+            <div className="p-3 bg-gray-50">
+              <div className={`p-2 rounded border ${mode === 'VRO' ? 'bg-purple-50 border-purple-100' : 'bg-gray-100'}`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <Bot className={`h-4 w-4 ${mode === 'VRO' ? 'text-purple-500' : 'text-gray-400'}`} />
+                  <span className="text-xs font-medium">{mode === 'VRO' ? 'AI Insight' : 'Status'}</span>
+                </div>
+                <p className="text-xs text-gray-700">{metric.aiInsight}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiative, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -432,6 +282,15 @@ function InitiativeCard({ initiative }: { initiative: Initiative }) {
 
 export default function TMODashboard() {
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  
+  const adoptionMetrics = getAdoptionMetricsFromDivisions(dataMode);
+  const initiatives = getInitiativesFromDivisions(dataMode);
+  const companyMetrics = getCompanyMetrics();
+  
+  const avgAdoption = Math.round(adoptionMetrics.reduce((sum, m) => sum + m.adoption, 0) / adoptionMetrics.length);
+  const totalUsers = adoptionMetrics.reduce((sum, m) => sum + m.users, 0);
+  const completeInitiatives = initiatives.filter(i => i.status === 'complete').length;
+  const atRiskInitiatives = initiatives.filter(i => i.status === 'at-risk').length;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -451,56 +310,69 @@ export default function TMODashboard() {
                 <p className="text-muted-foreground">Change Management & Adoption Analytics</p>
               </div>
               <Badge className="ml-4 bg-green-100 text-green-700">Active</Badge>
+              <Badge variant="outline" className="ml-2">{dataMode} Mode</Badge>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Overall Adoption</p>
-                    <p className="text-2xl font-bold text-teal-600">72%</p>
+                    <p className="text-2xl font-bold text-teal-600">{avgAdoption}%</p>
                   </div>
                   <Users className="h-8 w-8 text-teal-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">+8% vs last quarter</p>
+                <Progress value={avgAdoption} className="h-1.5 mt-2" />
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">Training Completion</p>
-                    <p className="text-2xl font-bold text-blue-600">68%</p>
+                    <p className="text-xs text-gray-500">Impacted Users</p>
+                    <p className="text-2xl font-bold text-blue-600">{totalUsers.toLocaleString()}</p>
                   </div>
-                  <Target className="h-8 w-8 text-blue-200" />
+                  <Building2 className="h-8 w-8 text-blue-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Target: 85%</p>
+                <p className="text-xs text-gray-500 mt-2">across {divisions.length} divisions</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">Active Changes</p>
-                    <p className="text-2xl font-bold text-purple-600">12</p>
+                    <p className="text-xs text-gray-500">Active Initiatives</p>
+                    <p className="text-2xl font-bold text-purple-600">{initiatives.length}</p>
                   </div>
                   <Repeat className="h-8 w-8 text-purple-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">3 at risk</p>
+                <p className="text-xs text-gray-500 mt-2">{completeInitiatives} complete</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">User Satisfaction</p>
-                    <p className="text-2xl font-bold text-green-600">4.2/5</p>
+                    <p className="text-xs text-gray-500">At Risk</p>
+                    <p className={`text-2xl font-bold ${atRiskInitiatives > 0 ? 'text-red-600' : 'text-green-600'}`}>{atRiskInitiatives}</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-red-200" />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">{atRiskInitiatives > 0 ? 'Needs attention' : 'All healthy'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">L&G Employees</p>
+                    <p className="text-2xl font-bold text-green-600">{companyMetrics.totalEmployees.toLocaleString()}</p>
                   </div>
                   <CheckCircle2 className="h-8 w-8 text-green-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Based on 2,340 responses</p>
+                <p className="text-xs text-gray-500 mt-2">total workforce</p>
               </CardContent>
             </Card>
           </div>
@@ -508,22 +380,15 @@ export default function TMODashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Division Adoption Rates</CardTitle>
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>Division Adoption Rates</span>
+                  <Badge variant="outline" className="text-xs">From L&G Divisions</Badge>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {adoptionMetrics.map((metric, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{metric.division}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-teal-600">{metric.adoption}%</span>
-                          <span className="text-xs text-gray-400">/ {metric.target}%</span>
-                        </div>
-                      </div>
-                      <Progress value={metric.adoption} className="h-2" />
-                      <p className="text-xs text-gray-500">{metric.users.toLocaleString()} users impacted</p>
-                    </div>
+                    <AdoptionMetricCard key={i} metric={metric} mode={dataMode} />
                   ))}
                 </div>
               </CardContent>
@@ -533,13 +398,13 @@ export default function TMODashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Active Change Initiatives</span>
-                  <Badge variant="outline" className="text-xs">Click to expand</Badge>
+                  <Badge variant="outline" className="text-xs">From Division Projects</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {changeInitiatives.map((initiative) => (
-                    <InitiativeCard key={initiative.id} initiative={initiative} />
+                  {initiatives.map((initiative) => (
+                    <InitiativeCard key={initiative.id} initiative={initiative} mode={dataMode} />
                   ))}
                 </div>
               </CardContent>
