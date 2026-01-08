@@ -334,7 +334,7 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
         'Critical Issues': agentData.risks.filter(r => r.severity === 'critical').length,
         'High Priority': agentData.risks.filter(r => r.severity === 'high').length
       };
-      relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.title }));
+      relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.category }));
       break;
     default:
       return null;

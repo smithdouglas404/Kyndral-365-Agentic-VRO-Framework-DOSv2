@@ -19,7 +19,6 @@ import ValueProposition from "@/pages/value-proposition";
 import DivisionPage from "@/pages/DivisionPage";
 import ClimatePage from "@/pages/ClimatePage";
 import RiskCenter from "@/pages/RiskCenter";
-import PolicyGenerator from "@/pages/policy-generator";
 import VROFramework from "@/pages/vro-framework";
 import TMODashboard from "@/pages/dashboard-tmo";
 import FinOpsDashboard from "@/pages/dashboard-finops";
@@ -44,7 +43,6 @@ function Router() {
       <Route path="/division/:id" component={DivisionPage} />
       <Route path="/climate" component={ClimatePage} />
       <Route path="/risk" component={RiskCenter} />
-      <Route path="/policy-generator" component={PolicyGenerator} />
       <Route path="/vro-framework" component={VROFramework} />
       <Route component={NotFound} />
     </Switch>

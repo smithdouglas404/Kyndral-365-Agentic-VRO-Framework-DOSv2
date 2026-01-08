@@ -5,7 +5,7 @@ import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as Link
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
@@ -273,6 +273,7 @@ function NavBar() {
 }
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
   const [isLive, setIsLive] = useState(true);
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
@@ -284,6 +285,18 @@ export default function Dashboard() {
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
 
   const handleDrillDown = (type: string, id: string) => {
+    if (type === 'division') {
+      navigate(`/division/${id}`);
+      return;
+    }
+    if (type === 'climate' && id === 'climate-overview') {
+      navigate('/climate');
+      return;
+    }
+    if (type === 'risk' && id === 'risk-overview') {
+      navigate('/risk');
+      return;
+    }
     setDrillDownEntity({ type, id });
     setDrillDownOpen(true);
   };
