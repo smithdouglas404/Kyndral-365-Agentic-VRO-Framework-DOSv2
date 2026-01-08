@@ -1,32 +1,39 @@
 import { challenges, pmoChallenges } from "@/lib/data";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Theme } from "@/lib/data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScenarioWorkflow } from "@/components/ScenarioWorkflow";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
-import { ArtOfPossibleFlyout } from "@/components/ArtOfPossibleFlyout";
 import { AICommandCenter } from "@/components/AICommandCenter";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
+import { ExecutiveCommandCenter } from "@/components/ExecutiveCommandCenter";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
-import { Scenario, StageId, scenarios, lgAnnualReportData } from "@/lib/scenarios";
+import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
+import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
+import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
+import { AgentSidebar } from "@/components/AgentSidebar";
+import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
+import { AIRecommendations } from "@/components/AIRecommendations";
+import { ScenarioParameters } from "@/components/ScenarioParameters";
+import { RiskConfidenceMetrics } from "@/components/RiskConfidenceMetrics";
+import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
-import { Leaf, Shield, Sparkles, Smartphone, Building, ChevronRight } from "lucide-react";
+import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -39,37 +46,6 @@ const LG = {
 };
 
 type DataMode = "VRO" | "PMO";
-
-function VROPMOToggle({ mode, onModeChange }: { mode: DataMode; onModeChange: (mode: DataMode) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => onModeChange("VRO")}
-        className={cn(
-          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
-          mode === "VRO" 
-            ? "bg-[#005EB8] text-white shadow-md" 
-            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
-        )}
-        data-testid="toggle-vro"
-      >
-        Value Realization Office
-      </button>
-      <button
-        onClick={() => onModeChange("PMO")}
-        className={cn(
-          "px-5 py-3 rounded-lg text-sm font-semibold transition-all",
-          mode === "PMO" 
-            ? "bg-[#757575] text-white shadow-md" 
-            : "bg-gray-100 text-[#005EB8] hover:bg-gray-200"
-        )}
-        data-testid="toggle-pmo"
-      >
-        Project Management Office
-      </button>
-    </div>
-  );
-}
 
 function LiveIndicator({ isLive, onToggle }: { isLive: boolean; onToggle: () => void }) {
   return (
@@ -257,29 +233,7 @@ function LGReportStats({ mode }: { mode: DataMode }) {
   );
 }
 
-interface NavBarProps {
-  onProjectSelect?: (scenarioId: string) => void;
-}
-
-function NavBar({ onProjectSelect }: NavBarProps) {
-  const [projectsOpen, setProjectsOpen] = useState(false);
-  const [reportsOpen, setReportsOpen] = useState(false);
-
-  const projectData = [
-    { name: "PRT Pipeline Acceleration", status: "On Track", progress: 78, scenarioId: "accelerate-prt" },
-    { name: "Governance Automation Platform", status: "On Track", progress: 65, scenarioId: "governance-uplift" },
-    { name: "Real-time Reporting Engine", status: "At Risk", progress: 42, scenarioId: "digitize-operations" },
-    { name: "Benefits Tracking System", status: "On Track", progress: 91, scenarioId: "accelerate-prt" },
-    { name: "Compliance Automation", status: "Complete", progress: 100, scenarioId: "governance-uplift" },
-  ];
-
-  const handleProjectClick = (scenarioId: string) => {
-    if (onProjectSelect) {
-      onProjectSelect(scenarioId);
-    }
-    setProjectsOpen(false);
-  };
-
+function NavBar() {
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
@@ -288,86 +242,6 @@ function NavBar({ onProjectSelect }: NavBarProps) {
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]" data-testid="link-dashboard">Dashboard</Link>
-          
-          <Dialog open={projectsOpen} onOpenChange={setProjectsOpen}>
-            <DialogTrigger asChild>
-              <button className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="button-projects">Projects</button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Active Projects</DialogTitle>
-                <DialogDescription>Current transformation initiatives aligned to VRO scenarios</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 mt-4">
-                {projectData.map((project, i) => {
-                  const scenarioName = scenarios.find(s => s.id === project.scenarioId)?.name || project.scenarioId;
-                  return (
-                    <div 
-                      key={i} 
-                      className="p-3 border rounded-lg hover:bg-[#005EB8]/5 hover:border-[#005EB8]/30 cursor-pointer transition-all" 
-                      onClick={() => handleProjectClick(project.scenarioId)}
-                      data-testid={`project-item-${i}`}
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium text-sm">{project.name}</span>
-                        <Badge variant={project.status === "On Track" ? "default" : project.status === "At Risk" ? "destructive" : "secondary"} className="text-xs">
-                          {project.status}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-muted-foreground">Scenario: {scenarioName}</span>
-                        <span className="text-xs font-medium">{project.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={cn(
-                            "h-2 rounded-full transition-all",
-                            project.status === "At Risk" ? "bg-[#FFC107]" : "bg-[#00843D]"
-                          )}
-                          style={{ width: `${project.progress}%` }}
-                        ></div>
-                      </div>
-                      <div className="mt-2 text-xs text-[#005EB8] font-medium">
-                        Click to view scenario →
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={reportsOpen} onOpenChange={setReportsOpen}>
-            <DialogTrigger asChild>
-              <button className="text-sm font-medium text-muted-foreground hover:text-[#005EB8] transition-colors" data-testid="button-reports">Reports</button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Available Reports</DialogTitle>
-                <DialogDescription>Download strategic reports with L&G benchmarks</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 mt-4">
-                {[
-                  { name: "Q4 2025 VRO Executive Summary", type: "PDF", date: "Dec 2025" },
-                  { name: "L&G Annual Report 2024 Extract", type: "PDF", date: "Mar 2024" },
-                  { name: "Scenario Impact Assessment", type: "Excel", date: "Dec 2025" },
-                  { name: "Benefits Realization Tracker", type: "Excel", date: "Weekly" },
-                  { name: "Governance Health Report", type: "PDF", date: "Dec 2025" },
-                ].map((report, i) => (
-                  <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" data-testid={`report-item-${i}`}>
-                    <div>
-                      <span className="font-medium text-sm">{report.name}</span>
-                      <p className="text-xs text-muted-foreground">{report.date}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">{report.type}</Badge>
-                      <Download size={16} className="text-muted-foreground" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
         </nav>
       </div>
       <div className="flex items-center gap-4">
@@ -390,13 +264,11 @@ function NavBar({ onProjectSelect }: NavBarProps) {
 export default function Dashboard() {
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
   const [isLive, setIsLive] = useState(true);
-  const [selectedScenario, setSelectedScenario] = useState<Scenario>(scenarios[0]);
-  const [activeStage, setActiveStage] = useState<StageId>("design");
+  const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [artOfPossibleOpen, setArtOfPossibleOpen] = useState(false);
 
   const filteredChallenges = activeTheme === "All" 
     ? challenges 
@@ -404,25 +276,17 @@ export default function Dashboard() {
 
   const themes: Theme[] = ["Automation", "Governance", "Data & Insights", "Value", "Speed"];
 
-  const handleScenarioChange = useCallback((scenario: Scenario, stage: StageId) => {
-    setSelectedScenario(scenario);
-    setActiveStage(stage);
-  }, []);
 
-  const handleProjectSelect = useCallback((scenarioId: string) => {
-    const scenario = scenarios.find(s => s.id === scenarioId);
-    if (scenario) {
-      setSelectedScenario(scenario);
-      setActiveTab("overview");
-    }
-  }, []);
 
   
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <NavBar onProjectSelect={handleProjectSelect} />
+      <NavBar />
 
-      <main className="container mx-auto px-8 py-8 max-w-[1400px]">
+      <div className="flex">
+        <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
+        
+        <main className="flex-1 px-8 py-8 max-w-[1400px]">
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -439,8 +303,7 @@ export default function Dashboard() {
             </p>
           </motion.div>
           
-          <VROPMOToggle mode={dataMode} onModeChange={setDataMode} />
-          
+                    
           <div className="flex items-center gap-3">
             <LiveIndicator isLive={isLive} onToggle={() => setIsLive(!isLive)} />
                         
@@ -548,44 +411,10 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Art of the Possible Button */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-[#C50B30] to-[#007FAA] rounded-xl text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <Smartphone className="h-8 w-8" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" /> Art of the Possible
-                </h3>
-                <p className="text-white/80 text-sm">
-                  Experience the 5-phase transformation journey with AI-powered mobile insights
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right text-sm">
-                <p className="text-white/80">Active AI Alerts</p>
-                <p className="text-2xl font-bold">{aiAlerts.length}</p>
-              </div>
-              <Button 
-                size="lg" 
-                className="bg-white text-[#C50B30] hover:bg-white/90 font-semibold gap-2"
-                data-testid="button-art-of-possible"
-                onClick={() => setArtOfPossibleOpen(true)}
-              >
-                <Smartphone className="h-5 w-5" />
-                Launch Mobile Experience
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid w-full grid-cols-6 h-12 bg-muted/50 p-1 rounded-lg mb-8">
+          <TabsList className="flex flex-wrap gap-1 h-auto bg-muted/50 p-1 rounded-lg mb-8">
             <TabsTrigger 
               value="overview" 
               className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
@@ -601,6 +430,30 @@ export default function Dashboard() {
             >
               <Building2 size={16} />
               <span className="hidden sm:inline">Portfolios</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="business-cases" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-business-cases"
+            >
+              <Briefcase size={16} />
+              <span className="hidden sm:inline">Business Cases</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="early-warning" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-early-warning"
+            >
+              <AlertOctagon size={16} />
+              <span className="hidden sm:inline">Early Warning</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="kpi-tracking" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-kpi-tracking"
+            >
+              <PieChart size={16} />
+              <span className="hidden sm:inline">KPIs</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-insights" 
@@ -638,33 +491,37 @@ export default function Dashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Design → Activate → Measure Value Section */}
-            <div className="border-b border-border pb-8">
-              <ScenarioWorkflow 
-                onScenarioChange={handleScenarioChange} 
-                initialScenario={selectedScenario}
-                initialStage={activeStage}
-              />
+            {/* AI Recommendations and Cross-Agent Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIRecommendations />
+              </div>
+              <div>
+                <RiskConfidenceMetrics />
+              </div>
             </div>
 
-            {/* VRO Metrics Framework Table - Only show in VRO mode */}
-            {dataMode === "VRO" && (
-              <div className="border-b border-border pb-8">
-                <VROMetricsTable />
+            {/* Scenario Parameters and Cross-Agent Collaboration */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div>
+                <ScenarioParameters />
               </div>
-            )}
+              <div className="lg:col-span-2">
+                <CrossAgentCollaboration />
+              </div>
+            </div>
 
-            {/* Scenario-Driven Charts */}
+            {/* Strategic Impact Analysis */}
             <div>
               <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
                 <div>
                   <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
                   <p className="text-muted-foreground">
-                    KPIs for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span> scenario
+                    Key performance indicators for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span>
                   </p>
                 </div>
               </div>
-              <ScenarioChartsGrid scenario={selectedScenario} stage={activeStage} isLive={isLive} />
+              <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={isLive} />
             </div>
           </TabsContent>
 
@@ -673,41 +530,28 @@ export default function Dashboard() {
             <BUProgramsSection dataMode={dataMode} />
           </TabsContent>
 
-          {/* AI Insights Tab */}
+          {/* Business Cases Tab */}
+          <TabsContent value="business-cases">
+            <BusinessCaseAssessment />
+          </TabsContent>
+
+          {/* Early Warning Tab */}
+          <TabsContent value="early-warning">
+            <EarlyWarningDashboard />
+          </TabsContent>
+
+          {/* KPI Tracking Tab */}
+          <TabsContent value="kpi-tracking">
+            <KPIAttributionPanel />
+          </TabsContent>
+
+          {/* AI Insights Tab - Available in both PMO and VRO modes */}
           <TabsContent value="ai-insights">
-            {dataMode === "VRO" ? (
-              <div className="space-y-8">
-                <AICommandCenter />
-                <AIProactiveInsightsSection />
-              </div>
-            ) : (
-              <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-center">
-                  <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-500 mb-2">AI Insights Not Available in PMO Mode</h3>
-                  <p className="text-gray-400 max-w-md mx-auto mb-4">
-                    Traditional PMO approach relies on manual reporting cycles and periodic reviews. 
-                    AI-powered proactive insights are exclusive to the VRO methodology.
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto mt-6">
-                    <div className="p-4 bg-white rounded border">
-                      <p className="text-xs text-gray-500 mb-1">PMO Reporting Cycle</p>
-                      <p className="text-2xl font-bold text-gray-600">Monthly</p>
-                    </div>
-                    <div className="p-4 bg-white rounded border">
-                      <p className="text-xs text-gray-500 mb-1">VRO AI Alerts</p>
-                      <p className="text-2xl font-bold text-[#005EB8]">Real-time</p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={() => setDataMode("VRO")} 
-                    className="mt-6 bg-[#005EB8]"
-                  >
-                    Switch to VRO for AI Insights
-                  </Button>
-                </div>
-              </div>
-            )}
+            <div className="space-y-8">
+              <ExecutiveCommandCenter />
+              <AICommandCenter />
+              <AIProactiveInsightsSection />
+            </div>
           </TabsContent>
 
           {/* Industry Benchmarks Tab */}
@@ -834,11 +678,7 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      
-      <ArtOfPossibleFlyout 
-        open={artOfPossibleOpen} 
-        onOpenChange={setArtOfPossibleOpen} 
-      />
+      </div>
       
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
         <div className="container mx-auto">
