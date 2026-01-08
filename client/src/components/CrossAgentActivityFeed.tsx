@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Brain, RefreshCw, AlertTriangle, Zap, CheckCircle2, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCrossAgentFeed } from '@/hooks/useAgentData';
 import { AgentType, CrossAgentMessage } from '@/lib/dataHub';
+import { DrillDownDrawer } from './DrillDownDrawer';
 
 const agentColors: Record<AgentType, string> = {
   vro: 'bg-green-500',
@@ -49,6 +51,11 @@ interface CrossAgentActivityFeedProps {
 
 export function CrossAgentActivityFeed({ maxItems = 10, compact = false }: CrossAgentActivityFeedProps) {
   const messages = useCrossAgentFeed();
+  const [selectedMessage, setSelectedMessage] = useState<CrossAgentMessage | null>(null);
+
+  const handleMessageClick = (msg: CrossAgentMessage) => {
+    setSelectedMessage(msg);
+  };
 
   const formatTime = (timestamp: Date) => {
     const now = new Date();
@@ -63,26 +70,35 @@ export function CrossAgentActivityFeed({ maxItems = 10, compact = false }: Cross
 
   if (compact) {
     return (
-      <div className="space-y-2">
-        {messages.slice(0, maxItems).map((msg, index) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className={`flex items-center gap-2 p-2 rounded-lg border-l-2 ${priorityColors[msg.priority]}`}
-            data-testid={`agent-message-${msg.id}`}
-          >
-            <div className={`w-2 h-2 rounded-full ${agentColors[msg.fromAgent]}`} />
-            <span className="text-xs font-medium">{agentShortNames[msg.fromAgent]}</span>
-            <ArrowRight size={10} className="text-gray-400" />
-            <div className={`w-2 h-2 rounded-full ${agentColors[msg.toAgent]}`} />
-            <span className="text-xs font-medium">{agentShortNames[msg.toAgent]}</span>
-            <span className="text-xs text-gray-500 flex-1 truncate">{msg.message}</span>
-            <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
-          </motion.div>
-        ))}
-      </div>
+      <>
+        <div className="space-y-2">
+          {messages.slice(0, maxItems).map((msg, index) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className={`flex items-center gap-2 p-2 rounded-lg border-l-2 ${priorityColors[msg.priority]} cursor-pointer hover:shadow-sm transition-shadow`}
+              onClick={() => handleMessageClick(msg)}
+              data-testid={`agent-message-${msg.id}`}
+            >
+              <div className={`w-2 h-2 rounded-full ${agentColors[msg.fromAgent]}`} />
+              <span className="text-xs font-medium">{agentShortNames[msg.fromAgent]}</span>
+              <ArrowRight size={10} className="text-gray-400" />
+              <div className={`w-2 h-2 rounded-full ${agentColors[msg.toAgent]}`} />
+              <span className="text-xs font-medium">{agentShortNames[msg.toAgent]}</span>
+              <span className="text-xs text-gray-500 flex-1 truncate">{msg.message}</span>
+              <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
+            </motion.div>
+          ))}
+        </div>
+        <DrillDownDrawer
+          isOpen={!!selectedMessage}
+          onClose={() => setSelectedMessage(null)}
+          entityType="agent-message"
+          entityId={selectedMessage?.id || ''}
+        />
+      </>
     );
   }
 
@@ -108,6 +124,7 @@ export function CrossAgentActivityFeed({ maxItems = 10, compact = false }: Cross
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               className={`p-3 rounded-lg border-l-4 ${priorityColors[msg.priority]} cursor-pointer hover:shadow-sm transition-shadow`}
+              onClick={() => handleMessageClick(msg)}
               data-testid={`agent-message-${msg.id}`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -136,6 +153,12 @@ export function CrossAgentActivityFeed({ maxItems = 10, compact = false }: Cross
           ))}
         </div>
       </CardContent>
+      <DrillDownDrawer
+        isOpen={!!selectedMessage}
+        onClose={() => setSelectedMessage(null)}
+        entityType="agent-message"
+        entityId={selectedMessage?.id || ''}
+      />
     </Card>
   );
 }
