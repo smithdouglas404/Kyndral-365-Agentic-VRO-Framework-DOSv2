@@ -401,7 +401,7 @@ export default function Dashboard() {
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
           <PageAgentWizard 
             context={{
-              pageName: 'VRO Intelligence Hub',
+              pageName: 'VRO Intelligence Engine',
               pageType: 'dashboard',
               entityId: 'vro',
               metrics: {
@@ -421,7 +421,7 @@ export default function Dashboard() {
             transition={{ duration: 0.3 }}
           >
             <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-              {dataMode === "VRO" ? "VRO Intelligence Hub" : "PMO Control Center"}
+              {dataMode === "VRO" ? "VRO Intelligence Engine" : "PMO Control Center"}
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">
               {dataMode === "VRO" 
