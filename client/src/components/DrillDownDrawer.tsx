@@ -42,14 +42,42 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
   const [activeTab, setActiveTab] = useState('overview');
   
   // Only call hook with valid entity type and id to prevent null returns
-  const drilldown = useEntityDrilldown(
+  const drilldownData = useEntityDrilldown(
     entityType || 'project', 
     entityId || ''
   );
 
   // Don't render if drawer is not open or entity is not selected
   if (!isOpen || !entityType || !entityId) return null;
-  if (!drilldown) return null;
+  
+  // Create a fallback for unsupported entity types
+  const fallbackDrilldown = !drilldownData ? {
+    entityType: entityType as 'project' | 'program' | 'risk' | 'portfolio',
+    entityId,
+    entityName: entityType === 'agent-activity' 
+      ? 'Agent Activity Details' 
+      : entityType === 'challenge' 
+        ? 'Challenge Analysis'
+        : `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`,
+    bu: 'VRO Intelligence Engine',
+    relatedAgents: ['vro' as AgentType, 'pmo' as AgentType],
+    events: [],
+    metrics: {
+      'Entity Type': entityType,
+      'Entity ID': entityId.slice(0, 20) + (entityId.length > 20 ? '...' : ''),
+      'Status': 'Active'
+    },
+    actions: [
+      { id: 'investigate', label: 'Investigate Further', type: 'investigate' },
+      { id: 'escalate', label: 'Escalate to Team', type: 'escalate' }
+    ],
+    history: [],
+    aiInsight: `This ${entityType} item requires detailed analysis. The VRO agent is monitoring this entity and will provide updates as more information becomes available.`,
+    summary: `Details for ${entityType} entity. Click on the actions below to trigger agent workflows.`
+  } : null;
+  
+  const displayData = drilldownData || fallbackDrilldown;
+  if (!displayData) return null;
 
   return (
     <AnimatePresence>
@@ -75,8 +103,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                   <Badge variant="outline" className="mb-1 text-xs">
                     {entityType.toUpperCase()}
                   </Badge>
-                  <h2 className="text-lg font-bold">{drilldown.entityName}</h2>
-                  <p className="text-sm text-gray-500">{drilldown.bu}</p>
+                  <h2 className="text-lg font-bold">{displayData.entityName}</h2>
+                  <p className="text-sm text-gray-500">{displayData.bu}</p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={onClose}>
                   <X size={20} />
@@ -86,8 +114,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
 
             <div className="p-4">
               <AICoPilot 
-                drilldown={drilldown} 
-                agentId={drilldown.relatedAgents[0] || 'vro'} 
+                drilldown={displayData} 
+                agentId={displayData.relatedAgents[0] || 'vro'} 
               />
               
               <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -99,7 +127,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
 
                 <TabsContent value="overview">
                   <div className="space-y-4">
-                    {drilldown.aiInsight && (
+                    {displayData.aiInsight && (
                       <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
@@ -108,12 +136,12 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-700 leading-relaxed">{drilldown.aiInsight}</p>
+                          <p className="text-sm text-gray-700 leading-relaxed">{displayData.aiInsight}</p>
                         </CardContent>
                       </Card>
                     )}
 
-                    {drilldown.summary && (
+                    {displayData.summary && (
                       <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
@@ -122,7 +150,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-700 leading-relaxed">{drilldown.summary}</p>
+                          <p className="text-sm text-gray-700 leading-relaxed">{displayData.summary}</p>
                         </CardContent>
                       </Card>
                     )}
@@ -136,7 +164,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-2 gap-3">
-                          {Object.entries(drilldown.metrics).map(([key, value]) => (
+                          {Object.entries(displayData.metrics).map(([key, value]) => (
                             <div key={key} className="bg-gray-50 rounded-lg p-3">
                               <p className="text-xs text-gray-500">{key}</p>
                               <p className="text-lg font-bold">{value}</p>
@@ -146,7 +174,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                       </CardContent>
                     </Card>
 
-                    {drilldown.actions.length > 0 && (
+                    {displayData.actions.length > 0 && (
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
@@ -156,7 +184,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-2">
-                            {drilldown.actions.map((action) => (
+                            {displayData.actions.map((action) => (
                               <Button
                                 key={action.id}
                                 variant="outline"
@@ -185,17 +213,17 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                       </Card>
                     )}
 
-                    {drilldown.relatedEntities && drilldown.relatedEntities.length > 0 && (
+                    {displayData.relatedEntities && displayData.relatedEntities.length > 0 && (
                       <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
                             <Brain size={16} className="text-indigo-600" />
-                            <span className="text-indigo-900">Projects That Make Up This Metric ({drilldown.relatedEntities.length})</span>
+                            <span className="text-indigo-900">Projects That Make Up This Metric ({displayData.relatedEntities.length})</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {drilldown.relatedEntities.map((entity, index) => (
+                            {displayData.relatedEntities.map((entity, index) => (
                               <div
                                 key={entity.id}
                                 className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors border border-indigo-100 shadow-sm"
@@ -220,17 +248,17 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                       </Card>
                     )}
 
-                    {drilldown.events.length > 0 && (
+                    {displayData.events.length > 0 && (
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
                             <AlertTriangle size={16} className="text-orange-500" />
-                            Recent Alerts ({drilldown.events.length})
+                            Recent Alerts ({displayData.events.length})
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-2">
-                            {drilldown.events.slice(0, 3).map((event) => (
+                            {displayData.events.slice(0, 3).map((event) => (
                               <div key={event.id} className="p-2 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-1">
                                   <Badge 
@@ -266,7 +294,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {drilldown.relatedAgents.map((agentId) => (
+                        {displayData.relatedAgents.map((agentId) => (
                           <div
                             key={agentId}
                             className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
@@ -293,13 +321,13 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {drilldown.history.length > 0 ? (
+                      {displayData.history.length > 0 ? (
                         <div className="space-y-3">
-                          {drilldown.history.map((item, index) => (
+                          {displayData.history.map((item, index) => (
                             <div key={index} className="flex gap-3">
                               <div className="flex flex-col items-center">
                                 <div className={`w-2 h-2 rounded-full ${agentColors[item.agent]}`} />
-                                {index < drilldown.history.length - 1 && (
+                                {index < displayData.history.length - 1 && (
                                   <div className="w-0.5 h-full bg-gray-200 mt-1" />
                                 )}
                               </div>
