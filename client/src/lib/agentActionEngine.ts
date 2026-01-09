@@ -104,7 +104,7 @@ let actionListeners: ((action: AgentAction) => void)[] = [];
 let messageListeners: ((message: AgentMessage) => void)[] = [];
 let recentActionKeys: Map<string, number> = new Map(); // Track recent actions to prevent duplicates
 
-const DEDUP_WINDOW_MS = 10000; // 10 second window to prevent duplicate actions
+const DEDUP_WINDOW_MS = 60000; // 60 second window to prevent duplicate actions
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

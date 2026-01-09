@@ -400,10 +400,20 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
       setMessages(prev => [message, ...prev].slice(0, 50));
     });
 
-    // Continuous simulation - fire a new agent action every 3-6 seconds
-    let activityIndex = 0;
+    // Continuous simulation - fire a new agent action every 12-20 seconds (slowed down)
+    const usedIndices = new Set<number>();
     const simulationInterval = setInterval(() => {
-      const activity = simulatedActivities[activityIndex % simulatedActivities.length];
+      // Pick a random activity that hasn't been used recently
+      let randomIndex: number;
+      if (usedIndices.size >= simulatedActivities.length - 2) {
+        usedIndices.clear(); // Reset when most activities have been used
+      }
+      do {
+        randomIndex = Math.floor(Math.random() * simulatedActivities.length);
+      } while (usedIndices.has(randomIndex));
+      usedIndices.add(randomIndex);
+      
+      const activity = simulatedActivities[randomIndex];
       const uniqueId = `${activity.target}-${Date.now()}`;
       
       executeAction(
@@ -415,9 +425,7 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
         activity.reason,
         75 + Math.floor(Math.random() * 20) // 75-95% confidence
       );
-      
-      activityIndex++;
-    }, 3000 + Math.random() * 3000); // Random 3-6 second interval
+    }, 12000 + Math.random() * 8000); // Random 12-20 second interval
 
     return () => {
       unsubActions();
@@ -426,10 +434,10 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
     };
   }, []);
 
-  // Deduplicate actions by creating a unique key from agent + action + target + 5-second window
+  // Deduplicate actions by creating a unique key from agent + action + target name (ignoring timestamp-based IDs)
   const deduplicatedActions = actions.reduce((acc, action) => {
-    const timeWindow = Math.floor(action.timestamp.getTime() / 5000); // 5-second window
-    const key = `${action.agentId}-${action.actionType}-${action.targetEntityId}-${timeWindow}`;
+    // Use target entity NAME not ID to prevent showing same action with different timestamps
+    const key = `${action.agentId}-${action.actionType}-${action.targetEntityName}`;
     if (!acc.seen.has(key)) {
       acc.seen.add(key);
       acc.actions.push(action);
