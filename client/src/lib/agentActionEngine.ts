@@ -102,9 +102,34 @@ let messageLog: AgentMessage[] = [];
 let breachLog: ThresholdBreach[] = [];
 let actionListeners: ((action: AgentAction) => void)[] = [];
 let messageListeners: ((message: AgentMessage) => void)[] = [];
+let recentActionKeys: Map<string, number> = new Map(); // Track recent actions to prevent duplicates
+
+const DEDUP_WINDOW_MS = 10000; // 10 second window to prevent duplicate actions
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function isDuplicateAction(agentId: AgentType, actionType: ActionType, targetEntityId: string): boolean {
+  const key = `${agentId}-${actionType}-${targetEntityId}`;
+  const lastTime = recentActionKeys.get(key);
+  const now = Date.now();
+  
+  if (lastTime && (now - lastTime) < DEDUP_WINDOW_MS) {
+    return true; // Duplicate within window
+  }
+  
+  recentActionKeys.set(key, now);
+  
+  // Clean up old entries periodically
+  if (recentActionKeys.size > 100) {
+    const cutoff = now - DEDUP_WINDOW_MS;
+    Array.from(recentActionKeys.entries()).forEach(([k, v]) => {
+      if (v < cutoff) recentActionKeys.delete(k);
+    });
+  }
+  
+  return false;
 }
 
 function cloneAction(action: AgentAction): AgentAction {
@@ -124,7 +149,12 @@ export function executeAction(
   reasoning: string,
   aiConfidence: number = 85,
   triggeredBy?: string
-): AgentAction {
+): AgentAction | null {
+  // Check for duplicate action within time window
+  if (isDuplicateAction(agentId, actionType, targetEntityId)) {
+    return null; // Skip duplicate
+  }
+  
   const action: AgentAction = {
     id: generateId(),
     agentId,

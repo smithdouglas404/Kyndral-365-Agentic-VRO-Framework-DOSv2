@@ -11,13 +11,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
-import { IndustryBenchmarksSection } from "@/components/IndustryBenchmarks";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
-import { AICommandCenter } from "@/components/AICommandCenter";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
-import { ExecutiveCommandCenter } from "@/components/ExecutiveCommandCenter";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
 import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
@@ -656,14 +653,6 @@ function DashboardContent() {
               <Brain size={16} />
               <span className="hidden sm:inline">AI Insights</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="benchmarks" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-benchmarks"
-            >
-              <TrendingUp size={16} />
-              <span className="hidden sm:inline">Benchmarks</span>
-            </TabsTrigger>
             {dataMode === "VRO" && (
               <>
                 <TabsTrigger 
@@ -753,21 +742,12 @@ function DashboardContent() {
             <KPIAttributionPanel />
           </TabsContent>
 
-          {/* AI Insights Tab - Available in both PMO and VRO modes */}
+          {/* AI Insights Tab - Simplified with key components */}
           <TabsContent value="ai-insights">
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ExecutiveCommandCenter />
-                <ActionAuditTimeline maxItems={15} />
-              </div>
-              <AICommandCenter />
+            <div className="space-y-6">
               <AIProactiveInsightsSection />
+              <ActionAuditTimeline maxItems={20} />
             </div>
-          </TabsContent>
-
-          {/* Industry Benchmarks Tab */}
-          <TabsContent value="benchmarks">
-            <IndustryBenchmarksSection />
           </TabsContent>
 
           {/* Project Lifecycle Command Center - VRO Only */}
