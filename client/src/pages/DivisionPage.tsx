@@ -25,6 +25,10 @@ export default function DivisionPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   
+  // Get the fromTab query parameter to know where to navigate back
+  const searchParams = new URLSearchParams(window.location.search);
+  const fromTab = searchParams.get('fromTab') || 'portfolios';
+  
   // Resolve legacy slugs to new IDs
   const resolvedId = legacySlugs[params.id || ''] || params.id;
   const division = divisions.find(d => d.id === resolvedId);
@@ -67,11 +71,14 @@ export default function DivisionPage() {
       <header className="bg-white shadow-sm border-b-4" style={{ borderColor: division.color }}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon" onClick={() => setLocation('/dashboard')} data-testid="button-back">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setLocation(`/dashboard?tab=${fromTab}`)} 
+              data-testid="button-back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold" style={{ color: division.color }} data-testid="text-division-name">

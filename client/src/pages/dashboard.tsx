@@ -422,6 +422,17 @@ function DashboardContent() {
   
   const { state, toggleLive, forceUpdate } = useSimulation();
 
+  // Read tab from URL query parameter on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+      // Clean up the URL
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, []);
+
   // Always redirect to VRO dashboard on initial load
   useEffect(() => {
     if (location === '/dashboard/pmo') {
@@ -460,7 +471,7 @@ function DashboardContent() {
 
   const handleDrillDown = (type: string, id: string) => {
     if (type === 'division') {
-      navigate(`/division/${id}`);
+      navigate(`/division/${id}?fromTab=${activeTab}`);
       return;
     }
     if (type === 'climate' && id === 'climate-overview') {
