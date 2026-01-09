@@ -527,7 +527,7 @@ function DashboardContent() {
                 : "Traditional project management with standard governance and oversight."}
             </p>
             {dataMode === "VRO" && (
-              <div className="mt-4">
+              <div className="mt-4 max-w-3xl">
                 <AIAlertTicker />
               </div>
             )}
