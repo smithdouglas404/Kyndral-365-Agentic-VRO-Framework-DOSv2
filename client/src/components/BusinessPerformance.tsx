@@ -9,8 +9,10 @@ import {
   globalPRTData,
   strategicTargets2028,
   climateMetrics,
-  shareholderReturns
+  shareholderReturns,
+  lgAnnualReportData
 } from "@/lib/scenarios";
+import { cn } from "@/lib/utils";
 import { 
   BarChart, 
   Bar, 
@@ -42,6 +44,85 @@ import {
 
 const LG_BLUE = "#005EB8";
 const LG_TEAL = "#00843D";
+
+function CorporateKPIs() {
+  const kpis = [
+    { 
+      label: "PRT Volume", 
+      value: lgAnnualReportData.prtVolume.actual2025,
+      unit: lgAnnualReportData.prtVolume.unit,
+      baseline: `2024: £${lgAnnualReportData.prtVolume.baseline2024}bn`,
+      target: `Target: £${lgAnnualReportData.prtVolume.target2026}bn`,
+      progress: Math.round((lgAnnualReportData.prtVolume.actual2025 / lgAnnualReportData.prtVolume.target2026) * 100),
+      color: "text-[#005EB8]",
+      source: lgAnnualReportData.prtVolume.source
+    },
+    { 
+      label: "Forecast Accuracy", 
+      value: lgAnnualReportData.forecastAccuracy.actual2025,
+      unit: lgAnnualReportData.forecastAccuracy.unit,
+      baseline: `2024: ${lgAnnualReportData.forecastAccuracy.baseline2024}%`,
+      target: `Target: ${lgAnnualReportData.forecastAccuracy.target2026}%`,
+      progress: Math.round((lgAnnualReportData.forecastAccuracy.actual2025 / lgAnnualReportData.forecastAccuracy.target2026) * 100),
+      color: "text-[#00843D]",
+      source: lgAnnualReportData.forecastAccuracy.source
+    },
+    { 
+      label: "Cost Savings", 
+      value: lgAnnualReportData.costSavings.actual2025,
+      unit: "£m",
+      baseline: `2024: £${lgAnnualReportData.costSavings.baseline2024}m`,
+      target: `Target: £${lgAnnualReportData.costSavings.target2026}m`,
+      progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100),
+      color: "text-[#00843D]",
+      source: lgAnnualReportData.costSavings.source
+    },
+    { 
+      label: "Digital Investment", 
+      value: lgAnnualReportData.digitalInvestment.actual2025,
+      unit: "£m",
+      baseline: `2024: £${lgAnnualReportData.digitalInvestment.baseline2024}m`,
+      target: `Target: £${lgAnnualReportData.digitalInvestment.target2026}m`,
+      progress: Math.round((lgAnnualReportData.digitalInvestment.actual2025 / lgAnnualReportData.digitalInvestment.target2026) * 100),
+      color: "text-[#005EB8]",
+      source: lgAnnualReportData.digitalInvestment.source
+    }
+  ];
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <Building2 className="h-4 w-4 text-gray-500" />
+        <span className="text-sm font-medium text-gray-600">Corporate KPIs (L&G Annual Report)</span>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {kpis.map((kpi, i) => (
+          <div
+            key={i}
+            className="bg-gray-50 border border-gray-200 rounded-[4px] p-4 flex flex-col"
+            data-testid={`corporate-kpi-${kpi.label.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            <span className="text-xs font-medium text-gray-500 mb-1">{kpi.label}</span>
+            <div className="flex items-baseline gap-1">
+              <span className={cn("text-2xl font-bold", kpi.color)}>{kpi.value}</span>
+              <span className="text-sm text-gray-500">{kpi.unit}</span>
+            </div>
+            <div className="mt-2">
+              <Progress value={Math.min(kpi.progress, 100)} className="h-1.5" />
+              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                <span>{kpi.baseline}</span>
+                <span>{kpi.target}</span>
+              </div>
+            </div>
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <p className="text-[10px] font-semibold text-[#005EB8]">{kpi.source}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function MetricCard({ 
   title, 
@@ -415,6 +496,8 @@ export function BusinessPerformanceSection({ mode = "VRO" }: { mode?: DataMode }
           </p>
         </div>
       )}
+
+      {mode === "VRO" && <CorporateKPIs />}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard 
