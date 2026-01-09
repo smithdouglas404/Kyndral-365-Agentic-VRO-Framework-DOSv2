@@ -27,7 +27,6 @@ const sectionNavItems: NavItem[] = [
   { id: "ai-recommendations", label: "AI Actions", icon: Sparkles, modes: "all" },
   { id: "ai-insights", label: "AI Insights", icon: Brain, modes: "all" },
   { id: "lifecycle", label: "Lifecycle", icon: Zap, modes: ["VRO"] },
-  { id: "performance", label: "Performance", icon: Target, modes: ["VRO"] },
   { id: "pipeline", label: "Pipeline", icon: GitBranch, modes: ["PMO"] },
   { id: "workspace", label: "Co-Pilot", icon: Compass, modes: ["PMO"] },
 ];
