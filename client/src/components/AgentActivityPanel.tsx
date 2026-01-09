@@ -357,26 +357,32 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
   const [detailModalItem, setDetailModalItem] = useState<ActivityItem | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  // Continuous agent activity simulation data
+  // Continuous agent activity simulation data - all 8 agents with project focus
   const simulatedActivities = [
     { agent: 'vro' as AgentType, action: 'investigate' as ActionType, target: 'PRT Volume Forecast', targetType: 'metric' as const, reason: 'Analyzing Q4 volume trends against market conditions' },
     { agent: 'pmo' as AgentType, action: 'update-status' as ActionType, target: 'Digital Transformation Sprint', targetType: 'project' as const, reason: 'Sprint velocity improved 12% - updating health indicators' },
     { agent: 'finops' as AgentType, action: 'notify' as ActionType, target: 'Cloud Cost Allocation', targetType: 'metric' as const, reason: 'Detected 8% cost optimization opportunity in compute resources' },
-    { agent: 'governance' as AgentType, action: 'approve' as ActionType, target: 'Data Retention Policy', targetType: 'task' as const, reason: 'Policy compliance verified - auto-approving renewal' },
+    { agent: 'governance' as AgentType, action: 'approve' as ActionType, target: 'Platform Migration Project', targetType: 'project' as const, reason: 'Compliance review completed - project cleared for Phase 2' },
     { agent: 'okr' as AgentType, action: 'investigate' as ActionType, target: 'Customer NPS Objective', targetType: 'okr' as const, reason: 'Key result tracking ahead of schedule - analyzing drivers' },
     { agent: 'tmo' as AgentType, action: 'accelerate' as ActionType, target: 'API Migration Wave 3', targetType: 'project' as const, reason: 'Dependency cleared - recommending fast-track to capture Q4 window' },
     { agent: 'planning' as AgentType, action: 'create-task' as ActionType, target: 'Q1 Roadmap Review', targetType: 'task' as const, reason: 'Scheduling strategic alignment sessions with division leads' },
-    { agent: 'ocm' as AgentType, action: 'notify' as ActionType, target: 'Change Readiness Score', targetType: 'metric' as const, reason: 'Training completion rate reached 85% threshold' },
+    { agent: 'ocm' as AgentType, action: 'notify' as ActionType, target: 'Longevity Platform Rollout', targetType: 'project' as const, reason: 'Change readiness assessment complete - 92% stakeholder alignment' },
     { agent: 'vro' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified £1.2M potential value at risk in delayed integrations' },
     { agent: 'pmo' as AgentType, action: 'reassign' as ActionType, target: 'Resource Optimization', targetType: 'task' as const, reason: 'Balancing workload across sprint teams' },
     { agent: 'finops' as AgentType, action: 'mitigate' as ActionType, target: 'Budget Variance', targetType: 'risk' as const, reason: 'Implementing cost controls to address 5% overspend' },
-    { agent: 'governance' as AgentType, action: 'investigate' as ActionType, target: 'Audit Finding Response', targetType: 'risk' as const, reason: 'Reviewing remediation progress for Q3 findings' },
+    { agent: 'governance' as AgentType, action: 'investigate' as ActionType, target: 'Data Privacy Compliance Project', targetType: 'project' as const, reason: 'Reviewing GDPR alignment for customer data handling' },
     { agent: 'vro' as AgentType, action: 'notify' as ActionType, target: 'ROI Achievement Update', targetType: 'metric' as const, reason: 'Portfolio ROI trending 3% above target' },
     { agent: 'tmo' as AgentType, action: 'notify' as ActionType, target: 'Milestone Completion', targetType: 'project' as const, reason: 'Phase 2 delivery completed - initiating Phase 3 prep' },
     { agent: 'pmo' as AgentType, action: 'investigate' as ActionType, target: 'Sprint Retrospective', targetType: 'project' as const, reason: 'Analyzing blockers from last iteration' },
     { agent: 'okr' as AgentType, action: 'update-status' as ActionType, target: 'Strategic Initiative KR', targetType: 'okr' as const, reason: 'Progress updated from stakeholder inputs' },
-    { agent: 'ocm' as AgentType, action: 'create-task' as ActionType, target: 'Stakeholder Engagement', targetType: 'task' as const, reason: 'Scheduling town hall for transformation update' },
+    { agent: 'ocm' as AgentType, action: 'create-task' as ActionType, target: 'Enterprise CRM Migration', targetType: 'project' as const, reason: 'Training program designed for 500+ end users' },
     { agent: 'planning' as AgentType, action: 'notify' as ActionType, target: 'Capacity Planning', targetType: 'metric' as const, reason: 'Resource availability updated for next quarter' },
+    { agent: 'governance' as AgentType, action: 'escalate' as ActionType, target: 'Risk Register Update', targetType: 'project' as const, reason: 'Critical control gap identified in vendor management' },
+    { agent: 'ocm' as AgentType, action: 'accelerate' as ActionType, target: 'Digital Workplace Initiative', targetType: 'project' as const, reason: 'Early adoption metrics exceeding targets - expanding rollout' },
+    { agent: 'governance' as AgentType, action: 'notify' as ActionType, target: 'Regulatory Reporting System', targetType: 'project' as const, reason: 'Audit trail verification complete - no exceptions found' },
+    { agent: 'ocm' as AgentType, action: 'investigate' as ActionType, target: 'User Adoption Analytics', targetType: 'project' as const, reason: 'Analyzing feature usage patterns across business units' },
+    { agent: 'governance' as AgentType, action: 'mitigate' as ActionType, target: 'Third-Party Integration Project', targetType: 'project' as const, reason: 'Implementing additional security controls for external APIs' },
+    { agent: 'ocm' as AgentType, action: 'escalate' as ActionType, target: 'Resistance Management', targetType: 'project' as const, reason: 'Flagging adoption barriers in Finance department' },
   ];
 
   useEffect(() => {
