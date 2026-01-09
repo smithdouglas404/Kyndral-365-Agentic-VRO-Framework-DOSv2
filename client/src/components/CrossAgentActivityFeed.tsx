@@ -105,15 +105,10 @@ export function CrossAgentActivityFeed({ maxItems = 10, compact = false }: Cross
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 text-blue-500" />
-            Cross-Agent Activity
-          </CardTitle>
-          <Badge variant="outline" className="bg-green-50 text-green-700">
-            Live
-          </Badge>
-        </div>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <RefreshCw className="h-5 w-5 text-blue-500" />
+          Cross-Agent Activity
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
