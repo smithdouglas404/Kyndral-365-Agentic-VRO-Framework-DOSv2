@@ -61,7 +61,7 @@ function GlobalAIOverlay() {
   const metrics = useLiveMetrics();
   
   // Check if we should show on this route
-  const isDashboardRoute = location && location.startsWith('/dashboard');
+  const isDashboardRoute = location && (location === '/dashboard' || location.startsWith('/dashboard/'));
   
   // Handle visibility change - also collapse when hiding
   const handleSetVisible = (visible: boolean) => {
