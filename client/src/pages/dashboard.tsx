@@ -543,30 +543,6 @@ function DashboardContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Agent Activity Feed */}
-            <AgentActivityPanel 
-              maxItems={10} 
-              onViewDetails={(item: ActivityItem) => {
-                if (item.targetType && item.targetId) {
-                  handleDrillDown(item.targetType, item.targetId);
-                } else {
-                  handleDrillDown('agent-activity', item.id);
-                }
-              }}
-            />
-
-            {/* PMO Guidance Section - Only in PMO Mode */}
-            {dataMode === "PMO" && (
-              <PMOGuidance onDrillDown={handleDrillDown} />
-            )}
-
-            {/* Cross-Agent Collaboration */}
-            <CrossAgentCollaboration />
-
-          </TabsContent>
-
-          {/* Portfolios Tab - Division cards and BU Programs */}
-          <TabsContent value="portfolios" className="space-y-6">
             {/* Division Cards - VRO Only */}
             {dataMode === "VRO" && (
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -628,6 +604,31 @@ function DashboardContent() {
                 </div>
               </div>
             )}
+
+            {/* Agent Activity Feed */}
+            <AgentActivityPanel 
+              maxItems={10} 
+              onViewDetails={(item: ActivityItem) => {
+                if (item.targetType && item.targetId) {
+                  handleDrillDown(item.targetType, item.targetId);
+                } else {
+                  handleDrillDown('agent-activity', item.id);
+                }
+              }}
+            />
+
+            {/* PMO Guidance Section - Only in PMO Mode */}
+            {dataMode === "PMO" && (
+              <PMOGuidance onDrillDown={handleDrillDown} />
+            )}
+
+            {/* Cross-Agent Collaboration */}
+            <CrossAgentCollaboration />
+
+          </TabsContent>
+
+          {/* Portfolios Tab - BU Programs with drill-down */}
+          <TabsContent value="portfolios">
             <BUProgramsSection dataMode={dataMode} />
           </TabsContent>
 
