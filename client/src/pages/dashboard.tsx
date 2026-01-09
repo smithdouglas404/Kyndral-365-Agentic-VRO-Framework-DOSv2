@@ -25,7 +25,6 @@ import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { AIRecommendations } from "@/components/AIRecommendations";
-import { RiskConfidenceMetrics } from "@/components/RiskConfidenceMetrics";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -730,15 +729,8 @@ function DashboardContent() {
               }}
             />
 
-            {/* AI Recommendations - Always shown first */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <AIRecommendations dataMode={dataMode} />
-              </div>
-              <div>
-                <RiskConfidenceMetrics dataMode={dataMode} />
-              </div>
-            </div>
+            {/* AI Recommendations - Full width */}
+            <AIRecommendations dataMode={dataMode} />
 
             {/* PMO Guidance Section - Only in PMO Mode */}
             {dataMode === "PMO" && (
