@@ -26,6 +26,7 @@ import {
   type TransformedSavingsOpportunity
 } from '@/lib/agentDataTransformers';
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
   return (
@@ -351,6 +352,10 @@ export default function FinOpsDashboard() {
                 <p className="text-xs text-gray-500 mt-2">2024 actual</p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-8">
+            <AIRecommendations agentType="finops" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

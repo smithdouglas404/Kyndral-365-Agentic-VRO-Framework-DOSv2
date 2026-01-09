@@ -26,6 +26,7 @@ import {
   type TransformedDeadline
 } from '@/lib/agentDataTransformers';
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
   return (
@@ -363,6 +364,10 @@ export default function PlanningDashboard() {
                 <p className="text-xs text-gray-500 mt-2">across divisions</p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-8">
+            <AIRecommendations agentType="planning" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

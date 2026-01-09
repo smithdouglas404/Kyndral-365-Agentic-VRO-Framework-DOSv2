@@ -23,6 +23,7 @@ interface Recommendation {
 }
 
 type DataMode = 'VRO' | 'PMO';
+type AgentType = 'vro' | 'pmo' | 'tmo' | 'finops' | 'governance' | 'okr' | 'planning' | 'ocm';
 
 const vroRecommendations: Recommendation[] = [
   {
@@ -110,6 +111,204 @@ const pmoRecommendations: Recommendation[] = [
   }
 ];
 
+const tmoRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Workstream Dependency Risk',
+    confidence: 92,
+    description: 'Inventory Optimization workstream is at risk due to dependency on ERP Upgrade Phase 2 which is currently blocked.',
+    actionLabel: 'View Impact',
+    type: 'risk',
+    impact: '£2.3M at risk',
+    actionType: 'mitigate'
+  },
+  {
+    id: '2',
+    title: 'WoW Mismatch Detected',
+    confidence: 85,
+    description: 'Product Innovation team context suggests Lean Kanban may be more effective than Scrum for Data Analytics stream.',
+    actionLabel: 'Analyze',
+    type: 'opportunity',
+    impact: '+23% throughput',
+    actionType: 'investigate'
+  },
+  {
+    id: '3',
+    title: 'Epic Acceleration Opportunity',
+    confidence: 88,
+    description: 'Adding 2 more developers to Demand Forecasting AI epic could reduce delivery time by 3 weeks.',
+    actionLabel: 'Apply',
+    type: 'opportunity',
+    impact: '3 weeks faster',
+    actionType: 'accelerate'
+  }
+];
+
+const finopsRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Cloud Cost Spike Detected',
+    confidence: 96,
+    description: 'AWS spending increased 42% this month. 23 unused EC2 instances detected across 3 environments.',
+    actionLabel: 'Optimize Now',
+    type: 'savings',
+    impact: '£45K/month savings',
+    actionType: 'accelerate'
+  },
+  {
+    id: '2',
+    title: 'Reserved Instance Opportunity',
+    confidence: 91,
+    description: 'Converting 15 on-demand instances to reserved could save £180K annually.',
+    actionLabel: 'Calculate Savings',
+    type: 'savings',
+    impact: '£180K annual',
+    actionType: 'investigate'
+  },
+  {
+    id: '3',
+    title: 'Budget Reallocation Needed',
+    confidence: 84,
+    description: 'Infrastructure budget 15% under-utilized while Application Development is at 120%.',
+    actionLabel: 'Rebalance',
+    type: 'opportunity',
+    impact: 'Optimize £2.1M',
+    actionType: 'accelerate'
+  }
+];
+
+const governanceRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Compliance Gap Identified',
+    confidence: 100,
+    description: '3 projects missing required security reviews before go-live date. InfoSec approval backlog is 2 weeks.',
+    actionLabel: 'Schedule Reviews',
+    type: 'risk',
+    impact: 'Go-live at risk',
+    actionType: 'escalate'
+  },
+  {
+    id: '2',
+    title: 'Policy Update Required',
+    confidence: 88,
+    description: 'Data retention policy needs update to reflect new GDPR requirements effective next quarter.',
+    actionLabel: 'Review Policy',
+    type: 'risk',
+    impact: '12 systems affected',
+    actionType: 'mitigate'
+  },
+  {
+    id: '3',
+    title: 'Audit Finding Resolution',
+    confidence: 79,
+    description: '4 open audit findings from Q3 require remediation plans. 2 are high priority.',
+    actionLabel: 'View Findings',
+    type: 'risk',
+    impact: 'Audit compliance',
+    actionType: 'investigate'
+  }
+];
+
+const okrRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Key Result At Risk',
+    confidence: 89,
+    description: 'Q1 customer satisfaction KR trending 15% below target with 4 weeks remaining. NPS at 42 vs target 55.',
+    actionLabel: 'View Actions',
+    type: 'risk',
+    impact: 'KR miss likely',
+    actionType: 'mitigate'
+  },
+  {
+    id: '2',
+    title: 'Stretch Goal Achievable',
+    confidence: 82,
+    description: 'Revenue growth KR on track to exceed target by 8% if current momentum continues.',
+    actionLabel: 'Set Stretch',
+    type: 'opportunity',
+    impact: '+£6M potential',
+    actionType: 'accelerate'
+  },
+  {
+    id: '3',
+    title: 'OKR Alignment Gap',
+    confidence: 76,
+    description: '5 team OKRs not properly cascaded from company objectives. Manual alignment review needed.',
+    actionLabel: 'Align OKRs',
+    type: 'risk',
+    impact: 'Strategy drift',
+    actionType: 'investigate'
+  }
+];
+
+const planningRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Capacity Conflict Detected',
+    confidence: 93,
+    description: 'Q2 portfolio demand exceeds available capacity by 25%. 29 FTE shortfall identified.',
+    actionLabel: 'Balance Load',
+    type: 'risk',
+    impact: '145 vs 116 FTEs',
+    actionType: 'escalate'
+  },
+  {
+    id: '2',
+    title: 'Dependency Chain Risk',
+    confidence: 87,
+    description: 'Critical path shows 6 sequential dependencies. Single delay could impact 4 downstream projects.',
+    actionLabel: 'View Chain',
+    type: 'risk',
+    impact: 'Schedule risk',
+    actionType: 'investigate'
+  },
+  {
+    id: '3',
+    title: 'Resource Optimization',
+    confidence: 81,
+    description: 'Cross-training 8 developers could reduce critical resource bottlenecks by 40%.',
+    actionLabel: 'Plan Training',
+    type: 'opportunity',
+    impact: '40% flexibility',
+    actionType: 'accelerate'
+  }
+];
+
+const ocmRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    title: 'Change Fatigue Detected',
+    confidence: 85,
+    description: 'Operations team experiencing 3 concurrent major changes. Survey scores dropped 18 points.',
+    actionLabel: 'View Impact',
+    type: 'risk',
+    impact: 'Resistance rising',
+    actionType: 'mitigate'
+  },
+  {
+    id: '2',
+    title: 'Training Gap Analysis',
+    confidence: 92,
+    description: '340 users need upskilling before Phase 2 launch. Only 45% completed required training.',
+    actionLabel: 'Schedule Training',
+    type: 'risk',
+    impact: '55% gap',
+    actionType: 'escalate'
+  },
+  {
+    id: '3',
+    title: 'Stakeholder Engagement Low',
+    confidence: 78,
+    description: 'Executive sponsorship visibility declining. 2 key sponsors missed last 3 steering committees.',
+    actionLabel: 'Engage Sponsors',
+    type: 'risk',
+    impact: 'Support at risk',
+    actionType: 'investigate'
+  }
+];
+
 const typeConfig = {
   risk: {
     icon: AlertTriangle,
@@ -139,22 +338,64 @@ const actionMessages: Record<string, { title: string; description: string }> = {
   'Schedule Review': { title: 'Review Scheduled', description: 'Cost review meeting has been added to the calendar.' },
   'View Forecast': { title: 'Forecast Loaded', description: 'PRT volume forecast analysis is now available.' },
   'Request Study': { title: 'Study Requested', description: 'Efficiency study request submitted. ETA: 6-8 weeks.' },
-  'View Risks': { title: 'Risk Register Opened', description: 'Displaying 12 pending risks for review.' }
+  'View Risks': { title: 'Risk Register Opened', description: 'Displaying 12 pending risks for review.' },
+  'View Impact': { title: 'Impact Analysis', description: 'Viewing dependency impact across workstreams.' },
+  'Analyze': { title: 'Analysis Started', description: 'Way of Working analysis in progress.' },
+  'Apply': { title: 'Recommendation Applied', description: 'Resource allocation changes queued for approval.' },
+  'Optimize Now': { title: 'Optimization Started', description: 'Cloud resource optimization in progress.' },
+  'Calculate Savings': { title: 'Savings Calculated', description: 'Reserved instance savings analysis ready.' },
+  'Rebalance': { title: 'Rebalancing', description: 'Budget reallocation proposal generated.' },
+  'Schedule Reviews': { title: 'Reviews Scheduled', description: 'Security review sessions booked.' },
+  'Review Policy': { title: 'Policy Review', description: 'Opening policy documentation for update.' },
+  'View Findings': { title: 'Audit Findings', description: 'Displaying open audit findings.' },
+  'View Actions': { title: 'Action Plan', description: 'Displaying recovery actions for at-risk KRs.' },
+  'Set Stretch': { title: 'Stretch Goal Set', description: 'Stretch target has been updated.' },
+  'Align OKRs': { title: 'OKR Alignment', description: 'Initiating OKR cascade review.' },
+  'Balance Load': { title: 'Load Balancing', description: 'Capacity planning optimization started.' },
+  'View Chain': { title: 'Dependency Chain', description: 'Critical path dependencies displayed.' },
+  'Plan Training': { title: 'Training Planned', description: 'Cross-training schedule created.' },
+  'Schedule Training': { title: 'Training Scheduled', description: 'Bootcamp sessions added to calendar.' },
+  'Engage Sponsors': { title: 'Sponsor Engagement', description: 'Executive briefing request sent.' }
+};
+
+const recommendationsByAgent: Record<AgentType, Recommendation[]> = {
+  vro: vroRecommendations,
+  pmo: pmoRecommendations,
+  tmo: tmoRecommendations,
+  finops: finopsRecommendations,
+  governance: governanceRecommendations,
+  okr: okrRecommendations,
+  planning: planningRecommendations,
+  ocm: ocmRecommendations
+};
+
+const agentLabels: Record<AgentType, string> = {
+  vro: 'VRO',
+  pmo: 'PMO',
+  tmo: 'TMO',
+  finops: 'FinOps',
+  governance: 'Governance',
+  okr: 'OKR',
+  planning: 'Planning',
+  ocm: 'OCM'
 };
 
 interface AIRecommendationsProps {
   dataMode?: DataMode;
+  agentType?: AgentType;
 }
 
-export function AIRecommendations({ dataMode = 'VRO' }: AIRecommendationsProps) {
-  const recommendations = dataMode === 'VRO' ? vroRecommendations : pmoRecommendations;
+export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendationsProps) {
+  const effectiveAgent = agentType || (dataMode === 'VRO' ? 'vro' : 'pmo');
+  const recommendations = recommendationsByAgent[effectiveAgent] || vroRecommendations;
+  const displayLabel = agentLabels[effectiveAgent];
   const { setSelectedEvent } = useSimulation();
   const { toast } = useToast();
   const [activeActions, setActiveActions] = useState<Set<string>>(new Set());
   const [completedActions, setCompletedActions] = useState<Set<string>>(new Set());
   
   const handleActionClick = (rec: Recommendation) => {
-    const actionKey = `${dataMode}-${rec.id}`;
+    const actionKey = `${effectiveAgent}-${rec.id}`;
     
     if (completedActions.has(actionKey)) return;
     
@@ -187,9 +428,9 @@ export function AIRecommendations({ dataMode = 'VRO' }: AIRecommendationsProps) 
         timestamp: new Date(),
         title: actionInfo.title,
         message: actionInfo.description,
-        detail: `Action initiated from ${dataMode} recommendation: ${rec.title}. ${rec.description}`,
+        detail: `Action initiated from ${displayLabel} recommendation: ${rec.title}. ${rec.description}`,
         confidence: rec.confidence,
-        source: dataMode === 'VRO' ? 'VRO AI Agent' : 'PMO System',
+        source: `${displayLabel} AI Agent`,
         relatedEntity: {
           type: 'program' as const,
           id: `rec-${rec.id}`,
@@ -216,8 +457,8 @@ export function AIRecommendations({ dataMode = 'VRO' }: AIRecommendationsProps) 
           <CardTitle className="text-lg flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-500" />
             AI Recommendations
-            <Badge variant={dataMode === 'VRO' ? 'default' : 'secondary'} className="text-xs ml-2">
-              {dataMode}
+            <Badge variant={effectiveAgent === 'pmo' ? 'secondary' : 'default'} className="text-xs ml-2">
+              {displayLabel}
             </Badge>
           </CardTitle>
           <Badge variant="secondary" className="text-xs">
@@ -225,10 +466,7 @@ export function AIRecommendations({ dataMode = 'VRO' }: AIRecommendationsProps) 
           </Badge>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          {dataMode === 'VRO' 
-            ? 'Proactive AI-driven insights with predictive analytics and automated interventions'
-            : 'Traditional analysis requiring manual review and escalation processes'
-          }
+          Proactive AI-driven insights with predictive analytics and automated interventions
         </p>
       </CardHeader>
       
@@ -237,13 +475,13 @@ export function AIRecommendations({ dataMode = 'VRO' }: AIRecommendationsProps) 
           {recommendations.map((rec, index) => {
             const config = typeConfig[rec.type];
             const Icon = config.icon;
-            const actionKey = `${dataMode}-${rec.id}`;
+            const actionKey = `${effectiveAgent}-${rec.id}`;
             const isActive = activeActions.has(actionKey);
             const isCompleted = completedActions.has(actionKey);
             
             return (
               <motion.div
-                key={`${dataMode}-${rec.id}`}
+                key={`${effectiveAgent}-${rec.id}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface AlertBubbleProps {
   count?: number;
-  severity?: 'critical';
+  severity?: 'critical' | 'warning';
   pulse?: boolean;
   className?: string;
   onClick?: () => void;
@@ -16,9 +16,12 @@ export function AlertBubble({
   className,
   onClick 
 }: AlertBubbleProps) {
+  const bgColor = severity === 'warning' ? 'bg-amber-500' : 'bg-red-500';
+  const pingColor = severity === 'warning' ? 'bg-amber-400' : 'bg-red-400';
+  
   const baseClasses = cn(
     "absolute -top-1 -right-1 flex items-center justify-center rounded-full text-white text-[10px] font-bold cursor-pointer z-10",
-    'bg-red-500',
+    bgColor,
     count && count > 0 ? 'min-w-[18px] h-[18px] px-1' : 'w-3 h-3',
     className
   );
@@ -37,7 +40,7 @@ export function AlertBubble({
       data-testid="alert-bubble"
     >
       {pulse && (
-        <span className="absolute inset-0 rounded-full animate-ping opacity-75 bg-red-400" />
+        <span className={cn("absolute inset-0 rounded-full animate-ping opacity-75", pingColor)} />
       )}
       {count && count > 0 && (
         <span className="relative z-10">{count > 99 ? '99+' : count}</span>

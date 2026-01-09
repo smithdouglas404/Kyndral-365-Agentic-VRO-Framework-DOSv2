@@ -27,6 +27,7 @@ import {
   type TransformedTrainingProgram
 } from '@/lib/agentDataTransformers';
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
   return (
@@ -392,6 +393,10 @@ export default function OCMDashboard() {
                 <p className="text-xs text-gray-500 mt-2">L&G employees</p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-8">
+            <AIRecommendations agentType="ocm" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

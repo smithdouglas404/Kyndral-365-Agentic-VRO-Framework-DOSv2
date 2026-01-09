@@ -26,6 +26,7 @@ import {
   type TransformedInitiative
 } from '@/lib/agentDataTransformers';
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
   return (
@@ -435,6 +436,10 @@ export default function TMODashboard() {
                 <p className="text-xs text-gray-500 mt-2">total workforce</p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-8">
+            <AIRecommendations agentType="tmo" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

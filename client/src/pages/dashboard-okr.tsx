@@ -24,6 +24,7 @@ import {
   type TransformedObjective
 } from '@/lib/agentDataTransformers';
 import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
   return (
@@ -358,6 +359,10 @@ export default function OKRDashboard() {
                 <p className="text-xs text-gray-500 mt-2">contributing</p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-8">
+            <AIRecommendations agentType="okr" />
           </div>
 
           <div className="space-y-4 mb-8">
