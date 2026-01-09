@@ -497,17 +497,26 @@ function NavBar() {
 }
 
 function DashboardContent() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
+  const [dataMode, setDataMode] = useState<DataMode>(location === '/dashboard/pmo' ? "PMO" : "VRO");
   const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
   
   const { state, toggleLive, forceUpdate } = useSimulation();
+
+  // Sync dataMode with URL when location changes
+  useEffect(() => {
+    if (location === '/dashboard/pmo' && dataMode !== 'PMO') {
+      setDataMode('PMO');
+    } else if (location === '/dashboard' && dataMode !== 'VRO') {
+      setDataMode('VRO');
+    }
+  }, [location]);
 
   const handleDrillDown = (type: string, id: string) => {
     if (type === 'division') {
