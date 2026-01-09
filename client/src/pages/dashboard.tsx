@@ -42,7 +42,6 @@ import { PMOProjectWorkspace } from "@/components/PMOProjectWorkspace";
 import { PMOKnowledgeHub } from "@/components/PMOKnowledgeHub";
 import { PMOCoPilotWorkspace } from "@/components/PMOCoPilotWorkspace";
 import { SimulationProvider } from "@/components/SimulationProvider";
-import { LiveActivityFeed } from "@/components/LiveIndicator";
 import { VROMetricsGrid } from "@/components/VROMetricCard";
 import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
@@ -647,8 +646,6 @@ function DashboardContent() {
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
 
-        {/* Live Activity Feed - Shows when simulation is running */}
-        <LiveActivityFeed />
         
         {/* VRO Stats Row - VRO ONLY shows Corporate KPIs */}
         {dataMode === "VRO" && (
