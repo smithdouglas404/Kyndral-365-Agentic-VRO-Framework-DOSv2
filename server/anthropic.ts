@@ -128,3 +128,44 @@ export async function suggestPolicyImprovements(policyCode: string): Promise<str
   
   throw new Error('Unexpected response format from Claude');
 }
+
+export async function generateLifecycleInsight(
+  metrics: { estimationAccuracy: { value: number; target: number }; costVariance: { value: number; target: number }; dependencyHealth: { value: number; target: number }; statusConfidence: { value: number; target: number }; greenProjects: number; amberProjects: number; redProjects: number; totalProjects: number },
+  funnel: { stage: string; label: string; count: number }[],
+  recentChanges: { entityName: string; field: string; oldValue: number; newValue: number; trend: string }[]
+): Promise<string> {
+  const systemPrompt = `You are the VRO (Value Realization Office) AI agent for Legal & General's Enterprise Transformation. Provide a concise, actionable insight about the project portfolio health based on the metrics provided. Be specific and executive-focused. Keep the response to 2-3 sentences maximum.`;
+
+  const dataContext = `
+Portfolio Metrics:
+- Estimation Accuracy: ${metrics.estimationAccuracy.value}% (target: ${metrics.estimationAccuracy.target}%)
+- Cost Variance: ${metrics.costVariance.value}% (target: <${metrics.costVariance.target}%)
+- Dependency Health: ${metrics.dependencyHealth.value}% (target: ${metrics.dependencyHealth.target}%)
+- Status Confidence: ${metrics.statusConfidence.value}% (target: ${metrics.statusConfidence.target}%)
+
+Project Distribution: ${metrics.greenProjects} green, ${metrics.amberProjects} amber, ${metrics.redProjects} red (${metrics.totalProjects} total)
+
+Innovation Funnel: ${funnel.map(f => `${f.label}: ${f.count}`).join(', ')}
+
+Recent Changes: ${recentChanges.slice(0, 5).map(c => `${c.entityName} ${c.field} ${c.trend === 'up' ? 'improved' : 'declined'}`).join('; ') || 'None recorded'}
+`;
+
+  const message = await anthropic.messages.create({
+    model: DEFAULT_MODEL_STR,
+    max_tokens: 256,
+    system: systemPrompt,
+    messages: [
+      {
+        role: 'user',
+        content: `Generate a brief executive insight for this portfolio state:\n${dataContext}`
+      }
+    ],
+  });
+
+  const content = message.content[0];
+  if (content.type === 'text') {
+    return content.text;
+  }
+  
+  throw new Error('Unexpected response format from Claude');
+}

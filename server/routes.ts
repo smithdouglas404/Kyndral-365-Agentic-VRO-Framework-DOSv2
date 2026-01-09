@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { parsePolicyDocument, extractPolicyMetadata } from "./anthropic";
+import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } from "./anthropic";
 import { registerCoPilotRoutes } from "./copilot";
 import { z } from "zod";
 import multer from "multer";
@@ -383,6 +383,17 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to update agent task status" });
+    }
+  });
+
+  app.post("/api/ai/lifecycle-insight", async (req, res) => {
+    try {
+      const { metrics, funnel, recentChanges } = req.body;
+      const insight = await generateLifecycleInsight(metrics, funnel, recentChanges);
+      res.json({ insight });
+    } catch (error: any) {
+      console.error("Lifecycle insight error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate insight" });
     }
   });
 
