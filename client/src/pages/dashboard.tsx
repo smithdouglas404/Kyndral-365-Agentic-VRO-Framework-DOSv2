@@ -537,15 +537,6 @@ function DashboardContent() {
           </motion.div>
           
                     
-          <div className="flex items-center gap-3">
-            {activeTab === "overview" && (
-              <Link href="/value-proposition">
-                <Button className="gap-2 bg-[#005EB8] hover:bg-[#004494] text-white shadow-sm transition-all hover:-translate-y-0.5" data-testid="button-executive-brief">
-                  Read Executive Brief <ArrowRight size={16} />
-                </Button>
-              </Link>
-            )}
-          </div>
         </div>
 
         {/* L&G Report Anchored Stats */}
