@@ -77,6 +77,10 @@ interface ActivityItem {
   priority: ActionPriority;
   status?: string;
   icon: React.ElementType;
+  targetType?: string;
+  targetId?: string;
+  metadata?: Record<string, any>;
+  toAgents?: string[];
 }
 
 function formatTime(date: Date): string {
@@ -100,6 +104,7 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [expanded, setExpanded] = useState(true);
   const [thinkingAgents, setThinkingAgents] = useState<Set<AgentType>>(new Set());
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   useEffect(() => {
     setActions(getActionLog());
@@ -139,7 +144,10 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
       description: a.reasoning,
       priority: a.priority,
       status: a.status,
-      icon: ACTION_ICONS[a.actionType] || Activity
+      icon: ACTION_ICONS[a.actionType] || Activity,
+      targetType: a.targetEntityType,
+      targetId: a.targetEntityId,
+      metadata: a.result ? { result: a.result, confidence: `${(a.aiConfidence * 100).toFixed(0)}%` } : { confidence: `${(a.aiConfidence * 100).toFixed(0)}%` }
     })),
     ...messages.map(m => ({
       id: m.id,
@@ -150,7 +158,8 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
       title: m.subject,
       description: m.content,
       priority: m.priority,
-      icon: MessageCircle
+      icon: MessageCircle,
+      toAgents: m.toAgents
     }))
   ]
     .filter(item => !filterAgent || item.agentId === filterAgent)
@@ -240,6 +249,7 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                       const AgentIcon = AGENT_ICONS[item.agentId];
                       const ItemIcon = item.icon;
                       const isThinking = thinkingAgents.has(item.agentId);
+                      const isSelected = selectedItem === item.id;
                       
                       return (
                         <motion.div
@@ -248,10 +258,12 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.05 }}
                           className={cn(
-                            "relative p-3 rounded-lg border transition-all",
+                            "relative p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md",
                             item.type === 'action' ? "bg-white border-gray-200" : "bg-blue-50 border-blue-100",
-                            isThinking && "ring-2 ring-purple-300 ring-opacity-50"
+                            isThinking && "ring-2 ring-purple-300 ring-opacity-50",
+                            isSelected && "ring-2 ring-blue-400 bg-blue-50/50"
                           )}
+                          onClick={() => setSelectedItem(isSelected ? null : item.id)}
                           data-testid={`activity-item-${item.id}`}
                         >
                           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg" 
@@ -274,14 +286,89 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                                     {item.status}
                                   </Badge>
                                 )}
+                                <ChevronDown className={cn(
+                                  "h-3 w-3 text-gray-400 ml-auto transition-transform",
+                                  isSelected && "rotate-180"
+                                )} />
                               </div>
                               
                               <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                              <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{item.description}</p>
+                              <p className={cn(
+                                "text-xs text-gray-500 mt-0.5",
+                                !isSelected && "line-clamp-2"
+                              )}>{item.description}</p>
+                              
+                              <AnimatePresence>
+                                {isSelected && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="mt-3 pt-3 border-t border-gray-200"
+                                  >
+                                    <div className="space-y-2 text-xs">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <span className="text-gray-400">Type:</span>
+                                          <span className="ml-1 font-medium capitalize">{item.type}</span>
+                                        </div>
+                                        <div>
+                                          <span className="text-gray-400">Agent:</span>
+                                          <span className="ml-1 font-medium uppercase">{item.agentId}</span>
+                                        </div>
+                                        {item.targetType && (
+                                          <div>
+                                            <span className="text-gray-400">Target:</span>
+                                            <span className="ml-1 font-medium capitalize">{item.targetType}</span>
+                                          </div>
+                                        )}
+                                        {item.targetId && (
+                                          <div>
+                                            <span className="text-gray-400">ID:</span>
+                                            <span className="ml-1 font-mono text-[10px]">{item.targetId.slice(0, 12)}...</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      
+                                      {item.toAgents && item.toAgents.length > 0 && (
+                                        <div>
+                                          <span className="text-gray-400">Sent to:</span>
+                                          <div className="flex gap-1 mt-1 flex-wrap">
+                                            {item.toAgents.map(agent => (
+                                              <Badge key={agent} variant="secondary" className="text-[10px] uppercase">
+                                                {agent}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      {item.metadata && Object.keys(item.metadata).length > 0 && (
+                                        <div>
+                                          <span className="text-gray-400 block mb-1">Details:</span>
+                                          <div className="bg-gray-100 rounded p-2 font-mono text-[10px] overflow-x-auto">
+                                            {Object.entries(item.metadata).map(([key, value]) => (
+                                              <div key={key}>
+                                                <span className="text-gray-500">{key}:</span>{' '}
+                                                <span>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      <div className="text-gray-400">
+                                        Full timestamp: {item.timestamp.toLocaleString()}
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                               
                               <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                                 <Clock className="h-3 w-3" />
                                 {formatTime(item.timestamp)}
+                                {!isSelected && <span className="ml-auto text-blue-500">Click for details</span>}
                               </div>
                             </div>
                           </div>
