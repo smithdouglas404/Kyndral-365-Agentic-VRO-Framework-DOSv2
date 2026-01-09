@@ -236,6 +236,20 @@ export function recordMemory(
     memoryStore = memoryStore.slice(0, 500);
   }
   
+  if (memoryType === 'action' && targetType && targetId && targetName) {
+    const actionType: ActionType = confidence >= 0.85 ? 'investigate' : 'notify';
+    executeAction(
+      agentId,
+      actionType,
+      targetType as 'project' | 'risk' | 'alert' | 'okr' | 'metric' | 'task',
+      targetId,
+      targetName,
+      content,
+      Math.round(confidence * 100)
+    );
+    notifyAction(agentId, actionType, targetName);
+  }
+  
   fetch('/api/agents/memory', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
