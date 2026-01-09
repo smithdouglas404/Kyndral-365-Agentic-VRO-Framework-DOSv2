@@ -451,6 +451,17 @@ function DashboardContent() {
   }, []);
   
   // Handle mode changes through sidebar clicks only (not URL)
+  const handleModeChange = (newMode: DataMode) => {
+    setDataMode(newMode);
+    // Reset to overview tab if current tab is mode-specific
+    const vroOnlyTabs = ['lifecycle', 'performance'];
+    const pmoOnlyTabs = ['pipeline', 'workspace'];
+    if (newMode === 'PMO' && vroOnlyTabs.includes(activeTab)) {
+      setActiveTab('overview');
+    } else if (newMode === 'VRO' && pmoOnlyTabs.includes(activeTab)) {
+      setActiveTab('overview');
+    }
+  };
 
   const handleDrillDown = (type: string, id: string) => {
     if (type === 'division') {
@@ -478,7 +489,7 @@ function DashboardContent() {
       <NavBar />
 
       <div className="flex">
-        <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
+        <AgentSidebar dataMode={dataMode} onModeChange={handleModeChange} />
         
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
           <PageAgentWizard 
