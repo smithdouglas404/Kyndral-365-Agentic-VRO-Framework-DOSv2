@@ -1,5 +1,3 @@
-import { challenges, pmoChallenges } from "@/lib/data";
-import { ChallengeCard } from "@/components/ChallengeCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode, Zap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -8,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Theme } from "@/lib/data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -497,11 +494,9 @@ function NavBar() {
 
 function DashboardContent() {
   const [location, navigate] = useLocation();
-  const [activeTheme, setActiveTheme] = useState<Theme | "All">("All");
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>(location === '/dashboard/pmo' ? "PMO" : "VRO");
-  const [relationshipsOpen, setRelationshipsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
@@ -534,11 +529,6 @@ function DashboardContent() {
     setDrillDownOpen(true);
   };
 
-  const filteredChallenges = activeTheme === "All" 
-    ? challenges 
-    : challenges.filter(c => c.themes.includes(activeTheme));
-
-  const themes: Theme[] = ["Automation", "Governance", "Data & Insights", "Value", "Speed"];
 
 
 
@@ -787,14 +777,6 @@ function DashboardContent() {
               <Target size={16} />
               <span className="hidden sm:inline">Performance</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="challenges" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-challenges"
-            >
-              <AlertCircle size={16} />
-              <span className="hidden sm:inline">Challenges</span>
-            </TabsTrigger>
             {dataMode === "PMO" && (
               <>
                 <TabsTrigger 
@@ -915,118 +897,6 @@ function DashboardContent() {
             <BusinessPerformanceSection mode={dataMode} />
           </TabsContent>
 
-          {/* Challenges Tab */}
-          <TabsContent value="challenges">
-        {/* Challenge Cards */}
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row justify-between items-center border-b border-border pb-4 gap-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-[32px] font-bold text-foreground">8 Client Challenges</h2>
-              <div className="hidden md:flex h-6 w-px bg-border" />
-              <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
-                <Button 
-                  variant={activeTheme === "All" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setActiveTheme("All")}
-                  className={activeTheme === "All" ? "bg-[#005EB8] text-white" : "text-muted-foreground"}
-                  data-testid="filter-all"
-                >
-                  All ({challenges.length})
-                </Button>
-                {themes.map(theme => {
-                  const count = challenges.filter(c => c.themes.includes(theme)).length;
-                  return (
-                    <Button
-                      key={theme}
-                      variant={activeTheme === theme ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setActiveTheme(theme)}
-                      className={activeTheme === theme ? "bg-[#005EB8] text-white" : "text-muted-foreground"}
-                      data-testid={`filter-${theme.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {theme} ({count})
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Dialog open={relationshipsOpen} onOpenChange={setRelationshipsOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2 bg-white rounded-[4px]" data-testid="button-relationships">
-                    <LinkIcon className="h-4 w-4" /> View Relationships
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Challenge → Scenario Relationships</DialogTitle>
-                    <DialogDescription>How the 8 client challenges map to VRO scenarios and the Design → Activate → Measure Value workflow</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    {scenarios.map((scenario) => (
-                      <div key={scenario.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-[#005EB8] flex items-center justify-center text-white">
-                            {scenario.id === "accelerate-prt" ? "⚡" : scenario.id === "digitize-operations" ? "📊" : "🛡️"}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold">{scenario.name}</h4>
-                            <p className="text-xs text-muted-foreground">{scenario.strategicFocus}</p>
-                          </div>
-                        </div>
-                        <div className="mb-3">
-                          <p className="text-xs font-medium text-muted-foreground mb-2">Addresses these challenges:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {scenario.challenges.map((challengeId) => {
-                              const challenge = challenges.find(c => c.id === challengeId);
-                              return (
-                                <Badge key={challengeId} variant="outline" className="capitalize">
-                                  {challenge?.title || challengeId.replace(/-/g, ' ')}
-                                </Badge>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="px-2 py-1 rounded bg-[#005EB8]/10 text-[#005EB8]">Design</span>
-                          <ArrowRight size={12} className="text-muted-foreground" />
-                          <span className="px-2 py-1 rounded bg-[#00843D]/10 text-[#00843D]">Activate</span>
-                          <ArrowRight size={12} className="text-muted-foreground" />
-                          <span className="px-2 py-1 rounded bg-[#FFD700]/10 text-[#B8860B]">Measure Value</span>
-                          <span className="ml-2 text-muted-foreground">→ {scenario.expectedROI}</span>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold text-sm mb-2">Workflow Integration</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Each scenario follows the VRO methodology: <strong>Design</strong> strategic interventions, 
-                        <strong> Activate</strong> through automation and process changes, then 
-                        <strong> Measure Value</strong> against L&G Annual Report 2024 benchmarks.
-                      </p>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={activeTheme}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-              {filteredChallenges.map((challenge, index) => (
-                <ChallengeCard key={challenge.id} challenge={challenge} index={index} onDrillDown={handleDrillDown} />
-              ))}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-          </TabsContent>
 
           {/* Pipeline Tab - PMO Only */}
           <TabsContent value="pipeline" className="space-y-6">
