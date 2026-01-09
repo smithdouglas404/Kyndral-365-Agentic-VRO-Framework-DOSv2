@@ -17,6 +17,7 @@ import {
   getMessageLog, 
   subscribeToActions, 
   subscribeToMessages,
+  executeAction,
   ActionType,
   ActionPriority
 } from '@/lib/agentActionEngine';
@@ -107,6 +108,28 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
   const [thinkingAgents, setThinkingAgents] = useState<Set<AgentType>>(new Set());
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
+  // Continuous agent activity simulation data
+  const simulatedActivities = [
+    { agent: 'vro' as AgentType, action: 'investigate' as ActionType, target: 'PRT Volume Forecast', targetType: 'metric' as const, reason: 'Analyzing Q4 volume trends against market conditions' },
+    { agent: 'pmo' as AgentType, action: 'update-status' as ActionType, target: 'Digital Transformation Sprint', targetType: 'project' as const, reason: 'Sprint velocity improved 12% - updating health indicators' },
+    { agent: 'finops' as AgentType, action: 'notify' as ActionType, target: 'Cloud Cost Allocation', targetType: 'metric' as const, reason: 'Detected 8% cost optimization opportunity in compute resources' },
+    { agent: 'governance' as AgentType, action: 'approve' as ActionType, target: 'Data Retention Policy', targetType: 'task' as const, reason: 'Policy compliance verified - auto-approving renewal' },
+    { agent: 'okr' as AgentType, action: 'investigate' as ActionType, target: 'Customer NPS Objective', targetType: 'okr' as const, reason: 'Key result tracking ahead of schedule - analyzing drivers' },
+    { agent: 'tmo' as AgentType, action: 'accelerate' as ActionType, target: 'API Migration Wave 3', targetType: 'project' as const, reason: 'Dependency cleared - recommending fast-track to capture Q4 window' },
+    { agent: 'planning' as AgentType, action: 'create-task' as ActionType, target: 'Q1 Roadmap Review', targetType: 'task' as const, reason: 'Scheduling strategic alignment sessions with division leads' },
+    { agent: 'ocm' as AgentType, action: 'notify' as ActionType, target: 'Change Readiness Score', targetType: 'metric' as const, reason: 'Training completion rate reached 85% threshold' },
+    { agent: 'vro' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified £1.2M potential value at risk in delayed integrations' },
+    { agent: 'pmo' as AgentType, action: 'reassign' as ActionType, target: 'Resource Optimization', targetType: 'task' as const, reason: 'Balancing workload across sprint teams' },
+    { agent: 'finops' as AgentType, action: 'mitigate' as ActionType, target: 'Budget Variance', targetType: 'risk' as const, reason: 'Implementing cost controls to address 5% overspend' },
+    { agent: 'governance' as AgentType, action: 'investigate' as ActionType, target: 'Audit Finding Response', targetType: 'risk' as const, reason: 'Reviewing remediation progress for Q3 findings' },
+    { agent: 'vro' as AgentType, action: 'notify' as ActionType, target: 'ROI Achievement Update', targetType: 'metric' as const, reason: 'Portfolio ROI trending 3% above target' },
+    { agent: 'tmo' as AgentType, action: 'notify' as ActionType, target: 'Milestone Completion', targetType: 'project' as const, reason: 'Phase 2 delivery completed - initiating Phase 3 prep' },
+    { agent: 'pmo' as AgentType, action: 'investigate' as ActionType, target: 'Sprint Retrospective', targetType: 'project' as const, reason: 'Analyzing blockers from last iteration' },
+    { agent: 'okr' as AgentType, action: 'update-status' as ActionType, target: 'Strategic Initiative KR', targetType: 'okr' as const, reason: 'Progress updated from stakeholder inputs' },
+    { agent: 'ocm' as AgentType, action: 'create-task' as ActionType, target: 'Stakeholder Engagement', targetType: 'task' as const, reason: 'Scheduling town hall for transformation update' },
+    { agent: 'planning' as AgentType, action: 'notify' as ActionType, target: 'Capacity Planning', targetType: 'metric' as const, reason: 'Resource availability updated for next quarter' },
+  ];
+
   useEffect(() => {
     setActions(getActionLog());
     setMessages(getMessageLog());
@@ -128,9 +151,29 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
       setMessages(prev => [message, ...prev].slice(0, 50));
     });
 
+    // Continuous simulation - fire a new agent action every 3-6 seconds
+    let activityIndex = 0;
+    const simulationInterval = setInterval(() => {
+      const activity = simulatedActivities[activityIndex % simulatedActivities.length];
+      const uniqueId = `${activity.target}-${Date.now()}`;
+      
+      executeAction(
+        activity.agent,
+        activity.action,
+        activity.targetType,
+        uniqueId,
+        activity.target,
+        activity.reason,
+        75 + Math.floor(Math.random() * 20) // 75-95% confidence
+      );
+      
+      activityIndex++;
+    }, 3000 + Math.random() * 3000); // Random 3-6 second interval
+
     return () => {
       unsubActions();
       unsubMessages();
+      clearInterval(simulationInterval);
     };
   }, []);
 
