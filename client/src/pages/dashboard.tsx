@@ -419,7 +419,6 @@ function NavBar() {
 function DashboardContent() {
   const [location, navigate] = useLocation();
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
-  const [exportOpen, setExportOpen] = useState(false);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
@@ -531,49 +530,15 @@ function DashboardContent() {
                 ? "AI-powered strategic transformation with real-time value realization insights."
                 : "Traditional project management with standard governance and oversight."}
             </p>
+            {dataMode === "VRO" && (
+              <div className="mt-4">
+                <AIAlertTicker />
+              </div>
+            )}
           </motion.div>
           
                     
           <div className="flex items-center gap-3">
-                        
-            <Dialog open={exportOpen} onOpenChange={setExportOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2" data-testid="button-export">
-                  <Download size={16} />
-                  Export
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[400px]">
-                <DialogHeader>
-                  <DialogTitle>Export Dashboard</DialogTitle>
-                  <DialogDescription>Download current view with L&G benchmarks</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-3 mt-4">
-                  {[
-                    { format: "PDF Executive Summary", desc: "Full report with citations" },
-                    { format: "Excel Workbook", desc: "Raw data for analysis" },
-                    { format: "PowerPoint", desc: "Presentation-ready slides" },
-                  ].map((option, i) => (
-                    <div 
-                      key={i} 
-                      className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center" 
-                      data-testid={`export-option-${i}`}
-                      onClick={() => {
-                        alert(`Exporting ${option.format}...\n\n${option.desc}\n\nYour download will begin shortly.`);
-                        setExportOpen(false);
-                      }}
-                    >
-                      <div>
-                        <span className="font-medium text-sm">{option.format}</span>
-                        <p className="text-xs text-muted-foreground">{option.desc}</p>
-                      </div>
-                      <Download size={16} className="text-muted-foreground" />
-                    </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-            
             {activeTab === "overview" && (
               <Link href="/value-proposition">
                 <Button className="gap-2 bg-[#005EB8] hover:bg-[#004494] text-white shadow-sm transition-all hover:-translate-y-0.5" data-testid="button-executive-brief">
@@ -586,12 +551,6 @@ function DashboardContent() {
 
         {/* L&G Report Anchored Stats */}
         <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
-
-
-        {/* AI Alert Ticker - Living Dashboard */}
-        <div className="mt-6">
-          <AIAlertTicker />
-        </div>
 
         {/* Quick Navigation - Division Pages, Climate, Risk - VRO ONLY */}
         {dataMode === "VRO" && (
