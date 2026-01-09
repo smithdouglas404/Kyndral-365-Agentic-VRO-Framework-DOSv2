@@ -258,12 +258,15 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.05 }}
                           className={cn(
-                            "relative p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md",
+                            "relative p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md select-none",
                             item.type === 'action' ? "bg-white border-gray-200" : "bg-blue-50 border-blue-100",
                             isThinking && "ring-2 ring-purple-300 ring-opacity-50",
                             isSelected && "ring-2 ring-blue-400 bg-blue-50/50"
                           )}
-                          onClick={() => setSelectedItem(isSelected ? null : item.id)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setSelectedItem(isSelected ? null : item.id);
+                          }}
                           data-testid={`activity-item-${item.id}`}
                         >
                           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg" 
@@ -368,15 +371,19 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                               <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                                 <Clock className="h-3 w-3" />
                                 {formatTime(item.timestamp)}
-                                <button 
-                                  className="ml-auto text-blue-500 hover:text-blue-700 hover:underline font-medium"
+                                <Button 
+                                  variant="link"
+                                  size="sm"
+                                  className="ml-auto text-blue-500 hover:text-blue-700 h-auto p-0 text-xs relative z-10"
                                   onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     setSelectedItem(isSelected ? null : item.id);
                                   }}
+                                  data-testid={`btn-view-details-${item.id}`}
                                 >
                                   {isSelected ? 'Hide details' : 'View details'}
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           </div>
