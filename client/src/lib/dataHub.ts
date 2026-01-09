@@ -105,23 +105,56 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
   const messages: CrossAgentMessage[] = [];
   const now = new Date();
   
-  // Generate some baseline messages showing agent collaboration
-  // PMO → VRO: Project impacts to value realization (key integration)
-  // VRO → PMO: Strategic priority changes affecting project execution
+  // Generate comprehensive cross-agent collaboration messages
+  // All 8 agents: VRO, PMO, TMO, FinOps, OKR, Governance, Planning, OCM
   const messageTemplates: Omit<CrossAgentMessage, 'id' | 'timestamp'>[] = [
+    // PMO ↔ VRO: Project-Value Integration
     { fromAgent: 'pmo', toAgent: 'vro', messageType: 'alert_forward', entity: 'PRT Intake System', message: 'Milestone delay impacts Strategic ROI - processing efficiency KPI down 8%', priority: 'critical' },
     { fromAgent: 'pmo', toAgent: 'vro', messageType: 'data_sync', entity: 'Cloud Migration Program', message: 'Project on track - KPI "Workloads Migrated" at 52%, contributing to OKR progress', priority: 'medium' },
-    { fromAgent: 'pmo', toAgent: 'vro', messageType: 'status_update', entity: 'API Gateway Modernization', message: 'Budget variance detected - may impact ROI calculation for Enterprise Cloud OKR', priority: 'high' },
     { fromAgent: 'vro', toAgent: 'pmo', messageType: 'recommendation', entity: 'Digital Onboarding', message: 'OKR "Digital-First Customer Experience" at 63% - accelerate project to boost KR completion', priority: 'high' },
-    { fromAgent: 'ocm', toAgent: 'vro', messageType: 'status_update', entity: 'PRT Intake System', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
-    { fromAgent: 'governance', toAgent: 'pmo', messageType: 'alert_forward', entity: 'Private Markets Platform', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
-    { fromAgent: 'finops', toAgent: 'vro', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - £2.1m under forecast', priority: 'low' },
+    { fromAgent: 'vro', toAgent: 'pmo', messageType: 'action_request', entity: 'API Modernization', message: 'Strategic priority shift - reallocate resources to high-ROI initiatives', priority: 'high' },
+    
+    // TMO ↔ OCM: Transformation-Change Integration
+    { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'action_request', entity: 'Digital Workplace', message: 'Phase 2 launch imminent - stakeholder readiness assessment needed', priority: 'high' },
+    { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'data_sync', entity: 'Process Automation', message: 'Adoption rate at 67% - below 80% target, intervention recommended', priority: 'critical' },
+    { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'status_update', entity: 'Digital Workplace', message: 'Training completion at 85% - readiness score improved to 78%', priority: 'medium' },
+    { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'alert_forward', entity: 'CRM Migration', message: 'Stakeholder resistance detected in Sales division - change plan adjustment needed', priority: 'high' },
+    
+    // FinOps ↔ VRO: Financial-Value Integration
+    { fromAgent: 'finops', toAgent: 'vro', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - £2.1m under forecast, ROI improving', priority: 'low' },
+    { fromAgent: 'finops', toAgent: 'vro', messageType: 'alert_forward', entity: 'Cloud Infrastructure', message: 'Cost overrun detected - £450k above baseline, value at risk', priority: 'critical' },
+    { fromAgent: 'vro', toAgent: 'finops', messageType: 'recommendation', entity: 'Portfolio Optimization', message: 'Low-ROI projects identified - recommend cost reallocation to high-value initiatives', priority: 'high' },
+    { fromAgent: 'finops', toAgent: 'planning', messageType: 'data_sync', entity: 'Q4 Budget', message: 'Forecast updated - £3.2m available for new initiatives', priority: 'medium' },
+    
+    // OKR ↔ Multiple Agents: Strategy Alignment
     { fromAgent: 'okr', toAgent: 'vro', messageType: 'data_sync', entity: 'OKR-001', message: 'Key Result "Reduce deal cycle time" progress calculated at 68% from project KPIs', priority: 'medium' },
     { fromAgent: 'okr', toAgent: 'tmo', messageType: 'recommendation', entity: 'Digital Transformation', message: 'OKR alignment at 94% - recommend accelerating Q4 objectives', priority: 'medium' },
-    { fromAgent: 'planning', toAgent: 'pmo', messageType: 'action_request', entity: 'Resource Pool', message: 'Capacity constraint detected for Q3 - reallocation needed', priority: 'high' },
+    { fromAgent: 'okr', toAgent: 'governance', messageType: 'alert_forward', entity: 'Compliance OKR', message: 'Regulatory readiness KR at 45% - escalation threshold breached', priority: 'critical' },
+    { fromAgent: 'vro', toAgent: 'okr', messageType: 'data_sync', entity: 'Strategic ROI', message: 'Value realization feeding OKR progress - 5 Key Results updated', priority: 'medium' },
+    
+    // Governance ↔ Multiple Agents: Risk & Compliance
+    { fromAgent: 'governance', toAgent: 'pmo', messageType: 'alert_forward', entity: 'Private Markets Platform', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
+    { fromAgent: 'governance', toAgent: 'vro', messageType: 'action_request', entity: 'Risk Assessment', message: 'High-value program requires governance review - £25m threshold exceeded', priority: 'high' },
+    { fromAgent: 'governance', toAgent: 'finops', messageType: 'recommendation', entity: 'Audit Findings', message: 'Cost allocation audit complete - 3 remediation items identified', priority: 'medium' },
     { fromAgent: 'vro', toAgent: 'governance', messageType: 'data_sync', entity: 'Longevity Risk Intelligence', message: 'Value realization at £15m - governance review triggered', priority: 'medium' },
+    { fromAgent: 'pmo', toAgent: 'governance', messageType: 'status_update', entity: 'Regulatory Project', message: 'Milestone achieved - ready for compliance validation', priority: 'medium' },
+    
+    // Planning ↔ Multiple Agents: Capacity & Resources
+    { fromAgent: 'planning', toAgent: 'pmo', messageType: 'action_request', entity: 'Resource Pool', message: 'Capacity constraint detected for Q3 - reallocation needed', priority: 'high' },
+    { fromAgent: 'planning', toAgent: 'tmo', messageType: 'recommendation', entity: 'Transformation Roadmap', message: 'Scenario analysis complete - Option B shows 23% better outcomes', priority: 'medium' },
+    { fromAgent: 'planning', toAgent: 'finops', messageType: 'data_sync', entity: 'Capacity Forecast', message: 'Resource demand projection updated - 15% increase expected Q4', priority: 'medium' },
+    { fromAgent: 'pmo', toAgent: 'planning', messageType: 'status_update', entity: 'Resource Utilization', message: 'Current utilization at 87% - approaching capacity threshold', priority: 'high' },
+    { fromAgent: 'tmo', toAgent: 'planning', messageType: 'action_request', entity: 'Initiative Pipeline', message: 'New transformation wave requires capacity assessment', priority: 'medium' },
+    
+    // OCM ↔ Multiple Agents: Change Readiness
+    { fromAgent: 'ocm', toAgent: 'vro', messageType: 'status_update', entity: 'PRT Intake System', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
+    { fromAgent: 'ocm', toAgent: 'governance', messageType: 'alert_forward', entity: 'Change Impact', message: 'High-impact change requires stakeholder sign-off - 500+ users affected', priority: 'high' },
     { fromAgent: 'pmo', toAgent: 'ocm', messageType: 'status_update', entity: 'Digital Onboarding', message: 'UAT phase starting - change communication required', priority: 'medium' },
-    { fromAgent: 'tmo', toAgent: 'finops', messageType: 'recommendation', entity: 'ESG Analytics', message: 'Transformation benefits exceeding forecast by 18%', priority: 'low' }
+    { fromAgent: 'governance', toAgent: 'ocm', messageType: 'action_request', entity: 'Policy Update', message: 'New compliance policy requires organization-wide communication plan', priority: 'high' },
+    
+    // TMO ↔ FinOps/Governance: Benefits & Compliance
+    { fromAgent: 'tmo', toAgent: 'finops', messageType: 'recommendation', entity: 'ESG Analytics', message: 'Transformation benefits exceeding forecast by 18%', priority: 'low' },
+    { fromAgent: 'tmo', toAgent: 'governance', messageType: 'data_sync', entity: 'Transformation Program', message: 'Major milestone achieved - governance checkpoint required', priority: 'medium' }
   ];
   
   messageTemplates.forEach((template, index) => {
