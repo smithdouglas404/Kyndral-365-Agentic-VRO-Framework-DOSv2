@@ -134,8 +134,19 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
     };
   }, []);
 
+  // Deduplicate actions by creating a unique key from agent + action + target + 5-second window
+  const deduplicatedActions = actions.reduce((acc, action) => {
+    const timeWindow = Math.floor(action.timestamp.getTime() / 5000); // 5-second window
+    const key = `${action.agentId}-${action.actionType}-${action.targetEntityId}-${timeWindow}`;
+    if (!acc.seen.has(key)) {
+      acc.seen.add(key);
+      acc.actions.push(action);
+    }
+    return acc;
+  }, { seen: new Set<string>(), actions: [] as typeof actions }).actions;
+
   const activityItems: ActivityItem[] = [
-    ...actions.map(a => ({
+    ...deduplicatedActions.map(a => ({
       id: a.id,
       type: 'action' as const,
       timestamp: a.timestamp,
