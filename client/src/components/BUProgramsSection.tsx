@@ -207,7 +207,7 @@ function ProjectDetailModal({
                         <div key={i}>
                           <div className="flex justify-between text-sm mb-1">
                             <span>{outcome.outcome}</span>
-                            <span className="font-medium">{outcome.progress} / {outcome.target} {outcome.unit}</span>
+                            <span className="font-medium">{outcome.progress.toLocaleString()} / {outcome.target.toLocaleString()} {outcome.unit}</span>
                           </div>
                           <Progress value={(outcome.progress / outcome.target) * 100} className="h-2" />
                         </div>
