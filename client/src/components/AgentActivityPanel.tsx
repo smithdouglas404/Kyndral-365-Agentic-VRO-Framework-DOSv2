@@ -368,7 +368,15 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                               <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                                 <Clock className="h-3 w-3" />
                                 {formatTime(item.timestamp)}
-                                {!isSelected && <span className="ml-auto text-blue-500">Click for details</span>}
+                                <button 
+                                  className="ml-auto text-blue-500 hover:text-blue-700 hover:underline font-medium"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedItem(isSelected ? null : item.id);
+                                  }}
+                                >
+                                  {isSelected ? 'Hide details' : 'View details'}
+                                </button>
                               </div>
                             </div>
                           </div>
