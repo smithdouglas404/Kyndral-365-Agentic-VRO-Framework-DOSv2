@@ -484,7 +484,7 @@ function DashboardContent() {
       <NavBar />
 
       <div className="flex">
-        <AgentSidebar dataMode={dataMode} onModeChange={handleModeChange} />
+        <AgentSidebar dataMode={dataMode} onModeChange={handleModeChange} activeTab={activeTab} onTabChange={setActiveTab} />
         
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
           <PageAgentWizard 
@@ -602,107 +602,8 @@ function DashboardContent() {
         )}
 
 
-        {/* Tab Navigation */}
+        {/* Tab Content - Navigation handled by sidebar */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="flex flex-wrap gap-1 h-auto bg-muted/50 p-1 rounded-lg mb-8">
-            <TabsTrigger 
-              value="overview" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-overview"
-            >
-              <BarChart3 size={16} />
-              <span className="hidden sm:inline">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="portfolios" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-portfolios"
-            >
-              <Building2 size={16} />
-              <span className="hidden sm:inline">Portfolios</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="business-cases" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-business-cases"
-            >
-              <Briefcase size={16} />
-              <span className="hidden sm:inline">Business Cases</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="early-warning" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-early-warning"
-            >
-              <AlertOctagon size={16} />
-              <span className="hidden sm:inline">Early Warning</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="kpi-tracking" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-kpi-tracking"
-            >
-              <PieChart size={16} />
-              <span className="hidden sm:inline">KPIs</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="ai-recommendations" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-ai-recommendations"
-            >
-              <Sparkles size={16} />
-              <span className="hidden sm:inline">AI Actions</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="ai-insights" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-ai-insights"
-            >
-              <Brain size={16} />
-              <span className="hidden sm:inline">AI Insights</span>
-            </TabsTrigger>
-            {dataMode === "VRO" && (
-              <>
-                <TabsTrigger 
-                  value="lifecycle" 
-                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                  data-testid="tab-lifecycle"
-                >
-                  <Zap size={16} />
-                  <span className="hidden sm:inline">Lifecycle</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="performance" 
-                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                  data-testid="tab-performance"
-                >
-                  <Target size={16} />
-                  <span className="hidden sm:inline">Performance</span>
-                </TabsTrigger>
-              </>
-            )}
-            {dataMode === "PMO" && (
-              <>
-                <TabsTrigger 
-                  value="pipeline" 
-                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                  data-testid="tab-pipeline"
-                >
-                  <GitBranch size={16} />
-                  <span className="hidden sm:inline">Pipeline</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="workspace" 
-                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                  data-testid="tab-workspace"
-                >
-                  <Compass size={16} />
-                  <span className="hidden sm:inline">Co-Pilot</span>
-                </TabsTrigger>
-              </>
-            )}
-          </TabsList>
-
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
             {/* Agent Activity Feed */}

@@ -1,13 +1,36 @@
 import { Link, useLocation } from 'wouter';
 import { 
   DollarSign, GitBranch, Repeat, Calculator, Target, 
-  Shield, Calendar, Users, Sparkles, ChevronRight, FileCode, AlertCircle
+  Shield, Calendar, Users, Sparkles, ChevronRight, FileCode, AlertCircle,
+  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Brain, Zap, Compass
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
+import { Switch } from '@/components/ui/switch';
 
 type DataMode = "VRO" | "PMO";
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  modes: ("VRO" | "PMO")[] | "all";
+}
+
+const sectionNavItems: NavItem[] = [
+  { id: "overview", label: "Overview", icon: BarChart3, modes: "all" },
+  { id: "portfolios", label: "Portfolios", icon: Building2, modes: "all" },
+  { id: "business-cases", label: "Business Cases", icon: Briefcase, modes: "all" },
+  { id: "early-warning", label: "Early Warning", icon: AlertOctagon, modes: "all" },
+  { id: "kpi-tracking", label: "KPIs", icon: PieChart, modes: "all" },
+  { id: "ai-recommendations", label: "AI Actions", icon: Sparkles, modes: "all" },
+  { id: "ai-insights", label: "AI Insights", icon: Brain, modes: "all" },
+  { id: "lifecycle", label: "Lifecycle", icon: Zap, modes: ["VRO"] },
+  { id: "performance", label: "Performance", icon: Target, modes: ["VRO"] },
+  { id: "pipeline", label: "Pipeline", icon: GitBranch, modes: ["PMO"] },
+  { id: "workspace", label: "Co-Pilot", icon: Compass, modes: ["PMO"] },
+];
 
 interface Agent {
   id: AgentType | 'policy';
@@ -97,12 +120,20 @@ const agents: Agent[] = [
 interface AgentSidebarProps {
   dataMode: DataMode;
   onModeChange: (mode: DataMode) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   collapsed?: boolean;
 }
 
-export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: AgentSidebarProps) {
+export function AgentSidebar({ dataMode, onModeChange, activeTab, onTabChange, collapsed = false }: AgentSidebarProps) {
   const [location] = useLocation();
   const agentSummary = useAllAgentsSummary();
+
+  const filteredSectionItems = sectionNavItems.filter(item => 
+    item.modes === "all" || item.modes.includes(dataMode)
+  );
+  const coreItems = filteredSectionItems.filter(item => item.modes === "all");
+  const modeSpecificItems = filteredSectionItems.filter(item => item.modes !== "all");
 
   const isActive = (href: string) => {
     if (href === '/dashboard' && location === '/dashboard') return true;
@@ -119,16 +150,91 @@ export function AgentSidebar({ dataMode, onModeChange, collapsed = false }: Agen
   return (
     <aside className={cn(
       "bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-64px)] sticky top-16 transition-all",
-      collapsed ? "w-16" : "w-56"
+      collapsed ? "w-16" : "w-64"
     )}>
-      <div className="p-3 border-b border-gray-100">
-        <div className="flex items-center gap-2 px-2 py-1">
-          <Sparkles className="h-4 w-4 text-purple-500" />
-          {!collapsed && <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AI Agents</span>}
+      {!collapsed && (
+        <div className="p-3 border-b border-gray-100">
+          <div className="flex items-center justify-center gap-3 p-2 bg-slate-50 rounded-lg">
+            <span className={cn(
+              "text-sm font-semibold transition-colors",
+              dataMode === "VRO" ? "text-teal-600" : "text-slate-400"
+            )}>
+              VRO
+            </span>
+            <Switch
+              checked={dataMode === "PMO"}
+              onCheckedChange={(checked) => onModeChange(checked ? "PMO" : "VRO")}
+              className="data-[state=checked]:bg-purple-600 data-[state=unchecked]:bg-teal-600"
+              data-testid="switch-mode-toggle"
+            />
+            <span className={cn(
+              "text-sm font-semibold transition-colors",
+              dataMode === "PMO" ? "text-purple-600" : "text-slate-400"
+            )}>
+              PMO
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <nav className="flex-1 overflow-y-auto py-2">
+        {!collapsed && (
+          <div className="px-3 mb-1">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Sections</span>
+          </div>
+        )}
+        {coreItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={cn(
+                "mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer transition-all w-[calc(100%-16px)] text-left flex items-center gap-3",
+                activeTab === item.id 
+                  ? "bg-[#005EB8] text-white" 
+                  : "hover:bg-gray-100 text-gray-700"
+              )}
+              data-testid={`nav-${item.id}`}
+            >
+              <Icon className={cn("h-4 w-4", activeTab === item.id ? "text-white" : "text-gray-500")} />
+              {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+            </button>
+          );
+        })}
+
+        {modeSpecificItems.length > 0 && !collapsed && (
+          <div className="px-3 mt-4 mb-1">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {dataMode === "VRO" ? "VRO Tools" : "PMO Tools"}
+            </span>
+          </div>
+        )}
+        {modeSpecificItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={cn(
+                "mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer transition-all w-[calc(100%-16px)] text-left flex items-center gap-3",
+                activeTab === item.id 
+                  ? dataMode === "VRO" ? "bg-teal-600 text-white" : "bg-purple-600 text-white"
+                  : "hover:bg-gray-100 text-gray-700"
+              )}
+              data-testid={`nav-${item.id}`}
+            >
+              <Icon className={cn("h-4 w-4", activeTab === item.id ? "text-white" : "text-gray-500")} />
+              {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+            </button>
+          );
+        })}
+
+        {!collapsed && (
+          <div className="px-3 mt-4 mb-1">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AI Agents</span>
+          </div>
+        )}
         {agents.map((agent) => {
           const Icon = agent.icon;
           const active = isActive(agent.href);
