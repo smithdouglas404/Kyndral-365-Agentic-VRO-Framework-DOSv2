@@ -135,12 +135,12 @@ export const pmoProjects: PMOProject[] = [
       velocity: 52,
       predictability: 91,
       flowEfficiency: 78,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.1",
       epicId: "EPIC-IR-102",
       epicName: "Actuarial Model Modernization",
       epicProgress: 85,
       okr: { objective: "Improve mortality prediction accuracy", keyResult: "Achieve 95% model accuracy", progress: 82 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 82 }, { pi: "PI 24.2", velocity: 48, predictability: 85 }, { pi: "PI 24.3", velocity: 50, predictability: 88 }, { pi: "PI 24.4", velocity: 52, predictability: 91 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 82 }, { pi: "PI 24.2", velocity: 48, predictability: 85 }, { pi: "PI 24.3", velocity: 50, predictability: 88 }, { pi: "PI 25.1", velocity: 52, predictability: 91 }]
     },
     safeStage: "implementing",
     aiSignals: [
@@ -201,12 +201,12 @@ export const pmoProjects: PMOProject[] = [
       velocity: 55,
       predictability: 88,
       flowEfficiency: 75,
-      currentPI: "PI 24.4",
+      currentPI: "PI 24.3",
       epicId: "EPIC-AM-202",
       epicName: "ESG Data & Reporting",
       epicProgress: 62,
       okr: { objective: "Achieve industry-leading ESG analytics", keyResult: "Cover 100% of portfolio holdings", progress: 58 },
-      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 80 }, { pi: "PI 24.2", velocity: 50, predictability: 82 }, { pi: "PI 24.3", velocity: 52, predictability: 85 }, { pi: "PI 24.4", velocity: 55, predictability: 88 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 80 }, { pi: "PI 24.2", velocity: 50, predictability: 82 }, { pi: "PI 24.3", velocity: 52, predictability: 85 }, { pi: "PI 24.3", velocity: 55, predictability: 88 }]
     },
     safeStage: "portfolio-backlog",
     aiSignals: [
@@ -331,12 +331,12 @@ export const pmoProjects: PMOProject[] = [
       velocity: 42,
       predictability: 75,
       flowEfficiency: 62,
-      currentPI: "PI 24.4",
+      currentPI: "PI 24.3",
       epicId: "EPIC-RC-501",
       epicName: "Enterprise Risk Framework",
       epicProgress: 58,
       okr: { objective: "Zero regulatory breaches", keyResult: "100% risk appetite coverage", progress: 72 },
-      piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.4", velocity: 42, predictability: 75 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.3", velocity: 42, predictability: 75 }]
     },
     safeStage: "reviewing",
     aiSignals: [
@@ -363,12 +363,12 @@ export const pmoProjects: PMOProject[] = [
       velocity: 52,
       predictability: 85,
       flowEfficiency: 72,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.1",
       epicId: "EPIC-RC-502",
       epicName: "GRC Automation Platform",
       epicProgress: 65,
       okr: { objective: "Complete operational resilience framework", keyResult: "Automate 80% of controls", progress: 58 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 82 }, { pi: "PI 24.4", velocity: 52, predictability: 85 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 82 }, { pi: "PI 25.1", velocity: 52, predictability: 85 }]
     },
     safeStage: "funnel",
     aiSignals: [
@@ -410,12 +410,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 58,
       predictability: 92,
       flowEfficiency: 78,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.2",
       epicId: "EPIC-VRO-IR-01",
       epicName: "AI Deal Intelligence",
       epicProgress: 72,
       okr: { objective: "Reduce PRT deal cycle by 40%", keyResult: "18-day to 5-day reduction", progress: 68 },
-      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 85 }, { pi: "PI 24.2", velocity: 52, predictability: 88 }, { pi: "PI 24.3", velocity: 55, predictability: 90 }, { pi: "PI 24.4", velocity: 58, predictability: 92 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 85 }, { pi: "PI 24.2", velocity: 52, predictability: 88 }, { pi: "PI 24.3", velocity: 55, predictability: 90 }, { pi: "PI 25.2", velocity: 58, predictability: 92 }]
     },
     aiSignals: [
       { type: "opportunity", message: "3 deals showing pricing anomalies - £12m reserve gap preventable", confidence: 92, dataSource: "ML pricing model" },
@@ -449,12 +449,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 52,
       predictability: 88,
       flowEfficiency: 72,
-      currentPI: "PI 24.4",
+      currentPI: "PI 24.3",
       epicId: "EPIC-VRO-IR-02",
       epicName: "Longevity AI Platform",
       epicProgress: 65,
       okr: { objective: "Achieve 99% reserve accuracy", keyResult: "Track 847 cohorts in real-time", progress: 75 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 83 }, { pi: "PI 24.3", velocity: 50, predictability: 85 }, { pi: "PI 24.4", velocity: 52, predictability: 88 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 83 }, { pi: "PI 24.3", velocity: 50, predictability: 85 }, { pi: "PI 24.3", velocity: 52, predictability: 88 }]
     },
     aiSignals: [
       { type: "insight", message: "Mortality 1.2% favorable - potential reserve release", confidence: 89, dataSource: "Actuarial AI" },
@@ -490,12 +490,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 55,
       predictability: 85,
       flowEfficiency: 72,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.1",
       epicId: "EPIC-VRO-AM-01",
       epicName: "Private Markets Expansion",
       epicProgress: 58,
       okr: { objective: "Grow Private Markets AUM to £85bn", keyResult: "Launch 3 new fund products", progress: 62 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 52, predictability: 82 }, { pi: "PI 24.4", velocity: 55, predictability: 85 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 52, predictability: 82 }, { pi: "PI 25.1", velocity: 55, predictability: 85 }]
     },
     aiSignals: [
       { type: "opportunity", message: "ESG demand up 340% - accelerate clean power fund launch", confidence: 94, dataSource: "Investor sentiment AI" },
@@ -529,12 +529,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 48,
       predictability: 88,
       flowEfficiency: 75,
-      currentPI: "PI 24.4",
+      currentPI: "PI 24.3",
       epicId: "EPIC-VRO-AM-02",
       epicName: "ESG Stewardship Excellence",
       epicProgress: 72,
       okr: { objective: "Achieve industry-leading ESG positioning", keyResult: "Complete 1000 climate engagements", progress: 85 },
-      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 82 }, { pi: "PI 24.2", velocity: 44, predictability: 84 }, { pi: "PI 24.3", velocity: 46, predictability: 86 }, { pi: "PI 24.4", velocity: 48, predictability: 88 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 82 }, { pi: "PI 24.2", velocity: 44, predictability: 84 }, { pi: "PI 24.3", velocity: 46, predictability: 86 }, { pi: "PI 24.3", velocity: 48, predictability: 88 }]
     },
     aiSignals: [
       { type: "insight", message: "78% positive reception on engagements - momentum building", confidence: 91, dataSource: "Sentiment analysis" },
@@ -570,12 +570,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 58,
       predictability: 90,
       flowEfficiency: 78,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.2",
       epicId: "EPIC-VRO-RT-01",
       epicName: "Digital-First Customer Journey",
       epicProgress: 68,
       okr: { objective: "Achieve 85% digital adoption", keyResult: "Reach NPS score of 55", progress: 72 },
-      piTrend: [{ pi: "PI 24.1", velocity: 50, predictability: 82 }, { pi: "PI 24.2", velocity: 52, predictability: 85 }, { pi: "PI 24.3", velocity: 55, predictability: 88 }, { pi: "PI 24.4", velocity: 58, predictability: 90 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 50, predictability: 82 }, { pi: "PI 24.2", velocity: 52, predictability: 85 }, { pi: "PI 24.3", velocity: 55, predictability: 88 }, { pi: "PI 25.2", velocity: 58, predictability: 90 }]
     },
     aiSignals: [
       { type: "insight", message: "Voice analysis: call queue frustration detected - chatbot expansion would help", confidence: 88, dataSource: "Voice analytics AI" },
@@ -609,12 +609,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 52,
       predictability: 86,
       flowEfficiency: 72,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.1",
       epicId: "EPIC-VRO-RT-02",
       epicName: "Workplace Pensions Scale-up",
       epicProgress: 58,
       okr: { objective: "Reach 5.6m DC members", keyResult: "Achieve 12% AUM growth", progress: 65 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 82 }, { pi: "PI 24.3", velocity: 50, predictability: 84 }, { pi: "PI 24.4", velocity: 52, predictability: 86 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 82 }, { pi: "PI 24.3", velocity: 50, predictability: 84 }, { pi: "PI 25.1", velocity: 52, predictability: 86 }]
     },
     aiSignals: [
       { type: "opportunity", message: "5 large DC schemes in acquisition pipeline - act now", confidence: 79, dataSource: "Market intelligence" },
@@ -650,12 +650,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 48,
       predictability: 92,
       flowEfficiency: 78,
-      currentPI: "PI 24.4",
+      currentPI: "PI 24.3",
       epicId: "EPIC-VRO-CI-01",
       epicName: "Net Zero Property Portfolio",
       epicProgress: 75,
       okr: { objective: "100% gas-free new homes", keyResult: "Complete 4500 homes by 2025", progress: 68 },
-      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 85 }, { pi: "PI 24.2", velocity: 44, predictability: 88 }, { pi: "PI 24.3", velocity: 46, predictability: 90 }, { pi: "PI 24.4", velocity: 48, predictability: 92 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 85 }, { pi: "PI 24.2", velocity: 44, predictability: 88 }, { pi: "PI 24.3", velocity: 46, predictability: 90 }, { pi: "PI 24.3", velocity: 48, predictability: 92 }]
     },
     aiSignals: [
       { type: "insight", message: "Millfield Green: 40% energy savings - scale model proven", confidence: 95, dataSource: "IoT monitoring" },
@@ -691,12 +691,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 45,
       predictability: 85,
       flowEfficiency: 68,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.2",
       epicId: "EPIC-VRO-RC-01",
       epicName: "AI-Powered Risk Intelligence",
       epicProgress: 62,
       okr: { objective: "Achieve 95% early warning accuracy", keyResult: "Reduce risk incidents to 3/quarter", progress: 55 },
-      piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 78 }, { pi: "PI 24.2", velocity: 40, predictability: 80 }, { pi: "PI 24.3", velocity: 42, predictability: 82 }, { pi: "PI 24.4", velocity: 45, predictability: 85 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 78 }, { pi: "PI 24.2", velocity: 40, predictability: 80 }, { pi: "PI 24.3", velocity: 42, predictability: 82 }, { pi: "PI 25.2", velocity: 45, predictability: 85 }]
     },
     aiSignals: [
       { type: "warning", message: "BBB cohort showing 0.3% deterioration - act before downgrades", confidence: 91, dataSource: "Credit AI" },
@@ -730,12 +730,12 @@ export const vroPrograms: VROProgram[] = [
       velocity: 42,
       predictability: 82,
       flowEfficiency: 70,
-      currentPI: "PI 24.4",
+      currentPI: "PI 25.1",
       epicId: "EPIC-VRO-RC-02",
       epicName: "Climate Risk Framework",
       epicProgress: 55,
       okr: { objective: "Achieve 1.5°C portfolio alignment", keyResult: "100% TNFD readiness", progress: 48 },
-      piTrend: [{ pi: "PI 24.1", velocity: 35, predictability: 75 }, { pi: "PI 24.2", velocity: 38, predictability: 78 }, { pi: "PI 24.3", velocity: 40, predictability: 80 }, { pi: "PI 24.4", velocity: 42, predictability: 82 }]
+      piTrend: [{ pi: "PI 24.1", velocity: 35, predictability: 75 }, { pi: "PI 24.2", velocity: 38, predictability: 78 }, { pi: "PI 24.3", velocity: 40, predictability: 80 }, { pi: "PI 25.1", velocity: 42, predictability: 82 }]
     },
     aiSignals: [
       { type: "insight", message: "1.5°C pathway achievable with £2.1bn reallocation", confidence: 88, dataSource: "Climate model" },
