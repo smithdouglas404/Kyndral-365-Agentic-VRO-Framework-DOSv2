@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, HelpCircle, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, HelpCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,15 +19,15 @@ interface CoPilotInsights {
   questions: string[];
 }
 
-const agentPersonalities: Record<AgentType, { name: string; style: string; focus: string }> = {
-  vro: { name: 'VRO Agent', style: 'strategic', focus: 'value realization and ROI optimization' },
-  pmo: { name: 'PMO Agent', style: 'operational', focus: 'project delivery and timeline management' },
-  tmo: { name: 'TMO Agent', style: 'transformational', focus: 'change adoption and initiative success' },
-  finops: { name: 'FinOps Agent', style: 'analytical', focus: 'cost optimization and financial efficiency' },
-  okr: { name: 'OKR Agent', style: 'strategic', focus: 'objective alignment and key results tracking' },
-  governance: { name: 'Governance Agent', style: 'risk-aware', focus: 'compliance and risk mitigation' },
-  planning: { name: 'Planning Agent', style: 'forward-looking', focus: 'capacity planning and roadmap management' },
-  ocm: { name: 'OCM Agent', style: 'people-focused', focus: 'stakeholder readiness and change adoption' }
+const agentPersonalities: Record<AgentType, { name: string; style: string; focus: string; color: string }> = {
+  vro: { name: 'VRO Agent', style: 'strategic', focus: 'value realization and ROI optimization', color: 'bg-green-500' },
+  pmo: { name: 'PMO Agent', style: 'operational', focus: 'project delivery and timeline management', color: 'bg-purple-500' },
+  tmo: { name: 'TMO Agent', style: 'transformational', focus: 'change adoption and initiative success', color: 'bg-blue-500' },
+  finops: { name: 'FinOps Agent', style: 'analytical', focus: 'cost optimization and financial efficiency', color: 'bg-amber-500' },
+  okr: { name: 'OKR Agent', style: 'strategic', focus: 'objective alignment and key results tracking', color: 'bg-orange-500' },
+  governance: { name: 'Governance Agent', style: 'risk-aware', focus: 'compliance and risk mitigation', color: 'bg-red-500' },
+  planning: { name: 'Planning Agent', style: 'forward-looking', focus: 'capacity planning and roadmap management', color: 'bg-teal-500' },
+  ocm: { name: 'OCM Agent', style: 'people-focused', focus: 'stakeholder readiness and change adoption', color: 'bg-pink-500' }
 };
 
 function generateFallbackInsights(drilldown: EntityDrilldown, agentId: AgentType): CoPilotInsights {
@@ -81,14 +81,24 @@ function generateFallbackInsights(drilldown: EntityDrilldown, agentId: AgentType
   return { greeting, situation, concerns, recommendations, questions };
 }
 
-export function AICoPilot({ drilldown, agentId = 'vro' }: AICoPilotProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [showQuestions, setShowQuestions] = useState(false);
+function AgentCard({ 
+  agent, 
+  drilldown, 
+  isExpanded, 
+  onToggle 
+}: { 
+  agent: AgentType; 
+  drilldown: EntityDrilldown; 
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(true);
   const [insights, setInsights] = useState<CoPilotInsights | null>(null);
-  const personality = agentPersonalities[agentId];
+  const personality = agentPersonalities[agent];
 
   useEffect(() => {
+    if (!isExpanded) return;
+    
     async function fetchInsights() {
       setIsLoading(true);
       try {
@@ -100,7 +110,7 @@ export function AICoPilot({ drilldown, agentId = 'vro' }: AICoPilotProps) {
             entityName: drilldown.entityName,
             bu: drilldown.bu,
             metrics: drilldown.metrics,
-            agentId,
+            agentId: agent,
             relatedAgents: drilldown.relatedAgents,
             eventsCount: drilldown.events.length,
             actionsCount: drilldown.actions.length,
@@ -112,69 +122,75 @@ export function AICoPilot({ drilldown, agentId = 'vro' }: AICoPilotProps) {
           if (!data.fallback) {
             setInsights(data);
           } else {
-            setInsights(generateFallbackInsights(drilldown, agentId));
+            setInsights(generateFallbackInsights(drilldown, agent));
           }
         } else {
-          setInsights(generateFallbackInsights(drilldown, agentId));
+          setInsights(generateFallbackInsights(drilldown, agent));
         }
       } catch {
-        setInsights(generateFallbackInsights(drilldown, agentId));
+        setInsights(generateFallbackInsights(drilldown, agent));
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchInsights();
-  }, [drilldown.entityId, agentId]);
+  }, [isExpanded, drilldown.entityId, agent]);
 
-  const currentInsights = insights || generateFallbackInsights(drilldown, agentId);
+  const currentInsights = insights || generateFallbackInsights(drilldown, agent);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
+      initial={{ opacity: 0, y: -5 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
+      className="border border-gray-200 rounded-lg overflow-hidden bg-white"
     >
-      <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 mb-4">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-purple-500 rounded-lg">
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 text-white animate-spin" />
-              ) : (
-                <Brain className="h-5 w-5 text-white" />
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-purple-800">{personality.name}</span>
-                  <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
-                    <Sparkles size={10} className="mr-1" />
-                    AI Co-Pilot
-                  </Badge>
-                  {isLoading && (
-                    <span className="text-xs text-purple-500 animate-pulse">Analyzing...</span>
-                  )}
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-purple-600 hover:text-purple-800"
-                >
-                  {isExpanded ? 'Collapse' : 'Expand'}
-                </Button>
-              </div>
+      <button
+        onClick={onToggle}
+        className="w-full p-3 flex items-center gap-3 hover:bg-gray-50 transition-colors cursor-pointer"
+        data-testid={`agent-card-${agent}`}
+      >
+        <div className={`p-2 ${personality.color} rounded-lg`}>
+          <Brain className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex-1 text-left">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-gray-800">{personality.name}</span>
+            <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
+              <Sparkles size={10} className="mr-1" />
+              AI Co-Pilot
+            </Badge>
+          </div>
+          <p className="text-sm text-gray-600 mt-0.5">
+            Analyzing {personality.focus}... <span className="text-blue-600 font-medium">Hello I have something to Say!</span>
+          </p>
+        </div>
+        {isExpanded ? (
+          <ChevronUp className="h-5 w-5 text-gray-400" />
+        ) : (
+          <ChevronDown className="h-5 w-5 text-gray-400" />
+        )}
+      </button>
 
-              {isExpanded && !isLoading && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-3"
-                >
-                  <p className="text-sm text-purple-900">{currentInsights.greeting}</p>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-gray-200 bg-gradient-to-b from-purple-50 to-blue-50"
+          >
+            <div className="p-4 space-y-3">
+              {isLoading ? (
+                <div className="flex items-center gap-2 text-purple-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Generating insights...</span>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-purple-900 font-medium">{currentInsights.greeting}</p>
                   <p className="text-sm text-gray-700">{currentInsights.situation}</p>
 
                   {currentInsights.concerns.length > 0 && (
@@ -209,51 +225,61 @@ export function AICoPilot({ drilldown, agentId = 'vro' }: AICoPilotProps) {
                     </ul>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs border-purple-300 text-purple-700 hover:bg-purple-100"
-                      onClick={() => setShowQuestions(!showQuestions)}
-                      data-testid="copilot-expand-questions"
-                    >
-                      <HelpCircle size={12} className="mr-1" />
-                      {showQuestions ? 'Hide Questions' : 'What would you like to explore?'}
-                    </Button>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle size={14} className="text-blue-500" />
+                      <span className="text-xs font-semibold text-blue-700">I can help you with:</span>
+                    </div>
+                    <div className="space-y-1">
+                      {currentInsights.questions.map((q, i) => (
+                        <Button
+                          key={i}
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-xs text-blue-700 hover:bg-blue-100 h-auto py-2"
+                          data-testid={`copilot-question-${agent}-${i}`}
+                        >
+                          <HelpCircle size={12} className="mr-2 text-blue-400" />
+                          {q}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-
-                  {showQuestions && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="bg-blue-50 border border-blue-200 rounded-lg p-3"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <MessageCircle size={14} className="text-blue-500" />
-                        <span className="text-xs font-semibold text-blue-700">I can help you with:</span>
-                      </div>
-                      <div className="space-y-2">
-                        {currentInsights.questions.map((q, i) => (
-                          <Button
-                            key={i}
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-start text-xs text-blue-700 hover:bg-blue-100 h-auto py-2"
-                            data-testid={`copilot-question-${i}`}
-                          >
-                            <span className="text-blue-400 mr-2">?</span>
-                            {q}
-                          </Button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </motion.div>
+                </>
               )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
+  );
+}
+
+export function AICoPilot({ drilldown, agentId = 'vro' }: AICoPilotProps) {
+  const [expandedAgent, setExpandedAgent] = useState<AgentType | null>(null);
+  
+  const agents = drilldown.relatedAgents && drilldown.relatedAgents.length > 0 
+    ? drilldown.relatedAgents 
+    : [agentId];
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="h-4 w-4 text-purple-500" />
+        <span className="text-sm font-semibold text-gray-700">AI Agents Monitoring This Entity</span>
+        <Badge variant="secondary" className="text-xs">{agents.length} agents</Badge>
+      </div>
+      <div className="space-y-2">
+        {agents.map((agent) => (
+          <AgentCard
+            key={agent}
+            agent={agent}
+            drilldown={drilldown}
+            isExpanded={expandedAgent === agent}
+            onToggle={() => setExpandedAgent(expandedAgent === agent ? null : agent)}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
