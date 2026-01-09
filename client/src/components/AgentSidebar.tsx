@@ -119,12 +119,12 @@ const agents: Agent[] = [
 interface AgentSidebarProps {
   dataMode: DataMode;
   onModeChange: (mode: DataMode) => void;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
   collapsed?: boolean;
 }
 
-export function AgentSidebar({ dataMode, onModeChange, activeTab, onTabChange, collapsed = false }: AgentSidebarProps) {
+export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", onTabChange, collapsed = false }: AgentSidebarProps) {
   const [location] = useLocation();
   const agentSummary = useAllAgentsSummary();
 
@@ -187,7 +187,7 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab, onTabChange, c
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => onTabChange?.(item.id)}
               className={cn(
                 "mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer transition-all w-[calc(100%-16px)] text-left flex items-center gap-3",
                 activeTab === item.id 
@@ -214,7 +214,7 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab, onTabChange, c
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => onTabChange?.(item.id)}
               className={cn(
                 "mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer transition-all w-[calc(100%-16px)] text-left flex items-center gap-3",
                 activeTab === item.id 
