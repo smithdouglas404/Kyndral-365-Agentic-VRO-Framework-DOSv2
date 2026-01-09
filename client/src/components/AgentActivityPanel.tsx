@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Activity, Brain, AlertTriangle, CheckCircle2, Clock, 
   ArrowRight, MessageCircle, Zap, ChevronDown, ChevronUp,
-  DollarSign, GitBranch, Repeat, Calculator, Target, Shield, Calendar, Users
+  DollarSign, GitBranch, Repeat, Calculator, Target, Shield, Calendar, Users,
+  Link2, FileText, History, Building2, User, ExternalLink
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { 
   AgentAction, 
@@ -94,6 +97,250 @@ function formatTime(date: Date): string {
   return date.toLocaleDateString();
 }
 
+// Activity Detail Modal with Traceability Tab
+function ActivityDetailModal({ 
+  item, 
+  open, 
+  onClose 
+}: { 
+  item: ActivityItem | null; 
+  open: boolean; 
+  onClose: () => void;
+}) {
+  if (!item) return null;
+
+  const AgentIcon = AGENT_ICONS[item.agentId];
+  const ActionIcon = item.icon;
+
+  // Generate simulated traceability data
+  const traceabilityData = {
+    sourceSystem: item.targetType === 'project' ? 'Jira' : item.targetType === 'metric' ? 'PowerBI' : 'ServiceNow',
+    sourceId: `SRC-${item.id.slice(-8).toUpperCase()}`,
+    triggeredBy: item.agentId === 'vro' ? 'Scheduled Analysis' : item.agentId === 'pmo' ? 'Sprint Event' : 'Threshold Alert',
+    parentAction: Math.random() > 0.5 ? `ACT-${Math.random().toString(36).slice(2, 8).toUpperCase()}` : null,
+    linkedEntities: [
+      { type: 'Project', id: 'PRJ-001', name: 'Digital Transformation' },
+      { type: 'OKR', id: 'OKR-Q4-02', name: 'Improve operational efficiency' },
+      { type: 'Risk', id: 'RSK-045', name: 'Integration delay risk' }
+    ].slice(0, Math.floor(Math.random() * 3) + 1),
+    auditTrail: [
+      { time: new Date(item.timestamp.getTime() - 5000), action: 'Data collected', agent: item.agentId },
+      { time: new Date(item.timestamp.getTime() - 3000), action: 'Analysis initiated', agent: item.agentId },
+      { time: new Date(item.timestamp.getTime() - 1000), action: 'Confidence calculated', agent: item.agentId },
+      { time: item.timestamp, action: 'Action executed', agent: item.agentId },
+    ],
+    dataInputs: [
+      { source: 'Real-time metrics', freshness: '< 1 min' },
+      { source: 'Historical trends (30 days)', freshness: 'Daily refresh' },
+      { source: 'Cross-agent insights', freshness: '< 5 min' }
+    ],
+    impactedAgents: ['pmo', 'finops', 'governance'].filter(() => Math.random() > 0.3) as AgentType[]
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-2">
+          <div className="flex items-center gap-3">
+            <div className={cn("p-2 rounded-lg", AGENT_COLORS[item.agentId])}>
+              <AgentIcon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg">{item.title}</DialogTitle>
+              <p className="text-sm text-muted-foreground">{item.agentName} Agent</p>
+            </div>
+            <Badge className={cn("ml-auto", PRIORITY_COLORS[item.priority])}>
+              {item.priority}
+            </Badge>
+          </div>
+        </DialogHeader>
+
+        <Tabs defaultValue="details" className="flex-1 overflow-hidden flex flex-col">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Details
+            </TabsTrigger>
+            <TabsTrigger value="traceability" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Traceability
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="flex-1 overflow-auto mt-4 space-y-4">
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                  <ActionIcon className="h-4 w-4" />
+                  Action Summary
+                </h4>
+                <p className="text-sm text-gray-700">{item.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="text-xs text-blue-600 font-medium">Type</p>
+                  <p className="font-semibold capitalize">{item.type}</p>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-3">
+                  <p className="text-xs text-purple-600 font-medium">Status</p>
+                  <p className="font-semibold capitalize">{item.status || 'Completed'}</p>
+                </div>
+              </div>
+
+              {item.targetType && item.targetId && (
+                <div className="border rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Target Entity</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="capitalize">{item.targetType}</Badge>
+                    <span className="font-mono text-xs text-gray-600">{item.targetId}</span>
+                  </div>
+                </div>
+              )}
+
+              {item.toAgents && item.toAgents.length > 0 && (
+                <div className="border rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-2">Notified Agents</p>
+                  <div className="flex flex-wrap gap-2">
+                    {item.toAgents.map(agent => (
+                      <Badge key={agent} variant="secondary" className="uppercase">{agent}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {item.metadata && Object.keys(item.metadata).length > 0 && (
+                <div className="border rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-2">Metadata</p>
+                  <div className="bg-gray-100 rounded p-2 font-mono text-xs">
+                    {Object.entries(item.metadata).map(([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="text-gray-500">{key}:</span>
+                        <span>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="text-xs text-gray-400 pt-2 border-t">
+                Full timestamp: {item.timestamp.toLocaleString()}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="traceability" className="flex-1 overflow-auto mt-4 space-y-4">
+            <div className="space-y-4">
+              {/* Source Information */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4 text-blue-600" />
+                  Source Information
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-gray-500 text-xs">Source System</p>
+                    <p className="font-medium">{traceabilityData.sourceSystem}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Source ID</p>
+                    <p className="font-mono text-xs">{traceabilityData.sourceId}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Triggered By</p>
+                    <p className="font-medium">{traceabilityData.triggeredBy}</p>
+                  </div>
+                  {traceabilityData.parentAction && (
+                    <div>
+                      <p className="text-gray-500 text-xs">Parent Action</p>
+                      <p className="font-mono text-xs text-blue-600">{traceabilityData.parentAction}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Linked Entities */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <Link2 className="h-4 w-4 text-purple-600" />
+                  Linked Entities
+                </h4>
+                <div className="space-y-2">
+                  {traceabilityData.linkedEntities.map((entity, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                      <Badge variant="outline" className="text-xs">{entity.type}</Badge>
+                      <span className="font-mono text-xs text-gray-500">{entity.id}</span>
+                      <span className="text-sm flex-1">{entity.name}</span>
+                      <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Inputs */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-green-600" />
+                  Data Inputs
+                </h4>
+                <div className="space-y-2">
+                  {traceabilityData.dataInputs.map((input, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm p-2 bg-green-50 rounded">
+                      <span>{input.source}</span>
+                      <Badge variant="secondary" className="text-xs">{input.freshness}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Audit Trail */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <History className="h-4 w-4 text-orange-600" />
+                  Audit Trail
+                </h4>
+                <div className="space-y-2">
+                  {traceabilityData.auditTrail.map((entry, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm">
+                      <div className="w-2 h-2 rounded-full bg-orange-400" />
+                      <span className="text-gray-400 text-xs w-20">{entry.time.toLocaleTimeString()}</span>
+                      <span className="flex-1">{entry.action}</span>
+                      <Badge variant="outline" className="text-xs uppercase">{entry.agent}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Impacted Agents */}
+              {traceabilityData.impactedAgents.length > 0 && (
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                    <Users className="h-4 w-4 text-pink-600" />
+                    Impacted Agents
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {traceabilityData.impactedAgents.map(agent => {
+                      const Icon = AGENT_ICONS[agent];
+                      return (
+                        <div key={agent} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-full text-white text-sm", AGENT_COLORS[agent])}>
+                          <Icon className="h-3 w-3" />
+                          <span className="uppercase">{agent}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 interface AgentActivityPanelProps {
   compact?: boolean;
   maxItems?: number;
@@ -107,6 +354,8 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
   const [expanded, setExpanded] = useState(true);
   const [thinkingAgents, setThinkingAgents] = useState<Set<AgentType>>(new Set());
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [detailModalItem, setDetailModalItem] = useState<ActivityItem | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   // Continuous agent activity simulation data
   const simulatedActivities = [
@@ -410,21 +659,20 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                                       Full timestamp: {item.timestamp.toLocaleString()}
                                     </div>
                                     
-                                    {onViewDetails && (
-                                      <Button
-                                        variant="default"
-                                        size="sm"
-                                        className="mt-3 w-full bg-blue-600 hover:bg-blue-700"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onViewDetails(item);
-                                        }}
-                                        data-testid={`button-view-details-${item.id}`}
-                                      >
-                                        <ArrowRight className="h-3 w-3 mr-2" />
-                                        Open Full Details
-                                      </Button>
-                                    )}
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className="mt-3 w-full bg-blue-600 hover:bg-blue-700"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDetailModalItem(item);
+                                        setDetailModalOpen(true);
+                                      }}
+                                      data-testid={`button-view-details-${item.id}`}
+                                    >
+                                      <ArrowRight className="h-3 w-3 mr-2" />
+                                      Open Full Details
+                                    </Button>
                                   </div>
                                 </div>
                               )}
@@ -432,22 +680,17 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                               <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                                 <Clock className="h-3 w-3" />
                                 {formatTime(item.timestamp)}
-                                {onViewDetails ? (
-                                  <button 
-                                    className="ml-auto text-blue-500 font-medium hover:text-blue-700 hover:underline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onViewDetails(item);
-                                    }}
-                                    data-testid={`link-view-details-${item.id}`}
-                                  >
-                                    ▼ View details
-                                  </button>
-                                ) : (
-                                  <span className="ml-auto text-blue-500 font-medium">
-                                    {isSelected ? '▲ Hide details' : '▼ View details'}
-                                  </span>
-                                )}
+                                <button 
+                                  className="ml-auto text-blue-500 font-medium hover:text-blue-700 hover:underline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDetailModalItem(item);
+                                    setDetailModalOpen(true);
+                                  }}
+                                  data-testid={`link-view-details-${item.id}`}
+                                >
+                                  {isSelected ? '▲ Hide details' : '▼ View details'}
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -461,6 +704,16 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Activity Detail Modal */}
+      <ActivityDetailModal 
+        item={detailModalItem} 
+        open={detailModalOpen} 
+        onClose={() => {
+          setDetailModalOpen(false);
+          setDetailModalItem(null);
+        }} 
+      />
     </Card>
   );
 }
