@@ -47,6 +47,7 @@ import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCal
 import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
+import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -704,14 +705,24 @@ function DashboardContent() {
               <span className="hidden sm:inline">Benchmarks</span>
             </TabsTrigger>
             {dataMode === "VRO" && (
-              <TabsTrigger 
-                value="performance" 
-                className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                data-testid="tab-performance"
-              >
-                <Target size={16} />
-                <span className="hidden sm:inline">Performance</span>
-              </TabsTrigger>
+              <>
+                <TabsTrigger 
+                  value="lifecycle" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                  data-testid="tab-lifecycle"
+                >
+                  <Zap size={16} />
+                  <span className="hidden sm:inline">Lifecycle</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="performance" 
+                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                  data-testid="tab-performance"
+                >
+                  <Target size={16} />
+                  <span className="hidden sm:inline">Performance</span>
+                </TabsTrigger>
+              </>
             )}
             {dataMode === "PMO" && (
               <>
@@ -795,6 +806,11 @@ function DashboardContent() {
           {/* Industry Benchmarks Tab */}
           <TabsContent value="benchmarks">
             <IndustryBenchmarksSection />
+          </TabsContent>
+
+          {/* Project Lifecycle Command Center - VRO Only */}
+          <TabsContent value="lifecycle">
+            <ProjectLifecycleCommandCenter />
           </TabsContent>
 
           {/* Business Performance Tab */}
