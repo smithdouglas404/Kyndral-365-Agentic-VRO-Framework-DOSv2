@@ -646,6 +646,14 @@ function DashboardContent() {
               <span className="hidden sm:inline">KPIs</span>
             </TabsTrigger>
             <TabsTrigger 
+              value="ai-recommendations" 
+              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+              data-testid="tab-ai-recommendations"
+            >
+              <Sparkles size={16} />
+              <span className="hidden sm:inline">AI Actions</span>
+            </TabsTrigger>
+            <TabsTrigger 
               value="ai-insights" 
               className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
               data-testid="tab-ai-insights"
@@ -709,9 +717,6 @@ function DashboardContent() {
               }}
             />
 
-            {/* AI Recommendations - Full width */}
-            <AIRecommendations dataMode={dataMode} />
-
             {/* PMO Guidance Section - Only in PMO Mode */}
             {dataMode === "PMO" && (
               <PMOGuidance onDrillDown={handleDrillDown} />
@@ -740,6 +745,11 @@ function DashboardContent() {
           {/* KPI Tracking Tab */}
           <TabsContent value="kpi-tracking">
             <KPIAttributionPanel />
+          </TabsContent>
+
+          {/* AI Recommendations Tab - Dedicated tab for AI actions */}
+          <TabsContent value="ai-recommendations">
+            <AIRecommendations dataMode={dataMode} />
           </TabsContent>
 
           {/* AI Insights Tab - Simplified with key components */}
