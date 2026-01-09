@@ -819,7 +819,7 @@ function DashboardContent() {
 
           {/* Project Lifecycle Command Center - VRO Only */}
           <TabsContent value="lifecycle">
-            <ProjectLifecycleCommandCenter />
+            <ProjectLifecycleCommandCenter onDrillDown={handleDrillDown} />
           </TabsContent>
 
           {/* Business Performance Tab */}
