@@ -837,18 +837,35 @@ function DashboardContent() {
             {/* Cross-Agent Collaboration */}
             <CrossAgentCollaboration />
 
-            {/* Strategic Impact Analysis */}
-            <div>
-              <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-                <div>
-                  <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
-                  <p className="text-muted-foreground">
-                    Key performance indicators for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span>
-                  </p>
+            {/* Strategic Impact Analysis - VRO Only */}
+            {dataMode === "VRO" && (
+              <div>
+                <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                  <div>
+                    <h2 className="text-[32px] font-bold text-foreground">Strategic Impact Analysis</h2>
+                    <p className="text-muted-foreground">
+                      Value realization metrics for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span>
+                    </p>
+                  </div>
                 </div>
+                <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={state.isLive} />
               </div>
-              <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={state.isLive} />
-            </div>
+            )}
+
+            {/* Delivery Performance - PMO Only */}
+            {dataMode === "PMO" && (
+              <div>
+                <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                  <div>
+                    <h2 className="text-[32px] font-bold text-foreground">Delivery Performance</h2>
+                    <p className="text-muted-foreground">
+                      Execution tracking for <span className="font-semibold text-[#005EB8]">{selectedScenario.name}</span>
+                    </p>
+                  </div>
+                </div>
+                <ScenarioChartsGrid scenario={selectedScenario} stage="design" isLive={state.isLive} />
+              </div>
+            )}
           </TabsContent>
 
           {/* Portfolios Tab - BU Programs with drill-down */}
