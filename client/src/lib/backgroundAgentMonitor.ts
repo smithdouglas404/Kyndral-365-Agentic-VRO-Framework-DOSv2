@@ -147,8 +147,8 @@ export function notifyAction(agentId: AgentType, actionType: string, targetName:
 }
 
 function getRandomInterval(): number {
-  const minMs = 8 * 60 * 1000;
-  const maxMs = 15 * 60 * 1000;
+  const minMs = 2 * 60 * 1000;  // 2 minutes
+  const maxMs = 4 * 60 * 1000;  // 4 minutes
   return minMs + Math.random() * (maxMs - minMs);
 }
 
