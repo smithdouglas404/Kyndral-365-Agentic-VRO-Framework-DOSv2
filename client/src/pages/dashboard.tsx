@@ -501,14 +501,14 @@ function DashboardContent() {
   
   const { state, toggleLive, forceUpdate } = useSimulation();
 
-  // Sync dataMode with URL when location changes
+  // Always redirect to VRO dashboard on initial load
   useEffect(() => {
-    if (location === '/dashboard/pmo' && dataMode !== 'PMO') {
-      setDataMode('PMO');
-    } else if (location === '/dashboard' && dataMode !== 'VRO') {
-      setDataMode('VRO');
+    if (location === '/dashboard/pmo') {
+      navigate('/dashboard', { replace: true });
     }
-  }, [location]);
+  }, []);
+  
+  // Handle mode changes through sidebar clicks only (not URL)
 
   const handleDrillDown = (type: string, id: string) => {
     if (type === 'division') {
