@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   BookOpen, Users, Lightbulb, MessageSquare, 
@@ -7,6 +8,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { DrillDownDrawer } from './DrillDownDrawer';
 
 interface GuidanceItem {
   id: string;
@@ -41,7 +43,7 @@ const guidanceItems: GuidanceItem[] = [
     id: 'gd-003',
     type: 'collaboration',
     title: 'Cross-Group Knowledge Share',
-    description: 'Retail team achieved 92% adoption with a structured playbook. This approach is recommended for other BU rollouts.',
+    description: 'Retail team achieved 92% adoption with a structured playbook. This approach is recommended for other Group rollouts.',
     source: 'Three Lines of Defence project',
     relevance: 'medium',
     actionable: true
@@ -58,10 +60,21 @@ const guidanceItems: GuidanceItem[] = [
 ];
 
 const learningResources = [
-  { title: 'SAFe 6.0 Portfolio Management', type: 'Guide', duration: '15 min' },
-  { title: 'Agile Estimation Best Practices', type: 'Video', duration: '8 min' },
-  { title: 'Risk-Based PI Planning', type: 'Template', duration: '5 min' },
-  { title: 'Cross-Team Dependencies', type: 'Playbook', duration: '12 min' }
+  { id: 'lr-0', title: 'SAFe 6.0 Portfolio Management', type: 'Guide', duration: '15 min' },
+  { id: 'lr-1', title: 'Agile Estimation Best Practices', type: 'Video', duration: '8 min' },
+  { id: 'lr-2', title: 'Risk-Based PI Planning', type: 'Template', duration: '5 min' },
+  { id: 'lr-3', title: 'Cross-Team Dependencies', type: 'Playbook', duration: '12 min' }
+];
+
+const collaborators = [
+  { id: 'collab-ak', name: 'Andrew Kail', initials: 'AK', color: 'blue', activity: 'Shared PRT automation insights', isNew: true },
+  { id: 'collab-pl', name: 'Paula Llewellyn', initials: 'PL', color: 'purple', activity: 'Posted accessibility checklist', isNew: false }
+];
+
+const blockers = [
+  { id: 'blocker-legacy', title: 'Legacy system integration delays' },
+  { id: 'blocker-resources', title: 'Resource constraints in Q3' },
+  { id: 'blocker-data', title: 'Third-party data quality issues' }
 ];
 
 function getTypeConfig(type: GuidanceItem['type']) {
@@ -78,6 +91,16 @@ function getTypeConfig(type: GuidanceItem['type']) {
 }
 
 export function PMOGuidance() {
+  const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
+
+  const openDrawer = (entityType: string, entityId: string) => {
+    setSelectedEntity({ type: entityType, id: entityId });
+  };
+
+  const closeDrawer = () => {
+    setSelectedEntity(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -107,9 +130,10 @@ export function PMOGuidance() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
                   className={cn(
-                    "p-4 rounded-lg border",
+                    "p-4 rounded-lg border cursor-pointer hover:shadow-md transition-shadow",
                     config.bg
                   )}
+                  onClick={() => openDrawer('guidance-item', item.id)}
                   data-testid={`guidance-item-${item.id}`}
                 >
                   <div className="flex items-start gap-3">
@@ -125,7 +149,16 @@ export function PMOGuidance() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-400">Source: {item.source}</span>
                         {item.actionable && (
-                          <Button variant="ghost" size="sm" className="text-xs h-7 gap-1" data-testid={`button-apply-${item.id}`}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs h-7 gap-1" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDrawer('guidance-item', item.id);
+                            }}
+                            data-testid={`button-apply-${item.id}`}
+                          >
                             Apply <ArrowRight className="h-3 w-3" />
                           </Button>
                         )}
@@ -145,11 +178,12 @@ export function PMOGuidance() {
               Learning Resources
             </h4>
             <div className="space-y-2">
-              {learningResources.map((resource, idx) => (
+              {learningResources.map((resource) => (
                 <div 
-                  key={idx} 
-                  className="flex items-center justify-between p-2 bg-white rounded-md border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer"
-                  data-testid={`learning-resource-${idx}`}
+                  key={resource.id} 
+                  className="flex items-center justify-between p-2 bg-white rounded-md border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => openDrawer('learning-resource', resource.id)}
+                  data-testid={`learning-resource-${resource.id}`}
                 >
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-gray-400" />
@@ -173,25 +207,31 @@ export function PMOGuidance() {
               Collaboration Hub
             </h4>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-2 bg-white rounded-md border border-gray-100">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-xs font-bold text-blue-600">AK</span>
+              {collaborators.map((collab) => (
+                <div 
+                  key={collab.id}
+                  className="flex items-center gap-3 p-2 bg-white rounded-md border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => openDrawer('collaborator', collab.id)}
+                  data-testid={`collaborator-${collab.id}`}
+                >
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center",
+                    collab.color === 'blue' ? 'bg-blue-100' : 'bg-purple-100'
+                  )}>
+                    <span className={cn(
+                      "text-xs font-bold",
+                      collab.color === 'blue' ? 'text-blue-600' : 'text-purple-600'
+                    )}>{collab.initials}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{collab.name}</p>
+                    <p className="text-xs text-gray-500">{collab.activity}</p>
+                  </div>
+                  {collab.isNew && (
+                    <Badge variant="secondary" className="text-xs">New</Badge>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Andrew Kail</p>
-                  <p className="text-xs text-gray-500">Shared PRT automation insights</p>
-                </div>
-                <Badge variant="secondary" className="text-xs">New</Badge>
-              </div>
-              <div className="flex items-center gap-3 p-2 bg-white rounded-md border border-gray-100">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <span className="text-xs font-bold text-purple-600">PL</span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Paula Llewellyn</p>
-                  <p className="text-xs text-gray-500">Posted accessibility checklist</p>
-                </div>
-              </div>
+              ))}
               <Button variant="outline" size="sm" className="w-full gap-2" data-testid="button-view-collaborators">
                 <Users className="h-4 w-4" />
                 View All Collaborators
@@ -206,22 +246,28 @@ export function PMOGuidance() {
             </h4>
             <p className="text-sm text-gray-600 mb-3">Based on recent project patterns</p>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2 text-gray-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Legacy system integration delays
-              </li>
-              <li className="flex items-center gap-2 text-gray-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Resource constraints in Q3
-              </li>
-              <li className="flex items-center gap-2 text-gray-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Third-party data quality issues
-              </li>
+              {blockers.map((blocker) => (
+                <li 
+                  key={blocker.id}
+                  className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-amber-700 transition-colors p-1 rounded hover:bg-amber-100"
+                  onClick={() => openDrawer('blocker', blocker.id)}
+                  data-testid={`blocker-${blocker.id}`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  {blocker.title}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
       </div>
+
+      <DrillDownDrawer
+        isOpen={!!selectedEntity}
+        onClose={closeDrawer}
+        entityType={selectedEntity?.type || ''}
+        entityId={selectedEntity?.id || ''}
+      />
     </div>
   );
 }

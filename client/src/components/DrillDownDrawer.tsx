@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight } from 'lucide-react';
+import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight, Sparkles, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,9 +39,16 @@ const agentNames: Record<AgentType, string> = {
 };
 
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: DrillDownDrawerProps) {
-  const drilldown = useEntityDrilldown(entityType, entityId);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Only call hook with valid entity type and id to prevent null returns
+  const drilldown = useEntityDrilldown(
+    entityType || 'project', 
+    entityId || ''
+  );
 
+  // Don't render if drawer is not open or entity is not selected
+  if (!isOpen || !entityType || !entityId) return null;
   if (!drilldown) return null;
 
   return (
@@ -92,6 +99,34 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
 
                 <TabsContent value="overview">
                   <div className="space-y-4">
+                    {drilldown.aiInsight && (
+                      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Sparkles size={16} className="text-purple-500" />
+                            AI Insight
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-700 leading-relaxed">{drilldown.aiInsight}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {drilldown.summary && (
+                      <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <FileText size={16} className="text-blue-500" />
+                            Summary
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-700 leading-relaxed">{drilldown.summary}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">

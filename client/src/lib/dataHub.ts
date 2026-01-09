@@ -44,7 +44,7 @@ export interface CrossAgentMessage {
 }
 
 export interface EntityDrilldown {
-  entityType: 'project' | 'program' | 'risk' | 'portfolio' | 'metric' | 'division' | 'climate' | 'agent-message' | string;
+  entityType: 'project' | 'program' | 'risk' | 'portfolio' | 'metric' | 'division' | 'climate' | 'agent-message' | 'guidance-item' | 'learning-resource' | 'collaborator' | 'blocker' | string;
   entityId: string;
   entityName: string;
   bu: string;
@@ -54,6 +54,8 @@ export interface EntityDrilldown {
   actions: { id: string; label: string; type: string }[];
   history: { timestamp: Date; action: string; agent: AgentType }[];
   relatedEntities?: { type: string; id: string; name: string }[];
+  aiInsight?: string;
+  summary?: string;
 }
 
 // Agent configuration with data mappings
@@ -822,6 +824,31 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
       break;
   }
   
+  // Handle PMO Guidance items
+  if (entityType === 'guidance-item') {
+    return getGuidanceDrilldown(entityId, events);
+  }
+  
+  // Handle Learning Resources
+  if (entityType === 'learning-resource') {
+    return getLearningResourceDrilldown(entityId, events);
+  }
+  
+  // Handle Collaborator items
+  if (entityType === 'collaborator') {
+    return getCollaboratorDrilldown(entityId, events);
+  }
+  
+  // Handle Blocker items
+  if (entityType === 'blocker') {
+    return getBlockerDrilldown(entityId, events);
+  }
+  
+  // Handle Cross-Agent Messages
+  if (entityType === 'agent-message') {
+    return getAgentMessageDrilldown(entityId, events);
+  }
+  
   if (!entity) return null;
   
   const entityEvents = events.filter(e => e.relatedEntity?.id === entityId);
@@ -843,6 +870,289 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
     metrics,
     actions,
     history
+  };
+}
+
+// Guidance item drilldown with AI insights
+function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): EntityDrilldown {
+  const guidanceData: Record<string, { title: string; type: string; aiInsight: string; relatedProjects: string[]; nextSteps: string[]; metrics: Record<string, string> }> = {
+    'gd-001': {
+      title: 'Early Stakeholder Alignment',
+      type: 'best-practice',
+      aiInsight: 'AI Analysis: Projects with Sprint 0 alignment sessions show 40% faster value delivery. Based on current portfolio, 3 projects would benefit from implementing this pattern immediately.',
+      relatedProjects: ['PRT Intake System', 'Digital Onboarding', 'Cloud Migration'],
+      nextSteps: [
+        'Schedule alignment workshop for Digital Onboarding (recommended: next week)',
+        'Create stakeholder mapping template from PRT success',
+        'Notify OCM Agent to prepare change readiness assessment'
+      ],
+      metrics: { 'Success Rate': '94%', 'Avg Time Saved': '6 weeks', 'Projects Applied': '12', 'ROI Impact': '+23%' }
+    },
+    'gd-002': {
+      title: 'Vendor Risk Mitigation',
+      type: 'lesson-learned',
+      aiInsight: 'AI Analysis: Single-vendor dependencies caused 34% of project delays in 2024. Current portfolio shows 4 projects with similar risk patterns. Governance Agent flagged 2 for immediate review.',
+      relatedProjects: ['Private Markets Platform', 'API Gateway', 'Data Lake Migration'],
+      nextSteps: [
+        'Review vendor contracts for Private Markets Platform',
+        'Identify backup vendors for critical components',
+        'Update risk register with Governance Agent findings'
+      ],
+      metrics: { 'Risk Reduction': '67%', 'Cost Avoided': '£2.3m', 'Vendor Alternatives': '3 identified', 'Review Status': 'In Progress' }
+    },
+    'gd-003': {
+      title: 'Cross-Group Knowledge Share',
+      type: 'collaboration',
+      aiInsight: 'AI Analysis: Retail team playbook achieved 92% adoption - highest across all divisions. Pattern analysis suggests this approach could accelerate 5 current rollouts by 4-6 weeks each.',
+      relatedProjects: ['Three Lines of Defence', 'ESG Reporting', 'Regulatory Compliance'],
+      nextSteps: [
+        'Adapt Retail playbook for Investment division rollout',
+        'Schedule knowledge transfer session with Retail PM',
+        'OCM Agent to assess readiness for playbook adoption'
+      ],
+      metrics: { 'Adoption Rate': '92%', 'Time Saved': '4-6 weeks', 'Reusability Score': '87%', 'Teams Benefited': '8' }
+    },
+    'gd-004': {
+      title: 'Accessibility Compliance Pattern',
+      type: 'insight',
+      aiInsight: 'AI Analysis: WCAG 2.1 gaps detected in 6 active projects. Early specialist engagement prevents 2-3 week delays. Governance Agent recommends immediate accessibility audit for Digital Onboarding.',
+      relatedProjects: ['Digital Onboarding', 'Customer Portal', 'Mobile App Refresh'],
+      nextSteps: [
+        'Engage accessibility specialist for Digital Onboarding',
+        'Run automated WCAG audit on Customer Portal',
+        'Add accessibility checkpoint to project templates'
+      ],
+      metrics: { 'Compliance Gap': '23%', 'Delay Risk': '2-3 weeks', 'Projects Affected': '6', 'Remediation Cost': '£45k' }
+    }
+  };
+  
+  const data = guidanceData[guidanceId] || guidanceData['gd-001'];
+  
+  return {
+    entityType: 'guidance-item',
+    entityId: guidanceId,
+    entityName: data.title,
+    bu: 'PMO Knowledge Base',
+    relatedAgents: ['pmo', 'ocm', 'governance'],
+    events: events.slice(0, 5),
+    metrics: data.metrics,
+    actions: data.nextSteps.map((step, i) => ({ id: `action-${i}`, label: step, type: 'recommendation' })),
+    history: [
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), action: 'AI insight generated', agent: 'pmo' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), action: 'Pattern detected across projects', agent: 'vro' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), action: 'Added to knowledge base', agent: 'pmo' as AgentType }
+    ],
+    relatedEntities: data.relatedProjects.map((p, i) => ({ type: 'project', id: `proj-${i}`, name: p })),
+    aiInsight: data.aiInsight
+  };
+}
+
+// Learning resource drilldown
+function getLearningResourceDrilldown(resourceId: string, events: SimulationEvent[]): EntityDrilldown {
+  const resources: Record<string, { title: string; type: string; duration: string; summary: string; keyPoints: string[]; relatedOKRs: string[] }> = {
+    'lr-0': {
+      title: 'SAFe 6.0 Portfolio Management',
+      type: 'Guide',
+      duration: '15 min',
+      summary: 'Comprehensive guide to Lean Portfolio Management in SAFe 6.0, covering strategic themes, portfolio canvas, and value stream coordination.',
+      keyPoints: [
+        'Lean budgeting replaces project-based funding',
+        'Portfolio Kanban enables flow-based prioritization',
+        'Epic hypothesis-driven delivery reduces waste',
+        'Participatory budgeting increases alignment'
+      ],
+      relatedOKRs: ['Enterprise Cloud Transformation', 'Digital-First Customer Experience']
+    },
+    'lr-1': {
+      title: 'Agile Estimation Best Practices',
+      type: 'Video',
+      duration: '8 min',
+      summary: 'Learn proven estimation techniques including Planning Poker, T-shirt sizing, and story point calibration across teams.',
+      keyPoints: [
+        'Relative sizing improves accuracy over absolute hours',
+        'Team calibration sessions reduce variance',
+        'Historical velocity enables predictability',
+        'Uncertainty buffers prevent overcommitment'
+      ],
+      relatedOKRs: ['Operational Excellence', 'Portfolio Predictability']
+    },
+    'lr-2': {
+      title: 'Risk-Based PI Planning',
+      type: 'Template',
+      duration: '5 min',
+      summary: 'Template for incorporating risk assessment into PI Planning, with ROAM categorization and mitigation tracking.',
+      keyPoints: [
+        'ROAM model: Resolved, Owned, Accepted, Mitigated',
+        'Risk-adjusted capacity planning',
+        'Cross-team dependency risk mapping',
+        'Confidence voting with risk factors'
+      ],
+      relatedOKRs: ['Risk Management Excellence', 'Governance Compliance']
+    },
+    'lr-3': {
+      title: 'Cross-Team Dependencies',
+      type: 'Playbook',
+      duration: '12 min',
+      summary: 'Practical playbook for managing cross-team dependencies in scaled agile environments, including visualization and resolution patterns.',
+      keyPoints: [
+        'Dependency board visualization techniques',
+        'Handoff protocols reduce wait time',
+        'Integration sprint patterns',
+        'Escalation paths for blockers'
+      ],
+      relatedOKRs: ['Operational Excellence', 'Cross-Group Collaboration']
+    }
+  };
+  
+  const data = resources[resourceId] || resources['lr-0'];
+  
+  return {
+    entityType: 'learning-resource',
+    entityId: resourceId,
+    entityName: data.title,
+    bu: 'Learning Center',
+    relatedAgents: ['pmo', 'ocm'],
+    events: [],
+    metrics: { 'Type': data.type, 'Duration': data.duration, 'Completions': '47', 'Avg Rating': '4.6/5' },
+    actions: data.keyPoints.map((point, i) => ({ id: `kp-${i}`, label: point, type: 'key-point' })),
+    history: [
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), action: 'Resource updated', agent: 'pmo' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), action: 'Added to library', agent: 'ocm' as AgentType }
+    ],
+    relatedEntities: data.relatedOKRs.map((okr, i) => ({ type: 'okr', id: `okr-${i}`, name: okr })),
+    summary: data.summary
+  };
+}
+
+// Collaborator drilldown
+function getCollaboratorDrilldown(collaboratorId: string, events: SimulationEvent[]): EntityDrilldown {
+  const collaborators: Record<string, { name: string; initials: string; role: string; contributions: string[]; sharedInsights: string[]; projects: string[] }> = {
+    'collab-ak': {
+      name: 'Andrew Kail',
+      initials: 'AK',
+      role: 'Senior PM - Technology',
+      contributions: ['PRT automation insights', 'Sprint velocity templates', 'Risk mitigation playbook'],
+      sharedInsights: ['Automation reduced manual processing by 65%', 'Team velocity improved 23% after capacity planning adjustment'],
+      projects: ['PRT Intake System', 'Cloud Migration', 'API Gateway']
+    },
+    'collab-pl': {
+      name: 'Paula Llewellyn',
+      initials: 'PL',
+      role: 'Accessibility Lead',
+      contributions: ['Accessibility checklist', 'WCAG 2.1 compliance guide', 'Screen reader testing protocol'],
+      sharedInsights: ['Early accessibility review saves 2-3 weeks', 'Automated testing catches 70% of issues'],
+      projects: ['Digital Onboarding', 'Customer Portal', 'Mobile App']
+    }
+  };
+  
+  const data = collaborators[collaboratorId] || collaborators['collab-ak'];
+  
+  return {
+    entityType: 'collaborator',
+    entityId: collaboratorId,
+    entityName: data.name,
+    bu: data.role,
+    relatedAgents: ['pmo', 'ocm'],
+    events: [],
+    metrics: { 'Contributions': String(data.contributions.length), 'Insights Shared': String(data.sharedInsights.length), 'Active Projects': String(data.projects.length), 'Knowledge Score': '94%' },
+    actions: data.contributions.map((c, i) => ({ id: `contrib-${i}`, label: c, type: 'contribution' })),
+    history: data.sharedInsights.map((insight, i) => ({
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * (i + 1)),
+      action: insight,
+      agent: 'pmo' as AgentType
+    })),
+    relatedEntities: data.projects.map((p, i) => ({ type: 'project', id: `proj-${i}`, name: p }))
+  };
+}
+
+// Blocker drilldown
+function getBlockerDrilldown(blockerId: string, events: SimulationEvent[]): EntityDrilldown {
+  const blockers: Record<string, { title: string; description: string; impact: string; affectedProjects: string[]; mitigations: string[] }> = {
+    'blocker-legacy': {
+      title: 'Legacy System Integration Delays',
+      description: 'Integration with legacy mainframe systems causing 2-4 week delays due to limited API availability and batch processing constraints.',
+      impact: '4 projects affected, £1.2m cost impact',
+      affectedProjects: ['Claims Processing', 'Policy Admin', 'Data Migration'],
+      mitigations: ['Implement API gateway layer', 'Parallel processing queues', 'Legacy modernization roadmap']
+    },
+    'blocker-resources': {
+      title: 'Resource Constraints in Q3',
+      description: 'Key technical resources overallocated across multiple high-priority initiatives, causing bottlenecks in delivery.',
+      impact: '6 projects at risk, velocity reduced 30%',
+      affectedProjects: ['Cloud Migration', 'AI Platform', 'Digital Onboarding', 'API Gateway'],
+      mitigations: ['Cross-train adjacent team members', 'Prioritize and defer lower-value work', 'Contract specialist support']
+    },
+    'blocker-data': {
+      title: 'Third-Party Data Quality Issues',
+      description: 'External data feeds showing inconsistent quality, requiring additional validation and cleansing effort.',
+      impact: '3 projects delayed, data accuracy at 78%',
+      affectedProjects: ['ESG Reporting', 'Risk Analytics', 'Customer 360'],
+      mitigations: ['Implement data quality monitoring', 'Establish SLAs with data providers', 'Build validation layer']
+    }
+  };
+  
+  const data = blockers[blockerId] || blockers['blocker-legacy'];
+  
+  return {
+    entityType: 'blocker',
+    entityId: blockerId,
+    entityName: data.title,
+    bu: 'Risk Management',
+    relatedAgents: ['pmo', 'governance', 'planning'],
+    events: [],
+    metrics: { 'Impact': data.impact, 'Projects Affected': String(data.affectedProjects.length), 'Status': 'Active', 'Priority': 'High' },
+    actions: data.mitigations.map((m, i) => ({ id: `mit-${i}`, label: m, type: 'mitigation' })),
+    history: [
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), action: 'Blocker identified', agent: 'pmo' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), action: 'Impact assessment completed', agent: 'governance' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), action: 'Mitigation plan created', agent: 'planning' as AgentType }
+    ],
+    relatedEntities: data.affectedProjects.map((p, i) => ({ type: 'project', id: `proj-${i}`, name: p }))
+  };
+}
+
+// Agent message drilldown
+function getAgentMessageDrilldown(messageId: string, events: SimulationEvent[]): EntityDrilldown {
+  const messages = generateCrossAgentMessages(events);
+  const message = messages.find(m => m.id === messageId);
+  
+  if (!message) {
+    return {
+      entityType: 'agent-message',
+      entityId: messageId,
+      entityName: 'Agent Communication',
+      bu: 'Cross-Agent Orchestration',
+      relatedAgents: ['pmo', 'vro'],
+      events: [],
+      metrics: {},
+      actions: [],
+      history: []
+    };
+  }
+  
+  return {
+    entityType: 'agent-message',
+    entityId: messageId,
+    entityName: message.message,
+    bu: `${AGENT_CONFIG[message.fromAgent].name} → ${AGENT_CONFIG[message.toAgent].name}`,
+    relatedAgents: [message.fromAgent, message.toAgent],
+    events: events.slice(0, 3),
+    metrics: {
+      'Priority': message.priority,
+      'Type': message.messageType.replace('_', ' '),
+      'Entity': message.entity,
+      'Time': message.timestamp.toLocaleTimeString()
+    },
+    actions: [
+      { id: 'action-1', label: 'Acknowledge and track', type: 'action' },
+      { id: 'action-2', label: 'Escalate to stakeholder', type: 'escalation' },
+      { id: 'action-3', label: 'Request more context', type: 'request' }
+    ],
+    history: [
+      { timestamp: message.timestamp, action: `Message sent from ${AGENT_CONFIG[message.fromAgent].name}`, agent: message.fromAgent },
+      { timestamp: new Date(message.timestamp.getTime() + 1000), action: `Received by ${AGENT_CONFIG[message.toAgent].name}`, agent: message.toAgent }
+    ],
+    relatedEntities: [{ type: 'entity', id: message.entity, name: message.entity }]
   };
 }
 
