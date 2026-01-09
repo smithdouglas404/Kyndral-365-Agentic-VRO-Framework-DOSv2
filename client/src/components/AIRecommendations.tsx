@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { executeAction, ActionType } from '@/lib/agentActionEngine';
+import { AgentType as AgentTypeFromHub } from '@/lib/dataHub';
 
 interface Recommendation {
   id: string;
@@ -400,6 +402,17 @@ export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendat
     if (completedActions.has(actionKey)) return;
     
     setActiveActions(prev => new Set(prev).add(actionKey));
+    
+    // Execute real agent action
+    executeAction(
+      effectiveAgent as AgentTypeFromHub,
+      rec.actionType as ActionType,
+      'project',
+      `rec-${rec.id}`,
+      rec.title,
+      rec.description,
+      rec.confidence
+    );
     
     // Simulate action processing
     setTimeout(() => {

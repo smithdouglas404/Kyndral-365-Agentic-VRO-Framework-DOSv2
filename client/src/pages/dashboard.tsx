@@ -42,6 +42,10 @@ import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
 import { getPMOOverviewMetrics } from "@/lib/unifiedMetrics";
+import { AgentActivityPanel } from "@/components/AgentActivityPanel";
+import { DemoScenarioPanel } from "@/components/DemoScenarioPanel";
+import { startBackgroundMonitor, stopBackgroundMonitor } from "@/lib/backgroundAgentMonitor";
+import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -508,6 +512,12 @@ function DashboardContent() {
     }
   }, []);
   
+  // Start background agent monitor
+  useEffect(() => {
+    startBackgroundMonitor(15000);
+    return () => stopBackgroundMonitor();
+  }, []);
+  
   // Handle mode changes through sidebar clicks only (not URL)
 
   const handleDrillDown = (type: string, id: string) => {
@@ -799,6 +809,16 @@ function DashboardContent() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
+            {/* Agent Activity & Demo Controls */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AgentActivityPanel maxItems={10} />
+              </div>
+              <div>
+                <DemoScenarioPanel />
+              </div>
+            </div>
+
             {/* AI Recommendations - Always shown first */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -854,7 +874,10 @@ function DashboardContent() {
           {/* AI Insights Tab - Available in both PMO and VRO modes */}
           <TabsContent value="ai-insights">
             <div className="space-y-8">
-              <ExecutiveCommandCenter />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ExecutiveCommandCenter />
+                <ActionAuditTimeline maxItems={15} />
+              </div>
               <AICommandCenter />
               <AIProactiveInsightsSection />
             </div>
