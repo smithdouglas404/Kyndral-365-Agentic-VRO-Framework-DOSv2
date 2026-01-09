@@ -536,8 +536,10 @@ function DashboardContent() {
                     
         </div>
 
-        {/* L&G Report Anchored Stats */}
-        <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
+        {/* L&G Report Anchored Stats - Only show on Overview tab */}
+        {activeTab === "overview" && (
+          <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
+        )}
 
         {/* Tab Content - Navigation handled by sidebar */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
