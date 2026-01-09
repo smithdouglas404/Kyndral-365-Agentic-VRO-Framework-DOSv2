@@ -43,8 +43,8 @@ import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
 import { getPMOOverviewMetrics } from "@/lib/unifiedMetrics";
 import { AgentActivityPanel } from "@/components/AgentActivityPanel";
-import { DemoScenarioPanel } from "@/components/DemoScenarioPanel";
-import { startBackgroundMonitor, stopBackgroundMonitor } from "@/lib/backgroundAgentMonitor";
+import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCallback } from "@/lib/backgroundAgentMonitor";
+import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
@@ -512,8 +512,14 @@ function DashboardContent() {
     }
   }, []);
   
-  // Start background agent monitor
+  // Start background agent monitor with toast notifications
   useEffect(() => {
+    setActionNotificationCallback((agentName, action, target) => {
+      toast.info(`${agentName} ${action} ${target}`, {
+        description: "Agent action completed",
+        duration: 5000,
+      });
+    });
     startBackgroundMonitor(15000);
     return () => stopBackgroundMonitor();
   }, []);
@@ -809,15 +815,8 @@ function DashboardContent() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Agent Activity & Demo Controls */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <AgentActivityPanel maxItems={10} />
-              </div>
-              <div>
-                <DemoScenarioPanel />
-              </div>
-            </div>
+            {/* Agent Activity Feed */}
+            <AgentActivityPanel maxItems={10} />
 
             {/* AI Recommendations - Always shown first */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

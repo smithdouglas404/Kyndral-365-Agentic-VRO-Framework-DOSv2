@@ -104,8 +104,67 @@ const AGENT_REACTIONS: AgentReaction[] = [
 ];
 
 let monitorInterval: NodeJS.Timeout | null = null;
+let scenarioInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
 let lastChecks: Record<string, { value: number; timestamp: Date }> = {};
+let actionNotificationCallback: ((agentName: string, action: string, target: string) => void) | null = null;
+
+const DEMO_SCENARIOS = ['budget-breach', 'critical-project', 'value-at-risk'];
+const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
+  vro: 'VRO Agent',
+  pmo: 'PMO Agent',
+  tmo: 'TMO Agent',
+  finops: 'FinOps Agent',
+  okr: 'OKR Agent',
+  governance: 'Governance Agent',
+  planning: 'Planning Agent',
+  ocm: 'OCM Agent'
+};
+
+const ACTION_DISPLAY_NAMES: Record<string, string> = {
+  'investigate': 'investigated',
+  'escalate': 'escalated',
+  'notify': 'notified stakeholders about',
+  'mitigate': 'initiated mitigation for',
+  'accelerate': 'accelerated',
+  'update-status': 'updated status of',
+  'create-task': 'created task for',
+  'reassign': 'reassigned'
+};
+
+export function setActionNotificationCallback(
+  callback: (agentName: string, action: string, target: string) => void
+): void {
+  actionNotificationCallback = callback;
+}
+
+export function notifyAction(agentId: AgentType, actionType: string, targetName: string): void {
+  if (actionNotificationCallback) {
+    const agentName = AGENT_DISPLAY_NAMES[agentId] || agentId;
+    const actionText = ACTION_DISPLAY_NAMES[actionType] || actionType;
+    actionNotificationCallback(agentName, actionText, targetName);
+  }
+}
+
+function getRandomInterval(): number {
+  const minMs = 8 * 60 * 1000;
+  const maxMs = 15 * 60 * 1000;
+  return minMs + Math.random() * (maxMs - minMs);
+}
+
+function scheduleNextScenario(): void {
+  if (!isRunning) return;
+  
+  const delay = getRandomInterval();
+  scenarioInterval = setTimeout(() => {
+    if (!isRunning) return;
+    
+    const randomScenario = DEMO_SCENARIOS[Math.floor(Math.random() * DEMO_SCENARIOS.length)];
+    triggerDemoScenario(randomScenario);
+    
+    scheduleNextScenario();
+  }, delay);
+}
 
 export function startBackgroundMonitor(intervalMs: number = 10000): void {
   if (isRunning) return;
@@ -114,12 +173,18 @@ export function startBackgroundMonitor(intervalMs: number = 10000): void {
   runMonitorCycle();
   
   monitorInterval = setInterval(runMonitorCycle, intervalMs);
+  
+  scheduleNextScenario();
 }
 
 export function stopBackgroundMonitor(): void {
   if (monitorInterval) {
     clearInterval(monitorInterval);
     monitorInterval = null;
+  }
+  if (scenarioInterval) {
+    clearTimeout(scenarioInterval);
+    scenarioInterval = null;
   }
   isRunning = false;
 }
@@ -253,6 +318,7 @@ export function triggerDemoScenario(scenarioId: string): void {
 function triggerBudgetBreachScenario(): void {
   executeAction('finops', 'investigate', 'project', 'proj-001', 'Cloud Migration Phase 2',
     'Budget variance detected: 23% over allocated spend. Analyzing cost drivers.', 92);
+  notifyAction('finops', 'investigate', 'Cloud Migration Phase 2');
   
   setTimeout(() => {
     sendAgentMessage('finops', ['pmo', 'governance'], 'alert',
@@ -265,18 +331,21 @@ function triggerBudgetBreachScenario(): void {
     executeAction('pmo', 'escalate', 'project', 'proj-001', 'Cloud Migration Phase 2',
       'Escalating to steering committee. Budget breach exceeds tolerance threshold.', 88,
       'finops');
+    notifyAction('pmo', 'escalate', 'Cloud Migration Phase 2');
   }, 3000);
   
   setTimeout(() => {
     executeAction('governance', 'investigate', 'project', 'proj-001', 'Cloud Migration Phase 2',
       'Initiating governance review. Checking approval chain and variance authorization.', 85,
       'pmo');
+    notifyAction('governance', 'investigate', 'Cloud Migration Phase 2');
   }, 4500);
 }
 
 function triggerCriticalProjectScenario(): void {
   executeAction('pmo', 'update-status', 'project', 'proj-003', 'Legacy System Decommission',
     'Status changed to CRITICAL. Three consecutive milestones missed.', 95);
+  notifyAction('pmo', 'update-status', 'Legacy System Decommission');
   
   setTimeout(() => {
     sendAgentMessage('pmo', ['vro', 'governance', 'tmo'], 'alert',
@@ -289,24 +358,28 @@ function triggerCriticalProjectScenario(): void {
     executeAction('vro', 'investigate', 'project', 'proj-003', 'Legacy System Decommission',
       'Assessing value impact. Estimated £2.3M annual savings at risk.', 90,
       'pmo');
+    notifyAction('vro', 'investigate', 'Legacy System Decommission');
   }, 2500);
   
   setTimeout(() => {
     executeAction('tmo', 'create-task', 'project', 'proj-003', 'Legacy System Decommission',
       'Creating recovery task force. Assigning transformation specialists.', 87,
       'vro');
+    notifyAction('tmo', 'create-task', 'Legacy System Decommission');
   }, 4000);
   
   setTimeout(() => {
     executeAction('governance', 'notify', 'project', 'proj-003', 'Legacy System Decommission',
       'Executive stakeholders notified. Scheduling emergency review for tomorrow.', 82,
       'pmo');
+    notifyAction('governance', 'notify', 'Legacy System Decommission');
   }, 5500);
 }
 
 function triggerValueAtRiskScenario(): void {
   executeAction('vro', 'investigate', 'metric', 'value-realized', 'Q4 Value Realization Target',
     'Value realization trending 18% below forecast. Analyzing contributing factors.', 88);
+  notifyAction('vro', 'investigate', 'Q4 Value Realization Target');
   
   setTimeout(() => {
     sendAgentMessage('vro', ['pmo', 'finops'], 'insight',
@@ -319,18 +392,21 @@ function triggerValueAtRiskScenario(): void {
     executeAction('pmo', 'investigate', 'project', 'proj-002', 'Digital Transformation',
       'Investigating delivery blockers. Resource constraints identified as primary factor.', 85,
       'vro');
+    notifyAction('pmo', 'investigate', 'Digital Transformation');
   }, 3000);
   
   setTimeout(() => {
     executeAction('finops', 'mitigate', 'metric', 'value-realized', 'Q4 Value Realization Target',
       'Proposing budget reallocation from lower-priority initiatives to accelerate key projects.', 82,
       'vro');
+    notifyAction('finops', 'mitigate', 'Q4 Value Realization Target');
   }, 4500);
   
   setTimeout(() => {
     executeAction('vro', 'accelerate', 'project', 'proj-002', 'Digital Transformation',
       'Recommending fast-track approval for additional resources. ROI analysis supports investment.', 90,
       'finops');
+    notifyAction('vro', 'accelerate', 'Digital Transformation');
   }, 6000);
 }
 
