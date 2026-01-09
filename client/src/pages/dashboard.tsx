@@ -747,17 +747,17 @@ function DashboardContent() {
             <KPIAttributionPanel />
           </TabsContent>
 
-          {/* AI Recommendations Tab - Dedicated tab for AI actions */}
+          {/* AI Actions Tab - Recommendations and Audit Trail */}
           <TabsContent value="ai-recommendations">
-            <AIRecommendations dataMode={dataMode} />
-          </TabsContent>
-
-          {/* AI Insights Tab - Simplified with key components */}
-          <TabsContent value="ai-insights">
             <div className="space-y-6">
-              <AIProactiveInsightsSection />
+              <AIRecommendations dataMode={dataMode} />
               <ActionAuditTimeline maxItems={20} />
             </div>
+          </TabsContent>
+
+          {/* AI Insights Tab - Proactive insights only */}
+          <TabsContent value="ai-insights">
+            <AIProactiveInsightsSection />
           </TabsContent>
 
           {/* Project Lifecycle Command Center - VRO Only */}
