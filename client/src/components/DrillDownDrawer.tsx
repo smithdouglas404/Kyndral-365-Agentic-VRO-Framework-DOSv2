@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight, Sparkles, FileText, Link2, ExternalLink, History, Database, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEntityDrilldown } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
 import { AICoPilot } from './AICoPilot';
+import { getActionLog, subscribeToActions, AgentAction } from '@/lib/agentActionEngine';
 
 interface DrillDownDrawerProps {
   isOpen: boolean;
@@ -41,6 +42,18 @@ const agentNames: Record<AgentType, string> = {
 
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO' }: DrillDownDrawerProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
+  
+  // Fetch and subscribe to agent activities for the History tab
+  useEffect(() => {
+    setAgentActivities(getActionLog().slice(0, 20));
+    
+    const unsubscribe = subscribeToActions((action) => {
+      setAgentActivities(prev => [action, ...prev].slice(0, 20));
+    });
+    
+    return () => unsubscribe();
+  }, [entityId]);
   
   // Only call hook with valid entity type and id to prevent null returns
   const drilldownData = useEntityDrilldown(
@@ -492,45 +505,111 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                 </TabsContent>
 
                 <TabsContent value="history">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Clock size={16} className="text-gray-500" />
-                        Activity History
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {displayData.history.length > 0 ? (
-                        <div className="space-y-3">
-                          {displayData.history.map((item, index) => (
-                            <div key={index} className="flex gap-3">
-                              <div className="flex flex-col items-center">
-                                <div className={`w-2 h-2 rounded-full ${agentColors[item.agent]}`} />
-                                {index < displayData.history.length - 1 && (
-                                  <div className="w-0.5 h-full bg-gray-200 mt-1" />
-                                )}
-                              </div>
-                              <div className="flex-1 pb-3">
-                                <p className="text-sm font-medium">{item.action}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge variant="outline" className="text-xs">
-                                    {agentNames[item.agent]}
-                                  </Badge>
-                                  <span className="text-xs text-gray-500">
-                                    {new Date(item.timestamp).toLocaleString()}
-                                  </span>
+                  <div className="space-y-4">
+                    {/* Entity-specific history */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Clock size={16} className="text-gray-500" />
+                          Entity Activity History
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {displayData.history.length > 0 ? (
+                          <div className="space-y-3">
+                            {displayData.history.map((item, index) => (
+                              <div key={index} className="flex gap-3">
+                                <div className="flex flex-col items-center">
+                                  <div className={`w-2 h-2 rounded-full ${agentColors[item.agent]}`} />
+                                  {index < displayData.history.length - 1 && (
+                                    <div className="w-0.5 h-full bg-gray-200 mt-1" />
+                                  )}
+                                </div>
+                                <div className="flex-1 pb-3">
+                                  <p className="text-sm font-medium">{item.action}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {agentNames[item.agent]}
+                                    </Badge>
+                                    <span className="text-xs text-gray-500">
+                                      {new Date(item.timestamp).toLocaleString()}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 text-center py-4">
-                          No activity history yet
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 text-center py-4">
+                            No entity-specific history yet
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Agent Activity Feed */}
+                    <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Activity size={16} className="text-purple-600" />
+                          Agent Activity Feed
+                          <Badge variant="outline" className="ml-auto bg-purple-100 text-purple-700 border-purple-200">
+                            {agentActivities.length} actions
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {agentActivities.length > 0 ? (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {agentActivities.map((activity, index) => (
+                              <div 
+                                key={activity.id} 
+                                className="flex gap-3 p-2 bg-white rounded-lg border border-purple-100 hover:bg-purple-50 transition-colors cursor-pointer"
+                              >
+                                <div className="flex flex-col items-center">
+                                  <div className={`w-2 h-2 rounded-full ${agentColors[activity.agentId]}`} />
+                                  {index < agentActivities.length - 1 && (
+                                    <div className="w-0.5 flex-1 bg-purple-200 mt-1" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge 
+                                      variant="outline" 
+                                      className={`text-xs ${
+                                        activity.priority === 'critical' ? 'bg-red-50 text-red-700 border-red-200' :
+                                        activity.priority === 'high' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                        'bg-blue-50 text-blue-700 border-blue-200'
+                                      }`}
+                                    >
+                                      {activity.actionType}
+                                    </Badge>
+                                    <span className="text-xs text-gray-500">
+                                      {new Date(activity.timestamp).toLocaleTimeString()}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm font-medium truncate">{activity.targetEntityName}</p>
+                                  <p className="text-xs text-gray-600 line-clamp-2">{activity.reasoning}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {agentNames[activity.agentId]}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                      {Math.round(activity.aiConfidence * 100)}% confidence
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 text-center py-4">
+                            No agent activities recorded yet
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
