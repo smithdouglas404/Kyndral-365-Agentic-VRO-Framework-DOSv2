@@ -660,17 +660,13 @@ function DashboardContent() {
             <KPIAttributionPanel />
           </TabsContent>
 
-          {/* AI Actions Tab - Recommendations and Audit Trail */}
-          <TabsContent value="ai-recommendations">
+          {/* AI Hub Tab - Actions, Insights, and Audit Trail */}
+          <TabsContent value="ai-hub">
             <div className="space-y-6">
               <AIRecommendations dataMode={dataMode} />
+              <AIProactiveInsightsSection />
               <ActionAuditTimeline maxItems={20} />
             </div>
-          </TabsContent>
-
-          {/* AI Insights Tab - Proactive insights only */}
-          <TabsContent value="ai-insights">
-            <AIProactiveInsightsSection />
           </TabsContent>
 
           {/* Project Lifecycle Command Center - VRO Only */}
