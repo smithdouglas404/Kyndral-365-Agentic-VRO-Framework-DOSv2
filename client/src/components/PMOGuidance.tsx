@@ -40,7 +40,7 @@ const guidanceItems: GuidanceItem[] = [
   {
     id: 'gd-003',
     type: 'collaboration',
-    title: 'Cross-BU Knowledge Share',
+    title: 'Cross-Group Knowledge Share',
     description: 'Retail team achieved 92% adoption with a structured playbook. This approach is recommended for other BU rollouts.',
     source: 'Three Lines of Defence project',
     relevance: 'medium',

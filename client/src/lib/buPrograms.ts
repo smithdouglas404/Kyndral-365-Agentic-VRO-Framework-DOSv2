@@ -899,7 +899,7 @@ export const pmoSummary = {
 };
 
 // ============================================================================
-// PORTFOLIO-LEVEL DATA - Business Unit Portfolios with SAFe 6.0 Metrics
+// PORTFOLIO-LEVEL DATA - Group Function Portfolios with SAFe 6.0 Metrics
 // ============================================================================
 export interface BUPortfolio {
   id: string;

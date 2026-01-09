@@ -506,7 +506,7 @@ export const EXPANDED_PMO_PROJECTS = [
     budget: { spent: 0.5, total: 1.8, unit: "£m" },
     timeline: { elapsed: 4, total: 12, unit: "months" },
     deliverables: { completed: 5, total: 16 },
-    risks: ["Cross-BU coordination"],
+    risks: ["Cross-Group coordination"],
     nextMilestone: "Sprint 1 start - Week 26",
     safe: {
       velocity: 42,

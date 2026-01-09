@@ -51,7 +51,7 @@ const retrospectives: Retrospective[] = [
     wentWell: [
       'Strong stakeholder engagement from Sprint 0',
       'Early integration testing prevented 3-week delay',
-      'Cross-BU collaboration improved delivery speed'
+      'Cross-Group collaboration improved delivery speed'
     ],
     improvements: [
       'Need better vendor communication protocols',

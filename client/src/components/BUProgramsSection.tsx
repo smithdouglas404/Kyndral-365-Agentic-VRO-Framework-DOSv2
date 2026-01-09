@@ -976,7 +976,7 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
             {dataMode === "PMO" ? (
               <>
                 <Building2 size={24} className="text-gray-600" />
-                {selectedBU ? `${selectedBU} Projects` : "Business Unit Portfolios"}
+                {selectedBU ? `${selectedBU} Projects` : "Group Function Portfolios"}
               </>
             ) : (
               <>
