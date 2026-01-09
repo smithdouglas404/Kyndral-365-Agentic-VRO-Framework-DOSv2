@@ -523,29 +523,30 @@ function DashboardContent() {
             agentName={dataMode === "VRO" ? "VRO Agent" : "PMO Agent"}
           />
 
-        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-              {dataMode === "VRO" ? "VRO Intelligence Engine" : "PMO Control Center"}
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-3xl">
-              {dataMode === "VRO" 
-                ? "AI-powered strategic transformation with real-time value realization insights."
-                : "Traditional project management with standard governance and oversight."}
-            </p>
-            {dataMode === "VRO" && (
-              <div className="mt-4 w-full max-w-5xl">
-                <AIAlertTicker />
-              </div>
-            )}
-          </motion.div>
-          
-                    
-        </div>
+        {/* Title section - Only show on Overview tab */}
+        {activeTab === "overview" && (
+          <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
+                {dataMode === "VRO" ? "VRO Intelligence Engine" : "PMO Control Center"}
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-3xl">
+                {dataMode === "VRO" 
+                  ? "AI-powered strategic transformation with real-time value realization insights."
+                  : "Traditional project management with standard governance and oversight."}
+              </p>
+              {dataMode === "VRO" && (
+                <div className="mt-4 w-full max-w-5xl">
+                  <AIAlertTicker />
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
 
         {/* L&G Report Anchored Stats - Only show on Overview tab */}
         {activeTab === "overview" && (
