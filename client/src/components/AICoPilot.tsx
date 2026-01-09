@@ -9,6 +9,7 @@ import { EntityDrilldown, AgentType } from '@/lib/dataHub';
 interface AICoPilotProps {
   drilldown: EntityDrilldown;
   agentId?: AgentType;
+  dataMode?: 'VRO' | 'PMO';
 }
 
 interface CoPilotInsights {
@@ -255,12 +256,12 @@ function AgentCard({
   );
 }
 
-export function AICoPilot({ drilldown, agentId = 'vro' }: AICoPilotProps) {
+export function AICoPilot({ drilldown, agentId = 'vro', dataMode = 'VRO' }: AICoPilotProps) {
   const [expandedAgent, setExpandedAgent] = useState<AgentType | null>(null);
   
-  const agents = drilldown.relatedAgents && drilldown.relatedAgents.length > 0 
-    ? drilldown.relatedAgents 
-    : [agentId];
+  // Filter agents based on dataMode - VRO mode shows VRO agent, PMO mode shows PMO agent
+  const primaryAgent: AgentType = dataMode === 'VRO' ? 'vro' : 'pmo';
+  const agents: AgentType[] = [primaryAgent];
 
   return (
     <div className="mb-4">

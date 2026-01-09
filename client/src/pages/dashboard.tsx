@@ -876,6 +876,7 @@ function DashboardContent() {
         onClose={() => setDrillDownOpen(false)}
         entityType={drillDownEntity?.type || ""}
         entityId={drillDownEntity?.id || ""}
+        dataMode={dataMode}
       />
     </div>
   );

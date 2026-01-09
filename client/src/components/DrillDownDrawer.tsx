@@ -14,6 +14,7 @@ interface DrillDownDrawerProps {
   onClose: () => void;
   entityType: string;
   entityId: string;
+  dataMode?: 'VRO' | 'PMO';
 }
 
 const agentColors: Record<AgentType, string> = {
@@ -38,7 +39,7 @@ const agentNames: Record<AgentType, string> = {
   ocm: 'OCM Agent'
 };
 
-export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: DrillDownDrawerProps) {
+export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO' }: DrillDownDrawerProps) {
   const [activeTab, setActiveTab] = useState('overview');
   
   // Only call hook with valid entity type and id to prevent null returns
@@ -73,7 +74,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
     ],
     history: [],
     aiInsight: `This ${entityType} item requires detailed analysis. The VRO agent is monitoring this entity and will provide updates as more information becomes available.`,
-    summary: `Details for ${entityType} entity. Click on the actions below to trigger agent workflows.`
+    summary: `Details for ${entityType} entity. Click on the actions below to trigger agent workflows.`,
+    relatedEntities: [] as { type: string; id: string; name: string }[]
   } : null;
   
   const displayData = drilldownData || fallbackDrilldown;
@@ -115,7 +117,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
             <div className="p-4">
               <AICoPilot 
                 drilldown={displayData} 
-                agentId={displayData.relatedAgents[0] || 'vro'} 
+                agentId={displayData.relatedAgents[0] || 'vro'}
+                dataMode={dataMode}
               />
               
               <Tabs value={activeTab} onValueChange={setActiveTab}>
