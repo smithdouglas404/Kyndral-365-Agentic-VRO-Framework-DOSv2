@@ -788,14 +788,16 @@ function DashboardContent() {
               <TrendingUp size={16} />
               <span className="hidden sm:inline">Benchmarks</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="performance" 
-              className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-              data-testid="tab-performance"
-            >
-              <Target size={16} />
-              <span className="hidden sm:inline">Performance</span>
-            </TabsTrigger>
+            {dataMode === "VRO" && (
+              <TabsTrigger 
+                value="performance" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
+                data-testid="tab-performance"
+              >
+                <Target size={16} />
+                <span className="hidden sm:inline">Performance</span>
+              </TabsTrigger>
+            )}
             {dataMode === "PMO" && (
               <>
                 <TabsTrigger 
