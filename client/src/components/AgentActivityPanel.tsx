@@ -66,7 +66,7 @@ const PRIORITY_COLORS: Record<ActionPriority, string> = {
   critical: 'bg-red-100 text-red-700'
 };
 
-interface ActivityItem {
+export interface ActivityItem {
   id: string;
   type: 'action' | 'message';
   timestamp: Date;
@@ -97,9 +97,10 @@ interface AgentActivityPanelProps {
   compact?: boolean;
   maxItems?: number;
   filterAgent?: AgentType;
+  onViewDetails?: (item: ActivityItem) => void;
 }
 
-export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent }: AgentActivityPanelProps) {
+export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent, onViewDetails }: AgentActivityPanelProps) {
   const [actions, setActions] = useState<AgentAction[]>([]);
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [expanded, setExpanded] = useState(true);
@@ -354,6 +355,22 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                                     <div className="text-gray-400">
                                       Full timestamp: {item.timestamp.toLocaleString()}
                                     </div>
+                                    
+                                    {onViewDetails && (
+                                      <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="mt-3 w-full bg-blue-600 hover:bg-blue-700"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onViewDetails(item);
+                                        }}
+                                        data-testid={`button-view-details-${item.id}`}
+                                      >
+                                        <ArrowRight className="h-3 w-3 mr-2" />
+                                        Open Full Details
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
                               )}
