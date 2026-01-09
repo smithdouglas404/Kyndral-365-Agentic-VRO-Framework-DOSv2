@@ -164,7 +164,7 @@ function AgentCard({
             </Badge>
           </div>
           <p className="text-sm text-gray-600 mt-0.5">
-            Analyzing {personality.focus}... <span className="text-blue-600 font-medium">Hello I have something to Say!</span>
+            Analyzing {personality.focus}... <span className="text-blue-600 font-medium">Hello I have something to say!</span>
           </p>
         </div>
         {isExpanded ? (
