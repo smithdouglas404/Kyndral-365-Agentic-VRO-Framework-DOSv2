@@ -614,27 +614,7 @@ export const OKRS: OKR[] = [
 
 export function calculateVROMetricsFromProjects(): VROAggregatedMetric[] {
   const allProjects = EXPANDED_PMO_PROJECTS;
-  
-  const completedProjects = allProjects.filter(p => p.safeStage === 'done');
-  const implementingProjects = allProjects.filter(p => p.safeStage === 'implementing');
   const allActiveProjects = allProjects.filter(p => p.safeStage !== 'done');
-  
-  let totalBudget = 0;
-  let totalSpent = 0;
-  let totalValueRealized = 0;
-  let totalExpectedValue = 0;
-  
-  vroPrograms.forEach(prog => {
-    totalValueRealized += prog.valueRealized;
-    totalExpectedValue += prog.roiValue;
-  });
-  
-  allProjects.forEach(proj => {
-    totalBudget += proj.budget.total;
-    totalSpent += proj.budget.spent;
-  });
-  
-  const currentROI = totalExpectedValue > 0 ? Math.round((totalValueRealized / totalExpectedValue) * 100) : 0;
   
   const avgPredictability = Math.round(
     allActiveProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / allActiveProjects.length
@@ -647,23 +627,23 @@ export function calculateVROMetricsFromProjects(): VROAggregatedMetric[] {
   const onTrackCount = allProjects.filter(p => p.status === 'green').length;
   const deliverySuccessRate = Math.round((onTrackCount / allProjects.length) * 100);
   
-  const okrProgress = Math.round(OKRS.reduce((sum, okr) => sum + okr.overallProgress, 0) / OKRS.length);
+  const tracedROI = getTracedVROROI();
+  const okrProgress = Math.round(OKRS.reduce((sum, okr) => sum + calculateOKRProgress(okr), 0) / OKRS.length);
 
   return [
     {
       id: "vro-metric-001",
-      name: "Current ROI",
-      currentValue: currentROI,
+      name: "Strategic ROI",
+      currentValue: tracedROI.roi,
       targetValue: 85,
       unit: "%",
       sourceOKRs: OKRS.map(o => o.id),
-      calculationFormula: "(Total Value Realized / Total Expected Value) × 100",
-      breakdown: [
-        { source: "Institutional Retirement", contribution: 35, value: vroPrograms.filter(p => p.bu === "Institutional Retirement").reduce((s, p) => s + p.valueRealized, 0) },
-        { source: "Asset Management", contribution: 28, value: vroPrograms.filter(p => p.bu === "Asset Management").reduce((s, p) => s + p.valueRealized, 0) },
-        { source: "Retail", contribution: 22, value: vroPrograms.filter(p => p.bu === "Retail").reduce((s, p) => s + p.valueRealized, 0) },
-        { source: "Corporate Investments", contribution: 15, value: vroPrograms.filter(p => p.bu === "Corporate Investments").reduce((s, p) => s + p.valueRealized, 0) }
-      ],
+      calculationFormula: "Weighted average of OKR progress (Critical: 1.5x, High: 1x, Medium: 0.5x)",
+      breakdown: tracedROI.breakdown.map(b => ({
+        source: b.objective,
+        contribution: Math.round(b.weight * 100 / tracedROI.breakdown.reduce((s, x) => s + x.weight, 0)),
+        value: b.progress
+      })),
       lastUpdated: new Date()
     },
     {
@@ -688,11 +668,11 @@ export function calculateVROMetricsFromProjects(): VROAggregatedMetric[] {
       targetValue: 80,
       unit: "%",
       sourceOKRs: OKRS.map(o => o.id),
-      calculationFormula: "Average progress across all strategic OKRs",
+      calculationFormula: "Average calculated progress across all strategic OKRs (derived from KR → KPI data)",
       breakdown: OKRS.map(okr => ({
         source: okr.objective.substring(0, 30) + "...",
         contribution: Math.round(100 / OKRS.length),
-        value: okr.overallProgress
+        value: calculateOKRProgress(okr)
       })),
       lastUpdated: new Date()
     },
@@ -780,4 +760,168 @@ export function getGroupFunctionCounts(): Record<string, number> {
   });
   
   return counts;
+}
+
+export interface PMOOverviewMetrics {
+  activeProjects: number;
+  onTrack: number;
+  atRisk: number;
+  critical: number;
+  safeStages: number;
+  totalBudget: number;
+  totalSpent: number;
+  avgPredictability: number;
+  avgVelocity: number;
+}
+
+export function getPMOOverviewMetrics(): PMOOverviewMetrics {
+  const allProjects = EXPANDED_PMO_PROJECTS;
+  const onTrack = allProjects.filter(p => p.status === 'green').length;
+  const atRisk = allProjects.filter(p => p.status === 'amber').length;
+  const critical = allProjects.filter(p => p.status === 'red').length;
+  
+  const totalBudget = allProjects.reduce((sum, p) => sum + p.budget.total, 0);
+  const totalSpent = allProjects.reduce((sum, p) => sum + p.budget.spent, 0);
+  
+  const avgPredictability = Math.round(
+    allProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / allProjects.length
+  );
+  
+  const avgVelocity = Math.round(
+    allProjects.reduce((sum, p) => sum + p.safe.velocity, 0) / allProjects.length
+  );
+  
+  return {
+    activeProjects: allProjects.length,
+    onTrack,
+    atRisk,
+    critical,
+    safeStages: 6,
+    totalBudget,
+    totalSpent,
+    avgPredictability,
+    avgVelocity
+  };
+}
+
+export function calculateKeyResultProgress(kpiIds: string[]): number {
+  let totalProgress = 0;
+  let totalWeight = 0;
+  
+  kpiIds.forEach(kpiId => {
+    for (const projectId in PROJECT_KPIS) {
+      const kpi = PROJECT_KPIS[projectId]?.find(k => k.id === kpiId);
+      if (kpi) {
+        const progress = Math.min(100, (kpi.value / kpi.target) * 100);
+        totalProgress += progress * kpi.weight;
+        totalWeight += kpi.weight;
+        break;
+      }
+    }
+  });
+  
+  return totalWeight > 0 ? Math.round(totalProgress / totalWeight) : 0;
+}
+
+export function calculateOKRProgress(okr: OKR): number {
+  if (okr.keyResults.length === 0) return 0;
+  
+  const totalProgress = okr.keyResults.reduce((sum, kr) => {
+    const calculatedProgress = calculateKeyResultProgress(kr.contributingKPIs);
+    return sum + (calculatedProgress > 0 ? calculatedProgress : kr.progress);
+  }, 0);
+  
+  return Math.round(totalProgress / okr.keyResults.length);
+}
+
+export function getTracedVROROI(): { 
+  roi: number; 
+  breakdown: { okrId: string; objective: string; progress: number; weight: number; contribution: number }[] 
+} {
+  const okrBreakdown = OKRS.map(okr => {
+    const calculatedProgress = calculateOKRProgress(okr);
+    const weight = okr.strategicPriority === 'critical' ? 1.5 : okr.strategicPriority === 'high' ? 1.0 : 0.5;
+    return {
+      okrId: okr.id,
+      objective: okr.objective,
+      progress: calculatedProgress,
+      weight,
+      contribution: calculatedProgress * weight
+    };
+  });
+  
+  const totalWeight = okrBreakdown.reduce((sum, o) => sum + o.weight, 0);
+  const weightedROI = Math.round(okrBreakdown.reduce((sum, o) => sum + o.contribution, 0) / totalWeight);
+  
+  return {
+    roi: weightedROI,
+    breakdown: okrBreakdown
+  };
+}
+
+export interface TraceableMetricBreakdown {
+  level: 'okr' | 'kr' | 'kpi' | 'project';
+  id: string;
+  name: string;
+  value: number;
+  contribution: number;
+  children?: TraceableMetricBreakdown[];
+}
+
+export function getFullTraceabilityChain(okrId: string): TraceableMetricBreakdown | null {
+  const okr = OKRS.find(o => o.id === okrId);
+  if (!okr) return null;
+  
+  const krChildren: TraceableMetricBreakdown[] = okr.keyResults.map(kr => {
+    const kpiChildren: TraceableMetricBreakdown[] = kr.contributingKPIs.map(kpiId => {
+      let foundKPI: ProjectKPI | null = null;
+      let foundProjectId = '';
+      
+      for (const projectId in PROJECT_KPIS) {
+        const kpi = PROJECT_KPIS[projectId]?.find(k => k.id === kpiId);
+        if (kpi) {
+          foundKPI = kpi;
+          foundProjectId = projectId;
+          break;
+        }
+      }
+      
+      if (!foundKPI) return null;
+      
+      const project = EXPANDED_PMO_PROJECTS.find(p => p.id === foundProjectId);
+      
+      return {
+        level: 'kpi' as const,
+        id: kpiId,
+        name: foundKPI.name,
+        value: foundKPI.value,
+        contribution: Math.min(100, (foundKPI.value / foundKPI.target) * 100),
+        children: project ? [{
+          level: 'project' as const,
+          id: project.id,
+          name: project.name,
+          value: project.safe.epicProgress,
+          contribution: project.status === 'green' ? 100 : project.status === 'amber' ? 60 : 30
+        }] : undefined
+      };
+    }).filter(Boolean) as TraceableMetricBreakdown[];
+    
+    return {
+      level: 'kr' as const,
+      id: kr.id,
+      name: kr.description,
+      value: calculateKeyResultProgress(kr.contributingKPIs) || kr.progress,
+      contribution: kr.progress,
+      children: kpiChildren
+    };
+  });
+  
+  return {
+    level: 'okr' as const,
+    id: okr.id,
+    name: okr.objective,
+    value: calculateOKRProgress(okr),
+    contribution: okr.overallProgress,
+    children: krChildren
+  };
 }

@@ -47,6 +47,7 @@ import { VROMetricsGrid } from "@/components/VROMetricCard";
 import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
+import { getPMOOverviewMetrics } from "@/lib/unifiedMetrics";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -554,12 +555,15 @@ function DashboardContent() {
                     'Cost Savings': lgAnnualReportData.costSavings.actual2025,
                     'Active Alerts': aiAlerts.length
                   }
-                : {
-                    'Active Projects': 24,
-                    'On Track': 18,
-                    'At Risk': 4,
-                    'SAFe Stages': 6
-                  }
+                : (() => {
+                    const pmoMetrics = getPMOOverviewMetrics();
+                    return {
+                      'Active Projects': pmoMetrics.activeProjects,
+                      'On Track': pmoMetrics.onTrack,
+                      'At Risk': pmoMetrics.atRisk + pmoMetrics.critical,
+                      'SAFe Stages': pmoMetrics.safeStages
+                    };
+                  })()
             }}
             agentName={dataMode === "VRO" ? "VRO Agent" : "PMO Agent"}
           />

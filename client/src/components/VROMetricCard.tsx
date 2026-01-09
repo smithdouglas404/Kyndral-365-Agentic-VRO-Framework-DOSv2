@@ -1,14 +1,85 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, TrendingDown, Info, ChevronDown, ChevronUp, Calculator, Target, Layers } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info, ChevronDown, ChevronUp, Calculator, Target, Layers, ChevronRight, FileText, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSimulation } from '@/lib/liveSimulationEngine';
-import type { VROAggregatedMetric } from '@/lib/unifiedMetrics';
+import type { VROAggregatedMetric, TraceableMetricBreakdown } from '@/lib/unifiedMetrics';
+import { getFullTraceabilityChain, OKRS } from '@/lib/unifiedMetrics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+interface TraceabilityItemProps {
+  item: TraceableMetricBreakdown | null;
+  okrName: string;
+  depth?: number;
+}
+
+function TraceabilityItem({ item, okrName, depth = 0 }: TraceabilityItemProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  if (!item) {
+    return (
+      <div className="text-xs text-gray-400 italic pl-4">
+        No traceability data available
+      </div>
+    );
+  }
+  
+  const levelColors = {
+    okr: 'bg-purple-50 border-purple-200 text-purple-700',
+    kr: 'bg-blue-50 border-blue-200 text-blue-700',
+    kpi: 'bg-green-50 border-green-200 text-green-700',
+    project: 'bg-amber-50 border-amber-200 text-amber-700'
+  };
+  
+  const levelIcons = {
+    okr: Target,
+    kr: BarChart3,
+    kpi: TrendingUp,
+    project: FileText
+  };
+  
+  const Icon = levelIcons[item.level];
+  const hasChildren = item.children && item.children.length > 0;
+  
+  return (
+    <div className={cn("rounded-lg border", depth === 0 ? "p-2" : "p-1.5 ml-3 mt-1", levelColors[item.level])}>
+      <button
+        onClick={() => hasChildren && setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-2 text-left"
+        disabled={!hasChildren}
+        data-testid={`trace-${item.level}-${item.id}`}
+      >
+        {hasChildren && (
+          <ChevronRight className={cn("h-3 w-3 transition-transform", isOpen && "rotate-90")} />
+        )}
+        <Icon className="h-3 w-3" />
+        <span className={cn("text-xs font-medium flex-1 truncate", depth === 0 ? "font-semibold" : "")}>
+          {depth === 0 ? okrName : item.name}
+        </span>
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+          {item.level === 'project' ? `${item.value}% complete` : `${Math.round(item.value)}%`}
+        </Badge>
+      </button>
+      
+      {isOpen && hasChildren && (
+        <div className="mt-1">
+          {item.children!.map((child, idx) => (
+            <TraceabilityItem 
+              key={child.id || idx} 
+              item={child} 
+              okrName={child.name}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface VROMetricCardProps {
   metric: VROAggregatedMetric;
@@ -162,14 +233,20 @@ export function VROMetricCard({ metric, index }: VROMetricCardProps) {
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Target className="h-4 w-4 text-gray-600" />
-                          <span className="text-sm font-semibold text-gray-700">Source OKRs</span>
+                          <span className="text-sm font-semibold text-gray-700">Full Traceability Chain</span>
                         </div>
-                        <div className="flex flex-wrap gap-1">
-                          {metric.sourceOKRs.map(okrId => (
-                            <Badge key={okrId} variant="secondary" className="text-xs">
-                              {okrId}
-                            </Badge>
-                          ))}
+                        <div className="space-y-2">
+                          {metric.sourceOKRs.map(okrId => {
+                            const okr = OKRS.find(o => o.id === okrId);
+                            const traceChain = getFullTraceabilityChain(okrId);
+                            return (
+                              <TraceabilityItem 
+                                key={okrId} 
+                                item={traceChain}
+                                okrName={okr?.objective || okrId}
+                              />
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
