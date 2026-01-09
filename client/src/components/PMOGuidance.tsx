@@ -90,11 +90,19 @@ function getTypeConfig(type: GuidanceItem['type']) {
   }
 }
 
-export function PMOGuidance() {
+interface PMOGuidanceProps {
+  onDrillDown?: (type: string, id: string) => void;
+}
+
+export function PMOGuidance({ onDrillDown }: PMOGuidanceProps) {
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
 
   const openDrawer = (entityType: string, entityId: string) => {
-    setSelectedEntity({ type: entityType, id: entityId });
+    if (onDrillDown) {
+      onDrillDown(entityType, entityId);
+    } else {
+      setSelectedEntity({ type: entityType, id: entityId });
+    }
   };
 
   const closeDrawer = () => {

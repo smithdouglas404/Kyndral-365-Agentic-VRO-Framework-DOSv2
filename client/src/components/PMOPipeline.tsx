@@ -24,7 +24,11 @@ function getStatusColor(status: 'green' | 'amber' | 'red') {
   }
 }
 
-export function PMOPipeline() {
+interface PMOPipelineProps {
+  onDrillDown?: (type: string, id: string) => void;
+}
+
+export function PMOPipeline({ onDrillDown }: PMOPipelineProps) {
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<{type: string; id: string} | null>(null);
   
@@ -33,13 +37,21 @@ export function PMOPipeline() {
   const groupFunctionCounts = getGroupFunctionCounts();
   
   const handleProjectClick = (projectId: string) => {
-    setSelectedProject({ type: 'project', id: projectId });
-    setDrillDownOpen(true);
+    if (onDrillDown) {
+      onDrillDown('project', projectId);
+    } else {
+      setSelectedProject({ type: 'project', id: projectId });
+      setDrillDownOpen(true);
+    }
   };
   
   const handleStageClick = (stageId: string) => {
-    setSelectedProject({ type: 'metric', id: stageId });
-    setDrillDownOpen(true);
+    if (onDrillDown) {
+      onDrillDown('metric', stageId);
+    } else {
+      setSelectedProject({ type: 'metric', id: stageId });
+      setDrillDownOpen(true);
+    }
   };
   
   const projectsByStage = SAFE_STAGES.map(stage => ({

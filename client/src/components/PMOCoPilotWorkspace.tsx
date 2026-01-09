@@ -28,12 +28,24 @@ function getStatusColor(status: 'green' | 'amber' | 'red') {
   }
 }
 
-export function PMOCoPilotWorkspace() {
+interface PMOCoPilotWorkspaceProps {
+  onDrillDown?: (type: string, id: string) => void;
+}
+
+export function PMOCoPilotWorkspace({ onDrillDown }: PMOCoPilotWorkspaceProps) {
   const [selectedProject, setSelectedProject] = useState<PMOProject | null>(null);
   const [stageFilter, setStageFilter] = useState<SAFePortfolioStage | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const allProjects = EXPANDED_PMO_PROJECTS as PMOProject[];
+  
+  const handleProjectClick = (project: PMOProject) => {
+    if (onDrillDown) {
+      onDrillDown('project', project.id);
+    } else {
+      setSelectedProject(project);
+    }
+  };
   
   const filteredProjects = allProjects.filter(project => {
     const matchesStage = stageFilter === 'all' || project.safeStage === stageFilter;

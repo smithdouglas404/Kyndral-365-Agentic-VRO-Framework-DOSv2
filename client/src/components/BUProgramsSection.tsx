@@ -506,14 +506,20 @@ function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfoli
       transition={{ duration: 0.2 }}
     >
       <Card 
-        className="h-full hover:shadow-xl transition-all cursor-pointer relative overflow-hidden border-l-4"
+        className={`h-full hover:shadow-xl transition-all cursor-pointer relative overflow-hidden border-l-4 ${
+          isPMO 
+            ? "bg-gradient-to-br from-slate-50 to-gray-100 border-t-2 border-t-purple-500" 
+            : "bg-gradient-to-br from-teal-50 to-emerald-50 border-t-2 border-t-teal-500"
+        }`}
         style={{ borderLeftColor: BU_COLORS[portfolio.name] || "#005EB8" }}
         onClick={onDrillDown}
         data-testid={`portfolio-${portfolio.id}`}
       >
-        {/* Mode Badge */}
-        <div className={`absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white rounded-bl ${isPMO ? "bg-gray-600" : "bg-teal-600"}`}>
-          {isPMO ? "PMO PORTFOLIO" : "VRO PORTFOLIO"}
+        {/* Mode Badge - More prominent */}
+        <div className={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold text-white rounded-bl-lg ${
+          isPMO ? "bg-purple-600" : "bg-teal-600"
+        }`}>
+          {isPMO ? "PMO VIEW" : "VRO VALUE"}
         </div>
         
         <CardHeader className="pb-2 pt-4">
@@ -526,33 +532,50 @@ function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfoli
         </CardHeader>
         
         <CardContent className="space-y-3">
-          {/* Macro KPIs */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-2 rounded" style={{ backgroundColor: `${healthColor}15` }}>
-              <p className="text-xl font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</p>
-              <p className="text-[9px] text-muted-foreground">Health</p>
+          {/* Macro KPIs - Different for PMO vs VRO */}
+          {isPMO ? (
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 rounded bg-purple-100 border border-purple-200">
+                <p className="text-xl font-bold text-purple-700">{portfolio.projectCount}</p>
+                <p className="text-[9px] text-purple-600 font-medium">Projects</p>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: `${healthColor}15`, border: `1px solid ${healthColor}30` }}>
+                <p className="text-xl font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</p>
+                <p className="text-[9px] text-muted-foreground">RAG Status</p>
+              </div>
+              <div className="p-2 bg-gray-100 rounded border border-gray-200">
+                <p className="text-xl font-bold text-gray-700">{portfolio.activeEpics}</p>
+                <p className="text-[9px] text-gray-600 font-medium">EPICs</p>
+              </div>
             </div>
-            <div className="p-2 bg-blue-50 rounded">
-              <p className="text-xl font-bold text-blue-700">{portfolio.projectCount}</p>
-              <p className="text-[9px] text-muted-foreground">Projects</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 rounded bg-teal-100 border border-teal-200">
+                <p className="text-xl font-bold text-teal-700">£{portfolio.valueRealized}m</p>
+                <p className="text-[9px] text-teal-600 font-medium">Value Realized</p>
+              </div>
+              <div className="p-2 rounded bg-emerald-100 border border-emerald-200">
+                <p className="text-xl font-bold text-emerald-700">{portfolio.programCount}</p>
+                <p className="text-[9px] text-emerald-600 font-medium">Programs</p>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: `${healthColor}15`, border: `1px solid ${healthColor}30` }}>
+                <p className="text-xl font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</p>
+                <p className="text-[9px] text-muted-foreground">Value Score</p>
+              </div>
             </div>
-            <div className="p-2 bg-purple-50 rounded">
-              <p className="text-xl font-bold text-purple-700">{portfolio.activeEpics}</p>
-              <p className="text-[9px] text-muted-foreground">EPICs</p>
-            </div>
-          </div>
+          )}
           
-          {/* SAFe Metrics Row */}
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="p-1.5 bg-gray-50 rounded">
+          {/* SAFe Metrics Row - Different labels for PMO vs VRO */}
+          <div className={`grid grid-cols-3 gap-2 text-center text-xs ${isPMO ? 'bg-purple-50/50 p-2 rounded-lg' : 'bg-teal-50/50 p-2 rounded-lg'}`}>
+            <div className="p-1.5 bg-white rounded shadow-sm">
               <p className="font-bold">{portfolio.velocity}</p>
-              <p className="text-[9px] text-muted-foreground">Velocity</p>
+              <p className="text-[9px] text-muted-foreground">{isPMO ? 'Delivery Vel.' : 'Value Vel.'}</p>
             </div>
-            <div className="p-1.5 bg-gray-50 rounded">
+            <div className="p-1.5 bg-white rounded shadow-sm">
               <p className="font-bold">{portfolio.predictability}%</p>
-              <p className="text-[9px] text-muted-foreground">Predictability</p>
+              <p className="text-[9px] text-muted-foreground">{isPMO ? 'On-Time %' : 'ROI Conf.'}</p>
             </div>
-            <div className="p-1.5 bg-gray-50 rounded">
+            <div className="p-1.5 bg-white rounded shadow-sm">
               <p className="font-bold">{portfolio.currentPI}</p>
               <p className="text-[9px] text-muted-foreground">Current PI</p>
             </div>

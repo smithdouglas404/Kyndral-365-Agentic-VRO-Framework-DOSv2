@@ -772,7 +772,7 @@ function DashboardContent() {
 
             {/* PMO Guidance Section - Only in PMO Mode */}
             {dataMode === "PMO" && (
-              <PMOGuidance />
+              <PMOGuidance onDrillDown={handleDrillDown} />
             )}
 
             {/* Cross-Agent Collaboration */}
@@ -830,12 +830,12 @@ function DashboardContent() {
 
           {/* Pipeline Tab - PMO Only */}
           <TabsContent value="pipeline" className="space-y-6">
-            <PMOPipeline />
+            <PMOPipeline onDrillDown={handleDrillDown} />
           </TabsContent>
 
           {/* Workspace Tab - PMO Co-Pilot */}
           <TabsContent value="workspace" className="space-y-6">
-            <PMOCoPilotWorkspace />
+            <PMOCoPilotWorkspace onDrillDown={handleDrillDown} />
           </TabsContent>
 
         </Tabs>
