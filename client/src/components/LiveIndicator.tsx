@@ -57,7 +57,7 @@ export function LiveToggle() {
 export function LiveActivityFeed() {
   const { state } = useSimulation();
   
-  if (!state.isLive || state.recentChanges.length === 0) {
+  if (state.recentChanges.length === 0) {
     return null;
   }
   

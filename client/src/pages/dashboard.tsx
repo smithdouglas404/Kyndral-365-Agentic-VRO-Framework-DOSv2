@@ -42,7 +42,7 @@ import { PMOProjectWorkspace } from "@/components/PMOProjectWorkspace";
 import { PMOKnowledgeHub } from "@/components/PMOKnowledgeHub";
 import { PMOCoPilotWorkspace } from "@/components/PMOCoPilotWorkspace";
 import { SimulationProvider } from "@/components/SimulationProvider";
-import { LiveToggle, LiveActivityFeed } from "@/components/LiveIndicator";
+import { LiveActivityFeed } from "@/components/LiveIndicator";
 import { VROMetricsGrid } from "@/components/VROMetricCard";
 import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
@@ -586,7 +586,6 @@ function DashboardContent() {
           
                     
           <div className="flex items-center gap-3">
-            <LiveToggle />
                         
             <Dialog open={exportOpen} onOpenChange={setExportOpen}>
               <DialogTrigger asChild>

@@ -42,7 +42,7 @@ function generateSmallChange(value: number, maxDelta: number = 2, isPositiveBias
 
 export function createInitialState(): SimulationState {
   return {
-    isLive: false,
+    isLive: true,
     lastUpdate: new Date(),
     updateCount: 0,
     projects: JSON.parse(JSON.stringify(EXPANDED_PMO_PROJECTS)),
