@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { SAFePortfolioStage } from '@/lib/buPrograms';
 import { EXPANDED_PMO_PROJECTS, getStageCounts, getGroupFunctionCounts } from '@/lib/unifiedMetrics';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb, Search, BarChart3, ClipboardList, Cog, CheckCircle2, Building2 } from 'lucide-react';
+import { DrillDownDrawer } from './DrillDownDrawer';
 
 const SAFE_STAGES: { id: SAFePortfolioStage; label: string; icon: React.ElementType; color: string; bgColor: string }[] = [
   { id: 'funnel', label: 'Funnel', icon: Lightbulb, color: 'text-purple-600', bgColor: 'bg-purple-50 border-purple-200' },
@@ -23,9 +25,22 @@ function getStatusColor(status: 'green' | 'amber' | 'red') {
 }
 
 export function PMOPipeline() {
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<{type: string; id: string} | null>(null);
+  
   const allProjects = EXPANDED_PMO_PROJECTS;
   const stageCounts = getStageCounts();
   const groupFunctionCounts = getGroupFunctionCounts();
+  
+  const handleProjectClick = (projectId: string) => {
+    setSelectedProject({ type: 'project', id: projectId });
+    setDrillDownOpen(true);
+  };
+  
+  const handleStageClick = (stageId: string) => {
+    setSelectedProject({ type: 'metric', id: stageId });
+    setDrillDownOpen(true);
+  };
   
   const projectsByStage = SAFE_STAGES.map(stage => ({
     ...stage,
@@ -90,7 +105,10 @@ export function PMOPipeline() {
               )}
               data-testid={`pipeline-stage-${stage.id}`}
             >
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+              <div 
+                className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 cursor-pointer hover:bg-white/50 -m-1 p-1 rounded transition-colors"
+                onClick={() => handleStageClick(stage.id)}
+              >
                 <Icon className={cn("h-4 w-4", stage.color)} />
                 <span className={cn("text-sm font-semibold", stage.color)}>{stage.label}</span>
                 <Badge variant="secondary" className="ml-auto text-xs">
@@ -112,6 +130,7 @@ export function PMOPipeline() {
                       transition={{ delay: stageIdx * 0.1 + idx * 0.05 }}
                       className="bg-white rounded-md p-2.5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
                       data-testid={`pipeline-project-${project.id}`}
+                      onClick={() => handleProjectClick(project.id)}
                     >
                       <div className="flex items-start gap-2">
                         <div className={cn("w-2 h-2 rounded-full mt-1.5 flex-shrink-0", getStatusColor(project.status))} />
@@ -151,6 +170,13 @@ export function PMOPipeline() {
           </div>
         </div>
       </div>
+      
+      <DrillDownDrawer
+        isOpen={drillDownOpen}
+        onClose={() => setDrillDownOpen(false)}
+        entityType={selectedProject?.type || ""}
+        entityId={selectedProject?.id || ""}
+      />
     </div>
   );
 }

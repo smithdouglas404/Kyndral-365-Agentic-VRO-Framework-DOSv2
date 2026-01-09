@@ -186,28 +186,33 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId }: Drill
                     )}
 
                     {drilldown.relatedEntities && drilldown.relatedEntities.length > 0 && (
-                      <Card>
+                      <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
-                            <Brain size={16} className="text-purple-500" />
-                            Related Items ({drilldown.relatedEntities.length})
+                            <Brain size={16} className="text-indigo-600" />
+                            <span className="text-indigo-900">Projects That Make Up This Metric ({drilldown.relatedEntities.length})</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-2">
-                            {drilldown.relatedEntities.map((entity) => (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {drilldown.relatedEntities.map((entity, index) => (
                               <div
                                 key={entity.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                                className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors border border-indigo-100 shadow-sm"
                                 data-testid={`related-entity-${entity.id}`}
                               >
                                 <div className="flex items-center gap-3">
-                                  <Badge variant="outline" className="text-xs">
-                                    {entity.type}
-                                  </Badge>
-                                  <span className="font-medium text-sm">{entity.name}</span>
+                                  <span className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    {index + 1}
+                                  </span>
+                                  <div>
+                                    <span className="font-medium text-sm text-gray-900 block">{entity.name}</span>
+                                    <Badge variant="outline" className="text-xs mt-0.5 bg-indigo-50 text-indigo-700 border-indigo-200">
+                                      {entity.type}
+                                    </Badge>
+                                  </div>
                                 </div>
-                                <ChevronRight size={16} className="text-gray-400" />
+                                <ChevronRight size={16} className="text-indigo-400" />
                               </div>
                             ))}
                           </div>

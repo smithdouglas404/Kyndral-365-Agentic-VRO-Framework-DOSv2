@@ -774,6 +774,155 @@ export interface PMOOverviewMetrics {
   avgVelocity: number;
 }
 
+export interface PMOMetricWithProjects {
+  count: number;
+  total: number;
+  projectIds: string[];
+  projects: typeof EXPANDED_PMO_PROJECTS;
+}
+
+export interface PMOMetricsDetailed {
+  activeProjects: PMOMetricWithProjects;
+  onTrack: PMOMetricWithProjects;
+  atRisk: PMOMetricWithProjects;
+  critical: PMOMetricWithProjects;
+  implementing: PMOMetricWithProjects;
+  funnel: PMOMetricWithProjects;
+  reviewing: PMOMetricWithProjects;
+  analyzing: PMOMetricWithProjects;
+  portfolioBacklog: PMOMetricWithProjects;
+  done: PMOMetricWithProjects;
+  totalBudget: number;
+  totalSpent: number;
+  avgPredictability: number;
+  avgVelocity: number;
+}
+
+export function getPMOMetricsDetailed(): PMOMetricsDetailed {
+  const allProjects = EXPANDED_PMO_PROJECTS;
+  
+  const onTrackProjects = allProjects.filter(p => p.status === 'green');
+  const atRiskProjects = allProjects.filter(p => p.status === 'amber');
+  const criticalProjects = allProjects.filter(p => p.status === 'red');
+  const implementingProjects = allProjects.filter(p => p.safeStage === 'implementing');
+  const funnelProjects = allProjects.filter(p => p.safeStage === 'funnel');
+  const reviewingProjects = allProjects.filter(p => p.safeStage === 'reviewing');
+  const analyzingProjects = allProjects.filter(p => p.safeStage === 'analyzing');
+  const portfolioBacklogProjects = allProjects.filter(p => p.safeStage === 'portfolio-backlog');
+  const doneProjects = allProjects.filter(p => p.safeStage === 'done');
+  
+  const totalBudget = allProjects.reduce((sum, p) => sum + p.budget.total, 0);
+  const totalSpent = allProjects.reduce((sum, p) => sum + p.budget.spent, 0);
+  
+  const avgPredictability = Math.round(
+    allProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / allProjects.length
+  );
+  
+  const avgVelocity = Math.round(
+    allProjects.reduce((sum, p) => sum + p.safe.velocity, 0) / allProjects.length
+  );
+  
+  return {
+    activeProjects: {
+      count: allProjects.length,
+      total: allProjects.length,
+      projectIds: allProjects.map(p => p.id),
+      projects: allProjects
+    },
+    onTrack: {
+      count: onTrackProjects.length,
+      total: allProjects.length,
+      projectIds: onTrackProjects.map(p => p.id),
+      projects: onTrackProjects
+    },
+    atRisk: {
+      count: atRiskProjects.length,
+      total: allProjects.length,
+      projectIds: atRiskProjects.map(p => p.id),
+      projects: atRiskProjects
+    },
+    critical: {
+      count: criticalProjects.length,
+      total: allProjects.length,
+      projectIds: criticalProjects.map(p => p.id),
+      projects: criticalProjects
+    },
+    implementing: {
+      count: implementingProjects.length,
+      total: allProjects.length,
+      projectIds: implementingProjects.map(p => p.id),
+      projects: implementingProjects
+    },
+    funnel: {
+      count: funnelProjects.length,
+      total: allProjects.length,
+      projectIds: funnelProjects.map(p => p.id),
+      projects: funnelProjects
+    },
+    reviewing: {
+      count: reviewingProjects.length,
+      total: allProjects.length,
+      projectIds: reviewingProjects.map(p => p.id),
+      projects: reviewingProjects
+    },
+    analyzing: {
+      count: analyzingProjects.length,
+      total: allProjects.length,
+      projectIds: analyzingProjects.map(p => p.id),
+      projects: analyzingProjects
+    },
+    portfolioBacklog: {
+      count: portfolioBacklogProjects.length,
+      total: allProjects.length,
+      projectIds: portfolioBacklogProjects.map(p => p.id),
+      projects: portfolioBacklogProjects
+    },
+    done: {
+      count: doneProjects.length,
+      total: allProjects.length,
+      projectIds: doneProjects.map(p => p.id),
+      projects: doneProjects
+    },
+    totalBudget,
+    totalSpent,
+    avgPredictability,
+    avgVelocity
+  };
+}
+
+export function getProjectsByMetricId(metricId: string): typeof EXPANDED_PMO_PROJECTS {
+  const allProjects = EXPANDED_PMO_PROJECTS;
+  
+  switch (metricId) {
+    case 'active-projects':
+    case 'all-projects':
+      return allProjects;
+    case 'on-track':
+    case 'onTrack':
+      return allProjects.filter(p => p.status === 'green');
+    case 'at-risk':
+    case 'atRisk':
+      return allProjects.filter(p => p.status === 'amber');
+    case 'critical':
+      return allProjects.filter(p => p.status === 'red');
+    case 'implementing':
+    case 'wip-items':
+      return allProjects.filter(p => p.safeStage === 'implementing');
+    case 'funnel':
+      return allProjects.filter(p => p.safeStage === 'funnel');
+    case 'reviewing':
+      return allProjects.filter(p => p.safeStage === 'reviewing');
+    case 'analyzing':
+      return allProjects.filter(p => p.safeStage === 'analyzing');
+    case 'portfolio-backlog':
+      return allProjects.filter(p => p.safeStage === 'portfolio-backlog');
+    case 'done':
+      return allProjects.filter(p => p.safeStage === 'done');
+    default:
+      return [];
+  }
+}
+
 export function getPMOOverviewMetrics(): PMOOverviewMetrics {
   const allProjects = EXPANDED_PMO_PROJECTS;
   const onTrack = allProjects.filter(p => p.status === 'green').length;

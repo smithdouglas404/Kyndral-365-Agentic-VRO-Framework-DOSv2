@@ -25,7 +25,6 @@ import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { AIRecommendations } from "@/components/AIRecommendations";
-import { ScenarioParameters } from "@/components/ScenarioParameters";
 import { RiskConfidenceMetrics } from "@/components/RiskConfidenceMetrics";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
@@ -36,7 +35,6 @@ import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { PMOPipeline } from "@/components/PMOPipeline";
 import { PMOGuidance } from "@/components/PMOGuidance";
 import { PMOProjectWorkspace } from "@/components/PMOProjectWorkspace";
-import { PMOKnowledgeHub } from "@/components/PMOKnowledgeHub";
 import { PMOCoPilotWorkspace } from "@/components/PMOCoPilotWorkspace";
 import { SimulationProvider } from "@/components/SimulationProvider";
 import { VROMetricsGrid } from "@/components/VROMetricCard";
@@ -496,7 +494,7 @@ function DashboardContent() {
   const [location, navigate] = useLocation();
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [exportOpen, setExportOpen] = useState(false);
-  const [dataMode, setDataMode] = useState<DataMode>(location === '/dashboard/pmo' ? "PMO" : "VRO");
+  const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
@@ -795,26 +793,13 @@ function DashboardContent() {
                   <Compass size={16} />
                   <span className="hidden sm:inline">Co-Pilot</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="knowledge" 
-                  className="flex items-center gap-2 data-[state=active]:bg-[#005EB8] data-[state=active]:text-white"
-                  data-testid="tab-knowledge"
-                >
-                  <BookOpen size={16} />
-                  <span className="hidden sm:inline">Knowledge</span>
-                </TabsTrigger>
               </>
             )}
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* PMO Guidance Section - Only in PMO Mode */}
-            {dataMode === "PMO" && (
-              <PMOGuidance />
-            )}
-
-            {/* AI Recommendations and Cross-Agent Panels */}
+            {/* AI Recommendations - Always shown first */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <AIRecommendations dataMode={dataMode} />
@@ -824,25 +809,13 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* Scenario Parameters and Cross-Agent Collaboration */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="relative">
-                <ScenarioParameters />
-                {/* Connecting line to Strategic Impact Analysis */}
-                <div className="absolute left-1/2 -bottom-8 w-px h-8 bg-gradient-to-b from-purple-300 to-blue-300 opacity-60" />
-              </div>
-              <div className="lg:col-span-2">
-                <CrossAgentCollaboration />
-              </div>
-            </div>
+            {/* PMO Guidance Section - Only in PMO Mode */}
+            {dataMode === "PMO" && (
+              <PMOGuidance />
+            )}
 
-            {/* Flow indicator arrow */}
-            <div className="flex justify-start ml-[16.67%] -mt-2 mb-2">
-              <div className="flex flex-col items-center">
-                <div className="w-px h-4 bg-gradient-to-b from-blue-300 to-blue-400 opacity-60" />
-                <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-400 opacity-60" />
-              </div>
-            </div>
+            {/* Cross-Agent Collaboration */}
+            <CrossAgentCollaboration />
 
             {/* Strategic Impact Analysis */}
             <div>
@@ -908,10 +881,6 @@ function DashboardContent() {
             <PMOCoPilotWorkspace />
           </TabsContent>
 
-          {/* Knowledge Hub Tab - PMO Only */}
-          <TabsContent value="knowledge" className="space-y-6">
-            <PMOKnowledgeHub />
-          </TabsContent>
         </Tabs>
       </main>
       </div>

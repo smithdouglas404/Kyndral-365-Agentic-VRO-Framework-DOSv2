@@ -5,6 +5,7 @@
 
 import { pmoProjects, vroPrograms, riskIssues, buPortfolios, PMOProject, VROProgram, RiskIssue, BUPortfolio } from './buPrograms';
 import { SimulationEvent } from './liveSimulation';
+import { getProjectsByMetricId, EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
 
 export type AgentType = 'vro' | 'pmo' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
 
@@ -514,25 +515,129 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       break;
       
     case 'wip-items':
-      entityName = 'Work In Progress - Full Traceability';
+    case 'implementing': {
+      const wipProjects = getProjectsByMetricId('implementing');
+      const allProjects = EXPANDED_PMO_PROJECTS;
+      entityName = `Work In Progress - ${wipProjects.length} Projects`;
       relatedAgents.push('pmo', 'governance');
-      calculationMethod = 'Count of active work items across all project teams vs WIP limits';
-      projectBreakdown = [
-        { project: 'Claims', bu: 'Insurance', value: '2 / 3 limit', contribution: '22%', status: 'Healthy' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '3 / 4 limit', contribution: '33%', status: 'Healthy' },
-        { project: 'Customer', bu: 'Group Functions', value: '3 / 3 limit', contribution: '33%', status: 'At Limit' },
-        { project: 'AI Powered Pricing', bu: 'Insurance', value: '1 / 2 limit', contribution: '11%', status: 'Healthy' }
-      ];
+      calculationMethod = 'Projects currently in Implementing stage per SAFe 6.0 Kanban flow';
+      projectBreakdown = wipProjects.map(p => ({
+        project: p.name,
+        bu: p.bu,
+        value: `${p.safe.velocity} velocity`,
+        contribution: `${Math.round((p.budget.spent / p.budget.total) * 100)}% budget used`,
+        status: p.status === 'green' ? 'On Track' : p.status === 'amber' ? 'At Risk' : 'Critical'
+      }));
       metrics = {
-        'Total WIP': '9 items',
-        'Total WIP Limit': '12 items',
-        'Utilization': '75%',
-        'Available Capacity': '3 slots',
-        'Blocked Items': '1',
-        'Avg Item Age': '4.2 days'
+        'WIP Count': `${wipProjects.length} projects`,
+        'Total Projects': `${allProjects.length} projects`,
+        'WIP Ratio': `${Math.round((wipProjects.length / allProjects.length) * 100)}%`,
+        'Avg Velocity': `${Math.round(wipProjects.reduce((sum, p) => sum + p.safe.velocity, 0) / wipProjects.length)}`,
+        'Avg Predictability': `${Math.round(wipProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / wipProjects.length)}%`,
+        'On Track': wipProjects.filter(p => p.status === 'green').length,
+        'At Risk': wipProjects.filter(p => p.status === 'amber').length
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = wipProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
+    }
+    
+    case 'on-track':
+    case 'onTrack': {
+      const onTrackProjects = getProjectsByMetricId('on-track');
+      const allProjects = EXPANDED_PMO_PROJECTS;
+      entityName = `On Track Projects - ${onTrackProjects.length} of ${allProjects.length}`;
+      relatedAgents.push('pmo', 'vro');
+      calculationMethod = 'Projects with green status - budget and timeline on target';
+      projectBreakdown = onTrackProjects.map(p => ({
+        project: p.name,
+        bu: p.bu,
+        value: `${Math.round((p.deliverables.completed / p.deliverables.total) * 100)}% complete`,
+        contribution: `£${p.budget.spent}m / £${p.budget.total}m`,
+        status: p.safeStage
+      }));
+      metrics = {
+        'On Track': `${onTrackProjects.length} projects`,
+        'Total Projects': `${allProjects.length} projects`,
+        'Health Rate': `${Math.round((onTrackProjects.length / allProjects.length) * 100)}%`,
+        'Total Budget': `£${onTrackProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Avg Velocity': `${Math.round(onTrackProjects.reduce((sum, p) => sum + p.safe.velocity, 0) / Math.max(onTrackProjects.length, 1))}`
+      };
+      relatedEntities = onTrackProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    }
+    
+    case 'at-risk':
+    case 'atRisk': {
+      const atRiskProjects = getProjectsByMetricId('at-risk');
+      const allProjects = EXPANDED_PMO_PROJECTS;
+      entityName = `At Risk Projects - ${atRiskProjects.length} of ${allProjects.length}`;
+      relatedAgents.push('pmo', 'governance', 'vro');
+      calculationMethod = 'Projects with amber status - requiring attention';
+      projectBreakdown = atRiskProjects.map(p => ({
+        project: p.name,
+        bu: p.bu,
+        value: p.risks[0] || 'Risk identified',
+        contribution: `${Math.round((p.timeline.elapsed / p.timeline.total) * 100)}% timeline`,
+        status: p.safeStage
+      }));
+      metrics = {
+        'At Risk': `${atRiskProjects.length} projects`,
+        'Total Projects': `${allProjects.length} projects`,
+        'Risk Rate': `${Math.round((atRiskProjects.length / allProjects.length) * 100)}%`,
+        'Total Budget at Risk': `£${atRiskProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Avg Predictability': `${Math.round(atRiskProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / Math.max(atRiskProjects.length, 1))}%`
+      };
+      relatedEntities = atRiskProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    }
+    
+    case 'critical': {
+      const criticalProjects = getProjectsByMetricId('critical');
+      const allProjects = EXPANDED_PMO_PROJECTS;
+      entityName = `Critical Projects - ${criticalProjects.length} of ${allProjects.length}`;
+      relatedAgents.push('pmo', 'governance', 'vro');
+      calculationMethod = 'Projects with red status - immediate intervention required';
+      projectBreakdown = criticalProjects.map(p => ({
+        project: p.name,
+        bu: p.bu,
+        value: p.risks[0] || 'Critical issue',
+        contribution: `${Math.round((p.timeline.elapsed / p.timeline.total) * 100)}% timeline`,
+        status: 'Critical'
+      }));
+      metrics = {
+        'Critical': `${criticalProjects.length} projects`,
+        'Total Projects': `${allProjects.length} projects`,
+        'Critical Rate': `${Math.round((criticalProjects.length / allProjects.length) * 100)}%`,
+        'Total Budget at Risk': `£${criticalProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`
+      };
+      relatedEntities = criticalProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    }
+    
+    case 'active-projects':
+    case 'all-projects': {
+      const allProjects = EXPANDED_PMO_PROJECTS;
+      entityName = `All Active Projects - ${allProjects.length}`;
+      relatedAgents.push('pmo', 'vro');
+      calculationMethod = 'Complete portfolio of transformation projects';
+      projectBreakdown = allProjects.slice(0, 10).map(p => ({
+        project: p.name,
+        bu: p.bu,
+        value: `${Math.round((p.deliverables.completed / p.deliverables.total) * 100)}% complete`,
+        contribution: `£${p.budget.spent}m / £${p.budget.total}m`,
+        status: p.status === 'green' ? 'On Track' : p.status === 'amber' ? 'At Risk' : 'Critical'
+      }));
+      metrics = {
+        'Total Projects': allProjects.length,
+        'On Track': allProjects.filter(p => p.status === 'green').length,
+        'At Risk': allProjects.filter(p => p.status === 'amber').length,
+        'Critical': allProjects.filter(p => p.status === 'red').length,
+        'Total Budget': `£${allProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Implementing': allProjects.filter(p => p.safeStage === 'implementing').length
+      };
+      relatedEntities = allProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    }
       
     default:
       entityName = `Metric - ${metricId}`;
