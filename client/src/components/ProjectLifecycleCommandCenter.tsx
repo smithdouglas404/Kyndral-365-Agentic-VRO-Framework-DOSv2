@@ -481,9 +481,6 @@ export function ProjectLifecycleCommandCenter({ onDrillDown }: Props = {}) {
             <Target size={24} className="text-[#005EB8]" />
             Project Lifecycle Command Center
           </h2>
-          <p className="text-muted-foreground">
-            Addressing L&G's core transformation challenges with AI-powered insights
-          </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs">Simulated Data</Badge>
