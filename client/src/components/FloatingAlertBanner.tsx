@@ -30,7 +30,7 @@ export function FloatingAlertBanner() {
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
   
   // Only show on dashboard pages
-  const isDashboardRoute = location && location.startsWith('/dashboard');
+  const isDashboardRoute = location && (location === '/dashboard' || location.startsWith('/dashboard/'));
 
   useEffect(() => {
     if (latestEvent) {
