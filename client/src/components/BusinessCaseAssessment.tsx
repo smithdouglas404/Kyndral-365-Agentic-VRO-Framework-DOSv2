@@ -147,7 +147,7 @@ export function BusinessCaseAssessment() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="text-[#005EB8]" />
-            AI Business Case Assessment
+            AI Business Case Project Insights
           </h2>
           <p className="text-muted-foreground">Intelligent analysis, recommendations, and governance tracking</p>
         </div>
