@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'wouter';
+import { Link, useLocation, useRoute } from 'wouter';
 import { 
   DollarSign, GitBranch, Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight, FileCode, AlertCircle,
@@ -124,8 +124,11 @@ interface AgentSidebarProps {
 }
 
 export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", onTabChange = () => {}, collapsed = false }: AgentSidebarProps) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const agentSummary = useAllAgentsSummary();
+  
+  // Check if we're on the main dashboard
+  const isOnDashboard = location === '/dashboard' || location === '/';
 
   const filteredSectionItems = sectionNavItems.filter(item => 
     item.modes === "all" || item.modes.includes(dataMode)
@@ -186,16 +189,22 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => {
+                // Navigate to dashboard first if not already there
+                if (!isOnDashboard) {
+                  setLocation('/dashboard');
+                }
+                onTabChange(item.id);
+              }}
               className={cn(
                 "mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer transition-all w-[calc(100%-16px)] text-left flex items-center gap-3",
-                activeTab === item.id 
+                activeTab === item.id && isOnDashboard
                   ? "bg-[#005EB8] text-white" 
                   : "hover:bg-gray-100 text-gray-700"
               )}
               data-testid={`nav-${item.id}`}
             >
-              <Icon className={cn("h-4 w-4", activeTab === item.id ? "text-white" : "text-gray-500")} />
+              <Icon className={cn("h-4 w-4", activeTab === item.id && isOnDashboard ? "text-white" : "text-gray-500")} />
               {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
             </button>
           );
@@ -213,16 +222,22 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => {
+                // Navigate to dashboard first if not already there
+                if (!isOnDashboard) {
+                  setLocation('/dashboard');
+                }
+                onTabChange(item.id);
+              }}
               className={cn(
                 "mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer transition-all w-[calc(100%-16px)] text-left flex items-center gap-3",
-                activeTab === item.id 
+                activeTab === item.id && isOnDashboard
                   ? dataMode === "VRO" ? "bg-teal-600 text-white" : "bg-purple-600 text-white"
                   : "hover:bg-gray-100 text-gray-700"
               )}
               data-testid={`nav-${item.id}`}
             >
-              <Icon className={cn("h-4 w-4", activeTab === item.id ? "text-white" : "text-gray-500")} />
+              <Icon className={cn("h-4 w-4", activeTab === item.id && isOnDashboard ? "text-white" : "text-gray-500")} />
               {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
             </button>
           );
