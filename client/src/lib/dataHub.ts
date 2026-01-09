@@ -106,10 +106,17 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
   const now = new Date();
   
   // Generate some baseline messages showing agent collaboration
+  // PMO → VRO: Project impacts to value realization (key integration)
+  // VRO → PMO: Strategic priority changes affecting project execution
   const messageTemplates: Omit<CrossAgentMessage, 'id' | 'timestamp'>[] = [
+    { fromAgent: 'pmo', toAgent: 'vro', messageType: 'alert_forward', entity: 'PRT Intake System', message: 'Milestone delay impacts Strategic ROI - processing efficiency KPI down 8%', priority: 'critical' },
+    { fromAgent: 'pmo', toAgent: 'vro', messageType: 'data_sync', entity: 'Cloud Migration Program', message: 'Project on track - KPI "Workloads Migrated" at 52%, contributing to OKR progress', priority: 'medium' },
+    { fromAgent: 'pmo', toAgent: 'vro', messageType: 'status_update', entity: 'API Gateway Modernization', message: 'Budget variance detected - may impact ROI calculation for Enterprise Cloud OKR', priority: 'high' },
+    { fromAgent: 'vro', toAgent: 'pmo', messageType: 'recommendation', entity: 'Digital Onboarding', message: 'OKR "Digital-First Customer Experience" at 63% - accelerate project to boost KR completion', priority: 'high' },
     { fromAgent: 'ocm', toAgent: 'vro', messageType: 'status_update', entity: 'PRT Intake System', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
     { fromAgent: 'governance', toAgent: 'pmo', messageType: 'alert_forward', entity: 'Private Markets Platform', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
     { fromAgent: 'finops', toAgent: 'vro', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - £2.1m under forecast', priority: 'low' },
+    { fromAgent: 'okr', toAgent: 'vro', messageType: 'data_sync', entity: 'OKR-001', message: 'Key Result "Reduce deal cycle time" progress calculated at 68% from project KPIs', priority: 'medium' },
     { fromAgent: 'okr', toAgent: 'tmo', messageType: 'recommendation', entity: 'Digital Transformation', message: 'OKR alignment at 94% - recommend accelerating Q4 objectives', priority: 'medium' },
     { fromAgent: 'planning', toAgent: 'pmo', messageType: 'action_request', entity: 'Resource Pool', message: 'Capacity constraint detected for Q3 - reallocation needed', priority: 'high' },
     { fromAgent: 'vro', toAgent: 'governance', messageType: 'data_sync', entity: 'Longevity Risk Intelligence', message: 'Value realization at £15m - governance review triggered', priority: 'medium' },
