@@ -186,7 +186,7 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-lg text-purple-800">{agentName}</span>
                   {!isExpanded && !isLoading && (
-                    <span className="text-purple-600 italic animate-pulse">Hey... I have something to say</span>
+                    <span className="text-purple-600 italic animate-pulse">Hello I have something to say!</span>
                   )}
                   {isExpanded && (
                     <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
