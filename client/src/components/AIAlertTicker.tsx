@@ -5,13 +5,13 @@ import { useSimulation } from "@/contexts/SimulationContext";
 import { SimulationEvent, SimulationEventType } from "@/lib/liveSimulation";
 
 const typeIcons: Record<SimulationEventType, React.ReactNode> = {
-  ai_alert: <Brain size={14} className="text-purple-500" />,
-  risk_warning: <AlertTriangle size={14} className="text-red-500" />,
-  opportunity: <Lightbulb size={14} className="text-green-500" />,
-  prediction: <TrendingUp size={14} className="text-blue-500" />,
-  safe_anomaly: <GitBranch size={14} className="text-amber-500" />,
-  value_milestone: <Target size={14} className="text-teal-500" />,
-  action_required: <Zap size={14} className="text-orange-500" />
+  ai_alert: <Brain size={18} className="text-purple-500" />,
+  risk_warning: <AlertTriangle size={18} className="text-red-500" />,
+  opportunity: <Lightbulb size={18} className="text-green-500" />,
+  prediction: <TrendingUp size={18} className="text-blue-500" />,
+  safe_anomaly: <GitBranch size={18} className="text-amber-500" />,
+  value_milestone: <Target size={18} className="text-teal-500" />,
+  action_required: <Zap size={18} className="text-orange-500" />
 };
 
 export function AIAlertTicker() {
@@ -59,21 +59,21 @@ export function AIAlertTicker() {
     <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg border-2 border-purple-500/50 shadow-lg shadow-purple-500/20 ring-1 ring-purple-400/30">
       <div className="absolute inset-0 opacity-50" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)", backgroundSize: "20px 20px" }} />
       
-      <div className="flex items-center gap-3 p-3 relative">
+      <div className="flex items-center gap-4 p-4 relative">
         <motion.div
-          className="flex items-center gap-2 px-2 py-1 bg-purple-600 text-white rounded text-xs font-medium"
+          className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white rounded text-sm font-medium"
           animate={isRunning && isLive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 2, repeat: isRunning && isLive ? Infinity : 0 }}
         >
-          <Activity size={12} />
+          <Activity size={14} />
           AI LIVE
           {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] px-1.5 rounded-full">{unreadCount}</span>
+            <span className="bg-red-500 text-white text-xs px-2 rounded-full">{unreadCount}</span>
           )}
         </motion.div>
         
         <div 
-          className="flex-1 min-w-0 h-6 overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex-1 min-w-0 h-8 overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
           onClick={handleEventClick}
           data-testid="alert-ticker-content"
         >
@@ -84,12 +84,12 @@ export function AIAlertTicker() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="flex items-center gap-2 absolute inset-0"
+              className="flex items-center gap-3 absolute inset-0"
             >
               {currentEvent && (
                 <>
-                  {typeIcons[currentEvent.type]}
-                  <span className="text-sm text-white truncate">
+                  <span className="flex-shrink-0">{typeIcons[currentEvent.type]}</span>
+                  <span className="text-base text-white">
                     <span className="text-slate-400 font-medium">{currentEvent.relatedEntity?.name || currentEvent.source}:</span>{" "}
                     {currentEvent.message}
                   </span>
