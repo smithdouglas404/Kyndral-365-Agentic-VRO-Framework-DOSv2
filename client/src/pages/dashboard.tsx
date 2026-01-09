@@ -44,6 +44,7 @@ import { GitBranch, BookOpen, Compass } from "lucide-react";
 import { getPMOOverviewMetrics } from "@/lib/unifiedMetrics";
 import { AgentActivityPanel } from "@/components/AgentActivityPanel";
 import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCallback } from "@/lib/backgroundAgentMonitor";
+import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 
@@ -512,7 +513,7 @@ function DashboardContent() {
     }
   }, []);
   
-  // Start background agent monitor with toast notifications
+  // Start background agent monitor and orchestrator with toast notifications
   useEffect(() => {
     setActionNotificationCallback((agentName, action, target) => {
       toast.info(`${agentName} ${action} ${target}`, {
@@ -521,7 +522,11 @@ function DashboardContent() {
       });
     });
     startBackgroundMonitor(15000);
-    return () => stopBackgroundMonitor();
+    startOrchestrator(5000, 45000);
+    return () => {
+      stopBackgroundMonitor();
+      stopOrchestrator();
+    };
   }, []);
   
   // Handle mode changes through sidebar clicks only (not URL)

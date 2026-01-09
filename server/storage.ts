@@ -5,7 +5,11 @@ import {
   type Project, type InsertProject,
   type PolicyBusinessUnitLink, type InsertPolicyBusinessUnitLink,
   type PolicyProjectLink, type InsertPolicyProjectLink,
-  users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks
+  type AgentMemory, type InsertAgentMemory,
+  type AgentPattern, type InsertAgentPattern,
+  type AgentTaskQueue, type InsertAgentTaskQueue,
+  users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
+  agentMemory, agentPatterns, agentTaskQueue
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -36,6 +40,14 @@ export interface IStorage {
   getProjectsForPolicy(policyId: string): Promise<(Project & { impactLevel: string })[]>;
   getPoliciesForProject(projectId: string): Promise<Policy[]>;
   seedDemoData(): Promise<void>;
+  
+  getAgentMemory(agentId?: string, limit?: number): Promise<AgentMemory[]>;
+  createAgentMemory(memory: InsertAgentMemory): Promise<AgentMemory>;
+  getAgentPatterns(targetType?: string): Promise<AgentPattern[]>;
+  createOrUpdateAgentPattern(pattern: InsertAgentPattern): Promise<AgentPattern>;
+  getAgentTasks(agentId?: string, status?: string): Promise<AgentTaskQueue[]>;
+  createAgentTask(task: InsertAgentTaskQueue): Promise<AgentTaskQueue>;
+  updateAgentTaskStatus(taskId: string, status: string): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -206,6 +218,95 @@ export class DatabaseStorage implements IStorage {
       { id: 'proj-5', name: 'Retirement Calculator', description: 'New online retirement planning tool', status: 'active', businessUnitId: 'bu-pensions' },
       { id: 'proj-6', name: 'Investment Risk Dashboard', description: 'Real-time portfolio risk monitoring', status: 'active', businessUnitId: 'bu-wealth' },
     ]);
+  }
+
+  async getAgentMemory(agentId?: string, limit: number = 100): Promise<AgentMemory[]> {
+    if (agentId) {
+      return await db.select().from(agentMemory)
+        .where(eq(agentMemory.agentId, agentId))
+        .orderBy(desc(agentMemory.createdAt))
+        .limit(limit);
+    }
+    return await db.select().from(agentMemory)
+      .orderBy(desc(agentMemory.createdAt))
+      .limit(limit);
+  }
+
+  async createAgentMemory(memory: InsertAgentMemory): Promise<AgentMemory> {
+    const result = await db.insert(agentMemory).values(memory).returning();
+    return result[0];
+  }
+
+  async getAgentPatterns(targetType?: string): Promise<AgentPattern[]> {
+    if (targetType) {
+      return await db.select().from(agentPatterns)
+        .where(eq(agentPatterns.targetType, targetType))
+        .orderBy(desc(agentPatterns.lastObserved));
+    }
+    return await db.select().from(agentPatterns)
+      .orderBy(desc(agentPatterns.lastObserved));
+  }
+
+  async createOrUpdateAgentPattern(pattern: InsertAgentPattern): Promise<AgentPattern> {
+    const existing = await db.select().from(agentPatterns)
+      .where(and(
+        eq(agentPatterns.patternType, pattern.patternType),
+        eq(agentPatterns.targetType, pattern.targetType),
+        eq(agentPatterns.targetIdentifier, pattern.targetIdentifier)
+      ))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      const updated = await db.update(agentPatterns)
+        .set({
+          occurrences: String(parseInt(existing[0].occurrences || '1') + 1),
+          confidence: String(Math.min(0.95, parseFloat(existing[0].confidence || '0.5') + 0.05)),
+          lastObserved: new Date()
+        })
+        .where(eq(agentPatterns.id, existing[0].id))
+        .returning();
+      return updated[0];
+    }
+    
+    const result = await db.insert(agentPatterns).values(pattern).returning();
+    return result[0];
+  }
+
+  async getAgentTasks(agentId?: string, status?: string): Promise<AgentTaskQueue[]> {
+    let query = db.select().from(agentTaskQueue);
+    
+    if (agentId && status) {
+      return await query
+        .where(and(
+          eq(agentTaskQueue.assignedAgent, agentId),
+          eq(agentTaskQueue.status, status)
+        ))
+        .orderBy(desc(agentTaskQueue.createdAt));
+    } else if (agentId) {
+      return await query
+        .where(eq(agentTaskQueue.assignedAgent, agentId))
+        .orderBy(desc(agentTaskQueue.createdAt));
+    } else if (status) {
+      return await query
+        .where(eq(agentTaskQueue.status, status))
+        .orderBy(desc(agentTaskQueue.createdAt));
+    }
+    
+    return await query.orderBy(desc(agentTaskQueue.createdAt));
+  }
+
+  async createAgentTask(task: InsertAgentTaskQueue): Promise<AgentTaskQueue> {
+    const result = await db.insert(agentTaskQueue).values(task).returning();
+    return result[0];
+  }
+
+  async updateAgentTaskStatus(taskId: string, status: string): Promise<void> {
+    await db.update(agentTaskQueue)
+      .set({ 
+        status,
+        resolvedAt: status === 'completed' || status === 'cancelled' ? new Date() : undefined
+      })
+      .where(eq(agentTaskQueue.id, taskId));
   }
 }
 

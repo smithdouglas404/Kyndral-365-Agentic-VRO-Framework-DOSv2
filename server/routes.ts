@@ -270,5 +270,121 @@ export async function registerRoutes(
     }
   });
 
+  // Agent Memory & Learning API Routes with Zod validation
+  const agentMemorySchema = z.object({
+    agentId: z.string().min(1),
+    memoryType: z.enum(['action', 'pattern', 'insight', 'learning']),
+    targetType: z.string().optional(),
+    targetId: z.string().optional(),
+    targetName: z.string().optional(),
+    content: z.string().min(1),
+    confidence: z.string().optional(),
+    metadata: z.string().optional(),
+  });
+
+  const agentPatternSchema = z.object({
+    patternType: z.string().min(1),
+    targetType: z.string().min(1),
+    targetIdentifier: z.string().min(1),
+    description: z.string().min(1),
+  });
+
+  const agentTaskSchema = z.object({
+    assignedAgent: z.string().min(1),
+    taskType: z.string().min(1),
+    priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+    targetType: z.string().optional(),
+    targetId: z.string().optional(),
+    targetName: z.string().optional(),
+    description: z.string().min(1),
+    reasoning: z.string().optional(),
+    delegatedBy: z.string().optional(),
+  });
+
+  app.get("/api/agents/memory", async (req, res) => {
+    try {
+      const agentId = req.query.agentId as string | undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const memories = await storage.getAgentMemory(agentId, limit);
+      res.json(memories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch agent memory" });
+    }
+  });
+
+  app.post("/api/agents/memory", async (req, res) => {
+    try {
+      const parsed = agentMemorySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parsed.error.errors });
+      }
+      const memory = await storage.createAgentMemory(parsed.data);
+      res.json(memory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create agent memory" });
+    }
+  });
+
+  app.get("/api/agents/patterns", async (req, res) => {
+    try {
+      const targetType = req.query.targetType as string | undefined;
+      const patterns = await storage.getAgentPatterns(targetType);
+      res.json(patterns);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch agent patterns" });
+    }
+  });
+
+  app.post("/api/agents/patterns", async (req, res) => {
+    try {
+      const parsed = agentPatternSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parsed.error.errors });
+      }
+      const pattern = await storage.createOrUpdateAgentPattern(parsed.data);
+      res.json(pattern);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create/update agent pattern" });
+    }
+  });
+
+  app.get("/api/agents/tasks", async (req, res) => {
+    try {
+      const agentId = req.query.agentId as string | undefined;
+      const status = req.query.status as string | undefined;
+      const tasks = await storage.getAgentTasks(agentId, status);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch agent tasks" });
+    }
+  });
+
+  app.post("/api/agents/tasks", async (req, res) => {
+    try {
+      const parsed = agentTaskSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parsed.error.errors });
+      }
+      const task = await storage.createAgentTask(parsed.data);
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create agent task" });
+    }
+  });
+
+  app.patch("/api/agents/tasks/:taskId/status", async (req, res) => {
+    try {
+      const statusSchema = z.object({ status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']) });
+      const parsed = statusSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      await storage.updateAgentTaskStatus(req.params.taskId, parsed.data.status);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update agent task status" });
+    }
+  });
+
   return httpServer;
 }
