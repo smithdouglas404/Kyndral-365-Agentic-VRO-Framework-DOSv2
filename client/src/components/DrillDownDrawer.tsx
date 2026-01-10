@@ -40,6 +40,60 @@ const agentNames: Record<AgentType, string> = {
   ocm: 'OCM Agent'
 };
 
+// Generate unique AI insights based on entity name/type
+function generateEntityInsight(entityType: string, entityId: string): { aiInsight: string; summary: string } {
+  const entityName = entityId.toLowerCase();
+  
+  // KPI-specific insights
+  if (entityName.includes('estimation') || entityName.includes('accuracy')) {
+    return {
+      aiInsight: "Strong forecasting performance detected. VRO agent analysis shows 89% estimation accuracy, a 3% improvement from last quarter. PMO agent correlates this with better requirements clarity and sprint planning maturity. Recommend maintaining current estimation practices.",
+      summary: "Estimation accuracy is on track at 89%. The VRO agent identified positive trends in forecasting precision, while PMO agent confirms improved sprint predictability. 2 projects are contributing to this improvement."
+    };
+  }
+  
+  if (entityName.includes('cost') || entityName.includes('variance') || entityName.includes('budget')) {
+    return {
+      aiInsight: "Budget overrun alert. FinOps agent detected 40.8% cost variance against 5% target threshold. Root cause analysis points to scope changes in Q3 and unplanned infrastructure costs. Recommend immediate cost control measures and scope freeze.",
+      summary: "Cost variance is over budget at 40.8%. FinOps agent flagged this as critical. VRO agent estimates £2.3M value at risk if not addressed. 4 projects are contributing to the overrun."
+    };
+  }
+  
+  if (entityName.includes('dependency') || entityName.includes('health')) {
+    return {
+      aiInsight: "Critical dependency risk identified. PMO agent flagged 4 blocking dependencies affecting 6 downstream projects. TMO agent analysis shows 58% dependency health score, below the 85% threshold. Immediate escalation recommended to unblock critical path.",
+      summary: "Dependency health is at risk at 58%. PMO agent identified integration delays as primary cause. Planning agent recommends parallel workstreams to mitigate impact. 6 projects affected."
+    };
+  }
+  
+  if (entityName.includes('status') || entityName.includes('confidence')) {
+    return {
+      aiInsight: "High confidence in reported project status. VRO agent cross-validated data from 3 source systems (Jira, ServiceNow, PowerBI). Status confidence at 87% indicates reliable reporting. Governance agent confirms audit trail integrity.",
+      summary: "Status confidence is high at 87%. Multiple agents validated this through cross-system analysis. Data freshness is within acceptable thresholds. 12 projects contribute to this metric."
+    };
+  }
+  
+  if (entityName.includes('roi') || entityName.includes('value')) {
+    return {
+      aiInsight: "Value realization trending positive. VRO agent calculates portfolio ROI at 127%, exceeding 100% target. FinOps agent confirms cost savings of £4.2M realized YTD. Recommend accelerating high-performing initiatives.",
+      summary: "ROI performance is strong at 127%. VRO agent identified 3 initiatives exceeding expectations. FinOps validates financial impact. 8 projects driving positive returns."
+    };
+  }
+  
+  if (entityName.includes('risk') || entityName.includes('mitigation')) {
+    return {
+      aiInsight: "Risk mitigation actions required. Governance agent identified 12 active risks, 3 rated as critical. VRO agent estimates £1.8M potential value impact. Recommend immediate risk review with stakeholders.",
+      summary: "Risk exposure is elevated with 3 critical items. Governance agent tracking mitigation progress at 67%. OCM agent flagged change resistance as emerging risk factor."
+    };
+  }
+  
+  // Default insight for other entity types
+  return {
+    aiInsight: `This ${entityType} has been analyzed by multiple AI agents. The VRO agent identified key value implications while the PMO agent assessed delivery impact. Confidence level is high based on cross-validation of multiple data sources.`,
+    summary: `Comprehensive analysis of this ${entityType} entity shows active monitoring by 3 agents. The system has identified 4 recommended actions based on current state and historical patterns.`
+  };
+}
+
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO' }: DrillDownDrawerProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
@@ -96,8 +150,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       { timestamp: new Date(Date.now() - 1000), action: 'AI analysis completed', agent: 'vro' as AgentType },
       { timestamp: new Date(), action: 'Action triggered and recorded', agent: 'vro' as AgentType }
     ],
-    aiInsight: `This ${entityType} has been analyzed by multiple AI agents. The VRO agent identified key value implications while the PMO agent assessed delivery impact. Confidence level is high based on cross-validation of multiple data sources.`,
-    summary: `Comprehensive analysis of this ${entityType} entity shows active monitoring by 3 agents. The system has identified 4 recommended actions based on current state and historical patterns.`,
+    aiInsight: generateEntityInsight(entityType, entityId).aiInsight,
+    summary: generateEntityInsight(entityType, entityId).summary,
     relatedEntities: [
       { type: 'Project', id: 'PRJ-' + entityId.slice(-4), name: 'Digital Transformation Initiative' },
       { type: 'OKR', id: 'OKR-Q4-' + entityId.slice(-2), name: 'Improve Operational Efficiency' },

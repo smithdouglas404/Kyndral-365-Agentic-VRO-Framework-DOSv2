@@ -4,13 +4,12 @@ import {
   Activity, Brain, AlertTriangle, CheckCircle2, Clock, 
   ArrowRight, MessageCircle, Zap, ChevronDown, ChevronUp,
   DollarSign, GitBranch, Repeat, Calculator, Target, Shield, Calendar, Users,
-  Link2, FileText, History, Building2, User, ExternalLink
+  Link2, FileText, History, Building2, User, ExternalLink, X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { 
@@ -97,8 +96,8 @@ function formatTime(date: Date): string {
   return date.toLocaleDateString();
 }
 
-// Activity Detail Modal with Traceability Tab
-function ActivityDetailModal({ 
+// Activity Detail Flyout with Traceability Tab (slides in from right)
+function ActivityDetailFlyout({ 
   item, 
   open, 
   onClose 
@@ -138,34 +137,60 @@ function ActivityDetailModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="pb-2">
-          <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-lg", AGENT_COLORS[item.agentId])}>
-              <AgentIcon className="h-5 w-5 text-white" />
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop overlay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-40"
+            onClick={onClose}
+          />
+          {/* Flyout panel */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl z-50 overflow-y-auto"
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b z-10">
+              <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <div className={cn("p-2 rounded-lg", AGENT_COLORS[item.agentId])}>
+                    <AgentIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold">{item.title}</h2>
+                    <p className="text-sm text-gray-500">{item.agentName} Agent</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className={cn(PRIORITY_COLORS[item.priority])}>
+                    {item.priority}
+                  </Badge>
+                  <Button variant="ghost" size="icon" onClick={onClose}>
+                    <X size={20} />
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div>
-              <DialogTitle className="text-lg">{item.title}</DialogTitle>
-              <p className="text-sm text-muted-foreground">{item.agentName} Agent</p>
-            </div>
-            <Badge className={cn("ml-auto", PRIORITY_COLORS[item.priority])}>
-              {item.priority}
-            </Badge>
-          </div>
-        </DialogHeader>
 
-        <Tabs defaultValue="details" className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Details
-            </TabsTrigger>
-            <TabsTrigger value="traceability" className="flex items-center gap-2">
-              <Link2 className="h-4 w-4" />
-              Traceability
-            </TabsTrigger>
-          </TabsList>
+            <div className="p-4">
+              <Tabs defaultValue="details">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="details" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger value="traceability" className="flex items-center gap-2">
+                    <Link2 className="h-4 w-4" />
+                    Traceability
+                  </TabsTrigger>
+                </TabsList>
 
           <TabsContent value="details" className="flex-1 overflow-auto mt-4 space-y-4">
             <div className="space-y-4">
@@ -334,10 +359,13 @@ function ActivityDetailModal({
                 </div>
               )}
             </div>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
   );
 }
 
@@ -719,8 +747,8 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
         )}
       </AnimatePresence>
 
-      {/* Activity Detail Modal */}
-      <ActivityDetailModal 
+      {/* Activity Detail Flyout */}
+      <ActivityDetailFlyout 
         item={detailModalItem} 
         open={detailModalOpen} 
         onClose={() => {
