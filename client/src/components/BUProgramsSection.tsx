@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   pmoProjects, vroPrograms, riskIssues,
   pmoSummary, vroSummary, riskSummary,
@@ -19,7 +19,7 @@ import {
   ChevronDown, ChevronUp, Zap, AlertCircle, RotateCcw,
   Rocket, Search, ArrowUpRight, Activity, ExternalLink,
   FileText, ChevronRight, ChevronLeft, Play, MessageSquare, Layers,
-  GitBranch, Calendar, BarChart3, Eye
+  GitBranch, Calendar, BarChart3, Eye, X
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, BarChart, Bar } from "recharts";
 
@@ -111,32 +111,70 @@ function ProjectDetailModal({
     { pi: "PI 24.4", planned: 92, actual: 89 }
   ];
   
+  // Escape key handler
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open, onClose]);
+  
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-3 flex-wrap">
-            <Badge 
-              className="text-white"
-              style={{ backgroundColor: BU_COLORS[item.bu] || "#005EB8" }}
-            >
-              {item.bu}
-            </Badge>
-            <Badge variant="outline" className={isPMO ? "border-gray-500 bg-gray-50" : "border-teal-500 text-teal-700 bg-teal-50"}>
-              {isPMO ? "PMO DELIVERY VIEW" : "VRO VALUE VIEW"}
-            </Badge>
-            <Badge variant="outline" className="border-blue-500 text-blue-700">
-              {safeMetrics.piNumber}
-            </Badge>
-          </div>
-          <DialogTitle className="text-xl mt-2">{item.name}</DialogTitle>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            <FileText size={12} />
-            Source: L&G Annual Report 2024, Climate & Nature Report 2024
-          </p>
-        </DialogHeader>
-        
-        <Tabs defaultValue="overview" className="mt-4">
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={onClose}
+          />
+          
+          {/* Flyout Panel */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 h-full w-full max-w-5xl bg-white shadow-2xl z-50 flex flex-col"
+            data-testid={`flyout-project-${item.id}`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-50 to-transparent">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge 
+                    className="text-white"
+                    style={{ backgroundColor: BU_COLORS[item.bu] || "#005EB8" }}
+                  >
+                    {item.bu}
+                  </Badge>
+                  <Badge variant="outline" className={isPMO ? "border-gray-500 bg-gray-50" : "border-teal-500 text-teal-700 bg-teal-50"}>
+                    {isPMO ? "PMO DELIVERY VIEW" : "VRO VALUE VIEW"}
+                  </Badge>
+                  <Badge variant="outline" className="border-blue-500 text-blue-700">
+                    {safeMetrics.piNumber}
+                  </Badge>
+                </div>
+                <h2 className="text-xl font-bold">{item.name}</h2>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <FileText size={12} />
+                  Source: L&G Annual Report 2024, Climate & Nature Report 2024
+                </p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-project-flyout">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <ScrollArea className="flex-1 p-6">
+              <Tabs defaultValue="overview">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="safe" data-testid="tab-safe">SAFe Metrics</TabsTrigger>
@@ -478,9 +516,12 @@ function ProjectDetailModal({
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+              </Tabs>
+            </ScrollArea>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 

@@ -4,8 +4,8 @@ import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, ChevronDown, 
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface PageContext {
   pageName: string;
@@ -96,6 +96,17 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
   const [chatResponse, setChatResponse] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [userInput, setUserInput] = useState('');
+
+  // Escape key handler for chat flyout
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && chatOpen) {
+        setChatOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [chatOpen]);
 
   const handleQuestionClick = async (question: string) => {
     setChatQuestion(question);
@@ -330,47 +341,84 @@ export function PageAgentWizard({ context, agentName = 'AI Agent', onDrillDown }
         </CardContent>
       </Card>
 
-      <Dialog open={chatOpen} onOpenChange={setChatOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-purple-600" />
-              {agentName}
-            </DialogTitle>
-            <DialogDescription>AI-powered insights and recommendations for your data</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-              <p className="text-sm text-purple-800 font-medium">Your Question:</p>
-              <p className="text-sm text-gray-700 mt-1">{chatQuestion}</p>
-            </div>
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 min-h-[100px]">
-              {chatLoading ? (
-                <div className="flex items-center gap-2 text-purple-600">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Thinking...</span>
+      <AnimatePresence>
+        {chatOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setChatOpen(false)}
+            />
+            
+            {/* Flyout Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+              data-testid="flyout-agent-chat"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">{agentName}</h2>
+                    <p className="text-xs text-muted-foreground">AI-powered insights</p>
+                  </div>
                 </div>
-              ) : (
-                <p className="text-sm text-gray-800 whitespace-pre-wrap">{chatResponse}</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Ask a follow-up question..."
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1"
-                data-testid="chat-input"
-              />
-              <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700">
-                <Send size={14} className="mr-1" />
-                Ask
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+                <Button variant="ghost" size="icon" onClick={() => setChatOpen(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Content */}
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
+                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                    <p className="text-sm text-purple-800 font-medium">Your Question:</p>
+                    <p className="text-sm text-gray-700 mt-1">{chatQuestion}</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 min-h-[100px]">
+                    {chatLoading ? (
+                      <div className="flex items-center gap-2 text-purple-600">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm">Thinking...</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-800 whitespace-pre-wrap">{chatResponse}</p>
+                    )}
+                  </div>
+                </div>
+              </ScrollArea>
+
+              {/* Footer Input */}
+              <div className="p-4 border-t bg-gray-50">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Ask a follow-up question..."
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1"
+                    data-testid="chat-input"
+                  />
+                  <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700">
+                    <Send size={14} className="mr-1" />
+                    Ask
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

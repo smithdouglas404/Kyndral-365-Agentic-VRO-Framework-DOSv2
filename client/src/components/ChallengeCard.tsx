@@ -1,12 +1,12 @@
-import { motion } from "framer-motion";
-import { ArrowRight, ExternalLink, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, ExternalLink, Info, X } from "lucide-react";
 import { Challenge } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -17,6 +17,17 @@ interface ChallengeCardProps {
 export function ChallengeCard({ challenge, index, onDrillDown }: ChallengeCardProps) {
   const Icon = challenge.icon;
   const [isOpen, setIsOpen] = useState(false);
+
+  // Escape key handler for accessibility
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
 
   const handleClick = () => {
     if (onDrillDown) {
@@ -112,139 +123,159 @@ export function ChallengeCard({ challenge, index, onDrillDown }: ChallengeCardPr
         </Card>
       </motion.div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 rounded-lg bg-[hsl(209,100%,36%)]/10 text-[hsl(209,100%,36%)]">
-                <Icon size={28} strokeWidth={1.5} />
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setIsOpen(false)}
+            />
+            
+            {/* Flyout Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 h-full w-full max-w-xl bg-white shadow-2xl z-50 flex flex-col"
+              data-testid={`flyout-challenge-${challenge.id}`}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[hsl(209,100%,36%)]/5 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg bg-[hsl(209,100%,36%)]/10 text-[hsl(209,100%,36%)]">
+                    <Icon size={28} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground font-medium">Challenge #{challenge.number}</span>
+                    <h2 className="text-xl font-bold">{challenge.title}</h2>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} data-testid="button-close-flyout">
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
-              <div>
-                <span className="text-xs text-muted-foreground font-medium">Challenge #{challenge.number}</span>
-                <DialogTitle className="text-2xl">{challenge.title}</DialogTitle>
-              </div>
-            </div>
-            <DialogDescription className="sr-only">
-              Details about {challenge.title}
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-6 mt-4">
-            <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
-              <h4 className="text-sm font-bold text-red-800 uppercase tracking-wide mb-2">The Challenge</h4>
-              <p className="text-sm text-red-900 leading-relaxed">
-                {challenge.problem}
-              </p>
-            </div>
+              {/* Content */}
+              <ScrollArea className="flex-1 p-6">
+                <div className="space-y-6">
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
+                    <h4 className="text-sm font-bold text-red-800 uppercase tracking-wide mb-2">The Challenge</h4>
+                    <p className="text-sm text-red-900 leading-relaxed">
+                      {challenge.problem}
+                    </p>
+                  </div>
 
-            <div className="p-4 bg-green-50 border border-green-100 rounded-lg">
-              <h4 className="text-sm font-bold text-green-800 uppercase tracking-wide mb-2">VRO Solution</h4>
-              <p className="text-sm text-green-900 leading-relaxed">
-                {challenge.solution}
-              </p>
-            </div>
+                  <div className="p-4 bg-green-50 border border-green-100 rounded-lg">
+                    <h4 className="text-sm font-bold text-green-800 uppercase tracking-wide mb-2">VRO Solution</h4>
+                    <p className="text-sm text-green-900 leading-relaxed">
+                      {challenge.solution}
+                    </p>
+                  </div>
 
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Implementation Mechanism</h4>
-              <div className="flex flex-wrap gap-2">
-                {challenge.mechanism.map((mech, i) => (
-                  <Badge key={i} variant="secondary" className="text-sm bg-background border">
-                    {mech}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Strategic Alignment</h4>
-              <div className="flex flex-wrap gap-2">
-                {challenge.strategicAlignment?.map((align, i) => (
-                  <Badge key={i} className="text-sm bg-[hsl(209,100%,36%)] text-white">
-                    {align}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Key Metrics</h4>
-              <div className="space-y-3">
-                {challenge.metrics.map((metric, i) => (
-                  <div key={i} className="p-3 bg-background rounded-lg border flex items-center justify-between">
-                    <span className="font-medium">{metric.label}</span>
-                    <div className="flex items-center gap-3 font-mono">
-                      {metric.before && (
-                        <>
-                          <span className="text-muted-foreground line-through">
-                            {metric.before}
-                          </span>
-                          <ArrowRight size={16} className="text-[hsl(148,100%,26%)]" />
-                        </>
-                      )}
-                      <span className="text-xl font-bold text-[hsl(148,100%,26%)]">
-                        {metric.after || metric.value}
-                      </span>
+                  <div>
+                    <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Implementation Mechanism</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {challenge.mechanism.map((mech, i) => (
+                        <Badge key={i} variant="secondary" className="text-sm bg-background border">
+                          {mech}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {challenge.vroMetrics && challenge.vroMetrics.length > 0 && (
-              <div className="p-4 bg-[hsl(209,100%,36%)]/5 border border-[hsl(209,100%,36%)]/20 rounded-lg">
-                <h4 className="text-sm font-bold text-[hsl(209,100%,36%)] uppercase tracking-wide mb-3">VRO Metrics (Tracked Continuously)</h4>
-                <div className="space-y-2">
-                  {challenge.vroMetrics.map((metric, i) => (
-                    <div key={i} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground font-medium">{metric.name}</span>
-                      <Badge variant="outline" className="text-xs border-[hsl(209,100%,36%)]/30 text-[hsl(209,100%,36%)]">
-                        {metric.cadence}
-                      </Badge>
+                  <div>
+                    <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Strategic Alignment</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {challenge.strategicAlignment?.map((align, i) => (
+                        <Badge key={i} className="text-sm bg-[hsl(209,100%,36%)] text-white">
+                          {align}
+                        </Badge>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                  </div>
 
-            {challenge.coreTrackingFields && challenge.coreTrackingFields.length > 0 && (
-              <div className="p-4 bg-[hsl(148,100%,26%)]/5 border border-[hsl(148,100%,26%)]/20 rounded-lg">
-                <h4 className="text-sm font-bold text-[hsl(148,100%,26%)] uppercase tracking-wide mb-3">Core Tracking Fields</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {challenge.coreTrackingFields.map((field, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-foreground">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[hsl(148,100%,26%)]" />
-                      {field}
+                  <div>
+                    <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Key Metrics</h4>
+                    <div className="space-y-3">
+                      {challenge.metrics.map((metric, i) => (
+                        <div key={i} className="p-3 bg-background rounded-lg border flex items-center justify-between">
+                          <span className="font-medium">{metric.label}</span>
+                          <div className="flex items-center gap-3 font-mono">
+                            {metric.before && (
+                              <>
+                                <span className="text-muted-foreground line-through">
+                                  {metric.before}
+                                </span>
+                                <ArrowRight size={16} className="text-[hsl(148,100%,26%)]" />
+                              </>
+                            )}
+                            <span className="text-xl font-bold text-[hsl(148,100%,26%)]">
+                              {metric.after || metric.value}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                  </div>
 
-            {challenge.relatedIds && challenge.relatedIds.length > 0 && (
-              <div>
-                <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Related Challenges</h4>
-                <div className="flex flex-wrap gap-2">
-                  {challenge.relatedIds.map((id, i) => (
-                    <Badge key={i} variant="outline" className="text-sm">
-                      {id.replace('pmo-', '').replace(/-/g, ' ')}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+                  {challenge.vroMetrics && challenge.vroMetrics.length > 0 && (
+                    <div className="p-4 bg-[hsl(209,100%,36%)]/5 border border-[hsl(209,100%,36%)]/20 rounded-lg">
+                      <h4 className="text-sm font-bold text-[hsl(209,100%,36%)] uppercase tracking-wide mb-3">VRO Metrics (Tracked Continuously)</h4>
+                      <div className="space-y-2">
+                        {challenge.vroMetrics.map((metric, i) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className="text-foreground font-medium">{metric.name}</span>
+                            <Badge variant="outline" className="text-xs border-[hsl(209,100%,36%)]/30 text-[hsl(209,100%,36%)]">
+                              {metric.cadence}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-            <div className="pt-4 border-t flex justify-between items-center">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Info size={12} />
-                Data sourced from L&G Annual Report 2024
-              </p>
-              <Button onClick={() => setIsOpen(false)} data-testid="button-close-dialog">
-                Close
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+                  {challenge.coreTrackingFields && challenge.coreTrackingFields.length > 0 && (
+                    <div className="p-4 bg-[hsl(148,100%,26%)]/5 border border-[hsl(148,100%,26%)]/20 rounded-lg">
+                      <h4 className="text-sm font-bold text-[hsl(148,100%,26%)] uppercase tracking-wide mb-3">Core Tracking Fields</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {challenge.coreTrackingFields.map((field, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-foreground">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(148,100%,26%)]" />
+                            {field}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {challenge.relatedIds && challenge.relatedIds.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Related Challenges</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {challenge.relatedIds.map((id, i) => (
+                          <Badge key={i} variant="outline" className="text-sm">
+                            {id.replace('pmo-', '').replace(/-/g, ' ')}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t flex items-center gap-2 text-xs text-muted-foreground">
+                    <Info size={12} />
+                    Data sourced from L&G Annual Report 2024
+                  </div>
+                </div>
+              </ScrollArea>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
