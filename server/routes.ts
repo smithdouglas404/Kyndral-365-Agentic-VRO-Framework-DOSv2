@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } from "./anthropic";
 import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
+import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
@@ -52,6 +53,27 @@ export async function registerRoutes(
 
   // Register AI CoPilot routes
   registerCoPilotRoutes(app);
+
+  // Executive AI Insights endpoint
+  app.get("/api/insights/executive", async (_req, res) => {
+    try {
+      const insights = await generateExecutiveInsights();
+      res.json(insights);
+    } catch (error: any) {
+      console.error("Executive insights error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate insights" });
+    }
+  });
+
+  app.post("/api/insights/executive/refresh", async (_req, res) => {
+    try {
+      const insights = await refreshInsights();
+      res.json(insights);
+    } catch (error: any) {
+      console.error("Executive insights refresh error:", error);
+      res.status(500).json({ error: error.message || "Failed to refresh insights" });
+    }
+  });
 
   app.post("/api/policies/upload-pdf", upload.single('pdf'), async (req, res) => {
     try {

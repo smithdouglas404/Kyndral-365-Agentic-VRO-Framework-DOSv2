@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
+import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
@@ -604,6 +605,9 @@ function DashboardContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
+            {/* AI Executive Intelligence - Portfolio-level insights and recommendations */}
+            <AIExecutiveInsights />
+            
             {/* Agent Activity & Audit Trail - consolidated view */}
             <ActionAuditTimeline maxItems={12} />
 
