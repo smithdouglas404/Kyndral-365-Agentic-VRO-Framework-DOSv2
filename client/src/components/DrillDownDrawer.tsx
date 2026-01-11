@@ -127,7 +127,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       : entityType === 'challenge' 
         ? 'Challenge Analysis'
         : `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`,
-    bu: 'VRO Intelligence Engine',
+    bu: 'Intelligence Engine',
     relatedAgents: ['vro' as AgentType, 'pmo' as AgentType, 'finops' as AgentType],
     events: [],
     metrics: {

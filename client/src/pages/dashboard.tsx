@@ -500,7 +500,7 @@ function DashboardContent() {
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
           <PageAgentWizard 
             context={{
-              pageName: dataMode === "VRO" ? 'VRO Intelligence Engine' : 'PMO Control Center',
+              pageName: dataMode === "VRO" ? 'Intelligence Engine' : 'PMO Control Center',
               pageType: 'dashboard',
               entityId: dataMode === "VRO" ? 'vro' : 'pmo',
               metrics: dataMode === "VRO" 
@@ -532,7 +532,7 @@ function DashboardContent() {
               transition={{ duration: 0.3 }}
             >
               <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-                {dataMode === "VRO" ? "VRO Intelligence Engine" : "PMO Control Center"}
+                {dataMode === "VRO" ? "Intelligence Engine" : "PMO Control Center"}
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl">
                 {dataMode === "VRO" 
