@@ -539,8 +539,8 @@ function DashboardContent() {
           <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
         )}
 
-        {/* Division Cards - VRO Only, on Overview tab */}
-        {activeTab === "overview" && dataMode === "VRO" && (
+        {/* Division Cards - Always visible in unified view (overview tab) */}
+        {activeTab === "overview" && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mt-6">
             {divisions.map((division) => (
               <div 
