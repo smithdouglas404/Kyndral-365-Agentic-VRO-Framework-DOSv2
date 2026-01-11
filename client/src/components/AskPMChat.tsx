@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { safeProjects } from "@/lib/safeProjectData";
+import { useLocation } from "wouter";
 
 interface Message {
   id: string;
@@ -25,7 +26,7 @@ interface Message {
   timestamp: Date;
 }
 
-function MarkdownRenderer({ content }: { content: string }) {
+function MarkdownRenderer({ content, onNavigate }: { content: string; onNavigate: (path: string) => void }) {
   const lines = content.split('\n');
   
   const renderInline = (text: string): React.ReactNode => {
@@ -34,6 +35,31 @@ function MarkdownRenderer({ content }: { content: string }) {
     let keyCounter = 0;
     
     while (remaining.length > 0) {
+      // Check for project links first: [Project Name](proj-id)
+      const linkMatch = remaining.match(/\[([^\]]+)\]\((proj-[a-z0-9-]+)\)/);
+      if (linkMatch && linkMatch.index !== undefined) {
+        if (linkMatch.index > 0) {
+          // Process any bold text in the prefix
+          const prefix = remaining.slice(0, linkMatch.index);
+          parts.push(...renderTextWithBold(prefix, keyCounter));
+          keyCounter += 10;
+        }
+        const projectName = linkMatch[1];
+        const projectId = linkMatch[2];
+        parts.push(
+          <button
+            key={`link${keyCounter++}`}
+            onClick={() => onNavigate(`/project/${projectId}`)}
+            className="text-purple-600 hover:text-purple-800 underline font-medium cursor-pointer bg-purple-50 hover:bg-purple-100 px-1 py-0.5 rounded transition-colors"
+          >
+            {projectName}
+          </button>
+        );
+        remaining = remaining.slice(linkMatch.index + linkMatch[0].length);
+        continue;
+      }
+      
+      // Check for bold text: **text**
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
       if (boldMatch && boldMatch.index !== undefined) {
         if (boldMatch.index > 0) {
@@ -43,11 +69,33 @@ function MarkdownRenderer({ content }: { content: string }) {
         remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
         continue;
       }
+      
       parts.push(<span key={`r${keyCounter++}`}>{remaining}</span>);
       break;
     }
     
     return parts.length > 0 ? <>{parts}</> : text;
+  };
+  
+  const renderTextWithBold = (text: string, startKey: number): React.ReactNode[] => {
+    const parts: React.ReactNode[] = [];
+    let remaining = text;
+    let keyCounter = startKey;
+    
+    while (remaining.length > 0) {
+      const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+      if (boldMatch && boldMatch.index !== undefined) {
+        if (boldMatch.index > 0) {
+          parts.push(<span key={`pre${keyCounter++}`}>{remaining.slice(0, boldMatch.index)}</span>);
+        }
+        parts.push(<strong key={`bold${keyCounter++}`} className="font-bold text-gray-900">{boldMatch[1]}</strong>);
+        remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+        continue;
+      }
+      parts.push(<span key={`txt${keyCounter++}`}>{remaining}</span>);
+      break;
+    }
+    return parts;
   };
   
   const renderLine = (line: string, index: number): React.ReactNode => {
@@ -99,6 +147,7 @@ const suggestedQuestions = [
 ];
 
 export function AskPMChat() {
+  const [, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -106,6 +155,11 @@ export function AskPMChat() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const handleNavigate = (path: string) => {
+    setLocation(path);
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -287,7 +341,7 @@ export function AskPMChat() {
                         : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                     }`}>
                       {message.role === 'assistant' ? (
-                        <MarkdownRenderer content={message.content} />
+                        <MarkdownRenderer content={message.content} onNavigate={handleNavigate} />
                       ) : (
                         <div className="text-sm">{message.content}</div>
                       )}
