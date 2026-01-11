@@ -621,7 +621,7 @@ function DashboardContent() {
 
           {/* Portfolios Tab - BU Programs */}
           <TabsContent value="portfolios" className="space-y-6">
-            <BUProgramsSection dataMode={dataMode} />
+            <BUProgramsSection dataMode={dataMode} onDrillDown={handleDrillDown} />
           </TabsContent>
 
           {/* Business Cases Tab */}

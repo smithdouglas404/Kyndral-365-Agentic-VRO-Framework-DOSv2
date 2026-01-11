@@ -952,8 +952,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                         <div className="space-y-2">
                           {[
                             { time: new Date(Date.now() - 5000).toLocaleTimeString(), action: 'Data ingested from source', user: 'System' },
-                            { time: new Date(Date.now() - 3000).toLocaleTimeString(), action: 'AI analysis triggered', user: 'VRO Agent' },
-                            { time: new Date(Date.now() - 1000).toLocaleTimeString(), action: 'Cross-validation completed', user: 'PMO Agent' },
+                            { time: new Date(Date.now() - 3000).toLocaleTimeString(), action: 'AI analysis triggered', user: 'Integrated Management Agent' },
+                            { time: new Date(Date.now() - 1000).toLocaleTimeString(), action: 'Cross-validation completed', user: 'Integrated Management Agent' },
                             { time: new Date().toLocaleTimeString(), action: 'Activity logged', user: 'System' }
                           ].map((entry, index) => (
                             <div key={index} className="flex gap-3 p-2 bg-white rounded-lg border border-amber-100">

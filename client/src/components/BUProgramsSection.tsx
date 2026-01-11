@@ -13,6 +13,7 @@ import {
   buPortfolios, BUPortfolio
 } from "@/lib/buPrograms";
 import { challenges, VROMetric } from "@/lib/data";
+import { enrichedProjects, getProjectById, type ProjectDependency } from "@/lib/projects";
 import { 
   Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, 
   DollarSign, Brain, Users, Target, Sparkles, Shield,
@@ -27,6 +28,7 @@ type DataMode = "VRO" | "PMO";
 
 interface BUProgramsSectionProps {
   dataMode: DataMode;
+  onDrillDown?: (type: string, id: string) => void;
 }
 
 const BU_COLORS: Record<string, string> = {
@@ -1022,7 +1024,15 @@ interface UnifiedProject {
   proactiveAction?: { action: string; impact: string; type: 'mitigate' | 'accelerate' | 'investigate' | 'escalate' };
 }
 
-function UnifiedProjectCard({ project, onViewDetails }: { project: UnifiedProject; onViewDetails: () => void }) {
+interface LiveAgentAlert {
+  projectId: string;
+  agentName: string;
+  message: string;
+  type: 'insight' | 'warning' | 'action' | 'update';
+  timestamp: Date;
+}
+
+function UnifiedProjectCard({ project, onViewDetails, liveAlert }: { project: UnifiedProject; onViewDetails: () => void; liveAlert?: LiveAgentAlert }) {
   const statusColors = {
     green: "#00843D",
     amber: "#f59e0b", 
@@ -1032,22 +1042,58 @@ function UnifiedProjectCard({ project, onViewDetails }: { project: UnifiedProjec
   const budgetPercent = (project.budget.spent / project.budget.total) * 100;
   const timelinePercent = (project.timeline.elapsed / project.timeline.total) * 100;
   const valuePercent = project.roiValue > 0 ? (project.valueRealized / project.roiValue) * 100 : 0;
+  
+  const alertColors = {
+    insight: { bg: 'bg-purple-500', border: 'border-purple-400', text: 'text-purple-700' },
+    warning: { bg: 'bg-amber-500', border: 'border-amber-400', text: 'text-amber-700' },
+    action: { bg: 'bg-teal-500', border: 'border-teal-400', text: 'text-teal-700' },
+    update: { bg: 'bg-blue-500', border: 'border-blue-400', text: 'text-blue-700' }
+  };
 
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
+      className="relative"
     >
+      {/* Live Agent Alert Pulse */}
+      {liveAlert && (
+        <motion.div
+          className="absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-500 via-teal-500 to-blue-500 opacity-50 blur-sm z-0"
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+      )}
+      
       <Card 
-        className="h-full border-l-4 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden" 
+        className={`h-full border-l-4 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden ${liveAlert ? 'ring-2 ring-purple-400' : ''}`}
         style={{ borderLeftColor: statusColors[project.status] }}
         data-testid={`card-unified-${project.id}`}
         onClick={onViewDetails}
       >
+        {/* Live Alert Banner */}
+        {liveAlert && (
+          <motion.div
+            className={`absolute top-0 left-0 right-0 px-3 py-1.5 ${alertColors[liveAlert.type].bg} text-white text-xs flex items-center gap-2 z-10`}
+            initial={{ y: -30 }}
+            animate={{ y: 0 }}
+            transition={{ type: 'spring', bounce: 0.4 }}
+          >
+            <motion.div
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 0.5, repeat: Infinity }}
+            >
+              <Sparkles size={12} />
+            </motion.div>
+            <span className="font-medium">{liveAlert.agentName}:</span>
+            <span className="truncate">{liveAlert.message}</span>
+          </motion.div>
+        )}
+        
         {/* UNIFIED Label Banner */}
-        <div className="absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-gradient-to-r from-blue-600 to-teal-600 rounded-bl">
-          INTELLIGENCE ENGINE
+        <div className={`absolute ${liveAlert ? 'top-7' : 'top-0'} right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-gradient-to-r from-blue-600 to-teal-600 rounded-bl`}>
+          VRO CO-PILOT
         </div>
         
         <CardHeader className="pb-2 pt-4">
@@ -1234,12 +1280,25 @@ function createUnifiedProjects(): UnifiedProject[] {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
+// Agent alert messages for simulation
+const AGENT_ALERTS: Omit<LiveAgentAlert, 'projectId' | 'timestamp'>[] = [
+  { agentName: 'Integrated Management', message: 'Value realization trending ahead of forecast', type: 'insight' },
+  { agentName: 'FinOps Agent', message: 'Budget variance detected - reviewing allocation', type: 'warning' },
+  { agentName: 'TMO Agent', message: 'Transformation milestone approaching', type: 'update' },
+  { agentName: 'Governance Agent', message: 'Compliance check completed successfully', type: 'action' },
+  { agentName: 'OKR Agent', message: 'Key result progress updated to 85%', type: 'insight' },
+  { agentName: 'Planning Agent', message: 'Sprint velocity improved by 12%', type: 'update' },
+  { agentName: 'OCM Agent', message: 'Stakeholder engagement score rising', type: 'action' },
+  { agentName: 'Integrated Management', message: 'Cross-portfolio dependency identified', type: 'warning' },
+];
+
+export function BUProgramsSection({ dataMode, onDrillDown }: BUProgramsSectionProps) {
   const [selectedBU, setSelectedBU] = useState<string | null>(null);
   const [pulseActive, setPulseActive] = useState(true);
   const [selectedProject, setSelectedProject] = useState<PMOProject | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<VROProgram | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [liveAlerts, setLiveAlerts] = useState<Map<string, LiveAgentAlert>>(new Map());
   
   // Generate unified projects (VRO + PMO combined)
   const unifiedProjects = createUnifiedProjects();
@@ -1264,6 +1323,38 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+  
+  // Simulate live agent alerts on project cards
+  useEffect(() => {
+    if (!selectedBU || filteredUnified.length === 0) return;
+    
+    const alertInterval = setInterval(() => {
+      // Pick a random project to alert
+      const randomProject = filteredUnified[Math.floor(Math.random() * filteredUnified.length)];
+      const randomAlert = AGENT_ALERTS[Math.floor(Math.random() * AGENT_ALERTS.length)];
+      
+      const newAlert: LiveAgentAlert = {
+        projectId: randomProject.id,
+        agentName: randomAlert.agentName,
+        message: randomAlert.message,
+        type: randomAlert.type,
+        timestamp: new Date()
+      };
+      
+      setLiveAlerts(prev => new Map(prev).set(randomProject.id, newAlert));
+      
+      // Clear alert after 5 seconds
+      setTimeout(() => {
+        setLiveAlerts(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(randomProject.id);
+          return newMap;
+        });
+      }, 5000);
+    }, 8000); // New alert every 8 seconds
+    
+    return () => clearInterval(alertInterval);
+  }, [selectedBU, filteredUnified]);
 
   const handleViewProjectDetails = (project: PMOProject) => {
     setSelectedProject(project);
@@ -1385,9 +1476,14 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
               >
                 <UnifiedProjectCard 
                   project={project} 
+                  liveAlert={liveAlerts.get(project.id)}
                   onViewDetails={() => {
-                    const pmoProject = pmoProjects.find(p => p.id === project.id);
-                    if (pmoProject) handleViewProjectDetails(pmoProject);
+                    if (onDrillDown) {
+                      onDrillDown('project', project.id);
+                    } else {
+                      const pmoProject = pmoProjects.find(p => p.id === project.id);
+                      if (pmoProject) handleViewProjectDetails(pmoProject);
+                    }
                   }} 
                 />
               </motion.div>
