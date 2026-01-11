@@ -714,7 +714,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                                       {agentNames[activity.agentId]}
                                     </Badge>
                                     <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                      {Math.round(activity.aiConfidence * 100)}% confidence
+                                      {Math.round(activity.aiConfidence)}% confidence
                                     </Badge>
                                   </div>
                                 </div>

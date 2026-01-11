@@ -492,7 +492,7 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
       icon: ACTION_ICONS[a.actionType] || Activity,
       targetType: a.targetEntityType,
       targetId: a.targetEntityId,
-      metadata: a.result ? { result: a.result, confidence: `${(a.aiConfidence * 100).toFixed(0)}%` } : { confidence: `${(a.aiConfidence * 100).toFixed(0)}%` }
+      metadata: a.result ? { result: a.result, confidence: `${Math.round(a.aiConfidence)}%` } : { confidence: `${Math.round(a.aiConfidence)}%` }
     })),
     ...messages.map(m => ({
       id: m.id,
