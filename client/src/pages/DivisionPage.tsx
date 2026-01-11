@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight, Link2, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,7 +131,7 @@ export default function DivisionPage() {
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="kpis" data-testid="tab-kpis">KPIs & Metrics</TabsTrigger>
             <TabsTrigger value="okrs" data-testid="tab-okrs">OKRs</TabsTrigger>
-            <TabsTrigger value="projects" data-testid="tab-projects">Projects vs AI Projects</TabsTrigger>
+            <TabsTrigger value="projects" data-testid="tab-projects">Projects</TabsTrigger>
             <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
             <TabsTrigger value="alerts" data-testid="tab-alerts">AI Alerts ({divisionAlerts.length})</TabsTrigger>
           </TabsList>
@@ -362,6 +362,54 @@ export default function DivisionPage() {
                         </div>
                       </div>
                     )}
+                    
+                    {project.dependencies && project.dependencies.length > 0 && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Link2 className="h-4 w-4 text-gray-600" />
+                          <p className="text-sm font-medium text-gray-700">Cross-Project Dependencies</p>
+                        </div>
+                        <div className="space-y-2">
+                          {project.dependencies.map((dep, depIdx) => (
+                            <div 
+                              key={depIdx} 
+                              className="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => handleDrillDown('project', dep.projectId)}
+                              data-testid={`dependency-${project.id}-${depIdx}`}
+                            >
+                              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                                dep.health === 'green' ? 'bg-green-500' : 
+                                dep.health === 'yellow' ? 'bg-yellow-500' : 
+                                'bg-red-500'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-gray-500 uppercase">
+                                    {dep.type === 'blocks' ? 'Blocks' : dep.type === 'blocked-by' ? 'Blocked by' : 'Related to'}
+                                  </span>
+                                  <ArrowRight className="h-3 w-3 text-gray-400" />
+                                  <span className="text-sm font-medium text-gray-800 truncate">{dep.projectName}</span>
+                                </div>
+                                {dep.description && (
+                                  <p className="text-xs text-gray-500 truncate">{dep.description}</p>
+                                )}
+                              </div>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-[10px] flex-shrink-0 ${
+                                  dep.health === 'green' ? 'border-green-500 text-green-700 bg-green-50' :
+                                  dep.health === 'yellow' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
+                                  'border-red-500 text-red-700 bg-red-50'
+                                }`}
+                              >
+                                {dep.health === 'green' ? 'Healthy' : dep.health === 'yellow' ? 'At Risk' : 'Blocked'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2 mt-4">
                       <Button 
                         size="sm" 

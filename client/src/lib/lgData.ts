@@ -58,13 +58,23 @@ export interface OKR {
   dueDate: string;
 }
 
+export interface ProjectDependency {
+  projectId: string;
+  projectName: string;
+  type: "blocks" | "blocked-by" | "related";
+  health: "green" | "yellow" | "red";
+  description?: string;
+}
+
 export interface Project {
+  id: string;
   name: string;
   description: string;
   expectedROI: string;
   priority: "high" | "medium" | "low";
   status: "proposed" | "in-progress" | "completed";
   aiRecommendation?: string;
+  dependencies?: ProjectDependency[];
 }
 
 export interface DivisionRisk {
@@ -116,20 +126,28 @@ export const divisions: DivisionData[] = [
     ],
     potentialProjects: [
       {
+        id: "ir-deal-intake",
         name: "AI-Powered Deal Intake Automation",
         description: "Automate initial assessment of PRT opportunities using AI to reduce cycle time from 35 days to 5 days",
         expectedROI: "£85m annual efficiency",
         priority: "high",
         status: "proposed",
-        aiRecommendation: "High probability of success based on similar implementations in Asset Management"
+        aiRecommendation: "High probability of success based on similar implementations in Asset Management",
+        dependencies: [
+          { projectId: "ir-longevity-dashboard", projectName: "Real-time Longevity Risk Dashboard", type: "related", health: "green", description: "Shares data pipeline for risk analytics" }
+        ]
       },
       {
+        id: "ir-longevity-dashboard",
         name: "Real-time Longevity Risk Dashboard",
         description: "Deploy predictive analytics for longevity assumption drift detection",
         expectedROI: "£42m risk mitigation",
         priority: "high",
         status: "in-progress",
-        aiRecommendation: "Current assumptions showing 2.3% variance - recommend expedited deployment"
+        aiRecommendation: "Current assumptions showing 2.3% variance - recommend expedited deployment",
+        dependencies: [
+          { projectId: "am-data-platform", projectName: "AI Data Analytics Platform", type: "blocked-by", health: "yellow", description: "Requires data feed from Asset Management platform" }
+        ]
       }
     ],
     risks: [
@@ -178,19 +196,27 @@ export const divisions: DivisionData[] = [
     ],
     potentialProjects: [
       {
+        id: "am-private-markets-fund",
         name: "L&G Private Markets Access Fund",
         description: "New fund providing meaningful opportunity to focus on sustainability by investing directly in assets such as clean power",
         expectedROI: "£2.5bn new AUM",
         priority: "high",
         status: "in-progress",
-        aiRecommendation: "Strong market demand detected - accelerate launch timeline"
+        aiRecommendation: "Strong market demand detected - accelerate launch timeline",
+        dependencies: [
+          { projectId: "am-data-platform", projectName: "AI Data Analytics Platform", type: "blocks", health: "green", description: "Will provide data for analytics platform" }
+        ]
       },
       {
+        id: "am-data-platform",
         name: "AI Portfolio Optimization Engine",
         description: "Machine learning-driven portfolio rebalancing with ESG integration",
         expectedROI: "12bps alpha improvement",
         priority: "medium",
-        status: "proposed"
+        status: "proposed",
+        dependencies: [
+          { projectId: "ir-longevity-dashboard", projectName: "Real-time Longevity Risk Dashboard", type: "blocks", health: "yellow", description: "Shared ML infrastructure" }
+        ]
       }
     ],
     risks: [
@@ -229,12 +255,28 @@ export const divisions: DivisionData[] = [
     ],
     potentialProjects: [
       {
+        id: "retail-digital-onboarding",
         name: "Digitizing Customer Onboarding",
         description: "Transform paper-based onboarding to fully digital journey with AI-assisted form completion",
         expectedROI: "£28m efficiency + improved NPS",
         priority: "high",
         status: "proposed",
-        aiRecommendation: "Customer feedback analysis shows 78% prefer digital-first - prioritize immediately"
+        aiRecommendation: "Customer feedback analysis shows 78% prefer digital-first - prioritize immediately",
+        dependencies: [
+          { projectId: "retail-ai-chatbot", projectName: "AI Customer Service Chatbot", type: "related", health: "green", description: "Shared customer interaction platform" }
+        ]
+      },
+      {
+        id: "retail-ai-chatbot",
+        name: "AI Customer Service Chatbot",
+        description: "Deploy intelligent chatbot for 24/7 customer query resolution and claims processing",
+        expectedROI: "£15m annual savings",
+        priority: "medium",
+        status: "in-progress",
+        aiRecommendation: "Current pilot showing 85% resolution rate - ready for full rollout",
+        dependencies: [
+          { projectId: "retail-digital-onboarding", projectName: "Digitizing Customer Onboarding", type: "related", health: "green", description: "Shared customer data integration" }
+        ]
       }
     ],
     risks: [
@@ -272,12 +314,16 @@ export const divisions: DivisionData[] = [
     ],
     potentialProjects: [
       {
+        id: "corp-net-zero-expansion",
         name: "Inspired Villages Net Zero Expansion",
         description: "Scale UK's first net zero carbon retirement community model (Millfield Green) to 5 additional sites",
         expectedROI: "£180m new development value",
         priority: "high",
         status: "in-progress",
-        aiRecommendation: "ESG investor demand analysis shows 340% increase in sustainable housing interest"
+        aiRecommendation: "ESG investor demand analysis shows 340% increase in sustainable housing interest",
+        dependencies: [
+          { projectId: "am-private-markets-fund", projectName: "L&G Private Markets Access Fund", type: "blocked-by", health: "red", description: "Awaiting funding allocation from Private Markets" }
+        ]
       }
     ],
     risks: [
