@@ -25,6 +25,70 @@ interface Message {
   timestamp: Date;
 }
 
+function MarkdownRenderer({ content }: { content: string }) {
+  const lines = content.split('\n');
+  
+  const renderInline = (text: string): React.ReactNode => {
+    const parts: React.ReactNode[] = [];
+    let remaining = text;
+    let keyCounter = 0;
+    
+    while (remaining.length > 0) {
+      const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+      if (boldMatch && boldMatch.index !== undefined) {
+        if (boldMatch.index > 0) {
+          parts.push(<span key={`t${keyCounter++}`}>{remaining.slice(0, boldMatch.index)}</span>);
+        }
+        parts.push(<strong key={`b${keyCounter++}`} className="font-bold text-gray-900">{boldMatch[1]}</strong>);
+        remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+        continue;
+      }
+      parts.push(<span key={`r${keyCounter++}`}>{remaining}</span>);
+      break;
+    }
+    
+    return parts.length > 0 ? <>{parts}</> : text;
+  };
+  
+  const renderLine = (line: string, index: number): React.ReactNode => {
+    const trimmed = line.trim();
+    
+    if (trimmed.startsWith('### ')) {
+      return <h4 key={index} className="font-bold text-purple-700 mt-3 mb-1 text-base">{renderInline(trimmed.slice(4))}</h4>;
+    }
+    if (trimmed.startsWith('## ')) {
+      return <h3 key={index} className="font-bold text-purple-800 mt-4 mb-2 text-base">{renderInline(trimmed.slice(3))}</h3>;
+    }
+    if (trimmed.startsWith('# ')) {
+      return <h2 key={index} className="font-bold text-purple-900 text-lg mt-3 mb-2 border-b border-purple-200 pb-1">{renderInline(trimmed.slice(2))}</h2>;
+    }
+    
+    if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      const bulletContent = trimmed.slice(2);
+      const leadingSpaces = line.length - line.trimStart().length;
+      const indentLevel = Math.floor(leadingSpaces / 2);
+      return (
+        <div key={index} className="flex gap-2 my-1" style={{ marginLeft: indentLevel * 16 }}>
+          <span className="text-purple-500 flex-shrink-0">•</span>
+          <span className="flex-1">{renderInline(bulletContent)}</span>
+        </div>
+      );
+    }
+    
+    if (trimmed === '') {
+      return <div key={index} className="h-2" />;
+    }
+    
+    return <p key={index} className="my-1">{renderInline(trimmed)}</p>;
+  };
+  
+  return (
+    <div className="text-sm leading-relaxed">
+      {lines.map((line, index) => renderLine(line, index))}
+    </div>
+  );
+}
+
 const suggestedQuestions = [
   "What are all the dependencies for the PRT Platform project?",
   "Show me all projects that are at risk",
@@ -220,10 +284,14 @@ export function AskPMChat() {
                     <div className={`flex-1 p-3 rounded-lg ${
                       message.role === 'user'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-800'
+                        : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                     }`}>
-                      <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                      <div className={`text-xs mt-1 ${
+                      {message.role === 'assistant' ? (
+                        <MarkdownRenderer content={message.content} />
+                      ) : (
+                        <div className="text-sm">{message.content}</div>
+                      )}
+                      <div className={`text-xs mt-2 ${
                         message.role === 'user' ? 'text-blue-200' : 'text-gray-400'
                       }`}>
                         {message.timestamp.toLocaleTimeString()}
