@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } from "./anthropic";
 import { registerCoPilotRoutes } from "./copilot";
+import { askPM } from "./askPM";
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
@@ -386,6 +387,26 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Lifecycle insight error:", error);
       res.status(500).json({ error: error.message || "Failed to generate insight" });
+    }
+  });
+
+  const askPMSchema = z.object({
+    question: z.string().min(1, "Question is required").max(500, "Question too long")
+  });
+
+  app.post("/api/ai/ask-pm", async (req, res) => {
+    try {
+      const parsed = askPMSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.errors[0].message });
+      }
+
+      const { question } = parsed.data;
+      const response = await askPM(question);
+      res.json({ response });
+    } catch (error: any) {
+      console.error("Ask PM error:", error);
+      res.status(500).json({ error: error.message || "Failed to get AI response" });
     }
   });
 

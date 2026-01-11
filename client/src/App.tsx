@@ -9,6 +9,7 @@ import { LiveEventDrawer } from "@/components/LiveEventDrawer";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
 import { AlertBubble } from "@/components/AlertBubble";
+import { AskPMChat } from "@/components/AskPMChat";
 import { useLiveMetrics, useCrossAgentFeed } from "@/hooks/useAgentData";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -26,6 +27,7 @@ import OKRDashboard from "@/pages/dashboard-okr";
 import GovernanceDashboard from "@/pages/dashboard-governance";
 import PlanningDashboard from "@/pages/dashboard-planning";
 import OCMDashboard from "@/pages/dashboard-ocm";
+import ProjectDetailPage from "@/pages/ProjectDetailPage";
 
 function Router() {
   return (
@@ -44,6 +46,7 @@ function Router() {
       <Route path="/climate" component={ClimatePage} />
       <Route path="/risk" component={RiskCenter} />
       <Route path="/vro-framework" component={VROFramework} />
+      <Route path="/project/:id" component={ProjectDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -180,6 +183,7 @@ function App() {
           <FloatingAlertBanner />
           <LiveEventDrawer />
           <GlobalAIOverlay />
+          <AskPMChat />
           <Router />
         </TooltipProvider>
       </SimulationProvider>

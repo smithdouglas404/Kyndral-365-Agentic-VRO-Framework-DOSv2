@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
 import { enrichedProjects, getSafeStages, getStageLabel, type EnrichedProject } from "@/lib/projects";
+import { safeProjects, getProjectsByBU } from "@/lib/safeProjectData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
@@ -67,6 +68,12 @@ export default function DivisionPage() {
   }, [divisionProjects, stageFilter]);
   
   const handleDrillDown = (type: string, id: string) => {
+    // Navigate to SAFe project detail page if it's a known SAFe project
+    const safeProject = safeProjects.find(p => p.id === id);
+    if (type === 'project' && safeProject) {
+      setLocation(`/project/${id}`);
+      return;
+    }
     setSelectedEntity({ type, id });
   };
   
