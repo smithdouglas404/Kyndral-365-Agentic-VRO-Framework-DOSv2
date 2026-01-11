@@ -65,8 +65,7 @@ export interface ThresholdBreach {
 }
 
 const AGENT_NAMES: Record<AgentType, string> = {
-  vro: 'VRO Intelligence',
-  pmo: 'PMO Control',
+  'integrated-management': 'Integrated Management',
   tmo: 'TMO',
   finops: 'FinOps',
   okr: 'OKR Mapping',
@@ -76,8 +75,7 @@ const AGENT_NAMES: Record<AgentType, string> = {
 };
 
 const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
-  vro: ['escalate', 'notify', 'investigate', 'accelerate', 'mitigate'],
-  pmo: ['escalate', 'notify', 'update-status', 'create-task', 'reassign', 'defer'],
+  'integrated-management': ['escalate', 'notify', 'investigate', 'accelerate', 'mitigate', 'update-status', 'create-task', 'reassign', 'defer'],
   tmo: ['notify', 'investigate', 'create-task', 'accelerate'],
   finops: ['escalate', 'notify', 'investigate', 'approve', 'reject', 'mitigate'],
   okr: ['notify', 'update-status', 'investigate'],
@@ -87,14 +85,13 @@ const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
 };
 
 const AGENT_SUBSCRIPTIONS: Record<AgentType, AgentType[]> = {
-  vro: ['pmo', 'finops', 'governance'],
-  pmo: ['vro', 'tmo', 'planning', 'governance'],
-  tmo: ['pmo', 'ocm', 'vro'],
-  finops: ['vro', 'pmo', 'governance'],
-  okr: ['vro', 'pmo'],
-  governance: ['vro', 'pmo', 'finops'],
-  planning: ['pmo', 'tmo'],
-  ocm: ['tmo', 'pmo']
+  'integrated-management': ['finops', 'governance', 'tmo', 'planning'],
+  tmo: ['integrated-management', 'ocm'],
+  finops: ['integrated-management', 'governance'],
+  okr: ['integrated-management'],
+  governance: ['integrated-management', 'finops'],
+  planning: ['integrated-management', 'tmo'],
+  ocm: ['tmo', 'integrated-management']
 };
 
 let actionLog: AgentAction[] = [];

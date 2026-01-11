@@ -20,8 +20,7 @@ export interface ActionScenario {
 }
 
 const AGENT_ICONS: Record<AgentType, string> = {
-  vro: '📊',
-  pmo: '📋',
+  'integrated-management': '🎛️',
   tmo: '🔧',
   finops: '💰',
   okr: '🎯',
@@ -31,8 +30,7 @@ const AGENT_ICONS: Record<AgentType, string> = {
 };
 
 const AGENT_NAMES: Record<AgentType, string> = {
-  vro: 'Value Agent',
-  pmo: 'PMO Agent',
+  'integrated-management': 'Integrated Management',
   tmo: 'Delivery Agent',
   finops: 'Finance Agent',
   okr: 'OKR Agent',
@@ -48,9 +46,9 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
     confirmMessage: `Budget for ${params.projectName} will be reduced from £${params.currentBudget}M to £${params.newBudget}M. This may impact timeline and scope.`,
     actions: [
       { agentId: 'finops', agentName: 'Finance Agent', icon: '💰', action: 'Budget Updated', detail: `${params.projectName} budget reduced by ${params.percentage}%`, delay: 1000 },
-      { agentId: 'pmo', agentName: 'Communication Agent', icon: '📧', action: 'PM Notified', detail: `Project Manager alerted to budget change`, delay: 2000 },
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '🎛️', action: 'PM Notified', detail: `Project Manager alerted to budget change`, delay: 2000 },
       { agentId: 'tmo', agentName: 'Dependency Agent', icon: '🔗', action: 'Dependencies Updated', detail: `${params.dependencyCount || 3} linked work items recalculated`, delay: 3500 },
-      { agentId: 'vro', agentName: 'Forecast Agent', icon: '📊', action: 'Projections Recalculated', detail: `Q2 value forecast updated to reflect changes`, delay: 4500 },
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '📊', action: 'Projections Recalculated', detail: `Q2 value forecast updated to reflect changes`, delay: 4500 },
       { agentId: 'planning', agentName: 'Scheduling Agent', icon: '📅', action: 'Meeting Scheduled', detail: `Team sync scheduled for tomorrow 2pm`, delay: 5500 },
       { agentId: 'governance', agentName: 'Risk Agent', icon: '⚠️', action: 'Risk Assessment', detail: `Potential scope impact flagged for review`, delay: 6500 }
     ]
@@ -61,7 +59,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
     trigger: `Accelerate ${params.projectName} delivery`,
     confirmMessage: `${params.projectName} will be accelerated. Additional resources may be required.`,
     actions: [
-      { agentId: 'pmo', agentName: 'PMO Agent', icon: '🚀', action: 'Acceleration Initiated', detail: `${params.projectName} marked as priority`, delay: 1000 },
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '🚀', action: 'Acceleration Initiated', detail: `${params.projectName} marked as priority`, delay: 1000 },
       { agentId: 'planning', agentName: 'Resource Agent', icon: '👥', action: 'Resources Allocated', detail: `2 additional team members assigned`, delay: 2500 },
       { agentId: 'tmo', agentName: 'Delivery Agent', icon: '📈', action: 'Sprint Adjusted', detail: `Velocity target increased by 20%`, delay: 3500 },
       { agentId: 'ocm', agentName: 'OCM Agent', icon: '📣', action: 'Stakeholders Notified', detail: `Change communication sent to sponsors`, delay: 4500 }
@@ -73,7 +71,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
     trigger: `Pause ${params.projectName}`,
     confirmMessage: `${params.projectName} will be paused. All active work will be suspended.`,
     actions: [
-      { agentId: 'pmo', agentName: 'PMO Agent', icon: '⏸️', action: 'Project Paused', detail: `${params.projectName} status changed to On Hold`, delay: 1000 },
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '⏸️', action: 'Project Paused', detail: `${params.projectName} status changed to On Hold`, delay: 1000 },
       { agentId: 'tmo', agentName: 'Task Agent', icon: '📋', action: 'Tasks Suspended', detail: `${params.taskCount || 12} active tasks moved to backlog`, delay: 2000 },
       { agentId: 'finops', agentName: 'Finance Agent', icon: '💰', action: 'Budget Released', detail: `Uncommitted funds returned to portfolio`, delay: 3000 },
       { agentId: 'ocm', agentName: 'Communication Agent', icon: '📧', action: 'Team Notified', detail: `Pause notification sent to all team members`, delay: 4000 },
@@ -89,7 +87,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
       { agentId: 'planning', agentName: 'Resource Agent', icon: '👤', action: 'Resource Assigned', detail: `${params.resourceName || 'New team member'} added to ${params.projectName}`, delay: 1000 },
       { agentId: 'finops', agentName: 'Finance Agent', icon: '💷', action: 'Budget Updated', detail: `Resource cost added to project forecast`, delay: 2000 },
       { agentId: 'tmo', agentName: 'Capacity Agent', icon: '📊', action: 'Capacity Recalculated', detail: `Team velocity projection increased`, delay: 3000 },
-      { agentId: 'pmo', agentName: 'PMO Agent', icon: '📧', action: 'Onboarding Initiated', detail: `Welcome materials sent to new team member`, delay: 4000 }
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '📧', action: 'Onboarding Initiated', detail: `Welcome materials sent to new team member`, delay: 4000 }
     ]
   }),
 
@@ -101,7 +99,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
       { agentId: 'governance', agentName: 'Risk Agent', icon: '🚨', action: 'Escalation Created', detail: `${params.riskName} flagged as critical`, delay: 1000 },
       { agentId: 'ocm', agentName: 'Communication Agent', icon: '📧', action: 'Leadership Notified', detail: `Escalation email sent to steering committee`, delay: 2500 },
       { agentId: 'planning', agentName: 'Scheduling Agent', icon: '📅', action: 'Review Meeting', detail: `Emergency review scheduled for today 4pm`, delay: 3500 },
-      { agentId: 'pmo', agentName: 'PMO Agent', icon: '📋', action: 'Action Items Created', detail: `Mitigation tasks assigned to leads`, delay: 4500 }
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '📋', action: 'Action Items Created', detail: `Mitigation tasks assigned to leads`, delay: 4500 }
     ]
   }),
 
@@ -111,9 +109,9 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
     confirmMessage: `${params.projectName} forecast will be updated with latest actuals and projections.`,
     actions: [
       { agentId: 'finops', agentName: 'Forecast Agent', icon: '📈', action: 'Forecast Updated', detail: `Q${params.quarter || '2'} projection revised based on actuals`, delay: 1000 },
-      { agentId: 'vro', agentName: 'Value Agent', icon: '💎', action: 'Value Impact Calculated', detail: `ROI projection adjusted to ${params.newRoi || '58'}%`, delay: 2500 },
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '💎', action: 'Value Impact Calculated', detail: `ROI projection adjusted to ${params.newRoi || '58'}%`, delay: 2500 },
       { agentId: 'okr', agentName: 'OKR Agent', icon: '🎯', action: 'OKRs Realigned', detail: `Key results updated to reflect new timeline`, delay: 3500 },
-      { agentId: 'pmo', agentName: 'PMO Agent', icon: '📧', action: 'Stakeholders Updated', detail: `Forecast change notification sent`, delay: 4500 }
+      { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '📧', action: 'Stakeholders Updated', detail: `Forecast change notification sent`, delay: 4500 }
     ]
   })
 };

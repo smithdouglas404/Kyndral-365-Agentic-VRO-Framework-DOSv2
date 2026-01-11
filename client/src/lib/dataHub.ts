@@ -7,7 +7,7 @@ import { pmoProjects, vroPrograms, riskIssues, buPortfolios, PMOProject, VROProg
 import { SimulationEvent } from './liveSimulation';
 import { getProjectsByMetricId, EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
 
-export type AgentType = 'vro' | 'pmo' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
+export type AgentType = 'integrated-management' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
 
 export interface AgentDataSlice {
   agentId: AgentType;
@@ -61,15 +61,10 @@ export interface EntityDrilldown {
 
 // Agent configuration with data mappings
 const AGENT_CONFIG: Record<AgentType, { name: string; category: string; buFilters?: string[]; focusAreas: string[] }> = {
-  vro: {
-    name: 'Value Realization Agent',
-    category: 'Value Realization',
-    focusAreas: ['ROI', 'value', 'strategic alignment', 'benefits']
-  },
-  pmo: {
-    name: 'PMO WorkFlow Orchestrator',
-    category: 'Project Management',
-    focusAreas: ['timeline', 'budget', 'deliverables', 'milestones']
+  'integrated-management': {
+    name: 'Integrated Management Agent',
+    category: 'Value & Delivery Management',
+    focusAreas: ['ROI', 'value', 'strategic alignment', 'benefits', 'timeline', 'budget', 'deliverables', 'milestones']
   },
   tmo: {
     name: 'TMO Transformation Agent',
@@ -112,10 +107,10 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
   // All 8 agents: VRO, PMO, TMO, FinOps, OKR, Governance, Planning, OCM
   const messageTemplates: Omit<CrossAgentMessage, 'id' | 'timestamp'>[] = [
     // PMO ↔ VRO: Project-Value Integration
-    { fromAgent: 'pmo', toAgent: 'vro', messageType: 'alert_forward', entity: 'PRT Intake System', message: 'Milestone delay impacts Strategic ROI - processing efficiency KPI down 8%', priority: 'critical' },
-    { fromAgent: 'pmo', toAgent: 'vro', messageType: 'data_sync', entity: 'Cloud Migration Program', message: 'Project on track - KPI "Workloads Migrated" at 52%, contributing to OKR progress', priority: 'medium' },
-    { fromAgent: 'vro', toAgent: 'pmo', messageType: 'recommendation', entity: 'Digital Onboarding', message: 'OKR "Digital-First Customer Experience" at 63% - accelerate project to boost KR completion', priority: 'high' },
-    { fromAgent: 'vro', toAgent: 'pmo', messageType: 'action_request', entity: 'API Modernization', message: 'Strategic priority shift - reallocate resources to high-ROI initiatives', priority: 'high' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'PRT Intake System', message: 'Milestone delay impacts Strategic ROI - processing efficiency KPI down 8%', priority: 'critical' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'Cloud Migration Program', message: 'Project on track - KPI "Workloads Migrated" at 52%, contributing to OKR progress', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'recommendation', entity: 'Digital Onboarding', message: 'OKR "Digital-First Customer Experience" at 63% - accelerate project to boost KR completion', priority: 'high' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'action_request', entity: 'API Modernization', message: 'Strategic priority shift - reallocate resources to high-ROI initiatives', priority: 'high' },
     
     // TMO ↔ OCM: Transformation-Change Integration
     { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'action_request', entity: 'Digital Workplace', message: 'Phase 2 launch imminent - stakeholder readiness assessment needed', priority: 'high' },
@@ -124,35 +119,35 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
     { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'alert_forward', entity: 'CRM Migration', message: 'Stakeholder resistance detected in Sales division - change plan adjustment needed', priority: 'high' },
     
     // FinOps ↔ VRO: Financial-Value Integration
-    { fromAgent: 'finops', toAgent: 'vro', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - £2.1m under forecast, ROI improving', priority: 'low' },
-    { fromAgent: 'finops', toAgent: 'vro', messageType: 'alert_forward', entity: 'Cloud Infrastructure', message: 'Cost overrun detected - £450k above baseline, value at risk', priority: 'critical' },
-    { fromAgent: 'vro', toAgent: 'finops', messageType: 'recommendation', entity: 'Portfolio Optimization', message: 'Low-ROI projects identified - recommend cost reallocation to high-value initiatives', priority: 'high' },
+    { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - £2.1m under forecast, ROI improving', priority: 'low' },
+    { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Cloud Infrastructure', message: 'Cost overrun detected - £450k above baseline, value at risk', priority: 'critical' },
+    { fromAgent: 'integrated-management', toAgent: 'finops', messageType: 'recommendation', entity: 'Portfolio Optimization', message: 'Low-ROI projects identified - recommend cost reallocation to high-value initiatives', priority: 'high' },
     { fromAgent: 'finops', toAgent: 'planning', messageType: 'data_sync', entity: 'Q4 Budget', message: 'Forecast updated - £3.2m available for new initiatives', priority: 'medium' },
     
     // OKR ↔ Multiple Agents: Strategy Alignment
-    { fromAgent: 'okr', toAgent: 'vro', messageType: 'data_sync', entity: 'OKR-001', message: 'Key Result "Reduce deal cycle time" progress calculated at 68% from project KPIs', priority: 'medium' },
+    { fromAgent: 'okr', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'OKR-001', message: 'Key Result "Reduce deal cycle time" progress calculated at 68% from project KPIs', priority: 'medium' },
     { fromAgent: 'okr', toAgent: 'tmo', messageType: 'recommendation', entity: 'Digital Transformation', message: 'OKR alignment at 94% - recommend accelerating Q4 objectives', priority: 'medium' },
     { fromAgent: 'okr', toAgent: 'governance', messageType: 'alert_forward', entity: 'Compliance OKR', message: 'Regulatory readiness KR at 45% - escalation threshold breached', priority: 'critical' },
-    { fromAgent: 'vro', toAgent: 'okr', messageType: 'data_sync', entity: 'Strategic ROI', message: 'Value realization feeding OKR progress - 5 Key Results updated', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'okr', messageType: 'data_sync', entity: 'Strategic ROI', message: 'Value realization feeding OKR progress - 5 Key Results updated', priority: 'medium' },
     
     // Governance ↔ Multiple Agents: Risk & Compliance
-    { fromAgent: 'governance', toAgent: 'pmo', messageType: 'alert_forward', entity: 'Private Markets Platform', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
-    { fromAgent: 'governance', toAgent: 'vro', messageType: 'action_request', entity: 'Risk Assessment', message: 'High-value program requires governance review - £25m threshold exceeded', priority: 'high' },
+    { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Private Markets Platform', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
+    { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'action_request', entity: 'Risk Assessment', message: 'High-value program requires governance review - £25m threshold exceeded', priority: 'high' },
     { fromAgent: 'governance', toAgent: 'finops', messageType: 'recommendation', entity: 'Audit Findings', message: 'Cost allocation audit complete - 3 remediation items identified', priority: 'medium' },
-    { fromAgent: 'vro', toAgent: 'governance', messageType: 'data_sync', entity: 'Longevity Risk Intelligence', message: 'Value realization at £15m - governance review triggered', priority: 'medium' },
-    { fromAgent: 'pmo', toAgent: 'governance', messageType: 'status_update', entity: 'Regulatory Project', message: 'Milestone achieved - ready for compliance validation', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'data_sync', entity: 'Longevity Risk Intelligence', message: 'Value realization at £15m - governance review triggered', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'status_update', entity: 'Regulatory Project', message: 'Milestone achieved - ready for compliance validation', priority: 'medium' },
     
     // Planning ↔ Multiple Agents: Capacity & Resources
-    { fromAgent: 'planning', toAgent: 'pmo', messageType: 'action_request', entity: 'Resource Pool', message: 'Capacity constraint detected for Q3 - reallocation needed', priority: 'high' },
+    { fromAgent: 'planning', toAgent: 'integrated-management', messageType: 'action_request', entity: 'Resource Pool', message: 'Capacity constraint detected for Q3 - reallocation needed', priority: 'high' },
     { fromAgent: 'planning', toAgent: 'tmo', messageType: 'recommendation', entity: 'Transformation Roadmap', message: 'Scenario analysis complete - Option B shows 23% better outcomes', priority: 'medium' },
     { fromAgent: 'planning', toAgent: 'finops', messageType: 'data_sync', entity: 'Capacity Forecast', message: 'Resource demand projection updated - 15% increase expected Q4', priority: 'medium' },
-    { fromAgent: 'pmo', toAgent: 'planning', messageType: 'status_update', entity: 'Resource Utilization', message: 'Current utilization at 87% - approaching capacity threshold', priority: 'high' },
+    { fromAgent: 'integrated-management', toAgent: 'planning', messageType: 'status_update', entity: 'Resource Utilization', message: 'Current utilization at 87% - approaching capacity threshold', priority: 'high' },
     { fromAgent: 'tmo', toAgent: 'planning', messageType: 'action_request', entity: 'Initiative Pipeline', message: 'New transformation wave requires capacity assessment', priority: 'medium' },
     
     // OCM ↔ Multiple Agents: Change Readiness
-    { fromAgent: 'ocm', toAgent: 'vro', messageType: 'status_update', entity: 'PRT Intake System', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
+    { fromAgent: 'ocm', toAgent: 'integrated-management', messageType: 'status_update', entity: 'PRT Intake System', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
     { fromAgent: 'ocm', toAgent: 'governance', messageType: 'alert_forward', entity: 'Change Impact', message: 'High-impact change requires stakeholder sign-off - 500+ users affected', priority: 'high' },
-    { fromAgent: 'pmo', toAgent: 'ocm', messageType: 'status_update', entity: 'Digital Onboarding', message: 'UAT phase starting - change communication required', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'ocm', messageType: 'status_update', entity: 'Digital Onboarding', message: 'UAT phase starting - change communication required', priority: 'medium' },
     { fromAgent: 'governance', toAgent: 'ocm', messageType: 'action_request', entity: 'Policy Update', message: 'New compliance policy requires organization-wide communication plan', priority: 'high' },
     
     // TMO ↔ FinOps/Governance: Benefits & Compliance
@@ -191,27 +186,27 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
 
 function getAgentForEventType(type: string): AgentType {
   const mapping: Record<string, AgentType> = {
-    'ai_alert': 'vro',
+    'ai_alert': 'integrated-management',
     'risk_warning': 'governance',
-    'opportunity': 'vro',
+    'opportunity': 'integrated-management',
     'prediction': 'planning',
-    'safe_anomaly': 'pmo',
-    'value_milestone': 'vro',
+    'safe_anomaly': 'integrated-management',
+    'value_milestone': 'integrated-management',
     'action_required': 'tmo'
   };
-  return mapping[type] || 'vro';
+  return mapping[type] || 'integrated-management';
 }
 
 function getRelatedAgents(agent: AgentType): AgentType[] {
   const relationships: Record<AgentType, AgentType[]> = {
-    vro: ['pmo', 'finops', 'governance'],
-    pmo: ['tmo', 'vro', 'ocm'],
-    tmo: ['ocm', 'pmo', 'governance'],
-    finops: ['vro', 'governance', 'planning'],
-    okr: ['governance', 'vro', 'tmo'],
-    governance: ['vro', 'pmo', 'finops'],
-    planning: ['pmo', 'finops', 'tmo'],
-    ocm: ['tmo', 'pmo', 'governance']
+    vro: ['integrated-management', 'finops', 'governance'],
+    pmo: ['tmo', 'integrated-management', 'ocm'],
+    tmo: ['ocm', 'integrated-management', 'governance'],
+    finops: ['integrated-management', 'governance', 'planning'],
+    okr: ['governance', 'integrated-management', 'tmo'],
+    governance: ['integrated-management', 'integrated-management', 'finops'],
+    planning: ['integrated-management', 'finops', 'tmo'],
+    ocm: ['tmo', 'integrated-management', 'governance']
   };
   return relationships[agent] || [];
 }
@@ -365,7 +360,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
     // VRO Metrics
     case 'current-roi':
       entityName = 'Current ROI - Full Traceability';
-      relatedAgents.push('vro', 'finops');
+      relatedAgents.push('integrated-management', 'finops');
       calculationMethod = 'Weighted average ROI across all active projects based on investment size';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'On Track' },
@@ -386,7 +381,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       
     case 'net-present-value':
       entityName = 'Net Present Value - Full Traceability';
-      relatedAgents.push('vro', 'finops');
+      relatedAgents.push('integrated-management', 'finops');
       calculationMethod = 'Sum of discounted cash flows across all projects (8% discount rate, 5-year horizon)';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '£12.5M', contribution: '34%', status: 'On Track' },
@@ -408,7 +403,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       
     case 'timeline-progress':
       entityName = 'Timeline Progress - Full Traceability';
-      relatedAgents.push('vro', 'pmo', 'planning');
+      relatedAgents.push('integrated-management', 'integrated-management', 'planning');
       calculationMethod = 'Average completion percentage across all projects weighted by strategic priority';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '82%', contribution: '30%', status: 'Phase 3' },
@@ -430,7 +425,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       
     case 'budget-utilization':
       entityName = 'Budget Utilization - Full Traceability';
-      relatedAgents.push('vro', 'finops');
+      relatedAgents.push('integrated-management', 'finops');
       calculationMethod = 'Total spend across all projects as percentage of allocated budget';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '£10.8M / £11.2M', contribution: '26%', status: '96%' },
@@ -453,7 +448,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
     // PMO Metrics
     case 'cycle-time':
       entityName = 'Cycle Time - Full Traceability';
-      relatedAgents.push('pmo', 'planning');
+      relatedAgents.push('integrated-management', 'planning');
       calculationMethod = 'Average time from work item start to completion across all project teams';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '14 days', contribution: '25%', status: 'On Track' },
@@ -474,7 +469,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       
     case 'flow-efficiency':
       entityName = 'Flow Efficiency - Full Traceability';
-      relatedAgents.push('pmo', 'planning');
+      relatedAgents.push('integrated-management', 'planning');
       calculationMethod = 'Active work time as percentage of total elapsed time (higher is better)';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'Exceeds' },
@@ -495,7 +490,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       
     case 'throughput':
       entityName = 'Throughput - Full Traceability';
-      relatedAgents.push('pmo', 'planning');
+      relatedAgents.push('integrated-management', 'planning');
       calculationMethod = 'Total work items completed per week across all project teams';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '4 items/week', contribution: '36%', status: 'On Track' },
@@ -519,7 +514,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       const wipProjects = getProjectsByMetricId('implementing');
       const allProjects = EXPANDED_PMO_PROJECTS;
       entityName = `Work In Progress - ${wipProjects.length} Projects`;
-      relatedAgents.push('pmo', 'governance');
+      relatedAgents.push('integrated-management', 'governance');
       calculationMethod = 'Projects currently in Implementing stage per SAFe 6.0 Kanban flow';
       projectBreakdown = wipProjects.map(p => ({
         project: p.name,
@@ -546,7 +541,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       const onTrackProjects = getProjectsByMetricId('on-track');
       const allProjects = EXPANDED_PMO_PROJECTS;
       entityName = `On Track Projects - ${onTrackProjects.length} of ${allProjects.length}`;
-      relatedAgents.push('pmo', 'vro');
+      relatedAgents.push('integrated-management', 'integrated-management');
       calculationMethod = 'Projects with green status - budget and timeline on target';
       projectBreakdown = onTrackProjects.map(p => ({
         project: p.name,
@@ -571,7 +566,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       const atRiskProjects = getProjectsByMetricId('at-risk');
       const allProjects = EXPANDED_PMO_PROJECTS;
       entityName = `At Risk Projects - ${atRiskProjects.length} of ${allProjects.length}`;
-      relatedAgents.push('pmo', 'governance', 'vro');
+      relatedAgents.push('integrated-management', 'governance', 'integrated-management');
       calculationMethod = 'Projects with amber status - requiring attention';
       projectBreakdown = atRiskProjects.map(p => ({
         project: p.name,
@@ -595,7 +590,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       const criticalProjects = getProjectsByMetricId('critical');
       const allProjects = EXPANDED_PMO_PROJECTS;
       entityName = `Critical Projects - ${criticalProjects.length} of ${allProjects.length}`;
-      relatedAgents.push('pmo', 'governance', 'vro');
+      relatedAgents.push('integrated-management', 'governance', 'integrated-management');
       calculationMethod = 'Projects with red status - immediate intervention required';
       projectBreakdown = criticalProjects.map(p => ({
         project: p.name,
@@ -618,7 +613,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
     case 'all-projects': {
       const allProjects = EXPANDED_PMO_PROJECTS;
       entityName = `All Active Projects - ${allProjects.length}`;
-      relatedAgents.push('pmo', 'vro');
+      relatedAgents.push('integrated-management', 'integrated-management');
       calculationMethod = 'Complete portfolio of transformation projects';
       projectBreakdown = allProjects.slice(0, 10).map(p => ({
         project: p.name,
@@ -670,7 +665,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
     history: events.slice(0, 5).map(e => ({
       timestamp: e.timestamp,
       action: e.title,
-      agent: 'vro'
+      agent: 'integrated-management'
     })),
     relatedEntities
   };
@@ -873,7 +868,7 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
       entity = pmoProjects.find(p => p.id === entityId);
       if (entity) {
         const proj = entity as PMOProject;
-        relatedAgents = ['pmo', 'governance', 'ocm'];
+        relatedAgents = ['integrated-management', 'governance', 'ocm'];
         metrics = {
           'Budget Spent': `${proj.budget.spent}${proj.budget.unit}`,
           'Budget Total': `${proj.budget.total}${proj.budget.unit}`,
@@ -890,7 +885,7 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
       entity = vroPrograms.find(p => p.id === entityId);
       if (entity) {
         const prog = entity as VROProgram;
-        relatedAgents = ['vro', 'finops', 'okr'];
+        relatedAgents = ['integrated-management', 'finops', 'okr'];
         metrics = {
           'Expected ROI': prog.expectedROI,
           'Value Realized': `£${prog.valueRealized}m`,
@@ -906,7 +901,7 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
       entity = riskIssues.find(r => r.id === entityId);
       if (entity) {
         const risk = entity as RiskIssue;
-        relatedAgents = ['governance', 'vro', 'pmo'];
+        relatedAgents = ['governance', 'integrated-management', 'integrated-management'];
         metrics = {
           'Severity': risk.severity,
           'Category': risk.category,
@@ -918,7 +913,7 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
       entity = buPortfolios.find(p => p.id === entityId);
       if (entity) {
         const portfolio = entity as BUPortfolio;
-        relatedAgents = ['vro', 'pmo', 'finops', 'tmo'];
+        relatedAgents = ['integrated-management', 'integrated-management', 'finops', 'tmo'];
         metrics = {
           'Total Programs': portfolio.programCount,
           'Total Projects': portfolio.projectCount,
@@ -1038,14 +1033,14 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
     entityId: guidanceId,
     entityName: data.title,
     bu: 'PMO Knowledge Base',
-    relatedAgents: ['pmo', 'ocm', 'governance'],
+    relatedAgents: ['integrated-management', 'ocm', 'governance'],
     events: events.slice(0, 5),
     metrics: data.metrics,
     actions: data.nextSteps.map((step, i) => ({ id: `action-${i}`, label: step, type: 'recommendation' })),
     history: [
-      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), action: 'AI insight generated', agent: 'pmo' as AgentType },
-      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), action: 'Pattern detected across projects', agent: 'vro' as AgentType },
-      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), action: 'Added to knowledge base', agent: 'pmo' as AgentType }
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), action: 'AI insight generated', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), action: 'Pattern detected across projects', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), action: 'Added to knowledge base', agent: 'integrated-management' as AgentType }
     ],
     relatedEntities: data.relatedProjects.map((p, i) => ({ type: 'project', id: `proj-${i}`, name: p })),
     aiInsight: data.aiInsight
@@ -1116,12 +1111,12 @@ function getLearningResourceDrilldown(resourceId: string, events: SimulationEven
     entityId: resourceId,
     entityName: data.title,
     bu: 'Learning Center',
-    relatedAgents: ['pmo', 'ocm'],
+    relatedAgents: ['integrated-management', 'ocm'],
     events: [],
     metrics: { 'Type': data.type, 'Duration': data.duration, 'Completions': '47', 'Avg Rating': '4.6/5' },
     actions: data.keyPoints.map((point, i) => ({ id: `kp-${i}`, label: point, type: 'key-point' })),
     history: [
-      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), action: 'Resource updated', agent: 'pmo' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), action: 'Resource updated', agent: 'integrated-management' as AgentType },
       { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), action: 'Added to library', agent: 'ocm' as AgentType }
     ],
     relatedEntities: data.relatedOKRs.map((okr, i) => ({ type: 'okr', id: `okr-${i}`, name: okr })),
@@ -1157,14 +1152,14 @@ function getCollaboratorDrilldown(collaboratorId: string, events: SimulationEven
     entityId: collaboratorId,
     entityName: data.name,
     bu: data.role,
-    relatedAgents: ['pmo', 'ocm'],
+    relatedAgents: ['integrated-management', 'ocm'],
     events: [],
     metrics: { 'Contributions': String(data.contributions.length), 'Insights Shared': String(data.sharedInsights.length), 'Active Projects': String(data.projects.length), 'Knowledge Score': '94%' },
     actions: data.contributions.map((c, i) => ({ id: `contrib-${i}`, label: c, type: 'contribution' })),
     history: data.sharedInsights.map((insight, i) => ({
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * (i + 1)),
       action: insight,
-      agent: 'pmo' as AgentType
+      agent: 'integrated-management' as AgentType
     })),
     relatedEntities: data.projects.map((p, i) => ({ type: 'project', id: `proj-${i}`, name: p }))
   };
@@ -1203,12 +1198,12 @@ function getBlockerDrilldown(blockerId: string, events: SimulationEvent[]): Enti
     entityId: blockerId,
     entityName: data.title,
     bu: 'Risk Management',
-    relatedAgents: ['pmo', 'governance', 'planning'],
+    relatedAgents: ['integrated-management', 'governance', 'planning'],
     events: [],
     metrics: { 'Impact': data.impact, 'Projects Affected': String(data.affectedProjects.length), 'Status': 'Active', 'Priority': 'High' },
     actions: data.mitigations.map((m, i) => ({ id: `mit-${i}`, label: m, type: 'mitigation' })),
     history: [
-      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), action: 'Blocker identified', agent: 'pmo' as AgentType },
+      { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), action: 'Blocker identified', agent: 'integrated-management' as AgentType },
       { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), action: 'Impact assessment completed', agent: 'governance' as AgentType },
       { timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), action: 'Mitigation plan created', agent: 'planning' as AgentType }
     ],
@@ -1227,7 +1222,7 @@ function getAgentMessageDrilldown(messageId: string, events: SimulationEvent[]):
       entityId: messageId,
       entityName: 'Agent Communication',
       bu: 'Cross-Agent Orchestration',
-      relatedAgents: ['pmo', 'vro'],
+      relatedAgents: ['integrated-management', 'integrated-management'],
       events: [],
       metrics: {},
       actions: [],
@@ -1268,7 +1263,7 @@ export function getAllCrossAgentMessages(events: SimulationEvent[] = []): CrossA
 
 // Get summary metrics for all agents
 export function getAllAgentsSummary(events: SimulationEvent[] = []): Record<AgentType, AgentMetrics> {
-  const agents: AgentType[] = ['vro', 'pmo', 'tmo', 'finops', 'okr', 'governance', 'planning', 'ocm'];
+  const agents: AgentType[] = ['integrated-management', 'integrated-management', 'tmo', 'finops', 'okr', 'governance', 'planning', 'ocm'];
   const summary: Record<string, AgentMetrics> = {};
   
   agents.forEach(agentId => {
