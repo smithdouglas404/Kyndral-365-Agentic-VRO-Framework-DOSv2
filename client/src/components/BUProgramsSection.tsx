@@ -76,6 +76,17 @@ function ProjectDetailModal({
 }) {
   const [actionsTaken, setActionsTaken] = useState<string[]>([]);
   
+  // Escape key handler - must be before any conditional returns
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open, onClose]);
+  
   const item = project || program;
   if (!item) return null;
   
@@ -110,17 +121,6 @@ function ProjectDetailModal({
     { pi: "PI 24.3", planned: 88, actual: 91 },
     { pi: "PI 24.4", planned: 92, actual: 89 }
   ];
-  
-  // Escape key handler
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [open, onClose]);
   
   return (
     <AnimatePresence>
