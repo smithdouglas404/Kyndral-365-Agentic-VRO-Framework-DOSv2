@@ -260,44 +260,88 @@ export default function DivisionPage() {
           </TabsContent>
 
           <TabsContent value="outcomes" className="space-y-6">
+            {/* Color Legend for OKR-KPI Mapping */}
+            <Card className="bg-slate-50 border-slate-200">
+              <CardContent className="py-3">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-slate-700">OKR to KPI Mapping:</span>
+                    {division.okrs.map((okr, i) => {
+                      const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
+                      return (
+                        <div key={i} className="flex items-center gap-1.5">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: okrColors[i % okrColors.length] }}
+                          />
+                          <span className="text-xs text-slate-600">OKR {i + 1}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <span className="text-xs text-slate-500">Hover over an OKR or KPI to highlight connections</span>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Two-pane layout: OKR hierarchy on left, linked KPIs on right */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Pane: OKR Hierarchy with Status */}
               <div className="space-y-4">
-                <Card>
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" style={{ color: division.color }} />
+                    <CardTitle className="flex items-center gap-2 text-blue-900">
+                      <Target className="h-5 w-5 text-blue-600" />
                       Strategic Objectives (OKRs)
                     </CardTitle>
-                    <CardDescription>
-                      {division.okrs.length} objectives driving {division.kpis.length} measurable outcomes
+                    <CardDescription className="text-blue-700">
+                      {division.okrs.length} objectives driving {division.kpis.length} measurable KPIs
                     </CardDescription>
                   </CardHeader>
                 </Card>
                 
                 {division.okrs.map((okr, i) => {
+                  const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
+                  const okrColor = okrColors[i % okrColors.length];
                   const overallProgress = Math.round(
                     okr.keyResults.reduce((sum, kr) => sum + (kr.progress / kr.target) * 100, 0) / okr.keyResults.length
                   );
+                  const linkedKpiCount = division.kpis.filter((_, ki) => ki % division.okrs.length === i).length;
+                  
                   return (
-                    <Card key={i} className="border-l-4" style={{ borderLeftColor: division.color }}>
+                    <Card 
+                      key={i} 
+                      className="border-l-4 hover:shadow-lg transition-all cursor-pointer group"
+                      style={{ borderLeftColor: okrColor }}
+                      data-testid={`okr-card-${i}`}
+                    >
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <CardTitle className="text-base flex items-center gap-2">
-                              <div className={`w-3 h-3 rounded-full ${
+                              <Badge 
+                                className="text-[10px] px-1.5" 
+                                style={{ backgroundColor: okrColor, color: 'white' }}
+                              >
+                                OKR {i + 1}
+                              </Badge>
+                              <div className={`w-2.5 h-2.5 rounded-full ${
                                 overallProgress >= 80 ? 'bg-green-500' : 
                                 overallProgress >= 50 ? 'bg-amber-500' : 'bg-red-500'
                               }`} />
-                              {okr.objective}
+                              <span className="group-hover:text-blue-700 transition-colors">{okr.objective}</span>
                             </CardTitle>
-                            <CardDescription className="mt-1 text-xs">
-                              Owner: {okr.owner} | Due: {okr.dueDate}
+                            <CardDescription className="mt-1 text-xs flex items-center gap-3">
+                              <span>Owner: {okr.owner}</span>
+                              <span>Due: {okr.dueDate}</span>
+                              <span className="flex items-center gap-1" style={{ color: okrColor }}>
+                                <ArrowRight className="h-3 w-3" />
+                                Drives {linkedKpiCount} KPI{linkedKpiCount !== 1 ? 's' : ''}
+                              </span>
                             </CardDescription>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl font-bold" style={{ color: division.color }}>
+                            <div className="text-2xl font-bold" style={{ color: okrColor }}>
                               {overallProgress}%
                             </div>
                             <span className="text-xs text-gray-500">overall</span>
@@ -332,18 +376,18 @@ export default function DivisionPage() {
 
               {/* Right Pane: Linked KPIs with Analytics */}
               <div className="space-y-4">
-                <Card>
+                <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200">
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" style={{ color: division.color }} />
-                      Key Performance Indicators
+                    <CardTitle className="flex items-center gap-2 text-emerald-900">
+                      <TrendingUp className="h-5 w-5 text-emerald-600" />
+                      Key Performance Indicators (KPIs)
                     </CardTitle>
-                    <CardDescription>
-                      Measuring progress against 2025 targets
+                    <CardDescription className="text-emerald-700">
+                      {division.kpis.length} metrics measuring progress against 2025 targets
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <ResponsiveContainer width="100%" height={180}>
                       <BarChart data={kpiChartData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-20} textAnchor="end" height={60} />
@@ -351,16 +395,21 @@ export default function DivisionPage() {
                         <Tooltip />
                         <Legend wrapperStyle={{ fontSize: '10px' }} />
                         <Bar dataKey="2023" fill="#94a3b8" name="2023" />
-                        <Bar dataKey="2024" fill={division.color} name="2024" />
+                        <Bar dataKey="2024" fill="#059669" name="2024" />
                         <Bar dataKey="Target" fill="#10b981" name="Target" />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
 
-                {/* KPI Cards with OKR Linkage */}
-                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                {/* KPI Cards with OKR Linkage - Color Coded */}
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
                   {division.kpis.map((kpi, i) => {
+                    const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
+                    const linkedOkrIndex = i % division.okrs.length;
+                    const linkedOkr = division.okrs[linkedOkrIndex];
+                    const okrColor = okrColors[linkedOkrIndex % okrColors.length];
+                    
                     const progressPercent = typeof kpi.value2024 === "number" && typeof kpi.target2025 === "number"
                       ? Math.round((kpi.value2024 / kpi.target2025) * 100)
                       : 0;
@@ -368,15 +417,17 @@ export default function DivisionPage() {
                       ? Math.round(((kpi.value2024 - kpi.value2023) / kpi.value2023) * 100)
                       : 0;
                     
-                    // Link KPI to relevant OKR (simulated linkage based on index)
-                    const linkedOkr = division.okrs[i % division.okrs.length];
-                    
                     return (
-                      <Card key={i} className="border border-gray-200 hover:shadow-md transition-shadow">
+                      <Card 
+                        key={i} 
+                        className="border-l-4 hover:shadow-lg transition-all cursor-pointer"
+                        style={{ borderLeftColor: okrColor }}
+                        data-testid={`kpi-card-${i}`}
+                      >
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-medium text-sm">{kpi.name}</span>
                                 <Badge 
                                   variant={kpi.status === "on-track" ? "default" : kpi.status === "at-risk" ? "secondary" : "destructive"}
@@ -386,16 +437,26 @@ export default function DivisionPage() {
                                 </Badge>
                               </div>
                               {linkedOkr && (
-                                <div className="flex items-center gap-1 mt-1">
-                                  <Link2 className="h-3 w-3 text-gray-400" />
-                                  <span className="text-[10px] text-gray-500 truncate max-w-[200px]">
-                                    Linked: {linkedOkr.objective.substring(0, 40)}...
+                                <div 
+                                  className="flex items-center gap-1.5 mt-2 p-1.5 rounded-md"
+                                  style={{ backgroundColor: `${okrColor}15` }}
+                                >
+                                  <Badge 
+                                    className="text-[9px] px-1" 
+                                    style={{ backgroundColor: okrColor, color: 'white' }}
+                                  >
+                                    OKR {linkedOkrIndex + 1}
+                                  </Badge>
+                                  <span className="text-[11px] font-medium" style={{ color: okrColor }}>
+                                    {linkedOkr.objective.length > 35 
+                                      ? linkedOkr.objective.substring(0, 35) + '...' 
+                                      : linkedOkr.objective}
                                   </span>
                                 </div>
                               )}
                             </div>
                             <div className="text-right">
-                              <div className="text-xl font-bold" style={{ color: division.color }}>
+                              <div className="text-xl font-bold" style={{ color: okrColor }}>
                                 {kpi.value2024}{kpi.unit}
                               </div>
                               <div className="flex items-center gap-1 justify-end">
@@ -419,10 +480,6 @@ export default function DivisionPage() {
                             </div>
                             <div className="relative">
                               <Progress value={Math.min(100, progressPercent)} className="h-2" />
-                              <div 
-                                className="absolute top-0 h-2 w-0.5 bg-gray-800"
-                                style={{ left: `${Math.min(100, progressPercent)}%` }}
-                              />
                             </div>
                             <div className="flex justify-between text-[10px] text-gray-400">
                               <span>Current: {kpi.value2024}{kpi.unit}</span>
