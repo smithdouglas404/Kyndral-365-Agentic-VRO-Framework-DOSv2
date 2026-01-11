@@ -199,12 +199,11 @@ function getAgentForEventType(type: string): AgentType {
 
 function getRelatedAgents(agent: AgentType): AgentType[] {
   const relationships: Record<AgentType, AgentType[]> = {
-    vro: ['integrated-management', 'finops', 'governance'],
-    pmo: ['tmo', 'integrated-management', 'ocm'],
+    'integrated-management': ['finops', 'governance', 'tmo', 'ocm'],
     tmo: ['ocm', 'integrated-management', 'governance'],
     finops: ['integrated-management', 'governance', 'planning'],
     okr: ['governance', 'integrated-management', 'tmo'],
-    governance: ['integrated-management', 'integrated-management', 'finops'],
+    governance: ['integrated-management', 'finops'],
     planning: ['integrated-management', 'finops', 'tmo'],
     ocm: ['tmo', 'integrated-management', 'governance']
   };

@@ -25,7 +25,7 @@ interface Recommendation {
 }
 
 type DataMode = 'VRO' | 'PMO';
-type AgentType = 'vro' | 'pmo' | 'tmo' | 'finops' | 'governance' | 'okr' | 'planning' | 'ocm';
+type AgentType = 'integrated-management' | 'tmo' | 'finops' | 'governance' | 'okr' | 'planning' | 'ocm';
 
 const vroRecommendations: Recommendation[] = [
   {
@@ -361,8 +361,7 @@ const actionMessages: Record<string, { title: string; description: string }> = {
 };
 
 const recommendationsByAgent: Record<AgentType, Recommendation[]> = {
-  vro: vroRecommendations,
-  pmo: pmoRecommendations,
+  'integrated-management': [...vroRecommendations, ...pmoRecommendations].slice(0, 4),
   tmo: tmoRecommendations,
   finops: finopsRecommendations,
   governance: governanceRecommendations,
@@ -372,8 +371,7 @@ const recommendationsByAgent: Record<AgentType, Recommendation[]> = {
 };
 
 const agentLabels: Record<AgentType, string> = {
-  vro: 'VRO',
-  pmo: 'PMO',
+  'integrated-management': 'IMA',
   tmo: 'TMO',
   finops: 'FinOps',
   governance: 'Governance',
@@ -388,7 +386,7 @@ interface AIRecommendationsProps {
 }
 
 export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendationsProps) {
-  const effectiveAgent = agentType || (dataMode === 'VRO' ? 'vro' : 'pmo');
+  const effectiveAgent = agentType || 'integrated-management';
   const recommendations = recommendationsByAgent[effectiveAgent] || vroRecommendations;
   const displayLabel = agentLabels[effectiveAgent];
   const { setSelectedEvent } = useSimulation();
@@ -470,7 +468,7 @@ export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendat
           <CardTitle className="text-lg flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-500" />
             AI Recommendations
-            <Badge variant={effectiveAgent === 'pmo' ? 'secondary' : 'default'} className="text-xs ml-2">
+            <Badge variant="default" className="text-xs ml-2">
               {displayLabel}
             </Badge>
           </CardTitle>

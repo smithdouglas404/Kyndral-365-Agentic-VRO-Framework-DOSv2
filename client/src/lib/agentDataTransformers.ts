@@ -507,8 +507,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
   );
   
   const agents = [
-    { agentId: 'vro', agentName: 'VRO Agent', role: 'Value tracking' },
-    { agentId: 'pmo', agentName: 'PMO Agent', role: 'Delivery oversight' },
+    { agentId: 'integrated-management', agentName: 'Integrated Management Agent', role: 'Value & Delivery' },
     { agentId: 'ocm', agentName: 'OCM Agent', role: 'Change management' },
     { agentId: 'finops', agentName: 'FinOps Agent', role: 'Cost monitoring' },
     { agentId: 'okr', agentName: 'OKR Agent', role: 'Alignment tracking' }
@@ -620,7 +619,7 @@ export function getObjectivesFromDivisions(mode: DataMode): TransformedObjective
   );
   
   const agents = [
-    { agentId: 'vro', agentName: 'VRO Agent', contribution: 'Value tracking & ROI' },
+    { agentId: 'integrated-management', agentName: 'Integrated Management Agent', contribution: 'Value & Delivery' },
     { agentId: 'finops', agentName: 'FinOps Agent', contribution: 'Cost optimization' },
     { agentId: 'tmo', agentName: 'TMO Agent', contribution: 'Change management' },
     { agentId: 'governance', agentName: 'Governance Agent', contribution: 'Compliance oversight' },

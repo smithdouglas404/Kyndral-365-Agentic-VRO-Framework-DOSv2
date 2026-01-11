@@ -57,23 +57,23 @@ export function useAllAgentsSummary(): Record<AgentType, AgentMetrics> {
 // Hook to get filtered projects by status
 export function useProjectsByStatus(status?: 'green' | 'amber' | 'red') {
   const { events } = useSimulation();
-  const pmoData = useMemo(() => getAgentDataSlice('pmo', events), [events]);
+  const integData = useMemo(() => getAgentDataSlice('integrated-management', events), [events]);
   
   return useMemo(() => {
-    if (!status) return pmoData.projects;
-    return pmoData.projects.filter(p => p.status === status);
-  }, [pmoData.projects, status]);
+    if (!status) return integData.projects;
+    return integData.projects.filter(p => p.status === status);
+  }, [integData.projects, status]);
 }
 
 // Hook to get programs by value status
 export function useProgramsByValueStatus(status?: 'accelerating' | 'on-track' | 'at-risk' | 'blocked') {
   const { events } = useSimulation();
-  const vroData = useMemo(() => getAgentDataSlice('vro', events), [events]);
+  const integData = useMemo(() => getAgentDataSlice('integrated-management', events), [events]);
   
   return useMemo(() => {
-    if (!status) return vroData.programs;
-    return vroData.programs.filter(p => p.valueStatus === status);
-  }, [vroData.programs, status]);
+    if (!status) return integData.programs;
+    return integData.programs.filter(p => p.valueStatus === status);
+  }, [integData.programs, status]);
 }
 
 // Hook to get real-time metrics with live updates
@@ -83,14 +83,16 @@ export function useLiveMetrics() {
   return useMemo(() => {
     const allSummary = getAllAgentsSummary(events);
     
-    // Aggregate metrics
-    const totalProjects = Object.values(allSummary).reduce((sum, a) => sum + a.totalProjects, 0) / 8; // Average since each agent has overlapping projects
-    const totalValue = allSummary.vro.totalValue;
-    const realizedValue = allSummary.vro.realizedValue;
+    // Aggregate metrics from integrated management agent
+    const integ = allSummary['integrated-management'];
+    const agentCount = Object.keys(allSummary).length;
+    const totalProjects = Object.values(allSummary).reduce((sum, a) => sum + (a?.totalProjects || 0), 0) / agentCount;
+    const totalValue = integ?.totalValue || 0;
+    const realizedValue = integ?.realizedValue || 0;
     const activeAlerts = events.filter(e => !e.read).length;
-    const avgConfidence = Object.values(allSummary).reduce((sum, a) => sum + a.avgConfidence, 0) / 8;
+    const avgConfidence = Object.values(allSummary).reduce((sum, a) => sum + (a?.avgConfidence || 0), 0) / agentCount;
     
-    // Apply VRO/PMO multipliers
+    // Apply confidence multipliers
     const confidenceMultiplier = dataMode === 'VRO' ? 1.15 : 0.85;
     
     return {
@@ -99,7 +101,7 @@ export function useLiveMetrics() {
       realizedValue,
       activeAlerts,
       avgConfidence: Math.round(avgConfidence * confidenceMultiplier),
-      pendingActions: Object.values(allSummary).reduce((sum, a) => sum + a.pendingActions, 0),
+      pendingActions: Object.values(allSummary).reduce((sum, a) => sum + (a?.pendingActions || 0), 0),
       dataMode
     };
   }, [events, dataMode]);

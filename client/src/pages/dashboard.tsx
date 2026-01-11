@@ -429,11 +429,11 @@ function DashboardContent() {
   useEffect(() => {
     setPageContext({
       pageType: 'dashboard',
-      entityId: dataMode === 'VRO' ? 'vro' : 'pmo',
-      entityName: dataMode === 'VRO' ? 'Intelligence Engine' : 'PMO Control Center',
+      entityId: 'integrated-management',
+      entityName: 'Intelligence Engine',
       breadcrumb: ['Dashboard']
     });
-  }, [dataMode, setPageContext]);
+  }, [setPageContext]);
 
   // Read tab from URL query parameter on mount
   useEffect(() => {

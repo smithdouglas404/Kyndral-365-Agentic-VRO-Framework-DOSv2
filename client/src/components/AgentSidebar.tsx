@@ -51,22 +51,13 @@ interface Agent {
 
 const agents: Agent[] = [
   {
-    id: 'vro',
-    name: 'Value Realization',
-    shortName: 'VRO',
-    icon: DollarSign,
+    id: 'integrated-management',
+    name: 'Integrated Management',
+    shortName: 'IMA',
+    icon: Sparkles,
     href: '/dashboard',
-    color: 'bg-blue-500',
-    description: 'Financial analytics & ROI'
-  },
-  {
-    id: 'pmo',
-    name: 'Project Manager',
-    shortName: 'PMO',
-    icon: GitBranch,
-    href: '/dashboard/pmo',
-    color: 'bg-purple-500',
-    description: 'Flow metrics & delivery'
+    color: 'bg-gradient-to-r from-teal-500 to-blue-500',
+    description: 'Unified Value & Delivery'
   },
   {
     id: 'tmo',
@@ -321,8 +312,7 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
             <Link key={agent.id} href={agent.href}>
               <div
                 onClick={() => {
-                  if (agent.id === 'vro') onModeChange('VRO');
-                  if (agent.id === 'pmo') onModeChange('PMO');
+                  if (agent.id === 'integrated-management') onModeChange('VRO');
                 }}
                 className={cn(
                   "mx-2 mb-1 px-3 py-2.5 rounded-lg cursor-pointer transition-all group relative",

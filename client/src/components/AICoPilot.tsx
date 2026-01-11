@@ -21,8 +21,7 @@ interface CoPilotInsights {
 }
 
 const agentPersonalities: Record<AgentType, { name: string; style: string; focus: string; color: string }> = {
-  vro: { name: 'VRO Agent', style: 'strategic', focus: 'value realization and ROI optimization', color: 'bg-green-500' },
-  pmo: { name: 'PMO Agent', style: 'operational', focus: 'project delivery and timeline management', color: 'bg-purple-500' },
+  'integrated-management': { name: 'Integrated Management Agent', style: 'unified', focus: 'value realization and project delivery', color: 'bg-gradient-to-r from-teal-500 to-blue-500' },
   tmo: { name: 'TMO Agent', style: 'transformational', focus: 'change adoption and initiative success', color: 'bg-blue-500' },
   finops: { name: 'FinOps Agent', style: 'analytical', focus: 'cost optimization and financial efficiency', color: 'bg-amber-500' },
   okr: { name: 'OKR Agent', style: 'strategic', focus: 'objective alignment and key results tracking', color: 'bg-orange-500' },
@@ -256,11 +255,11 @@ function AgentCard({
   );
 }
 
-export function AICoPilot({ drilldown, agentId = 'vro', dataMode = 'VRO' }: AICoPilotProps) {
+export function AICoPilot({ drilldown, agentId = 'integrated-management', dataMode = 'VRO' }: AICoPilotProps) {
   const [expandedAgent, setExpandedAgent] = useState<AgentType | null>(null);
   
-  // Filter agents based on dataMode - VRO mode shows VRO agent, PMO mode shows PMO agent
-  const primaryAgent: AgentType = dataMode === 'VRO' ? 'vro' : 'pmo';
+  // Unified integrated management agent for both VRO and PMO views
+  const primaryAgent: AgentType = 'integrated-management';
   const agents: AgentType[] = [primaryAgent];
 
   return (

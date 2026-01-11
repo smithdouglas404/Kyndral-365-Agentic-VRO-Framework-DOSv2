@@ -26,8 +26,7 @@ import {
 import { AgentType } from '@/lib/dataHub';
 
 const AGENT_ICONS: Record<AgentType, React.ElementType> = {
-  vro: DollarSign,
-  pmo: GitBranch,
+  'integrated-management': Brain,
   tmo: Repeat,
   finops: Calculator,
   okr: Target,
@@ -37,8 +36,7 @@ const AGENT_ICONS: Record<AgentType, React.ElementType> = {
 };
 
 const AGENT_COLORS: Record<AgentType, string> = {
-  vro: 'bg-blue-500',
-  pmo: 'bg-purple-500',
+  'integrated-management': 'bg-gradient-to-r from-teal-500 to-blue-500',
   tmo: 'bg-teal-500',
   finops: 'bg-green-500',
   okr: 'bg-orange-500',
@@ -115,7 +113,7 @@ function ActivityDetailFlyout({
   const traceabilityData = {
     sourceSystem: item.targetType === 'project' ? 'Jira' : item.targetType === 'metric' ? 'PowerBI' : 'ServiceNow',
     sourceId: `SRC-${item.id.slice(-8).toUpperCase()}`,
-    triggeredBy: item.agentId === 'vro' ? 'Scheduled Analysis' : item.agentId === 'pmo' ? 'Sprint Event' : 'Threshold Alert',
+    triggeredBy: item.agentId === 'integrated-management' ? 'Scheduled Analysis' : 'Threshold Alert',
     parentAction: Math.random() > 0.5 ? `ACT-${Math.random().toString(36).slice(2, 8).toUpperCase()}` : null,
     linkedEntities: [
       { type: 'Project', id: 'PRJ-001', name: 'Digital Transformation' },
@@ -133,7 +131,7 @@ function ActivityDetailFlyout({
       { source: 'Historical trends (30 days)', freshness: 'Daily refresh' },
       { source: 'Cross-agent insights', freshness: '< 5 min' }
     ],
-    impactedAgents: ['pmo', 'finops', 'governance'].filter(() => Math.random() > 0.3) as AgentType[]
+    impactedAgents: ['integrated-management', 'finops', 'governance'].filter(() => Math.random() > 0.3) as AgentType[]
   };
 
   return (
@@ -386,21 +384,21 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
 
   // Continuous agent activity simulation data - all 8 agents with project focus
   const simulatedActivities = [
-    { agent: 'vro' as AgentType, action: 'investigate' as ActionType, target: 'PRT Volume Forecast', targetType: 'metric' as const, reason: 'Analyzing Q4 volume trends against market conditions' },
-    { agent: 'pmo' as AgentType, action: 'update-status' as ActionType, target: 'Digital Transformation Sprint', targetType: 'project' as const, reason: 'Sprint velocity improved 12% - updating health indicators' },
+    { agent: 'integrated-management' as AgentType, action: 'investigate' as ActionType, target: 'PRT Volume Forecast', targetType: 'metric' as const, reason: 'Analyzing Q4 volume trends against market conditions' },
+    { agent: 'integrated-management' as AgentType, action: 'update-status' as ActionType, target: 'Digital Transformation Sprint', targetType: 'project' as const, reason: 'Sprint velocity improved 12% - updating health indicators' },
     { agent: 'finops' as AgentType, action: 'notify' as ActionType, target: 'Cloud Cost Allocation', targetType: 'metric' as const, reason: 'Detected 8% cost optimization opportunity in compute resources' },
     { agent: 'governance' as AgentType, action: 'approve' as ActionType, target: 'Platform Migration Project', targetType: 'project' as const, reason: 'Compliance review completed - project cleared for Phase 2' },
     { agent: 'okr' as AgentType, action: 'investigate' as ActionType, target: 'Customer NPS Objective', targetType: 'okr' as const, reason: 'Key result tracking ahead of schedule - analyzing drivers' },
     { agent: 'tmo' as AgentType, action: 'accelerate' as ActionType, target: 'API Migration Wave 3', targetType: 'project' as const, reason: 'Dependency cleared - recommending fast-track to capture Q4 window' },
     { agent: 'planning' as AgentType, action: 'create-task' as ActionType, target: 'Q1 Roadmap Review', targetType: 'task' as const, reason: 'Scheduling strategic alignment sessions with division leads' },
     { agent: 'ocm' as AgentType, action: 'notify' as ActionType, target: 'Longevity Platform Rollout', targetType: 'project' as const, reason: 'Change readiness assessment complete - 92% stakeholder alignment' },
-    { agent: 'vro' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified £1.2M potential value at risk in delayed integrations' },
-    { agent: 'pmo' as AgentType, action: 'reassign' as ActionType, target: 'Resource Optimization', targetType: 'task' as const, reason: 'Balancing workload across sprint teams' },
+    { agent: 'integrated-management' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified £1.2M potential value at risk in delayed integrations' },
+    { agent: 'integrated-management' as AgentType, action: 'reassign' as ActionType, target: 'Resource Optimization', targetType: 'task' as const, reason: 'Balancing workload across sprint teams' },
     { agent: 'finops' as AgentType, action: 'mitigate' as ActionType, target: 'Budget Variance', targetType: 'risk' as const, reason: 'Implementing cost controls to address 5% overspend' },
     { agent: 'governance' as AgentType, action: 'investigate' as ActionType, target: 'Data Privacy Compliance Project', targetType: 'project' as const, reason: 'Reviewing GDPR alignment for customer data handling' },
-    { agent: 'vro' as AgentType, action: 'notify' as ActionType, target: 'ROI Achievement Update', targetType: 'metric' as const, reason: 'Portfolio ROI trending 3% above target' },
+    { agent: 'integrated-management' as AgentType, action: 'notify' as ActionType, target: 'ROI Achievement Update', targetType: 'metric' as const, reason: 'Portfolio ROI trending 3% above target' },
     { agent: 'tmo' as AgentType, action: 'notify' as ActionType, target: 'Milestone Completion', targetType: 'project' as const, reason: 'Phase 2 delivery completed - initiating Phase 3 prep' },
-    { agent: 'pmo' as AgentType, action: 'investigate' as ActionType, target: 'Sprint Retrospective', targetType: 'project' as const, reason: 'Analyzing blockers from last iteration' },
+    { agent: 'integrated-management' as AgentType, action: 'investigate' as ActionType, target: 'Sprint Retrospective', targetType: 'project' as const, reason: 'Analyzing blockers from last iteration' },
     { agent: 'okr' as AgentType, action: 'update-status' as ActionType, target: 'Strategic Initiative KR', targetType: 'okr' as const, reason: 'Progress updated from stakeholder inputs' },
     { agent: 'ocm' as AgentType, action: 'create-task' as ActionType, target: 'Enterprise CRM Migration', targetType: 'project' as const, reason: 'Training program designed for 500+ end users' },
     { agent: 'planning' as AgentType, action: 'notify' as ActionType, target: 'Capacity Planning', targetType: 'metric' as const, reason: 'Resource availability updated for next quarter' },

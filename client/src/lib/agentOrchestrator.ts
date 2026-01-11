@@ -44,8 +44,7 @@ export interface LearnedPattern {
 }
 
 const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
-  vro: ['investigate', 'accelerate', 'escalate', 'notify'],
-  pmo: ['investigate', 'escalate', 'notify', 'update-status', 'create-task', 'reassign'],
+  'integrated-management': ['investigate', 'accelerate', 'escalate', 'notify', 'update-status', 'create-task', 'reassign'],
   tmo: ['investigate', 'create-task', 'notify', 'accelerate'],
   finops: ['investigate', 'mitigate', 'notify', 'escalate'],
   okr: ['investigate', 'notify', 'update-status'],
@@ -55,9 +54,8 @@ const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
 };
 
 const AGENT_PRIORITIES: Record<AgentType, number> = {
-  vro: 100,
+  'integrated-management': 100,
   governance: 95,
-  pmo: 90,
   finops: 85,
   tmo: 80,
   okr: 75,
@@ -121,7 +119,7 @@ export function delegateTask(
   });
   
   sendAgentMessage(
-    fromAgent === 'orchestrator' ? 'vro' : fromAgent,
+    fromAgent === 'orchestrator' ? 'integrated-management' : fromAgent,
     [bestAgent],
     'request',
     `Task Delegated: ${taskType}`,
@@ -302,7 +300,7 @@ export function learnPattern(
     }).catch(err => console.warn('Failed to persist pattern:', err));
     
     if (previousConfidence < 0.65 && existing.confidence >= 0.65) {
-      sendAgentMessage('vro', ['pmo', 'governance', 'finops'], 'insight',
+      sendAgentMessage('integrated-management', ['integrated-management', 'governance', 'finops'], 'insight',
         `Pattern Confirmed: ${patternType}`,
         `High-confidence pattern detected (${(existing.confidence * 100).toFixed(0)}%): ${description}. ` +
         `Observed ${existing.occurrences} times on ${targetIdentifier}.`,
@@ -377,7 +375,7 @@ function runContinuousAgentActivity(): void {
   if (rand < 0.5) {
     const vroAction = VRO_MICRO_ACTIONS[Math.floor(Math.random() * VRO_MICRO_ACTIONS.length)];
     executeAction(
-      'vro',
+      'integrated-management',
       vroAction.action as ActionType,
       'metric',
       vroAction.target,
@@ -385,9 +383,9 @@ function runContinuousAgentActivity(): void {
       vroAction.reason,
       70 + Math.floor(Math.random() * 25)
     );
-    notifyAction('vro', vroAction.action, vroAction.name);
+    notifyAction('integrated-management', vroAction.action, vroAction.name);
     
-    recordMemory('vro', 'action', 'metric', vroAction.target, vroAction.name, vroAction.reason, 0.8);
+    recordMemory('integrated-management', 'action', 'metric', vroAction.target, vroAction.name, vroAction.reason, 0.8);
     
     if (Math.random() < 0.3) {
       const pattern = learnPattern(
@@ -397,7 +395,7 @@ function runContinuousAgentActivity(): void {
         `VRO observed recurring pattern on ${vroAction.name}`
       );
       if (pattern.occurrences > 2 && pattern.confidence >= 0.7) {
-        sendAgentMessage('vro', ['pmo', 'finops'], 'insight',
+        sendAgentMessage('integrated-management', ['integrated-management', 'finops'], 'insight',
           `Pattern Detected: ${vroAction.name}`,
           `After ${pattern.occurrences} observations, VRO has identified a trend: ${pattern.description}`,
           'medium'
@@ -410,7 +408,7 @@ function runContinuousAgentActivity(): void {
     const randomProject = EXPANDED_PMO_PROJECTS[Math.floor(Math.random() * EXPANDED_PMO_PROJECTS.length)];
     
     executeAction(
-      'pmo',
+      'integrated-management',
       pmoAction.action as ActionType,
       'project',
       randomProject.id,
@@ -418,9 +416,9 @@ function runContinuousAgentActivity(): void {
       `${pmoAction.reason} for ${randomProject.name}`,
       70 + Math.floor(Math.random() * 25)
     );
-    notifyAction('pmo', pmoAction.action, randomProject.name);
+    notifyAction('integrated-management', pmoAction.action, randomProject.name);
     
-    recordMemory('pmo', 'action', 'project', randomProject.id, randomProject.name, pmoAction.reason, 0.8);
+    recordMemory('integrated-management', 'action', 'project', randomProject.id, randomProject.name, pmoAction.reason, 0.8);
     
     if (randomProject.status === 'red' || randomProject.status === 'amber') {
       const pattern = learnPattern(
@@ -431,7 +429,7 @@ function runContinuousAgentActivity(): void {
       );
       
       if (pattern.occurrences >= 3 && pattern.confidence >= 0.65) {
-        sendAgentMessage('pmo', ['vro', 'governance'], 'insight',
+        sendAgentMessage('integrated-management', ['integrated-management', 'governance'], 'insight',
           `Team Pattern Identified`,
           `PMO has detected that ${pattern.targetIdentifier} has ${pattern.occurrences} instances of ${pattern.patternType}. Confidence: ${(pattern.confidence * 100).toFixed(0)}%`,
           'high'

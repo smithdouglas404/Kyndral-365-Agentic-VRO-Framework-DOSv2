@@ -21,8 +21,7 @@ interface DrillDownDrawerProps {
 }
 
 const agentColors: Record<AgentType, string> = {
-  vro: 'bg-green-500',
-  pmo: 'bg-purple-500',
+  'integrated-management': 'bg-gradient-to-r from-teal-500 to-blue-500',
   tmo: 'bg-blue-500',
   finops: 'bg-amber-500',
   okr: 'bg-orange-500',
@@ -32,8 +31,7 @@ const agentColors: Record<AgentType, string> = {
 };
 
 const agentNames: Record<AgentType, string> = {
-  vro: 'VRO Agent',
-  pmo: 'PMO Agent',
+  'integrated-management': 'Integrated Management Agent',
   tmo: 'TMO Agent',
   finops: 'FinOps Agent',
   okr: 'OKR Agent',
@@ -135,7 +133,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     entityId: enrichedProject.id,
     entityName: enrichedProject.name,
     bu: enrichedProject.bu,
-    relatedAgents: ['vro' as AgentType, 'pmo' as AgentType, 'finops' as AgentType],
+    relatedAgents: ['integrated-management' as AgentType, 'finops' as AgentType],
     events: [],
     metrics: {
       'Expected ROI': enrichedProject.expectedROI,
@@ -156,7 +154,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     history: enrichedProject.aiSignals.map((s, i) => ({
       timestamp: new Date(Date.now() - i * 60000),
       action: s.message,
-      agent: 'vro' as AgentType
+      agent: 'integrated-management' as AgentType
     })),
     aiInsight: enrichedProject.aiRecommendation,
     summary: enrichedProject.description,
@@ -193,7 +191,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         ? 'Challenge Analysis'
         : `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`,
     bu: 'Intelligence Engine',
-    relatedAgents: ['vro' as AgentType, 'pmo' as AgentType, 'finops' as AgentType],
+    relatedAgents: ['integrated-management' as AgentType, 'finops' as AgentType],
     events: [],
     metrics: {
       'Entity Type': entityType.charAt(0).toUpperCase() + entityType.slice(1),
@@ -210,10 +208,10 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       { id: 'mitigate', label: 'Apply Mitigation', type: 'mitigate' }
     ],
     history: [
-      { timestamp: new Date(Date.now() - 5000), action: 'Data collected from source systems', agent: 'vro' as AgentType },
-      { timestamp: new Date(Date.now() - 3000), action: 'Cross-referenced with historical patterns', agent: 'pmo' as AgentType },
-      { timestamp: new Date(Date.now() - 1000), action: 'AI analysis completed', agent: 'vro' as AgentType },
-      { timestamp: new Date(), action: 'Action triggered and recorded', agent: 'vro' as AgentType }
+      { timestamp: new Date(Date.now() - 5000), action: 'Data collected from source systems', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(Date.now() - 3000), action: 'Cross-referenced with historical patterns', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(Date.now() - 1000), action: 'AI analysis completed', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(), action: 'Action triggered and recorded', agent: 'integrated-management' as AgentType }
     ],
     aiInsight: generateEntityInsight(entityType, entityId).aiInsight,
     summary: generateEntityInsight(entityType, entityId).summary,
@@ -277,7 +275,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
             <div className="p-4">
               <AICoPilot 
                 drilldown={displayData} 
-                agentId={displayData.relatedAgents[0] || 'vro'}
+                agentId={displayData.relatedAgents[0] || 'integrated-management'}
                 dataMode={dataMode}
               />
               

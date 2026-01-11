@@ -25,8 +25,8 @@ const THRESHOLDS: ThresholdConfig[] = [
     metricName: 'At-Risk Project Ratio',
     max: 25,
     warningBuffer: 5,
-    responsibleAgent: 'pmo',
-    escalateTo: ['vro', 'governance'],
+    responsibleAgent: 'integrated-management',
+    escalateTo: ['governance'],
     checkFn: () => {
       const atRisk = EXPANDED_PMO_PROJECTS.filter(p => p.status === 'red' || p.status === 'amber').length;
       return (atRisk / EXPANDED_PMO_PROJECTS.length) * 100;
@@ -37,8 +37,8 @@ const THRESHOLDS: ThresholdConfig[] = [
     metricName: 'Critical Status Projects',
     max: 3,
     warningBuffer: 1,
-    responsibleAgent: 'pmo',
-    escalateTo: ['governance', 'vro'],
+    responsibleAgent: 'integrated-management',
+    escalateTo: ['governance'],
     checkFn: () => EXPANDED_PMO_PROJECTS.filter(p => p.status === 'red').length
   },
   {
@@ -47,7 +47,7 @@ const THRESHOLDS: ThresholdConfig[] = [
     max: 15,
     warningBuffer: 5,
     responsibleAgent: 'finops',
-    escalateTo: ['pmo', 'governance'],
+    escalateTo: ['integrated-management', 'governance'],
     checkFn: () => {
       const overBudget = EXPANDED_PMO_PROJECTS.filter(p => (p.budget?.spent || 0) > (p.budget?.total || 1) * 1.1);
       return (overBudget.length / EXPANDED_PMO_PROJECTS.length) * 100;
@@ -59,7 +59,7 @@ const THRESHOLDS: ThresholdConfig[] = [
     min: 70,
     warningBuffer: 10,
     responsibleAgent: 'tmo',
-    escalateTo: ['pmo'],
+    escalateTo: ['integrated-management'],
     checkFn: () => {
       const avgProgress = EXPANDED_PMO_PROJECTS.reduce((sum, p) => 
         sum + (p.deliverables.completed / p.deliverables.total) * 100, 0) / EXPANDED_PMO_PROJECTS.length;
@@ -87,7 +87,7 @@ const AGENT_REACTIONS: AgentReaction[] = [
   },
   {
     triggerId: 'critical-projects',
-    agentId: 'vro',
+    agentId: 'integrated-management',
     condition: (current, threshold) => current > threshold,
     actionType: 'escalate',
     generateReasoning: (name, current, threshold) => 
@@ -111,8 +111,7 @@ let actionNotificationCallback: ((agentName: string, action: string, target: str
 
 const DEMO_SCENARIOS = ['budget-breach', 'critical-project', 'value-at-risk'];
 const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
-  vro: 'VRO Agent',
-  pmo: 'PMO Agent',
+  'integrated-management': 'Integrated Management Agent',
   tmo: 'TMO Agent',
   finops: 'FinOps Agent',
   okr: 'OKR Agent',
@@ -321,92 +320,92 @@ function triggerBudgetBreachScenario(): void {
   notifyAction('finops', 'investigate', 'Cloud Migration Phase 2');
   
   setTimeout(() => {
-    sendAgentMessage('finops', ['pmo', 'governance'], 'alert',
+    sendAgentMessage('finops', ['integrated-management', 'governance'], 'alert',
       'Budget Breach: Cloud Migration Phase 2',
       'Project is 23% over budget due to unexpected infrastructure costs. Recommend scope review.',
       'high', 'proj-001');
   }, 1500);
   
   setTimeout(() => {
-    executeAction('pmo', 'escalate', 'project', 'proj-001', 'Cloud Migration Phase 2',
+    executeAction('integrated-management', 'escalate', 'project', 'proj-001', 'Cloud Migration Phase 2',
       'Escalating to steering committee. Budget breach exceeds tolerance threshold.', 88,
       'finops');
-    notifyAction('pmo', 'escalate', 'Cloud Migration Phase 2');
+    notifyAction('integrated-management', 'escalate', 'Cloud Migration Phase 2');
   }, 3000);
   
   setTimeout(() => {
     executeAction('governance', 'investigate', 'project', 'proj-001', 'Cloud Migration Phase 2',
       'Initiating governance review. Checking approval chain and variance authorization.', 85,
-      'pmo');
+      'integrated-management');
     notifyAction('governance', 'investigate', 'Cloud Migration Phase 2');
   }, 4500);
 }
 
 function triggerCriticalProjectScenario(): void {
-  executeAction('pmo', 'update-status', 'project', 'proj-003', 'Legacy System Decommission',
+  executeAction('integrated-management', 'update-status', 'project', 'proj-003', 'Legacy System Decommission',
     'Status changed to CRITICAL. Three consecutive milestones missed.', 95);
-  notifyAction('pmo', 'update-status', 'Legacy System Decommission');
+  notifyAction('integrated-management', 'update-status', 'Legacy System Decommission');
   
   setTimeout(() => {
-    sendAgentMessage('pmo', ['vro', 'governance', 'tmo'], 'alert',
+    sendAgentMessage('integrated-management', ['integrated-management', 'governance', 'tmo'], 'alert',
       'Critical Project Alert: Legacy System Decommission',
       'Project has entered critical status. Immediate intervention required to prevent value leakage.',
       'critical', 'proj-003');
   }, 1000);
   
   setTimeout(() => {
-    executeAction('vro', 'investigate', 'project', 'proj-003', 'Legacy System Decommission',
+    executeAction('integrated-management', 'investigate', 'project', 'proj-003', 'Legacy System Decommission',
       'Assessing value impact. Estimated £2.3M annual savings at risk.', 90,
-      'pmo');
-    notifyAction('vro', 'investigate', 'Legacy System Decommission');
+      'integrated-management');
+    notifyAction('integrated-management', 'investigate', 'Legacy System Decommission');
   }, 2500);
   
   setTimeout(() => {
     executeAction('tmo', 'create-task', 'project', 'proj-003', 'Legacy System Decommission',
       'Creating recovery task force. Assigning transformation specialists.', 87,
-      'vro');
+      'integrated-management');
     notifyAction('tmo', 'create-task', 'Legacy System Decommission');
   }, 4000);
   
   setTimeout(() => {
     executeAction('governance', 'notify', 'project', 'proj-003', 'Legacy System Decommission',
       'Executive stakeholders notified. Scheduling emergency review for tomorrow.', 82,
-      'pmo');
+      'integrated-management');
     notifyAction('governance', 'notify', 'Legacy System Decommission');
   }, 5500);
 }
 
 function triggerValueAtRiskScenario(): void {
-  executeAction('vro', 'investigate', 'metric', 'value-realized', 'Q4 Value Realization Target',
+  executeAction('integrated-management', 'investigate', 'metric', 'value-realized', 'Q4 Value Realization Target',
     'Value realization trending 18% below forecast. Analyzing contributing factors.', 88);
-  notifyAction('vro', 'investigate', 'Q4 Value Realization Target');
+  notifyAction('integrated-management', 'investigate', 'Q4 Value Realization Target');
   
   setTimeout(() => {
-    sendAgentMessage('vro', ['pmo', 'finops'], 'insight',
+    sendAgentMessage('integrated-management', ['integrated-management', 'finops'], 'insight',
       'Value Realization Gap Analysis',
       'Three key projects underperforming: Cloud Migration (-12%), Digital Transformation (-8%), Customer Platform (-6%). Combined impact: £4.2M value gap.',
       'high');
   }, 1500);
   
   setTimeout(() => {
-    executeAction('pmo', 'investigate', 'project', 'proj-002', 'Digital Transformation',
+    executeAction('integrated-management', 'investigate', 'project', 'proj-002', 'Digital Transformation',
       'Investigating delivery blockers. Resource constraints identified as primary factor.', 85,
-      'vro');
-    notifyAction('pmo', 'investigate', 'Digital Transformation');
+      'integrated-management');
+    notifyAction('integrated-management', 'investigate', 'Digital Transformation');
   }, 3000);
   
   setTimeout(() => {
     executeAction('finops', 'mitigate', 'metric', 'value-realized', 'Q4 Value Realization Target',
       'Proposing budget reallocation from lower-priority initiatives to accelerate key projects.', 82,
-      'vro');
+      'integrated-management');
     notifyAction('finops', 'mitigate', 'Q4 Value Realization Target');
   }, 4500);
   
   setTimeout(() => {
-    executeAction('vro', 'accelerate', 'project', 'proj-002', 'Digital Transformation',
+    executeAction('integrated-management', 'accelerate', 'project', 'proj-002', 'Digital Transformation',
       'Recommending fast-track approval for additional resources. ROI analysis supports investment.', 90,
       'finops');
-    notifyAction('vro', 'accelerate', 'Digital Transformation');
+    notifyAction('integrated-management', 'accelerate', 'Digital Transformation');
   }, 6000);
 }
 

@@ -26,8 +26,7 @@ import {
 import { AgentType } from '@/lib/dataHub';
 
 const AGENT_ICONS: Record<string, React.ElementType> = {
-  vro: DollarSign,
-  pmo: GitBranch,
+  'integrated-management': Brain,
   tmo: Repeat,
   finops: Calculator,
   okr: Target,
@@ -37,9 +36,8 @@ const AGENT_ICONS: Record<string, React.ElementType> = {
 };
 
 const AGENT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  vro: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
-  pmo: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300' },
-  tmo: { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300' },
+  'integrated-management': { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300' },
+  tmo: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
   finops: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300' },
   okr: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300' },
   governance: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-300' },
@@ -157,8 +155,8 @@ function ActivityDetailFlyout({
   
   const getTriggerSource = () => {
     if (item.type === 'message') return 'Inter-Agent Communication';
-    if (item.agentId === 'vro') return 'Value Analysis Cycle';
-    if (item.agentId === 'pmo') return 'Sprint Event Listener';
+    if (item.agentId === 'integrated-management') return 'Value & Delivery Analysis';
+    if (item.agentId === 'tmo') return 'Sprint Event Listener';
     if (item.agentId === 'governance') return 'Compliance Monitor';
     return 'Threshold Alert';
   };

@@ -509,8 +509,8 @@ export function ProjectLifecycleCommandCenter({ onDrillDown }: Props) {
                       variant="outline" 
                       className={cn(
                         "text-[10px] shrink-0",
-                        action.agentId === 'vro' && "border-blue-300 text-blue-700",
-                        action.agentId === 'pmo' && "border-purple-300 text-purple-700"
+                        action.agentId === 'integrated-management' && "border-teal-300 text-teal-700",
+                        action.agentId === 'tmo' && "border-purple-300 text-purple-700"
                       )}
                     >
                       {action.agentId.toUpperCase()}
