@@ -9,7 +9,9 @@ import {
   Sparkles,
   X,
   Maximize2,
-  Minimize2
+  Minimize2,
+  CheckCircle,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,12 +21,15 @@ import { Badge } from "@/components/ui/badge";
 import { safeProjects } from "@/lib/safeProjectData";
 import { useLocation } from "wouter";
 import { usePageContext, getSuggestedQuestions } from "@/contexts/PageContext";
+import { parseActionIntent, buildScenario, dispatchAgentCascade, type ActionScenario } from "@/lib/agentCascade";
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  actionScenario?: ActionScenario;
+  isActionConfirmation?: boolean;
 }
 
 function MarkdownRenderer({ content, onNavigate }: { content: string; onNavigate: (path: string) => void }) {
@@ -146,6 +151,7 @@ export function AskPMChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ActionScenario | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -154,6 +160,61 @@ export function AskPMChat() {
   const handleNavigate = (path: string) => {
     setLocation(path);
     setIsOpen(false);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!pendingAction) return;
+    
+    const confirmMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: 'Yes, confirm',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, confirmMessage]);
+    
+    const executingMessage: Message = {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content: `Executing: ${pendingAction.trigger}...\n\nWatch the notifications as agents coordinate the changes.`,
+      timestamp: new Date(),
+      isActionConfirmation: true
+    };
+    setMessages(prev => [...prev, executingMessage]);
+    
+    await dispatchAgentCascade(pendingAction);
+    
+    const completedMessage: Message = {
+      id: `assistant-complete-${Date.now()}`,
+      role: 'assistant',
+      content: `All agent actions completed successfully. The changes have been applied and all stakeholders have been notified.`,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, completedMessage]);
+    
+    setPendingAction(null);
+  };
+
+  const handleCancelAction = () => {
+    if (!pendingAction) return;
+    
+    const cancelMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: 'Cancel',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, cancelMessage]);
+    
+    const cancelledMessage: Message = {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content: 'Action cancelled. No changes were made.',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, cancelledMessage]);
+    
+    setPendingAction(null);
   };
 
   useEffect(() => {
@@ -182,6 +243,25 @@ export function AskPMChat() {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+
+    const actionIntent = parseActionIntent(messageText);
+    
+    if (actionIntent) {
+      const scenario = buildScenario(actionIntent.scenarioType, actionIntent.params);
+      if (scenario) {
+        const confirmMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: `**Action Detected:** ${scenario.trigger}\n\n${scenario.confirmMessage}\n\n**This will trigger the following agent actions:**\n${scenario.actions.map(a => `• ${a.icon} ${a.agentName}: ${a.action}`).join('\n')}\n\nWould you like me to proceed?`,
+          timestamp: new Date(),
+          actionScenario: scenario
+        };
+        setMessages(prev => [...prev, confirmMessage]);
+        setPendingAction(scenario);
+        setIsLoading(false);
+        return;
+      }
+    }
 
     try {
       const response = await fetch('/api/ai/ask-pm', {
@@ -341,12 +421,37 @@ export function AskPMChat() {
                     <div className={`flex-1 p-3 rounded-lg ${
                       message.role === 'user'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
+                        : message.actionScenario 
+                          ? 'bg-amber-50 border-2 border-amber-300 text-gray-800 shadow-sm'
+                          : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                     }`}>
                       {message.role === 'assistant' ? (
                         <MarkdownRenderer content={message.content} onNavigate={handleNavigate} />
                       ) : (
                         <div className="text-sm">{message.content}</div>
+                      )}
+                      {message.actionScenario && pendingAction && (
+                        <div className="flex gap-2 mt-3 pt-3 border-t border-amber-200">
+                          <Button 
+                            size="sm" 
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={handleConfirmAction}
+                            data-testid="button-confirm-action"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Yes, Proceed
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                            onClick={handleCancelAction}
+                            data-testid="button-cancel-action"
+                          >
+                            <AlertCircle className="h-4 w-4 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
                       )}
                       <div className={`text-xs mt-2 ${
                         message.role === 'user' ? 'text-blue-200' : 'text-gray-400'

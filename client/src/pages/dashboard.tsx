@@ -15,6 +15,8 @@ import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
+import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
+import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
 import { BUProgramsSection } from "@/components/BUProgramsSection";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
@@ -451,7 +453,7 @@ function DashboardContent() {
     }
   }, []);
   
-  // Start background agent monitor and orchestrator with toast notifications
+  // Start background agent monitor, orchestrator, and scenario simulation with toast notifications
   useEffect(() => {
     setActionNotificationCallback((agentName, action, target) => {
       toast.info(`${agentName} ${action} ${target}`, {
@@ -461,9 +463,11 @@ function DashboardContent() {
     });
     startBackgroundMonitor(15000);
     startOrchestrator(5000, 45000);
+    const stopScenarios = startScenarioSimulation(240000);
     return () => {
       stopBackgroundMonitor();
       stopOrchestrator();
+      stopScenarios();
     };
   }, []);
   
@@ -518,18 +522,14 @@ function DashboardContent() {
               transition={{ duration: 0.3 }}
             >
               <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-                {dataMode === "VRO" ? "Intelligence Engine" : "PMO Control Center"}
+                Intelligence Engine
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl">
-                {dataMode === "VRO" 
-                  ? "AI-powered strategic transformation with real-time value realization insights."
-                  : "Traditional project management with standard governance and oversight."}
+                AI-powered strategic transformation combining Value Realization (VRO) and Project Delivery (PMO) insights.
               </p>
-              {dataMode === "VRO" && (
-                <div className="mt-4 w-full max-w-5xl">
-                  <AIAlertTicker />
-                </div>
-              )}
+              <div className="mt-4 w-full max-w-5xl">
+                <AIAlertTicker />
+              </div>
             </motion.div>
           </div>
         )}
@@ -608,13 +608,11 @@ function DashboardContent() {
             {/* AI Executive Intelligence - Portfolio-level insights and recommendations */}
             <AIExecutiveInsights />
             
+            {/* Unified Metrics Section - VRO and PMO side by side */}
+            <UnifiedMetricsSection />
+            
             {/* Agent Activity & Audit Trail - consolidated view */}
             <ActionAuditTimeline maxItems={12} />
-
-            {/* PMO Guidance Section - Only in PMO Mode */}
-            {dataMode === "PMO" && (
-              <PMOGuidance onDrillDown={handleDrillDown} />
-            )}
 
             {/* Cross-Agent Collaboration */}
             <CrossAgentCollaboration />
