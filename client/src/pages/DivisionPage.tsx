@@ -160,8 +160,7 @@ export default function DivisionPage() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-white shadow-sm">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-            <TabsTrigger value="kpis" data-testid="tab-kpis">KPIs & Metrics</TabsTrigger>
-            <TabsTrigger value="okrs" data-testid="tab-okrs">OKRs</TabsTrigger>
+            <TabsTrigger value="outcomes" data-testid="tab-outcomes">Outcomes & Alignment</TabsTrigger>
             <TabsTrigger value="projects" data-testid="tab-projects">Projects</TabsTrigger>
             <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
             <TabsTrigger value="alerts" data-testid="tab-alerts">AI Alerts ({divisionAlerts.length})</TabsTrigger>
@@ -260,106 +259,206 @@ export default function DivisionPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="kpis" className="space-y-6">
+          <TabsContent value="outcomes" className="space-y-6">
+            {/* Two-pane layout: OKR hierarchy on left, linked KPIs on right */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>KPI Performance 2023 vs 2024 vs Target</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={kpiChartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="2023" fill="#94a3b8" name="2023" />
-                      <Bar dataKey="2024" fill={division.color} name="2024" />
-                      <Bar dataKey="Target" fill="#10b981" name="2025 Target" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              {/* Left Pane: OKR Hierarchy with Status */}
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5" style={{ color: division.color }} />
+                      Strategic Objectives (OKRs)
+                    </CardTitle>
+                    <CardDescription>
+                      {division.okrs.length} objectives driving {division.kpis.length} measurable outcomes
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                
+                {division.okrs.map((okr, i) => {
+                  const overallProgress = Math.round(
+                    okr.keyResults.reduce((sum, kr) => sum + (kr.progress / kr.target) * 100, 0) / okr.keyResults.length
+                  );
+                  return (
+                    <Card key={i} className="border-l-4" style={{ borderLeftColor: division.color }}>
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${
+                                overallProgress >= 80 ? 'bg-green-500' : 
+                                overallProgress >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                              }`} />
+                              {okr.objective}
+                            </CardTitle>
+                            <CardDescription className="mt-1 text-xs">
+                              Owner: {okr.owner} | Due: {okr.dueDate}
+                            </CardDescription>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold" style={{ color: division.color }}>
+                              {overallProgress}%
+                            </div>
+                            <span className="text-xs text-gray-500">overall</span>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          {okr.keyResults.map((kr, j) => {
+                            const krProgress = Math.round((kr.progress / kr.target) * 100);
+                            return (
+                              <div key={j} className="p-3 bg-gray-50 rounded-lg">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm font-medium">{kr.result}</span>
+                                  <Badge 
+                                    variant={krProgress >= 80 ? "default" : krProgress >= 50 ? "secondary" : "destructive"}
+                                    className="text-xs"
+                                  >
+                                    {kr.progress}/{kr.target} {kr.unit}
+                                  </Badge>
+                                </div>
+                                <Progress value={Math.min(100, krProgress)} className="h-2" />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>All KPIs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 max-h-[350px] overflow-y-auto">
-                    {division.kpis.map((kpi, i) => (
-                      <div key={i} className="p-3 border rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium">{kpi.name}</span>
-                          <Badge variant={kpi.status === "on-track" ? "default" : kpi.status === "at-risk" ? "secondary" : "destructive"}>
-                            {kpi.status}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 text-sm">
-                          <div>
-                            <span className="text-gray-500">2023:</span> {kpi.value2023}{kpi.unit}
+              {/* Right Pane: Linked KPIs with Analytics */}
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" style={{ color: division.color }} />
+                      Key Performance Indicators
+                    </CardTitle>
+                    <CardDescription>
+                      Measuring progress against 2025 targets
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={kpiChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-20} textAnchor="end" height={60} />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip />
+                        <Legend wrapperStyle={{ fontSize: '10px' }} />
+                        <Bar dataKey="2023" fill="#94a3b8" name="2023" />
+                        <Bar dataKey="2024" fill={division.color} name="2024" />
+                        <Bar dataKey="Target" fill="#10b981" name="Target" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* KPI Cards with OKR Linkage */}
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                  {division.kpis.map((kpi, i) => {
+                    const progressPercent = typeof kpi.value2024 === "number" && typeof kpi.target2025 === "number"
+                      ? Math.round((kpi.value2024 / kpi.target2025) * 100)
+                      : 0;
+                    const variance = typeof kpi.value2024 === "number" && typeof kpi.value2023 === "number"
+                      ? Math.round(((kpi.value2024 - kpi.value2023) / kpi.value2023) * 100)
+                      : 0;
+                    
+                    // Link KPI to relevant OKR (simulated linkage based on index)
+                    const linkedOkr = division.okrs[i % division.okrs.length];
+                    
+                    return (
+                      <Card key={i} className="border border-gray-200 hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">{kpi.name}</span>
+                                <Badge 
+                                  variant={kpi.status === "on-track" ? "default" : kpi.status === "at-risk" ? "secondary" : "destructive"}
+                                  className="text-[10px]"
+                                >
+                                  {kpi.status}
+                                </Badge>
+                              </div>
+                              {linkedOkr && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <Link2 className="h-3 w-3 text-gray-400" />
+                                  <span className="text-[10px] text-gray-500 truncate max-w-[200px]">
+                                    Linked: {linkedOkr.objective.substring(0, 40)}...
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold" style={{ color: division.color }}>
+                                {kpi.value2024}{kpi.unit}
+                              </div>
+                              <div className="flex items-center gap-1 justify-end">
+                                {variance >= 0 ? (
+                                  <TrendingUp className="h-3 w-3 text-green-600" />
+                                ) : (
+                                  <TrendingDown className="h-3 w-3 text-red-600" />
+                                )}
+                                <span className={`text-xs ${variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {variance >= 0 ? '+' : ''}{variance}% YoY
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-gray-500">2024:</span> <span className="font-medium">{kpi.value2024}{kpi.unit}</span>
+                          
+                          {/* Progress gauge */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>Progress to 2025 Target</span>
+                              <span>{progressPercent}%</span>
+                            </div>
+                            <div className="relative">
+                              <Progress value={Math.min(100, progressPercent)} className="h-2" />
+                              <div 
+                                className="absolute top-0 h-2 w-0.5 bg-gray-800"
+                                style={{ left: `${Math.min(100, progressPercent)}%` }}
+                              />
+                            </div>
+                            <div className="flex justify-between text-[10px] text-gray-400">
+                              <span>Current: {kpi.value2024}{kpi.unit}</span>
+                              <span>Target: {kpi.target2025}{kpi.unit}</span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-gray-500">Target:</span> {kpi.target2025}{kpi.unit}
-                          </div>
-                        </div>
-                        {typeof kpi.value2024 === "number" && typeof kpi.target2025 === "number" && (
-                          <Progress 
-                            value={Math.min(100, (kpi.value2024 / kpi.target2025) * 100)} 
-                            className="mt-2 h-2"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-          </TabsContent>
 
-          <TabsContent value="okrs" className="space-y-6">
-            {division.okrs.map((okr, i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Target className="h-5 w-5" style={{ color: division.color }} />
-                        {okr.objective}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        Owner: {okr.owner} | Due: {okr.dueDate}
-                      </CardDescription>
-                    </div>
+            {/* Summary Insight Card */}
+            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-100 rounded-full">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {okr.keyResults.map((kr, j) => (
-                      <div key={j} className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium">{kr.result}</span>
-                          <span className="text-sm font-medium" style={{ color: division.color }}>
-                            {kr.progress} / {kr.target} {kr.unit}
-                          </span>
-                        </div>
-                        <Progress 
-                          value={Math.min(100, (kr.progress / kr.target) * 100)} 
-                          className="h-3"
-                        />
-                        <p className="text-sm text-gray-500 mt-1">
-                          {Math.round((kr.progress / kr.target) * 100)}% complete
-                        </p>
-                      </div>
-                    ))}
+                  <div>
+                    <h4 className="font-semibold text-purple-900">AI-Generated Alignment Summary</h4>
+                    <p className="text-sm text-purple-800 mt-1">
+                      {division.okrs.length} strategic objectives are driving {division.kpis.filter(k => k.status === 'on-track').length} of {division.kpis.length} KPIs on track. 
+                      {division.kpis.filter(k => k.status === 'at-risk').length > 0 && (
+                        <span className="text-amber-700"> {division.kpis.filter(k => k.status === 'at-risk').length} KPIs require attention to meet 2025 targets.</span>
+                      )}
+                      {division.kpis.filter(k => k.status === 'off-track').length > 0 && (
+                        <span className="text-red-700"> {division.kpis.filter(k => k.status === 'off-track').length} KPIs are off-track and may impact objective completion.</span>
+                      )}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="projects" className="space-y-6">
@@ -544,24 +643,14 @@ export default function DivisionPage() {
                         </div>
                       )}
                       
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          style={{ backgroundColor: division.color }}
-                          onClick={() => handleDrillDown('project', project.id)}
-                          data-testid={`view-project-${project.id}`}
-                        >
-                          View Details
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleDrillDown('start-project', project.id)}
-                          data-testid={`start-project-${project.id}`}
-                        >
-                          Start Project
-                        </Button>
-                      </div>
+                      <Button 
+                        size="sm" 
+                        style={{ backgroundColor: division.color }}
+                        onClick={() => handleDrillDown('project', project.id)}
+                        data-testid={`view-project-${project.id}`}
+                      >
+                        View Details
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
