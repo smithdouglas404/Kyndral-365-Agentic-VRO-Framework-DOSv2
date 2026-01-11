@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, CheckCircle2, Flag,
@@ -25,7 +26,6 @@ import {
   type TransformedMilestone,
   type TransformedDeadline
 } from '@/lib/agentDataTransformers';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
@@ -208,9 +208,20 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
 
 export default function PlanningDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const { setPageContext } = usePageContext();
   const liveData = useAgentData('planning');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: 'planning',
+      entityName: 'Strategic Planning Console',
+      breadcrumb: ['Dashboard', 'Planning']
+    });
+  }, [setPageContext]);
 
   const handleDrillDown = (entityType: string, entityId: string) => {
     setDrillDownEntity({ type: entityType, id: entityId });
@@ -277,23 +288,6 @@ export default function PlanningDashboard() {
               </div>
             </div>
           </div>
-
-          <PageAgentWizard 
-            context={{
-              pageName: 'Strategic Planning Console',
-              pageType: 'dashboard',
-              metrics: {
-                'Current Phase': `${completedPhases + 1}/${milestones.length}`,
-                'Overall Progress': `${liveData.metrics.avgConfidence || overallProgress}%`,
-                'Budget Spent': `£${liveData.metrics.realizedValue || totalSpent.toFixed(1)}M of £${liveData.metrics.totalValue || totalBudget}M`,
-                'Deadlines On Track': `${onTrackDeadlines}/${deadlines.length}`,
-                'Active Projects': liveData.metrics.totalProjects || inProgressProjects
-              },
-              alertCount: liveData.metrics.activeAlerts,
-              riskCount: liveData.metrics.atRiskProjects || atRiskDeadlines
-            }}
-            agentName="Planning Agent"
-          />
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-phase')} data-testid="metric-phase">

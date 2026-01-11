@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect, useMemo } from "react";
+import { usePageContext } from "@/contexts/PageContext";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -26,7 +27,6 @@ import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { PMOPipeline } from "@/components/PMOPipeline";
 import { PMOGuidance } from "@/components/PMOGuidance";
@@ -413,6 +413,7 @@ function NavBar() {
 
 function DashboardContent() {
   const [location, navigate] = useLocation();
+  const { setPageContext } = usePageContext();
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
   const [dataMode, setDataMode] = useState<DataMode>("VRO");
   const [activeTab, setActiveTab] = useState("overview");
@@ -420,6 +421,16 @@ function DashboardContent() {
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
   
   const { state, toggleLive, forceUpdate } = useSimulation();
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: dataMode === 'VRO' ? 'vro' : 'pmo',
+      entityName: dataMode === 'VRO' ? 'Intelligence Engine' : 'PMO Control Center',
+      breadcrumb: ['Dashboard']
+    });
+  }, [dataMode, setPageContext]);
 
   // Read tab from URL query parameter on mount
   useEffect(() => {
@@ -497,31 +508,6 @@ function DashboardContent() {
         <AgentSidebar dataMode={dataMode} onModeChange={handleModeChange} activeTab={activeTab} onTabChange={setActiveTab} />
         
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
-          <PageAgentWizard 
-            context={{
-              pageName: dataMode === "VRO" ? 'Intelligence Engine' : 'PMO Control Center',
-              pageType: 'dashboard',
-              entityId: dataMode === "VRO" ? 'vro' : 'pmo',
-              metrics: dataMode === "VRO" 
-                ? {
-                    'PRT Volume': lgAnnualReportData.prtVolume.actual2025,
-                    'Forecast Accuracy': lgAnnualReportData.forecastAccuracy.actual2025,
-                    'Cost Savings': lgAnnualReportData.costSavings.actual2025,
-                    'Active Alerts': aiAlerts.length
-                  }
-                : (() => {
-                    const pmoMetrics = getPMOOverviewMetrics();
-                    return {
-                      'Active Projects': pmoMetrics.activeProjects,
-                      'On Track': pmoMetrics.onTrack,
-                      'At Risk': pmoMetrics.atRisk + pmoMetrics.critical,
-                      'SAFe Stages': pmoMetrics.safeStages
-                    };
-                  })()
-            }}
-            agentName={dataMode === "VRO" ? "VRO Agent" : "PMO Agent"}
-          />
-
         {/* Title section - Only show on Overview tab */}
         {activeTab === "overview" && (
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">

@@ -65,9 +65,30 @@ ${projectDetails}
 `;
 }
 
-export async function askPM(question: string): Promise<string> {
-  // Build context server-side from trusted data
+export interface PageContext {
+  pageType?: 'dashboard' | 'division' | 'project' | 'portfolio' | 'other';
+  entityId?: string;
+  entityName?: string;
+  businessUnit?: string;
+}
+
+export async function askPM(question: string, pageContext?: PageContext): Promise<string> {
   const projectContext = buildProjectContext();
+  
+  // Build context hint based on current page
+  let contextHint = '';
+  if (pageContext) {
+    if (pageContext.pageType === 'division' && pageContext.entityName) {
+      contextHint = `\n\nCURRENT FOCUS: The user is viewing the ${pageContext.entityName} division. Prioritize information about ${pageContext.entityName} projects when relevant, but still answer any cross-portfolio questions fully.`;
+    } else if (pageContext.pageType === 'project' && pageContext.entityId) {
+      const project = projectSummaries.find(p => p.id === pageContext.entityId);
+      if (project) {
+        contextHint = `\n\nCURRENT FOCUS: The user is viewing the ${project.name} project (${project.id}). Prioritize information about this project and its dependencies when relevant, but still answer any cross-portfolio questions fully.`;
+      }
+    } else if (pageContext.pageType === 'portfolio') {
+      contextHint = `\n\nCURRENT FOCUS: The user is viewing the portfolio overview. Provide portfolio-wide insights and cross-project analysis.`;
+    }
+  }
   
   const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office) at Legal & General. You have access to the complete portfolio of enterprise transformation projects.
 
@@ -89,9 +110,10 @@ When answering:
 - If asked about dependencies, list all affected projects with clickable links
 - If asked about at-risk items, prioritize by financial impact and include status colors
 - When listing projects, always include: clickable name, status color, key risk, and financial impact
+- You can answer ANY question about the portfolio - the context hint below is just a focus area, not a restriction
 
 Current Portfolio Context:
-${projectContext}`;
+${projectContext}${contextHint}`;
 
   try {
     const message = await anthropic.messages.create({

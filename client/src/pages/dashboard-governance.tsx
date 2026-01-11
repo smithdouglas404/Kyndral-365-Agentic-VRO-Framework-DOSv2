@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, CheckCircle2, Clock, AlertOctagon,
@@ -24,7 +25,6 @@ import {
   type DataMode,
   type TransformedGovernanceItem
 } from '@/lib/agentDataTransformers';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
@@ -193,9 +193,20 @@ function RiskCategoryCard({ category }: { category: typeof riskData.categories[0
 
 export default function GovernanceDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const { setPageContext } = usePageContext();
   const liveData = useAgentData('governance');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: 'governance',
+      entityName: 'Risk & Governance Console',
+      breadcrumb: ['Dashboard', 'Governance']
+    });
+  }, [setPageContext]);
 
   const handleDrillDown = (entityType: string, entityId: string) => {
     setDrillDownEntity({ type: entityType, id: entityId });
@@ -217,21 +228,6 @@ export default function GovernanceDashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8">
-          <PageAgentWizard 
-            context={{
-              pageName: 'Governance Dashboard',
-              pageType: 'dashboard',
-              entityId: 'governance',
-              metrics: {
-                'Compliance Score': liveData.metrics.avgConfidence,
-                'High Risks': liveData.metrics.atRiskProjects,
-                'Pending Actions': liveData.metrics.pendingActions,
-                'Active Alerts': liveData.metrics.activeAlerts
-              }
-            }}
-            agentName="Governance Agent"
-          />
-
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">

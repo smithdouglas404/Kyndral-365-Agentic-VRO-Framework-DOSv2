@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Bot, Zap, Brain, RefreshCw, FileText, 
@@ -11,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 
 const agents = [
   {
@@ -461,7 +461,18 @@ function AgentCard({ agent, index }: { agent: typeof agents[0]; index: number })
 
 export default function VROFramework() {
   const [, navigate] = useLocation();
+  const { setPageContext } = usePageContext();
   const [activeTab, setActiveTab] = useState('agent-lineage');
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'framework',
+      entityId: 'vro-framework',
+      entityName: 'VRO Agentic Framework',
+      breadcrumb: ['Dashboard', 'VRO Framework']
+    });
+  }, [setPageContext]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -483,21 +494,6 @@ export default function VROFramework() {
       </header>
 
       <main className="container mx-auto px-8 py-8">
-        <PageAgentWizard 
-          context={{
-            pageName: 'VRO Framework',
-            pageType: 'framework',
-            metrics: {
-              'Core Agents': agents.length,
-              'MCP/A2A Agents': mcpAgents.length,
-              'Integration Connectors': integrationAgents.length,
-              'Roadmap Phases': roadmapPhases.length,
-              'Value Agents': valueAgents.length
-            }
-          }}
-          agentName="Framework Agent"
-        />
-
         <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
           <div className="flex items-start gap-4 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl">

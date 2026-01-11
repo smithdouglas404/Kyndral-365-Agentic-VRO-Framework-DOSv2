@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calculator, DollarSign, TrendingUp, PieChart,
@@ -25,7 +26,6 @@ import {
   type TransformedCostCategory,
   type TransformedSavingsOpportunity
 } from '@/lib/agentDataTransformers';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
@@ -199,9 +199,20 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
 
 export default function FinOpsDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const { setPageContext } = usePageContext();
   const liveData = useAgentData('finops');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: 'finops',
+      entityName: 'FinOps Intelligence Center',
+      breadcrumb: ['Dashboard', 'FinOps']
+    });
+  }, [setPageContext]);
 
   const handleDrillDown = (entityType: string, entityId: string) => {
     setDrillDownEntity({ type: entityType, id: entityId });
@@ -227,21 +238,6 @@ export default function FinOpsDashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8">
-          <PageAgentWizard 
-            context={{
-              pageName: 'FinOps Dashboard',
-              pageType: 'dashboard',
-              entityId: 'finops',
-              metrics: {
-                'Total Budget': liveData.metrics.totalValue,
-                'YTD Spend': liveData.metrics.realizedValue,
-                'At-Risk Projects': liveData.metrics.atRiskProjects,
-                'Active Alerts': liveData.metrics.activeAlerts
-              }
-            }}
-            agentName="FinOps Agent"
-          />
-
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">

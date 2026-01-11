@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from "wouter";
+import { usePageContext } from "@/contexts/PageContext";
 import { ArrowLeft, Leaf, TrendingDown, Target, AlertTriangle, Thermometer, Factory, Home, Building2, Globe2 } from "lucide-react";
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,13 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { climateData, lgCompanyOverview } from "@/lib/lgData";
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, RadialBarChart, RadialBar } from "recharts";
 
 export default function ClimatePage() {
   const [, navigate] = useLocation();
+  const { setPageContext } = usePageContext();
   const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
   const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'tool',
+      entityId: 'climate',
+      entityName: 'Climate & Nature',
+      breadcrumb: ['Dashboard', 'Climate']
+    });
+  }, [setPageContext]);
 
   const emissionsTrajectory = [
     { year: "2019", emissions: 100, target: 100 },
@@ -80,22 +91,6 @@ export default function ClimatePage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        <PageAgentWizard 
-          context={{
-            pageName: 'Climate Risk Analysis',
-            pageType: 'tool',
-            metrics: {
-              'Operational Reduction': `${climateData.headline.operationalFootprintReduction.value}%`,
-              'Financed Emissions': `-${climateData.headline.financedEmissionsReduction.value}%`,
-              'Portfolio Temperature': `${climateData.targets.portfolioTemperature.current}°C`,
-              'Paris Target': `${climateData.targets.portfolioTemperature.target}°C`,
-              'Transition Finance': `£${climateData.headline.transitionFinance.value}bn`,
-              'Net Zero Target': '2050'
-            }
-          }}
-          agentName="Climate Agent"
-        />
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className="border-t-4 border-t-green-600 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('operational-reduction', 'op-reduction-001')} data-testid="card-operational-reduction">
             <CardContent className="pt-4">

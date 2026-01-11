@@ -7,6 +7,7 @@ import {
   FileUp, X, File
 } from 'lucide-react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +19,6 @@ import { BusinessRulesViewer } from '@/components/BusinessRulesViewer';
 import { WhatIfPanel } from '@/components/WhatIfPanel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 
 interface Policy {
@@ -69,6 +69,7 @@ Your premiums will remain the same during the length of the policy unless you ma
 If you stop paying your premiums your cover will end 60 days after the first missed premium.`;
 
 export default function PolicyGenerator() {
+  const { setPageContext } = usePageContext();
   const [activeTab, setActiveTab] = useState('generate');
   const [policyText, setPolicyText] = useState('');
   const [policyName, setPolicyName] = useState('');
@@ -79,6 +80,16 @@ export default function PolicyGenerator() {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [error, setError] = useState('');
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'tool',
+      entityId: 'policy-generator',
+      entityName: 'Policy as Code Generator',
+      breadcrumb: ['Tools', 'Policy Generator']
+    });
+  }, [setPageContext]);
   const [viewMode, setViewMode] = useState<'technical' | 'business'>('technical');
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -284,19 +295,6 @@ export default function PolicyGenerator() {
       </div>
 
       <div className="max-w-7xl mx-auto p-8">
-        <PageAgentWizard 
-          context={{
-            pageName: 'Policy Generator',
-            pageType: 'tool',
-            metrics: {
-              'Policies in Library': policies.length,
-              'Active Generation': isGenerating ? 'In Progress' : 'Ready',
-              'View Mode': viewMode === 'business' ? 'Business Rules' : 'Technical YAML'
-            }
-          }}
-          agentName="Policy Agent"
-        />
-
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="generate" className="gap-2" data-testid="tab-generate">

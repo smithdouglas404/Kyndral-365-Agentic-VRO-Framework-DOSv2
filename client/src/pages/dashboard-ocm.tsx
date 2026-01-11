@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, BookOpen, MessageSquare, TrendingUp,
@@ -26,7 +27,6 @@ import {
   type TransformedStakeholderGroup,
   type TransformedTrainingProgram
 } from '@/lib/agentDataTransformers';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
@@ -242,9 +242,20 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 
 export default function OCMDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const { setPageContext } = usePageContext();
   const liveData = useAgentData('ocm');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: 'ocm',
+      entityName: 'OCM Intelligence Console',
+      breadcrumb: ['Dashboard', 'OCM']
+    });
+  }, [setPageContext]);
 
   const handleDrillDown = (entityType: string, entityId: string) => {
     setDrillDownEntity({ type: entityType, id: entityId });
@@ -308,23 +319,6 @@ export default function OCMDashboard() {
               </div>
             </div>
           </div>
-
-          <PageAgentWizard 
-            context={{
-              pageName: 'OCM Intelligence Console',
-              pageType: 'dashboard',
-              metrics: {
-                'Change Readiness': `${liveData.metrics.avgConfidence || avgReadiness}%`,
-                'Training Completion': `${Math.round((totalCompleted / totalEnrolled) * 100)}%`,
-                'Positive Stakeholders': `${positiveStakeholders}/${stakeholderGroups.length}`,
-                'Avg Satisfaction': `${avgSatisfaction}/5`,
-                'Impacted Staff': companyMetrics.totalEmployees
-              },
-              alertCount: liveData.metrics.activeAlerts,
-              riskCount: liveData.metrics.atRiskProjects
-            }}
-            agentName="OCM Agent"
-          />
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-readiness')} data-testid="metric-readiness">

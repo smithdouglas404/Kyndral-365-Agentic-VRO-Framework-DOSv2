@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Repeat, Users, TrendingUp, Target, CheckCircle2, 
@@ -25,7 +26,6 @@ import {
   type TransformedAdoptionMetric,
   type TransformedInitiative
 } from '@/lib/agentDataTransformers';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
@@ -289,9 +289,20 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
 
 export default function TMODashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const { setPageContext } = usePageContext();
   const liveData = useAgentData('tmo');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: 'tmo',
+      entityName: 'AI Operations Hub',
+      breadcrumb: ['Dashboard', 'TMO']
+    });
+  }, [setPageContext]);
 
   const handleDrillDown = (entityType: string, entityId: string) => {
     setDrillDownEntity({ type: entityType, id: entityId });
@@ -315,20 +326,6 @@ export default function TMODashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8">
-          <PageAgentWizard 
-            context={{
-              pageName: 'TMO Dashboard',
-              pageType: 'dashboard',
-              entityId: 'tmo',
-              metrics: {
-                'Total Projects': liveData.metrics.totalProjects,
-                'At-Risk': liveData.metrics.atRiskProjects,
-                'Active Alerts': liveData.metrics.activeAlerts
-              }
-            }}
-            agentName="TMO Agent"
-          />
-
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">

@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimulationProvider } from "@/contexts/SimulationContext";
+import { PageContextProvider } from "@/contexts/PageContext";
 import { LiveEventDrawer } from "@/components/LiveEventDrawer";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
@@ -178,14 +179,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SimulationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <FloatingAlertBanner />
-          <LiveEventDrawer />
-          <GlobalAIOverlay />
-          <AskPMChat />
-          <Router />
-        </TooltipProvider>
+        <PageContextProvider>
+          <TooltipProvider>
+            <Toaster />
+            <FloatingAlertBanner />
+            <LiveEventDrawer />
+            <GlobalAIOverlay />
+            <AskPMChat />
+            <Router />
+          </TooltipProvider>
+        </PageContextProvider>
       </SimulationProvider>
     </QueryClientProvider>
   );

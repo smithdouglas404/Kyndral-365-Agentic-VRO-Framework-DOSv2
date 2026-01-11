@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from "wouter";
+import { usePageContext } from "@/contexts/PageContext";
 import { ArrowLeft, Shield, AlertTriangle, TrendingUp, CreditCard, Droplets, Settings, Eye, Users } from "lucide-react";
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,13 +8,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { riskData, aiAlerts } from "@/lib/lgData";
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, Cell } from "recharts";
 
 export default function RiskCenter() {
   const [, navigate] = useLocation();
+  const { setPageContext } = usePageContext();
   const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
   const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'tool',
+      entityId: 'risk-center',
+      entityName: 'Risk Command Center',
+      breadcrumb: ['Dashboard', 'Risk Center']
+    });
+  }, [setPageContext]);
 
   const riskAlerts = aiAlerts.filter(a => 
     a.title.toLowerCase().includes("risk") || 
@@ -80,23 +91,6 @@ export default function RiskCenter() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        <PageAgentWizard 
-          context={{
-            pageName: 'Enterprise Risk Center',
-            pageType: 'tool',
-            metrics: {
-              'Risk Categories': riskData.categories.length,
-              'Emerging Risks': riskData.emergingRisks.keyEmergingRisks.length,
-              'High Severity Risks': riskData.categories.reduce((sum, cat) => sum + cat.subRisks.filter(r => r.severity === 'high').length, 0),
-              'Active Risk Alerts': riskAlerts.length,
-              'Largest Exposures': riskData.overview.largestExposures.join(', ')
-            },
-            alertCount: riskAlerts.length,
-            riskCount: riskData.categories.reduce((sum, cat) => sum + cat.subRisks.filter(r => r.severity === 'high').length, 0)
-          }}
-          agentName="Risk Agent"
-        />
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           <Card className="lg:col-span-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('governance', 'three-lines-defence')} data-testid="card-three-lines-defence">
             <CardHeader>

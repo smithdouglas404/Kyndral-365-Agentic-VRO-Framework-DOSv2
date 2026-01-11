@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { safeProjects } from "@/lib/safeProjectData";
 import { useLocation } from "wouter";
+import { usePageContext, getSuggestedQuestions } from "@/contexts/PageContext";
 
 interface Message {
   id: string;
@@ -137,17 +138,9 @@ function MarkdownRenderer({ content, onNavigate }: { content: string; onNavigate
   );
 }
 
-const suggestedQuestions = [
-  "What are all the dependencies for the PRT Platform project?",
-  "Show me all projects that are at risk",
-  "What is the total portfolio ROI and confidence level?",
-  "Which projects are blocking other projects?",
-  "What are the AI recommendations for the Trading Platform?",
-  "List all projects in the implementing stage"
-];
-
 export function AskPMChat() {
   const [, setLocation] = useLocation();
+  const { context } = usePageContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -155,6 +148,8 @@ export function AskPMChat() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const suggestedQuestions = getSuggestedQuestions(context);
   
   const handleNavigate = (path: string) => {
     setLocation(path);
@@ -192,7 +187,15 @@ export function AskPMChat() {
       const response = await fetch('/api/ai/ask-pm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: messageText })
+        body: JSON.stringify({ 
+          question: messageText,
+          pageContext: {
+            pageType: context.pageType,
+            entityId: context.entityId,
+            entityName: context.entityName,
+            businessUnit: context.businessUnit
+          }
+        })
       });
 
       const data = await response.json();

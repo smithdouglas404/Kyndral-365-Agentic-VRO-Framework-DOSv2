@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, CheckCircle2, TrendingUp, AlertTriangle,
@@ -23,7 +24,6 @@ import {
   type DataMode,
   type TransformedObjective
 } from '@/lib/agentDataTransformers';
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { AIRecommendations } from "@/components/AIRecommendations";
 
 function NavBar() {
@@ -199,9 +199,20 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
 
 export default function OKRDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const { setPageContext } = usePageContext();
   const liveData = useAgentData('okr');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'dashboard',
+      entityId: 'okr',
+      entityName: 'Strategy Alignment Console',
+      breadcrumb: ['Dashboard', 'OKR']
+    });
+  }, [setPageContext]);
 
   const handleDrillDown = (entityType: string, entityId: string) => {
     setDrillDownEntity({ type: entityType, id: entityId });
@@ -227,21 +238,6 @@ export default function OKRDashboard() {
         <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
         
         <main className="flex-1 px-8 py-8">
-          <PageAgentWizard 
-            context={{
-              pageName: 'OKR Dashboard',
-              pageType: 'dashboard',
-              entityId: 'okr',
-              metrics: {
-                'Total Projects': liveData.metrics.totalProjects,
-                'At-Risk': liveData.metrics.atRiskProjects,
-                'Active Alerts': liveData.metrics.activeAlerts,
-                'Avg Confidence': liveData.metrics.avgConfidence
-              }
-            }}
-            agentName="OKR Agent"
-          />
-
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">

@@ -391,7 +391,13 @@ export async function registerRoutes(
   });
 
   const askPMSchema = z.object({
-    question: z.string().min(1, "Question is required").max(500, "Question too long")
+    question: z.string().min(1, "Question is required").max(500, "Question too long"),
+    pageContext: z.object({
+      pageType: z.enum(['dashboard', 'division', 'project', 'portfolio', 'other']).optional(),
+      entityId: z.string().optional(),
+      entityName: z.string().optional(),
+      businessUnit: z.string().optional()
+    }).optional()
   });
 
   app.post("/api/ai/ask-pm", async (req, res) => {
@@ -401,8 +407,8 @@ export async function registerRoutes(
         return res.status(400).json({ error: parsed.error.errors[0].message });
       }
 
-      const { question } = parsed.data;
-      const response = await askPM(question);
+      const { question, pageContext } = parsed.data;
+      const response = await askPM(question, pageContext);
       res.json({ response });
     } catch (error: any) {
       console.error("Ask PM error:", error);

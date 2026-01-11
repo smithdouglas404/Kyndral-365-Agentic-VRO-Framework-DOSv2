@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight, Link2, ArrowRight, Filter, GitBranch, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,8 +11,8 @@ import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
 import { enrichedProjects, getSafeStages, getStageLabel, type EnrichedProject } from "@/lib/projects";
 import { safeProjects, getProjectsByBU } from "@/lib/safeProjectData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
-import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
+import { usePageContext } from "@/contexts/PageContext";
 
 // Legacy slug mapping for backward compatibility
 const legacySlugs: Record<string, string> = {
@@ -43,6 +43,7 @@ const buNameMapping: Record<string, string[]> = {
 export default function DivisionPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const { setPageContext } = usePageContext();
   const [stageFilter, setStageFilter] = useState<string>("all");
   
   // Get the fromTab query parameter to know where to navigate back
@@ -53,6 +54,18 @@ export default function DivisionPage() {
   const resolvedId = legacySlugs[params.id || ''] || params.id;
   const division = divisions.find(d => d.id === resolvedId);
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
+  
+  // Update page context for Ask PM
+  useEffect(() => {
+    if (division) {
+      setPageContext({
+        pageType: 'division',
+        entityId: division.id,
+        entityName: division.name,
+        breadcrumb: ['Dashboard', division.name]
+      });
+    }
+  }, [division, setPageContext]);
   
   // Get enriched projects for this business unit (supports multiple BU mappings)
   const buNames = buNameMapping[resolvedId || ''] || buNameMapping['default'] || [];
@@ -144,28 +157,6 @@ export default function DivisionPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        <PageAgentWizard 
-          context={{
-            pageName: division.name,
-            pageType: 'division',
-            entityId: division.id,
-            alertCount: divisionAlerts.length,
-            riskCount: division.risks.length,
-            projectCount: divisionProjects.length,
-            metrics: {
-              'Operating Profit': `£${division.profit2024}m`,
-              'YoY Change': `${division.changePercent}%`,
-              'KPIs Tracked': division.kpis.length,
-              'At-Risk KPIs': division.kpis.filter(k => k.status === 'at-risk' || k.status === 'off-track').length,
-              'OKRs': division.okrs.length,
-              'High-Priority Projects': divisionProjects.filter(p => p.priority === 'high' || p.priority === 'critical').length,
-              'Total Expected ROI': `£${divisionProjects.length > 0 ? divisionProjects.reduce((sum, p) => sum + (p.roiValue || 0), 0) : 0}m`
-            }
-          }}
-          agentName="Division Intelligence Agent"
-          onDrillDown={handleDrillDown}
-        />
-        
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-white shadow-sm">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>

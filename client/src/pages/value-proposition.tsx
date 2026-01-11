@@ -1,11 +1,23 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, CheckCircle2, TrendingUp, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
-import { PageAgentWizard } from "@/components/PageAgentWizard";
+import { usePageContext } from "@/contexts/PageContext";
 
 export default function ValueProposition() {
   const [, navigate] = useLocation();
+  const { setPageContext } = usePageContext();
+  
+  // Update page context for Ask PM
+  useEffect(() => {
+    setPageContext({
+      pageType: 'overview',
+      entityId: 'value-proposition',
+      entityName: 'VRO Strategic Value',
+      breadcrumb: ['Value Proposition']
+    });
+  }, [setPageContext]);
   
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -38,21 +50,6 @@ export default function ValueProposition() {
       </header>
 
       <main className="container mx-auto px-8 py-12 max-w-4xl">
-        <PageAgentWizard 
-          context={{
-            pageName: 'Value Proposition',
-            pageType: 'overview',
-            metrics: {
-              'Cycle Time Reduction': '83%',
-              'Speed Improvement': '30 Days → 5 Days',
-              'Forecast Accuracy': '85%',
-              'Overhead Reduction': '75%',
-              'Portfolio Visibility': '100%'
-            }
-          }}
-          agentName="Value Agent"
-        />
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
