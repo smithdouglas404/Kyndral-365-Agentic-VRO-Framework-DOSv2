@@ -36,7 +36,6 @@ const vroNavItems: NavItem[] = [
 
 // PMO-specific items - only items with existing dashboard views
 const pmoNavItems: NavItem[] = [
-  { id: "pipeline", label: "Pipeline", icon: GitBranch, modes: ["PMO"] },
   { id: "workspace", label: "Co-Pilot", icon: Compass, modes: ["PMO"] },
 ];
 

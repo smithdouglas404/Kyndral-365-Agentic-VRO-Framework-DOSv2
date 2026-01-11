@@ -34,7 +34,6 @@ const navItems: NavItem[] = [
   { id: "ai-insights", label: "AI Insights", icon: <Brain size={18} />, modes: "all" },
   { id: "lifecycle", label: "Lifecycle", icon: <Zap size={18} />, modes: ["VRO"] },
   { id: "performance", label: "Performance", icon: <Target size={18} />, modes: ["VRO"] },
-  { id: "pipeline", label: "Pipeline", icon: <GitBranch size={18} />, modes: ["PMO"] },
   { id: "workspace", label: "Co-Pilot", icon: <Compass size={18} />, modes: ["PMO"] },
 ];
 

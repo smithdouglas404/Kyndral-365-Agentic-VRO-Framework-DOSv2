@@ -376,7 +376,7 @@ export function AIProactiveInsightsSection() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="text-[#005EB8]" />
-            AI Proactive Insights
+            Proactive Insights
           </h2>
           <p className="text-muted-foreground">Shifting from reactive reporting to predictive value protection</p>
         </div>
