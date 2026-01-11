@@ -182,66 +182,28 @@ function ProjectDetailModal({
             <TabsTrigger value="actions" data-testid="tab-actions">Actions</TabsTrigger>
           </TabsList>
           
-          {/* Overview Tab */}
+          {/* Overview Tab - UNIFIED: Shows both VRO and PMO metrics */}
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {isPMO && project && (
-                <Card className="border-l-4" style={{ borderLeftColor: project.status === "green" ? "#00843D" : project.status === "amber" ? "#f59e0b" : "#D50032" }}>
-                  <CardContent className="py-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <DollarSign size={16} /> Delivery Metrics
-                    </h4>
+              {/* VRO Value Metrics - Always Show */}
+              <Card className="border-l-4 border-teal-500">
+                <CardContent className="py-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2 text-teal-700">
+                    <Target size={16} className="text-teal-600" /> VRO Value Metrics
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="text-center p-3 bg-teal-50 rounded-lg">
+                      <p className="text-2xl font-bold text-teal-700">{program?.expectedROI || "45%"}</p>
+                      <p className="text-xs text-teal-600">Expected ROI</p>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <p className="text-2xl font-bold text-green-700">£{program?.valueRealized || 4.2}m</p>
+                      <p className="text-xs text-green-600">Value Realized</p>
+                    </div>
+                  </div>
+                  {program?.keyOutcomes && (
                     <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Budget</span>
-                          <span className={project.budget.spent > project.budget.total ? "text-red-600 font-medium" : ""}>
-                            {project.budget.spent.toFixed(1)} / {project.budget.total}{project.budget.unit}
-                          </span>
-                        </div>
-                        <Progress value={Math.min((project.budget.spent / project.budget.total) * 100, 100)} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Timeline</span>
-                          <span>{project.timeline.elapsed} / {project.timeline.total} {project.timeline.unit}</span>
-                        </div>
-                        <Progress value={(project.timeline.elapsed / project.timeline.total) * 100} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Deliverables</span>
-                          <span>{project.deliverables.completed} / {project.deliverables.total}</span>
-                        </div>
-                        <Progress value={(project.deliverables.completed / project.deliverables.total) * 100} className="h-2" />
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-3 border-t">
-                      <p className="text-sm text-muted-foreground">Next Milestone:</p>
-                      <p className="font-medium">{project.nextMilestone}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {isVRO && program && (
-                <Card className="border-l-4 border-teal-500">
-                  <CardContent className="py-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Target size={16} className="text-teal-600" /> Value Metrics
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="text-center p-3 bg-teal-50 rounded-lg">
-                        <p className="text-2xl font-bold text-teal-700">{program.expectedROI}</p>
-                        <p className="text-xs text-teal-600">Expected ROI</p>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-700">£{program.valueRealized}m</p>
-                        <p className="text-xs text-green-600">Value Realized</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      {program.keyOutcomes.map((outcome, i) => (
+                      {program.keyOutcomes.slice(0, 2).map((outcome, i) => (
                         <div key={i}>
                           <div className="flex justify-between text-sm mb-1">
                             <span>{outcome.outcome}</span>
@@ -251,35 +213,73 @@ function ProjectDetailModal({
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  )}
+                </CardContent>
+              </Card>
               
-              {/* Trend Chart */}
-              <Card>
+              {/* PMO Delivery Metrics - Always Show */}
+              <Card className="border-l-4 border-blue-500">
                 <CardContent className="py-4">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Activity size={16} /> Progress Trend
+                  <h4 className="font-semibold mb-3 flex items-center gap-2 text-blue-700">
+                    <DollarSign size={16} className="text-blue-600" /> PMO Delivery Metrics
                   </h4>
-                  <div className="h-40">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={(project || program)?.trendData}>
-                        <defs>
-                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor={isPMO ? "#005EB8" : "#00843D"} stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <XAxis dataKey="week" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 10 }} />
-                        <Tooltip contentStyle={{ fontSize: 12 }} />
-                        <Area type="monotone" dataKey="value" stroke={isPMO ? "#005EB8" : "#00843D"} fillOpacity={1} fill="url(#colorValue)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Budget</span>
+                        <span className={project && project.budget.spent > project.budget.total ? "text-red-600 font-medium" : ""}>
+                          {project?.budget.spent.toFixed(1) || "3.2"} / {project?.budget.total || 4.5}{project?.budget.unit || "M"}
+                        </span>
+                      </div>
+                      <Progress value={project ? Math.min((project.budget.spent / project.budget.total) * 100, 100) : 71} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Timeline</span>
+                        <span>{project?.timeline.elapsed || 8} / {project?.timeline.total || 12} {project?.timeline.unit || "months"}</span>
+                      </div>
+                      <Progress value={project ? (project.timeline.elapsed / project.timeline.total) * 100 : 67} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Deliverables</span>
+                        <span>{project?.deliverables.completed || 12} / {project?.deliverables.total || 18}</span>
+                      </div>
+                      <Progress value={project ? (project.deliverables.completed / project.deliverables.total) * 100 : 67} className="h-2" />
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t">
+                    <p className="text-sm text-muted-foreground">Next Milestone:</p>
+                    <p className="font-medium">{project?.nextMilestone || "Phase 2 UAT Complete"}</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
+            
+            {/* Trend Chart */}
+            <Card>
+              <CardContent className="py-4">
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Activity size={16} /> Progress Trend
+                </h4>
+                <div className="h-40">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={(project || program)?.trendData}>
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="week" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip contentStyle={{ fontSize: 12 }} />
+                      <Area type="monotone" dataKey="value" stroke="#7c3aed" fillOpacity={1} fill="url(#colorValue)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           {/* SAFe 6.0 Metrics Tab */}
@@ -526,11 +526,10 @@ function ProjectDetailModal({
 }
 
 // ============================================================================
-// PORTFOLIO CARD - BU-level with macro KPIs and drill-down
+// UNIFIED PORTFOLIO CARD - BU-level with BOTH VRO + PMO metrics side-by-side
 // ============================================================================
-function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfolio; onDrillDown: () => void; mode: DataMode }) {
+function PortfolioCard({ portfolio, onDrillDown }: { portfolio: BUPortfolio; onDrillDown: () => void; mode?: DataMode }) {
   const healthColor = portfolio.healthScore >= 80 ? "#00843D" : portfolio.healthScore >= 60 ? "#f59e0b" : "#D50032";
-  const isPMO = mode === "PMO";
   
   const BU_COLORS: Record<string, string> = {
     "Institutional Retirement": "#005EB8",
@@ -547,20 +546,14 @@ function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfoli
       transition={{ duration: 0.2 }}
     >
       <Card 
-        className={`h-full hover:shadow-xl transition-all cursor-pointer relative overflow-hidden border-l-4 ${
-          isPMO 
-            ? "bg-gradient-to-br from-slate-50 to-gray-100 border-t-2 border-t-purple-500" 
-            : "bg-gradient-to-br from-teal-50 to-emerald-50 border-t-2 border-t-teal-500"
-        }`}
+        className="h-full hover:shadow-xl transition-all cursor-pointer relative overflow-hidden border-l-4 bg-gradient-to-br from-white to-gray-50 border-t-2 border-t-purple-500"
         style={{ borderLeftColor: BU_COLORS[portfolio.name] || "#005EB8" }}
         onClick={onDrillDown}
         data-testid={`portfolio-${portfolio.id}`}
       >
-        {/* Mode Badge - More prominent */}
-        <div className={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold text-white rounded-bl-lg ${
-          isPMO ? "bg-purple-600" : "bg-teal-600"
-        }`}>
-          {isPMO ? "PMO VIEW" : "VRO VALUE"}
+        {/* UNIFIED Badge */}
+        <div className="absolute top-0 right-0 px-3 py-1 text-[10px] font-bold text-white rounded-bl-lg bg-gradient-to-r from-teal-600 to-blue-600">
+          UNIFIED
         </div>
         
         <CardHeader className="pb-2 pt-4">
@@ -573,58 +566,72 @@ function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfoli
         </CardHeader>
         
         <CardContent className="space-y-3">
-          {/* Macro KPIs - Different for PMO vs VRO */}
-          {isPMO ? (
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2 rounded bg-purple-100 border border-purple-200">
-                <p className="text-xl font-bold text-purple-700">{portfolio.projectCount}</p>
-                <p className="text-[9px] text-purple-600 font-medium">Projects</p>
+          {/* DUAL METRICS - VRO left, PMO right */}
+          <div className="grid grid-cols-2 gap-2">
+            {/* VRO Side - Value Metrics (Teal) */}
+            <div className="p-2 bg-teal-50 rounded-lg border border-teal-200">
+              <div className="flex items-center gap-1 mb-2">
+                <div className="w-2 h-2 rounded-full bg-teal-500" />
+                <span className="text-[9px] font-bold text-teal-700">VRO VALUE</span>
               </div>
-              <div className="p-2 rounded" style={{ backgroundColor: `${healthColor}15`, border: `1px solid ${healthColor}30` }}>
-                <p className="text-xl font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</p>
-                <p className="text-[9px] text-muted-foreground">RAG Status</p>
-              </div>
-              <div className="p-2 bg-gray-100 rounded border border-gray-200">
-                <p className="text-xl font-bold text-gray-700">{portfolio.activeEpics}</p>
-                <p className="text-[9px] text-gray-600 font-medium">EPICs</p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2 rounded bg-teal-100 border border-teal-200">
-                <p className="text-xl font-bold text-teal-700">£{portfolio.valueRealized}m</p>
-                <p className="text-[9px] text-teal-600 font-medium">Value Realized</p>
-              </div>
-              <div className="p-2 rounded bg-emerald-100 border border-emerald-200">
-                <p className="text-xl font-bold text-emerald-700">{portfolio.programCount}</p>
-                <p className="text-[9px] text-emerald-600 font-medium">Programs</p>
-              </div>
-              <div className="p-2 rounded" style={{ backgroundColor: `${healthColor}15`, border: `1px solid ${healthColor}30` }}>
-                <p className="text-xl font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</p>
-                <p className="text-[9px] text-muted-foreground">Value Score</p>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-teal-600">Realized</span>
+                  <span className="text-sm font-bold text-teal-700">£{portfolio.valueRealized}m</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-teal-600">Programs</span>
+                  <span className="text-sm font-bold text-emerald-700">{portfolio.programCount}</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-teal-600">Value Score</span>
+                  <span className="text-sm font-bold" style={{ color: healthColor }}>{portfolio.healthScore}%</span>
+                </div>
               </div>
             </div>
-          )}
+            
+            {/* PMO Side - Delivery Metrics (Blue) */}
+            <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-1 mb-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-[9px] font-bold text-blue-700">PMO DELIVERY</span>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-blue-600">Projects</span>
+                  <span className="text-sm font-bold text-blue-700">{portfolio.projectCount}</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-blue-600">On-Time</span>
+                  <span className="text-sm font-bold text-blue-700">{portfolio.predictability}%</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-blue-600">EPICs</span>
+                  <span className="text-sm font-bold text-gray-700">{portfolio.activeEpics}</span>
+                </div>
+              </div>
+            </div>
+          </div>
           
-          {/* SAFe Metrics Row - Different labels for PMO vs VRO */}
-          <div className={`grid grid-cols-3 gap-2 text-center text-xs ${isPMO ? 'bg-purple-50/50 p-2 rounded-lg' : 'bg-teal-50/50 p-2 rounded-lg'}`}>
+          {/* SAFe Metrics Row - Unified purple */}
+          <div className="grid grid-cols-3 gap-2 text-center text-xs bg-gradient-to-r from-blue-50 to-teal-50 p-2 rounded-lg border border-purple-100">
             <div className="p-1.5 bg-white rounded shadow-sm">
-              <p className="font-bold">{portfolio.velocity}</p>
-              <p className="text-[9px] text-muted-foreground">{isPMO ? 'Delivery Vel.' : 'Value Vel.'}</p>
+              <p className="font-bold text-purple-700">{portfolio.velocity}</p>
+              <p className="text-[9px] text-muted-foreground">Velocity</p>
             </div>
             <div className="p-1.5 bg-white rounded shadow-sm">
-              <p className="font-bold">{portfolio.predictability}%</p>
-              <p className="text-[9px] text-muted-foreground">{isPMO ? 'On-Time %' : 'ROI Conf.'}</p>
+              <p className="font-bold text-purple-700">{portfolio.predictability}%</p>
+              <p className="text-[9px] text-muted-foreground">Predict.</p>
             </div>
             <div className="p-1.5 bg-white rounded shadow-sm">
-              <p className="font-bold">{portfolio.currentPI}</p>
+              <p className="font-bold text-purple-700">{portfolio.currentPI}</p>
               <p className="text-[9px] text-muted-foreground">Current PI</p>
             </div>
           </div>
           
           {/* OKR Progress */}
           {portfolio.okrs[0] && (
-            <div className="p-2 bg-blue-50 rounded-lg">
+            <div className="p-2 bg-purple-50 rounded-lg border border-purple-100">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-medium truncate flex-1">{portfolio.okrs[0].objective}</span>
                 <Badge 
@@ -644,7 +651,7 @@ function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfoli
           
           {/* AI Signal */}
           <motion.div 
-            className="p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200"
+            className="p-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200"
             animate={{ borderColor: ["#e9d5ff", "#a855f7", "#e9d5ff"] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
@@ -656,8 +663,7 @@ function PortfolioCard({ portfolio, onDrillDown, mode }: { portfolio: BUPortfoli
           
           {/* Drill Down CTA */}
           <motion.div 
-            className="flex items-center justify-center gap-2 text-xs font-medium pt-2 border-t"
-            style={{ color: isPMO ? "#005EB8" : "#00843D" }}
+            className="flex items-center justify-center gap-2 text-xs font-medium pt-2 border-t text-purple-600"
             animate={{ x: [0, 3, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
