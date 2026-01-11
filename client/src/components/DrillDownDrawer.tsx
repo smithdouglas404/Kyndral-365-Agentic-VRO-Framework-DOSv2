@@ -159,10 +159,12 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     aiInsight: enrichedProject.aiRecommendation,
     summary: enrichedProject.description,
     relatedEntities: enrichedProject.dependencies.map(d => ({
-      type: 'Dependency',
+      type: d.type === 'blocks' ? 'Blocks' : d.type === 'blocked-by' ? 'Blocked By' : 'Related',
       id: d.projectId,
       name: d.projectName,
-      status: d.health
+      status: d.health,
+      description: d.description,
+      impactIfDelayed: d.impactIfDelayed
     })),
     traceability: {
       sourceSystem: 'Enterprise PMO',
@@ -180,9 +182,326 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       }))
     }
   } : null;
+
+  // Create specialized drilldown for metric entities
+  const metricConfigs: Record<string, {
+    label: string;
+    category: 'VRO' | 'PMO';
+    metrics: Record<string, string>;
+    projectBreakdown: { name: string; value: string; budget: string }[];
+    insight: string;
+    summary: string;
+  }> = {
+    'current-roi': {
+      label: 'Current ROI',
+      category: 'VRO',
+      metrics: {
+        'Current Value': '64%',
+        'Target': '85%',
+        'Baseline (2024)': '0%',
+        'Gap to Target': '-21%',
+        'Variance': '+64% vs baseline',
+        'Last Updated': new Date().toLocaleTimeString()
+      },
+      projectBreakdown: [
+        { name: 'PRT Digital Intake', value: '+£8.2M', budget: '£12.4M' },
+        { name: 'Claims Automation', value: '+£5.7M', budget: '£7.2M' },
+        { name: 'Customer Portal', value: '+£4.1M', budget: '£6.8M' }
+      ],
+      insight: 'ROI is trending positive at 64% against an 85% target. VRO agent analysis shows 3 initiatives exceeding expectations, with Claims Automation delivering the highest marginal return. FinOps agent recommends reallocating £2.1M from underperforming initiatives to accelerate top performers.',
+      summary: 'Portfolio ROI performance is on track. The VRO agent identified strong value realization from digital transformation initiatives, while FinOps validates cost efficiency improvements across 8 projects.'
+    },
+    'net-present-value': {
+      label: 'Net Present Value',
+      category: 'VRO',
+      metrics: {
+        'Current NPV': '$36.25M',
+        'Target (5-year)': '$50M',
+        'Discount Rate': '8.5%',
+        'Confidence Level': '73%',
+        'Variance': '+$36.25M',
+        'Projection Period': '5 years'
+      },
+      projectBreakdown: [
+        { name: 'Longevity Model Upgrade', value: '+$12.4M', budget: '$8.2M' },
+        { name: 'Digital Workplace', value: '+$9.8M', budget: '$5.1M' },
+        { name: 'API Gateway', value: '+$7.2M', budget: '$3.9M' }
+      ],
+      insight: 'NPV projection shows strong positive trajectory at $36.25M. VRO agent forecasts reaching $50M target within 18 months if current velocity is maintained. Risk-adjusted scenarios show 85% probability of achieving target.',
+      summary: 'Net Present Value analysis indicates healthy portfolio value creation. FinOps agent confirms discount rate assumptions are conservative, suggesting actual returns may exceed projections.'
+    },
+    'timeline-progress': {
+      label: 'Timeline Progress',
+      category: 'VRO',
+      metrics: {
+        'Current Phase': 'Phase 2 of 4',
+        'Progress': '69%',
+        'Days Elapsed': '487 days',
+        'Days Remaining': '243 days',
+        'Variance': '-6% behind schedule',
+        'Confidence': '82%'
+      },
+      projectBreakdown: [
+        { name: 'Foundation Phase', value: 'Complete', budget: '100%' },
+        { name: 'Build Phase', value: 'In Progress', budget: '68%' },
+        { name: 'Integration Phase', value: 'Pending', budget: '0%' },
+        { name: 'Rollout Phase', value: 'Pending', budget: '0%' }
+      ],
+      insight: 'Timeline is 6% behind target due to integration delays in Q3. TMO agent recommends parallel workstreams to recover schedule. Critical path analysis shows 3 blockers that need immediate attention.',
+      summary: 'Phase 2 is 68% complete with key deliverables on track. Planning agent has identified opportunities to compress Phase 3 timeline through resource optimization.'
+    },
+    'budget-utilization': {
+      label: 'Budget Utilization',
+      category: 'VRO',
+      metrics: {
+        'Total Utilized': '£41.2M',
+        'Total Budget': '£43.8M',
+        'Utilization Rate': '94%',
+        'Baseline (2024)': '£0',
+        'Target (2026)': '£41.2M',
+        'Remaining': '£2.6M',
+        'Variance': '+6% efficiency gain'
+      },
+      projectBreakdown: [
+        { name: 'Claims', value: '£12.2M', budget: '£14.2M' },
+        { name: 'Digital', value: '£9.8M', budget: '£10.5M' },
+        { name: 'Infrastructure', value: '£8.4M', budget: '£8.9M' },
+        { name: 'Analytics', value: '£5.2M', budget: '£5.6M' },
+        { name: 'Other', value: '£5.6M', budget: '£4.6M' }
+      ],
+      insight: 'Budget utilization is healthy at 94% with £2.6M remaining. FinOps agent detected 6% efficiency gains through vendor consolidation. Recommend reallocating £1.2M surplus to high-priority initiatives in Q4.',
+      summary: 'Budget tracking shows strong fiscal discipline. FinOps agent confirms no overruns, with cost savings identified in infrastructure and licensing categories.'
+    },
+    'cycle-time': {
+      label: 'Cycle Time',
+      category: 'PMO',
+      metrics: {
+        'Current': '19 days',
+        'Target': '10 days',
+        'Baseline (2024)': '35 days',
+        'Improvement': '46% reduction',
+        'Gap to Target': '+9 days',
+        'Trend': 'Improving'
+      },
+      projectBreakdown: [
+        { name: 'Feature Development', value: '8.2 days', budget: '43%' },
+        { name: 'Testing & QA', value: '4.8 days', budget: '25%' },
+        { name: 'Code Review', value: '3.1 days', budget: '16%' },
+        { name: 'Deployment', value: '2.9 days', budget: '15%' }
+      ],
+      insight: 'Cycle time has improved 46% from baseline but remains 9 days above target. TMO agent analysis shows testing bottleneck as primary cause. Recommend implementing parallel testing and automated regression suites.',
+      summary: 'Cycle time trending positive with consistent week-over-week improvement. PMO agent forecasts reaching 15-day target by Q2 with current velocity.'
+    },
+    'flow-efficiency': {
+      label: 'Flow Efficiency',
+      category: 'PMO',
+      metrics: {
+        'Current': '69%',
+        'Target': '50%',
+        'Baseline (2024)': '45%',
+        'Improvement': '+24%',
+        'Active Time Ratio': '69:31',
+        'Wait Time': '31%'
+      },
+      projectBreakdown: [
+        { name: 'Development', value: '78%', budget: 'High' },
+        { name: 'Testing', value: '62%', budget: 'Medium' },
+        { name: 'Review', value: '54%', budget: 'Medium' },
+        { name: 'Deployment', value: '82%', budget: 'High' }
+      ],
+      insight: 'Flow efficiency exceeds target at 69%, up from 45% baseline. Wait time reduced through improved handoff processes. TMO agent recommends maintaining current practices and focusing on testing phase optimization.',
+      summary: 'Excellent flow efficiency performance. Lean/Agile metrics show reduced waste and improved value stream flow across all delivery teams.'
+    },
+    'throughput': {
+      label: 'Throughput',
+      category: 'PMO',
+      metrics: {
+        'Current': '11 items/week',
+        'Target': '25 items/week',
+        'Baseline (2024)': '8 items/week',
+        'Improvement': '+38%',
+        'Gap to Target': '-14 items',
+        'Trend': 'Stable'
+      },
+      projectBreakdown: [
+        { name: 'Features', value: '4 items', budget: '36%' },
+        { name: 'Bug Fixes', value: '3 items', budget: '27%' },
+        { name: 'Tech Debt', value: '2 items', budget: '18%' },
+        { name: 'Enhancements', value: '2 items', budget: '18%' }
+      ],
+      insight: 'Throughput at 11 items/week shows 38% improvement from baseline. Gap to 25-item target requires capacity increase or scope reduction. TMO agent recommends team scaling and automation investments.',
+      summary: 'Sprint analytics show consistent delivery with room for improvement. Planning agent identifies WIP limits as key lever for throughput gains.'
+    },
+    'wip-items': {
+      label: 'WIP Items',
+      category: 'PMO',
+      metrics: {
+        'Current WIP': '9 items',
+        'WIP Limit': '12 items',
+        'Utilization': '75%',
+        'Available Slots': '3',
+        'Baseline': '12 items',
+        'Target': '8 items'
+      },
+      projectBreakdown: [
+        { name: 'In Development', value: '4 items', budget: '44%' },
+        { name: 'In Review', value: '2 items', budget: '22%' },
+        { name: 'In Testing', value: '2 items', budget: '22%' },
+        { name: 'Ready for Deploy', value: '1 item', budget: '11%' }
+      ],
+      insight: 'WIP is within healthy limits at 9/12 items. Kanban board shows balanced distribution across stages. TMO agent recommends maintaining current WIP limits to optimize flow.',
+      summary: 'Work-in-progress management is effective. 3 slots available for new work intake without impacting flow efficiency.'
+    },
+    'vro-metric-001': {
+      label: 'Strategic ROI',
+      category: 'VRO',
+      metrics: {
+        'Current Value': '84%',
+        'Target': '85%',
+        'Baseline (2024)': '0%',
+        'Gap to Target': '-1%',
+        'Variance': '+84% vs baseline',
+        'Last Updated': new Date().toLocaleTimeString()
+      },
+      projectBreakdown: [
+        { name: 'Claims Digital Transformation', value: '+£12.4M', budget: '£18.2M' },
+        { name: 'Customer Experience Platform', value: '+£8.7M', budget: '£12.1M' },
+        { name: 'Operational Excellence', value: '+£5.2M', budget: '£7.8M' }
+      ],
+      insight: 'Strategic ROI is near target at 84%. VRO agent analysis shows digital transformation initiatives are driving the majority of returns. FinOps recommends continued investment in Claims and CX portfolios.',
+      summary: 'Portfolio ROI performance is strong. The VRO agent identified 12 initiatives exceeding expectations with Claims Automation delivering the highest marginal return.'
+    },
+    'vro-metric-002': {
+      label: 'Delivery Predictability',
+      category: 'VRO',
+      metrics: {
+        'Current Value': '80%',
+        'Target': '90%',
+        'Baseline (2024)': '65%',
+        'Gap to Target': '-10%',
+        'Improvement': '+15% vs baseline',
+        'Confidence': '89%'
+      },
+      projectBreakdown: [
+        { name: 'Green Projects', value: '80%', budget: '65% of portfolio' },
+        { name: 'Amber Projects', value: '72%', budget: '25% of portfolio' },
+        { name: 'Red Projects', value: '58%', budget: '10% of portfolio' }
+      ],
+      insight: 'Delivery predictability at 80% shows 15% improvement from baseline. SAFe PI planning adoption has improved sprint commitment accuracy. TMO recommends focus on reducing scope volatility in amber projects.',
+      summary: 'Predictability metrics trending positive with consistent quarter-over-quarter gains. Planning agent identifies capacity planning as key lever for improvement.'
+    },
+    'vro-metric-003': {
+      label: 'OKR Achievement',
+      category: 'VRO',
+      metrics: {
+        'Current Value': '88%',
+        'Target': '80%',
+        'Baseline (2024)': '60%',
+        'Variance': '+28% vs baseline',
+        'Objectives On Track': '3/4',
+        'Key Results Met': '9/12'
+      },
+      projectBreakdown: [
+        { name: 'Strategic Objective 1', value: '92%', budget: 'Critical' },
+        { name: 'Strategic Objective 2', value: '87%', budget: 'High' },
+        { name: 'Strategic Objective 3', value: '85%', budget: 'High' },
+        { name: 'Strategic Objective 4', value: '78%', budget: 'Medium' }
+      ],
+      insight: 'OKR Achievement exceeds target at 88%. 3 of 4 strategic objectives are on track. OKR agent recommends focus on Objective 4 which is slightly behind target.',
+      summary: 'Strong OKR performance with 9 of 12 Key Results at or above target. Cross-functional alignment has improved significantly.'
+    },
+    'vro-metric-004': {
+      label: 'Delivery Success Rate',
+      category: 'VRO',
+      metrics: {
+        'Current Value': '61%',
+        'Target': '85%',
+        'Baseline (2024)': '45%',
+        'Gap to Target': '-24%',
+        'Improvement': '+16% vs baseline',
+        'Projects On Track': '14/23'
+      },
+      projectBreakdown: [
+        { name: 'On Track (Green)', value: '14 projects', budget: '61%' },
+        { name: 'At Risk (Amber)', value: '6 projects', budget: '26%' },
+        { name: 'Critical (Red)', value: '3 projects', budget: '13%' }
+      ],
+      insight: 'Delivery success rate at 61% is improving but below target. 3 critical projects need immediate attention. TMO agent recommends focused intervention on red status initiatives.',
+      summary: 'Project delivery showing improvement with 14 of 23 projects on track. Amber projects present recovery opportunities.'
+    },
+    'vro-metric-005': {
+      label: 'Portfolio Velocity',
+      category: 'VRO',
+      metrics: {
+        'Current Value': '53 pts',
+        'Target': '55 pts',
+        'Baseline (2024)': '42 pts',
+        'Gap to Target': '-2 pts',
+        'Improvement': '+11 pts vs baseline',
+        'Sprint Commitment': '96%'
+      },
+      projectBreakdown: [
+        { name: 'Group Technology', value: '62 pts', budget: 'High' },
+        { name: 'LGRI', value: '51 pts', budget: 'Medium' },
+        { name: 'LGC', value: '48 pts', budget: 'Medium' },
+        { name: 'LGIM', value: '45 pts', budget: 'Medium' }
+      ],
+      insight: 'Portfolio velocity at 53 points is near target. Group Technology leads with highest velocity. Planning agent recommends cross-team knowledge sharing to improve velocity across business units.',
+      summary: 'Velocity trending positive with 26% improvement from baseline. Sprint commitment at 96% indicates healthy capacity planning.'
+    }
+  };
+
+  const metricConfig = entityType === 'metric' ? metricConfigs[entityId] : null;
+  
+  const metricDrilldown = metricConfig ? {
+    entityType: 'metric' as const,
+    entityId,
+    entityName: `${metricConfig.label} - Full Traceability`,
+    bu: metricConfig.category === 'VRO' ? 'Value Realization Office' : 'Project Management Office',
+    relatedAgents: metricConfig.category === 'VRO' 
+      ? ['integrated-management' as AgentType, 'finops' as AgentType, 'okr' as AgentType]
+      : ['integrated-management' as AgentType, 'tmo' as AgentType, 'planning' as AgentType],
+    events: [],
+    metrics: metricConfig.metrics,
+    projectBreakdown: metricConfig.projectBreakdown,
+    actions: [
+      { id: 'analyze', label: 'Deep Dive Analysis', type: 'investigate' },
+      { id: 'forecast', label: 'Run Forecast Scenario', type: 'accelerate' },
+      { id: 'alert', label: 'Set Alert Threshold', type: 'mitigate' },
+      { id: 'report', label: 'Generate Report', type: 'escalate' }
+    ],
+    history: [
+      { timestamp: new Date(Date.now() - 300000), action: 'Metric data refreshed from source systems', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(Date.now() - 180000), action: 'Cross-validated with historical trends', agent: 'finops' as AgentType },
+      { timestamp: new Date(Date.now() - 60000), action: 'AI analysis and recommendations generated', agent: 'integrated-management' as AgentType },
+      { timestamp: new Date(), action: 'Dashboard updated with latest values', agent: 'integrated-management' as AgentType }
+    ],
+    aiInsight: metricConfig.insight,
+    summary: metricConfig.summary,
+    relatedEntities: [
+      { type: 'Portfolio', id: 'PF-TMO', name: 'Transformation Office Portfolio' },
+      { type: 'OKR', id: 'OKR-Q4-01', name: 'Improve Operational Efficiency' },
+      { type: 'Project', id: 'PRJ-DIG-001', name: 'Digital Transformation Initiative' }
+    ],
+    traceability: {
+      sourceSystem: metricConfig.category === 'VRO' ? 'VRO Analytics' : 'PMO Flow Metrics',
+      sourceId: `MET-${entityId.toUpperCase().slice(0, 8)}`,
+      triggeredBy: 'Dashboard Metric Card',
+      dataInputs: [
+        { source: metricConfig.category === 'VRO' ? 'Financial Systems' : 'Jira/Azure DevOps', freshness: '< 1 min' },
+        { source: 'Historical Analytics', freshness: 'Daily refresh' },
+        { source: 'AI Prediction Engine', freshness: '< 5 min' }
+      ],
+      linkedProjects: metricConfig.projectBreakdown.slice(0, 3).map((p, i) => ({
+        id: `PRJ-${String(i + 1).padStart(3, '0')}`,
+        name: p.name,
+        status: i === 0 ? 'green' : i === 1 ? 'amber' : 'green'
+      }))
+    }
+  } : null;
   
   // Create a fallback for unsupported entity types with rich traceability data
-  const fallbackDrilldown = !drilldownData && !projectDrilldown ? {
+  const fallbackDrilldown = !drilldownData && !projectDrilldown && !metricDrilldown ? {
     entityType: entityType as 'project' | 'program' | 'risk' | 'portfolio',
     entityId,
     entityName: entityType === 'agent-activity' 
@@ -236,7 +555,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     }
   } : null;
   
-  const displayData = drilldownData || projectDrilldown || fallbackDrilldown;
+  // Priority: metricDrilldown first (for configured metrics), then projectDrilldown, then drilldownData, then fallback
+  const displayData = metricDrilldown || projectDrilldown || drilldownData || fallbackDrilldown;
   if (!displayData) return null;
 
   return (
@@ -336,6 +656,36 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                       </CardContent>
                     </Card>
 
+                    {/* Project Breakdown for Metric entities */}
+                    {entityType === 'metric' && metricDrilldown?.projectBreakdown && (
+                      <Card className="border-gray-200">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2 uppercase tracking-wide text-gray-600">
+                            <Activity size={16} className="text-gray-500" />
+                            Project Breakdown
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {metricDrilldown.projectBreakdown.map((project, index) => (
+                              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                <div className="flex items-center gap-3">
+                                  <span className="w-6 h-6 bg-gray-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    {index + 1}
+                                  </span>
+                                  <span className="font-medium text-sm">{project.name}</span>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-sm">{project.value}</p>
+                                  <p className="text-xs text-gray-500">{project.budget}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     {displayData.actions.length > 0 && (
                       <Card>
                         <CardHeader className="pb-2">
@@ -376,35 +726,84 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                     )}
 
                     {displayData.relatedEntities && displayData.relatedEntities.length > 0 && (
-                      <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+                      <Card className={entityType === 'project' 
+                        ? "border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50" 
+                        : "border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50"}>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
-                            <Brain size={16} className="text-indigo-600" />
-                            <span className="text-indigo-900">Projects That Make Up This Metric ({displayData.relatedEntities.length})</span>
+                            {entityType === 'project' ? (
+                              <>
+                                <GitBranch size={16} className="text-amber-600" />
+                                <span className="text-amber-900">Project Dependencies ({displayData.relatedEntities.length})</span>
+                              </>
+                            ) : (
+                              <>
+                                <Brain size={16} className="text-indigo-600" />
+                                <span className="text-indigo-900">Related Entities ({displayData.relatedEntities.length})</span>
+                              </>
+                            )}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {displayData.relatedEntities.map((entity, index) => (
-                              <div
-                                key={entity.id}
-                                className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors border border-indigo-100 shadow-sm"
-                                data-testid={`related-entity-${entity.id}`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                                    {index + 1}
-                                  </span>
-                                  <div>
-                                    <span className="font-medium text-sm text-gray-900 block">{entity.name}</span>
-                                    <Badge variant="outline" className="text-xs mt-0.5 bg-indigo-50 text-indigo-700 border-indigo-200">
-                                      {entity.type}
-                                    </Badge>
+                            {displayData.relatedEntities.map((entity, index) => {
+                              const healthColor = entity.status === 'green' ? 'bg-green-500' : 
+                                                  entity.status === 'yellow' ? 'bg-yellow-500' : 
+                                                  entity.status === 'red' ? 'bg-red-500' : 
+                                                  entity.status === 'amber' ? 'bg-amber-500' : 'bg-gray-400';
+                              const borderColor = entity.status === 'green' ? 'border-green-200' : 
+                                                  entity.status === 'yellow' ? 'border-yellow-200' : 
+                                                  entity.status === 'red' ? 'border-red-200' : 
+                                                  entity.status === 'amber' ? 'border-amber-200' : 'border-gray-200';
+                              return (
+                                <div
+                                  key={entity.id}
+                                  className={`flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors border ${borderColor} shadow-sm`}
+                                  data-testid={`related-entity-${entity.id}`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {entityType === 'project' ? (
+                                      <span className={`w-3 h-3 rounded-full ${healthColor}`} title={`Health: ${entity.status}`} />
+                                    ) : (
+                                      <span className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                        {index + 1}
+                                      </span>
+                                    )}
+                                    <div className="flex-1">
+                                      <span className="font-medium text-sm text-gray-900 block">{entity.name}</span>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        <Badge variant="outline" className={entityType === 'project' 
+                                          ? "text-xs bg-amber-50 text-amber-700 border-amber-200" 
+                                          : "text-xs bg-indigo-50 text-indigo-700 border-indigo-200"}>
+                                          {entity.type}
+                                        </Badge>
+                                        {entityType === 'project' && entity.status && (
+                                          <Badge variant="outline" className={
+                                            entity.status === 'green' ? "text-xs bg-green-50 text-green-700 border-green-200" :
+                                            entity.status === 'yellow' ? "text-xs bg-yellow-50 text-yellow-700 border-yellow-200" :
+                                            entity.status === 'red' ? "text-xs bg-red-50 text-red-700 border-red-200" :
+                                            entity.status === 'amber' ? "text-xs bg-amber-50 text-amber-700 border-amber-200" :
+                                            "text-xs bg-gray-50 text-gray-700 border-gray-200"
+                                          }>
+                                            {entity.status === 'green' ? 'Healthy' : 
+                                             entity.status === 'yellow' ? 'Warning' : 
+                                             entity.status === 'red' ? 'Critical' :
+                                             entity.status === 'amber' ? 'At Risk' : entity.status}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      {entityType === 'project' && (entity as any).description && (
+                                        <p className="text-xs text-gray-500 mt-1">{(entity as any).description}</p>
+                                      )}
+                                      {entityType === 'project' && (entity as any).impactIfDelayed && (
+                                        <p className="text-xs text-amber-600 mt-0.5 font-medium">Impact: {(entity as any).impactIfDelayed}</p>
+                                      )}
+                                    </div>
                                   </div>
+                                  <ChevronRight size={16} className={entityType === 'project' ? "text-amber-400" : "text-indigo-400"} />
                                 </div>
-                                <ChevronRight size={16} className="text-indigo-400" />
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </CardContent>
                       </Card>

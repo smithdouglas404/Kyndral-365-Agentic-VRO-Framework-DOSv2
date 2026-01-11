@@ -609,7 +609,7 @@ function DashboardContent() {
             <AIExecutiveInsights />
             
             {/* Unified Metrics Section - VRO and PMO side by side */}
-            <UnifiedMetricsSection />
+            <UnifiedMetricsSection onDrillDown={handleDrillDown} />
             
             {/* Agent Activity & Audit Trail - consolidated view */}
             <ActionAuditTimeline maxItems={12} />

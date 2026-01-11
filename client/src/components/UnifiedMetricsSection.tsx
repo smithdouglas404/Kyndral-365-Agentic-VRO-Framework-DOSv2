@@ -67,11 +67,13 @@ const PMO_METRICS: PMOMetric[] = [
 function MetricCard({ 
   metric, 
   isPulsing = false,
-  domain
+  domain,
+  onClick
 }: { 
   metric: { id: string; name: string; value: number; target: number; unit: string; trend?: string; source?: string };
   isPulsing?: boolean;
   domain: 'VRO' | 'PMO';
+  onClick?: () => void;
 }) {
   const progress = Math.min(100, (metric.value / metric.target) * 100);
   const isOnTrack = progress >= 90;
@@ -92,10 +94,11 @@ function MetricCard({
       } : {}}
       transition={{ duration: 0.5 }}
       className={cn(
-        `${domainColors.bg} ${domainColors.border} border rounded-lg p-4 transition-all hover:shadow-md`,
+        `${domainColors.bg} ${domainColors.border} border rounded-lg p-4 transition-all hover:shadow-md cursor-pointer`,
         isPulsing && `ring-2 ${domainColors.ring} ring-opacity-50`
       )}
       data-testid={`metric-card-${metric.id}`}
+      onClick={onClick}
     >
       <div className="flex items-start justify-between mb-2">
         <span className="text-xs font-medium text-gray-500">{metric.name}</span>
@@ -134,7 +137,11 @@ function MetricCard({
   );
 }
 
-export function UnifiedMetricsSection() {
+interface UnifiedMetricsSectionProps {
+  onDrillDown?: (type: string, id: string) => void;
+}
+
+export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProps) {
   const { state } = useSimulation();
   const vroMetrics = state.vroMetrics;
   
@@ -192,6 +199,7 @@ export function UnifiedMetricsSection() {
                   }}
                   isPulsing={isPulsing}
                   domain="VRO"
+                  onClick={() => onDrillDown?.('metric', metric.id)}
                 />
               );
             })}
@@ -223,6 +231,7 @@ export function UnifiedMetricsSection() {
                   }}
                   isPulsing={isPulsing}
                   domain="PMO"
+                  onClick={() => onDrillDown?.('metric', metric.id)}
                 />
               );
             })}
