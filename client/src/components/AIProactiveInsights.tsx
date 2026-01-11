@@ -110,7 +110,11 @@ function AlertCard({ alert, isNew }: { alert: ProactiveAlert; isNew?: boolean })
               variant="outline" 
               size="sm" 
               className="text-xs h-7"
-              onClick={() => window.alert(`View Insights: Detailed analysis for ${alert.title} - showing risk factors, timeline, and recommended actions`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                window.alert(`View Insights: Detailed analysis for ${alert.title} - showing risk factors, timeline, and recommended actions`);
+              }}
               data-testid={`button-view-insights-${alert.id}`}
             >
               <Eye size={12} className="mr-1" />
@@ -120,7 +124,11 @@ function AlertCard({ alert, isNew }: { alert: ProactiveAlert; isNew?: boolean })
               variant="ghost" 
               size="sm" 
               className="text-xs h-7"
-              onClick={() => window.alert(`Trigger Automation: Initiating automated response workflow for ${alert.title} - notifying stakeholders and creating mitigation tasks`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                window.alert(`Trigger Automation: Initiating automated response workflow for ${alert.title} - notifying stakeholders and creating mitigation tasks`);
+              }}
               data-testid={`button-trigger-automation-${alert.id}`}
             >
               <Zap size={12} className="mr-1" />
