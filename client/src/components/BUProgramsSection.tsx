@@ -986,6 +986,246 @@ function VROProgramCard({ program, onViewDetails }: { program: VROProgram; onVie
 }
 
 // ============================================================================
+// UNIFIED PROJECT CARD - Shows both VRO value + PMO delivery on same card
+// ============================================================================
+interface UnifiedProject {
+  id: string;
+  name: string;
+  bu: string;
+  status: 'green' | 'amber' | 'red';
+  valueStatus: 'accelerating' | 'on-track' | 'at-risk' | 'blocked';
+  // PMO Delivery Metrics
+  budget: { spent: number; total: number };
+  timeline: { elapsed: number; total: number };
+  deliverables: { completed: number; total: number };
+  // VRO Value Metrics
+  expectedROI: string;
+  valueRealized: number;
+  roiValue: number;
+  // SAFe
+  safe: {
+    currentPI: string;
+    epicId: string;
+    velocity: number;
+    predictability: number;
+    flowEfficiency: number;
+  };
+  // AI
+  aiInsight: string;
+  aiConfidence: number;
+  proactiveAction?: { action: string; impact: string; type: 'mitigate' | 'accelerate' | 'investigate' | 'escalate' };
+}
+
+function UnifiedProjectCard({ project, onViewDetails }: { project: UnifiedProject; onViewDetails: () => void }) {
+  const statusColors = {
+    green: "#00843D",
+    amber: "#f59e0b", 
+    red: "#D50032"
+  };
+  
+  const budgetPercent = (project.budget.spent / project.budget.total) * 100;
+  const timelinePercent = (project.timeline.elapsed / project.timeline.total) * 100;
+  const valuePercent = project.roiValue > 0 ? (project.valueRealized / project.roiValue) * 100 : 0;
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card 
+        className="h-full border-l-4 hover:shadow-xl transition-all cursor-pointer relative overflow-hidden" 
+        style={{ borderLeftColor: statusColors[project.status] }}
+        data-testid={`card-unified-${project.id}`}
+        onClick={onViewDetails}
+      >
+        {/* UNIFIED Label Banner */}
+        <div className="absolute top-0 right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-gradient-to-r from-blue-600 to-teal-600 rounded-bl">
+          INTELLIGENCE ENGINE
+        </div>
+        
+        <CardHeader className="pb-2 pt-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <Badge 
+                className="mb-2 text-white text-xs"
+                style={{ backgroundColor: BU_COLORS[project.bu] || "#005EB8" }}
+              >
+                {project.bu}
+              </Badge>
+              <CardTitle className="text-base leading-tight">{project.name}</CardTitle>
+            </div>
+            <Badge 
+              className="text-white uppercase text-xs"
+              style={{ backgroundColor: statusColors[project.status] }}
+            >
+              {project.status}
+            </Badge>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-3">
+          {/* DUAL METRICS - VRO left, PMO right */}
+          <div className="grid grid-cols-2 gap-2">
+            {/* VRO Side - Value */}
+            <div className="p-2 bg-teal-50 rounded-lg border border-teal-200">
+              <div className="flex items-center gap-1 mb-1.5">
+                <div className="w-2 h-2 rounded-full bg-teal-500" />
+                <span className="text-[9px] font-bold text-teal-700">VRO VALUE</span>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-teal-600">ROI</span>
+                  <span className="text-sm font-bold text-teal-700">{project.expectedROI}</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-teal-600">Realized</span>
+                  <span className="text-sm font-bold text-green-700">£{project.valueRealized}m</span>
+                </div>
+                {valuePercent > 0 && (
+                  <Progress value={valuePercent} className="h-1 [&>div]:bg-teal-500" />
+                )}
+              </div>
+            </div>
+            
+            {/* PMO Side - Delivery */}
+            <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-1 mb-1.5">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-[9px] font-bold text-blue-700">PMO DELIVERY</span>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-blue-600">Budget</span>
+                  <span className={`text-sm font-bold ${budgetPercent > 100 ? 'text-red-600' : 'text-blue-700'}`}>
+                    {Math.round(budgetPercent)}%
+                  </span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-blue-600">Timeline</span>
+                  <span className="text-sm font-bold text-blue-700">{Math.round(timelinePercent)}%</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[10px] text-blue-600">Done</span>
+                  <span className="text-sm font-bold text-green-700">{project.deliverables.completed}/{project.deliverables.total}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* SAFe 6.0 Metrics Row */}
+          <div className="p-2 bg-gradient-to-r from-blue-50 to-teal-50 rounded-lg border border-purple-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[9px] font-semibold text-purple-700 flex items-center gap-1">
+                <GitBranch size={10} /> SAFe 6.0 | {project.safe.currentPI}
+              </span>
+              <Badge className="text-[8px] bg-purple-600 text-white">{project.safe.epicId}</Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-center">
+              <div>
+                <p className="text-sm font-bold text-purple-700">{project.safe.velocity}</p>
+                <p className="text-[8px] text-muted-foreground">Velocity</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-purple-700">{project.safe.predictability}%</p>
+                <p className="text-[8px] text-muted-foreground">Predict.</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-purple-700">{project.safe.flowEfficiency}%</p>
+                <p className="text-[8px] text-muted-foreground">Flow</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* AI INSIGHT - Unified */}
+          <motion.div 
+            className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200"
+            animate={{ borderColor: ["#e9d5ff", "#a855f7", "#e9d5ff"] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="flex items-start gap-2">
+              <Brain size={14} className="text-purple-600 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-[10px] font-semibold text-purple-700 mb-1">AI INSIGHT</p>
+                <p className="text-xs text-purple-900 leading-tight line-clamp-2">{project.aiInsight}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1">
+                    <div className="w-12 h-1.5 bg-purple-200 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-purple-600 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${project.aiConfidence}%` }}
+                        transition={{ duration: 0.8 }}
+                      />
+                    </div>
+                    <span className="text-[9px] text-purple-600 font-medium">{project.aiConfidence}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* Proactive Action */}
+          {project.proactiveAction && (
+            <motion.div 
+              className="p-2 rounded-lg border-2 flex items-center gap-2"
+              style={{ borderColor: actionTypeColors[project.proactiveAction.type], backgroundColor: `${actionTypeColors[project.proactiveAction.type]}10` }}
+              whileHover={{ x: 4 }}
+            >
+              <div 
+                className="p-1.5 rounded text-white"
+                style={{ backgroundColor: actionTypeColors[project.proactiveAction.type] }}
+              >
+                <Zap size={12} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{project.proactiveAction.action}</p>
+                <p className="text-[10px] text-green-600 font-medium">{project.proactiveAction.impact}</p>
+              </div>
+              <ChevronRight size={14} className="text-muted-foreground" />
+            </motion.div>
+          )}
+          
+          {/* View Details CTA */}
+          <motion.div 
+            className="flex items-center justify-center gap-2 text-xs font-medium text-purple-600 pt-2 border-t"
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Eye size={12} />
+            <span>Click for Full AI Briefing</span>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+// Helper to merge PMO + VRO data into unified format
+function createUnifiedProjects(): UnifiedProject[] {
+  return pmoProjects.map(pmo => {
+    const matchingVRO = vroPrograms.find(v => v.bu === pmo.bu) || vroPrograms[0];
+    return {
+      id: pmo.id,
+      name: pmo.name,
+      bu: pmo.bu,
+      status: pmo.status,
+      valueStatus: matchingVRO.valueStatus,
+      budget: pmo.budget,
+      timeline: pmo.timeline,
+      deliverables: pmo.deliverables,
+      expectedROI: matchingVRO.expectedROI,
+      valueRealized: matchingVRO.valueRealized,
+      roiValue: matchingVRO.roiValue,
+      safe: pmo.safe,
+      aiInsight: pmo.aiSignals[0]?.message || matchingVRO.prediction,
+      aiConfidence: pmo.aiSignals[0]?.confidence || 85,
+      proactiveAction: pmo.proactiveActions[0]
+    };
+  });
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
@@ -995,7 +1235,15 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
   const [selectedProgram, setSelectedProgram] = useState<VROProgram | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   
-  // Get projects/programs for selected BU
+  // Generate unified projects (VRO + PMO combined)
+  const unifiedProjects = createUnifiedProjects();
+  
+  // Get projects for selected BU (now always unified)
+  const filteredUnified = selectedBU 
+    ? unifiedProjects.filter(p => p.bu === selectedBU)
+    : [];
+  
+  // Keep legacy filters for modal compatibility
   const filteredPMO = selectedBU 
     ? pmoProjects.filter(p => p.bu === selectedBU)
     : [];
@@ -1033,21 +1281,14 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header - Unified Intelligence Engine */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            {dataMode === "PMO" ? (
-              <>
-                <Building2 size={24} className="text-gray-600" />
-                {selectedBU ? `${selectedBU} Projects` : "Group Function Portfolios"}
-              </>
-            ) : (
-              <>
-                <Target size={24} className="text-teal-600" />
-                {selectedBU ? `${selectedBU} Programs` : "Value Portfolios"}
-              </>
-            )}
+            <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600">
+              <Layers size={20} className="text-white" />
+            </div>
+            {selectedBU ? `${selectedBU} - Unified View` : "Intelligence Engine Portfolios"}
             <motion.div
               animate={{ scale: pulseActive ? [1, 1.2, 1] : 1, opacity: pulseActive ? [0.7, 1, 0.7] : 0.7 }}
               transition={{ duration: 1.5, repeat: pulseActive ? Infinity : 0 }}
@@ -1057,8 +1298,8 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
           </h2>
           <p className="text-muted-foreground text-sm">
             {selectedBU 
-              ? "Click any project card to access full AI briefing, SAFe metrics, and proactive actions"
-              : "Click a portfolio to drill down to individual projects and programs"
+              ? "Unified VRO + PMO view - Click any project to access full AI briefing"
+              : "Click a portfolio to see unified value + delivery metrics"
             }
           </p>
         </div>
@@ -1075,21 +1316,19 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
               Back to Portfolios
             </Button>
           )}
-          {dataMode === "PMO" ? (
-            <div className="flex gap-2">
-              <Badge className="bg-green-600 text-white">{pmoSummary.green} Green</Badge>
-              <Badge className="bg-amber-500 text-white">{pmoSummary.amber} Amber</Badge>
-              <Badge className="bg-red-600 text-white">{pmoSummary.red} Red</Badge>
+          {/* Unified summary showing both VRO + PMO stats */}
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-1 px-2 py-1 bg-teal-50 rounded border border-teal-200">
+              <span className="text-[10px] text-teal-600">VRO:</span>
+              <span className="text-xs font-bold text-teal-700">£{vroSummary.totalRealized}m</span>
             </div>
-          ) : (
-            <div className="flex gap-2">
-              <Badge className="bg-green-600 text-white">{vroSummary.accelerating} Accelerating</Badge>
-              <Badge className="bg-blue-600 text-white">{vroSummary.onTrack} On Track</Badge>
-              <div className="text-sm font-medium text-green-700">
-                £{vroSummary.totalRealized}m realized
-              </div>
+            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded border border-blue-200">
+              <span className="text-[10px] text-blue-600">PMO:</span>
+              <Badge className="bg-green-600 text-white text-[10px]">{pmoSummary.green}</Badge>
+              <Badge className="bg-amber-500 text-white text-[10px]">{pmoSummary.amber}</Badge>
+              <Badge className="bg-red-600 text-white text-[10px]">{pmoSummary.red}</Badge>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -1120,7 +1359,7 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
         </motion.div>
       )}
 
-      {/* Project/Program Grid (when BU selected) */}
+      {/* Unified Project Grid (when BU selected) - Always shows combined VRO + PMO */}
       {selectedBU && (
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -1129,62 +1368,46 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
           animate={{ opacity: 1 }}
         >
           <AnimatePresence mode="popLayout">
-            {dataMode === "PMO" ? (
-              filteredPMO.map((project, i) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ delay: i * 0.05 }}
-                  layout
-                >
-                  <PMOProjectCard 
-                    project={project} 
-                    onViewDetails={() => handleViewProjectDetails(project)} 
-                  />
-                </motion.div>
-              ))
-            ) : (
-              filteredVRO.map((program, i) => (
-                <motion.div
-                  key={program.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ delay: i * 0.05 }}
-                  layout
-                >
-                  <VROProgramCard 
-                    program={program} 
-                    onViewDetails={() => handleViewProgramDetails(program)} 
-                  />
-                </motion.div>
-              ))
-            )}
+            {filteredUnified.map((project, i) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: i * 0.05 }}
+                layout
+              >
+                <UnifiedProjectCard 
+                  project={project} 
+                  onViewDetails={() => {
+                    const pmoProject = pmoProjects.find(p => p.id === project.id);
+                    if (pmoProject) handleViewProjectDetails(pmoProject);
+                  }} 
+                />
+              </motion.div>
+            ))}
           </AnimatePresence>
         </motion.div>
       )}
       
-      {/* Risk Section for VRO mode */}
-      {dataMode === "VRO" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <Shield className="text-red-600" size={20} />
-                Risk Intelligence Dashboard
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                From L&G Risk Management Supplement 2024 - AI-monitored risk landscape
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Badge className="bg-red-600 text-white">{riskSummary.critical} Critical</Badge>
-              <Badge className="bg-amber-500 text-white">{riskSummary.high} High</Badge>
-              <Badge className="bg-blue-600 text-white">{riskSummary.medium} Medium</Badge>
-            </div>
+      {/* Risk Intelligence - Always visible in unified view */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Shield className="text-red-600" size={20} />
+              Risk Intelligence Dashboard
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              AI-monitored risk landscape with proactive alerts
+            </p>
           </div>
+          <div className="flex gap-2">
+            <Badge className="bg-red-600 text-white">{riskSummary.critical} Critical</Badge>
+            <Badge className="bg-amber-500 text-white">{riskSummary.high} High</Badge>
+            <Badge className="bg-blue-600 text-white">{riskSummary.medium} Medium</Badge>
+          </div>
+        </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {riskIssues.slice(0, 4).map((risk, i) => {
@@ -1239,31 +1462,6 @@ export function BUProgramsSection({ dataMode }: BUProgramsSectionProps) {
             })}
           </div>
         </div>
-      )}
-
-      {/* PMO Limitation Notice */}
-      {dataMode === "PMO" && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="bg-amber-50 border-amber-200">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="text-amber-600" size={24} />
-                <div>
-                  <p className="font-medium text-amber-800">PMO Limitation</p>
-                  <p className="text-sm text-amber-700">
-                    Traditional project tracking shows delivery status but lacks value realization insights, 
-                    AI predictions, and strategic alignment metrics that VRO provides.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
 
       {/* Detail Modal */}
       <ProjectDetailModal
