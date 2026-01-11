@@ -31,15 +31,20 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  getProjectById, 
+  getProjectById as getSafeProjectById, 
   SAFeProject, 
   Feature, 
   Story, 
   Task,
   Milestone,
   Resource,
-  Dependency
+  Dependency,
+  safeProjects
 } from "@/lib/safeProjectData";
+import { 
+  getProjectById as getEnrichedProjectById, 
+  EnrichedProject 
+} from "@/lib/projects";
 
 const statusColors = {
   green: 'bg-green-500',
@@ -63,13 +68,219 @@ const stageLabels: Record<string, string> = {
   done: 'Done'
 };
 
+function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
+  const budgetAmount = enriched.budget.total * (enriched.budget.unit === '£M' ? 1000000 : 1);
+  const spentAmount = enriched.budget.spent * (enriched.budget.unit === '£M' ? 1000000 : 1);
+  
+  const createTask = (id: string, storyId: string, title: string, status: 'todo' | 'in-progress' | 'done' | 'blocked', assignee: string, estimatedHours: number, actualHours: number): Task => ({
+    id,
+    storyId,
+    title,
+    description: `Task for ${title}`,
+    status,
+    assignee,
+    estimatedHours,
+    actualHours,
+    priority: 'medium'
+  });
+
+  const sampleFeatures: Feature[] = [
+    {
+      id: `${enriched.id}-feat-1`,
+      epicId: `${enriched.id}-epic-1`,
+      title: `Core ${enriched.name} Implementation`,
+      description: `Main implementation work for ${enriched.name}`,
+      status: enriched.status === 'green' ? 'implementing' : 'backlog',
+      targetPI: 25.1,
+      wsjfScore: 18,
+      benefitHypothesis: `Delivering ${enriched.expectedROI} expected ROI through successful implementation`,
+      acceptanceCriteria: ['Meets business requirements', 'Passes quality gates', 'User acceptance completed'],
+      dependencies: [],
+      stories: [
+        {
+          id: `${enriched.id}-story-1`,
+          featureId: `${enriched.id}-feat-1`,
+          title: 'Requirements Analysis',
+          description: 'Complete requirements gathering and analysis',
+          status: 'done',
+          storyPoints: 8,
+          sprint: 1,
+          assignedTeam: 'Analysis Team',
+          acceptanceCriteria: ['All stakeholders interviewed', 'Requirements documented'],
+          tasks: [
+            createTask(`${enriched.id}-task-1`, `${enriched.id}-story-1`, 'Stakeholder interviews', 'done', 'Business Analyst', 16, 18),
+            createTask(`${enriched.id}-task-2`, `${enriched.id}-story-1`, 'Document requirements', 'done', 'Business Analyst', 8, 10)
+          ]
+        },
+        {
+          id: `${enriched.id}-story-2`,
+          featureId: `${enriched.id}-feat-1`,
+          title: 'Design & Architecture',
+          description: 'Complete solution design and architecture',
+          status: enriched.status === 'green' ? 'done' : 'in-progress',
+          storyPoints: 13,
+          sprint: 2,
+          assignedTeam: 'Architecture Team',
+          acceptanceCriteria: ['Architecture approved', 'Design reviewed'],
+          tasks: [
+            createTask(`${enriched.id}-task-3`, `${enriched.id}-story-2`, 'Solution architecture', 'done', 'Solution Architect', 24, 20),
+            createTask(`${enriched.id}-task-4`, `${enriched.id}-story-2`, 'Technical design', enriched.status === 'green' ? 'done' : 'in-progress', 'Tech Lead', 16, 14)
+          ]
+        },
+        {
+          id: `${enriched.id}-story-3`,
+          featureId: `${enriched.id}-feat-1`,
+          title: 'Core Development',
+          description: 'Implement core functionality',
+          status: enriched.status === 'green' ? 'in-progress' : 'backlog',
+          storyPoints: 21,
+          sprint: 3,
+          assignedTeam: 'Development Team',
+          acceptanceCriteria: ['Unit tests pass', 'Code review completed', 'Integration tested'],
+          tasks: [
+            createTask(`${enriched.id}-task-5`, `${enriched.id}-story-3`, 'Backend development', enriched.status === 'green' ? 'in-progress' : 'todo', 'Senior Developer', 40, 32),
+            createTask(`${enriched.id}-task-6`, `${enriched.id}-story-3`, 'Frontend development', 'todo', 'UI Developer', 32, 0),
+            createTask(`${enriched.id}-task-7`, `${enriched.id}-story-3`, 'Integration work', 'todo', 'Integration Lead', 24, 0)
+          ]
+        }
+      ]
+    },
+    {
+      id: `${enriched.id}-feat-2`,
+      epicId: `${enriched.id}-epic-1`,
+      title: `${enriched.name} Testing & Validation`,
+      description: 'Comprehensive testing and quality assurance',
+      status: 'backlog',
+      targetPI: 25.2,
+      wsjfScore: 15,
+      benefitHypothesis: 'Ensuring quality delivery reduces operational risk and rework costs',
+      acceptanceCriteria: ['All test cases pass', 'UAT sign-off obtained', 'Performance benchmarks met'],
+      dependencies: [`${enriched.id}-feat-1`],
+      stories: [
+        {
+          id: `${enriched.id}-story-4`,
+          featureId: `${enriched.id}-feat-2`,
+          title: 'Test Planning',
+          description: 'Create comprehensive test plan',
+          status: 'backlog',
+          storyPoints: 5,
+          sprint: 4,
+          assignedTeam: 'QA Team',
+          acceptanceCriteria: ['Test plan approved', 'Test cases documented'],
+          tasks: [
+            createTask(`${enriched.id}-task-8`, `${enriched.id}-story-4`, 'Write test plan', 'todo', 'QA Lead', 12, 0)
+          ]
+        }
+      ]
+    }
+  ];
+
+  const safeStageMap: Record<string, 'funnel' | 'reviewing' | 'analyzing' | 'backlog' | 'implementing' | 'done'> = {
+    'funnel': 'funnel',
+    'reviewing': 'reviewing',
+    'analyzing': 'analyzing',
+    'backlog': 'backlog',
+    'implementing': 'implementing',
+    'done': 'done',
+    'portfolio-backlog': 'backlog',
+    'portfolio-review': 'reviewing'
+  };
+
+  const buMap: Record<string, 'Institutional Retirement' | 'Asset Management' | 'Retail' | 'Corporate Investments' | 'Risk & Compliance' | 'Group Functions'> = {
+    'Institutional Retirement': 'Institutional Retirement',
+    'Asset Management': 'Asset Management',
+    'Retail': 'Retail',
+    'Corporate Investments': 'Corporate Investments',
+    'Risk & Compliance': 'Risk & Compliance',
+    'Group Functions': 'Group Functions',
+    'Group HR': 'Group Functions',
+    'Group Finance': 'Group Functions',
+    'Group Technology': 'Group Functions',
+    'Group Legal': 'Group Functions'
+  };
+
+  return {
+    id: enriched.id,
+    name: enriched.name,
+    bu: buMap[enriched.bu] || 'Group Functions',
+    artName: `${enriched.bu} ART`,
+    description: enriched.description,
+    status: enriched.status,
+    priority: enriched.priority,
+    safeStage: safeStageMap[enriched.safeStage] || 'backlog',
+    startDate: 'Q1 2024',
+    targetEndDate: 'Q4 2025',
+    currentPI: 25.1,
+    totalPIs: 4,
+    portfolioTheme: 'Digital Transformation',
+    velocity: 45,
+    totalFTE: 8,
+    qualityScore: enriched.status === 'green' ? 85 : enriched.status === 'amber' ? 70 : 55,
+    burndownHealth: enriched.status === 'green' ? 90 : enriched.status === 'amber' ? 65 : 45,
+    financials: {
+      budget: budgetAmount,
+      spent: spentAmount,
+      forecast: budgetAmount * 1.1,
+      currency: '£',
+      laborCost: spentAmount * 0.7,
+      vendorCost: spentAmount * 0.2,
+      infrastructureCost: spentAmount * 0.1,
+      contingency: budgetAmount * 0.1,
+      roi: {
+        projected: budgetAmount * 2.5,
+        confidence: 75,
+        paybackMonths: 24
+      }
+    },
+    features: sampleFeatures,
+    milestones: [
+      { id: `${enriched.id}-ms-1`, name: 'Project Kickoff', targetDate: '2024-01-15', status: 'completed', deliverables: ['Project charter', 'Team onboarded'], piNumber: 24.4 },
+      { id: `${enriched.id}-ms-2`, name: 'Design Complete', targetDate: '2024-03-31', status: enriched.status === 'green' ? 'completed' : 'on-track', deliverables: ['Architecture design', 'Technical specs'], piNumber: 25.1 },
+      { id: `${enriched.id}-ms-3`, name: 'Development Complete', targetDate: '2024-06-30', status: 'on-track', deliverables: ['Core features', 'Integration tests'], piNumber: 25.2 },
+      { id: `${enriched.id}-ms-4`, name: 'Go Live', targetDate: '2024-09-30', status: 'on-track', deliverables: ['Production deployment', 'User training'], piNumber: 25.3 }
+    ],
+    resources: [
+      { id: `${enriched.id}-res-1`, name: 'Project Lead', role: 'PM', allocation: 100, team: 'PMO', costRate: 800 },
+      { id: `${enriched.id}-res-2`, name: 'Tech Lead', role: 'Architect', allocation: 100, team: 'Engineering', costRate: 950 },
+      { id: `${enriched.id}-res-3`, name: 'Business Analyst', role: 'BA', allocation: 75, team: 'Analysis', costRate: 650 }
+    ],
+    dependencies: enriched.dependencies?.map((dep, i) => ({
+      id: `${enriched.id}-dep-${i}`,
+      sourceProjectId: enriched.id,
+      targetProjectId: dep.projectId,
+      type: dep.type as 'blocks' | 'blocked-by' | 'related' | 'data-dependency' | 'api-dependency',
+      health: dep.health as 'green' | 'yellow' | 'red',
+      description: dep.description || `Dependency with ${dep.projectName}`,
+      impactIfDelayed: dep.impactIfDelayed || 'Schedule impact if delayed'
+    })) || [],
+    riskFlags: enriched.status === 'red' ? ['Timeline at risk', 'Budget concerns'] : enriched.status === 'amber' ? ['Resource constraints'] : [],
+    aiRecommendations: [
+      enriched.aiRecommendation || 'Continue monitoring project health indicators',
+      `Expected ROI: ${enriched.expectedROI}`
+    ],
+    vroInsights: [
+      `Value opportunity aligned with ${enriched.bu} strategic priorities`,
+      'Recommend quarterly value reviews with stakeholders'
+    ],
+    pmoDataFeeds: [
+      `Budget utilization: ${Math.round((enriched.budget.spent / enriched.budget.total) * 100)}%`,
+      `Timeline progress: ${Math.round((enriched.timeline.elapsed / enriched.timeline.total) * 100)}%`
+    ]
+  };
+}
+
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
   const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
   
-  const project = getProjectById(params.id || '');
+  // Try to find project in SAFe projects first, then enriched projects
+  const safeProject = getSafeProjectById(params.id || '');
+  const enrichedProject = getEnrichedProjectById(params.id || '');
+  
+  // Use SAFe project if available, otherwise convert enriched project to compatible format
+  const project: SAFeProject | undefined = safeProject || (enrichedProject ? convertEnrichedToSAFe(enrichedProject) : undefined);
   
   if (!project) {
     return (
@@ -643,7 +854,7 @@ export default function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-4">
                     {project.dependencies.map(dep => {
-                      const targetProject = getProjectById(dep.targetProjectId);
+                      const targetProject = getSafeProjectById(dep.targetProjectId);
                       return (
                         <div 
                           key={dep.id} 

@@ -81,9 +81,8 @@ export default function DivisionPage() {
   }, [divisionProjects, stageFilter]);
   
   const handleDrillDown = (type: string, id: string) => {
-    // Navigate to SAFe project detail page if it's a known SAFe project
-    const safeProject = safeProjects.find(p => p.id === id);
-    if (type === 'project' && safeProject) {
+    // Always navigate to full project detail page for projects
+    if (type === 'project') {
       setLocation(`/project/${id}`);
       return;
     }
