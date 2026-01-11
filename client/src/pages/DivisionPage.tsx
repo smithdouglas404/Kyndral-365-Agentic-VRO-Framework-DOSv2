@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight, Link2, ArrowRight } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight, Link2, ArrowRight, Filter, GitBranch, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
+import { enrichedProjects, getSafeStages, getStageLabel, type EnrichedProject } from "@/lib/projects";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { PageAgentWizard } from "@/components/PageAgentWizard";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
@@ -21,9 +23,26 @@ const legacySlugs: Record<string, string> = {
   'lgi': 'insurance'
 };
 
+// BU name mapping for filtering enriched projects (covers all division IDs)
+const buNameMapping: Record<string, string[]> = {
+  'institutional-retirement': ['Institutional Retirement'],
+  'asset-management': ['Asset Management'],
+  'retail': ['Retail'],
+  'corporate-investments': ['Corporate Investments'],
+  'capital': ['Corporate Investments'],
+  'insurance': ['Risk & Compliance'],
+  'fintech': ['Group Functions'],
+  'risk-center': ['Risk & Compliance'],
+  'climate': ['Group Functions', 'Corporate Investments'],
+  'group-functions': ['Group Functions'],
+  'technology': ['Group Functions'],
+  'default': ['Institutional Retirement', 'Asset Management', 'Retail', 'Corporate Investments', 'Risk & Compliance', 'Group Functions']
+};
+
 export default function DivisionPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const [stageFilter, setStageFilter] = useState<string>("all");
   
   // Get the fromTab query parameter to know where to navigate back
   const searchParams = new URLSearchParams(window.location.search);
@@ -33,6 +52,19 @@ export default function DivisionPage() {
   const resolvedId = legacySlugs[params.id || ''] || params.id;
   const division = divisions.find(d => d.id === resolvedId);
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
+  
+  // Get enriched projects for this business unit (supports multiple BU mappings)
+  const buNames = buNameMapping[resolvedId || ''] || buNameMapping['default'] || [];
+  const divisionProjects = useMemo(() => {
+    if (buNames.length === 0) return enrichedProjects;
+    return enrichedProjects.filter(p => buNames.includes(p.bu));
+  }, [buNames]);
+  
+  // Apply stage filter
+  const filteredProjects = useMemo(() => {
+    if (stageFilter === "all") return divisionProjects;
+    return divisionProjects.filter(p => p.safeStage === stageFilter);
+  }, [divisionProjects, stageFilter]);
   
   const handleDrillDown = (type: string, id: string) => {
     setSelectedEntity({ type, id });
@@ -112,14 +144,15 @@ export default function DivisionPage() {
             entityId: division.id,
             alertCount: divisionAlerts.length,
             riskCount: division.risks.length,
-            projectCount: division.potentialProjects.length,
+            projectCount: divisionProjects.length,
             metrics: {
               'Operating Profit': `£${division.profit2024}m`,
               'YoY Change': `${division.changePercent}%`,
               'KPIs Tracked': division.kpis.length,
               'At-Risk KPIs': division.kpis.filter(k => k.status === 'at-risk' || k.status === 'off-track').length,
               'OKRs': division.okrs.length,
-              'High-Priority Projects': division.potentialProjects.filter(p => p.priority === 'high').length
+              'High-Priority Projects': divisionProjects.filter(p => p.priority === 'high' || p.priority === 'critical').length,
+              'Total Expected ROI': `£${divisionProjects.length > 0 ? divisionProjects.reduce((sum, p) => sum + (p.roiValue || 0), 0) : 0}m`
             }
           }}
           agentName="Division Intelligence Agent"
@@ -332,106 +365,210 @@ export default function DivisionPage() {
           </TabsContent>
 
           <TabsContent value="projects" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {division.potentialProjects.map((project, i) => (
-                <Card key={i} className={`border-l-4 ${project.priority === "high" ? "border-l-red-500" : project.priority === "medium" ? "border-l-amber-500" : "border-l-gray-300"}`}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant={project.priority === "high" ? "destructive" : "secondary"}>
-                            {project.priority} priority
-                          </Badge>
-                          <Badge variant="outline">{project.status}</Badge>
-                        </div>
-                      </div>
-                      <span className="text-lg font-bold text-green-600">{project.expectedROI}</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 mb-4">{project.description}</p>
-                    {project.aiRecommendation && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-start gap-2">
-                          <Lightbulb className="h-5 w-5 text-blue-600 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-medium text-blue-800">AI Recommendation</p>
-                            <p className="text-sm text-blue-700 mt-1">{project.aiRecommendation}</p>
+            {/* Stage Filter Bar */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-600">Filter by Stage</span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    size="sm"
+                    variant={stageFilter === "all" ? "default" : "outline"}
+                    onClick={() => setStageFilter("all")}
+                    data-testid="filter-all-stages"
+                  >
+                    All Stages ({divisionProjects.length})
+                  </Button>
+                  {getSafeStages().map(stage => {
+                    const count = divisionProjects.filter(p => p.safeStage === stage).length;
+                    return (
+                      <Button
+                        key={stage}
+                        size="sm"
+                        variant={stageFilter === stage ? "default" : "outline"}
+                        onClick={() => setStageFilter(stage)}
+                        className={stageFilter === stage ? "" : "hover:bg-gray-100"}
+                        data-testid={`filter-stage-${stage}`}
+                      >
+                        {getStageLabel(stage)} ({count})
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+            
+            {/* Projects Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="p-4 bg-green-50 border-green-200">
+                <div className="text-2xl font-bold text-green-700">{divisionProjects.filter(p => p.status === 'green').length}</div>
+                <div className="text-sm text-green-600">On Track</div>
+              </Card>
+              <Card className="p-4 bg-amber-50 border-amber-200">
+                <div className="text-2xl font-bold text-amber-700">{divisionProjects.filter(p => p.status === 'amber').length}</div>
+                <div className="text-sm text-amber-600">At Risk</div>
+              </Card>
+              <Card className="p-4 bg-red-50 border-red-200">
+                <div className="text-2xl font-bold text-red-700">{divisionProjects.filter(p => p.status === 'red').length}</div>
+                <div className="text-sm text-red-600">Critical</div>
+              </Card>
+              <Card className="p-4 bg-blue-50 border-blue-200">
+                <div className="text-2xl font-bold text-blue-700">£{divisionProjects.reduce((sum, p) => sum + p.roiValue, 0)}m</div>
+                <div className="text-sm text-blue-600">Total Expected ROI</div>
+              </Card>
+            </div>
+
+            {filteredProjects.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-gray-500">No projects match the selected filter</p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredProjects.map((project, i) => (
+                  <Card 
+                    key={project.id} 
+                    className={`border-l-4 ${
+                      project.priority === "critical" ? "border-l-red-600" :
+                      project.priority === "high" ? "border-l-red-500" : 
+                      project.priority === "medium" ? "border-l-amber-500" : 
+                      "border-l-gray-300"
+                    }`}
+                  >
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{project.name}</CardTitle>
+                          <div className="flex gap-2 mt-2 flex-wrap">
+                            <Badge variant={project.priority === "critical" || project.priority === "high" ? "destructive" : "secondary"}>
+                              {project.priority} priority
+                            </Badge>
+                            <Badge 
+                              variant="outline" 
+                              className={
+                                project.status === 'green' ? 'border-green-500 text-green-700 bg-green-50' :
+                                project.status === 'amber' ? 'border-amber-500 text-amber-700 bg-amber-50' :
+                                'border-red-500 text-red-700 bg-red-50'
+                              }
+                            >
+                              {project.status === 'green' ? 'On Track' : project.status === 'amber' ? 'At Risk' : 'Critical'}
+                            </Badge>
+                            <Badge variant="outline" className="border-blue-500 text-blue-700">
+                              <GitBranch className="h-3 w-3 mr-1" />
+                              {getStageLabel(project.safeStage)}
+                            </Badge>
                           </div>
                         </div>
+                        <span className="text-lg font-bold text-green-600">{project.expectedROI}</span>
                       </div>
-                    )}
-                    
-                    {project.dependencies && project.dependencies.length > 0 && (
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Link2 className="h-4 w-4 text-gray-600" />
-                          <p className="text-sm font-medium text-gray-700">Cross-Project Dependencies</p>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 mb-4">{project.description}</p>
+                      
+                      {/* Budget & Timeline Progress */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Budget</span>
+                            <span className="font-medium">{project.budget.spent}/{project.budget.total} {project.budget.unit}</span>
+                          </div>
+                          <Progress value={(project.budget.spent / project.budget.total) * 100} className="h-2" />
                         </div>
-                        <div className="space-y-2">
-                          {project.dependencies.map((dep, depIdx) => (
-                            <div 
-                              key={depIdx} 
-                              className="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-gray-50 transition-colors"
-                              onClick={() => handleDrillDown('project', dep.projectName)}
-                              data-testid={`dependency-${project.id}-${depIdx}`}
-                            >
-                              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                                dep.health === 'green' ? 'bg-green-500' : 
-                                dep.health === 'yellow' ? 'bg-yellow-500' : 
-                                'bg-red-500'
-                              }`} />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs text-gray-500 uppercase">
-                                    {dep.type === 'blocks' ? 'Blocks' : dep.type === 'blocked-by' ? 'Blocked by' : 'Related to'}
-                                  </span>
-                                  <ArrowRight className="h-3 w-3 text-gray-400" />
-                                  <span className="text-sm font-medium text-gray-800 truncate">{dep.projectName}</span>
-                                </div>
-                                {dep.description && (
-                                  <p className="text-xs text-gray-500 truncate">{dep.description}</p>
-                                )}
-                              </div>
-                              <Badge 
-                                variant="outline" 
-                                className={`text-[10px] flex-shrink-0 ${
-                                  dep.health === 'green' ? 'border-green-500 text-green-700 bg-green-50' :
-                                  dep.health === 'yellow' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
-                                  'border-red-500 text-red-700 bg-red-50'
-                                }`}
-                              >
-                                {dep.health === 'green' ? 'Healthy' : dep.health === 'yellow' ? 'At Risk' : 'Blocked'}
-                              </Badge>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Timeline</span>
+                            <span className="font-medium">{project.timeline.elapsed}/{project.timeline.total} {project.timeline.unit}</span>
+                          </div>
+                          <Progress value={(project.timeline.elapsed / project.timeline.total) * 100} className="h-2" />
+                        </div>
+                      </div>
+                      
+                      {project.aiRecommendation && (
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 mb-4">
+                          <div className="flex items-start gap-2">
+                            <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-blue-800">AI Recommendation</p>
+                              <p className="text-sm text-blue-700 mt-1">{project.aiRecommendation}</p>
                             </div>
-                          ))}
+                          </div>
                         </div>
+                      )}
+                      
+                      {project.dependencies && project.dependencies.length > 0 && (
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Link2 className="h-4 w-4 text-gray-600" />
+                            <p className="text-sm font-medium text-gray-700">Cross-Project Dependencies ({project.dependencies.length})</p>
+                          </div>
+                          <div className="space-y-2">
+                            {project.dependencies.map((dep, depIdx) => (
+                              <div 
+                                key={depIdx} 
+                                className="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-gray-50 transition-colors"
+                                onClick={() => handleDrillDown('project', dep.projectId)}
+                                data-testid={`dependency-${project.id}-${depIdx}`}
+                              >
+                                <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                                  dep.health === 'green' ? 'bg-green-500' : 
+                                  dep.health === 'yellow' ? 'bg-yellow-500' : 
+                                  'bg-red-500'
+                                }`} />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs text-gray-500 uppercase">
+                                      {dep.type === 'blocks' ? 'Blocks' : dep.type === 'blocked-by' ? 'Blocked by' : 'Related to'}
+                                    </span>
+                                    <ArrowRight className="h-3 w-3 text-gray-400" />
+                                    <span className="text-sm font-medium text-gray-800 truncate">{dep.projectName}</span>
+                                  </div>
+                                  {dep.description && (
+                                    <p className="text-xs text-gray-500 truncate">{dep.description}</p>
+                                  )}
+                                  {dep.impactIfDelayed && (
+                                    <p className="text-xs text-amber-600 truncate">Impact: {dep.impactIfDelayed}</p>
+                                  )}
+                                </div>
+                                <Badge 
+                                  variant="outline" 
+                                  className={`text-[10px] flex-shrink-0 ${
+                                    dep.health === 'green' ? 'border-green-500 text-green-700 bg-green-50' :
+                                    dep.health === 'yellow' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
+                                    'border-red-500 text-red-700 bg-red-50'
+                                  }`}
+                                >
+                                  {dep.health === 'green' ? 'Healthy' : dep.health === 'yellow' ? 'At Risk' : 'Blocked'}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          style={{ backgroundColor: division.color }}
+                          onClick={() => handleDrillDown('project', project.id)}
+                          data-testid={`view-project-${project.id}`}
+                        >
+                          View Details
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDrillDown('start-project', project.id)}
+                          data-testid={`start-project-${project.id}`}
+                        >
+                          Start Project
+                        </Button>
                       </div>
-                    )}
-                    
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        size="sm" 
-                        style={{ backgroundColor: division.color }}
-                        onClick={() => handleDrillDown('project', project.name)}
-                        data-testid={`view-project-${i}`}
-                      >
-                        View Details
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleDrillDown('start-project', project.name)}
-                        data-testid={`start-project-${i}`}
-                      >
-                        Start Project
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="risks" className="space-y-6">

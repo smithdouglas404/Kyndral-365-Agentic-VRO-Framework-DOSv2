@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight, Sparkles, FileText, Link2, ExternalLink, History, Database, Activity } from 'lucide-react';
+import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight, Sparkles, FileText, Link2, ExternalLink, History, Database, Activity, GitBranch } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { useEntityDrilldown } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
 import { AICoPilot } from './AICoPilot';
 import { getActionLog, subscribeToActions, AgentAction } from '@/lib/agentActionEngine';
+import { enrichedProjects, getProjectById, getStageLabel, type EnrichedProject } from '@/lib/projects';
 
 interface DrillDownDrawerProps {
   isOpen: boolean;
@@ -114,12 +116,75 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     entityType || 'project', 
     entityId || ''
   );
+  
+  // Look up enriched project data by ID or exact name match only (no fuzzy matching)
+  const enrichedProject: EnrichedProject | undefined = 
+    entityType === 'project' 
+      ? getProjectById(entityId) || enrichedProjects.find(p => 
+          p.id === entityId ||
+          p.name.toLowerCase() === entityId.toLowerCase()
+        )
+      : undefined;
 
   // Don't render if drawer is not open or entity is not selected
   if (!isOpen || !entityType || !entityId) return null;
   
+  // Create a fallback for project types using enriched project data
+  const projectDrilldown = enrichedProject ? {
+    entityType: 'project' as const,
+    entityId: enrichedProject.id,
+    entityName: enrichedProject.name,
+    bu: enrichedProject.bu,
+    relatedAgents: ['vro' as AgentType, 'pmo' as AgentType, 'finops' as AgentType],
+    events: [],
+    metrics: {
+      'Expected ROI': enrichedProject.expectedROI,
+      'Priority': enrichedProject.priority.charAt(0).toUpperCase() + enrichedProject.priority.slice(1),
+      'Status': enrichedProject.status === 'green' ? 'On Track' : enrichedProject.status === 'amber' ? 'At Risk' : 'Critical',
+      'Stage': getStageLabel(enrichedProject.safeStage),
+      'Budget': `${enrichedProject.budget.spent}/${enrichedProject.budget.total} ${enrichedProject.budget.unit}`,
+      'Timeline': `${enrichedProject.timeline.elapsed}/${enrichedProject.timeline.total} ${enrichedProject.timeline.unit}`,
+      'Deliverables': `${enrichedProject.deliverables.completed}/${enrichedProject.deliverables.total}`,
+      'Velocity': enrichedProject.safe.velocity.toString(),
+      'Predictability': `${enrichedProject.safe.predictability}%`
+    },
+    actions: enrichedProject.proactiveActions.map(a => ({
+      id: a.id,
+      label: a.action,
+      type: a.type
+    })),
+    history: enrichedProject.aiSignals.map((s, i) => ({
+      timestamp: new Date(Date.now() - i * 60000),
+      action: s.message,
+      agent: 'vro' as AgentType
+    })),
+    aiInsight: enrichedProject.aiRecommendation,
+    summary: enrichedProject.description,
+    relatedEntities: enrichedProject.dependencies.map(d => ({
+      type: 'Dependency',
+      id: d.projectId,
+      name: d.projectName,
+      status: d.health
+    })),
+    traceability: {
+      sourceSystem: 'Enterprise PMO',
+      sourceId: enrichedProject.id,
+      triggeredBy: 'Project Dashboard',
+      dataInputs: [
+        { source: 'SAFe Metrics', freshness: '< 1 min' },
+        { source: 'Budget Tracking', freshness: 'Daily' },
+        { source: 'AI Analysis', freshness: '< 5 min' }
+      ],
+      linkedProjects: enrichedProject.dependencies.map(d => ({
+        id: d.projectId,
+        name: d.projectName,
+        status: d.health
+      }))
+    }
+  } : null;
+  
   // Create a fallback for unsupported entity types with rich traceability data
-  const fallbackDrilldown = !drilldownData ? {
+  const fallbackDrilldown = !drilldownData && !projectDrilldown ? {
     entityType: entityType as 'project' | 'program' | 'risk' | 'portfolio',
     entityId,
     entityName: entityType === 'agent-activity' 
@@ -173,7 +238,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     }
   } : null;
   
-  const displayData = drilldownData || fallbackDrilldown;
+  const displayData = drilldownData || projectDrilldown || fallbackDrilldown;
   if (!displayData) return null;
 
   return (
