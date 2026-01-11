@@ -146,7 +146,7 @@ export const divisions: DivisionData[] = [
         status: "in-progress",
         aiRecommendation: "Current assumptions showing 2.3% variance - recommend expedited deployment",
         dependencies: [
-          { projectId: "am-data-platform", projectName: "AI Data Analytics Platform", type: "blocked-by", health: "yellow", description: "Requires data feed from Asset Management platform" }
+          { projectId: "am-data-platform", projectName: "AI Portfolio Optimization Engine", type: "blocked-by", health: "yellow", description: "Requires data feed from Asset Management platform" }
         ]
       }
     ],
@@ -204,7 +204,7 @@ export const divisions: DivisionData[] = [
         status: "in-progress",
         aiRecommendation: "Strong market demand detected - accelerate launch timeline",
         dependencies: [
-          { projectId: "am-data-platform", projectName: "AI Data Analytics Platform", type: "blocks", health: "green", description: "Will provide data for analytics platform" }
+          { projectId: "am-data-platform", projectName: "AI Portfolio Optimization Engine", type: "blocks", health: "green", description: "Will provide data for analytics platform" }
         ]
       },
       {
