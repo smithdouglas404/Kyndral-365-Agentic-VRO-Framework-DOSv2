@@ -61,6 +61,12 @@ export interface Task {
   estimatedHours: number;
   actualHours: number;
   priority: 'low' | 'medium' | 'high';
+  // Optional schedule fields - computed by enrichment layer if not provided
+  plannedStart?: string;
+  plannedEnd?: string;
+  actualStart?: string;
+  actualEnd?: string;
+  blockedBy?: string[]; // Task IDs this is blocked by
 }
 
 export interface Story {
