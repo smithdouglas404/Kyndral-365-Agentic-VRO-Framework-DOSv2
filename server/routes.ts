@@ -5,32 +5,24 @@ import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } 
 import { registerCoPilotRoutes } from "./copilot";
 import { z } from "zod";
 import multer from "multer";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { PDFParse } from "pdf-parse";
 
 async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string; numpages: number; info: any }> {
-  const data = new Uint8Array(buffer);
-  const doc = await pdfjs.getDocument({ data, verbosity: 0 }).promise;
+  const parser = new PDFParse({ data: buffer });
+  const textResult = await parser.getText();
+  const infoResult = await parser.getInfo();
   
-  let fullText = '';
-  const numPages = doc.numPages;
+  // Get page count from the pages array
+  const pageCount = textResult.pages?.length || 0;
   
-  for (let i = 1; i <= numPages; i++) {
-    const page = await doc.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items
-      .map((item: any) => item.str)
-      .join(' ');
-    fullText += pageText + '\n\n';
-  }
-  
-  const metadata = await doc.getMetadata().catch(() => null);
-  await doc.destroy();
-  
-  return {
-    text: fullText.trim(),
-    numpages: numPages,
-    info: metadata?.info || {}
+  const result = {
+    text: textResult.text.trim(),
+    numpages: pageCount,
+    info: infoResult.info || {}
   };
+  
+  await parser.destroy();
+  return result;
 }
 
 const upload = multer({ 

@@ -5,6 +5,7 @@ import { rm, readFile } from "fs/promises";
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
 const allowlist = [
+  "@anthropic-ai/sdk",
   "@google/generative-ai",
   "axios",
   "connect-pg-simple",
@@ -23,6 +24,7 @@ const allowlist = [
   "openai",
   "passport",
   "passport-local",
+  "pdf-parse",
   "pg",
   "stripe",
   "uuid",
@@ -30,6 +32,29 @@ const allowlist = [
   "xlsx",
   "zod",
   "zod-validation-error",
+];
+
+// Browser-only packages that must NEVER be bundled into server code
+const browserOnlyPackages = [
+  "react",
+  "react-dom",
+  "recharts",
+  "framer-motion",
+  "wouter",
+  "@radix-ui",
+  "@tanstack/react-query",
+  "lucide-react",
+  "pdfjs-dist",
+  "embla-carousel-react",
+  "cmdk",
+  "vaul",
+  "sonner",
+  "next-themes",
+  "input-otp",
+  "react-hook-form",
+  "react-day-picker",
+  "react-resizable-panels",
+  "@hookform/resolvers",
 ];
 
 async function buildAll() {
@@ -44,7 +69,11 @@ async function buildAll() {
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.devDependencies || {}),
   ];
-  const externals = allDeps.filter((dep) => !allowlist.includes(dep));
+  // Start with deps not in allowlist, then add browser-only packages
+  const externals = [
+    ...allDeps.filter((dep) => !allowlist.includes(dep)),
+    ...browserOnlyPackages,
+  ];
 
   await esbuild({
     entryPoints: ["server/index.ts"],
