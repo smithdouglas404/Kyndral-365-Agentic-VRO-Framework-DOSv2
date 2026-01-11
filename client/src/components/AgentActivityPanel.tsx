@@ -634,12 +634,15 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
                                 <Clock className="h-3 w-3" />
                                 {formatTime(item.timestamp)}
                                 <button 
+                                  type="button"
                                   className="ml-auto text-blue-500 font-medium hover:text-blue-700 hover:underline"
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    onViewDetails?.(item);
                                     setDetailModalItem(item);
                                     setDetailModalOpen(true);
                                   }}
+                                  aria-label={`View details for ${item.title}`}
                                   data-testid={`link-view-details-${item.id}`}
                                 >
                                   ▼ View details
