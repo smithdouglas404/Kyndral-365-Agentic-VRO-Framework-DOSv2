@@ -525,7 +525,7 @@ function DashboardContent() {
                 VRO Co-Pilot
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl">
-                AI-powered strategic transformation combining Value Realization (VRO) and Project Delivery (PMO) insights.
+                AI-powered Insights supporting the Value Realization and Project Execution Process
               </p>
               <div className="mt-4 w-full max-w-5xl">
                 <AIAlertTicker />
