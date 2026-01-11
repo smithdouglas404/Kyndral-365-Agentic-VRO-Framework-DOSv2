@@ -374,7 +374,7 @@ export default function DivisionPage() {
                             <div 
                               key={depIdx} 
                               className="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-gray-50 transition-colors"
-                              onClick={() => handleDrillDown('project', dep.projectId)}
+                              onClick={() => handleDrillDown('project', dep.projectName)}
                               data-testid={`dependency-${project.id}-${depIdx}`}
                             >
                               <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
