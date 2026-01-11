@@ -85,7 +85,8 @@ function buildDependencyGraph(): Map<string, DependencyNode> {
   // Add epics
   for (const epic of portfolioEpics) {
     const childDeps = dependencies.filter(d => d.targetId === epic.id);
-    const epicFeatures = features.filter(f => f.epicId === epic.id);
+    // Get features linked to this epic from the epic's linkedFeatures array
+    const epicFeatures = features.filter(f => epic.linkedFeatures.includes(f.id));
     graph.set(epic.id, {
       id: epic.id,
       name: epic.name,

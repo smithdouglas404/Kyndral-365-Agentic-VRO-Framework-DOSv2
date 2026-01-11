@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { useLocation } from 'wouter';
 
 export interface PageContextData {
@@ -27,19 +27,16 @@ const PageContext = createContext<PageContextValue>({
 export function PageContextProvider({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [context, setContext] = useState<PageContextData>(defaultContext);
-  const [lastLocation, setLastLocation] = useState<string>('');
-  const [isExplicitlySet, setIsExplicitlySet] = useState(false);
+  const lastLocationRef = useRef<string>('');
 
   useEffect(() => {
     // Only auto-detect when location actually changes to a new route
-    // If context was explicitly set by a page, preserve it until navigation
-    if (location === lastLocation) {
+    if (location === lastLocationRef.current) {
       return;
     }
     
-    // Reset explicit flag on navigation to new route
-    setIsExplicitlySet(false);
-    setLastLocation(location);
+    // Update ref without triggering re-render
+    lastLocationRef.current = location;
     
     // Auto-detect page context from route
     const path = location;
@@ -104,12 +101,11 @@ export function PageContextProvider({ children }: { children: ReactNode }) {
         breadcrumb: ['Dashboard']
       });
     }
-  }, [location, lastLocation]);
+  }, [location]);
 
-  const setPageContext = (newContext: Partial<PageContextData>) => {
-    setIsExplicitlySet(true);
+  const setPageContext = useCallback((newContext: Partial<PageContextData>) => {
     setContext(prev => ({ ...prev, ...newContext }));
-  };
+  }, []);
 
   return (
     <PageContext.Provider value={{ context, setPageContext }}>

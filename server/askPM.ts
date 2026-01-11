@@ -1,6 +1,101 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { analyzeImpact, parseWhatIfQuery, generateImpactSummary } from "./impactAnalysis";
+import {
+  strategicThemes,
+  valueStreams,
+  portfolioEpics,
+  portfolioOKRs,
+  portfolioKPIs,
+  arts,
+  programIncrements,
+  teams,
+  teamMembers,
+  iterations,
+  features,
+  stories,
+  tasks,
+  dependencies,
+  financialSnapshots,
+  riskRegister,
+  okrAlignments
+} from "../client/src/lib/safe6Data";
 
 const anthropic = new Anthropic();
+
+// Build SAFe 6.0 hierarchy context for AI
+function buildSAFe6Context(): string {
+  const portfolioSummary = `
+PORTFOLIO LEVEL (PPM):
+Strategic Themes (${strategicThemes.length}):
+${strategicThemes.map(t => `  - ${t.name}: ${t.budgetAllocation}% budget | Status: ${t.status}`).join('\n')}
+
+Value Streams (${valueStreams.length}):
+${valueStreams.map(vs => `  - ${vs.name}: ${vs.linkedARTs.length} ARTs | Budget: £${vs.annualBudget}M`).join('\n')}
+
+Portfolio Epics (${portfolioEpics.length}):
+${portfolioEpics.map(e => `  - ${e.name}: £${e.estimatedCost}M | Status: ${e.status} | WSJF: ${e.wsjfScore}`).join('\n')}
+
+Portfolio OKRs (${portfolioOKRs.length}):
+${portfolioOKRs.map(o => {
+  const achieved = o.keyResults.filter(kr => kr.status === 'achieved').length;
+  return `  - ${o.objective} (${achieved}/${o.keyResults.length} KRs achieved): Status: ${o.status}`;
+}).join('\n')}
+
+Portfolio KPIs (${portfolioKPIs.length}):
+${portfolioKPIs.map(k => `  - ${k.name}: ${k.currentValue}/${k.targetValue} ${k.unit} | Trend: ${k.trend}`).join('\n')}
+`;
+
+  const artSummary = `
+ART LEVEL (Program):
+Agile Release Trains (${arts.length}):
+${arts.map(art => `  - ${art.name}: ${art.teams.length} teams | Value Stream: ${valueStreams.find(vs => vs.linkedARTs.includes(art.id))?.name || 'N/A'}`).join('\n')}
+
+Program Increments (${programIncrements.length}):
+${programIncrements.map(pi => {
+  const achieved = pi.piObjectives.filter(o => o.status === 'achieved').length;
+  return `  - ${pi.name}: ${pi.status} | ${achieved}/${pi.piObjectives.length} objectives achieved`;
+}).join('\n')}
+
+Features (${features.length}):
+${features.map(f => `  - ${f.title}: ${f.status} | Epic: ${portfolioEpics.find(e => e.linkedFeatures.includes(f.id))?.name || 'N/A'}`).join('\n')}
+`;
+
+  const teamSummary = `
+TEAM LEVEL:
+Teams (${teams.length}):
+${teams.map(t => `  - ${t.name}: ${t.capacity} pts/sprint | ${t.members.length} members`).join('\n')}
+
+Team Members (${teamMembers.length}):
+${teamMembers.map(m => `  - ${m.name}: ${m.role} | £${m.dailyCostRate}/day | ${m.skills.join(', ')}`).join('\n')}
+
+Stories (${stories.length}):
+${stories.map(s => `  - ${s.title}: ${s.storyPoints} pts | ${s.status} | Feature: ${features.find(f => f.id === s.featureId)?.title || 'N/A'}`).join('\n')}
+
+Tasks (${tasks.length}):
+${tasks.map(t => {
+  const assignee = teamMembers.find(m => m.id === t.assigneeId);
+  return `  - ${t.title}: ${t.estimatedHours}h | ${t.status} | Assignee: ${assignee?.name || 'Unassigned'}`;
+}).join('\n')}
+`;
+
+  const crossCuttingSummary = `
+CROSS-CUTTING CONCERNS:
+Dependencies (${dependencies.length}):
+${dependencies.map(d => {
+  return `  - ${d.sourceName} → ${d.targetName}: ${d.health} (${d.type})`;
+}).join('\n')}
+
+Financial Snapshots (${financialSnapshots.length}):
+${financialSnapshots.map(f => {
+  return `  - ${f.entityName}: Budget £${f.totalBudget}M | Actual £${f.actualSpend}M | EV: £${f.earnedValue}M | SPI: ${f.schedulePerformanceIndex.toFixed(2)} | CPI: ${f.costPerformanceIndex.toFixed(2)}`;
+}).join('\n')}
+
+Risk Register (${riskRegister.length}):
+${riskRegister.map(r => `  - ${r.title}: ${r.category} | Status: ${r.status} | Impact: ${r.impact}`).join('\n')}
+`;
+
+  return portfolioSummary + artSummary + teamSummary + crossCuttingSummary;
+}
 
 // Server-side project data for context building
 // This is a simplified version of the client data to avoid cross-import issues
@@ -74,6 +169,21 @@ export interface PageContext {
 
 export async function askPM(question: string, pageContext?: PageContext): Promise<string> {
   const projectContext = buildProjectContext();
+  const safeContext = buildSAFe6Context();
+  
+  // Check for "what if" scenario queries
+  const whatIfMatch = parseWhatIfQuery(question);
+  let impactAnalysisResult = '';
+  
+  if (whatIfMatch) {
+    try {
+      const result = analyzeImpact(whatIfMatch);
+      impactAnalysisResult = `\n\nIMPACT ANALYSIS RESULTS:
+${generateImpactSummary(result)}`;
+    } catch (error) {
+      console.error('Impact analysis error:', error);
+    }
+  }
   
   // Build context hint based on current page
   let contextHint = '';
@@ -90,7 +200,7 @@ export async function askPM(question: string, pageContext?: PageContext): Promis
     }
   }
   
-  const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office) at Legal & General. You have access to the complete portfolio of enterprise transformation projects.
+  const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office) at Legal & General. You have access to the complete portfolio of enterprise transformation projects following SAFe 6.0 methodology.
 
 Your role is to:
 1. Answer questions about projects, dependencies, status, and financials
@@ -98,10 +208,17 @@ Your role is to:
 3. Identify cross-project dependencies and their impacts
 4. Recommend actions based on project data and AI insights
 5. Help users understand the VRO value proposition vs traditional PMO
+6. **IMPORTANT: Handle "what if" scenario analysis** - When asked about delays or changes, provide traceable impact analysis including:
+   - Direct schedule impact on the affected item
+   - Cascade effects on dependent work items
+   - Cost implications (additional labor costs, vendor impacts)
+   - Resource conflicts that may arise
+   - Risk escalations
+   - Mitigation options with costs and recovery potential
 
 When answering:
 - Be concise but thorough
-- Use specific data from the projects
+- Use specific data from the projects and SAFe hierarchy
 - Highlight risks and recommendations
 - IMPORTANT: Always format project references as clickable links using this exact format: [Project Name](proj-id)
   Example: [PRT Platform Modernization](proj-prt-platform) or [Enterprise Data Foundation](proj-data-foundation)
@@ -110,15 +227,19 @@ When answering:
 - If asked about dependencies, list all affected projects with clickable links
 - If asked about at-risk items, prioritize by financial impact and include status colors
 - When listing projects, always include: clickable name, status color, key risk, and financial impact
+- For "what if" scenarios, provide detailed traceable analysis with specific numbers
 - You can answer ANY question about the portfolio - the context hint below is just a focus area, not a restriction
 
-Current Portfolio Context:
-${projectContext}${contextHint}`;
+PROJECT PORTFOLIO CONTEXT:
+${projectContext}
+
+SAFe 6.0 HIERARCHY CONTEXT:
+${safeContext}${contextHint}${impactAnalysisResult}`;
 
   try {
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: [
         {
           role: "user",
