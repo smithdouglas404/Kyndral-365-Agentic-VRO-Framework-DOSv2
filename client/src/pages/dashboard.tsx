@@ -38,7 +38,6 @@ import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
 import { getPMOOverviewMetrics } from "@/lib/unifiedMetrics";
-import { AgentActivityPanel, type ActivityItem } from "@/components/AgentActivityPanel";
 import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCallback } from "@/lib/backgroundAgentMonitor";
 import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
@@ -619,17 +618,8 @@ function DashboardContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Agent Activity Feed */}
-            <AgentActivityPanel 
-              maxItems={10} 
-              onViewDetails={(item: ActivityItem) => {
-                if (item.targetType && item.targetId) {
-                  handleDrillDown(item.targetType, item.targetId);
-                } else {
-                  handleDrillDown('agent-activity', item.id);
-                }
-              }}
-            />
+            {/* Agent Activity & Audit Trail - consolidated view */}
+            <ActionAuditTimeline maxItems={12} />
 
             {/* PMO Guidance Section - Only in PMO Mode */}
             {dataMode === "PMO" && (
