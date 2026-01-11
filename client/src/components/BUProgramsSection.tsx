@@ -1091,10 +1091,6 @@ function UnifiedProjectCard({ project, onViewDetails, liveAlert }: { project: Un
           </motion.div>
         )}
         
-        {/* UNIFIED Label Banner */}
-        <div className={`absolute ${liveAlert ? 'top-7' : 'top-0'} right-0 px-2 py-0.5 text-[9px] font-bold text-white bg-gradient-to-r from-blue-600 to-teal-600 rounded-bl`}>
-          VRO CO-PILOT
-        </div>
         
         <CardHeader className="pb-2 pt-4">
           <div className="flex items-start justify-between">
