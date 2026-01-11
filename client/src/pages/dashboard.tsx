@@ -430,7 +430,7 @@ function DashboardContent() {
     setPageContext({
       pageType: 'dashboard',
       entityId: 'integrated-management',
-      entityName: 'Intelligence Engine',
+      entityName: 'VRO Co-Pilot',
       breadcrumb: ['Dashboard']
     });
   }, [setPageContext]);
@@ -522,7 +522,7 @@ function DashboardContent() {
               transition={{ duration: 0.3 }}
             >
               <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-                Intelligence Engine
+                VRO Co-Pilot
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl">
                 AI-powered strategic transformation combining Value Realization (VRO) and Project Delivery (PMO) insights.

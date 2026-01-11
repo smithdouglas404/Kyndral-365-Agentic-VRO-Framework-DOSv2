@@ -150,7 +150,7 @@ function ActivityDetailFlyout({
     if (item.type === 'message') return 'Agent Communication';
     if (item.targetType === 'project') return 'Project Registry';
     if (item.targetType === 'metric') return 'Analytics Engine';
-    return 'Intelligence Engine';
+    return 'VRO Co-Pilot';
   };
   
   const getTriggerSource = () => {
