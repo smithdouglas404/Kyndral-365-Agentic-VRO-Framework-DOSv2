@@ -8,6 +8,8 @@ import { generateExecutiveInsights, refreshInsights } from "./executiveInsights"
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
+import * as fs from "fs";
+import * as path from "path";
 
 async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string; numpages: number; info: any }> {
   const parser = new PDFParse({ data: buffer });
@@ -435,6 +437,36 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Ask PM error:", error);
       res.status(500).json({ error: error.message || "Failed to get AI response" });
+    }
+  });
+
+  // Project Template endpoints
+  const templatesDir = path.join(process.cwd(), 'attached_assets', 'project_templates');
+  
+  app.get("/api/templates", async (_req, res) => {
+    try {
+      if (!fs.existsSync(templatesDir)) {
+        fs.mkdirSync(templatesDir, { recursive: true });
+      }
+      const files = fs.readdirSync(templatesDir).filter(f => f.endsWith('.json'));
+      res.json({ templates: files });
+    } catch (error: any) {
+      console.error("Templates list error:", error);
+      res.status(500).json({ error: "Failed to list templates" });
+    }
+  });
+
+  app.get("/api/templates/:name", async (req, res) => {
+    try {
+      const templatePath = path.join(templatesDir, req.params.name);
+      if (!fs.existsSync(templatePath)) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      const content = fs.readFileSync(templatePath, 'utf-8');
+      res.json(JSON.parse(content));
+    } catch (error: any) {
+      console.error("Template fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch template" });
     }
   });
 

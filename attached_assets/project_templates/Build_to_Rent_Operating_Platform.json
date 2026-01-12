@@ -1,0 +1,27 @@
+{
+  "id": "pmo-ci-003",
+  "name": "Build to Rent Operating Platform",
+  "bu": "Capital Investment",
+  "description": "Platform for managing build-to-rent housing portfolio operations.",
+  "expectedROI": "£12m rental income optimization",
+  "roiValue": 12,
+  "priority": "medium",
+  "status": "green",
+  "budget": { "spent": 0.5, "total": 0.9, "unit": "£m" },
+  "timeline": { "elapsed": 4, "total": 7, "unit": "months" },
+  "artName": "Housing Tech ART",
+  "portfolioTheme": "Operational Excellence",
+  "safe": { "velocity": 38, "predictability": 82, "flowEfficiency": 70, "currentPI": "PI 24.2", "epicId": "EPIC-CI-103", "epicName": "BTR Platform", "epicProgress": 55 },
+  "features": [
+    { "id": "feat-1601", "name": "Tenant Management", "status": "in-progress", "storyPoints": 21, "completedPoints": 11, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1601", "name": "Mike Roberts", "role": "Property Tech Lead", "allocation": 100, "team": "PropTech" }
+  ],
+  "milestones": [
+    { "id": "ms-1601", "name": "Platform Go-Live", "date": "2024-09-15", "status": "planned", "deliverables": ["Full platform", "Training"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.7, "opex": 0.2, "contingency": 0.09, "npv": 9.5, "irr": 52, "paybackMonths": 10 },
+  "currentPI": 2, "totalPIs": 3, "velocity": 38, "burndownHealth": 82, "qualityScore": 86
+}

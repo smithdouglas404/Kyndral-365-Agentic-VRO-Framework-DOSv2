@@ -1,0 +1,28 @@
+{
+  "id": "pmo-am-003",
+  "name": "Client Portal Modernization",
+  "bu": "Asset Management",
+  "description": "Modernizing client portal with improved UX, real-time portfolio views, and self-service capabilities.",
+  "expectedROI": "£20m client retention",
+  "roiValue": 20,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 1.2, "total": 1.8, "unit": "£m" },
+  "timeline": { "elapsed": 7, "total": 11, "unit": "months" },
+  "artName": "Client Experience ART",
+  "portfolioTheme": "Client Centricity",
+  "safe": { "velocity": 44, "predictability": 85, "flowEfficiency": 73, "currentPI": "PI 24.4", "epicId": "EPIC-AM-203", "epicName": "Client Portal", "epicProgress": 62 },
+  "features": [
+    { "id": "feat-1101", "name": "Real-time Portfolio Dashboard", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-1102", "name": "Self-service Transactions", "status": "in-progress", "storyPoints": 21, "completedPoints": 10, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1101", "name": "Emily Watson", "role": "Product Designer", "allocation": 100, "team": "Design" }
+  ],
+  "milestones": [
+    { "id": "ms-1101", "name": "Portal Launch", "date": "2024-11-15", "status": "planned", "deliverables": ["New portal", "Client migration"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.4, "opex": 0.4, "contingency": 0.18, "npv": 16.5, "irr": 48, "paybackMonths": 14 },
+  "currentPI": 4, "totalPIs": 5, "velocity": 44, "burndownHealth": 82, "qualityScore": 88
+}

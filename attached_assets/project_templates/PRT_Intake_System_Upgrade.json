@@ -1,0 +1,56 @@
+{
+  "id": "pmo-ir-001",
+  "name": "PRT Intake System Upgrade",
+  "bu": "Institutional Retirement",
+  "description": "Modernizing the Pension Risk Transfer intake system to automate initial deal assessment, reduce manual processing, and accelerate deal cycle times.",
+  "expectedROI": "£85m annual efficiency",
+  "roiValue": 85,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 2.4, "total": 3.5, "unit": "£m" },
+  "timeline": { "elapsed": 8, "total": 12, "unit": "months" },
+  "artName": "Institutional Retirement ART",
+  "portfolioTheme": "Digital Transformation",
+  "safe": {
+    "velocity": 48,
+    "predictability": 82,
+    "flowEfficiency": 68,
+    "currentPI": "PI 24.4",
+    "epicId": "EPIC-IR-101",
+    "epicName": "PRT Digital Transformation",
+    "epicProgress": 55
+  },
+  "features": [
+    { "id": "feat-001", "name": "Automated Deal Assessment", "status": "in-progress", "storyPoints": 34, "completedPoints": 21, "priority": "high" },
+    { "id": "feat-002", "name": "Legacy API Modernization", "status": "planned", "storyPoints": 21, "completedPoints": 0, "priority": "critical" },
+    { "id": "feat-003", "name": "Real-time Dashboard", "status": "done", "storyPoints": 13, "completedPoints": 13, "priority": "medium" }
+  ],
+  "resources": [
+    { "id": "res-001", "name": "Sarah Chen", "role": "Technical Lead", "allocation": 100, "team": "Core Platform" },
+    { "id": "res-002", "name": "James Wilson", "role": "Senior Developer", "allocation": 80, "team": "Core Platform" },
+    { "id": "res-003", "name": "Emma Thompson", "role": "Business Analyst", "allocation": 60, "team": "Product" },
+    { "id": "res-004", "name": "Michael Brown", "role": "DevOps Engineer", "allocation": 40, "team": "Platform" }
+  ],
+  "milestones": [
+    { "id": "ms-001", "name": "Phase 1 Complete", "date": "2024-03-15", "status": "completed", "deliverables": ["Core API endpoints", "Database schema", "Authentication"] },
+    { "id": "ms-002", "name": "UAT Phase 2", "date": "2024-08-23", "status": "in-progress", "deliverables": ["User acceptance testing", "Performance validation", "Security audit"] },
+    { "id": "ms-003", "name": "Production Go-Live", "date": "2024-11-30", "status": "planned", "deliverables": ["Full deployment", "Staff training", "Support handover"] }
+  ],
+  "safeDependencies": [
+    { "id": "dep-001", "type": "blocked-by", "targetProject": "ESG Analytics Dashboard", "description": "Requires ESG data feeds", "status": "at-risk" },
+    { "id": "dep-002", "type": "blocks", "targetProject": "Longevity Model Enhancement", "description": "Provides pricing data", "status": "on-track" }
+  ],
+  "financials": {
+    "capitalex": 2.1,
+    "opex": 1.4,
+    "contingency": 0.35,
+    "npv": 42.5,
+    "irr": 28,
+    "paybackMonths": 18
+  },
+  "currentPI": 4,
+  "totalPIs": 6,
+  "velocity": 48,
+  "burndownHealth": 72,
+  "qualityScore": 85
+}

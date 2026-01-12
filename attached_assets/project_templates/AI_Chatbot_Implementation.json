@@ -1,0 +1,27 @@
+{
+  "id": "pmo-rt-002",
+  "name": "AI Chatbot Implementation",
+  "bu": "Retail",
+  "description": "Implementing AI-powered chatbot for customer service across digital channels.",
+  "expectedROI": "£12m cost savings",
+  "roiValue": 12,
+  "priority": "medium",
+  "status": "green",
+  "budget": { "spent": 0.4, "total": 0.7, "unit": "£m" },
+  "timeline": { "elapsed": 3, "total": 6, "unit": "months" },
+  "artName": "Customer Experience ART",
+  "portfolioTheme": "AI Enablement",
+  "safe": { "velocity": 38, "predictability": 82, "flowEfficiency": 70, "currentPI": "PI 24.2", "epicId": "EPIC-RT-102", "epicName": "AI Customer Service", "epicProgress": 45 },
+  "features": [
+    { "id": "feat-501", "name": "Natural Language Understanding", "status": "in-progress", "storyPoints": 21, "completedPoints": 12, "priority": "critical" }
+  ],
+  "resources": [
+    { "id": "res-501", "name": "Priya Sharma", "role": "ML Engineer", "allocation": 100, "team": "AI" }
+  ],
+  "milestones": [
+    { "id": "ms-501", "name": "Pilot Launch", "date": "2024-08-15", "status": "in-progress", "deliverables": ["Chatbot MVP", "Integration"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.5, "opex": 0.2, "contingency": 0.07, "npv": 9.5, "irr": 65, "paybackMonths": 7 },
+  "currentPI": 2, "totalPIs": 3, "velocity": 38, "burndownHealth": 78, "qualityScore": 82
+}

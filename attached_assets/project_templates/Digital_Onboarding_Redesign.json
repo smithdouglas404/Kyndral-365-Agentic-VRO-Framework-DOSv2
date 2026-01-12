@@ -1,0 +1,30 @@
+{
+  "id": "pmo-rt-001",
+  "name": "Digital Onboarding Redesign",
+  "bu": "Retail",
+  "description": "Redesigning customer onboarding journey for protection and savings products with modern UX.",
+  "expectedROI": "£28m revenue uplift",
+  "roiValue": 28,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 1.1, "total": 1.8, "unit": "£m" },
+  "timeline": { "elapsed": 6, "total": 10, "unit": "months" },
+  "artName": "Customer Experience ART",
+  "portfolioTheme": "Digital Excellence",
+  "safe": { "velocity": 45, "predictability": 85, "flowEfficiency": 72, "currentPI": "PI 24.3", "epicId": "EPIC-RT-101", "epicName": "Digital Customer Journey", "epicProgress": 58 },
+  "features": [
+    { "id": "feat-401", "name": "Mobile-First Application Form", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-402", "name": "Document Upload & Verification", "status": "in-progress", "storyPoints": 13, "completedPoints": 8, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-401", "name": "Jessica Lee", "role": "UX Designer", "allocation": 100, "team": "Design" },
+    { "id": "res-402", "name": "Ryan Mitchell", "role": "Frontend Developer", "allocation": 100, "team": "Engineering" }
+  ],
+  "milestones": [
+    { "id": "ms-401", "name": "Design Complete", "date": "2024-05-15", "status": "completed", "deliverables": ["UI designs", "User flows"] },
+    { "id": "ms-402", "name": "A/B Testing", "date": "2024-10-01", "status": "planned", "deliverables": ["Test results", "Optimization"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.4, "opex": 0.4, "contingency": 0.18, "npv": 22.0, "irr": 42, "paybackMonths": 12 },
+  "currentPI": 3, "totalPIs": 5, "velocity": 45, "burndownHealth": 82, "qualityScore": 90
+}

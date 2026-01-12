@@ -1,0 +1,27 @@
+{
+  "id": "pmo-rt-003",
+  "name": "Protection Product Digitization",
+  "bu": "Retail",
+  "description": "Digitizing protection product application and underwriting processes.",
+  "expectedROI": "£22m processing efficiency",
+  "roiValue": 22,
+  "priority": "high",
+  "status": "amber",
+  "budget": { "spent": 1.3, "total": 2.0, "unit": "£m" },
+  "timeline": { "elapsed": 8, "total": 12, "unit": "months" },
+  "artName": "Product Tech ART",
+  "portfolioTheme": "Digital Transformation",
+  "safe": { "velocity": 38, "predictability": 74, "flowEfficiency": 64, "currentPI": "PI 24.3", "epicId": "EPIC-RT-103", "epicName": "Protection Digital", "epicProgress": 55 },
+  "features": [
+    { "id": "feat-1301", "name": "Digital Underwriting", "status": "in-progress", "storyPoints": 34, "completedPoints": 18, "priority": "critical" }
+  ],
+  "resources": [
+    { "id": "res-1301", "name": "Ben Patel", "role": "Underwriting Specialist", "allocation": 100, "team": "Product" }
+  ],
+  "milestones": [
+    { "id": "ms-1301", "name": "Digital Launch", "date": "2024-12-15", "status": "planned", "deliverables": ["Digital workflow", "Automation"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.6, "opex": 0.4, "contingency": 0.2, "npv": 18.0, "irr": 40, "paybackMonths": 16 },
+  "currentPI": 3, "totalPIs": 5, "velocity": 38, "burndownHealth": 68, "qualityScore": 76
+}

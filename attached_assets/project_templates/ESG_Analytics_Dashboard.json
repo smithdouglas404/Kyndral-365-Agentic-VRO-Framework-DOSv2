@@ -1,0 +1,29 @@
+{
+  "id": "pmo-am-002",
+  "name": "ESG Analytics Dashboard",
+  "bu": "Asset Management",
+  "description": "Comprehensive ESG analytics platform providing portfolio-level sustainability metrics and TCFD reporting.",
+  "expectedROI": "£15m in ESG mandate wins",
+  "roiValue": 15,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 0.6, "total": 0.9, "unit": "£m" },
+  "timeline": { "elapsed": 4, "total": 8, "unit": "months" },
+  "artName": "Sustainable Investing ART",
+  "portfolioTheme": "ESG Leadership",
+  "safe": { "velocity": 42, "predictability": 88, "flowEfficiency": 75, "currentPI": "PI 24.3", "epicId": "EPIC-AM-202", "epicName": "ESG Analytics", "epicProgress": 62 },
+  "features": [
+    { "id": "feat-301", "name": "Carbon Footprint Calculator", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-302", "name": "TCFD Report Generator", "status": "in-progress", "storyPoints": 13, "completedPoints": 5, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-301", "name": "Sophie Martin", "role": "ESG Analyst", "allocation": 100, "team": "Sustainability" },
+    { "id": "res-302", "name": "Tom Harris", "role": "Full Stack Developer", "allocation": 80, "team": "Engineering" }
+  ],
+  "milestones": [
+    { "id": "ms-301", "name": "Beta Launch", "date": "2024-09-30", "status": "planned", "deliverables": ["Core dashboard", "Key metrics"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.7, "opex": 0.2, "contingency": 0.09, "npv": 12.5, "irr": 55, "paybackMonths": 10 },
+  "currentPI": 3, "totalPIs": 4, "velocity": 42, "burndownHealth": 85, "qualityScore": 88
+}

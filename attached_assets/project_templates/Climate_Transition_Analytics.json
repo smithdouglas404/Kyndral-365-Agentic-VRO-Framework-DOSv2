@@ -1,0 +1,28 @@
+{
+  "id": "pmo-grp-002",
+  "name": "Climate Transition Analytics",
+  "bu": "Group Functions",
+  "description": "Analytics platform for climate transition planning and Net Zero pathway monitoring.",
+  "expectedROI": "£30m regulatory compliance",
+  "roiValue": 30,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 1.2, "total": 2.0, "unit": "£m" },
+  "timeline": { "elapsed": 6, "total": 10, "unit": "months" },
+  "artName": "Sustainability ART",
+  "portfolioTheme": "Climate Action",
+  "safe": { "velocity": 44, "predictability": 86, "flowEfficiency": 74, "currentPI": "PI 24.3", "epicId": "EPIC-GRP-102", "epicName": "Climate Analytics", "epicProgress": 58 },
+  "features": [
+    { "id": "feat-2001", "name": "Emissions Tracking", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-2002", "name": "Transition Pathway Modeling", "status": "in-progress", "storyPoints": 21, "completedPoints": 10, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-2001", "name": "Dr. Emma Green", "role": "Climate Lead", "allocation": 100, "team": "Sustainability" }
+  ],
+  "milestones": [
+    { "id": "ms-2001", "name": "Analytics Launch", "date": "2024-10-31", "status": "planned", "deliverables": ["Platform launch", "Reporting"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.6, "opex": 0.4, "contingency": 0.2, "npv": 25.0, "irr": 48, "paybackMonths": 14 },
+  "currentPI": 3, "totalPIs": 5, "velocity": 44, "burndownHealth": 84, "qualityScore": 88
+}

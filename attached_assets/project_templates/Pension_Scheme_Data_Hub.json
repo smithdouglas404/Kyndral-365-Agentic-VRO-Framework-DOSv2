@@ -1,0 +1,27 @@
+{
+  "id": "pmo-ir-004",
+  "name": "Pension Scheme Data Hub",
+  "bu": "Institutional Retirement",
+  "description": "Centralized data hub for pension scheme information enabling faster deal execution.",
+  "expectedROI": "£22m operational efficiency",
+  "roiValue": 22,
+  "priority": "high",
+  "status": "amber",
+  "budget": { "spent": 1.0, "total": 1.5, "unit": "£m" },
+  "timeline": { "elapsed": 6, "total": 9, "unit": "months" },
+  "artName": "Data Excellence ART",
+  "portfolioTheme": "Data Foundation",
+  "safe": { "velocity": 40, "predictability": 78, "flowEfficiency": 65, "currentPI": "PI 24.3", "epicId": "EPIC-IR-104", "epicName": "Data Centralization", "epicProgress": 58 },
+  "features": [
+    { "id": "feat-1001", "name": "Data Ingestion Pipeline", "status": "in-progress", "storyPoints": 21, "completedPoints": 12, "priority": "critical" }
+  ],
+  "resources": [
+    { "id": "res-1001", "name": "Chris Taylor", "role": "Data Engineer", "allocation": 100, "team": "Data" }
+  ],
+  "milestones": [
+    { "id": "ms-1001", "name": "Hub Launch", "date": "2024-10-30", "status": "planned", "deliverables": ["Core hub", "API access"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.2, "opex": 0.3, "contingency": 0.15, "npv": 18.0, "irr": 45, "paybackMonths": 13 },
+  "currentPI": 3, "totalPIs": 4, "velocity": 40, "burndownHealth": 72, "qualityScore": 78
+}

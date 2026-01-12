@@ -1,0 +1,35 @@
+{
+  "id": "pmo-am-001",
+  "name": "Private Markets Platform Build",
+  "bu": "Asset Management",
+  "description": "Building enterprise platform for private markets investments including infrastructure, real estate, and clean energy.",
+  "expectedROI": "£2.5bn new AUM capacity",
+  "roiValue": 125,
+  "priority": "critical",
+  "status": "red",
+  "budget": { "spent": 4.2, "total": 4.0, "unit": "£m" },
+  "timeline": { "elapsed": 14, "total": 18, "unit": "months" },
+  "artName": "Private Markets ART",
+  "portfolioTheme": "Growth Enablement",
+  "safe": { "velocity": 38, "predictability": 65, "flowEfficiency": 52, "currentPI": "PI 24.4", "epicId": "EPIC-AM-201", "epicName": "Private Markets Capability Build", "epicProgress": 45 },
+  "features": [
+    { "id": "feat-201", "name": "Deal Pipeline Management", "status": "in-progress", "storyPoints": 55, "completedPoints": 28, "priority": "critical" },
+    { "id": "feat-202", "name": "Valuation Engine", "status": "planned", "storyPoints": 34, "completedPoints": 0, "priority": "high" },
+    { "id": "feat-203", "name": "Investor Reporting", "status": "planned", "storyPoints": 21, "completedPoints": 0, "priority": "medium" }
+  ],
+  "resources": [
+    { "id": "res-201", "name": "Alex Turner", "role": "Platform Architect", "allocation": 100, "team": "Engineering" },
+    { "id": "res-202", "name": "Maria Garcia", "role": "Product Manager", "allocation": 100, "team": "Product" },
+    { "id": "res-203", "name": "David Kim", "role": "Senior Developer", "allocation": 100, "team": "Engineering" }
+  ],
+  "milestones": [
+    { "id": "ms-201", "name": "MVP Release", "date": "2024-06-01", "status": "completed", "deliverables": ["Core platform", "Basic workflows"] },
+    { "id": "ms-202", "name": "Executive Steering", "date": "2024-08-12", "status": "in-progress", "deliverables": ["Budget review", "Scope alignment"] },
+    { "id": "ms-203", "name": "Full Launch", "date": "2025-02-28", "status": "at-risk", "deliverables": ["Complete platform", "Client onboarding"] }
+  ],
+  "safeDependencies": [
+    { "id": "dep-201", "type": "blocks", "targetProject": "ESG Analytics Dashboard", "description": "Platform provides data", "status": "at-risk" }
+  ],
+  "financials": { "capitalex": 3.2, "opex": 0.8, "contingency": 0.4, "npv": 95.0, "irr": 32, "paybackMonths": 24 },
+  "currentPI": 4, "totalPIs": 6, "velocity": 38, "burndownHealth": 48, "qualityScore": 68
+}

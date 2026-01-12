@@ -1,0 +1,28 @@
+{
+  "id": "pmo-rt-004",
+  "name": "Savings & Investments Platform",
+  "bu": "Retail",
+  "description": "New platform for savings and investment products with modern digital experience.",
+  "expectedROI": "£35m new business",
+  "roiValue": 35,
+  "priority": "critical",
+  "status": "green",
+  "budget": { "spent": 2.0, "total": 3.2, "unit": "£m" },
+  "timeline": { "elapsed": 10, "total": 15, "unit": "months" },
+  "artName": "Digital Products ART",
+  "portfolioTheme": "Growth",
+  "safe": { "velocity": 46, "predictability": 86, "flowEfficiency": 74, "currentPI": "PI 24.4", "epicId": "EPIC-RT-104", "epicName": "S&I Platform", "epicProgress": 65 },
+  "features": [
+    { "id": "feat-1401", "name": "Investment Selection Tool", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-1402", "name": "Portfolio Management", "status": "in-progress", "storyPoints": 34, "completedPoints": 20, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1401", "name": "Simon Jones", "role": "Platform Lead", "allocation": 100, "team": "Engineering" }
+  ],
+  "milestones": [
+    { "id": "ms-1401", "name": "Platform Beta", "date": "2024-11-30", "status": "planned", "deliverables": ["Beta release", "User testing"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 2.5, "opex": 0.7, "contingency": 0.32, "npv": 28.0, "irr": 45, "paybackMonths": 18 },
+  "currentPI": 4, "totalPIs": 6, "velocity": 46, "burndownHealth": 84, "qualityScore": 88
+}

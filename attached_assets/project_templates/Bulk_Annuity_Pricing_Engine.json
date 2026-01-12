@@ -1,0 +1,28 @@
+{
+  "id": "pmo-ir-003",
+  "name": "Bulk Annuity Pricing Engine",
+  "bu": "Institutional Retirement",
+  "description": "Next-generation pricing engine for bulk annuity deals with real-time market data integration.",
+  "expectedROI": "£65m competitive advantage",
+  "roiValue": 65,
+  "priority": "critical",
+  "status": "green",
+  "budget": { "spent": 1.8, "total": 2.5, "unit": "£m" },
+  "timeline": { "elapsed": 9, "total": 14, "unit": "months" },
+  "artName": "Institutional Retirement ART",
+  "portfolioTheme": "Competitive Edge",
+  "safe": { "velocity": 50, "predictability": 88, "flowEfficiency": 76, "currentPI": "PI 24.4", "epicId": "EPIC-IR-103", "epicName": "Pricing Excellence", "epicProgress": 62 },
+  "features": [
+    { "id": "feat-901", "name": "Real-time Market Integration", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-902", "name": "ML Pricing Optimization", "status": "in-progress", "storyPoints": 34, "completedPoints": 18, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-901", "name": "Dr. Mark Evans", "role": "Quantitative Analyst", "allocation": 100, "team": "Quant" }
+  ],
+  "milestones": [
+    { "id": "ms-901", "name": "Engine Launch", "date": "2024-12-01", "status": "planned", "deliverables": ["Full engine", "Performance benchmarks"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.9, "opex": 0.6, "contingency": 0.25, "npv": 55.0, "irr": 42, "paybackMonths": 15 },
+  "currentPI": 4, "totalPIs": 6, "velocity": 50, "burndownHealth": 86, "qualityScore": 91
+}

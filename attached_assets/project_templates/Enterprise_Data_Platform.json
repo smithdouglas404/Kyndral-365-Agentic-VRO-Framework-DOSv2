@@ -1,0 +1,31 @@
+{
+  "id": "pmo-grp-001",
+  "name": "Enterprise Data Platform",
+  "bu": "Group Functions",
+  "description": "Enterprise-wide data platform enabling analytics and AI across all business units.",
+  "expectedROI": "£50m data monetization",
+  "roiValue": 50,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 3.5, "total": 5.0, "unit": "£m" },
+  "timeline": { "elapsed": 12, "total": 18, "unit": "months" },
+  "artName": "Enterprise Tech ART",
+  "portfolioTheme": "Data Foundation",
+  "safe": { "velocity": 42, "predictability": 75, "flowEfficiency": 65, "currentPI": "PI 24.4", "epicId": "EPIC-GRP-101", "epicName": "Enterprise Data", "epicProgress": 62 },
+  "features": [
+    { "id": "feat-1901", "name": "Data Lake Implementation", "status": "done", "storyPoints": 34, "completedPoints": 34, "priority": "critical" },
+    { "id": "feat-1902", "name": "Analytics Platform", "status": "in-progress", "storyPoints": 34, "completedPoints": 18, "priority": "high" },
+    { "id": "feat-1903", "name": "AI/ML Infrastructure", "status": "planned", "storyPoints": 21, "completedPoints": 0, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1901", "name": "Dr. Kevin Zhang", "role": "Chief Data Architect", "allocation": 100, "team": "Data" },
+    { "id": "res-1902", "name": "Anna Schmidt", "role": "Data Platform Lead", "allocation": 100, "team": "Data" }
+  ],
+  "milestones": [
+    { "id": "ms-1901", "name": "Platform MVP", "date": "2024-06-30", "status": "completed", "deliverables": ["Core platform", "First use cases"] },
+    { "id": "ms-1902", "name": "Full Platform Launch", "date": "2025-01-31", "status": "planned", "deliverables": ["Complete platform", "All BU onboarding"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 4.0, "opex": 1.0, "contingency": 0.5, "npv": 42.0, "irr": 35, "paybackMonths": 22 },
+  "currentPI": 4, "totalPIs": 6, "velocity": 42, "burndownHealth": 68, "qualityScore": 80
+}

@@ -1,0 +1,28 @@
+{
+  "id": "pmo-rc-004",
+  "name": "Operational Resilience Framework",
+  "bu": "Risk & Compliance",
+  "description": "Framework and tooling for operational resilience compliance and testing.",
+  "expectedROI": "£15m risk mitigation",
+  "roiValue": 15,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 0.9, "total": 1.4, "unit": "£m" },
+  "timeline": { "elapsed": 7, "total": 10, "unit": "months" },
+  "artName": "Risk Excellence ART",
+  "portfolioTheme": "Resilience",
+  "safe": { "velocity": 36, "predictability": 76, "flowEfficiency": 64, "currentPI": "PI 24.4", "epicId": "EPIC-RC-104", "epicName": "Op Resilience", "epicProgress": 65 },
+  "features": [
+    { "id": "feat-1801", "name": "Business Service Mapping", "status": "in-progress", "storyPoints": 21, "completedPoints": 14, "priority": "critical" },
+    { "id": "feat-1802", "name": "Impact Tolerance Testing", "status": "planned", "storyPoints": 13, "completedPoints": 0, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1801", "name": "Peter White", "role": "Resilience Lead", "allocation": 100, "team": "Risk" }
+  ],
+  "milestones": [
+    { "id": "ms-1801", "name": "Framework Complete", "date": "2024-11-30", "status": "planned", "deliverables": ["Framework", "Testing tools"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.1, "opex": 0.3, "contingency": 0.14, "npv": 12.5, "irr": 40, "paybackMonths": 15 },
+  "currentPI": 4, "totalPIs": 5, "velocity": 36, "burndownHealth": 70, "qualityScore": 78
+}

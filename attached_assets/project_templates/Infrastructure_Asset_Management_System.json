@@ -1,0 +1,27 @@
+{
+  "id": "pmo-ci-002",
+  "name": "Infrastructure Asset Management System",
+  "bu": "Capital Investment",
+  "description": "System for managing and monitoring infrastructure investments across the portfolio.",
+  "expectedROI": "£15m operational efficiency",
+  "roiValue": 15,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 0.8, "total": 1.3, "unit": "£m" },
+  "timeline": { "elapsed": 5, "total": 9, "unit": "months" },
+  "artName": "Investment Tech ART",
+  "portfolioTheme": "Asset Excellence",
+  "safe": { "velocity": 42, "predictability": 84, "flowEfficiency": 72, "currentPI": "PI 24.3", "epicId": "EPIC-CI-102", "epicName": "Infra Management", "epicProgress": 52 },
+  "features": [
+    { "id": "feat-1501", "name": "Asset Tracking Dashboard", "status": "in-progress", "storyPoints": 21, "completedPoints": 12, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1501", "name": "Laura Chen", "role": "Investment Analyst", "allocation": 80, "team": "Investments" }
+  ],
+  "milestones": [
+    { "id": "ms-1501", "name": "System Launch", "date": "2024-10-15", "status": "planned", "deliverables": ["Core system", "Integration"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.0, "opex": 0.3, "contingency": 0.13, "npv": 12.0, "irr": 48, "paybackMonths": 12 },
+  "currentPI": 3, "totalPIs": 4, "velocity": 42, "burndownHealth": 80, "qualityScore": 85
+}

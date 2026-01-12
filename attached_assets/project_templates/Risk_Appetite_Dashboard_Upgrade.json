@@ -1,0 +1,29 @@
+{
+  "id": "pmo-rc-001",
+  "name": "Risk Appetite Dashboard Upgrade",
+  "bu": "Risk & Compliance",
+  "description": "Upgrading risk appetite monitoring dashboard with real-time alerts and predictive analytics.",
+  "expectedROI": "£25m risk reduction",
+  "roiValue": 25,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 0.9, "total": 1.4, "unit": "£m" },
+  "timeline": { "elapsed": 7, "total": 10, "unit": "months" },
+  "artName": "Risk Excellence ART",
+  "portfolioTheme": "Risk Modernization",
+  "safe": { "velocity": 35, "predictability": 72, "flowEfficiency": 62, "currentPI": "PI 24.4", "epicId": "EPIC-RC-101", "epicName": "Risk Dashboard", "epicProgress": 68 },
+  "features": [
+    { "id": "feat-701", "name": "Real-time Risk Monitoring", "status": "in-progress", "storyPoints": 21, "completedPoints": 14, "priority": "critical" },
+    { "id": "feat-702", "name": "Predictive Risk Alerts", "status": "planned", "storyPoints": 13, "completedPoints": 0, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-701", "name": "Andrew Clark", "role": "Risk Analyst", "allocation": 100, "team": "Risk" },
+    { "id": "res-702", "name": "Helen Foster", "role": "Senior Developer", "allocation": 80, "team": "Engineering" }
+  ],
+  "milestones": [
+    { "id": "ms-701", "name": "Dashboard Go-Live", "date": "2024-10-15", "status": "in-progress", "deliverables": ["Core dashboard", "Integrations"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 1.1, "opex": 0.3, "contingency": 0.14, "npv": 20.5, "irr": 38, "paybackMonths": 16 },
+  "currentPI": 4, "totalPIs": 5, "velocity": 35, "burndownHealth": 68, "qualityScore": 75
+}

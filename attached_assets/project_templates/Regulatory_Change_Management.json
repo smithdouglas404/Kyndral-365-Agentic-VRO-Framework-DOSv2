@@ -1,0 +1,27 @@
+{
+  "id": "pmo-rc-003",
+  "name": "Regulatory Change Management",
+  "bu": "Risk & Compliance",
+  "description": "System for tracking and implementing regulatory changes across the organization.",
+  "expectedROI": "£10m compliance efficiency",
+  "roiValue": 10,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 0.6, "total": 1.0, "unit": "£m" },
+  "timeline": { "elapsed": 5, "total": 8, "unit": "months" },
+  "artName": "Compliance Tech ART",
+  "portfolioTheme": "Regulatory Excellence",
+  "safe": { "velocity": 40, "predictability": 85, "flowEfficiency": 72, "currentPI": "PI 24.3", "epicId": "EPIC-RC-103", "epicName": "Reg Change", "epicProgress": 58 },
+  "features": [
+    { "id": "feat-1701", "name": "Regulatory Tracking Dashboard", "status": "in-progress", "storyPoints": 21, "completedPoints": 12, "priority": "critical" }
+  ],
+  "resources": [
+    { "id": "res-1701", "name": "Sarah Johnson", "role": "Regulatory Analyst", "allocation": 100, "team": "Compliance" }
+  ],
+  "milestones": [
+    { "id": "ms-1701", "name": "System Launch", "date": "2024-09-30", "status": "planned", "deliverables": ["Tracking system", "Workflows"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.8, "opex": 0.2, "contingency": 0.1, "npv": 8.0, "irr": 45, "paybackMonths": 12 },
+  "currentPI": 3, "totalPIs": 4, "velocity": 40, "burndownHealth": 82, "qualityScore": 87
+}

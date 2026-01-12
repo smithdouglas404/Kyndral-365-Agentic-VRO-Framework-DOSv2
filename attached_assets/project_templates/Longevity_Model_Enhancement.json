@@ -1,0 +1,30 @@
+{
+  "id": "pmo-ir-002",
+  "name": "Longevity Model Enhancement",
+  "bu": "Institutional Retirement",
+  "description": "Upgrading actuarial mortality and longevity models with latest population data and ML prediction capabilities.",
+  "expectedROI": "£42m risk mitigation",
+  "roiValue": 42,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 0.8, "total": 1.2, "unit": "£m" },
+  "timeline": { "elapsed": 5, "total": 6, "unit": "months" },
+  "artName": "Actuarial Excellence ART",
+  "portfolioTheme": "Risk Management",
+  "safe": { "velocity": 52, "predictability": 91, "flowEfficiency": 78, "currentPI": "PI 25.1", "epicId": "EPIC-IR-102", "epicName": "Actuarial Model Modernization", "epicProgress": 85 },
+  "features": [
+    { "id": "feat-101", "name": "ML Mortality Prediction", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
+    { "id": "feat-102", "name": "Population Data Integration", "status": "in-progress", "storyPoints": 13, "completedPoints": 8, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-101", "name": "Dr. Robert Chen", "role": "Lead Actuary", "allocation": 100, "team": "Actuarial" },
+    { "id": "res-102", "name": "Lisa Park", "role": "Data Scientist", "allocation": 80, "team": "Analytics" }
+  ],
+  "milestones": [
+    { "id": "ms-101", "name": "Model Validation", "date": "2024-06-30", "status": "completed", "deliverables": ["Backtesting results", "Regulatory approval"] },
+    { "id": "ms-102", "name": "Go-Live", "date": "2024-07-15", "status": "in-progress", "deliverables": ["Production deployment", "Training"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.9, "opex": 0.3, "contingency": 0.12, "npv": 38.5, "irr": 45, "paybackMonths": 8 },
+  "currentPI": 1, "totalPIs": 2, "velocity": 52, "burndownHealth": 92, "qualityScore": 94
+}

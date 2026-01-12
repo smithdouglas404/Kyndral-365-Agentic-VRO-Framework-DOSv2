@@ -1,0 +1,28 @@
+{
+  "id": "pmo-ci-001",
+  "name": "Net Zero Housing Tracker",
+  "bu": "Capital Investment",
+  "description": "Platform to track and report carbon emissions across housing portfolio for net zero targets.",
+  "expectedROI": "£8m regulatory compliance",
+  "roiValue": 8,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 0.5, "total": 0.8, "unit": "£m" },
+  "timeline": { "elapsed": 4, "total": 7, "unit": "months" },
+  "artName": "Sustainability Tech ART",
+  "portfolioTheme": "Net Zero Commitment",
+  "safe": { "velocity": 40, "predictability": 86, "flowEfficiency": 74, "currentPI": "PI 24.3", "epicId": "EPIC-CI-101", "epicName": "Carbon Tracking", "epicProgress": 55 },
+  "features": [
+    { "id": "feat-601", "name": "Emissions Calculator", "status": "done", "storyPoints": 13, "completedPoints": 13, "priority": "critical" },
+    { "id": "feat-602", "name": "Reporting Dashboard", "status": "in-progress", "storyPoints": 13, "completedPoints": 6, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-601", "name": "Oliver Wright", "role": "Sustainability Engineer", "allocation": 80, "team": "Green Tech" }
+  ],
+  "milestones": [
+    { "id": "ms-601", "name": "Regulatory Submission", "date": "2024-09-30", "status": "planned", "deliverables": ["Compliance report", "Audit trail"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.6, "opex": 0.2, "contingency": 0.08, "npv": 6.5, "irr": 48, "paybackMonths": 14 },
+  "currentPI": 3, "totalPIs": 4, "velocity": 40, "burndownHealth": 84, "qualityScore": 88
+}

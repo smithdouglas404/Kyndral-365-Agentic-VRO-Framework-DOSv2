@@ -1,0 +1,27 @@
+{
+  "id": "pmo-am-004",
+  "name": "Investment Research AI",
+  "bu": "Asset Management",
+  "description": "AI-powered research platform for investment insights and market analysis.",
+  "expectedROI": "£18m alpha generation",
+  "roiValue": 18,
+  "priority": "medium",
+  "status": "green",
+  "budget": { "spent": 0.6, "total": 1.0, "unit": "£m" },
+  "timeline": { "elapsed": 4, "total": 8, "unit": "months" },
+  "artName": "Investment Tech ART",
+  "portfolioTheme": "AI Innovation",
+  "safe": { "velocity": 36, "predictability": 80, "flowEfficiency": 68, "currentPI": "PI 24.2", "epicId": "EPIC-AM-204", "epicName": "Research AI", "epicProgress": 48 },
+  "features": [
+    { "id": "feat-1201", "name": "Market Sentiment Analysis", "status": "in-progress", "storyPoints": 21, "completedPoints": 10, "priority": "high" }
+  ],
+  "resources": [
+    { "id": "res-1201", "name": "Dr. Amanda Liu", "role": "AI Research Lead", "allocation": 100, "team": "AI" }
+  ],
+  "milestones": [
+    { "id": "ms-1201", "name": "AI Beta", "date": "2024-10-01", "status": "planned", "deliverables": ["Research tool", "Analyst training"] }
+  ],
+  "safeDependencies": [],
+  "financials": { "capitalex": 0.8, "opex": 0.2, "contingency": 0.1, "npv": 14.5, "irr": 55, "paybackMonths": 10 },
+  "currentPI": 2, "totalPIs": 4, "velocity": 36, "burndownHealth": 78, "qualityScore": 84
+}
