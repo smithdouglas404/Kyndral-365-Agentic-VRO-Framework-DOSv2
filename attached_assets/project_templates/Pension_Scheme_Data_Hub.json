@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Schema Design is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given pension data model designed, When documented, Then all entity relationships, attributes, and constraints defined per TPR standards",
+            "Given schema versioning required, When migration applied, Then backward compatibility maintained with audit trail",
+            "Given cross-scheme querying needed, When normalized, Then common member attributes queryable across all schemes"
           ],
           "tasks": [
             {
@@ -115,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Data Lineage receives pension scheme data, When validation runs, Then records comply with Pensions Dashboard Programme data standards",
-            "Given data quality issues identified, When cleansing workflow triggered, Then corrections are tracked with full audit trail for TPR compliance",
-            "Given GDPR SAR request received, When member data extracted, Then complete records provided within statutory 30-day deadline"
+            "Given data transformation applied, When lineage tracked, Then full source-to-target path documented with business logic",
+            "Given lineage visualization accessed, When graph displayed, Then upstream and downstream dependencies shown",
+            "Given data issue detected, When traced, Then root cause source system identified within 30 minutes"
           ],
           "tasks": [
             {
@@ -153,9 +153,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Data Migration receives pension scheme data, When validation runs, Then records comply with Pensions Dashboard Programme data standards",
-            "Given data quality issues identified, When cleansing workflow triggered, Then corrections are tracked with full audit trail for TPR compliance",
-            "Given GDPR SAR request received, When member data extracted, Then complete records provided within statutory 30-day deadline"
+            "Given legacy system data extracted, When migration scripts run, Then 99.9%+ data accuracy validated post-migration",
+            "Given parallel running required, When enabled, Then source and target reconciled daily until cutover",
+            "Given migration validated, When signed off, Then legacy system decommissioned with archive retained per policy"
           ],
           "tasks": [
             {
@@ -214,9 +214,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Quality Rules Engine is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given 150+ quality rules defined, When execution engine runs, Then all rules evaluated with pass/fail results",
+            "Given rule failure detected, When flagged, Then affected records quarantined with remediation workflow triggered",
+            "Given new quality rule added, When deployed, Then rule active within 24 hours without system restart"
           ],
           "tasks": [
             {
@@ -252,9 +252,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Quality Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given data quality scores calculated, When dashboard accessed, Then scorecard displays by scheme, field, and trend",
+            "Given quality threshold breached, When alert triggered, Then data steward notified with specific remediation actions",
+            "Given trend analysis requested, When displayed, Then quality improvement trajectory shown with root cause attribution"
           ],
           "tasks": [
             {

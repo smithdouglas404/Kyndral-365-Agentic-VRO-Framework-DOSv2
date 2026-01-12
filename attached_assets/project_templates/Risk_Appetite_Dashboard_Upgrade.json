@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given KRI Definition is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given key risk indicators required, When 150 KRIs defined, Then each mapped to risk appetite statement with threshold bands",
+            "Given data source identified, When mapped, Then automated collection configured with data quality checks",
+            "Given KRI hierarchy established, When aggregated, Then enterprise-level and business unit rollups calculated"
           ],
           "tasks": [
             {
@@ -115,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Automated Data Feeds is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given risk data source connected, When pipeline built, Then automated refresh schedules per required frequency",
+            "Given data refresh fails, When alert triggered, Then operations team notified with diagnostic information",
+            "Given manual override required, When entered, Then override logged with user, reason, and expiry date"
           ],
           "tasks": [
             {
@@ -176,9 +176,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Executive Summary View is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given CRO accesses dashboard, When loaded, Then executive summary shows top risks, breaches, and trends",
+            "Given board report due, When generated, Then one-page risk summary with traffic lights produced",
+            "Given emerging risk added, When flagged, Then executive summary includes emerging risk section"
           ],
           "tasks": [
             {
@@ -214,9 +214,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Drill-Down Analysis is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given executive clicks KRI, When drill-down triggered, Then trend chart, contributing factors, and actions displayed",
+            "Given historical comparison needed, When period selected, Then time series shows risk position over chosen period",
+            "Given root cause analysis requested, When causal factors displayed, Then linked risks and controls shown"
           ],
           "tasks": [
             {

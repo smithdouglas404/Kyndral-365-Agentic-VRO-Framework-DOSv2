@@ -80,24 +80,24 @@ const allStoryCriteria: Record<string, string[]> = {
 
   // ========== NET ZERO HOUSING TRACKER ==========
   'Smart Meter Integration': [
-    'Given property has smart meter, When API connection established, Then half-hourly consumption data ingested automatically',
-    'Given meter data gaps detected, When flagged, Then estimation methodology applied with data quality indicator',
-    'Given consumption anomaly detected, When alert triggered, Then property manager notified with investigation guidance'
+    'Given property has smart meter per Energy Act 2011 requirements, When API connection established, Then half-hourly consumption data ingested automatically per SMETS2 standards',
+    'Given meter data gaps detected in DCC Smart Energy Code compliant feed, When flagged, Then estimation methodology applied with data quality disclosure',
+    'Given consumption anomaly detected exceeding MEES benchmark, When alert triggered, Then property manager notified with HHSRS Category 1 risk assessment'
   ],
   'Consumption Dashboard': [
-    'Given property consumption accessed, When dashboard loads, Then electricity, gas, and water usage displayed with benchmarks',
-    'Given tenant wants to see usage, When portal accessed, Then personalized consumption insights with cost estimates shown',
-    'Given consumption exceeds threshold, When alert created, Then energy efficiency recommendations provided'
+    'Given property consumption accessed for Housing Act 2004 HHSRS assessment, When dashboard loads, Then electricity, gas, and water usage displayed against MEES minimum EPC Band E thresholds',
+    'Given tenant requests energy data per Energy Performance of Buildings Regulations 2012, When portal accessed, Then consumption insights with EPC improvement recommendations shown',
+    'Given consumption exceeds CRREM 1.5C pathway threshold, When alert created, Then retrofit recommendations aligned with 2028 MEES Band C requirements provided'
   ],
   'Carbon Baseline Calculator': [
-    'Given building energy data collected, When carbon calculation runs, Then tCO2e calculated using latest DEFRA conversion factors',
-    'Given portfolio carbon footprint aggregated, When reported, Then emissions by source (electricity, gas, vehicles) displayed',
-    'Given carbon intensity benchmarked, When compared to sector, Then CRREM alignment score calculated'
+    'Given building energy data collected per SECR reporting requirements, When carbon calculation runs, Then tCO2e calculated using DEFRA GHG conversion factors with Scope 1/2/3 disclosure',
+    'Given portfolio carbon footprint aggregated for TCFD disclosure, When reported, Then emissions by source with Science Based Targets alignment displayed',
+    'Given carbon intensity benchmarked against CRREM decarbonization pathway, When compared to sector, Then stranding year and MEES compliance trajectory calculated'
   ],
   'Retrofit Scenario Modeling': [
-    'Given property requires energy upgrade, When retrofit options modeled, Then EPC improvement, carbon savings, and cost displayed per measure',
-    'Given cost-benefit analysis run, When payback calculated, Then NPV of energy savings vs capital cost shown with IRR',
-    'Given retrofit package selected, When approved, Then project created with milestones and contractor procurement workflow'
+    'Given property requires upgrade to meet MEES 2028 Band C requirement, When retrofit options modeled, Then EPC improvement, carbon savings, and PAS 2035 compliant measures displayed',
+    'Given cost-benefit analysis run per Green Finance Institute methodology, When payback calculated, Then NPV of energy savings with ECO4 funding eligibility shown',
+    'Given retrofit package selected per PAS 2030 installer standards, When approved, Then project created with TrustMark registration and MCS certification requirements'
   ],
 
   // ========== INVESTMENT RESEARCH AI ==========
@@ -128,116 +128,141 @@ const allStoryCriteria: Record<string, string[]> = {
   ],
 
   // ========== REGULATORY CHANGE MANAGEMENT ==========
-  'Regulatory Scanning Service': [
-    'Given FCA/PRA publishes new guidance, When scanned, Then relevance assessment generated with affected business areas flagged',
-    'Given consultation paper published, When analyzed, Then key proposals summarized with response deadline tracked',
-    'Given regulatory deadline approaching, When 90 days out, Then escalation notification sent to compliance and business owners'
+  'Regulatory Source Integration': [
+    'Given FCA RSS feed connected, When new publication detected, Then content ingested within 1 hour of publication',
+    'Given PRA publication scraped, When parsed, Then structured metadata extracted with categorization',
+    'Given EIOPA/SEC/ESMA feeds integrated, When synchronized, Then international regulatory landscape covered'
   ],
-  'Impact Assessment Tracker': [
-    'Given regulatory change identified, When impact assessed, Then effort score and resource estimate calculated',
-    'Given high impact change identified, When escalated, Then steering committee update scheduled within 2 weeks',
-    'Given impact assessment complete, When signed off, Then implementation plan with milestones created'
+  'AI Relevance Classification': [
+    'Given regulatory content ingested, When classification model runs, Then relevance score 0-100 assigned with confidence',
+    'Given false positive identified, When feedback submitted, Then model retraining triggered within 48 hours',
+    'Given accuracy monitored, When dashboard accessed, Then precision/recall metrics displayed with trend'
   ],
-  'Policy Update Workflow': [
-    'Given internal policy update required, When draft created, Then version control maintains edit history with comparison',
-    'Given policy update approved, When published, Then affected staff notified with attestation requirement',
-    'Given attestation outstanding, When 14 days elapsed, Then escalation to line manager triggered'
+  'Alert and Notification System': [
+    'Given high priority regulation detected, When alert triggered, Then relevant stakeholders notified within 4 hours',
+    'Given user preferences configured, When notification sent, Then delivery channel (email/SMS/app) matches preference',
+    'Given acknowledgment required, When 48 hours elapsed, Then escalation to manager triggered'
   ],
-  'Compliance Dashboard': [
-    'Given regulatory portfolio accessed, When dashboard loads, Then implementation status, RAG, and issues displayed',
-    'Given implementation delay identified, When escalated, Then contingency plan presented to project sponsor',
-    'Given implementation complete, When signed off, Then regulatory compliance confirmation documented'
+  'Automated Impact Routing': [
+    'Given regulatory change classified, When routing rules applied, Then impacted business units automatically identified',
+    'Given impact assessment assigned, When workflow initiated, Then due date and owner tracked with reminders',
+    'Given cross-functional impact detected, When multiple units identified, Then coordination meeting auto-scheduled'
   ],
-  'Training Content Generator': [
-    'Given regulatory change requires training, When content created, Then LMS course published with target audience',
-    'Given training completion tracked, When threshold met, Then compliance certification updated',
-    'Given completion rate below target, When 30 days remain, Then manager notification for non-completers sent'
+  'Impact Scoring Engine': [
+    'Given impact assessment completed, When scoring model runs, Then composite impact score calculated with effort estimate',
+    'Given high impact score generated, When threshold exceeded, Then executive sponsor notification triggered',
+    'Given impact scores aggregated, When portfolio view accessed, Then heat map shows change concentration by area'
+  ],
+  'Implementation Tracking': [
+    'Given regulatory implementation project created, When milestones defined, Then progress tracked with RAG status',
+    'Given milestone delayed, When escalation triggered, Then mitigation plan requested from project owner',
+    'Given implementation complete, When evidence uploaded, Then compliance certification generated for audit'
+  ],
+  'Policy Management': [
+    'Given policy update required, When draft created, Then version control and approval workflow applied',
+    'Given policy approved, When published, Then affected staff notified with attestation requirement',
+    'Given attestation incomplete, When deadline passed, Then escalation chain activated per governance policy'
+  ],
+  'Training Delivery': [
+    'Given regulatory training required, When course published, Then target audience auto-enrolled with due date',
+    'Given training completion tracked, When threshold met, Then compliance dashboard updated with certification',
+    'Given non-compliance detected, When 30 days remain, Then manager receives escalation with non-completer list'
+  ],
+  'Audit Evidence Repository': [
+    'Given regulatory audit scheduled, When evidence requested, Then document search returns relevant artifacts',
+    'Given audit finding raised, When logged, Then remediation action created with owner and due date tracking',
+    'Given finding remediated, When evidence submitted, Then closure confirmed with audit trail'
+  ],
+  'Regulatory Calendar': [
+    'Given regulatory deadlines tracked, When calendar accessed, Then timeline view shows upcoming milestones',
+    'Given deadline approaches, When 90 days out, Then readiness assessment workflow triggered',
+    'Given deadline missed, When flagged, Then incident log created with root cause analysis required'
   ],
 
   // ========== RISK APPETITE DASHBOARD UPGRADE ==========
-  'Risk Data Aggregation': [
-    'Given risk metrics calculated across BUs, When aggregated, Then group-level risk profile displayed with drill-down',
-    'Given risk metric breaches threshold, When alert triggers, Then risk owner and second line notified within 1 hour',
-    'Given risk trend analyzed, When deterioration detected, Then early warning indicator displays with contributing factors'
+  'KRI Definition': [
+    'Given key risk indicators required, When 150 KRIs defined, Then each mapped to risk appetite statement with threshold bands',
+    'Given data source identified, When mapped, Then automated collection configured with data quality checks',
+    'Given KRI hierarchy established, When aggregated, Then enterprise-level and business unit rollups calculated'
   ],
-  'Threshold Configuration': [
-    'Given risk appetite thresholds defined by board, When configured, Then green/amber/red bands applied to metrics',
-    'Given appetite reviewed annually, When updated, Then new thresholds effective from specified date with historical comparison',
-    'Given metric approaches amber, When 90% reached, Then watching brief notification sent to risk team'
+  'Automated Data Feeds': [
+    'Given risk data source connected, When pipeline built, Then automated refresh schedules per required frequency',
+    'Given data refresh fails, When alert triggered, Then operations team notified with diagnostic information',
+    'Given manual override required, When entered, Then override logged with user, reason, and expiry date'
   ],
-  'Executive Reporting': [
-    'Given quarterly board report due, When generated, Then executive summary with key risk indicators produced',
-    'Given emerging risk identified, When documented, Then emerging risk register updated with assessment',
-    'Given regulatory risk report required, When data extracted, Then PRA-compliant submission format generated'
+  'Executive Summary View': [
+    'Given CRO accesses dashboard, When loaded, Then executive summary shows top risks, breaches, and trends',
+    'Given board report due, When generated, Then one-page risk summary with traffic lights produced',
+    'Given emerging risk added, When flagged, Then executive summary includes emerging risk section'
   ],
-  'Stress Scenario Engine': [
-    'Given stress scenario defined, When applied to portfolio, Then capital impact and solvency under stress displayed',
-    'Given reverse stress test required, When run, Then scenarios causing failure identified with probabilities',
-    'Given stress test results approved, When submitted, Then regulator receives within required timeframe'
+  'Drill-Down Analysis': [
+    'Given executive clicks KRI, When drill-down triggered, Then trend chart, contributing factors, and actions displayed',
+    'Given historical comparison needed, When period selected, Then time series shows risk position over chosen period',
+    'Given root cause analysis requested, When causal factors displayed, Then linked risks and controls shown'
   ],
 
   // ========== SAVINGS INVESTMENTS PLATFORM ==========
-  'ISA Product Engine': [
-    'Given new ISA product launched, When configured, Then contribution limits and tax wrapper rules applied',
-    'Given product fee schedule updated, When published, Then platform charges displayed to customers',
-    'Given product withdrawn from sale, When configured, Then existing customers continue but new applications blocked'
+  'Product Selection': [
+    'Given customer explores savings products per FCA Consumer Duty, When product selector accessed, Then ISA/SIPP/GIA options displayed with clear charges and risk warnings',
+    'Given suitability assessment required per FCA COBS 9, When questionnaire completed, Then product recommendations aligned with investment objectives and risk tolerance',
+    'Given product comparison needed, When selected, Then Key Information Documents with PRIIPs-compliant costs and projections displayed'
   ],
-  'Fund Switch Manager': [
-    'Given customer places fund trade, When order submitted, Then trade executed at next valuation point with confirmation',
-    'Given regular investment scheduled, When payment received, Then automated trade placed with no additional instruction',
-    'Given fund switch requested, When processed, Then sell followed by buy with no cash drag between'
+  'Application Form': [
+    'Given customer starts application per FCA Client Assets rules, When progressive form loaded, Then anti-money laundering checks and ID verification integrated per MLR 2017',
+    'Given application requires appropriateness assessment, When questions answered, Then suitability determination with risk warnings per FCA COBS 10 completed',
+    'Given application submitted, When validated, Then account opening confirmation with cooling-off rights per FCA DISP sent within 24 hours'
   ],
-  'Tax Wrapper Compliance': [
-    'Given ISA subscription made, When recorded, Then contribution tracked against annual allowance with warning at 90%',
-    'Given customer exceeds ISA allowance, When detected, Then excess identified and void ISA rules applied',
-    'Given bed and ISA requested, When processed, Then CGT event crystallized and repurchase within wrapper completed'
+  'Payment Integration': [
+    'Given customer makes contribution per FCA Client Money rules, When payment gateway processes, Then funds segregated in client money account with reconciliation within T+1',
+    'Given payment fails, When retry attempted, Then customer notified with alternative payment methods and ISA deadline warning if applicable',
+    'Given reconciliation runs per FCA CASS 7, When completed, Then client money calculations accurate with regulatory reporting data generated'
   ],
-  'Valuation Reporting': [
-    'Given customer requests valuation, When generated, Then holdings, cost basis, and current value displayed',
-    'Given tax year-end consolidation due, When processed, Then CGT summary and dividend reports generated',
-    'Given platform statement due, When generated, Then annual summary with charges and performance sent'
+  'Account Dashboard': [
+    'Given customer accesses account per FCA disclosure requirements, When dashboard loads, Then portfolio valuation, performance, and charges displayed in real-time',
+    'Given performance calculation required, When displayed, Then time-weighted returns shown with benchmark comparison and MiFID II compliant cost disclosure',
+    'Given document access needed, When repository opened, Then contract notes, statements, and tax certificates available with 7-year retention per FCA SYSC'
   ],
-  'Drawdown Calculator': [
-    'Given customer in drawdown, When income requested, Then tax-free cash and taxable income calculated per LTA',
-    'Given UFPLS withdrawal requested, When processed, Then 25% tax-free and 75% taxable portions calculated',
-    'Given death benefit claim made, When processed, Then beneficiary options presented based on member age'
+  'Transaction Capabilities': [
+    'Given customer requests withdrawal per FCA CASS rules, When processed, Then funds released within stated SLA with anti-fraud verification',
+    'Given fund switch requested, When executed, Then trade completed at next valuation point with MiFID II best execution policy applied',
+    'Given regular savings plan modified, When updated, Then changes effective from next collection date with confirmation sent'
   ],
 
   // ========== PRIVATE MARKETS PLATFORM ==========
-  'Fund NAV Aggregation': [
-    'Given PE fund reports quarterly, When NAV data ingested, Then fund metrics update with data currency indicator',
-    'Given infrastructure fund has underlying assets, When look-through applied, Then asset-level exposures displayed',
-    'Given fund manager provides document, When parsed, Then key data extracted with audit trail to source'
+  'Deal Pipeline CRM': [
+    'Given PE deal opportunity identified, When entered in CRM, Then pipeline stage, probability, and expected close date tracked per investment committee governance',
+    'Given deal advances through stages per ILPA DDQ standards, When gate criteria met, Then next stage unlocked with required approvals documented',
+    'Given deal pipeline reviewed, When dashboard accessed, Then deal flow by sector, geography, and stage displayed with commitment capacity analysis'
   ],
-  'Performance Attribution': [
-    'Given private markets performance measured, When IRR/MOIC calculated, Then returns since inception displayed',
-    'Given cashflow data received, When PME analysis runs, Then public market equivalent comparison generated',
-    'Given attribution required, When analysis runs, Then value creation decomposed by leverage, growth, multiple'
+  'Due Diligence Workflow': [
+    'Given due diligence initiated per ILPA Due Diligence Questionnaire standards, When checklist activated, Then financial, legal, commercial, and ESG workstreams assigned with deadlines',
+    'Given DD finding raised per institutional investor standards, When documented, Then risk rating and mitigation requirement tracked to resolution',
+    'Given DD complete, When investment committee pack generated, Then ILPA-compliant summary with risk matrix and deal terms comparison produced'
   ],
-  'Capital Tracking': [
-    'Given capital commitment made, When recorded, Then unfunded commitment tracked with drawdown schedule',
-    'Given capital call received, When processed, Then commitment balance updated with payment instruction',
-    'Given distribution received, When recorded, Then DPI and RVPI metrics updated with waterfall analysis'
+  'Deal Documentation': [
+    'Given deal documentation required per LPA standards, When uploaded, Then version control with audit trail maintained for 10+ year fund life',
+    'Given side letter negotiated, When executed, Then MFN tracking initiated with comparison to similar vintage commitments',
+    'Given closing checklist complete per AIFMD requirements, When signed, Then fund subscription documents filed with custodian notification'
   ],
-  'Portfolio Analytics': [
-    'Given private markets portfolio accessed, When dashboard loads, Then allocation by strategy and vintage displayed',
-    'Given ESG data available, When aggregated, Then portfolio-level ESG scores calculated',
-    'Given liquidity projection required, When modeled, Then expected cashflows by quarter for 5 years displayed'
+  'Asset Register': [
+    'Given portfolio company acquired, When registered, Then investment date, cost basis, and ownership percentage recorded with fair value hierarchy classification',
+    'Given asset valuation updated quarterly per IPEV guidelines, When calculated, Then Level 3 fair value with comparable multiple and DCF support documented',
+    'Given asset performance monitored, When KPIs collected, Then revenue growth, EBITDA margin, and leverage tracked against investment case'
   ],
-  'Manager ODD Tracker': [
-    'Given fund manager ODD completed, When documented, Then operational risk assessment stored with renewal reminder',
-    'Given manager incident reported, When logged, Then exposure quantified and escalation triggered',
-    'Given DDQ refresh due, When notification sent, Then manager portal access granted for self-certification'
+  'Valuation Engine': [
+    'Given quarterly valuation required per IPEV Guidelines, When model runs, Then enterprise value calculated with comparable transactions and market multiples',
+    'Given external valuer report received per AIFMD requirements, When incorporated, Then independent valuation compared with internal estimate and variance explained',
+    'Given valuation committee reviews, When approved, Then NAV impact recorded with carry waterfall recalculation'
   ],
-  'Secondary Pricing': [
-    'Given secondary sale considered, When market analyzed, Then expected pricing range based on transactions displayed',
-    'Given bid received, When evaluated, Then discount/premium to NAV calculated with recommendation',
-    'Given secondary sale closed, When completed, Then gain/loss calculated with tax reporting data'
+  'Investor Reporting': [
+    'Given quarterly investor report due per ILPA Reporting Template, When generated, Then capital account, IRR/MOIC, and portfolio company updates included',
+    'Given ESG reporting required per SFDR, When PAI indicators calculated, Then portfolio-level and asset-level adverse impact metrics disclosed',
+    'Given annual financial statements due per AIFMD, When audited, Then investor distribution with GP clawback and carry calculations provided'
   ],
-  'Co-Invest Management': [
-    'Given co-investment opportunity presented, When evaluated, Then IC materials generated with risk assessment',
-    'Given co-investment committed, When tracked, Then valuation updates separate from parent fund',
-    'Given co-investment exits, When proceeds received, Then realized return calculated with attribution'
+  'Cashflow Forecasting': [
+    'Given unfunded commitments outstanding, When cashflow modeled, Then expected capital calls by quarter projected with stress scenarios',
+    'Given distribution received, When recorded, Then DPI/RVPI metrics updated with waterfall and catch-up calculations',
+    'Given liquidity planning required for pension scheme per TPR requirements, When forecast run, Then private markets cash needs integrated with overall ALM'
   ],
 
   // ========== INFRASTRUCTURE ASSET MANAGEMENT ==========
@@ -268,30 +293,30 @@ const allStoryCriteria: Record<string, string[]> = {
   ],
 
   // ========== PENSION SCHEME DATA HUB ==========
-  'Scheme Configuration': [
-    'Given new scheme onboarded, When configuration wizard completed, Then scheme rules and benefit structure stored',
-    'Given scheme rules amended, When change logged, Then effective date and audit trail maintained with version history',
-    'Given scheme merger occurs, When consolidation runs, Then member data migrates with rules mapping'
+  'Schema Design': [
+    'Given pension data model designed, When documented, Then all entity relationships, attributes, and constraints defined per TPR standards',
+    'Given schema versioning required, When migration applied, Then backward compatibility maintained with audit trail',
+    'Given cross-scheme querying needed, When normalized, Then common member attributes queryable across all schemes'
   ],
-  'Member Repository': [
-    'Given member record accessed, When display requested, Then full benefit entitlement and service history visible',
-    'Given member data change received, When validated, Then record updated with source attribution and timestamp',
-    'Given bulk data refresh required, When batch import runs, Then quality report generated with error counts'
+  'Data Lineage': [
+    'Given data transformation applied, When lineage tracked, Then full source-to-target path documented with business logic',
+    'Given lineage visualization accessed, When graph displayed, Then upstream and downstream dependencies shown',
+    'Given data issue detected, When traced, Then root cause source system identified within 30 minutes'
   ],
-  'Benefit Calculator': [
-    'Given member requests quote, When calculation runs, Then pension calculated per scheme rules with assumptions disclosed',
-    'Given transfer value requested, When CETV calculated, Then cash equivalent calculated with 3-month guarantee',
-    'Given retirement options requested, When commutation applied, Then lump sum and reduced pension displayed'
+  'Data Migration': [
+    'Given legacy system data extracted, When migration scripts run, Then 99.9%+ data accuracy validated post-migration',
+    'Given parallel running required, When enabled, Then source and target reconciled daily until cutover',
+    'Given migration validated, When signed off, Then legacy system decommissioned with archive retained per policy'
   ],
-  'Payroll Integration': [
-    'Given payroll cycle due, When payment file generated, Then BACS file produced with net payments after tax',
-    'Given HMRC PAYE codes received, When applied, Then tax deductions calculated with RTI submission generated',
-    'Given payment returned unpaid, When identified, Then tracing process initiated with payment re-routing'
+  'Quality Rules Engine': [
+    'Given 150+ quality rules defined, When execution engine runs, Then all rules evaluated with pass/fail results',
+    'Given rule failure detected, When flagged, Then affected records quarantined with remediation workflow triggered',
+    'Given new quality rule added, When deployed, Then rule active within 24 hours without system restart'
   ],
-  'Member Portal': [
-    'Given member logs into portal, When dashboard loads, Then benefit summary and communication history displayed',
-    'Given member requests projection, When calculator accessed, Then estimated pension at different dates shown',
-    'Given member updates contact details, When submitted, Then address and email update across integrated systems'
+  'Quality Dashboard': [
+    'Given data quality scores calculated, When dashboard accessed, Then scorecard displays by scheme, field, and trend',
+    'Given quality threshold breached, When alert triggered, Then data steward notified with specific remediation actions',
+    'Given trend analysis requested, When displayed, Then quality improvement trajectory shown with root cause attribution'
   ],
 
   // ========== OPERATIONAL RESILIENCE FRAMEWORK ==========
@@ -333,42 +358,92 @@ const allStoryCriteria: Record<string, string[]> = {
 
   // ========== CLIMATE TRANSITION ANALYTICS ==========
   'NGFS Scenario Implementation': [
-    'Given NGFS scenario version selected, When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 horizons',
-    'Given NGFS updates parameters, When new version released, Then platform incorporates within 1 month',
-    'Given custom scenario defined, When created, Then custom pathway saved and reusable for comparison'
+    'Given NGFS scenario version selected per TCFD recommendations, When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 horizons with SFDR Article 9 disclosure compliance',
+    'Given NGFS updates scenario parameters, When new version released, Then platform incorporates within 1 month per Bank of England CBES methodology',
+    'Given custom scenario defined for PRA SS3/19 compliance, When created, Then custom pathway saved with regulatory audit trail'
   ],
   'Custom Scenario Builder': [
-    'Given custom climate parameters required, When builder accessed, Then carbon price, policy, and technology assumptions configurable',
-    'Given scenario preview requested, When calculated, Then real-time portfolio impact updates as parameters change',
-    'Given scenario saved, When shared, Then version control and access permissions applied'
+    'Given custom climate parameters required for TCFD scenario analysis, When builder accessed, Then carbon price (IEA/NGFS aligned), policy, and technology assumptions configurable',
+    'Given scenario preview requested per SFDR RTS requirements, When calculated, Then real-time portfolio impact updates with PAI indicator projections',
+    'Given scenario saved for regulatory reporting, When shared, Then version control and audit permissions applied per FCA sustainability disclosure rules'
   ],
   'Portfolio Stress Testing': [
-    'Given climate stress test required, When run, Then VaR and expected shortfall under scenario calculated',
-    'Given TCFD report required, When export generated, Then compliant template with all recommended disclosures produced',
-    'Given stress results reviewed, When approved, Then results available for regulatory submission'
+    'Given climate stress test required per PRA supervisory statement SS3/19, When run, Then VaR and expected shortfall under orderly/disorderly/hot house scenarios calculated',
+    'Given TCFD report required per FCA Listing Rule 9.8.6R, When export generated, Then all 11 TCFD recommended disclosures with metrics and targets produced',
+    'Given stress results reviewed by Climate Risk Committee, When approved, Then results formatted for PRA climate biennial exploratory scenario submission'
   ],
   'Implied Temperature Rise Calculation': [
-    'Given portfolio holdings provided, When ITR calculated, Then temperature alignment score with methodology disclosed',
-    'Given company targets assessed, When credibility scored, Then confidence weighting applied to trajectory',
-    'Given ITR drill-down requested, When analyzed, Then top contributors identified with engagement actions'
+    'Given portfolio holdings provided for SFDR Article 8/9 disclosure, When ITR calculated, Then TCFD-aligned temperature score with SBTi methodology disclosed',
+    'Given company targets assessed per Transition Pathway Initiative methodology, When credibility scored, Then management quality and carbon performance ratings applied',
+    'Given ITR drill-down requested for engagement prioritization, When analyzed, Then CA100+ focus companies and net zero laggards identified with escalation recommendations'
   ],
   'Physical Risk Mapping': [
-    'Given real asset geocoded, When climate hazard layers applied, Then flood/wildfire/heat scores at property level displayed',
-    'Given risk score is high, When drill-down requested, Then specific hazards and adaptation recommendations provided',
-    'Given physical risk aggregated, When reported, Then VaR contribution from physical vs transition quantified'
+    'Given real asset geocoded per TCFD physical risk guidance, When climate hazard layers applied, Then RCP 4.5/8.5 scenario flood/wildfire/heat scores at property level displayed',
+    'Given physical risk score high for insurance purposes, When drill-down requested, Then Flood Re eligibility, coastal erosion, and subsidence risk with adaptation costs provided',
+    'Given physical risk aggregated for TCFD disclosure, When reported, Then chronic vs acute risk VaR with climate adaptation expenditure recommendations quantified'
   ],
   'Decarbonization Tracker': [
-    'Given portfolio carbon baseline established, When target set, Then SBTi-aligned reduction pathway calculated',
-    'Given interim target reached, When progress assessed, Then variance quantified with rebalancing options',
-    'Given target methodology updates, When recalculated, Then old vs new comparison displayed'
+    'Given portfolio carbon baseline established per GHG Protocol, When SBTi-aligned target set, Then 1.5C/well-below 2C reduction pathway with annual milestones calculated',
+    'Given interim 2030 target reached per NZAM commitment, When progress assessed, Then variance from Science Based Target quantified with divestment/engagement options',
+    'Given SBTi methodology updates to Net Zero Standard, When recalculated, Then FLAG emissions and Scope 3 coverage improvements displayed'
   ],
   'Net Zero Dashboard': [
-    'Given Net Zero commitment made, When dashboard accessed, Then current footprint vs target pathway displayed',
-    'Given manager drills down, When asset view loaded, Then individual security contribution shown',
-    'Given quarterly progress due, When report generated, Then standardized NZAM report exports with disclosures'
+    'Given NZAM Net Zero commitment made, When dashboard accessed, Then current financed emissions vs Paris-aligned glidepath displayed with PCAF data quality scores',
+    'Given portfolio manager drills down for engagement, When asset view loaded, Then individual company contribution with CA100+ benchmark alignment shown',
+    'Given quarterly NZAM progress due, When report generated, Then standardized NZAM Progress Report with IIGCC template and CDP response data exported'
   ],
 
   // ========== ENTERPRISE DATA PLATFORM ==========
+  'Delta Lake Format Implementation': [
+    'Given raw data ingested into Bronze layer, When Delta format applied, Then ACID transactions ensure data integrity with time travel for 90-day point-in-time recovery',
+    'Given concurrent Spark jobs write data, When optimistic concurrency applied, Then Z-ORDER clustering and VACUUM operations maintain query performance under <5 second SLA',
+    'Given schema evolution required per business change, When ALTER TABLE applied, Then existing downstream queries continue with null handling per data contract'
+  ],
+  'Source System Connectors - Wave 1': [
+    'Given Salesforce CRM integration required, When connector deployed, Then CDC-based incremental sync captures all opportunity and contact changes within 15 minutes',
+    'Given Oracle Financials data needed, When connector deployed, Then GL, AP, AR data extracted with referential integrity preserved across entities',
+    'Given mainframe policy admin system accessed, When COBOL copybook parsed, Then data mapped to modern schema with business key preservation per GDPR lineage'
+  ],
+  'PII Detection and GDPR Compliance': [
+    'Given customer data stored per GDPR Article 5, When Microsoft Purview scans, Then NI numbers, addresses, and DOBs tagged with 95%+ precision for sensitivity classification',
+    'Given data subject access request received per GDPR Article 15, When SAR workflow triggered, Then all customer data across Bronze/Silver/Gold layers extracted within 30-day statutory deadline',
+    'Given right to erasure requested per GDPR Article 17, When deletion workflow runs, Then customer PII pseudonymized/deleted with audit trail for ICO compliance'
+  ],
+  'Semantic Layer with dbt': [
+    'Given business metrics defined, When dbt models built, Then semantic layer provides consistent definitions across Power BI, Databricks SQL, and API consumers',
+    'Given data lineage required for governance, When dbt docs generated, Then column-level lineage from source to consumption layer documented with business glossary integration',
+    'Given CI/CD pipeline triggered, When dbt tests run, Then data quality gates enforce freshness, uniqueness, and referential integrity before promotion'
+  ],
+  'Power BI Premium Workspace': [
+    'Given business report required, When Power BI dataset connected, Then row-level security enforces data access per user AD group membership',
+    'Given large dataset analyzed, When DirectQuery mode used, Then query performance meets <10 second SLA for dashboard refresh',
+    'Given report scheduled for distribution, When subscription triggered, Then PDF/Excel delivered to stakeholders with refresh timestamp and data currency indicator'
+  ],
+  'Data Catalog Self-Service': [
+    'Given business user searches for customer data, When Purview catalog queried, Then datasets returned with sensitivity classification, data owner, and data quality score',
+    'Given new dataset published, When classification requested, Then data steward workflow assigns owner, sensitivity, and retention per data governance policy',
+    'Given data request submitted, When approved by owner, Then access provisioned to Unity Catalog with access expiry and audit logging'
+  ],
+  'Master Data Management': [
+    'Given customer exists across multiple source systems, When MDM matching runs, Then golden record created with confidence score and survivorship rules applied',
+    'Given product master required, When hierarchy defined, Then product attributes standardized across all consuming systems with change propagation',
+    'Given reference data updated, When change applied, Then downstream systems receive notification with effective date for synchronized cutover'
+  ],
+  'Real-time Streaming Layer': [
+    'Given event-driven architecture required, When Kafka topics configured, Then real-time events processed with exactly-once semantics and <1 second latency',
+    'Given streaming data quality needed, When validation rules applied, Then malformed events routed to dead-letter queue with alerting to data ops',
+    'Given stream processing job monitored, When lag exceeds threshold, Then auto-scaling triggers with PagerDuty alert to on-call engineer'
+  ],
+  'ML Feature Store': [
+    'Given ML features defined, When registered in Feast, Then online and offline stores synchronized with point-in-time correctness for training',
+    'Given feature drift detected, When monitoring threshold breached, Then data science team alerted with distribution comparison and retraining recommendation',
+    'Given new feature version deployed, When serving layer updated, Then A/B traffic routing enables gradual rollout with rollback capability'
+  ],
+  'Data Quality Observability': [
+    'Given Great Expectations rules configured, When validation checkpoint runs, Then DQ scores published to observability dashboard with trend analysis',
+    'Given DQ score falls below 95% threshold, When alert triggered, Then data steward receives notification with sample of failed records and root cause suggestions',
+    'Given DQ incident resolved, When post-mortem completed, Then preventive rules added to pipeline with automated regression testing'
+  ],
   'Azure ADLS Gen2 Infrastructure Setup': [
     'Given infrastructure-as-code is executed, When Terraform applies successfully, Then ADLS Gen2 containers are provisioned with RBAC policies in under 30 minutes',
     'Given storage accounts are created, When hierarchical namespace is enabled, Then Delta Lake tables can be written with ACID transactions',
@@ -663,43 +738,6 @@ const allStoryCriteria: Record<string, string[]> = {
     'Given client needs historical documents, When document library accessed, Then contracts, reports, and statements are searchable by date and type',
     'Given new quarterly report published, When uploaded, Then client notification sent with secure download link',
     'Given document retention period expires, When archival runs, Then document moved to cold storage per data retention policy'
-  ],
-
-  // ========== CLIMATE TRANSITION ANALYTICS ==========
-  'NGFS Scenario Implementation': [
-    'Given NGFS scenario version selected (orderly/disorderly/hot house), When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 horizons',
-    'Given NGFS updates scenario parameters, When new version released, Then platform incorporates updated parameters within 1 month',
-    'Given custom scenario parameters defined, When scenario created, Then custom pathway can be saved and reused for comparison'
-  ],
-  'Implied Temperature Rise Calculation': [
-    'Given portfolio holdings provided, When ITR calculated, Then portfolio temperature alignment score displays with methodology disclosure',
-    'Given company targets assessed, When credibility scored, Then high/medium/low confidence weighting applied to trajectory',
-    'Given ITR drill-down requested, When analysis runs, Then top 10 temperature contributors identified with engagement actions'
-  ],
-  'Physical Risk Mapping': [
-    'Given real asset portfolio geocoded, When climate hazard layers applied, Then flood/wildfire/heat/water stress scores display at property level',
-    'Given physical risk score is high, When drill-down requested, Then specific hazards and adaptation recommendations provided',
-    'Given portfolio physical risk aggregated, When reported, Then VaR contribution from physical risk quantified vs transition risk'
-  ],
-  'Transition Pathway Tracker': [
-    'Given company publishes Net Zero commitment, When tracked, Then interim targets and progress milestones monitored with alerts on missed targets',
-    'Given sector decarbonization pathway defined, When company compared, Then alignment vs Paris-aligned trajectory scored',
-    'Given company transition plan published, When assessed, Then credibility scoring reflects CapEx commitment and technology roadmap'
-  ],
-  'Decarbonization Target Setting': [
-    'Given portfolio carbon intensity baseline established, When target set, Then SBTi-aligned reduction pathway calculated',
-    'Given interim target year reached, When progress assessed, Then variance from target quantified with rebalancing options',
-    'Given target methodology updates, When recalculated, Then comparison between old and new methodology results displayed'
-  ],
-  'Net Zero Progress Dashboard': [
-    'Given Net Zero commitment made, When dashboard accessed, Then current carbon footprint vs target pathway displays',
-    'Given portfolio manager drills down, When asset-level view loaded, Then individual security contribution to carbon reduction shown',
-    'Given quarterly progress report due, When generated, Then standardized NZAM progress report exports with required disclosures'
-  ],
-  'Stranded Asset Risk Analysis': [
-    'Given fossil fuel exposure assessed, When stranded asset risk calculated, Then value at risk under accelerated phase-out scenario quantified',
-    'Given sector-specific transition risk modeled, When results displayed, Then oil and gas, utilities, transport sectors analyzed separately',
-    'Given engagement priority needed, When ranked, Then companies with highest stranding risk and engagement opportunity flagged'
   ],
 
   // ========== PROTECTION PRODUCT DIGITIZATION ==========
@@ -1078,29 +1116,150 @@ const allStoryCriteria: Record<string, string[]> = {
 
   // ========== INFRASTRUCTURE ASSET MANAGEMENT SYSTEM ==========
   'Asset Lifecycle Management': [
-    'Given infrastructure asset acquired, When registered, Then valuation, depreciation schedule, and maintenance plan created',
-    'Given asset condition assessment due, When completed, Then condition score updated with remaining useful life estimate',
-    'Given asset disposal planned, When executed, Then gain/loss calculated with environmental remediation obligations captured'
+    'Given infrastructure asset acquired per AIFMD requirements, When registered, Then valuation, depreciation schedule, and maintenance plan created',
+    'Given asset condition assessment due, When completed, Then condition score updated with remaining useful life per IPEV Guidelines',
+    'Given asset disposal planned per environmental regulations, When executed, Then gain/loss calculated with remediation obligations captured'
   ],
   'Revenue Forecasting': [
-    'Given infrastructure asset has contracted revenue, When forecast modeled, Then NPV of future cashflows calculated',
-    'Given inflation adjustment applies to revenue, When escalator applied, Then real and nominal revenue projections generated',
-    'Given regulatory price review approaches, When scenario modeled, Then allowed revenue under different scenarios compared'
+    'Given infrastructure asset has contracted revenue per RAB regulation, When forecast modeled, Then NPV of future cashflows calculated with regulatory price review sensitivity',
+    'Given inflation adjustment applies per RPI/CPI linkage, When escalator applied, Then real and nominal revenue projections generated',
+    'Given OFWAT/OFGEM price review approaches, When scenario modeled, Then allowed revenue under different regulatory determination scenarios compared'
   ],
   'Maintenance Scheduling': [
-    'Given preventive maintenance schedule defined, When due date approaches, Then work order generated with contractor notification',
-    'Given unplanned maintenance required, When emergency work order created, Then impact on asset availability and budget tracked',
-    'Given maintenance history analyzed, When patterns identified, Then predictive maintenance recommendations generated'
+    'Given preventive maintenance schedule defined per asset management ISO 55001, When due date approaches, Then work order generated with contractor SLA tracking',
+    'Given unplanned maintenance required, When emergency work order created per CDM 2015 regulations, Then impact on asset availability and OPEX budget tracked',
+    'Given maintenance history analyzed, When patterns identified with predictive analytics, Then AI recommendations for preventive intervention generated'
   ],
   'Insurance and Compliance': [
-    'Given insurance renewal due, When notification sent, Then coverage review completed with risk engineering recommendations',
-    'Given regulatory inspection scheduled, When completed, Then findings logged with remediation tracking',
-    'Given HSE incident occurs, When reported, Then root cause analysis initiated with RIDDOR compliance checked'
+    'Given insurance renewal due per institutional investor requirements, When notification sent, Then coverage review completed with risk engineering recommendations',
+    'Given regulatory inspection scheduled per HSE regulations, When completed, Then findings logged with remediation tracking and deadline management',
+    'Given HSE incident occurs, When reported per RIDDOR 2013, Then root cause analysis initiated with regulator notification if threshold breached'
   ],
   'Valuation Engine': [
-    'Given infrastructure asset valuation required, When DCF model runs, Then fair value calculated with key assumptions documented',
-    'Given comparable transaction data available, When benchmarked, Then valuation multiple comparison provided',
-    'Given quarterly valuation update due, When completed, Then NAV impact calculated with movement attribution'
+    'Given infrastructure asset valuation required per IPEV Guidelines, When DCF model runs, Then fair value calculated with WACC and terminal value assumptions documented',
+    'Given comparable transaction data available from Preqin/Burgiss, When benchmarked, Then valuation multiple comparison with vintage adjustment provided',
+    'Given quarterly valuation update due per AIFMD, When completed, Then NAV impact calculated with movement attribution across value drivers'
+  ],
+
+  // ========== AI CHATBOT - REMAINING STORIES ==========
+  'Mobile App Integration': [
+    'Given customer uses L&G mobile app, When chatbot SDK integrated, Then conversation interface loads natively within 1 second with consistent L&G branding',
+    'Given push notification received, When customer responds via chat, Then context includes notification reference with seamless conversation flow',
+    'Given app used offline, When chat attempted, Then offline message displayed with queued message sync on reconnection'
+  ],
+  'Voice IVR Integration': [
+    'Given customer calls L&G contact centre, When IVR dialogue triggered, Then speech recognition accuracy exceeds 85% for pension terminology per HMRC validation',
+    'Given speech-to-text transcribes pension query, When intent matched, Then automated response plays with option to transfer to human per FCA DISP requirements',
+    'Given call quality degrades or customer frustrated, When detected, Then graceful escalation to human agent with full conversation context'
+  ],
+  'Document Ingestion Pipeline': [
+    'Given pension scheme PDF uploaded by administrator, When OCR and parsing complete, Then structured data extracted with 95%+ accuracy for scheme rules',
+    'Given document contains benefit tables, When processed, Then tabular data queryable with scheme-specific factor extraction',
+    'Given bilingual Welsh/English document, When language detected, Then appropriate language model processes content per Welsh Language Act'
+  ],
+
+  // ========== BUILD TO RENT - REMAINING STORIES ==========
+  'SLA Monitoring': [
+    'Given work order raised, When SLA timer starts, Then dashboard displays time-to-resolution against Housing Act 2004 HHSRS Category 1 response targets',
+    'Given SLA breach imminent, When 80% elapsed, Then escalation to property manager with contractor contact details',
+    'Given SLA breached, When logged, Then penalty clause calculation triggered per contractor agreement with tenant communication'
+  ],
+
+  // ========== BULK ANNUITY - REMAINING STORIES ==========
+  'Win Probability Model': [
+    'Given BPA deal parameters entered, When XGBoost model predicts, Then win probability 0-100% returned with feature importance per PRA model risk requirements',
+    'Given prediction made and deal outcome known, When accuracy tracked, Then Brier score and calibration curve update with model performance dashboard',
+    'Given market conditions shift significantly, When model retrained on recent deals, Then SS3/21 model governance sign-off required before production deployment'
+  ],
+  'Optimal Pricing Recommendation': [
+    'Given target margin and win probability trade-off defined by pricing actuary, When optimization runs, Then price recommendation balances profitability with competitive positioning per IFoA guidance',
+    'Given competitive intelligence on rival insurers available from market sources, When incorporated, Then recommendations adjust based on expected competitor behavior',
+    'Given pricing recommendation reviewed by Chief Actuary, When rationale requested, Then SHAP values explain contribution with full audit trail for PRA'
+  ],
+  'Quote Generation Engine': [
+    'Given liability cashflows uploaded for DB scheme with 10,000 members, When pricing engine invoked, Then quote generation completes in under 60 seconds per SLA',
+    'Given gilt yields move significantly during bidding window, When re-quote triggered, Then updated price reflects latest market data with timestamp',
+    'Given final quote approved by pricing committee, When documentation packaged, Then full assumptions breakdown and TPR-compliant sensitivity analysis audit-ready'
+  ],
+
+  // ========== CLIENT PORTAL - REMAINING STORIES ==========
+  'Mobile Responsive Design': [
+    'Given institutional client accesses portal on tablet, When responsive layout renders, Then touch-friendly controls with MiFID II compliant disclosures displayed',
+    'Given slow mobile connection detected, When content loaded, Then progressive enhancement delivers portfolio value first with charts loading async',
+    'Given accessibility requirements per WCAG 2.1 AA, When tested, Then screen reader compatibility and keyboard navigation confirmed'
+  ],
+  'Document Repository': [
+    'Given client needs historical IMA documents, When document library accessed, Then contracts, quarterly reports, and performance statements searchable by date with 7-year retention per FCA SYSC',
+    'Given new quarterly report published by client reporting team, When uploaded, Then client notification sent with secure download link per data protection policy',
+    'Given document retention period expires per records management policy, When archival runs, Then document moved to cold storage with metadata retained'
+  ],
+
+  // ========== ESG ANALYTICS - REMAINING STORIES ==========
+  'MSCI ESG Ratings Integration': [
+    'Given MSCI publishes daily ESG rating update via API, When feed processed overnight, Then updated ratings reflect in portfolio ESG scores by 7am GMT',
+    'Given portfolio contains 500+ securities for institutional mandate, When MSCI coverage analyzed, Then percentage covered and gaps by GICS sector reported with alternative data source recommendations',
+    'Given MSCI ESG methodology version changes annually, When new version released, Then recalibration impact analysis on portfolio scores available within 1 week of publication'
+  ],
+  'Sustainalytics Risk Scores': [
+    'Given company experiences ESG controversy, When Sustainalytics updates incident severity, Then alert triggers to portfolio managers with holdings exposure quantified in AUM',
+    'Given company ESG Risk Rating deteriorates to High category, When watchlist threshold breached, Then engagement escalation workflow initiates with stewardship team',
+    'Given controversy status changes from ongoing to resolved, When database updated, Then historical controversy timeline displays with ESG score recovery tracking'
+  ],
+  'Climate Data Pipeline': [
+    'Given CDP releases annual climate questionnaire responses, When data ingested, Then company climate scores available in platform within 48 hours of publication',
+    'Given company reports Scope 1/2/3 GHG emissions per GHG Protocol, When data normalized to tCO2e per million GBP revenue, Then peer comparison across GICS sectors enabled',
+    'Given company sets or achieves SBTi-validated target, When SBTi database syncs, Then Net Zero commitment status reflects current validation level within 1 week'
+  ],
+  'Portfolio Score Calculator': [
+    'Given portfolio holdings with weights provided for SFDR Article 8 fund, When ESG score calculated, Then weighted average ESG rating with sector tilts displayed',
+    'Given ESG score methodology documented per FCA sustainability disclosure rules, When explained, Then calculation approach with data sources and limitations disclosed',
+    'Given portfolio ESG score benchmarked, When compared to reference index, Then active ESG contribution from security selection quantified'
+  ],
+
+  // ========== REGULATORY CHANGE - REMAINING STORIES ==========
+  'Regulatory Calendar': [
+    'Given FCA/PRA regulatory deadlines tracked, When calendar accessed, Then timeline view shows upcoming milestones with responsible owner and status',
+    'Given regulatory implementation deadline approaches, When 90 days out, Then readiness assessment workflow triggered with gap analysis',
+    'Given deadline missed, When flagged in system, Then incident log created with root cause analysis required per operational risk framework'
+  ],
+  'Implementation Tracking': [
+    'Given regulatory implementation project created, When milestones defined, Then progress tracked with RAG status per governance framework',
+    'Given milestone delayed, When escalation triggered, Then mitigation plan requested from project owner with revised timeline',
+    'Given implementation complete, When evidence uploaded, Then compliance certification generated for internal audit and regulatory submission'
+  ],
+
+  // ========== PRT INTAKE - REMAINING STORIES ==========
+  'Member Validation Rules': [
+    'Given member data batch ingested from scheme administrator, When 200+ TPR validation rules execute, Then errors categorized with scheme-specific correction guidance per field',
+    'Given NI number format validation fails, When error displayed, Then correct HMRC format example and common transcription mistakes shown',
+    'Given benefit calculation validation detects discrepancy vs scheme schedule, When flagged, Then expected vs actual values displayed with actuarial calculation breakdown'
+  ],
+  'Data Cleansing Tools': [
+    'Given multiple validation errors exist for scheme data load, When cleansing UI accessed, Then batch editing allows simultaneous correction of common error patterns',
+    'Given member address is incomplete, When Royal Mail PAF lookup triggered, Then address auto-completes from postcode with UPRN validation',
+    'Given cleansing session complete, When sign-off requested by scheme actuary, Then audit trail captures all changes with user attribution and timestamp per TPR governance'
+  ],
+  'Liability Cashflow Generator': [
+    'Given member data cleansed and validated, When cashflow generation runs, Then monthly benefit projections calculated for 70+ years based on CMI mortality assumptions',
+    'Given mortality basis is CMI_2022 with scheme-specific adjustments, When survival probabilities applied, Then mortality improvement rate incorporated per actuarial basis',
+    'Given spouse reversionary benefits apply per scheme rules, When calculated, Then contingent spouse pensions modeled using age difference and reversion percentage assumptions'
+  ],
+  'Pricing API Integration': [
+    'Given liability cashflows generated for DB scheme, When pricing API invoked, Then quote response returns within 60 seconds for 10,000 member scheme',
+    'Given gilt yields move significantly during bidding window, When re-quote requested, Then updated price reflects current market conditions with data currency timestamp',
+    'Given quote finalized for trustee review, When documentation requested, Then full methodology, assumptions, and regulatory sensitivity analysis delivered in TPR-compliant format'
+  ],
+
+  // ========== PROTECTION PRODUCT - REMAINING STORIES ==========
+  'Quote Engine': [
+    'Given customer enters personal details and coverage requirements, When quote calculation runs per actuarial pricing model, Then premium displays within 5 seconds with FCA-compliant breakdown',
+    'Given customer discloses smoker status or elevated BMI, When underwriting rating factors applied, Then premium loading explained with Consumer Duty fair value assessment',
+    'Given customer saves quote for later, When returning within 30-day validity, Then quote retrievable with option to refresh rates to current market'
+  ],
+  'Policy Issuance': [
+    'Given protection application approved and initial premium collected, When policy documents generated, Then policy schedule with FCA Key Facts document available in secure portal',
+    'Given customer requests mid-term alteration per life event, When change processed, Then premium recalculates with pro-rata adjustment and amended schedule issued',
+    'Given annual renewal date approaches, When renewal notice sent per FCA ICOBS, Then customer can confirm continuation, adjust cover, or cancel online'
   ]
 };
 

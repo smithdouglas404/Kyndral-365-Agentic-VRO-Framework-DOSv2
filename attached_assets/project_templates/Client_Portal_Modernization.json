@@ -248,9 +248,9 @@
           "storyPoints": 8,
           "status": "done",
           "acceptanceCriteria": [
-            "Given customer uses mobile device, When form loads, Then touch-friendly inputs sized for finger interaction",
-            "Given slow 3G connection detected, When content loaded, Then progressive enhancement delivers core functionality first",
-            "Given device matrix testing runs, When results reviewed, Then 95%+ of target devices pass visual and functional tests"
+            "Given institutional client accesses portal on tablet, When responsive layout renders, Then touch-friendly controls with MiFID II compliant disclosures displayed",
+            "Given slow mobile connection detected, When content loaded, Then progressive enhancement delivers portfolio value first with charts loading async",
+            "Given accessibility requirements per WCAG 2.1 AA, When tested, Then screen reader compatibility and keyboard navigation confirmed"
           ],
           "tasks": [
             {

@@ -214,9 +214,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given SLA Monitoring is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given work order raised, When SLA timer starts, Then dashboard displays time-to-resolution against Housing Act 2004 HHSRS Category 1 response targets",
+            "Given SLA breach imminent, When 80% elapsed, Then escalation to property manager with contractor contact details",
+            "Given SLA breached, When logged, Then penalty clause calculation triggered per contractor agreement with tenant communication"
           ],
           "tasks": [
             {

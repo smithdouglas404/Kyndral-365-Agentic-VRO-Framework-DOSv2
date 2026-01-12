@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given property has smart meter, When API connection established, Then half-hourly consumption data ingested automatically",
-            "Given meter data gaps detected, When flagged, Then estimation methodology applied with data quality indicator",
-            "Given consumption anomaly detected, When alert triggered, Then property manager notified with investigation guidance"
+            "Given property has smart meter per Energy Act 2011 requirements, When API connection established, Then half-hourly consumption data ingested automatically per SMETS2 standards",
+            "Given meter data gaps detected in DCC Smart Energy Code compliant feed, When flagged, Then estimation methodology applied with data quality disclosure",
+            "Given consumption anomaly detected exceeding MEES benchmark, When alert triggered, Then property manager notified with HHSRS Category 1 risk assessment"
           ],
           "tasks": [
             {
@@ -115,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given property consumption accessed, When dashboard loads, Then electricity, gas, and water usage displayed with benchmarks",
-            "Given tenant wants to see usage, When portal accessed, Then personalized consumption insights with cost estimates shown",
-            "Given consumption exceeds threshold, When alert created, Then energy efficiency recommendations provided"
+            "Given property consumption accessed for Housing Act 2004 HHSRS assessment, When dashboard loads, Then electricity, gas, and water usage displayed against MEES minimum EPC Band E thresholds",
+            "Given tenant requests energy data per Energy Performance of Buildings Regulations 2012, When portal accessed, Then consumption insights with EPC improvement recommendations shown",
+            "Given consumption exceeds CRREM 1.5C pathway threshold, When alert created, Then retrofit recommendations aligned with 2028 MEES Band C requirements provided"
           ],
           "tasks": [
             {
@@ -176,9 +176,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given building energy data collected, When carbon calculation runs, Then tCO2e calculated using latest DEFRA conversion factors",
-            "Given portfolio carbon footprint aggregated, When reported, Then emissions by source (electricity, gas, vehicles) displayed",
-            "Given carbon intensity benchmarked, When compared to sector, Then CRREM alignment score calculated"
+            "Given building energy data collected per SECR reporting requirements, When carbon calculation runs, Then tCO2e calculated using DEFRA GHG conversion factors with Scope 1/2/3 disclosure",
+            "Given portfolio carbon footprint aggregated for TCFD disclosure, When reported, Then emissions by source with Science Based Targets alignment displayed",
+            "Given carbon intensity benchmarked against CRREM decarbonization pathway, When compared to sector, Then stranding year and MEES compliance trajectory calculated"
           ],
           "tasks": [
             {
@@ -214,9 +214,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given property requires energy upgrade, When retrofit options modeled, Then EPC improvement, carbon savings, and cost displayed per measure",
-            "Given cost-benefit analysis run, When payback calculated, Then NPV of energy savings vs capital cost shown with IRR",
-            "Given retrofit package selected, When approved, Then project created with milestones and contractor procurement workflow"
+            "Given property requires upgrade to meet MEES 2028 Band C requirement, When retrofit options modeled, Then EPC improvement, carbon savings, and PAS 2035 compliant measures displayed",
+            "Given cost-benefit analysis run per Green Finance Institute methodology, When payback calculated, Then NPV of energy savings with ECO4 funding eligibility shown",
+            "Given retrofit package selected per PAS 2030 installer standards, When approved, Then project created with TrustMark registration and MCS certification requirements"
           ],
           "tasks": [
             {

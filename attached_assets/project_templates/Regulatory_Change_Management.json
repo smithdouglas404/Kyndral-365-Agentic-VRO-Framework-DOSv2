@@ -79,9 +79,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Regulatory Source Integration regulatory requirement identified, When assessed, Then impact score and implementation plan created",
-            "Given policy update required, When drafted, Then version control and approval workflow maintained",
-            "Given audit finding raised, When documented, Then remediation tracked with owner and due date"
+            "Given FCA RSS feed connected, When new publication detected, Then content ingested within 1 hour of publication",
+            "Given PRA publication scraped, When parsed, Then structured metadata extracted with categorization",
+            "Given EIOPA/SEC/ESMA feeds integrated, When synchronized, Then international regulatory landscape covered"
           ],
           "tasks": [
             {
@@ -153,9 +153,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given AI Relevance Classification is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given regulatory content ingested, When classification model runs, Then relevance score 0-100 assigned with confidence",
+            "Given false positive identified, When feedback submitted, Then model retraining triggered within 48 hours",
+            "Given accuracy monitored, When dashboard accessed, Then precision/recall metrics displayed with trend"
           ],
           "tasks": [
             {
@@ -215,9 +215,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Alert and Notification System is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given high priority regulation detected, When alert triggered, Then relevant stakeholders notified within 4 hours",
+            "Given user preferences configured, When notification sent, Then delivery channel (email/SMS/app) matches preference",
+            "Given acknowledgment required, When 48 hours elapsed, Then escalation to manager triggered"
           ],
           "tasks": [
             {
@@ -301,9 +301,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Automated Impact Routing is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given regulatory change classified, When routing rules applied, Then impacted business units automatically identified",
+            "Given impact assessment assigned, When workflow initiated, Then due date and owner tracked with reminders",
+            "Given cross-functional impact detected, When multiple units identified, Then coordination meeting auto-scheduled"
           ],
           "tasks": [
             {

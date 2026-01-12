@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Deal Pipeline CRM is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given PE deal opportunity identified, When entered in CRM, Then pipeline stage, probability, and expected close date tracked per investment committee governance",
+            "Given deal advances through stages per ILPA DDQ standards, When gate criteria met, Then next stage unlocked with required approvals documented",
+            "Given deal pipeline reviewed, When dashboard accessed, Then deal flow by sector, geography, and stage displayed with commitment capacity analysis"
           ],
           "tasks": [
             {
@@ -127,9 +127,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Due Diligence Workflow is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given due diligence initiated per ILPA Due Diligence Questionnaire standards, When checklist activated, Then financial, legal, commercial, and ESG workstreams assigned with deadlines",
+            "Given DD finding raised per institutional investor standards, When documented, Then risk rating and mitigation requirement tracked to resolution",
+            "Given DD complete, When investment committee pack generated, Then ILPA-compliant summary with risk matrix and deal terms comparison produced"
           ],
           "tasks": [
             {
@@ -165,9 +165,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Deal Documentation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given deal documentation required per LPA standards, When uploaded, Then version control with audit trail maintained for 10+ year fund life",
+            "Given side letter negotiated, When executed, Then MFN tracking initiated with comparison to similar vintage commitments",
+            "Given closing checklist complete per AIFMD requirements, When signed, Then fund subscription documents filed with custodian notification"
           ],
           "tasks": [
             {
@@ -226,9 +226,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Asset Register is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given portfolio company acquired, When registered, Then investment date, cost basis, and ownership percentage recorded with fair value hierarchy classification",
+            "Given asset valuation updated quarterly per IPEV guidelines, When calculated, Then Level 3 fair value with comparable multiple and DCF support documented",
+            "Given asset performance monitored, When KPIs collected, Then revenue growth, EBITDA margin, and leverage tracked against investment case"
           ],
           "tasks": [
             {
@@ -264,9 +264,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given infrastructure asset valuation required, When DCF model runs, Then fair value calculated with key assumptions documented",
-            "Given comparable transaction data available, When benchmarked, Then valuation multiple comparison provided",
-            "Given quarterly valuation update due, When completed, Then NAV impact calculated with movement attribution"
+            "Given infrastructure asset valuation required per IPEV Guidelines, When DCF model runs, Then fair value calculated with WACC and terminal value assumptions documented",
+            "Given comparable transaction data available from Preqin/Burgiss, When benchmarked, Then valuation multiple comparison with vintage adjustment provided",
+            "Given quarterly valuation update due per AIFMD, When completed, Then NAV impact calculated with movement attribution across value drivers"
           ],
           "tasks": [
             {

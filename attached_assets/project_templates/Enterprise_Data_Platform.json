@@ -140,9 +140,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Delta Lake Format Implementation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given raw data ingested into Bronze layer, When Delta format applied, Then ACID transactions ensure data integrity with time travel for 90-day point-in-time recovery",
+            "Given concurrent Spark jobs write data, When optimistic concurrency applied, Then Z-ORDER clustering and VACUUM operations maintain query performance under <5 second SLA",
+            "Given schema evolution required per business change, When ALTER TABLE applied, Then existing downstream queries continue with null handling per data contract"
           ],
           "tasks": [
             {
@@ -201,9 +201,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Source System Connectors - Wave 1 is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given Salesforce CRM integration required, When connector deployed, Then CDC-based incremental sync captures all opportunity and contact changes within 15 minutes",
+            "Given Oracle Financials data needed, When connector deployed, Then GL, AP, AR data extracted with referential integrity preserved across entities",
+            "Given mainframe policy admin system accessed, When COBOL copybook parsed, Then data mapped to modern schema with business key preservation per GDPR lineage"
           ],
           "tasks": [
             {
@@ -274,9 +274,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given PII Detection and GDPR Compliance regulatory requirement identified, When assessed, Then impact score and implementation plan created",
-            "Given policy update required, When drafted, Then version control and approval workflow maintained",
-            "Given audit finding raised, When documented, Then remediation tracked with owner and due date"
+            "Given customer data stored per GDPR Article 5, When Microsoft Purview scans, Then NI numbers, addresses, and DOBs tagged with 95%+ precision for sensitivity classification",
+            "Given data subject access request received per GDPR Article 15, When SAR workflow triggered, Then all customer data across Bronze/Silver/Gold layers extracted within 30-day statutory deadline",
+            "Given right to erasure requested per GDPR Article 17, When deletion workflow runs, Then customer PII pseudonymized/deleted with audit trail for ICO compliance"
           ],
           "tasks": [
             {
@@ -347,9 +347,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Semantic Layer with dbt is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given business metrics defined, When dbt models built, Then semantic layer provides consistent definitions across Power BI, Databricks SQL, and API consumers",
+            "Given data lineage required for governance, When dbt docs generated, Then column-level lineage from source to consumption layer documented with business glossary integration",
+            "Given CI/CD pipeline triggered, When dbt tests run, Then data quality gates enforce freshness, uniqueness, and referential integrity before promotion"
           ],
           "tasks": [
             {

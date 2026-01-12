@@ -322,9 +322,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Mobile App Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer uses L&G mobile app, When chatbot SDK integrated, Then conversation interface loads natively within 1 second with consistent L&G branding",
+            "Given push notification received, When customer responds via chat, Then context includes notification reference with seamless conversation flow",
+            "Given app used offline, When chat attempted, Then offline message displayed with queued message sync on reconnection"
           ],
           "tasks": [
             {
@@ -372,9 +372,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Voice IVR Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer calls L&G contact centre, When IVR dialogue triggered, Then speech recognition accuracy exceeds 85% for pension terminology per HMRC validation",
+            "Given speech-to-text transcribes pension query, When intent matched, Then automated response plays with option to transfer to human per FCA DISP requirements",
+            "Given call quality degrades or customer frustrated, When detected, Then graceful escalation to human agent with full conversation context"
           ],
           "tasks": [
             {
@@ -445,9 +445,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given PDF pension document uploaded, When OCR and parsing complete, Then structured data extracted with 95%+ accuracy",
-            "Given document contains tables, When processed, Then tabular data is queryable and charts summarized",
-            "Given document language is Welsh, When language detected, Then appropriate language model processes content"
+            "Given pension scheme PDF uploaded by administrator, When OCR and parsing complete, Then structured data extracted with 95%+ accuracy for scheme rules",
+            "Given document contains benefit tables, When processed, Then tabular data queryable with scheme-specific factor extraction",
+            "Given bilingual Welsh/English document, When language detected, Then appropriate language model processes content per Welsh Language Act"
           ],
           "tasks": [
             {

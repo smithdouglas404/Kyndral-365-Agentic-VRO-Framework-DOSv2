@@ -116,9 +116,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Application Form is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer starts application per FCA Client Assets rules, When progressive form loaded, Then anti-money laundering checks and ID verification integrated per MLR 2017",
+            "Given application requires appropriateness assessment, When questions answered, Then suitability determination with risk warnings per FCA COBS 10 completed",
+            "Given application submitted, When validated, Then account opening confirmation with cooling-off rights per FCA DISP sent within 24 hours"
           ],
           "tasks": [
             {
@@ -154,9 +154,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Payment Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer makes contribution per FCA Client Money rules, When payment gateway processes, Then funds segregated in client money account with reconciliation within T+1",
+            "Given payment fails, When retry attempted, Then customer notified with alternative payment methods and ISA deadline warning if applicable",
+            "Given reconciliation runs per FCA CASS 7, When completed, Then client money calculations accurate with regulatory reporting data generated"
           ],
           "tasks": [
             {
@@ -215,9 +215,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Account Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer accesses account per FCA disclosure requirements, When dashboard loads, Then portfolio valuation, performance, and charges displayed in real-time",
+            "Given performance calculation required, When displayed, Then time-weighted returns shown with benchmark comparison and MiFID II compliant cost disclosure",
+            "Given document access needed, When repository opened, Then contract notes, statements, and tax certificates available with 7-year retention per FCA SYSC"
           ],
           "tasks": [
             {
@@ -253,9 +253,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Transaction Capabilities is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer requests withdrawal per FCA CASS rules, When processed, Then funds released within stated SLA with anti-fraud verification",
+            "Given fund switch requested, When executed, Then trade completed at next valuation point with MiFID II best execution policy applied",
+            "Given regular savings plan modified, When updated, Then changes effective from next collection date with confirmation sent"
           ],
           "tasks": [
             {

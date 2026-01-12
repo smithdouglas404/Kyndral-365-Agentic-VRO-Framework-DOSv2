@@ -115,9 +115,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given customer enters details and coverage requirements, When quote calculation runs, Then premium displays within 5 seconds with breakdown",
-            "Given customer discloses smoker status or elevated BMI, When rating factors applied, Then premium loading explained with wellness discount opportunities",
-            "Given customer saves quote for later, When returning within 30 days, Then quote retrievable with option to refresh rates"
+            "Given customer enters personal details and coverage requirements, When quote calculation runs per actuarial pricing model, Then premium displays within 5 seconds with FCA-compliant breakdown",
+            "Given customer discloses smoker status or elevated BMI, When underwriting rating factors applied, Then premium loading explained with Consumer Duty fair value assessment",
+            "Given customer saves quote for later, When returning within 30-day validity, Then quote retrievable with option to refresh rates to current market"
           ],
           "tasks": [
             {
@@ -153,9 +153,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Application Form is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer starts application per FCA Client Assets rules, When progressive form loaded, Then anti-money laundering checks and ID verification integrated per MLR 2017",
+            "Given application requires appropriateness assessment, When questions answered, Then suitability determination with risk warnings per FCA COBS 10 completed",
+            "Given application submitted, When validated, Then account opening confirmation with cooling-off rights per FCA DISP sent within 24 hours"
           ],
           "tasks": [
             {

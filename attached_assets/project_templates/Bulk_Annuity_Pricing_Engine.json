@@ -347,9 +347,9 @@
           "storyPoints": 34,
           "status": "done",
           "acceptanceCriteria": [
-            "Given deal parameters entered, When XGBoost model predicts, Then win probability 0-100% returned with 90% confidence interval",
-            "Given prediction made and deal outcome known, When accuracy tracked, Then Brier score and calibration curve update",
-            "Given macro conditions shift significantly, When model retrained, Then performance improvement validated on holdout set"
+            "Given BPA deal parameters entered, When XGBoost model predicts, Then win probability 0-100% returned with feature importance per PRA model risk requirements",
+            "Given prediction made and deal outcome known, When accuracy tracked, Then Brier score and calibration curve update with model performance dashboard",
+            "Given market conditions shift significantly, When model retrained on recent deals, Then SS3/21 model governance sign-off required before production deployment"
           ],
           "tasks": [
             {
@@ -420,9 +420,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given target margin and win probability trade-off defined, When optimization runs, Then price recommendation balances profitability with positioning",
-            "Given competitive intelligence on rival pricing available, When incorporated, Then recommendations adjust based on competitor behavior",
-            "Given pricing recommendation reviewed by actuary, When rationale requested, Then SHAP values explain contribution of each feature"
+            "Given target margin and win probability trade-off defined by pricing actuary, When optimization runs, Then price recommendation balances profitability with competitive positioning per IFoA guidance",
+            "Given competitive intelligence on rival insurers available from market sources, When incorporated, Then recommendations adjust based on expected competitor behavior",
+            "Given pricing recommendation reviewed by Chief Actuary, When rationale requested, Then SHAP values explain contribution with full audit trail for PRA"
           ],
           "tasks": [
             {

@@ -79,9 +79,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given NGFS scenario version selected (orderly/disorderly/hot house), When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 horizons",
-            "Given NGFS updates scenario parameters, When new version released, Then platform incorporates updated parameters within 1 month",
-            "Given custom scenario parameters defined, When scenario created, Then custom pathway can be saved and reused for comparison"
+            "Given NGFS scenario version selected per TCFD recommendations, When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 horizons with SFDR Article 9 disclosure compliance",
+            "Given NGFS updates scenario parameters, When new version released, Then platform incorporates within 1 month per Bank of England CBES methodology",
+            "Given custom scenario defined for PRA SS3/19 compliance, When created, Then custom pathway saved with regulatory audit trail"
           ],
           "tasks": [
             {
@@ -140,9 +140,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given custom climate parameters required, When builder accessed, Then carbon price, policy, and technology assumptions configurable",
-            "Given scenario preview requested, When calculated, Then real-time portfolio impact updates as parameters change",
-            "Given scenario saved, When shared, Then version control and access permissions applied"
+            "Given custom climate parameters required for TCFD scenario analysis, When builder accessed, Then carbon price (IEA/NGFS aligned), policy, and technology assumptions configurable",
+            "Given scenario preview requested per SFDR RTS requirements, When calculated, Then real-time portfolio impact updates with PAI indicator projections",
+            "Given scenario saved for regulatory reporting, When shared, Then version control and audit permissions applied per FCA sustainability disclosure rules"
           ],
           "tasks": [
             {
@@ -201,9 +201,9 @@
           "storyPoints": 34,
           "status": "done",
           "acceptanceCriteria": [
-            "Given climate stress test required, When run, Then VaR and expected shortfall under scenario calculated",
-            "Given TCFD report required, When export generated, Then compliant template with all recommended disclosures produced",
-            "Given stress results reviewed, When approved, Then results available for regulatory submission"
+            "Given climate stress test required per PRA supervisory statement SS3/19, When run, Then VaR and expected shortfall under orderly/disorderly/hot house scenarios calculated",
+            "Given TCFD report required per FCA Listing Rule 9.8.6R, When export generated, Then all 11 TCFD recommended disclosures with metrics and targets produced",
+            "Given stress results reviewed by Climate Risk Committee, When approved, Then results formatted for PRA climate biennial exploratory scenario submission"
           ],
           "tasks": [
             {
@@ -298,9 +298,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given portfolio holdings provided, When ITR calculated, Then portfolio temperature alignment score displays with methodology disclosure",
-            "Given company targets assessed, When credibility scored, Then high/medium/low confidence weighting applied to trajectory",
-            "Given ITR drill-down requested, When analysis runs, Then top 10 temperature contributors identified with engagement actions"
+            "Given portfolio holdings provided for SFDR Article 8/9 disclosure, When ITR calculated, Then TCFD-aligned temperature score with SBTi methodology disclosed",
+            "Given company targets assessed per Transition Pathway Initiative methodology, When credibility scored, Then management quality and carbon performance ratings applied",
+            "Given ITR drill-down requested for engagement prioritization, When analyzed, Then CA100+ focus companies and net zero laggards identified with escalation recommendations"
           ],
           "tasks": [
             {
