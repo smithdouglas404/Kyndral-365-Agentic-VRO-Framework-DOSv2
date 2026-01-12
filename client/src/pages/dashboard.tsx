@@ -545,9 +545,6 @@ function DashboardContent() {
             {/* Unified Metrics Section - VRO and PMO side by side */}
             <UnifiedMetricsSection onDrillDown={handleDrillDown} />
             
-            {/* Agent Activity & Audit Trail - consolidated view */}
-            <ActionAuditTimeline maxItems={12} />
-
           </TabsContent>
 
           {/* Portfolios Tab - BU Programs */}
@@ -628,6 +625,9 @@ function DashboardContent() {
 
             {/* Cross-Agent Collaboration */}
             <CrossAgentCollaboration />
+
+            {/* Agent Activity & Audit Trail */}
+            <ActionAuditTimeline maxItems={12} />
 
           </TabsContent>
 
