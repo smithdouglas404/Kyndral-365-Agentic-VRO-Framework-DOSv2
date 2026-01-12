@@ -174,6 +174,33 @@ export const insertAgentPatternSchema = createInsertSchema(agentPatterns).omit({
 export type InsertAgentPattern = z.infer<typeof insertAgentPatternSchema>;
 export type AgentPattern = typeof agentPatterns.$inferSelect;
 
+// Project Metrics - Database-backed metrics for reactive monitoring
+export const projectMetrics = pgTable("project_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: text("project_id").notNull(),
+  projectName: text("project_name").notNull(),
+  metricKey: text("metric_key").notNull(), // spi, cpi, okr_progress, change_adoption, sprint_velocity
+  metricName: text("metric_name").notNull(),
+  currentValue: text("current_value").notNull(), // Stored as text, parsed as decimal
+  previousValue: text("previous_value"), // For change detection
+  threshold: text("threshold").notNull(), // Warning threshold
+  criticalThreshold: text("critical_threshold"), // Critical threshold
+  direction: text("direction").default("higher_is_better"), // higher_is_better, lower_is_better
+  unit: text("unit").default("decimal"), // decimal, percentage, days, currency
+  agentOwner: text("agent_owner").notNull(), // finops, planning, okr, ocm, tmo
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertProjectMetricSchema = createInsertSchema(projectMetrics).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
+export type InsertProjectMetric = z.infer<typeof insertProjectMetricSchema>;
+export type ProjectMetric = typeof projectMetrics.$inferSelect;
+
 // Risk Interventions - AI-detected risks requiring human decision
 export const interventions = pgTable("interventions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

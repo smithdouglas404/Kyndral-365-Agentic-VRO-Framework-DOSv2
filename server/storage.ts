@@ -11,8 +11,10 @@ import {
   type Intervention, type InsertIntervention,
   type AgentDiscussion, type InsertAgentDiscussion,
   type DiscussionMessage, type InsertDiscussionMessage,
+  type ProjectMetric, type InsertProjectMetric,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
-  agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages
+  agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
+  projectMetrics
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -60,6 +62,10 @@ export interface IStorage {
   createDiscussion(discussion: InsertAgentDiscussion): Promise<AgentDiscussion>;
   getDiscussionMessages(discussionId: string): Promise<DiscussionMessage[]>;
   addDiscussionMessage(message: InsertDiscussionMessage): Promise<DiscussionMessage>;
+  
+  getProjectMetrics(projectId: string): Promise<ProjectMetric[]>;
+  getAllProjectMetrics(): Promise<ProjectMetric[]>;
+  upsertProjectMetric(metric: InsertProjectMetric): Promise<ProjectMetric>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -376,6 +382,41 @@ export class DatabaseStorage implements IStorage {
   async addDiscussionMessage(message: InsertDiscussionMessage): Promise<DiscussionMessage> {
     const result = await db.insert(discussionMessages).values(message).returning();
     return result[0];
+  }
+
+  async getProjectMetrics(projectId: string): Promise<ProjectMetric[]> {
+    return await db.select().from(projectMetrics)
+      .where(eq(projectMetrics.projectId, projectId))
+      .orderBy(projectMetrics.metricKey);
+  }
+
+  async getAllProjectMetrics(): Promise<ProjectMetric[]> {
+    return await db.select().from(projectMetrics)
+      .orderBy(desc(projectMetrics.lastUpdated));
+  }
+
+  async upsertProjectMetric(metric: InsertProjectMetric): Promise<ProjectMetric> {
+    const existing = await db.select().from(projectMetrics)
+      .where(and(
+        eq(projectMetrics.projectId, metric.projectId),
+        eq(projectMetrics.metricKey, metric.metricKey)
+      ))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      const result = await db.update(projectMetrics)
+        .set({
+          ...metric,
+          previousValue: existing[0].currentValue,
+          lastUpdated: new Date()
+        })
+        .where(eq(projectMetrics.id, existing[0].id))
+        .returning();
+      return result[0];
+    } else {
+      const result = await db.insert(projectMetrics).values(metric).returning();
+      return result[0];
+    }
   }
 }
 

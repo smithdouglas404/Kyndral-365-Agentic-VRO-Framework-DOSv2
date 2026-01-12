@@ -9,14 +9,14 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
-  Bot
+  Bot,
+  Database
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { triggerMetricSimulation } from "@/lib/agentOrchestrator";
-import { getAutonomousActionsLog, getRegisteredThresholds } from "@/lib/reactiveMetricMonitor";
+import { apiRequest } from "@/lib/queryClient";
 
 interface MetricSimulator {
   id: string;
@@ -104,7 +104,7 @@ export function ReactiveAgentDemo() {
     ));
   };
 
-  const handleTriggerSimulation = (metric: MetricSimulator) => {
+  const handleTriggerSimulation = async (metric: MetricSimulator) => {
     if (simulatingMetrics.has(metric.id)) return;
     
     setSimulatingMetrics(prev => new Set(prev).add(metric.id));
@@ -115,44 +115,59 @@ export function ReactiveAgentDemo() {
       : metric.currentValue.toFixed(2);
     
     setSimulationLog(prev => [
-      `[${timestamp}] Triggering ${metric.name} = ${displayValue}`,
+      `[${timestamp}] Sending ${metric.name} = ${displayValue} to database...`,
       ...prev.slice(0, 9)
     ]);
     
-    triggerMetricSimulation(metric.id, metric.currentValue);
+    const metricKeyMap: Record<string, string> = {
+      'schedule-performance': 'spi',
+      'cost-performance': 'cpi',
+      'okr-progress': 'okr_progress',
+      'change-adoption': 'change_adoption',
+      'sprint-velocity': 'sprint_velocity'
+    };
     
-    const status = getStatus(metric);
-    if (status !== 'ok') {
-      setTimeout(() => {
-        setSimulationLog(prev => [
-          `[${new Date().toLocaleTimeString()}] ${status.toUpperCase()} threshold breached! ${metric.agent} creating intervention...`,
-          ...prev.slice(0, 9)
-        ]);
-      }, 500);
+    try {
+      const response = await apiRequest('POST', '/api/metrics/update', {
+        projectId: 'proj-reactive-demo',
+        projectName: 'Reactive Agent Demo Project',
+        metricKey: metricKeyMap[metric.id] || metric.id,
+        value: metric.id === 'sprint-velocity' ? metric.currentValue / 100 : metric.currentValue
+      });
       
-      setTimeout(() => {
+      const result = await response.json();
+      
+      if (result.intervention) {
         setSimulationLog(prev => [
-          `[${new Date().toLocaleTimeString()}] Intervention sent to Command Center. Check floating alerts!`,
+          `[${new Date().toLocaleTimeString()}] BREACH DETECTED! ${metric.agent} created intervention in database.`,
           ...prev.slice(0, 9)
         ]);
-        setSimulatingMetrics(prev => {
-          const next = new Set(prev);
-          next.delete(metric.id);
-          return next;
-        });
-      }, 1500);
-    } else {
-      setTimeout(() => {
+        
+        if (result.autonomousAction) {
+          setTimeout(() => {
+            setSimulationLog(prev => [
+              `[${new Date().toLocaleTimeString()}] Autonomous action executed! Check floating alerts.`,
+              ...prev.slice(0, 9)
+            ]);
+          }, 500);
+        }
+      } else {
         setSimulationLog(prev => [
-          `[${new Date().toLocaleTimeString()}] Metric within acceptable range. No intervention needed.`,
+          `[${new Date().toLocaleTimeString()}] Metric stored. Within acceptable range - no intervention.`,
           ...prev.slice(0, 9)
         ]);
-        setSimulatingMetrics(prev => {
-          const next = new Set(prev);
-          next.delete(metric.id);
-          return next;
-        });
-      }, 500);
+      }
+    } catch (error) {
+      setSimulationLog(prev => [
+        `[${new Date().toLocaleTimeString()}] Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ...prev.slice(0, 9)
+      ]);
+    } finally {
+      setSimulatingMetrics(prev => {
+        const next = new Set(prev);
+        next.delete(metric.id);
+        return next;
+      });
     }
   };
 
@@ -169,8 +184,9 @@ export function ReactiveAgentDemo() {
         <CardTitle className="flex items-center gap-2 text-lg">
           <Bot className="h-5 w-5 text-purple-600" />
           Reactive Agent Demo
-          <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-300">
-            Live Simulation
+          <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-300">
+            <Database className="h-3 w-3 mr-1" />
+            Database-Backed
           </Badge>
         </CardTitle>
         <p className="text-sm text-gray-600 mt-1">

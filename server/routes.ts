@@ -829,5 +829,99 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Reactive Metric Watcher Routes
+  const { updateMetricAndCheck, getThresholdConfigs } = await import("./reactiveMetricWatcher");
+
+  app.get("/api/metrics/thresholds", async (_req, res) => {
+    try {
+      const configs = getThresholdConfigs();
+      res.json({ thresholds: configs });
+    } catch (error: any) {
+      console.error("Get thresholds error:", error);
+      res.status(500).json({ error: "Failed to get thresholds" });
+    }
+  });
+
+  app.get("/api/metrics/:projectId", async (req, res) => {
+    try {
+      const metrics = await storage.getProjectMetrics(req.params.projectId);
+      res.json({ metrics });
+    } catch (error: any) {
+      console.error("Get project metrics error:", error);
+      res.status(500).json({ error: "Failed to get project metrics" });
+    }
+  });
+
+  app.get("/api/metrics", async (_req, res) => {
+    try {
+      const metrics = await storage.getAllProjectMetrics();
+      res.json({ metrics });
+    } catch (error: any) {
+      console.error("Get all metrics error:", error);
+      res.status(500).json({ error: "Failed to get metrics" });
+    }
+  });
+
+  app.post("/api/metrics/update", async (req, res) => {
+    try {
+      const { projectId, projectName, metricKey, value } = req.body;
+      
+      if (!projectId || !projectName || !metricKey || value === undefined) {
+        return res.status(400).json({ error: "Missing required fields: projectId, projectName, metricKey, value" });
+      }
+
+      const result = await updateMetricAndCheck(projectId, projectName, metricKey, parseFloat(value));
+      
+      res.json({
+        success: true,
+        intervention: result.intervention,
+        autonomousAction: result.autonomousAction,
+        message: result.intervention 
+          ? `Threshold breach detected - intervention created` 
+          : `Metric updated successfully - within acceptable range`
+      });
+    } catch (error: any) {
+      console.error("Update metric error:", error);
+      res.status(500).json({ error: "Failed to update metric" });
+    }
+  });
+
+  app.post("/api/metrics/simulate", async (req, res) => {
+    try {
+      const { projectId, projectName, metricKey, targetValue, steps = 5 } = req.body;
+      
+      if (!projectId || !projectName || !metricKey || targetValue === undefined) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const existingMetrics = await storage.getProjectMetrics(projectId);
+      const existing = existingMetrics.find(m => m.metricKey === metricKey);
+      const startValue = existing ? parseFloat(existing.currentValue) : 1.0;
+      
+      const stepSize = (targetValue - startValue) / steps;
+      const results = [];
+
+      for (let i = 1; i <= steps; i++) {
+        const newValue = startValue + (stepSize * i);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const result = await updateMetricAndCheck(projectId, projectName, metricKey, newValue);
+        results.push({ step: i, value: newValue, ...result });
+      }
+
+      res.json({
+        success: true,
+        simulation: {
+          startValue,
+          targetValue,
+          steps,
+          results
+        }
+      });
+    } catch (error: any) {
+      console.error("Simulate metric error:", error);
+      res.status(500).json({ error: "Failed to simulate metric" });
+    }
+  });
+
   return httpServer;
 }
