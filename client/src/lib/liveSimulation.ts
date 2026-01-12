@@ -399,6 +399,36 @@ export class SimulationEngine {
   getIsRunning(): boolean {
     return this.isRunning;
   }
+  
+  pushEvent(event: Partial<SimulationEvent> & { title: string; message: string }): SimulationEvent {
+    const fullEvent: SimulationEvent = {
+      id: `cascade-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: event.type || 'action_required',
+      priority: event.priority || 'high',
+      timestamp: event.timestamp || new Date(),
+      title: event.title,
+      message: event.message,
+      detail: event.detail || event.message,
+      confidence: event.confidence || 95,
+      source: event.source || 'Agent Cascade',
+      relatedEntity: event.relatedEntity || { type: 'project', id: 'cascade-action', name: 'Agent Action', bu: 'VRO' },
+      metrics: event.metrics || { impact: 'High', timeframe: 'Immediate' },
+      actions: event.actions || [
+        { id: 'view', label: 'View Details', type: 'investigate' as const },
+        { id: 'ack', label: 'Acknowledge', type: 'mitigate' as const }
+      ],
+      citations: event.citations || [],
+      read: false
+    };
+    
+    if (this.events.length >= 13) {
+      this.events = this.events.slice(0, this.events.length - 3);
+    }
+    
+    this.events.unshift(fullEvent);
+    this.notifySubscribers(fullEvent);
+    return fullEvent;
+  }
 }
 
 export const simulationEngine = new SimulationEngine();

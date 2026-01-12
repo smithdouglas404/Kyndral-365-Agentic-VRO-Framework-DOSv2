@@ -143,11 +143,11 @@ export function getSuggestedQuestions(context: PageContextData): string[] {
     
     case 'project':
       return [
-        "What are all the dependencies for this project?",
-        "Show me the risk factors and recommendations",
-        "What's the financial status and ROI forecast?",
-        "Which other projects does this one impact?",
-        "What are the key milestones and their status?"
+        "Increase the budget by 20%",
+        "Extend timeline by 2 weeks",
+        "Mark as critical priority",
+        "Accelerate project delivery",
+        "Escalate to leadership"
       ];
     
     case 'portfolio':

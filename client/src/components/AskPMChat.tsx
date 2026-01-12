@@ -244,7 +244,7 @@ export function AskPMChat() {
     setInput("");
     setIsLoading(true);
 
-    const actionIntent = parseActionIntent(messageText);
+    const actionIntent = parseActionIntent(messageText, { entityName: context.entityName, entityId: context.entityId });
     
     if (actionIntent) {
       const scenario = buildScenario(actionIntent.scenarioType, actionIntent.params);
