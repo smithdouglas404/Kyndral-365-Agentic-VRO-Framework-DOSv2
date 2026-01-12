@@ -829,6 +829,32 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Reset demo data for presentations
+  app.post("/api/demo/reset", async (_req, res) => {
+    try {
+      // Clear all pending interventions from reactive demo
+      const allInterventions = await storage.getInterventions();
+      const demoInterventions = allInterventions.filter(i => 
+        i.projectId === 'proj-reactive-demo' || 
+        i.projectName?.includes('Reactive') ||
+        i.title?.includes('Alert')
+      );
+      
+      for (const intervention of demoInterventions) {
+        await storage.updateInterventionStatus(intervention.id, 'dismissed', 'demo-reset');
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Demo reset complete. Cleared ${demoInterventions.length} interventions.`,
+        clearedCount: demoInterventions.length
+      });
+    } catch (error: any) {
+      console.error("Demo reset error:", error);
+      res.status(500).json({ error: "Failed to reset demo" });
+    }
+  });
+
   // Reactive Metric Watcher Routes
   const { updateMetricAndCheck, getThresholdConfigs } = await import("./reactiveMetricWatcher");
 

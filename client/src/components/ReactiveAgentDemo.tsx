@@ -86,6 +86,20 @@ export function ReactiveAgentDemo() {
   const [metrics, setMetrics] = useState<MetricSimulator[]>(DEMO_METRICS);
   const [simulationLog, setSimulationLog] = useState<string[]>([]);
   const [simulatingMetrics, setSimulatingMetrics] = useState<Set<string>>(new Set());
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetDemo = async () => {
+    setIsResetting(true);
+    try {
+      await apiRequest('POST', '/api/demo/reset', {});
+      setMetrics(DEMO_METRICS);
+      setSimulationLog([`[${new Date().toLocaleTimeString()}] Demo reset - ready for presentation!`]);
+    } catch (error) {
+      setSimulationLog(prev => [`[${new Date().toLocaleTimeString()}] Reset failed`, ...prev]);
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const getStatus = (metric: MetricSimulator): 'ok' | 'warning' | 'critical' => {
     if (metric.direction === 'below') {
@@ -270,6 +284,21 @@ export function ReactiveAgentDemo() {
         </div>
         
         <div className="flex gap-2">
+          <Button 
+            onClick={handleResetDemo} 
+            variant="outline"
+            disabled={isResetting}
+            data-testid="button-reset-demo"
+          >
+            {isResetting ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Reset
+              </>
+            )}
+          </Button>
           <Button 
             onClick={handleTriggerAll} 
             className="flex-1 bg-purple-600 hover:bg-purple-700"
