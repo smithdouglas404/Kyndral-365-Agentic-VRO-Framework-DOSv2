@@ -647,9 +647,6 @@ function DashboardContent() {
 
           {/* Portfolios Tab - BU Programs */}
           <TabsContent value="portfolios" className="space-y-6">
-            {/* AI Executive Intelligence - Portfolio-level insights */}
-            <AIExecutiveInsights />
-            
             {/* Portfolio Value Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {divisions.map((division) => (
@@ -709,6 +706,9 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
+
+            {/* AI Executive Intelligence - Portfolio-level insights */}
+            <AIExecutiveInsights />
 
           </TabsContent>
 
