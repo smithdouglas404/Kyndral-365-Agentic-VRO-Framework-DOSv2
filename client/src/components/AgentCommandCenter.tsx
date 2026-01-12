@@ -29,6 +29,7 @@ import {
   RotateCcw,
   Loader2
 } from 'lucide-react';
+import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
 
 interface RiskIntervention {
   id: string;
@@ -188,17 +189,33 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     setProcessingId(id);
     const intervention = interventions.find(i => i.id === id);
     
+    if (!intervention) {
+      setProcessingId(null);
+      return;
+    }
+    
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'executing' as const } : i));
     
-    try {
-      await fetch('/api/interventions/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interventionId: id, projectId: intervention?.projectId })
-      });
-    } catch (error) {
-      console.log('Intervention API not implemented - using local state');
-    }
+    // Route to unified Command Center
+    const action: AgentAction = {
+      actionType: 'approve',
+      sourceComponent: 'Agent Command Center',
+      interventionData: {
+        id: intervention.id,
+        type: intervention.type,
+        severity: intervention.severity,
+        title: intervention.title,
+        description: intervention.description,
+        projectId: intervention.projectId,
+        projectName: intervention.projectName,
+        confidence: intervention.confidence,
+        suggestedAction: intervention.suggestedAction,
+        impact: intervention.impact,
+        agentSource: intervention.agentSource
+      }
+    };
+    
+    await routeToCommandCenter(action);
     
     await new Promise(resolve => setTimeout(resolve, 1500));
     
@@ -213,18 +230,31 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
   const handleDismissIntervention = useCallback(async (id: string) => {
     const intervention = interventions.find(i => i.id === id);
     
-    try {
-      await fetch('/api/interventions/dismiss', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interventionId: id, projectId: intervention?.projectId })
-      });
-    } catch (error) {
-      console.log('Intervention API not implemented - using local state');
+    if (intervention) {
+      // Route to unified Command Center
+      const action: AgentAction = {
+        actionType: 'dismiss',
+        sourceComponent: 'Agent Command Center',
+        interventionData: {
+          id: intervention.id,
+          type: intervention.type,
+          severity: intervention.severity,
+          title: intervention.title,
+          description: intervention.description,
+          projectId: intervention.projectId,
+          projectName: intervention.projectName,
+          confidence: intervention.confidence,
+          suggestedAction: intervention.suggestedAction,
+          impact: intervention.impact,
+          agentSource: intervention.agentSource
+        }
+      };
+      
+      await routeToCommandCenter(action);
     }
     
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'dismissed' as const } : i));
-    toast.info(`Intervention dismissed - ${intervention?.title}`);
+    toast.info(`Intervention dismissed - logged to Command Center`);
   }, [interventions]);
 
   const handleSendChat = async () => {

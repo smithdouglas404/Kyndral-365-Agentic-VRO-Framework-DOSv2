@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { executeAction, ActionType } from '@/lib/agentActionEngine';
 import { AgentType as AgentTypeFromHub } from '@/lib/dataHub';
+import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
 
 interface Recommendation {
   id: string;
@@ -394,7 +395,7 @@ export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendat
   const [activeActions, setActiveActions] = useState<Set<string>>(new Set());
   const [completedActions, setCompletedActions] = useState<Set<string>>(new Set());
   
-  const handleActionClick = (rec: Recommendation) => {
+  const handleActionClick = async (rec: Recommendation) => {
     const actionKey = `${effectiveAgent}-${rec.id}`;
     
     if (completedActions.has(actionKey)) return;
@@ -411,6 +412,27 @@ export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendat
       rec.description,
       rec.confidence
     );
+    
+    // Route to Command Center for unified tracking
+    const action: AgentAction = {
+      actionType: rec.actionType === 'mitigate' ? 'acknowledge' : 
+                  rec.actionType === 'escalate' ? 'escalate' : 'approve',
+      sourceComponent: 'AI Recommendations',
+      interventionData: {
+        type: rec.type === 'risk' ? 'quality' : rec.type === 'savings' ? 'budget' : 'timeline',
+        severity: rec.confidence >= 90 ? 'critical' : rec.confidence >= 75 ? 'high' : 'medium',
+        title: rec.title,
+        description: rec.description,
+        projectId: `rec-${rec.id}`,
+        projectName: rec.title,
+        confidence: rec.confidence,
+        suggestedAction: rec.actionLabel,
+        impact: rec.impact || 'Impact analysis pending',
+        agentSource: `${effectiveAgent.charAt(0).toUpperCase() + effectiveAgent.slice(1).replace('-', ' ')} Agent`
+      }
+    };
+    
+    routeToCommandCenter(action);
     
     // Simulate action processing
     setTimeout(() => {

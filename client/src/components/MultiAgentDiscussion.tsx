@@ -15,8 +15,11 @@ import {
   RotateCcw,
   Sparkles,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
 
 interface AgentMessage {
   id: string;
@@ -113,6 +116,8 @@ export function MultiAgentDiscussion() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTopic] = useState(discussionTopics[0]);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
 
   useEffect(() => {
     if (!isPlaying || currentIndex >= simulatedDiscussion.length) return;
@@ -135,6 +140,43 @@ export function MultiAgentDiscussion() {
     setMessages([]);
     setCurrentIndex(0);
     setIsPlaying(true);
+    setIsApproved(false);
+  };
+
+  const handleApproveConsensus = async () => {
+    setIsApproving(true);
+    
+    const action: AgentAction = {
+      actionType: 'approve',
+      sourceComponent: 'Multi-Agent Discussion',
+      interventionData: {
+        type: 'budget',
+        severity: 'high',
+        title: activeTopic.title,
+        description: activeTopic.context,
+        projectId: 'proj-data-foundation',
+        projectName: 'Enterprise Data Foundation',
+        confidence: 92,
+        suggestedAction: 'Defer MDM Phase 2, release £400K contingency, fast-track CAB approval, notify stakeholders',
+        impact: '£1.4M savings, back within 5% of original budget',
+        agentSource: 'Multi-Agent Consensus'
+      }
+    };
+    
+    const result = await routeToCommandCenter(action);
+    
+    setIsApproving(false);
+    setIsApproved(true);
+    
+    if (result.success) {
+      toast.success('Consensus approved and logged to Command Center', {
+        description: 'Agent actions are now executing'
+      });
+    } else {
+      toast.success('Consensus approved', {
+        description: 'Agents are now executing the agreed actions'
+      });
+    }
   };
 
   const getMessageStyle = (type: string) => {
@@ -256,8 +298,26 @@ export function MultiAgentDiscussion() {
                       <p className="text-sm text-green-600 mt-1">
                         Agents have aligned on a recommended action. Ready for human approval.
                       </p>
-                      <Button className="mt-3 bg-green-600 hover:bg-green-700" size="sm" data-testid="button-review-approve">
-                        Review & Approve
+                      <Button 
+                        className="mt-3 bg-green-600 hover:bg-green-700" 
+                        size="sm" 
+                        data-testid="button-review-approve"
+                        onClick={handleApproveConsensus}
+                        disabled={isApproving || isApproved}
+                      >
+                        {isApproving ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Approving...
+                          </>
+                        ) : isApproved ? (
+                          <>
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Approved
+                          </>
+                        ) : (
+                          'Review & Approve'
+                        )}
                       </Button>
                     </motion.div>
                   )}
