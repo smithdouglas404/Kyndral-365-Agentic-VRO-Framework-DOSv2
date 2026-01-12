@@ -45,7 +45,7 @@ export default function Home() {
             <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight">
               Speed Without <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">
-                Compromise.
+                Compromising Accuracy.
               </span>
             </h1>
             
