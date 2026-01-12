@@ -17,8 +17,6 @@ import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
 import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
-import { BUProgramsSection, PortfolioCard } from "@/components/BUProgramsSection";
-import { buPortfolios } from "@/lib/buPrograms";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
@@ -47,7 +45,6 @@ import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
-import { ProjectHighlights } from "@/components/ProjectHighlights";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -548,7 +545,7 @@ function DashboardContent() {
             {/* Unified Metrics Section - VRO and PMO side by side */}
             <UnifiedMetricsSection onDrillDown={handleDrillDown} />
             
-            {/* Group Function Overview - Portfolio cards with dual VRO/PMO metrics */}
+            {/* Group Function Overview - Simple summary cards */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -562,24 +559,81 @@ function DashboardContent() {
                     Group Function Overview
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    Unified VRO value and PMO delivery metrics across business units
+                    Click any Group Function to view detailed projects and metrics
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {buPortfolios.map((portfolio, i) => (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {divisions.map((division, i) => (
                   <motion.div
-                    key={portfolio.id}
+                    key={division.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
+                    transition={{ delay: i * 0.03 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="p-4 rounded-lg border bg-white hover:shadow-lg transition-all cursor-pointer group"
+                    style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                    data-testid={`card-division-overview-${division.id}`}
+                    onClick={() => handleDrillDown("division", division.id)}
                   >
-                    <PortfolioCard 
-                      portfolio={portfolio} 
-                      onDrillDown={() => handleDrillDown('portfolio', portfolio.id)}
-                    />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
+                        <p className="text-xl font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
+                        <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
+                          {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
+                        </Badge>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                    </div>
                   </motion.div>
                 ))}
+                
+                {/* Climate Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  className="p-4 rounded-lg border border-green-200 bg-green-50 hover:shadow-lg transition-all cursor-pointer group"
+                  data-testid="card-climate-overview"
+                  onClick={() => handleDrillDown("climate", "climate-overview")}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <Leaf className="h-4 w-4 text-green-600" />
+                        <p className="text-xs text-green-700 font-medium">Climate</p>
+                      </div>
+                      <p className="text-xl font-bold text-green-600">-37%</p>
+                      <p className="text-xs text-green-600">emissions</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
+                  </div>
+                </motion.div>
+                
+                {/* Risk Center Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.18 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  className="p-4 rounded-lg border border-slate-200 bg-slate-50 hover:shadow-lg transition-all cursor-pointer group"
+                  data-testid="card-risk-overview"
+                  onClick={() => handleDrillDown("risk", "risk-overview")}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <Shield className="h-4 w-4 text-slate-600" />
+                        <p className="text-xs text-slate-700 font-medium">Risk Center</p>
+                      </div>
+                      <p className="text-xl font-bold text-slate-600">5</p>
+                      <p className="text-xs text-slate-500">Categories</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
             
@@ -653,10 +707,6 @@ function DashboardContent() {
               </div>
             </div>
 
-            <BUProgramsSection dataMode={dataMode} onDrillDown={handleDrillDown} />
-
-            {/* Project Highlights - Moved from Lifecycle */}
-            <ProjectHighlights onDrillDown={handleDrillDown} />
           </TabsContent>
 
           {/* Business Cases Tab */}
