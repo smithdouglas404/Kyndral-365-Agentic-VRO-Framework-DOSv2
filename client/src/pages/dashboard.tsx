@@ -429,7 +429,7 @@ function DashboardContent() {
     setPageContext({
       pageType: 'dashboard',
       entityId: 'integrated-management',
-      entityName: 'VRO Co-Pilot',
+      entityName: 'Value Realization Co-pilot',
       breadcrumb: ['Dashboard']
     });
   }, [setPageContext]);
@@ -521,7 +521,7 @@ function DashboardContent() {
               transition={{ duration: 0.3 }}
             >
               <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-                VRO Co-Pilot
+                Value Realization Co-pilot
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl">
                 AI-powered Insights supporting the Value Realization and Project Execution Process

@@ -1413,14 +1413,14 @@ export function BUProgramsSection({ dataMode, onDrillDown }: BUProgramsSectionPr
 
   return (
     <div className="space-y-6">
-      {/* Header - VRO Co-Pilot */}
+      {/* Header - Value Realization Co-pilot */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600">
               <Layers size={20} className="text-white" />
             </div>
-            {selectedBU ? `${selectedBU} - Unified View` : "VRO Co-Pilot Portfolios"}
+            {selectedBU ? `${selectedBU} - Unified View` : "Value Realization Co-pilot Portfolios"}
             <motion.div
               animate={{ scale: pulseActive ? [1, 1.2, 1] : 1, opacity: pulseActive ? [0.7, 1, 0.7] : 0.7 }}
               transition={{ duration: 1.5, repeat: pulseActive ? Infinity : 0 }}
