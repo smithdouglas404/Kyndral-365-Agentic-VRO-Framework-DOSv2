@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight, Link2, ArrowRight, Filter, GitBranch, Sparkles } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Target, AlertTriangle, Lightbulb, Users, ChevronRight, Link2, ArrowRight, Filter, GitBranch, Sparkles, Zap, Activity, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -719,8 +719,9 @@ export default function DivisionPage() {
                       project.priority === "medium" ? "border-l-amber-500" : 
                       "border-l-gray-300"
                     }`}
+                    data-testid={`project-card-${project.id}`}
                   >
-                    <CardHeader>
+                    <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <div>
                           <CardTitle className="text-lg">{project.name}</CardTitle>
@@ -747,8 +748,67 @@ export default function DivisionPage() {
                         <span className="text-lg font-bold text-green-600">{project.expectedROI}</span>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-700 mb-4">{project.description}</p>
+                    <CardContent className="pt-2">
+                      <p className="text-gray-700 text-sm mb-4">{project.description}</p>
+                      
+                      {/* VRO VALUE + PMO DELIVERY Dual-Lane Metrics */}
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        {/* VRO VALUE (teal) */}
+                        <div className="p-3 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border border-teal-200">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-teal-500" />
+                            <span className="text-xs font-bold text-teal-700">VRO VALUE</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <span className="text-[10px] text-teal-600 block">Expected</span>
+                              <span className="text-sm font-bold text-teal-700">{project.expectedROI}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-teal-600 block">Epic</span>
+                              <span className="text-sm font-bold text-teal-700">{project.safe.epicProgress}%</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* PMO DELIVERY (blue) */}
+                        <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                            <span className="text-xs font-bold text-blue-700">PMO DELIVERY</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <span className="text-[10px] text-blue-600 block">On-Time</span>
+                              <span className="text-sm font-bold text-blue-700">{project.safe.predictability}%</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-blue-600 block">Deliverables</span>
+                              <span className="text-sm font-bold text-blue-700">{project.deliverables.completed}/{project.deliverables.total}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SAFe Metrics Row */}
+                      <div className="grid grid-cols-4 gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                          <span className="text-lg font-bold text-amber-600">{project.safe.velocity}</span>
+                          <span className="text-[10px] text-gray-500 block">Velocity</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-lg font-bold text-amber-600">{project.safe.predictability}%</span>
+                          <span className="text-[10px] text-gray-500 block">Predict.</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-lg font-bold text-purple-600">{project.safe.flowEfficiency}%</span>
+                          <span className="text-[10px] text-gray-500 block">Flow Eff.</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-lg font-bold text-purple-600">{project.safe.currentPI}</span>
+                          <span className="text-[10px] text-gray-500 block">PI</span>
+                        </div>
+                      </div>
                       
                       {/* Budget & Timeline Progress */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -767,6 +827,82 @@ export default function DivisionPage() {
                           <Progress value={(project.timeline.elapsed / project.timeline.total) * 100} className="h-2" />
                         </div>
                       </div>
+
+                      {/* OKR Progress */}
+                      {project.safe.okr && (
+                        <div className="p-3 bg-purple-50 rounded-lg border border-purple-200 mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4 text-purple-600" />
+                              <span className="text-xs font-medium text-purple-800">OKR: {project.safe.okr.objective}</span>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] border-purple-300 text-purple-700 bg-purple-100">
+                              {project.safe.okr.progress}%
+                            </Badge>
+                          </div>
+                          <Progress value={project.safe.okr.progress} className="h-1.5" />
+                          <p className="text-[10px] text-purple-600 mt-1">Key Result: {project.safe.okr.keyResult}</p>
+                        </div>
+                      )}
+
+                      {/* AI Signals */}
+                      {project.aiSignals && project.aiSignals.length > 0 && (
+                        <div className="space-y-2 mb-4">
+                          {project.aiSignals.slice(0, 2).map((signal, idx) => (
+                            <div 
+                              key={idx}
+                              className={`p-2 rounded-lg border text-xs ${
+                                signal.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+                                signal.type === 'opportunity' ? 'bg-green-50 border-green-200 text-green-800' :
+                                signal.type === 'prediction' ? 'bg-blue-50 border-blue-200 text-blue-800' :
+                                'bg-gray-50 border-gray-200 text-gray-800'
+                              }`}
+                            >
+                              <div className="flex items-start gap-2">
+                                <Activity className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <span className="font-medium">{signal.message}</span>
+                                  <div className="flex items-center gap-2 mt-1 text-[10px] opacity-70">
+                                    <span>{signal.confidence}% confidence</span>
+                                    <span>•</span>
+                                    <span>{signal.dataSource}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Proactive Actions */}
+                      {project.proactiveActions && project.proactiveActions.length > 0 && (
+                        <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Zap className="h-4 w-4 text-amber-600" />
+                            <span className="text-xs font-bold text-amber-700">Proactive Actions ({project.proactiveActions.length})</span>
+                          </div>
+                          <div className="space-y-1.5">
+                            {project.proactiveActions.slice(0, 2).map((action, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 bg-white rounded border border-amber-100">
+                                <div className="flex-1">
+                                  <p className="text-xs font-medium text-gray-800">{action.action}</p>
+                                  <p className="text-[10px] text-amber-600">Impact: {action.impact}</p>
+                                </div>
+                                <Badge 
+                                  variant="outline" 
+                                  className={`text-[9px] ${
+                                    action.urgency === 'immediate' ? 'border-red-300 text-red-600 bg-red-50' :
+                                    action.urgency === 'this-week' ? 'border-amber-300 text-amber-600 bg-amber-50' :
+                                    'border-gray-300 text-gray-600 bg-gray-50'
+                                  }`}
+                                >
+                                  {action.urgency}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       
                       {project.aiRecommendation && (
                         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 mb-4">
@@ -787,7 +923,7 @@ export default function DivisionPage() {
                             <p className="text-sm font-medium text-gray-700">Cross-Project Dependencies ({project.dependencies.length})</p>
                           </div>
                           <div className="space-y-2">
-                            {project.dependencies.map((dep, depIdx) => (
+                            {project.dependencies.slice(0, 2).map((dep, depIdx) => (
                               <div 
                                 key={depIdx} 
                                 className="flex items-center gap-2 p-2 bg-white rounded border cursor-pointer hover:bg-gray-50 transition-colors"
@@ -807,12 +943,6 @@ export default function DivisionPage() {
                                     <ArrowRight className="h-3 w-3 text-gray-400" />
                                     <span className="text-sm font-medium text-gray-800 truncate">{dep.projectName}</span>
                                   </div>
-                                  {dep.description && (
-                                    <p className="text-xs text-gray-500 truncate">{dep.description}</p>
-                                  )}
-                                  {dep.impactIfDelayed && (
-                                    <p className="text-xs text-amber-600 truncate">Impact: {dep.impactIfDelayed}</p>
-                                  )}
                                 </div>
                                 <Badge 
                                   variant="outline" 
@@ -826,18 +956,32 @@ export default function DivisionPage() {
                                 </Badge>
                               </div>
                             ))}
+                            {project.dependencies.length > 2 && (
+                              <p className="text-xs text-gray-500 text-center">+{project.dependencies.length - 2} more dependencies</p>
+                            )}
                           </div>
                         </div>
                       )}
                       
-                      <Button 
-                        size="sm" 
-                        style={{ backgroundColor: division.color }}
-                        onClick={() => handleDrillDown('project', project.id)}
-                        data-testid={`view-project-${project.id}`}
-                      >
-                        View Details
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setSelectedEntity({ type: 'project', id: project.id })}
+                          data-testid={`flyout-project-${project.id}`}
+                        >
+                          Quick View
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          style={{ backgroundColor: division.color }}
+                          onClick={() => setLocation(`/project/${project.id}`)}
+                          data-testid={`view-project-${project.id}`}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                          Full Page
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
