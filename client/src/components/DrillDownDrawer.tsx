@@ -11,6 +11,7 @@ import { AgentType } from '@/lib/dataHub';
 import { AICoPilot } from './AICoPilot';
 import { getActionLog, subscribeToActions, AgentAction } from '@/lib/agentActionEngine';
 import { enrichedProjects, getProjectById, getStageLabel, type EnrichedProject } from '@/lib/projects';
+import { buPortfolios, type BUPortfolio } from '@/lib/buPrograms';
 import { 
   strategicThemes, valueStreams, portfolioEpics, features, stories, tasks, teams, teamMembers
 } from '@/lib/safe6Data';
@@ -474,6 +475,12 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
           p.id === entityId ||
           p.name.toLowerCase() === entityId.toLowerCase()
         )
+      : undefined;
+  
+  // Look up portfolio data for Group Function entities
+  const portfolioData: BUPortfolio | undefined = 
+    entityType === 'portfolio'
+      ? buPortfolios.find(p => p.id === entityId || p.name.toLowerCase() === entityId.toLowerCase())
       : undefined;
   
   // Look up SAFe entities for other entity types
@@ -1106,6 +1113,107 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                             </div>
                           </div>
                         </div>
+                      </>
+                    )}
+
+                    {/* PORTFOLIO-SPECIFIC: VRO VALUE + PMO DELIVERY dual-lane metrics for Group Functions */}
+                    {entityType === 'portfolio' && portfolioData && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3" data-testid="portfolio-metrics">
+                          {/* VRO VALUE section (teal) */}
+                          <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                            <div className="flex items-center gap-1 mb-2">
+                              <div className="w-2 h-2 rounded-full bg-teal-500" />
+                              <span className="text-[10px] font-bold text-teal-700">VRO VALUE</span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-teal-600">Realized</span>
+                                <span className="text-sm font-bold text-teal-700">£{portfolioData.valueRealized}m</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-teal-600">Programs</span>
+                                <span className="text-sm font-bold text-teal-700">{portfolioData.programCount}</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-teal-600">Value Score</span>
+                                <span className="text-sm font-bold text-teal-700">{portfolioData.healthScore}%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* PMO DELIVERY section (blue) */}
+                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center gap-1 mb-2">
+                              <div className="w-2 h-2 rounded-full bg-blue-500" />
+                              <span className="text-[10px] font-bold text-blue-700">PMO DELIVERY</span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-blue-600">Projects</span>
+                                <span className="text-sm font-bold text-blue-700">{portfolioData.projectCount}</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-blue-600">On-Time</span>
+                                <span className="text-sm font-bold text-blue-700">{portfolioData.predictability}%</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-blue-600">EPICs</span>
+                                <span className="text-sm font-bold text-blue-700">{portfolioData.activeEpics}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* SAFe 6.0 metrics row */}
+                        <div className="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200" data-testid="portfolio-safe-metrics">
+                          <div className="text-center p-2 bg-white rounded shadow-sm">
+                            <p className="text-lg font-bold text-amber-600">{portfolioData.velocity}</p>
+                            <p className="text-[10px] text-gray-500">Velocity</p>
+                          </div>
+                          <div className="text-center p-2 bg-white rounded shadow-sm">
+                            <p className="text-lg font-bold text-amber-600">{portfolioData.predictability}%</p>
+                            <p className="text-[10px] text-gray-500">Predict.</p>
+                          </div>
+                          <div className="text-center p-2 bg-white rounded shadow-sm">
+                            <p className="text-lg font-bold text-purple-600">{portfolioData.currentPI}</p>
+                            <p className="text-[10px] text-gray-500">Current PI</p>
+                          </div>
+                        </div>
+
+                        {/* OKR Progress */}
+                        {portfolioData.okrs.length > 0 && (
+                          <div className="space-y-2" data-testid="portfolio-okrs">
+                            {portfolioData.okrs.map((okr, idx) => (
+                              <div key={idx} className="p-3 bg-white rounded-lg border border-gray-200">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium text-gray-800">{okr.objective}</span>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={
+                                      okr.status === 'on-track' ? 'bg-green-100 text-green-700 border-green-300' :
+                                      okr.status === 'at-risk' ? 'bg-amber-100 text-amber-700 border-amber-300' :
+                                      'bg-red-100 text-red-700 border-red-300'
+                                    }
+                                  >
+                                    {okr.status}
+                                  </Badge>
+                                </div>
+                                <Progress value={okr.progress} className="h-1.5" />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* AI Signal */}
+                        {portfolioData.topAISignal && (
+                          <div className="p-3 bg-purple-50 rounded-lg border border-purple-200" data-testid="portfolio-ai-signal">
+                            <div className="flex items-start gap-2">
+                              <Brain size={16} className="text-purple-600 mt-0.5" />
+                              <p className="text-sm text-purple-800">{portfolioData.topAISignal.message}</p>
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
 
