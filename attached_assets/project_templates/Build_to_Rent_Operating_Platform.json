@@ -77,9 +77,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given property listings, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given property becomes available, When listing created, Then photos, floor plans, and virtual tour publish within 24 hours",
+            "Given prospect inquires about listing, When lead captured, Then automated response with booking link sent within 2 hours",
+            "Given listing updated, When saved, Then Rightmove/Zoopla syndication reflects changes within 4 hours"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Build listings portal",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Frontend Team",
+              "assignee": "Sarah Jenkins (Operations Director)",
               "skills": [
-                "React"
+                "BTR Operations",
+                "Portfolio Management",
+                "P&L"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Integrate with Rightmove/Zoopla",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Mark Stevens (Property Manager)",
               "skills": [
-                "APIs"
+                "Property Management",
+                "Tenant Relations",
+                "Maintenance"
               ]
             }
           ]
@@ -111,9 +115,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given application processing, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given prospective tenant completes application, When ID uploaded, Then biometric liveness check completes in under 60 seconds",
+            "Given affordability assessment required, When Open Banking connected, Then 30x rent income verification runs automatically",
+            "Given all checks pass, When approval granted, Then AST contract with property-specific terms generates for e-signature"
           ],
           "tasks": [
             {
@@ -121,9 +125,11 @@
               "name": "Build application workflow",
               "status": "done",
               "effortHours": 28,
-              "assignee": "Backend Team",
+              "assignee": "Mark Stevens (Property Manager)",
               "skills": [
-                "Workflow"
+                "Property Management",
+                "Tenant Relations",
+                "Maintenance"
               ]
             },
             {
@@ -131,9 +137,11 @@
               "name": "Integrate referencing",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Backend Team",
+              "assignee": "Lucy Cooper (Lettings Lead)",
               "skills": [
-                "Integration"
+                "Lettings",
+                "Referencing",
+                "AST Contracts"
               ]
             }
           ]
@@ -168,9 +176,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given work order system, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given tenant reports emergency, When work order created, Then contractor dispatched within 4-hour emergency SLA",
+            "Given contractor completes repair, When photos uploaded, Then tenant receives completion notification with satisfaction survey",
+            "Given same issue reported 3 times, When pattern detected, Then property manager escalation flags potential major works"
           ],
           "tasks": [
             {
@@ -178,10 +186,11 @@
               "name": "Build work order UI",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Frontend Team",
+              "assignee": "Mark Stevens (Property Manager)",
               "skills": [
-                "React",
-                "Mobile"
+                "Property Management",
+                "Tenant Relations",
+                "Maintenance"
               ]
             },
             {
@@ -189,9 +198,11 @@
               "name": "Implement contractor dispatch",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Lucy Cooper (Lettings Lead)",
               "skills": [
-                "Scheduling"
+                "Lettings",
+                "Referencing",
+                "AST Contracts"
               ]
             }
           ]
@@ -203,9 +214,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given sla monitoring, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given SLA Monitoring is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -213,9 +224,11 @@
               "name": "Build SLA dashboard",
               "status": "in-progress",
               "effortHours": 16,
-              "assignee": "Frontend Team",
+              "assignee": "Lucy Cooper (Lettings Lead)",
               "skills": [
-                "React"
+                "Lettings",
+                "Referencing",
+                "AST Contracts"
               ]
             },
             {
@@ -223,9 +236,11 @@
               "name": "Create alerting system",
               "status": "pending",
               "effortHours": 12,
-              "assignee": "Backend Team",
+              "assignee": "Alex Turner (Technology Lead)",
               "skills": [
-                "Alerting"
+                "PropTech",
+                "React",
+                "APIs"
               ]
             }
           ]

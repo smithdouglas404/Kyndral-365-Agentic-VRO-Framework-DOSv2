@@ -78,9 +78,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given progressive form architecture, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer starts onboarding, When multi-step form loads, Then progress indicator shows current step with estimated completion time",
+            "Given customer abandons mid-flow, When session restored, Then form state persists with data pre-populated from last interaction",
+            "Given inline validation fails, When error displayed, Then specific guidance shows with example of correct input format"
           ],
           "tasks": [
             {
@@ -88,10 +88,11 @@
               "name": "Design multi-step form flow",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Jessica Lee",
+              "assignee": "Amanda Richards (Product Manager)",
               "skills": [
-                "UX Design",
-                "Figma"
+                "Digital Products",
+                "Customer Journeys",
+                "Pensions"
               ]
             },
             {
@@ -99,10 +100,11 @@
               "name": "Build form state management",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "React",
-                "Redux"
+                "UX Research",
+                "Mobile Design",
+                "Accessibility"
               ]
             },
             {
@@ -110,10 +112,11 @@
               "name": "Implement progress saving",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Daniel Wilson (Security Architect)",
               "skills": [
-                "Backend",
-                "APIs"
+                "Identity Verification",
+                "Biometrics",
+                "Fraud Prevention"
               ]
             },
             {
@@ -121,10 +124,11 @@
               "name": "Create inline validation",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "React",
-                "Validation"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             }
           ]
@@ -136,9 +140,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given smart address lookup, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer enters postcode, When PostCode Anywhere API queried, Then address list returns within 2 seconds for selection",
+            "Given address selected, When verified, Then UPRN lookup confirms delivery point accuracy",
+            "Given address not found, When manual entry allowed, Then address components captured with Royal Mail PAF validation"
           ],
           "tasks": [
             {
@@ -146,10 +150,11 @@
               "name": "Integrate PostCode Anywhere API",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Alex Turner",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "APIs",
-                "Integration"
+                "UX Research",
+                "Mobile Design",
+                "Accessibility"
               ]
             },
             {
@@ -157,10 +162,11 @@
               "name": "Build address selection UI",
               "status": "done",
               "effortHours": 8,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Daniel Wilson (Security Architect)",
               "skills": [
-                "React",
-                "UX"
+                "Identity Verification",
+                "Biometrics",
+                "Fraud Prevention"
               ]
             },
             {
@@ -168,9 +174,11 @@
               "name": "Implement address verification",
               "status": "done",
               "effortHours": 8,
-              "assignee": "Alex Turner",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "Data Validation"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             }
           ]
@@ -182,9 +190,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given mobile responsive design, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer uses mobile device, When form loads, Then touch-friendly inputs sized for finger interaction",
+            "Given slow 3G connection detected, When content loaded, Then progressive enhancement delivers core functionality first",
+            "Given device matrix testing runs, When results reviewed, Then 95%+ of target devices pass visual and functional tests"
           ],
           "tasks": [
             {
@@ -192,10 +200,11 @@
               "name": "Create mobile-first CSS framework",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Jessica Lee",
+              "assignee": "Daniel Wilson (Security Architect)",
               "skills": [
-                "CSS",
-                "Responsive Design"
+                "Identity Verification",
+                "Biometrics",
+                "Fraud Prevention"
               ]
             },
             {
@@ -203,10 +212,11 @@
               "name": "Implement touch-friendly inputs",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "Mobile UX",
-                "React"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             },
             {
@@ -214,10 +224,11 @@
               "name": "Optimize for slow connections",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Alex Turner",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Performance",
-                "PWA"
+                "Open Banking",
+                "API Integration",
+                "Onfido"
               ]
             },
             {
@@ -225,10 +236,11 @@
               "name": "Test across device matrix",
               "status": "done",
               "effortHours": 16,
-              "assignee": "QA Team",
+              "assignee": "Amanda Richards (Product Manager)",
               "skills": [
-                "Testing",
-                "Mobile"
+                "Digital Products",
+                "Customer Journeys",
+                "Pensions"
               ]
             }
           ]
@@ -263,9 +275,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given document capture ui, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer uses smartphone camera, When document photographed, Then auto-crop and brightness adjustment applied",
+            "Given document image unclear, When quality check fails, Then re-capture prompt with lighting guidance displayed",
+            "Given document captured successfully, When OCR runs, Then key data extracted with 95%+ accuracy for ID documents"
           ],
           "tasks": [
             {
@@ -273,10 +285,11 @@
               "name": "Build camera capture component",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "React",
-                "Media APIs"
+                "UX Research",
+                "Mobile Design",
+                "Accessibility"
               ]
             },
             {
@@ -284,10 +297,11 @@
               "name": "Create document preview/crop",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Daniel Wilson (Security Architect)",
               "skills": [
-                "Image Processing",
-                "Canvas"
+                "Identity Verification",
+                "Biometrics",
+                "Fraud Prevention"
               ]
             },
             {
@@ -295,10 +309,11 @@
               "name": "Implement secure upload",
               "status": "done",
               "effortHours": 8,
-              "assignee": "Alex Turner",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "Security",
-                "S3"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             }
           ]
@@ -310,9 +325,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given ai document verification, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given AI Document Verification is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -320,10 +335,11 @@
               "name": "Integrate OCR for ID extraction",
               "status": "done",
               "effortHours": 20,
-              "assignee": "AI Team",
+              "assignee": "Daniel Wilson (Security Architect)",
               "skills": [
-                "OCR",
-                "Azure Vision"
+                "Identity Verification",
+                "Biometrics",
+                "Fraud Prevention"
               ]
             },
             {
@@ -331,10 +347,11 @@
               "name": "Build fraud detection checks",
               "status": "in-progress",
               "effortHours": 24,
-              "assignee": "AI Team",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "ML",
-                "Fraud Detection"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             },
             {
@@ -342,10 +359,11 @@
               "name": "Create human review queue",
               "status": "pending",
               "effortHours": 16,
-              "assignee": "Alex Turner",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Workflow",
-                "Backend"
+                "Open Banking",
+                "API Integration",
+                "Onfido"
               ]
             },
             {
@@ -353,10 +371,11 @@
               "name": "Implement verification audit trail",
               "status": "pending",
               "effortHours": 8,
-              "assignee": "Alex Turner",
+              "assignee": "Amanda Richards (Product Manager)",
               "skills": [
-                "Logging",
-                "Compliance"
+                "Digital Products",
+                "Customer Journeys",
+                "Pensions"
               ]
             }
           ]
@@ -391,9 +410,9 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given rules engine integration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Rules Engine Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -401,10 +420,11 @@
               "name": "Connect to underwriting rules engine",
               "status": "planned",
               "effortHours": 24,
-              "assignee": "Integration Team",
+              "assignee": "Daniel Wilson (Security Architect)",
               "skills": [
-                "APIs",
-                "Rules Engines"
+                "Identity Verification",
+                "Biometrics",
+                "Fraud Prevention"
               ]
             },
             {
@@ -412,10 +432,11 @@
               "name": "Build decision display UI",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "React",
-                "UX"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             },
             {
@@ -423,10 +444,11 @@
               "name": "Implement escalation workflow",
               "status": "planned",
               "effortHours": 20,
-              "assignee": "Alex Turner",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Workflow",
-                "Backend"
+                "Open Banking",
+                "API Integration",
+                "Onfido"
               ]
             }
           ]
@@ -438,9 +460,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given quote comparison display, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Quote Comparison Display is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -448,9 +470,11 @@
               "name": "Design quote comparison UI",
               "status": "planned",
               "effortHours": 12,
-              "assignee": "Jessica Lee",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "UX Design"
+                "FCA Consumer Duty",
+                "KYC/AML",
+                "GDPR"
               ]
             },
             {
@@ -458,10 +482,11 @@
               "name": "Build quote selection flow",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Ryan Mitchell",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "React",
-                "State Management"
+                "Open Banking",
+                "API Integration",
+                "Onfido"
               ]
             },
             {
@@ -469,10 +494,11 @@
               "name": "Implement quote persistence",
               "status": "planned",
               "effortHours": 8,
-              "assignee": "Alex Turner",
+              "assignee": "Amanda Richards (Product Manager)",
               "skills": [
-                "Backend",
-                "Database"
+                "Digital Products",
+                "Customer Journeys",
+                "Pensions"
               ]
             }
           ]

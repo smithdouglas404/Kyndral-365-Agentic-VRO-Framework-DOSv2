@@ -77,9 +77,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given product selector, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer answers lifestyle and protection needs questions, When recommendation engine runs, Then suitable life/CI/IP products ranked with coverage rationale",
+            "Given customer specifies monthly budget, When products filtered, Then affordable alternatives presented with trade-off explanations",
+            "Given customer discloses dependents and mortgage, When sum assured calculated, Then recommendation accounts for income replacement and debt clearance"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Build needs analysis wizard",
               "status": "done",
               "effortHours": 24,
-              "assignee": "UX Team",
+              "assignee": "Katherine White (Product Director)",
               "skills": [
-                "UX Design"
+                "Protection Products",
+                "Life/CI/IP",
+                "Product Design"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Implement recommendation engine",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Andrew Martin (Underwriting Lead)",
               "skills": [
-                "Rules Engine"
+                "Underwriting",
+                "Risk Selection",
+                "Medical Evidence"
               ]
             }
           ]
@@ -111,9 +115,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given quote engine, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer enters details and coverage requirements, When quote calculation runs, Then premium displays within 5 seconds with breakdown",
+            "Given customer discloses smoker status or elevated BMI, When rating factors applied, Then premium loading explained with wellness discount opportunities",
+            "Given customer saves quote for later, When returning within 30 days, Then quote retrievable with option to refresh rates"
           ],
           "tasks": [
             {
@@ -121,10 +125,11 @@
               "name": "Build pricing API",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Actuarial Dev",
+              "assignee": "Andrew Martin (Underwriting Lead)",
               "skills": [
-                "Actuarial",
-                "APIs"
+                "Underwriting",
+                "Risk Selection",
+                "Medical Evidence"
               ]
             },
             {
@@ -132,9 +137,11 @@
               "name": "Create quote comparison UI",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "Victoria Jackson (Claims Manager)",
               "skills": [
-                "React"
+                "Claims Assessment",
+                "Fraud Detection",
+                "FNOL"
               ]
             }
           ]
@@ -146,9 +153,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given application form, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Application Form is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -156,9 +163,11 @@
               "name": "Design progressive form flow",
               "status": "done",
               "effortHours": 16,
-              "assignee": "UX Team",
+              "assignee": "Victoria Jackson (Claims Manager)",
               "skills": [
-                "UX"
+                "Claims Assessment",
+                "Fraud Detection",
+                "FNOL"
               ]
             },
             {
@@ -166,10 +175,11 @@
               "name": "Build form with validation",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Frontend Team",
+              "assignee": "Nicholas Robinson (Pricing Actuary)",
               "skills": [
-                "React",
-                "Forms"
+                "Protection Pricing",
+                "Experience Analysis",
+                "Morbidity"
               ]
             }
           ]
@@ -204,9 +214,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given rules-based decisions, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Rules-Based Decisions is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -214,9 +224,11 @@
               "name": "Implement underwriting rules",
               "status": "done",
               "effortHours": 40,
-              "assignee": "Underwriting Team",
+              "assignee": "Andrew Martin (Underwriting Lead)",
               "skills": [
-                "Underwriting"
+                "Underwriting",
+                "Risk Selection",
+                "Medical Evidence"
               ]
             },
             {
@@ -224,9 +236,11 @@
               "name": "Build decision API",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Backend Team",
+              "assignee": "Victoria Jackson (Claims Manager)",
               "skills": [
-                "APIs"
+                "Claims Assessment",
+                "Fraud Detection",
+                "FNOL"
               ]
             }
           ]
@@ -238,9 +252,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given ai triage, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given AI Triage is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -248,10 +262,11 @@
               "name": "Train triage ML model",
               "status": "in-progress",
               "effortHours": 32,
-              "assignee": "ML Team",
+              "assignee": "Victoria Jackson (Claims Manager)",
               "skills": [
-                "ML",
-                "Classification"
+                "Claims Assessment",
+                "Fraud Detection",
+                "FNOL"
               ]
             },
             {
@@ -259,9 +274,11 @@
               "name": "Integrate with workflow",
               "status": "pending",
               "effortHours": 16,
-              "assignee": "Backend Team",
+              "assignee": "Nicholas Robinson (Pricing Actuary)",
               "skills": [
-                "Integration"
+                "Protection Pricing",
+                "Experience Analysis",
+                "Morbidity"
               ]
             }
           ]

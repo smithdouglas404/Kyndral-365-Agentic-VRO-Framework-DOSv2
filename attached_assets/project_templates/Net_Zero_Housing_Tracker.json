@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given smart meter integration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given property has smart meter, When API connection established, Then half-hourly consumption data ingested automatically",
+            "Given meter data gaps detected, When flagged, Then estimation methodology applied with data quality indicator",
+            "Given consumption anomaly detected, When alert triggered, Then property manager notified with investigation guidance"
           ],
           "tasks": [
             {
@@ -87,10 +87,11 @@
               "name": "Build meter API integration",
               "status": "done",
               "effortHours": 24,
-              "assignee": "IoT Team",
+              "assignee": "Mark Stevens (Net Zero Manager)",
               "skills": [
-                "IoT",
-                "APIs"
+                "Net Zero Carbon",
+                "Retrofit",
+                "Heat Pumps"
               ]
             },
             {
@@ -98,9 +99,11 @@
               "name": "Create data ingestion pipeline",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Data Team",
+              "assignee": "Sarah Jenkins (Asset Manager)",
               "skills": [
-                "ETL"
+                "Asset Management",
+                "Valuation",
+                "CapEx Planning"
               ]
             }
           ]
@@ -112,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given consumption dashboard, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given property consumption accessed, When dashboard loads, Then electricity, gas, and water usage displayed with benchmarks",
+            "Given tenant wants to see usage, When portal accessed, Then personalized consumption insights with cost estimates shown",
+            "Given consumption exceeds threshold, When alert created, Then energy efficiency recommendations provided"
           ],
           "tasks": [
             {
@@ -122,10 +125,11 @@
               "name": "Build consumption charts",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "Sarah Jenkins (Asset Manager)",
               "skills": [
-                "React",
-                "Charts"
+                "Asset Management",
+                "Valuation",
+                "CapEx Planning"
               ]
             },
             {
@@ -133,9 +137,11 @@
               "name": "Create alerting for anomalies",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Backend Team",
+              "assignee": "Alex Turner (Sustainability Lead)",
               "skills": [
-                "Alerting"
+                "EPC",
+                "SAP Calculations",
+                "MEES"
               ]
             }
           ]
@@ -170,9 +176,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given carbon baseline calculator, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given building energy data collected, When carbon calculation runs, Then tCO2e calculated using latest DEFRA conversion factors",
+            "Given portfolio carbon footprint aggregated, When reported, Then emissions by source (electricity, gas, vehicles) displayed",
+            "Given carbon intensity benchmarked, When compared to sector, Then CRREM alignment score calculated"
           ],
           "tasks": [
             {
@@ -180,9 +186,11 @@
               "name": "Build emission calculator",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Sustainability Team",
+              "assignee": "Sarah Jenkins (Asset Manager)",
               "skills": [
-                "Carbon Accounting"
+                "Asset Management",
+                "Valuation",
+                "CapEx Planning"
               ]
             },
             {
@@ -190,9 +198,11 @@
               "name": "Integrate with asset database",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Backend Team",
+              "assignee": "Alex Turner (Sustainability Lead)",
               "skills": [
-                "Integration"
+                "EPC",
+                "SAP Calculations",
+                "MEES"
               ]
             }
           ]
@@ -204,9 +214,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given retrofit scenario modeling, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given property requires energy upgrade, When retrofit options modeled, Then EPC improvement, carbon savings, and cost displayed per measure",
+            "Given cost-benefit analysis run, When payback calculated, Then NPV of energy savings vs capital cost shown with IRR",
+            "Given retrofit package selected, When approved, Then project created with milestones and contractor procurement workflow"
           ],
           "tasks": [
             {
@@ -214,9 +224,11 @@
               "name": "Build scenario engine",
               "status": "in-progress",
               "effortHours": 32,
-              "assignee": "Analytics Team",
+              "assignee": "Alex Turner (Sustainability Lead)",
               "skills": [
-                "Modeling"
+                "EPC",
+                "SAP Calculations",
+                "MEES"
               ]
             },
             {
@@ -224,9 +236,11 @@
               "name": "Create cost-benefit analysis",
               "status": "pending",
               "effortHours": 20,
-              "assignee": "Finance Team",
+              "assignee": "Emma Collins (Data Analyst)",
               "skills": [
-                "Financial Modeling"
+                "Energy Data",
+                "Analytics",
+                "Python"
               ]
             }
           ]

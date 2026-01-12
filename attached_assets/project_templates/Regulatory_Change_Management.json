@@ -8,11 +8,27 @@
   "roiValue": 35,
   "priority": "high",
   "status": "green",
-  "budget": { "spent": 0.6, "total": 1.0, "unit": "£m", "contingency": 0.1, "forecastAtCompletion": 0.95 },
-  "timeline": { "elapsed": 5, "total": 8, "unit": "months", "startDate": "2024-06-01", "endDate": "2025-02-01" },
+  "budget": {
+    "spent": 0.6,
+    "total": 1,
+    "unit": "£m",
+    "contingency": 0.1,
+    "forecastAtCompletion": 0.95
+  },
+  "timeline": {
+    "elapsed": 5,
+    "total": 8,
+    "unit": "months",
+    "startDate": "2024-06-01",
+    "endDate": "2025-02-01"
+  },
   "artName": "Compliance Tech ART",
   "portfolioTheme": "Regulatory Excellence",
-  "strategicObjectives": ["SO-7: Regulatory Compliance", "SO-3: Operational Excellence", "SO-5: Data-Driven Decision Making"],
+  "strategicObjectives": [
+    "SO-7: Regulatory Compliance",
+    "SO-3: Operational Excellence",
+    "SO-5: Data-Driven Decision Making"
+  ],
   "safe": {
     "velocity": 40,
     "predictability": 85,
@@ -23,7 +39,13 @@
     "epicId": "EPIC-RC-103",
     "epicName": "Reg Change Platform",
     "epicProgress": 58,
-    "epicWsjf": { "businessValue": 13, "timeCriticality": 21, "riskReduction": 13, "jobSize": 8, "score": 5.88 },
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 21,
+      "riskReduction": 13,
+      "jobSize": 8,
+      "score": 5.88
+    },
     "solutionTrain": "Risk & Compliance Technology",
     "valueStream": "Regulatory Management"
   },
@@ -36,7 +58,13 @@
       "storyPoints": 55,
       "completedPoints": 55,
       "priority": "critical",
-      "wsjf": { "businessValue": 21, "timeCriticality": 21, "riskReduction": 13, "jobSize": 8, "score": 6.88 },
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 21,
+        "riskReduction": 13,
+        "jobSize": 8,
+        "score": 6.88
+      },
       "acceptanceCriteria": [
         "Daily ingestion from 50+ regulatory sources (FCA, PRA, EIOPA, SEC, etc.)",
         "AI classification accuracy >90% for L&G relevance",
@@ -51,16 +79,71 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given FCA publishes, When feed runs, Then item is ingested within 4 hours",
-            "Given PRA issues speech, When detected, Then transcript is extracted",
-            "Given EU regulator publishes, When translated, Then English version available"
+            "Given Regulatory Source Integration regulatory requirement identified, When assessed, Then impact score and implementation plan created",
+            "Given policy update required, When drafted, Then version control and approval workflow maintained",
+            "Given audit finding raised, When documented, Then remediation tracked with owner and due date"
           ],
           "tasks": [
-            { "id": "task-170001", "name": "Build FCA RSS/API connector", "status": "done", "effortHours": 16, "assignee": "David Morrison", "skills": ["APIs", "Python"] },
-            { "id": "task-170002", "name": "Build PRA publication scraper", "status": "done", "effortHours": 20, "assignee": "David Morrison", "skills": ["Web Scraping", "Python"] },
-            { "id": "task-170003", "name": "Integrate EIOPA, SEC, ESMA feeds", "status": "done", "effortHours": 32, "assignee": "David Morrison", "skills": ["APIs", "International Reg"] },
-            { "id": "task-170004", "name": "Build speech transcript extraction", "status": "done", "effortHours": 16, "assignee": "Dr. Helen Patel", "skills": ["NLP", "Text Extraction"] },
-            { "id": "task-170005", "name": "Implement translation pipeline", "status": "done", "effortHours": 12, "assignee": "Dr. Helen Patel", "skills": ["NLP", "Translation"] }
+            {
+              "id": "task-170001",
+              "name": "Build FCA RSS/API connector",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            },
+            {
+              "id": "task-170002",
+              "name": "Build PRA publication scraper",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            },
+            {
+              "id": "task-170003",
+              "name": "Integrate EIOPA, SEC, ESMA feeds",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            },
+            {
+              "id": "task-170004",
+              "name": "Build speech transcript extraction",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170005",
+              "name": "Implement translation pipeline",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            }
           ]
         },
         {
@@ -70,15 +153,59 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given item ingested, When classified, Then relevance score 0-100 is assigned",
-            "Given classification made, When reviewed, Then accuracy >90%",
-            "Given false positive/negative, When reported, Then model retrains"
+            "Given AI Relevance Classification is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170006", "name": "Train initial classification model", "status": "done", "effortHours": 40, "assignee": "Dr. Helen Patel", "skills": ["NLP", "Classification"] },
-            { "id": "task-170007", "name": "Build relevance scoring API", "status": "done", "effortHours": 16, "assignee": "David Morrison", "skills": ["APIs", "ML Serving"] },
-            { "id": "task-170008", "name": "Create feedback loop for retraining", "status": "done", "effortHours": 20, "assignee": "Dr. Helen Patel", "skills": ["MLOps", "Active Learning"] },
-            { "id": "task-170009", "name": "Build accuracy monitoring dashboard", "status": "done", "effortHours": 12, "assignee": "Sarah Johnson", "skills": ["Dashboards", "Monitoring"] }
+            {
+              "id": "task-170006",
+              "name": "Train initial classification model",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            },
+            {
+              "id": "task-170007",
+              "name": "Build relevance scoring API",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            },
+            {
+              "id": "task-170008",
+              "name": "Create feedback loop for retraining",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170009",
+              "name": "Build accuracy monitoring dashboard",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            }
           ]
         },
         {
@@ -88,15 +215,59 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given high-priority item detected, When alert triggers, Then notification within 1 hour",
-            "Given user preferences set, When item matches, Then personalized alert sent",
-            "Given alert sent, When acknowledged, Then status is tracked"
+            "Given Alert and Notification System is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170010", "name": "Design alert priority rules", "status": "done", "effortHours": 8, "assignee": "Sarah Johnson", "skills": ["Business Rules"] },
-            { "id": "task-170011", "name": "Build notification engine", "status": "done", "effortHours": 16, "assignee": "David Morrison", "skills": ["Email", "Push Notifications"] },
-            { "id": "task-170012", "name": "Create user preference management", "status": "done", "effortHours": 12, "assignee": "David Morrison", "skills": ["User Settings", "Backend"] },
-            { "id": "task-170013", "name": "Implement acknowledgment tracking", "status": "done", "effortHours": 8, "assignee": "David Morrison", "skills": ["Workflow", "Backend"] }
+            {
+              "id": "task-170010",
+              "name": "Design alert priority rules",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            },
+            {
+              "id": "task-170011",
+              "name": "Build notification engine",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170012",
+              "name": "Create user preference management",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170013",
+              "name": "Implement acknowledgment tracking",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            }
           ]
         }
       ]
@@ -109,7 +280,13 @@
       "storyPoints": 55,
       "completedPoints": 34,
       "priority": "high",
-      "wsjf": { "businessValue": 13, "timeCriticality": 13, "riskReduction": 13, "jobSize": 8, "score": 4.88 },
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 13,
+        "riskReduction": 13,
+        "jobSize": 8,
+        "score": 4.88
+      },
       "acceptanceCriteria": [
         "Impact assessments routed to correct BU owners automatically",
         "Collaborative assessment with version control",
@@ -124,15 +301,59 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given regulation type identified, When routed, Then correct BU owners are assigned",
-            "Given multiple BUs affected, When routed, Then all receive parallel assignments",
-            "Given routing fails, When error occurs, Then escalation to coordinator"
+            "Given Automated Impact Routing is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170014", "name": "Build routing rules engine", "status": "done", "effortHours": 24, "assignee": "David Morrison", "skills": ["Rules Engine", "Backend"] },
-            { "id": "task-170015", "name": "Create BU owner mapping database", "status": "done", "effortHours": 12, "assignee": "Sarah Johnson", "skills": ["Data Management"] },
-            { "id": "task-170016", "name": "Implement parallel assignment", "status": "done", "effortHours": 16, "assignee": "David Morrison", "skills": ["Workflow"] },
-            { "id": "task-170017", "name": "Build escalation mechanism", "status": "done", "effortHours": 8, "assignee": "David Morrison", "skills": ["Alerting"] }
+            {
+              "id": "task-170014",
+              "name": "Build routing rules engine",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            },
+            {
+              "id": "task-170015",
+              "name": "Create BU owner mapping database",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            },
+            {
+              "id": "task-170016",
+              "name": "Implement parallel assignment",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170017",
+              "name": "Build escalation mechanism",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            }
           ]
         },
         {
@@ -142,15 +363,59 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given assessment started, When form opened, Then all required fields displayed",
-            "Given multiple users editing, When saved, Then version control tracks changes",
-            "Given assessment complete, When submitted, Then validation ensures completeness"
+            "Given Collaborative Assessment Form is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170018", "name": "Design assessment form UX", "status": "done", "effortHours": 12, "assignee": "UX Team", "skills": ["UX Design"] },
-            { "id": "task-170019", "name": "Build dynamic form components", "status": "done", "effortHours": 20, "assignee": "Frontend Team", "skills": ["React", "Forms"] },
-            { "id": "task-170020", "name": "Implement version control", "status": "done", "effortHours": 16, "assignee": "David Morrison", "skills": ["Versioning", "Backend"] },
-            { "id": "task-170021", "name": "Create validation and submission", "status": "done", "effortHours": 12, "assignee": "Frontend Team", "skills": ["Validation", "React"] }
+            {
+              "id": "task-170018",
+              "name": "Design assessment form UX",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            },
+            {
+              "id": "task-170019",
+              "name": "Build dynamic form components",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170020",
+              "name": "Implement version control",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170021",
+              "name": "Create validation and submission",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            }
           ]
         },
         {
@@ -160,16 +425,71 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given assessments complete, When dashboard viewed, Then all BU impacts visible",
-            "Given filter applied, When selected, Then results narrow appropriately",
-            "Given executive report needed, When exported, Then board-ready format available"
+            "Given Consolidated Impact Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170022", "name": "Design consolidated dashboard", "status": "done", "effortHours": 12, "assignee": "UX Team", "skills": ["UX Design", "Dashboards"] },
-            { "id": "task-170023", "name": "Build impact aggregation API", "status": "done", "effortHours": 20, "assignee": "David Morrison", "skills": ["APIs", "Aggregation"] },
-            { "id": "task-170024", "name": "Create visualization components", "status": "in-progress", "effortHours": 24, "assignee": "Frontend Team", "skills": ["React", "Charts"] },
-            { "id": "task-170025", "name": "Implement filtering and search", "status": "pending", "effortHours": 12, "assignee": "Frontend Team", "skills": ["Search", "Filtering"] },
-            { "id": "task-170026", "name": "Build executive report export", "status": "pending", "effortHours": 16, "assignee": "Sarah Johnson", "skills": ["Reporting", "PDF"] }
+            {
+              "id": "task-170022",
+              "name": "Design consolidated dashboard",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170023",
+              "name": "Build impact aggregation API",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170024",
+              "name": "Create visualization components",
+              "status": "in-progress",
+              "effortHours": 24,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            },
+            {
+              "id": "task-170025",
+              "name": "Implement filtering and search",
+              "status": "pending",
+              "effortHours": 12,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            },
+            {
+              "id": "task-170026",
+              "name": "Build executive report export",
+              "status": "pending",
+              "effortHours": 16,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            }
           ]
         },
         {
@@ -179,14 +499,47 @@
           "storyPoints": 8,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given assessment assigned, When SLA set, Then countdown timer starts",
-            "Given SLA approaching, When threshold reached, Then reminder sent",
-            "Given SLA breached, When escalation triggers, Then manager notified"
+            "Given SLA Tracking and Escalation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170027", "name": "Build SLA timer service", "status": "done", "effortHours": 12, "assignee": "David Morrison", "skills": ["Scheduling", "Backend"] },
-            { "id": "task-170028", "name": "Create reminder notifications", "status": "in-progress", "effortHours": 8, "assignee": "David Morrison", "skills": ["Notifications"] },
-            { "id": "task-170029", "name": "Implement escalation workflow", "status": "pending", "effortHours": 8, "assignee": "David Morrison", "skills": ["Workflow", "Alerting"] }
+            {
+              "id": "task-170027",
+              "name": "Build SLA timer service",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170028",
+              "name": "Create reminder notifications",
+              "status": "in-progress",
+              "effortHours": 8,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            },
+            {
+              "id": "task-170029",
+              "name": "Implement escalation workflow",
+              "status": "pending",
+              "effortHours": 8,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            }
           ]
         }
       ]
@@ -199,7 +552,13 @@
       "storyPoints": 34,
       "completedPoints": 0,
       "priority": "medium",
-      "wsjf": { "businessValue": 8, "timeCriticality": 8, "riskReduction": 8, "jobSize": 8, "score": 3.0 },
+      "wsjf": {
+        "businessValue": 8,
+        "timeCriticality": 8,
+        "riskReduction": 8,
+        "jobSize": 8,
+        "score": 3
+      },
       "acceptanceCriteria": [
         "Implementation tasks linked to source regulation",
         "Progress tracking with milestones and deadlines",
@@ -214,15 +573,59 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given impact assessment approved, When implementation planned, Then tasks are created",
-            "Given task assigned, When worked, Then progress is tracked",
-            "Given deadline approaching, When threshold reached, Then reminder sent"
+            "Given Implementation Task Management is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170030", "name": "Build task creation from assessment", "status": "planned", "effortHours": 16, "assignee": "David Morrison", "skills": ["Workflow", "Backend"] },
-            { "id": "task-170031", "name": "Create task management UI", "status": "planned", "effortHours": 20, "assignee": "Frontend Team", "skills": ["React", "Task Management"] },
-            { "id": "task-170032", "name": "Implement progress tracking", "status": "planned", "effortHours": 12, "assignee": "David Morrison", "skills": ["Progress Tracking"] },
-            { "id": "task-170033", "name": "Build deadline reminders", "status": "planned", "effortHours": 8, "assignee": "David Morrison", "skills": ["Notifications"] }
+            {
+              "id": "task-170030",
+              "name": "Build task creation from assessment",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Dr. Robert Turner (Change Lead)",
+              "skills": [
+                "Change Management",
+                "Impact Assessment",
+                "Remediation"
+              ]
+            },
+            {
+              "id": "task-170031",
+              "name": "Create task management UI",
+              "status": "planned",
+              "effortHours": 20,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170032",
+              "name": "Implement progress tracking",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170033",
+              "name": "Build deadline reminders",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            }
           ]
         },
         {
@@ -232,15 +635,59 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given implementation complete, When evidence uploaded, Then linked to task",
-            "Given evidence stored, When retrieved, Then full audit trail available",
-            "Given audit requested, When evidence searched, Then results comprehensive"
+            "Given Evidence Capture and Storage is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170034", "name": "Build document upload and storage", "status": "planned", "effortHours": 16, "assignee": "David Morrison", "skills": ["File Storage", "Backend"] },
-            { "id": "task-170035", "name": "Create evidence linking mechanism", "status": "planned", "effortHours": 12, "assignee": "David Morrison", "skills": ["Data Modeling"] },
-            { "id": "task-170036", "name": "Implement audit trail logging", "status": "planned", "effortHours": 12, "assignee": "David Morrison", "skills": ["Audit Logging"] },
-            { "id": "task-170037", "name": "Build evidence search and retrieval", "status": "planned", "effortHours": 16, "assignee": "Frontend Team", "skills": ["Search", "React"] }
+            {
+              "id": "task-170034",
+              "name": "Build document upload and storage",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Simon Price (Project Manager)",
+              "skills": [
+                "Project Management",
+                "RAID",
+                "Dependencies"
+              ]
+            },
+            {
+              "id": "task-170035",
+              "name": "Create evidence linking mechanism",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170036",
+              "name": "Implement audit trail logging",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            },
+            {
+              "id": "task-170037",
+              "name": "Build evidence search and retrieval",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            }
           ]
         },
         {
@@ -250,55 +697,256 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given implementation complete, When sign-off requested, Then approver is notified",
-            "Given approver reviews, When decision made, Then outcome is recorded",
-            "Given sign-off complete, When regulation closed, Then full history preserved"
+            "Given Completion Sign-off Workflow is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-170038", "name": "Build sign-off workflow", "status": "planned", "effortHours": 16, "assignee": "David Morrison", "skills": ["Workflow", "Approvals"] },
-            { "id": "task-170039", "name": "Create approval UI", "status": "planned", "effortHours": 12, "assignee": "Frontend Team", "skills": ["React", "UI"] },
-            { "id": "task-170040", "name": "Implement completion archiving", "status": "planned", "effortHours": 8, "assignee": "David Morrison", "skills": ["Archiving", "Backend"] }
+            {
+              "id": "task-170038",
+              "name": "Build sign-off workflow",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Rebecca Morris (Business Analyst)",
+              "skills": [
+                "Requirements",
+                "Gap Analysis",
+                "Testing"
+              ]
+            },
+            {
+              "id": "task-170039",
+              "name": "Create approval UI",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Claire Edwards (Regulatory Affairs Director)",
+              "skills": [
+                "Regulatory Change",
+                "Horizon Scanning",
+                "Policy Analysis"
+              ]
+            },
+            {
+              "id": "task-170040",
+              "name": "Implement completion archiving",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Helen Baker (Compliance Manager)",
+              "skills": [
+                "Compliance Monitoring",
+                "Attestation",
+                "Assurance"
+              ]
+            }
           ]
         }
       ]
     }
   ],
   "resources": [
-    { "id": "res-1701", "name": "Sarah Johnson", "role": "Lead Regulatory Analyst", "allocation": 100, "team": "Compliance", "skills": ["Regulatory Knowledge", "Project Management"], "costRate": 750 },
-    { "id": "res-1702", "name": "David Morrison", "role": "Senior Developer", "allocation": 100, "team": "Compliance Tech", "skills": ["Python", "APIs", "Backend"], "costRate": 700 },
-    { "id": "res-1703", "name": "Dr. Helen Patel", "role": "NLP Specialist", "allocation": 60, "team": "AI", "skills": ["NLP", "Classification", "Python"], "costRate": 850 }
+    {
+      "id": "res-1701",
+      "name": "Sarah Johnson",
+      "role": "Lead Regulatory Analyst",
+      "allocation": 100,
+      "team": "Compliance",
+      "skills": [
+        "Regulatory Knowledge",
+        "Project Management"
+      ],
+      "costRate": 750
+    },
+    {
+      "id": "res-1702",
+      "name": "David Morrison",
+      "role": "Senior Developer",
+      "allocation": 100,
+      "team": "Compliance Tech",
+      "skills": [
+        "Python",
+        "APIs",
+        "Backend"
+      ],
+      "costRate": 700
+    },
+    {
+      "id": "res-1703",
+      "name": "Dr. Helen Patel",
+      "role": "NLP Specialist",
+      "allocation": 60,
+      "team": "AI",
+      "skills": [
+        "NLP",
+        "Classification",
+        "Python"
+      ],
+      "costRate": 850
+    }
   ],
   "milestones": [
-    { "id": "ms-1701", "name": "Horizon Scanning Live", "date": "2024-08-31", "status": "completed", "deliverables": ["50+ sources integrated", "AI classification operational", "Alert system live"] },
-    { "id": "ms-1702", "name": "Impact Assessment Workflow", "date": "2024-11-30", "status": "in-progress", "deliverables": ["Automated routing", "Collaborative forms", "Consolidated dashboard"] },
-    { "id": "ms-1703", "name": "Implementation Tracking", "date": "2025-01-31", "status": "planned", "deliverables": ["Task management", "Evidence capture", "Sign-off workflow"] },
-    { "id": "ms-1704", "name": "Full Platform Go-Live", "date": "2025-02-01", "status": "planned", "deliverables": ["All features operational", "User training complete", "Legacy process retired"] }
+    {
+      "id": "ms-1701",
+      "name": "Horizon Scanning Live",
+      "date": "2024-08-31",
+      "status": "completed",
+      "deliverables": [
+        "50+ sources integrated",
+        "AI classification operational",
+        "Alert system live"
+      ]
+    },
+    {
+      "id": "ms-1702",
+      "name": "Impact Assessment Workflow",
+      "date": "2024-11-30",
+      "status": "in-progress",
+      "deliverables": [
+        "Automated routing",
+        "Collaborative forms",
+        "Consolidated dashboard"
+      ]
+    },
+    {
+      "id": "ms-1703",
+      "name": "Implementation Tracking",
+      "date": "2025-01-31",
+      "status": "planned",
+      "deliverables": [
+        "Task management",
+        "Evidence capture",
+        "Sign-off workflow"
+      ]
+    },
+    {
+      "id": "ms-1704",
+      "name": "Full Platform Go-Live",
+      "date": "2025-02-01",
+      "status": "planned",
+      "deliverables": [
+        "All features operational",
+        "User training complete",
+        "Legacy process retired"
+      ]
+    }
   ],
   "risks": [
-    { "id": "risk-1701", "name": "Regulatory source format changes", "probability": "high", "impact": "medium", "status": "active", "mitigation": "Flexible scraper architecture; weekly source health monitoring", "owner": "David Morrison" },
-    { "id": "risk-1702", "name": "AI classification accuracy drop", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Continuous accuracy monitoring; rapid retraining pipeline; manual override available", "owner": "Dr. Helen Patel" },
-    { "id": "risk-1703", "name": "User adoption challenges", "probability": "medium", "impact": "medium", "status": "active", "mitigation": "Phased rollout; super-user training; dedicated support during transition", "owner": "Sarah Johnson" }
+    {
+      "id": "risk-1701",
+      "name": "Regulatory source format changes",
+      "probability": "high",
+      "impact": "medium",
+      "status": "active",
+      "mitigation": "Flexible scraper architecture; weekly source health monitoring",
+      "owner": "David Morrison"
+    },
+    {
+      "id": "risk-1702",
+      "name": "AI classification accuracy drop",
+      "probability": "medium",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "Continuous accuracy monitoring; rapid retraining pipeline; manual override available",
+      "owner": "Dr. Helen Patel"
+    },
+    {
+      "id": "risk-1703",
+      "name": "User adoption challenges",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "active",
+      "mitigation": "Phased rollout; super-user training; dedicated support during transition",
+      "owner": "Sarah Johnson"
+    }
   ],
   "dependencies": [
-    { "id": "dep-1701", "name": "Enterprise SSO", "type": "internal", "status": "resolved", "project": "Identity Management", "description": "Staff authentication for platform access" },
-    { "id": "dep-1702", "name": "Document Management System", "type": "internal", "status": "active", "project": "Enterprise Content", "description": "Evidence storage integration" },
-    { "id": "dep-1703", "name": "Email System", "type": "internal", "status": "resolved", "project": "IT Infrastructure", "description": "Notification delivery" }
+    {
+      "id": "dep-1701",
+      "name": "Enterprise SSO",
+      "type": "internal",
+      "status": "resolved",
+      "project": "Identity Management",
+      "description": "Staff authentication for platform access"
+    },
+    {
+      "id": "dep-1702",
+      "name": "Document Management System",
+      "type": "internal",
+      "status": "active",
+      "project": "Enterprise Content",
+      "description": "Evidence storage integration"
+    },
+    {
+      "id": "dep-1703",
+      "name": "Email System",
+      "type": "internal",
+      "status": "resolved",
+      "project": "IT Infrastructure",
+      "description": "Notification delivery"
+    }
   ],
   "stakeholders": [
-    { "id": "sh-1701", "name": "Catherine Williams", "role": "Chief Compliance Officer", "department": "Compliance", "influence": "high", "interest": "high" },
-    { "id": "sh-1702", "name": "BU Compliance Heads", "role": "Key Users", "department": "All BUs", "influence": "high", "interest": "high" },
-    { "id": "sh-1703", "name": "Internal Audit", "role": "Oversight", "department": "Audit", "influence": "medium", "interest": "high" }
+    {
+      "id": "sh-1701",
+      "name": "Catherine Williams",
+      "role": "Chief Compliance Officer",
+      "department": "Compliance",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-1702",
+      "name": "BU Compliance Heads",
+      "role": "Key Users",
+      "department": "All BUs",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-1703",
+      "name": "Internal Audit",
+      "role": "Oversight",
+      "department": "Audit",
+      "influence": "medium",
+      "interest": "high"
+    }
   ],
   "iterations": [
-    { "id": "iter-1701", "name": "PI 24.3 - Iteration 1", "startDate": "2024-07-29", "endDate": "2024-08-09", "capacity": 80, "committed": 75, "completed": 73, "velocity": 73 },
-    { "id": "iter-1702", "name": "PI 24.3 - Iteration 2", "startDate": "2024-08-12", "endDate": "2024-08-23", "capacity": 80, "committed": 78, "completed": 76, "velocity": 76 },
-    { "id": "iter-1703", "name": "PI 24.3 - Iteration 3", "startDate": "2024-08-26", "endDate": "2024-09-06", "capacity": 85, "committed": 82, "completed": 80, "velocity": 80 }
+    {
+      "id": "iter-1701",
+      "name": "PI 24.3 - Iteration 1",
+      "startDate": "2024-07-29",
+      "endDate": "2024-08-09",
+      "capacity": 80,
+      "committed": 75,
+      "completed": 73,
+      "velocity": 73
+    },
+    {
+      "id": "iter-1702",
+      "name": "PI 24.3 - Iteration 2",
+      "startDate": "2024-08-12",
+      "endDate": "2024-08-23",
+      "capacity": 80,
+      "committed": 78,
+      "completed": 76,
+      "velocity": 76
+    },
+    {
+      "id": "iter-1703",
+      "name": "PI 24.3 - Iteration 3",
+      "startDate": "2024-08-26",
+      "endDate": "2024-09-06",
+      "capacity": 85,
+      "committed": 82,
+      "completed": 80,
+      "velocity": 80
+    }
   ],
   "financials": {
     "capitalex": 0.8,
     "opex": 0.2,
     "contingency": 0.1,
-    "npv": 8.0,
+    "npv": 8,
     "irr": 45,
     "paybackMonths": 12,
     "costBreakdown": {

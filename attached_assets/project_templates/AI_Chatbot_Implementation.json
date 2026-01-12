@@ -78,9 +78,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given intent classification model, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer types pension query, When NLU processes, Then intent classified with 92%+ accuracy within 2 seconds",
+            "Given ambiguous query with multiple intents, When confidence below threshold, Then clarification question generated",
+            "Given new intent pattern emerges, When retraining triggered, Then updated model deploys within 48 hours"
           ],
           "tasks": [
             {
@@ -88,10 +88,11 @@
               "name": "Train intent classifier on 50k labeled queries",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Priya Sharma",
+              "assignee": "Christopher Lee (AI/ML Lead)",
               "skills": [
-                "NLP",
-                "PyTorch"
+                "LLM",
+                "RAG",
+                "Prompt Engineering"
               ]
             },
             {
@@ -99,10 +100,10 @@
               "name": "Build entity extraction pipeline",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Priya Sharma",
+              "assignee": "Amanda Richards (Product Owner)",
               "skills": [
-                "NER",
-                "spaCy"
+                "Pension Products",
+                "Customer Experience"
               ]
             },
             {
@@ -110,10 +111,11 @@
               "name": "Implement context management",
               "status": "done",
               "effortHours": 16,
-              "assignee": "James Wong",
+              "assignee": "Jessica Taylor (Conversation Designer)",
               "skills": [
-                "Python",
-                "Redis"
+                "Conversation Design",
+                "NLU",
+                "Dialog Flow"
               ]
             },
             {
@@ -121,10 +123,11 @@
               "name": "Deploy model to inference API",
               "status": "done",
               "effortHours": 12,
-              "assignee": "James Wong",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "FastAPI",
-                "Docker"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             }
           ]
@@ -136,9 +139,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given llm response generation, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer question matched to intent, When GPT-4 generates response, Then answer is contextually accurate with pension terminology",
+            "Given hallucination risk detected, When confidence low, Then response includes caveat and offers human escalation",
+            "Given response generated, When quality scored, Then inappropriate responses trigger feedback loop to content team"
           ],
           "tasks": [
             {
@@ -146,10 +149,10 @@
               "name": "Fine-tune LLM on L&G tone and policies",
               "status": "done",
               "effortHours": 40,
-              "assignee": "Priya Sharma",
+              "assignee": "Amanda Richards (Product Owner)",
               "skills": [
-                "LLM",
-                "Fine-tuning"
+                "Pension Products",
+                "Customer Experience"
               ]
             },
             {
@@ -157,10 +160,11 @@
               "name": "Build response generation pipeline",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Priya Sharma",
+              "assignee": "Jessica Taylor (Conversation Designer)",
               "skills": [
-                "LangChain",
-                "Python"
+                "Conversation Design",
+                "NLU",
+                "Dialog Flow"
               ]
             },
             {
@@ -168,10 +172,11 @@
               "name": "Implement guardrails and safety filters",
               "status": "done",
               "effortHours": 16,
-              "assignee": "James Wong",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "AI Safety",
-                "Moderation"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             },
             {
@@ -179,10 +184,11 @@
               "name": "Create response quality monitoring",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Sarah Kim",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Analytics",
-                "Dashboards"
+                "API Integration",
+                "Azure OpenAI",
+                "Vector DB"
               ]
             }
           ]
@@ -194,9 +200,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given multi-turn conversation management, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer mid-conversation, When context window updated, Then previous exchanges inform current response with slot filling",
+            "Given conversation exceeds 10 turns, When summarization triggered, Then key points extracted to maintain context within token limits",
+            "Given customer returns after timeout, When conversation resumes, Then previous context restored with recap offered"
           ],
           "tasks": [
             {
@@ -204,10 +210,11 @@
               "name": "Build conversation state manager",
               "status": "done",
               "effortHours": 20,
-              "assignee": "James Wong",
+              "assignee": "Jessica Taylor (Conversation Designer)",
               "skills": [
-                "State Management",
-                "Redis"
+                "Conversation Design",
+                "NLU",
+                "Dialog Flow"
               ]
             },
             {
@@ -215,10 +222,11 @@
               "name": "Implement session persistence",
               "status": "done",
               "effortHours": 12,
-              "assignee": "James Wong",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "Backend",
-                "PostgreSQL"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             },
             {
@@ -226,10 +234,11 @@
               "name": "Create handoff to human agent",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Sarah Kim",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Integration",
-                "Contact Center"
+                "API Integration",
+                "Azure OpenAI",
+                "Vector DB"
               ]
             }
           ]
@@ -264,9 +273,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given web widget deployment, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given website integration required, When widget script embedded, Then chatbot loads within 2 seconds with consistent styling",
+            "Given mobile browser detected, When widget rendered, Then responsive design provides optimal touch experience",
+            "Given widget loads on authenticated page, When session context passed, Then personalized greeting uses customer name"
           ],
           "tasks": [
             {
@@ -274,10 +283,10 @@
               "name": "Build React chat widget component",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Sarah Kim",
+              "assignee": "Amanda Richards (Product Owner)",
               "skills": [
-                "React",
-                "TypeScript"
+                "Pension Products",
+                "Customer Experience"
               ]
             },
             {
@@ -285,10 +294,11 @@
               "name": "Implement WebSocket connection",
               "status": "done",
               "effortHours": 12,
-              "assignee": "James Wong",
+              "assignee": "Jessica Taylor (Conversation Designer)",
               "skills": [
-                "WebSocket",
-                "Real-time"
+                "Conversation Design",
+                "NLU",
+                "Dialog Flow"
               ]
             },
             {
@@ -296,10 +306,11 @@
               "name": "Create widget customization options",
               "status": "done",
               "effortHours": 8,
-              "assignee": "Sarah Kim",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "CSS",
-                "Theming"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             }
           ]
@@ -311,9 +322,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given mobile app integration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Mobile App Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -321,10 +332,11 @@
               "name": "Build iOS chat SDK",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Mobile Team",
+              "assignee": "Jessica Taylor (Conversation Designer)",
               "skills": [
-                "Swift",
-                "iOS"
+                "Conversation Design",
+                "NLU",
+                "Dialog Flow"
               ]
             },
             {
@@ -332,10 +344,11 @@
               "name": "Build Android chat SDK",
               "status": "in-progress",
               "effortHours": 20,
-              "assignee": "Mobile Team",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "Kotlin",
-                "Android"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             },
             {
@@ -343,9 +356,11 @@
               "name": "Implement push notification triggers",
               "status": "pending",
               "effortHours": 12,
-              "assignee": "James Wong",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Push Notifications"
+                "API Integration",
+                "Azure OpenAI",
+                "Vector DB"
               ]
             }
           ]
@@ -357,9 +372,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given voice ivr integration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Voice IVR Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -367,10 +382,11 @@
               "name": "Integrate speech-to-text engine",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Priya Sharma",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "Speech Recognition",
-                "Whisper"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             },
             {
@@ -378,10 +394,11 @@
               "name": "Build text-to-speech output",
               "status": "planned",
               "effortHours": 12,
-              "assignee": "Priya Sharma",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "TTS",
-                "Audio"
+                "API Integration",
+                "Azure OpenAI",
+                "Vector DB"
               ]
             },
             {
@@ -389,10 +406,11 @@
               "name": "Connect to existing IVR platform",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Integration Team",
+              "assignee": "Christopher Lee (AI/ML Lead)",
               "skills": [
-                "Telephony",
-                "SIP"
+                "LLM",
+                "RAG",
+                "Prompt Engineering"
               ]
             }
           ]
@@ -427,9 +445,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given document ingestion pipeline, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given PDF pension document uploaded, When OCR and parsing complete, Then structured data extracted with 95%+ accuracy",
+            "Given document contains tables, When processed, Then tabular data is queryable and charts summarized",
+            "Given document language is Welsh, When language detected, Then appropriate language model processes content"
           ],
           "tasks": [
             {
@@ -437,10 +455,11 @@
               "name": "Build PDF/Word document parser",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "James Wong",
+              "assignee": "Jessica Taylor (Conversation Designer)",
               "skills": [
-                "Document Processing",
-                "Python"
+                "Conversation Design",
+                "NLU",
+                "Dialog Flow"
               ]
             },
             {
@@ -448,10 +467,11 @@
               "name": "Create vector embedding pipeline",
               "status": "planned",
               "effortHours": 20,
-              "assignee": "Priya Sharma",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "Embeddings",
-                "Vector DB"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             },
             {
@@ -459,10 +479,11 @@
               "name": "Implement RAG retrieval system",
               "status": "planned",
               "effortHours": 24,
-              "assignee": "Priya Sharma",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "RAG",
-                "LangChain"
+                "API Integration",
+                "Azure OpenAI",
+                "Vector DB"
               ]
             }
           ]
@@ -474,9 +495,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given answer accuracy validation, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Answer Accuracy Validation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -484,10 +505,11 @@
               "name": "Build answer verification pipeline",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Priya Sharma",
+              "assignee": "Laura Anderson (Compliance)",
               "skills": [
-                "NLP",
-                "Fact Checking"
+                "FCA SMCR",
+                "Advice Boundaries",
+                "TCF"
               ]
             },
             {
@@ -495,10 +517,11 @@
               "name": "Create accuracy monitoring dashboard",
               "status": "planned",
               "effortHours": 12,
-              "assignee": "Sarah Kim",
+              "assignee": "Matthew Johnson (Integration Lead)",
               "skills": [
-                "Dashboards",
-                "Analytics"
+                "API Integration",
+                "Azure OpenAI",
+                "Vector DB"
               ]
             }
           ]

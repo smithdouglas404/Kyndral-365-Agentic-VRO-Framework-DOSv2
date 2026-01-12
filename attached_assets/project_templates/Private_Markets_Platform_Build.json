@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given deal pipeline crm, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Deal Pipeline CRM is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Design pipeline workflow",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Business Analysts",
+              "assignee": "Oliver Thompson (Private Markets Lead)",
               "skills": [
-                "Process Design"
+                "Private Equity",
+                "Infrastructure",
+                "Real Assets"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Build pipeline UI",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Frontend Team",
+              "assignee": "Sophie Mitchell (Fund Accountant)",
               "skills": [
-                "React"
+                "Fund Accounting",
+                "IPEV",
+                "NAV Calculations"
               ]
             },
             {
@@ -107,9 +111,11 @@
               "name": "Implement stage gates",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Backend Team",
+              "assignee": "William Harris (Operations Manager)",
               "skills": [
-                "Workflow"
+                "Capital Calls",
+                "Distributions",
+                "Waterfalls"
               ]
             }
           ]
@@ -121,9 +127,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given due diligence workflow, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Due Diligence Workflow is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -131,9 +137,11 @@
               "name": "Define DD checklists",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Investment Team",
+              "assignee": "Sophie Mitchell (Fund Accountant)",
               "skills": [
-                "Due Diligence"
+                "Fund Accounting",
+                "IPEV",
+                "NAV Calculations"
               ]
             },
             {
@@ -141,9 +149,11 @@
               "name": "Build DD tracking system",
               "status": "done",
               "effortHours": 28,
-              "assignee": "Backend Team",
+              "assignee": "William Harris (Operations Manager)",
               "skills": [
-                "Workflow"
+                "Capital Calls",
+                "Distributions",
+                "Waterfalls"
               ]
             }
           ]
@@ -155,9 +165,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given deal documentation, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Deal Documentation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -165,9 +175,11 @@
               "name": "Build document repository",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "William Harris (Operations Manager)",
               "skills": [
-                "Document Mgmt"
+                "Capital Calls",
+                "Distributions",
+                "Waterfalls"
               ]
             },
             {
@@ -175,9 +187,11 @@
               "name": "Implement version control",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Backend Team",
+              "assignee": "Emma Clarke (Investor Relations)",
               "skills": [
-                "Version Control"
+                "LP Reporting",
+                "IRR/TVPI",
+                "ILPA Templates"
               ]
             }
           ]
@@ -212,9 +226,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given asset register, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Asset Register is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -222,9 +236,11 @@
               "name": "Design asset data model",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Data Architect",
+              "assignee": "Sophie Mitchell (Fund Accountant)",
               "skills": [
-                "Data Modeling"
+                "Fund Accounting",
+                "IPEV",
+                "NAV Calculations"
               ]
             },
             {
@@ -232,9 +248,11 @@
               "name": "Build asset management UI",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Frontend Team",
+              "assignee": "William Harris (Operations Manager)",
               "skills": [
-                "React"
+                "Capital Calls",
+                "Distributions",
+                "Waterfalls"
               ]
             }
           ]
@@ -246,9 +264,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given valuation engine, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given infrastructure asset valuation required, When DCF model runs, Then fair value calculated with key assumptions documented",
+            "Given comparable transaction data available, When benchmarked, Then valuation multiple comparison provided",
+            "Given quarterly valuation update due, When completed, Then NAV impact calculated with movement attribution"
           ],
           "tasks": [
             {
@@ -256,10 +274,11 @@
               "name": "Build valuation models",
               "status": "in-progress",
               "effortHours": 40,
-              "assignee": "Valuation Team",
+              "assignee": "William Harris (Operations Manager)",
               "skills": [
-                "Valuation",
-                "Finance"
+                "Capital Calls",
+                "Distributions",
+                "Waterfalls"
               ]
             },
             {
@@ -267,9 +286,11 @@
               "name": "Integrate external valuers",
               "status": "pending",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Emma Clarke (Investor Relations)",
               "skills": [
-                "Integration"
+                "LP Reporting",
+                "IRR/TVPI",
+                "ILPA Templates"
               ]
             }
           ]
@@ -304,9 +325,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given report templates, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Report Templates is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -314,9 +335,11 @@
               "name": "Design report templates",
               "status": "planned",
               "effortHours": 24,
-              "assignee": "IR Team",
+              "assignee": "William Harris (Operations Manager)",
               "skills": [
-                "Reporting"
+                "Capital Calls",
+                "Distributions",
+                "Waterfalls"
               ]
             },
             {
@@ -324,9 +347,11 @@
               "name": "Build report generation",
               "status": "planned",
               "effortHours": 32,
-              "assignee": "Backend Team",
+              "assignee": "Emma Clarke (Investor Relations)",
               "skills": [
-                "Reporting"
+                "LP Reporting",
+                "IRR/TVPI",
+                "ILPA Templates"
               ]
             }
           ]
@@ -338,9 +363,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given investor portal, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Investor Portal is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -348,10 +373,11 @@
               "name": "Build investor portal UI",
               "status": "planned",
               "effortHours": 28,
-              "assignee": "Frontend Team",
+              "assignee": "Emma Clarke (Investor Relations)",
               "skills": [
-                "React",
-                "Portal"
+                "LP Reporting",
+                "IRR/TVPI",
+                "ILPA Templates"
               ]
             },
             {
@@ -359,9 +385,11 @@
               "name": "Implement secure access",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Security Team",
+              "assignee": "Charlotte Davies (Compliance Director)",
               "skills": [
-                "Security"
+                "AIFMD",
+                "FCA Host",
+                "Depositary"
               ]
             }
           ]

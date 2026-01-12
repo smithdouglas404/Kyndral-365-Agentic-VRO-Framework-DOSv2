@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given kri definition, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given KRI Definition is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Define 150 KRIs",
               "status": "done",
               "effortHours": 40,
-              "assignee": "Risk Team",
+              "assignee": "Helen Baker (Enterprise Risk Lead)",
               "skills": [
-                "Risk Management"
+                "Enterprise Risk",
+                "Risk Appetite",
+                "ORSA"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Map data sources",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Data Team",
+              "assignee": "Dr. Robert Turner (CRO Office)",
               "skills": [
-                "Data Integration"
+                "Strategic Risk",
+                "Emerging Risks",
+                "Scenario Analysis"
               ]
             }
           ]
@@ -111,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given automated data feeds, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Automated Data Feeds is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -121,9 +125,11 @@
               "name": "Build data pipelines",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Data Team",
+              "assignee": "Dr. Robert Turner (CRO Office)",
               "skills": [
-                "ETL"
+                "Strategic Risk",
+                "Emerging Risks",
+                "Scenario Analysis"
               ]
             },
             {
@@ -131,9 +137,11 @@
               "name": "Implement refresh scheduling",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Backend Team",
+              "assignee": "Simon Price (Risk Analyst)",
               "skills": [
-                "Scheduling"
+                "Risk Analytics",
+                "Quantitative Methods",
+                "Monte Carlo"
               ]
             }
           ]
@@ -168,9 +176,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given executive summary view, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Executive Summary View is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -178,9 +186,11 @@
               "name": "Design executive dashboard",
               "status": "done",
               "effortHours": 16,
-              "assignee": "UX Team",
+              "assignee": "Dr. Robert Turner (CRO Office)",
               "skills": [
-                "UX"
+                "Strategic Risk",
+                "Emerging Risks",
+                "Scenario Analysis"
               ]
             },
             {
@@ -188,9 +198,11 @@
               "name": "Build summary components",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "Simon Price (Risk Analyst)",
               "skills": [
-                "React"
+                "Risk Analytics",
+                "Quantitative Methods",
+                "Monte Carlo"
               ]
             }
           ]
@@ -202,9 +214,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given drill-down analysis, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Drill-Down Analysis is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -212,9 +224,11 @@
               "name": "Build drill-down navigation",
               "status": "in-progress",
               "effortHours": 24,
-              "assignee": "Frontend Team",
+              "assignee": "Simon Price (Risk Analyst)",
               "skills": [
-                "React"
+                "Risk Analytics",
+                "Quantitative Methods",
+                "Monte Carlo"
               ]
             },
             {
@@ -222,9 +236,11 @@
               "name": "Create trend analysis",
               "status": "pending",
               "effortHours": 16,
-              "assignee": "Analytics Team",
+              "assignee": "Claire Edwards (Risk Reporting Manager)",
               "skills": [
-                "Analytics"
+                "Board Reporting",
+                "Visualization",
+                "Dashboards"
               ]
             }
           ]

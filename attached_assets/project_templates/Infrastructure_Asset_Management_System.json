@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given asset registry, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given infrastructure asset acquired, When registered, Then valuation, depreciation schedule, and maintenance plan created",
+            "Given asset condition assessment due, When completed, Then condition score updated with remaining useful life",
+            "Given asset disposal planned, When executed, Then gain/loss calculated with environmental obligations captured"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Design asset data model",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Data Architect",
+              "assignee": "Lucy Cooper (Infrastructure Manager)",
               "skills": [
-                "Data Modeling"
+                "Infrastructure Assets",
+                "Lifecycle Management",
+                "CMMS"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Build asset management UI",
               "status": "done",
               "effortHours": 28,
-              "assignee": "Frontend Team",
+              "assignee": "Mark Stevens (Technical Director)",
               "skills": [
-                "React"
+                "Civil Engineering",
+                "Asset Condition",
+                "Inspections"
               ]
             }
           ]
@@ -111,9 +115,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given performance tracking, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given infrastructure asset has contracted revenue, When forecast modeled, Then NPV of future cashflows calculated",
+            "Given inflation adjustment applies, When escalator applied, Then real and nominal revenue projections generated",
+            "Given regulatory price review approaches, When modeled, Then allowed revenue under scenarios compared"
           ],
           "tasks": [
             {
@@ -121,10 +125,11 @@
               "name": "Build performance dashboard",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Frontend Team",
+              "assignee": "Mark Stevens (Technical Director)",
               "skills": [
-                "React",
-                "Charts"
+                "Civil Engineering",
+                "Asset Condition",
+                "Inspections"
               ]
             },
             {
@@ -132,9 +137,11 @@
               "name": "Implement IRR/MOIC calcs",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Alex Turner (IoT Lead)",
               "skills": [
-                "Finance"
+                "IoT",
+                "Sensors",
+                "SCADA"
               ]
             }
           ]
@@ -146,9 +153,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given valuation integration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Valuation Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -156,9 +163,11 @@
               "name": "Integrate external valuers",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Alex Turner (IoT Lead)",
               "skills": [
-                "Integration"
+                "IoT",
+                "Sensors",
+                "SCADA"
               ]
             },
             {
@@ -166,9 +175,11 @@
               "name": "Build valuation workflow",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Backend Team",
+              "assignee": "Sarah Jenkins (Finance Analyst)",
               "skills": [
-                "Workflow"
+                "IAS 16",
+                "Asset Accounting",
+                "Depreciation"
               ]
             }
           ]
@@ -203,9 +214,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given energy asset data, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Energy Asset Data is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -213,10 +224,11 @@
               "name": "Build SCADA integration",
               "status": "done",
               "effortHours": 32,
-              "assignee": "IoT Team",
+              "assignee": "Mark Stevens (Technical Director)",
               "skills": [
-                "SCADA",
-                "IoT"
+                "Civil Engineering",
+                "Asset Condition",
+                "Inspections"
               ]
             },
             {
@@ -224,9 +236,11 @@
               "name": "Create operational dashboard",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "Alex Turner (IoT Lead)",
               "skills": [
-                "React"
+                "IoT",
+                "Sensors",
+                "SCADA"
               ]
             }
           ]
@@ -238,9 +252,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given transport asset data, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Transport Asset Data is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -248,9 +262,11 @@
               "name": "Integrate traffic systems",
               "status": "in-progress",
               "effortHours": 28,
-              "assignee": "Backend Team",
+              "assignee": "Alex Turner (IoT Lead)",
               "skills": [
-                "Integration"
+                "IoT",
+                "Sensors",
+                "SCADA"
               ]
             },
             {
@@ -258,9 +274,11 @@
               "name": "Build revenue forecasting",
               "status": "pending",
               "effortHours": 24,
-              "assignee": "Analytics Team",
+              "assignee": "Sarah Jenkins (Finance Analyst)",
               "skills": [
-                "Forecasting"
+                "IAS 16",
+                "Asset Accounting",
+                "Depreciation"
               ]
             }
           ]

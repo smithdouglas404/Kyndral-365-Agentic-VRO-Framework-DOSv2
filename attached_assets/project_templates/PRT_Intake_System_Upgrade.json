@@ -77,40 +77,43 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given multi-format parser, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given pension scheme provides member data in Excel, When file uploaded, Then 50,000+ records parsed within 5 minutes with validation report",
+            "Given scheme uses legacy column headers, When intelligent mapping runs, Then field suggestions achieve 90%+ accuracy with manual override",
+            "Given file contains duplicate NI numbers, When duplicates detected, Then records flagged with merge/split decision workflow"
           ],
           "tasks": [
             {
               "id": "task-prt-001",
-              "name": "Build Excel parser",
+              "name": "Build Excel parser with xlsxwriter supporting 1M+ rows",
               "status": "done",
-              "effortHours": 20,
-              "assignee": "Data Team",
+              "effortHours": 24,
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
                 "Python",
-                "Pandas"
+                "Pandas",
+                "Excel"
               ]
             },
             {
               "id": "task-prt-002",
-              "name": "Build CSV/XML parsers",
+              "name": "Implement intelligent column header matching using NLP",
               "status": "done",
-              "effortHours": 16,
-              "assignee": "Data Team",
+              "effortHours": 32,
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "ETL"
+                "NLP",
+                "Machine Learning"
               ]
             },
             {
               "id": "task-prt-003",
-              "name": "Create schema mapping engine",
+              "name": "Create duplicate detection engine with fuzzy matching",
               "status": "done",
-              "effortHours": 24,
-              "assignee": "Data Lead",
+              "effortHours": 20,
+              "assignee": "Emily Watson (Risk Analyst)",
               "skills": [
-                "Data Engineering"
+                "Record Linkage",
+                "Python"
               ]
             }
           ]
@@ -122,29 +125,31 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given data validation rules, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given member data batch ingested, When 200+ validation rules execute, Then errors categorized with correction guidance per field",
+            "Given NI number format validation fails, When error displayed, Then correct format example and common mistakes shown",
+            "Given benefit calculation validation detects discrepancy, When flagged, Then expected vs actual values displayed with calculation breakdown"
           ],
           "tasks": [
             {
               "id": "task-prt-004",
-              "name": "Define 200+ validation rules",
+              "name": "Implement NI number validation with HMRC format checks",
               "status": "done",
-              "effortHours": 32,
-              "assignee": "Business Analysts",
+              "effortHours": 16,
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
-                "Business Rules"
+                "Regex",
+                "UK Tax Systems"
               ]
             },
             {
               "id": "task-prt-005",
-              "name": "Build validation engine",
+              "name": "Build benefit calculation validation (GMP, revaluation, pension increases)",
               "status": "done",
-              "effortHours": 24,
-              "assignee": "Backend Team",
+              "effortHours": 32,
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "Rules Engine"
+                "Pension Calculations",
+                "Actuarial"
               ]
             }
           ]
@@ -156,29 +161,31 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given data cleansing workflows, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given multiple validation errors exist, When cleansing UI accessed, Then batch editing allows simultaneous correction of common patterns",
+            "Given address is incomplete, When Royal Mail PAF lookup triggered, Then address auto-completes from postcode with UPRN validation",
+            "Given cleansing session complete, When sign-off requested, Then audit trail captures all changes with user attribution and timestamp"
           ],
           "tasks": [
             {
               "id": "task-prt-006",
-              "name": "Build data cleansing UI",
+              "name": "Build batch editing UI with undo/redo functionality",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Frontend Team",
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
-                "React"
+                "React",
+                "State Management"
               ]
             },
             {
               "id": "task-prt-007",
-              "name": "Create exception queues",
+              "name": "Integrate Royal Mail PAF for address validation",
               "status": "done",
-              "effortHours": 16,
-              "assignee": "Backend Team",
+              "effortHours": 20,
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "Workflow"
+                "API Integration",
+                "Address Data"
               ]
             }
           ]
@@ -213,30 +220,31 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given benefit calculation engine, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Benefit Calculation Engine is initiated for pension scheme, When actuarial assumptions applied, Then results comply with TPR and FCA regulatory standards",
+            "Given calculation parameters are set, When processing completes, Then member-level outputs are validated against expected ranges with variance reporting",
+            "Given scheme-specific rules apply, When overrides configured, Then custom calculation logic reflects scheme deed amendments"
           ],
           "tasks": [
             {
               "id": "task-prt-008",
-              "name": "Build calculation framework",
+              "name": "Implement GMP revaluation calculations (fixed rate and S148 orders)",
               "status": "done",
-              "effortHours": 40,
-              "assignee": "Actuarial Dev",
+              "effortHours": 32,
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
-                "Actuarial",
-                "Java"
+                "GMP",
+                "Actuarial Calculations"
               ]
             },
             {
               "id": "task-prt-009",
-              "name": "Implement 50 scheme rules",
+              "name": "Build HMRC COD reconciliation module",
               "status": "done",
-              "effortHours": 60,
-              "assignee": "Rules Team",
+              "effortHours": 28,
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "Business Rules"
+                "HMRC Integration",
+                "GMP Reconciliation"
               ]
             }
           ]
@@ -248,39 +256,42 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given calculation audit trail, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Calculation Audit Trail is initiated for pension scheme, When actuarial assumptions applied, Then results comply with TPR and FCA regulatory standards",
+            "Given calculation parameters are set, When processing completes, Then member-level outputs are validated against expected ranges with variance reporting",
+            "Given scheme-specific rules apply, When overrides configured, Then custom calculation logic reflects scheme deed amendments"
           ],
           "tasks": [
             {
               "id": "task-prt-010",
-              "name": "Design audit data model",
+              "name": "Build ONS index integration for RPI/CPI/CPIH",
               "status": "done",
-              "effortHours": 16,
-              "assignee": "Data Lead",
+              "effortHours": 20,
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
-                "Data Modeling"
+                "API Integration",
+                "Inflation Indices"
               ]
             },
             {
               "id": "task-prt-011",
-              "name": "Implement audit logging",
+              "name": "Implement LPI cap and collar calculation logic",
               "status": "in-progress",
               "effortHours": 24,
-              "assignee": "Backend Team",
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "Logging"
+                "Pension Increases",
+                "Actuarial"
               ]
             },
             {
               "id": "task-prt-012",
-              "name": "Build audit query interface",
+              "name": "Create multi-tranche benefit tracking system",
               "status": "pending",
-              "effortHours": 16,
-              "assignee": "Frontend Team",
+              "effortHours": 28,
+              "assignee": "Emily Watson (Risk Analyst)",
               "skills": [
-                "React"
+                "Pension Administration",
+                "Data Modeling"
               ]
             }
           ]
@@ -315,29 +326,31 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given workflow automation, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Workflow Automation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
               "id": "task-prt-013",
-              "name": "Design workflow states",
+              "name": "Build monthly cashflow projection engine",
               "status": "planned",
-              "effortHours": 16,
-              "assignee": "Business Analysts",
+              "effortHours": 36,
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
-                "Process Design"
+                "Actuarial Projections",
+                "Python"
               ]
             },
             {
               "id": "task-prt-014",
-              "name": "Implement workflow engine",
+              "name": "Implement CMI mortality model with improvements",
               "status": "planned",
               "effortHours": 32,
-              "assignee": "Backend Team",
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "Workflow"
+                "CMI Model",
+                "Longevity"
               ]
             }
           ]
@@ -349,30 +362,31 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given pipeline dashboard, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Pipeline Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
               "id": "task-prt-015",
-              "name": "Build pipeline dashboard",
+              "name": "Optimize pricing engine for sub-minute performance",
               "status": "planned",
-              "effortHours": 24,
-              "assignee": "Frontend Team",
+              "effortHours": 28,
+              "assignee": "Dr. Sarah Chen (Actuary)",
               "skills": [
-                "React",
-                "D3"
+                "Performance Optimization",
+                "C++"
               ]
             },
             {
               "id": "task-prt-016",
-              "name": "Create SLA alerting",
+              "name": "Build real-time market data integration for pricing",
               "status": "planned",
-              "effortHours": 12,
-              "assignee": "Backend Team",
+              "effortHours": 24,
+              "assignee": "James Morrison (Pension Specialist)",
               "skills": [
-                "Alerting"
+                "Market Data",
+                "Bloomberg"
               ]
             }
           ]

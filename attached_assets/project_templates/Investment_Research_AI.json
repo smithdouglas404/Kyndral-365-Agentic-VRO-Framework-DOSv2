@@ -77,9 +77,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given earnings transcription, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given earnings call audio available, When Whisper ASR processes, Then transcript generated with speaker diarization and 98%+ accuracy",
+            "Given multiple languages detected, When translation runs, Then English transcript with original language preserved for verification",
+            "Given transcript quality reviewed, When corrections made, Then fine-tuning dataset updated for model improvement"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Integrate Whisper ASR",
               "status": "done",
               "effortHours": 20,
-              "assignee": "ML Team",
+              "assignee": "Dr. James Foster (Quant Analyst)",
               "skills": [
-                "Speech Recognition"
+                "Quantitative Analysis",
+                "Factor Models",
+                "Alpha Generation"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Build transcript processing",
               "status": "done",
               "effortHours": 16,
-              "assignee": "ML Team",
+              "assignee": "Oliver Thompson (Research Director)",
               "skills": [
-                "NLP"
+                "Equity Research",
+                "Fixed Income",
+                "Credit Analysis"
               ]
             }
           ]
@@ -111,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given call summarization, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given earnings transcript available, When summarization LLM runs, Then executive summary, key metrics, and guidance extracted",
+            "Given sector-specific terminology used, When domain model applied, Then financial terms correctly interpreted with context",
+            "Given summary generated, When reviewed by analyst, Then feedback loop improves future summaries"
           ],
           "tasks": [
             {
@@ -121,10 +125,11 @@
               "name": "Fine-tune summarization LLM",
               "status": "done",
               "effortHours": 32,
-              "assignee": "ML Team",
+              "assignee": "Oliver Thompson (Research Director)",
               "skills": [
-                "LLM",
-                "Fine-tuning"
+                "Equity Research",
+                "Fixed Income",
+                "Credit Analysis"
               ]
             },
             {
@@ -132,9 +137,11 @@
               "name": "Build summary generation API",
               "status": "done",
               "effortHours": 12,
-              "assignee": "Backend Team",
+              "assignee": "Sophie Mitchell (NLP Engineer)",
               "skills": [
-                "APIs"
+                "NLP",
+                "LLM",
+                "Named Entity Recognition"
               ]
             }
           ]
@@ -146,9 +153,9 @@
           "storyPoints": 8,
           "status": "done",
           "acceptanceCriteria": [
-            "Given management sentiment, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given management commentary analyzed, When sentiment classified, Then positive/negative/neutral score calculated with confidence",
+            "Given sentiment compared to prior calls, When trend displayed, Then sentiment shift direction and magnitude shown",
+            "Given significant sentiment change detected, When alert triggered, Then analyst notified with key phrase excerpts"
           ],
           "tasks": [
             {
@@ -156,10 +163,11 @@
               "name": "Build sentiment classifier",
               "status": "done",
               "effortHours": 24,
-              "assignee": "ML Team",
+              "assignee": "Sophie Mitchell (NLP Engineer)",
               "skills": [
                 "NLP",
-                "Sentiment"
+                "LLM",
+                "Named Entity Recognition"
               ]
             },
             {
@@ -167,9 +175,11 @@
               "name": "Create sentiment dashboard",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Frontend Team",
+              "assignee": "William Harris (Data Engineer)",
               "skills": [
-                "React"
+                "Python",
+                "SQL",
+                "Bloomberg"
               ]
             }
           ]
@@ -204,9 +214,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given document ingestion, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Document Ingestion is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -214,9 +224,11 @@
               "name": "Build PDF/doc parser",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Data Team",
+              "assignee": "Oliver Thompson (Research Director)",
               "skills": [
-                "Document Processing"
+                "Equity Research",
+                "Fixed Income",
+                "Credit Analysis"
               ]
             },
             {
@@ -224,9 +236,11 @@
               "name": "Create vector embeddings",
               "status": "done",
               "effortHours": 16,
-              "assignee": "ML Team",
+              "assignee": "Sophie Mitchell (NLP Engineer)",
               "skills": [
-                "Embeddings"
+                "NLP",
+                "LLM",
+                "Named Entity Recognition"
               ]
             }
           ]
@@ -238,9 +252,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given research q&a, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Research Q&A for client mandate, When performance calculated, Then GIPS-compliant returns are generated with benchmark comparison",
+            "Given client reporting period ends, When factsheet generated, Then MiFID II cost disclosures and ESG metrics are included",
+            "Given portfolio rebalancing triggered, When trades executed, Then best execution documentation is maintained per FCA requirements"
           ],
           "tasks": [
             {
@@ -248,10 +262,11 @@
               "name": "Build RAG pipeline",
               "status": "done",
               "effortHours": 24,
-              "assignee": "ML Team",
+              "assignee": "Sophie Mitchell (NLP Engineer)",
               "skills": [
-                "RAG",
-                "LangChain"
+                "NLP",
+                "LLM",
+                "Named Entity Recognition"
               ]
             },
             {
@@ -259,9 +274,11 @@
               "name": "Create chat interface",
               "status": "in-progress",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "William Harris (Data Engineer)",
               "skills": [
-                "React"
+                "Python",
+                "SQL",
+                "Bloomberg"
               ]
             },
             {
@@ -269,9 +286,11 @@
               "name": "Implement citations",
               "status": "pending",
               "effortHours": 16,
-              "assignee": "ML Team",
+              "assignee": "Charlotte Davies (Compliance Lead)",
               "skills": [
-                "RAG"
+                "MiFID II",
+                "Research Unbundling",
+                "Inducements"
               ]
             }
           ]

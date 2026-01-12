@@ -8,11 +8,27 @@
   "roiValue": 50,
   "priority": "critical",
   "status": "amber",
-  "budget": { "spent": 3.5, "total": 5.0, "unit": "£m", "contingency": 0.5, "forecastAtCompletion": 5.2 },
-  "timeline": { "elapsed": 12, "total": 18, "unit": "months", "startDate": "2024-01-15", "endDate": "2025-07-15" },
+  "budget": {
+    "spent": 3.5,
+    "total": 5,
+    "unit": "£m",
+    "contingency": 0.5,
+    "forecastAtCompletion": 5.2
+  },
+  "timeline": {
+    "elapsed": 12,
+    "total": 18,
+    "unit": "months",
+    "startDate": "2024-01-15",
+    "endDate": "2025-07-15"
+  },
   "artName": "Enterprise Tech ART",
   "portfolioTheme": "Data Foundation",
-  "strategicObjectives": ["SO-1: Digital Leadership", "SO-3: Operational Excellence", "SO-5: Data-Driven Decision Making"],
+  "strategicObjectives": [
+    "SO-1: Digital Leadership",
+    "SO-3: Operational Excellence",
+    "SO-5: Data-Driven Decision Making"
+  ],
   "safe": {
     "velocity": 42,
     "predictability": 75,
@@ -23,7 +39,13 @@
     "epicId": "EPIC-GRP-101",
     "epicName": "Enterprise Data Foundation",
     "epicProgress": 62,
-    "epicWsjf": { "businessValue": 21, "timeCriticality": 13, "riskReduction": 8, "jobSize": 13, "score": 3.23 },
+    "epicWsjf": {
+      "businessValue": 21,
+      "timeCriticality": 13,
+      "riskReduction": 8,
+      "jobSize": 13,
+      "score": 3.23
+    },
     "solutionTrain": "L&G Digital",
     "valueStream": "Customer & Operations Analytics"
   },
@@ -36,7 +58,13 @@
       "storyPoints": 89,
       "completedPoints": 89,
       "priority": "critical",
-      "wsjf": { "businessValue": 21, "timeCriticality": 13, "riskReduction": 8, "jobSize": 8, "score": 5.25 },
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 13,
+        "riskReduction": 8,
+        "jobSize": 8,
+        "score": 5.25
+      },
       "acceptanceCriteria": [
         "Data lake ingests from all 47 identified source systems",
         "Delta Lake time travel enabled for 90-day lookback",
@@ -51,15 +79,58 @@
           "storyPoints": 8,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Azure subscription is available, When infrastructure is provisioned, Then ADLS Gen2 accounts are created in UK South and UK West regions",
-            "Given security requirements, When storage is configured, Then private endpoints and managed identities are enabled",
-            "Given DR requirements, When replication is set up, Then geo-redundant storage is enabled with 15-minute RPO"
+            "Given infrastructure-as-code is executed, When Terraform applies successfully, Then ADLS Gen2 containers are provisioned with RBAC policies in under 30 minutes",
+            "Given storage accounts are created, When hierarchical namespace is enabled, Then Delta Lake tables can be written with ACID transactions",
+            "Given disaster recovery is configured, When primary region fails, Then data is accessible from paired region within RPO of 1 hour"
           ],
           "tasks": [
-            { "id": "task-190001", "name": "Create Terraform modules for ADLS Gen2", "status": "done", "effortHours": 16, "assignee": "James Chen", "skills": ["Terraform", "Azure"] },
-            { "id": "task-190002", "name": "Configure private endpoints and NSGs", "status": "done", "effortHours": 8, "assignee": "James Chen", "skills": ["Azure Networking"] },
-            { "id": "task-190003", "name": "Set up managed identities and RBAC", "status": "done", "effortHours": 8, "assignee": "Sarah Mitchell", "skills": ["Azure AD", "Security"] },
-            { "id": "task-190004", "name": "Configure geo-replication and DR", "status": "done", "effortHours": 6, "assignee": "James Chen", "skills": ["Azure", "DR"] }
+            {
+              "id": "task-190001",
+              "name": "Create Terraform modules for ADLS Gen2",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190002",
+              "name": "Configure private endpoints and NSGs",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            },
+            {
+              "id": "task-190003",
+              "name": "Set up managed identities and RBAC",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190004",
+              "name": "Configure geo-replication and DR",
+              "status": "done",
+              "effortHours": 6,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            }
           ]
         },
         {
@@ -69,15 +140,58 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given raw data lands in bronze layer, When processing completes, Then data is converted to Delta format in silver layer",
-            "Given Delta tables exist, When user queries historical data, Then time travel works for 90-day lookback",
-            "Given concurrent writes occur, When transactions complete, Then ACID guarantees are maintained"
+            "Given Delta Lake Format Implementation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190005", "name": "Configure Databricks Delta Lake runtime", "status": "done", "effortHours": 12, "assignee": "Dr. Kevin Zhang", "skills": ["Databricks", "Spark"] },
-            { "id": "task-190006", "name": "Build bronze-to-silver ETL pipelines", "status": "done", "effortHours": 24, "assignee": "Anna Schmidt", "skills": ["PySpark", "ETL"] },
-            { "id": "task-190007", "name": "Implement Delta table optimization (Z-ORDER, VACUUM)", "status": "done", "effortHours": 8, "assignee": "Anna Schmidt", "skills": ["Delta Lake"] },
-            { "id": "task-190008", "name": "Set up time travel retention policies", "status": "done", "effortHours": 4, "assignee": "Dr. Kevin Zhang", "skills": ["Delta Lake"] }
+            {
+              "id": "task-190005",
+              "name": "Configure Databricks Delta Lake runtime",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            },
+            {
+              "id": "task-190006",
+              "name": "Build bronze-to-silver ETL pipelines",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190007",
+              "name": "Implement Delta table optimization (Z-ORDER, VACUUM)",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190008",
+              "name": "Set up time travel retention policies",
+              "status": "done",
+              "effortHours": 4,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            }
           ]
         },
         {
@@ -87,16 +201,70 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given source systems are identified, When connectors are deployed, Then 15 Wave 1 systems are ingesting data",
-            "Given data arrives, When quality checks run, Then 99.5% of records pass validation",
-            "Given schema changes occur, When drift is detected, Then alerts notify data stewards within 5 minutes"
+            "Given Source System Connectors - Wave 1 is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190009", "name": "Build Salesforce CRM connector", "status": "done", "effortHours": 16, "assignee": "Marcus Williams", "skills": ["APIs", "Salesforce"] },
-            { "id": "task-190010", "name": "Build Oracle Financials connector", "status": "done", "effortHours": 20, "assignee": "Marcus Williams", "skills": ["Oracle", "JDBC"] },
-            { "id": "task-190011", "name": "Build Mainframe policy admin connector", "status": "done", "effortHours": 32, "assignee": "Richard Thompson", "skills": ["Mainframe", "COBOL"] },
-            { "id": "task-190012", "name": "Build 12 additional API-based connectors", "status": "done", "effortHours": 48, "assignee": "Marcus Williams", "skills": ["REST APIs", "Python"] },
-            { "id": "task-190013", "name": "Implement data quality framework", "status": "done", "effortHours": 24, "assignee": "Anna Schmidt", "skills": ["Great Expectations", "Python"] }
+            {
+              "id": "task-190009",
+              "name": "Build Salesforce CRM connector",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190010",
+              "name": "Build Oracle Financials connector",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190011",
+              "name": "Build Mainframe policy admin connector",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190012",
+              "name": "Build 12 additional API-based connectors",
+              "status": "done",
+              "effortHours": 48,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190013",
+              "name": "Implement data quality framework",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            }
           ]
         },
         {
@@ -106,14 +274,46 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given data ingestion occurs, When PII scan runs, Then all 23 defined PII types are detected",
-            "Given PII is detected, When masking applies, Then data is tokenized or anonymized per policy",
-            "Given access request arrives, When DPO queries, Then full data lineage is available within 24 hours"
+            "Given PII Detection and GDPR Compliance regulatory requirement identified, When assessed, Then impact score and implementation plan created",
+            "Given policy update required, When drafted, Then version control and approval workflow maintained",
+            "Given audit finding raised, When documented, Then remediation tracked with owner and due date"
           ],
           "tasks": [
-            { "id": "task-190014", "name": "Implement Microsoft Purview PII scanning", "status": "done", "effortHours": 16, "assignee": "Sarah Mitchell", "skills": ["Purview", "Data Governance"] },
-            { "id": "task-190015", "name": "Build dynamic data masking rules", "status": "done", "effortHours": 12, "assignee": "Sarah Mitchell", "skills": ["Data Security"] },
-            { "id": "task-190016", "name": "Create GDPR compliance dashboards", "status": "done", "effortHours": 8, "assignee": "Emily Watson", "skills": ["Power BI", "Compliance"] }
+            {
+              "id": "task-190014",
+              "name": "Implement Microsoft Purview PII scanning",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190015",
+              "name": "Build dynamic data masking rules",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190016",
+              "name": "Create GDPR compliance dashboards",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            }
           ]
         }
       ]
@@ -126,7 +326,13 @@
       "storyPoints": 55,
       "completedPoints": 34,
       "priority": "high",
-      "wsjf": { "businessValue": 13, "timeCriticality": 8, "riskReduction": 5, "jobSize": 8, "score": 3.25 },
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 8,
+        "riskReduction": 5,
+        "jobSize": 8,
+        "score": 3.25
+      },
       "acceptanceCriteria": [
         "Business users can create dashboards without SQL knowledge",
         "Semantic layer covers 80% of common business metrics",
@@ -141,15 +347,58 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given business glossary exists, When semantic layer is built, Then 150+ business metrics are defined",
-            "Given user selects metrics, When query executes, Then correct SQL is generated automatically",
-            "Given metric definitions change, When dbt runs, Then downstream reports update automatically"
+            "Given Semantic Layer with dbt is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190017", "name": "Set up dbt project structure", "status": "done", "effortHours": 8, "assignee": "Anna Schmidt", "skills": ["dbt", "SQL"] },
-            { "id": "task-190018", "name": "Build core financial metrics models", "status": "done", "effortHours": 24, "assignee": "Anna Schmidt", "skills": ["dbt", "Finance"] },
-            { "id": "task-190019", "name": "Build customer metrics models", "status": "done", "effortHours": 16, "assignee": "Emily Watson", "skills": ["dbt", "Customer Analytics"] },
-            { "id": "task-190020", "name": "Implement dbt documentation and lineage", "status": "done", "effortHours": 8, "assignee": "Anna Schmidt", "skills": ["dbt"] }
+            {
+              "id": "task-190017",
+              "name": "Set up dbt project structure",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            },
+            {
+              "id": "task-190018",
+              "name": "Build core financial metrics models",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190019",
+              "name": "Build customer metrics models",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190020",
+              "name": "Implement dbt documentation and lineage",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            }
           ]
         },
         {
@@ -159,14 +408,46 @@
           "storyPoints": 8,
           "status": "done",
           "acceptanceCriteria": [
-            "Given licensing is approved, When workspaces are created, Then 12 departmental workspaces exist",
-            "Given workspace exists, When permissions are set, Then AD group-based access is enforced",
-            "Given reports are published, When refresh runs, Then incremental refresh completes within SLA"
+            "Given Power BI Premium Workspace Setup is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190021", "name": "Configure Power BI Premium capacity", "status": "done", "effortHours": 8, "assignee": "Michael Brown", "skills": ["Power BI Admin"] },
-            { "id": "task-190022", "name": "Create workspace structure and governance", "status": "done", "effortHours": 12, "assignee": "Michael Brown", "skills": ["Power BI", "Governance"] },
-            { "id": "task-190023", "name": "Set up deployment pipelines (Dev/Test/Prod)", "status": "done", "effortHours": 8, "assignee": "Michael Brown", "skills": ["Power BI", "DevOps"] }
+            {
+              "id": "task-190021",
+              "name": "Configure Power BI Premium capacity",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190022",
+              "name": "Create workspace structure and governance",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190023",
+              "name": "Set up deployment pipelines (Dev/Test/Prod)",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            }
           ]
         },
         {
@@ -176,15 +457,58 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given user logs in, When RLS evaluates, Then only permitted business unit data is visible",
-            "Given 50 concurrent users query, When RLS applies, Then query performance remains <5 seconds",
-            "Given access audit is requested, When report runs, Then full access history is available"
+            "Given Row-Level Security Implementation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190024", "name": "Design RLS model with AD integration", "status": "done", "effortHours": 12, "assignee": "Sarah Mitchell", "skills": ["Security", "Power BI"] },
-            { "id": "task-190025", "name": "Implement RLS in semantic models", "status": "in-progress", "effortHours": 16, "assignee": "Michael Brown", "skills": ["Power BI", "DAX"] },
-            { "id": "task-190026", "name": "Build access audit logging", "status": "pending", "effortHours": 8, "assignee": "Sarah Mitchell", "skills": ["Security", "Logging"] },
-            { "id": "task-190027", "name": "Performance test with 50 concurrent users", "status": "pending", "effortHours": 8, "assignee": "Michael Brown", "skills": ["Performance Testing"] }
+            {
+              "id": "task-190024",
+              "name": "Design RLS model with AD integration",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190025",
+              "name": "Implement RLS in semantic models",
+              "status": "in-progress",
+              "effortHours": 16,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190026",
+              "name": "Build access audit logging",
+              "status": "pending",
+              "effortHours": 8,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190027",
+              "name": "Performance test with 50 concurrent users",
+              "status": "pending",
+              "effortHours": 8,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            }
           ]
         },
         {
@@ -194,16 +518,70 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given executive logs in, When dashboard loads, Then 8 key KPIs are visible within 3 seconds",
-            "Given drill-down is clicked, When navigation occurs, Then detailed view loads within 2 seconds",
-            "Given mobile access is needed, When executive uses phone, Then responsive design works correctly"
+            "Given Executive Dashboard Suite is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190028", "name": "Design executive dashboard UX", "status": "done", "effortHours": 16, "assignee": "Emily Watson", "skills": ["UX Design", "Power BI"] },
-            { "id": "task-190029", "name": "Build Group Performance dashboard", "status": "done", "effortHours": 24, "assignee": "Emily Watson", "skills": ["Power BI", "DAX"] },
-            { "id": "task-190030", "name": "Build Division deep-dive dashboards", "status": "in-progress", "effortHours": 32, "assignee": "Emily Watson", "skills": ["Power BI", "DAX"] },
-            { "id": "task-190031", "name": "Implement mobile-responsive layouts", "status": "pending", "effortHours": 12, "assignee": "Emily Watson", "skills": ["Power BI Mobile"] },
-            { "id": "task-190032", "name": "Configure real-time streaming for key metrics", "status": "pending", "effortHours": 16, "assignee": "Dr. Kevin Zhang", "skills": ["Azure Stream Analytics"] }
+            {
+              "id": "task-190028",
+              "name": "Design executive dashboard UX",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190029",
+              "name": "Build Group Performance dashboard",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190030",
+              "name": "Build Division deep-dive dashboards",
+              "status": "in-progress",
+              "effortHours": 32,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            },
+            {
+              "id": "task-190031",
+              "name": "Implement mobile-responsive layouts",
+              "status": "pending",
+              "effortHours": 12,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190032",
+              "name": "Configure real-time streaming for key metrics",
+              "status": "pending",
+              "effortHours": 16,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            }
           ]
         }
       ]
@@ -216,7 +594,13 @@
       "storyPoints": 55,
       "completedPoints": 0,
       "priority": "high",
-      "wsjf": { "businessValue": 13, "timeCriticality": 5, "riskReduction": 8, "jobSize": 13, "score": 2.0 },
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 5,
+        "riskReduction": 8,
+        "jobSize": 13,
+        "score": 2
+      },
       "acceptanceCriteria": [
         "Data scientists can deploy models to production within 4 hours",
         "Model drift detection alerts within 24 hours of degradation",
@@ -231,15 +615,58 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given experiment runs, When training completes, Then metrics, parameters, and artifacts are logged",
-            "Given model is approved, When registered, Then it appears in model registry with versioning",
-            "Given model is promoted, When deployment triggers, Then CI/CD pipeline executes"
+            "Given MLflow Tracking and Registry is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190033", "name": "Deploy MLflow on Azure ML", "status": "planned", "effortHours": 16, "assignee": "Dr. Kevin Zhang", "skills": ["MLflow", "Azure ML"] },
-            { "id": "task-190034", "name": "Configure experiment tracking", "status": "planned", "effortHours": 8, "assignee": "Dr. Kevin Zhang", "skills": ["MLflow"] },
-            { "id": "task-190035", "name": "Set up model registry with approval workflow", "status": "planned", "effortHours": 12, "assignee": "Dr. Kevin Zhang", "skills": ["MLflow", "MLOps"] },
-            { "id": "task-190036", "name": "Integrate with Azure DevOps for CI/CD", "status": "planned", "effortHours": 16, "assignee": "James Chen", "skills": ["Azure DevOps", "MLOps"] }
+            {
+              "id": "task-190033",
+              "name": "Deploy MLflow on Azure ML",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            },
+            {
+              "id": "task-190034",
+              "name": "Configure experiment tracking",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190035",
+              "name": "Set up model registry with approval workflow",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190036",
+              "name": "Integrate with Azure DevOps for CI/CD",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            }
           ]
         },
         {
@@ -249,15 +676,58 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given features are defined, When stored, Then they are versioned and documented",
-            "Given model training occurs, When features are fetched, Then point-in-time correctness is guaranteed",
-            "Given prediction request arrives, When serving occurs, Then <10ms feature retrieval latency"
+            "Given feature registered in Feast, When ML model requests feature, Then real-time serving returns value in <50ms from Redis",
+            "Given feature definition changes, When new version deployed, Then model training uses versioned features with point-in-time correctness",
+            "Given feature drift detected, When threshold exceeded, Then alert triggers to data science team"
           ],
           "tasks": [
-            { "id": "task-190037", "name": "Evaluate and select feature store (Feast vs Databricks)", "status": "planned", "effortHours": 16, "assignee": "Dr. Kevin Zhang", "skills": ["Feature Stores", "Architecture"] },
-            { "id": "task-190038", "name": "Deploy feature store infrastructure", "status": "planned", "effortHours": 24, "assignee": "James Chen", "skills": ["Infrastructure", "Kubernetes"] },
-            { "id": "task-190039", "name": "Build customer features (100+ features)", "status": "planned", "effortHours": 40, "assignee": "Data Science Team", "skills": ["Feature Engineering"] },
-            { "id": "task-190040", "name": "Implement online serving with Redis", "status": "planned", "effortHours": 16, "assignee": "James Chen", "skills": ["Redis", "Low Latency"] }
+            {
+              "id": "task-190037",
+              "name": "Evaluate and select feature store (Feast vs Databricks)",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Claire Edwards (MDM Specialist)",
+              "skills": [
+                "Master Data Management",
+                "Entity Resolution"
+              ]
+            },
+            {
+              "id": "task-190038",
+              "name": "Deploy feature store infrastructure",
+              "status": "planned",
+              "effortHours": 24,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190039",
+              "name": "Build customer features (100+ features)",
+              "status": "planned",
+              "effortHours": 40,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190040",
+              "name": "Implement online serving with Redis",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            }
           ]
         },
         {
@@ -267,14 +737,47 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given model is deployed, When predictions occur, Then input/output distributions are tracked",
-            "Given drift threshold is breached, When detection runs, Then alert fires within 1 hour",
-            "Given retraining is needed, When triggered, Then automated pipeline executes"
+            "Given Model Monitoring and Drift Detection is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190041", "name": "Implement Evidently AI for drift detection", "status": "planned", "effortHours": 16, "assignee": "Dr. Kevin Zhang", "skills": ["Evidently", "ML Monitoring"] },
-            { "id": "task-190042", "name": "Build drift dashboards in Grafana", "status": "planned", "effortHours": 12, "assignee": "Emily Watson", "skills": ["Grafana", "Monitoring"] },
-            { "id": "task-190043", "name": "Create automated retraining triggers", "status": "planned", "effortHours": 16, "assignee": "Dr. Kevin Zhang", "skills": ["MLOps", "Automation"] }
+            {
+              "id": "task-190041",
+              "name": "Implement Evidently AI for drift detection",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "David Hughes (Platform Engineer)",
+              "skills": [
+                "Kubernetes",
+                "Terraform",
+                "DevOps"
+              ]
+            },
+            {
+              "id": "task-190042",
+              "name": "Build drift dashboards in Grafana",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190043",
+              "name": "Create automated retraining triggers",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            }
           ]
         },
         {
@@ -284,68 +787,398 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given training job submitted, When GPU available, Then job starts within 5 minutes",
-            "Given multiple users need GPU, When contention occurs, Then fair scheduling applies",
-            "Given job completes, When resources released, Then cost optimization achieved"
+            "Given GPU Compute Cluster is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
-            { "id": "task-190044", "name": "Provision Azure NC-series GPU nodes", "status": "planned", "effortHours": 8, "assignee": "James Chen", "skills": ["Azure", "GPU"] },
-            { "id": "task-190045", "name": "Configure Kubernetes GPU scheduling", "status": "planned", "effortHours": 12, "assignee": "James Chen", "skills": ["Kubernetes", "GPU"] },
-            { "id": "task-190046", "name": "Implement spot instance cost optimization", "status": "planned", "effortHours": 8, "assignee": "James Chen", "skills": ["Azure", "Cost Optimization"] }
+            {
+              "id": "task-190044",
+              "name": "Provision Azure NC-series GPU nodes",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Dr. Robert Turner (Chief Data Architect)",
+              "skills": [
+                "Enterprise Architecture",
+                "Data Mesh",
+                "Lakehouse"
+              ]
+            },
+            {
+              "id": "task-190045",
+              "name": "Configure Kubernetes GPU scheduling",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Helen Baker (Data Governance Lead)",
+              "skills": [
+                "Data Governance",
+                "BCBS 239",
+                "Data Quality"
+              ]
+            },
+            {
+              "id": "task-190046",
+              "name": "Implement spot instance cost optimization",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Simon Price (Data Engineer)",
+              "skills": [
+                "Spark",
+                "Databricks",
+                "dbt"
+              ]
+            }
           ]
         }
       ]
     }
   ],
   "resources": [
-    { "id": "res-1901", "name": "Dr. Kevin Zhang", "role": "Chief Data Architect", "allocation": 100, "team": "Data Platform", "skills": ["Data Architecture", "Databricks", "ML"], "costRate": 950 },
-    { "id": "res-1902", "name": "Anna Schmidt", "role": "Data Platform Lead", "allocation": 100, "team": "Data Platform", "skills": ["PySpark", "dbt", "ETL"], "costRate": 750 },
-    { "id": "res-1903", "name": "James Chen", "role": "Cloud Infrastructure Engineer", "allocation": 80, "team": "Platform Engineering", "skills": ["Terraform", "Azure", "Kubernetes"], "costRate": 700 },
-    { "id": "res-1904", "name": "Sarah Mitchell", "role": "Data Security Lead", "allocation": 60, "team": "Security", "skills": ["Data Governance", "Purview", "Compliance"], "costRate": 800 },
-    { "id": "res-1905", "name": "Marcus Williams", "role": "Senior Data Engineer", "allocation": 100, "team": "Data Platform", "skills": ["Python", "APIs", "ETL"], "costRate": 650 },
-    { "id": "res-1906", "name": "Emily Watson", "role": "BI Developer", "allocation": 100, "team": "Analytics", "skills": ["Power BI", "DAX", "UX Design"], "costRate": 600 },
-    { "id": "res-1907", "name": "Michael Brown", "role": "Power BI Admin", "allocation": 80, "team": "Analytics", "skills": ["Power BI Admin", "Governance"], "costRate": 650 },
-    { "id": "res-1908", "name": "Richard Thompson", "role": "Legacy Systems Specialist", "allocation": 40, "team": "Data Platform", "skills": ["Mainframe", "COBOL", "Data Migration"], "costRate": 850 }
+    {
+      "id": "res-1901",
+      "name": "Dr. Kevin Zhang",
+      "role": "Chief Data Architect",
+      "allocation": 100,
+      "team": "Data Platform",
+      "skills": [
+        "Data Architecture",
+        "Databricks",
+        "ML"
+      ],
+      "costRate": 950
+    },
+    {
+      "id": "res-1902",
+      "name": "Anna Schmidt",
+      "role": "Data Platform Lead",
+      "allocation": 100,
+      "team": "Data Platform",
+      "skills": [
+        "PySpark",
+        "dbt",
+        "ETL"
+      ],
+      "costRate": 750
+    },
+    {
+      "id": "res-1903",
+      "name": "James Chen",
+      "role": "Cloud Infrastructure Engineer",
+      "allocation": 80,
+      "team": "Platform Engineering",
+      "skills": [
+        "Terraform",
+        "Azure",
+        "Kubernetes"
+      ],
+      "costRate": 700
+    },
+    {
+      "id": "res-1904",
+      "name": "Sarah Mitchell",
+      "role": "Data Security Lead",
+      "allocation": 60,
+      "team": "Security",
+      "skills": [
+        "Data Governance",
+        "Purview",
+        "Compliance"
+      ],
+      "costRate": 800
+    },
+    {
+      "id": "res-1905",
+      "name": "Marcus Williams",
+      "role": "Senior Data Engineer",
+      "allocation": 100,
+      "team": "Data Platform",
+      "skills": [
+        "Python",
+        "APIs",
+        "ETL"
+      ],
+      "costRate": 650
+    },
+    {
+      "id": "res-1906",
+      "name": "Emily Watson",
+      "role": "BI Developer",
+      "allocation": 100,
+      "team": "Analytics",
+      "skills": [
+        "Power BI",
+        "DAX",
+        "UX Design"
+      ],
+      "costRate": 600
+    },
+    {
+      "id": "res-1907",
+      "name": "Michael Brown",
+      "role": "Power BI Admin",
+      "allocation": 80,
+      "team": "Analytics",
+      "skills": [
+        "Power BI Admin",
+        "Governance"
+      ],
+      "costRate": 650
+    },
+    {
+      "id": "res-1908",
+      "name": "Richard Thompson",
+      "role": "Legacy Systems Specialist",
+      "allocation": 40,
+      "team": "Data Platform",
+      "skills": [
+        "Mainframe",
+        "COBOL",
+        "Data Migration"
+      ],
+      "costRate": 850
+    }
   ],
   "milestones": [
-    { "id": "ms-1901", "name": "Data Lake MVP", "date": "2024-06-30", "status": "completed", "deliverables": ["Azure ADLS Gen2 deployed", "Delta Lake configured", "15 source systems connected", "PII scanning operational"] },
-    { "id": "ms-1902", "name": "Analytics Platform Beta", "date": "2024-10-31", "status": "completed", "deliverables": ["Semantic layer with 100+ metrics", "Power BI workspaces live", "5 pilot dashboards deployed"] },
-    { "id": "ms-1903", "name": "Analytics Platform GA", "date": "2025-02-28", "status": "in-progress", "deliverables": ["Row-level security complete", "Executive dashboard suite", "All 47 source systems connected", "Self-service training delivered"] },
-    { "id": "ms-1904", "name": "ML Platform Launch", "date": "2025-05-31", "status": "planned", "deliverables": ["MLflow operational", "Feature store with 200+ features", "3 models in production", "Model monitoring dashboards"] },
-    { "id": "ms-1905", "name": "Full Platform Maturity", "date": "2025-07-15", "status": "planned", "deliverables": ["All BUs onboarded", "Cost optimization complete", "Operational runbooks", "Knowledge transfer complete"] }
+    {
+      "id": "ms-1901",
+      "name": "Data Lake MVP",
+      "date": "2024-06-30",
+      "status": "completed",
+      "deliverables": [
+        "Azure ADLS Gen2 deployed",
+        "Delta Lake configured",
+        "15 source systems connected",
+        "PII scanning operational"
+      ]
+    },
+    {
+      "id": "ms-1902",
+      "name": "Analytics Platform Beta",
+      "date": "2024-10-31",
+      "status": "completed",
+      "deliverables": [
+        "Semantic layer with 100+ metrics",
+        "Power BI workspaces live",
+        "5 pilot dashboards deployed"
+      ]
+    },
+    {
+      "id": "ms-1903",
+      "name": "Analytics Platform GA",
+      "date": "2025-02-28",
+      "status": "in-progress",
+      "deliverables": [
+        "Row-level security complete",
+        "Executive dashboard suite",
+        "All 47 source systems connected",
+        "Self-service training delivered"
+      ]
+    },
+    {
+      "id": "ms-1904",
+      "name": "ML Platform Launch",
+      "date": "2025-05-31",
+      "status": "planned",
+      "deliverables": [
+        "MLflow operational",
+        "Feature store with 200+ features",
+        "3 models in production",
+        "Model monitoring dashboards"
+      ]
+    },
+    {
+      "id": "ms-1905",
+      "name": "Full Platform Maturity",
+      "date": "2025-07-15",
+      "status": "planned",
+      "deliverables": [
+        "All BUs onboarded",
+        "Cost optimization complete",
+        "Operational runbooks",
+        "Knowledge transfer complete"
+      ]
+    }
   ],
   "risks": [
-    { "id": "risk-1901", "name": "Mainframe data extraction complexity", "probability": "high", "impact": "high", "status": "mitigated", "mitigation": "Engaged legacy specialist Richard Thompson; built custom COBOL extraction routines", "owner": "Anna Schmidt" },
-    { "id": "risk-1902", "name": "Power BI Premium licensing costs", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Negotiated enterprise agreement; monitoring usage to optimize capacity", "owner": "Michael Brown" },
-    { "id": "risk-1903", "name": "Data quality from legacy systems", "probability": "high", "impact": "medium", "status": "active", "mitigation": "Implemented Great Expectations framework; weekly data quality reviews", "owner": "Anna Schmidt" },
-    { "id": "risk-1904", "name": "GPU compute cost overrun", "probability": "medium", "impact": "low", "status": "planned", "mitigation": "Will use spot instances and auto-scaling; budget alerts configured", "owner": "James Chen" },
-    { "id": "risk-1905", "name": "Adoption resistance from business users", "probability": "medium", "impact": "high", "status": "active", "mitigation": "Change management program in progress; 12 data champions identified", "owner": "Emily Watson" }
+    {
+      "id": "risk-1901",
+      "name": "Mainframe data extraction complexity",
+      "probability": "high",
+      "impact": "high",
+      "status": "mitigated",
+      "mitigation": "Engaged legacy specialist Richard Thompson; built custom COBOL extraction routines",
+      "owner": "Anna Schmidt"
+    },
+    {
+      "id": "risk-1902",
+      "name": "Power BI Premium licensing costs",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Negotiated enterprise agreement; monitoring usage to optimize capacity",
+      "owner": "Michael Brown"
+    },
+    {
+      "id": "risk-1903",
+      "name": "Data quality from legacy systems",
+      "probability": "high",
+      "impact": "medium",
+      "status": "active",
+      "mitigation": "Implemented Great Expectations framework; weekly data quality reviews",
+      "owner": "Anna Schmidt"
+    },
+    {
+      "id": "risk-1904",
+      "name": "GPU compute cost overrun",
+      "probability": "medium",
+      "impact": "low",
+      "status": "planned",
+      "mitigation": "Will use spot instances and auto-scaling; budget alerts configured",
+      "owner": "James Chen"
+    },
+    {
+      "id": "risk-1905",
+      "name": "Adoption resistance from business users",
+      "probability": "medium",
+      "impact": "high",
+      "status": "active",
+      "mitigation": "Change management program in progress; 12 data champions identified",
+      "owner": "Emily Watson"
+    }
   ],
   "dependencies": [
-    { "id": "dep-1901", "name": "Azure Landing Zone", "type": "internal", "status": "resolved", "project": "Cloud Foundation", "description": "Network connectivity and security baseline required before deployment" },
-    { "id": "dep-1902", "name": "Oracle Financials API Access", "type": "external", "status": "resolved", "vendor": "Finance IT", "description": "Read-only API credentials for real-time financial data" },
-    { "id": "dep-1903", "name": "Mainframe batch window", "type": "internal", "status": "active", "project": "IT Operations", "description": "4-hour nightly window for mainframe data extraction" },
-    { "id": "dep-1904", "name": "AD Group provisioning", "type": "internal", "status": "active", "project": "Identity Management", "description": "150+ AD groups needed for row-level security" }
+    {
+      "id": "dep-1901",
+      "name": "Azure Landing Zone",
+      "type": "internal",
+      "status": "resolved",
+      "project": "Cloud Foundation",
+      "description": "Network connectivity and security baseline required before deployment"
+    },
+    {
+      "id": "dep-1902",
+      "name": "Oracle Financials API Access",
+      "type": "external",
+      "status": "resolved",
+      "vendor": "Finance IT",
+      "description": "Read-only API credentials for real-time financial data"
+    },
+    {
+      "id": "dep-1903",
+      "name": "Mainframe batch window",
+      "type": "internal",
+      "status": "active",
+      "project": "IT Operations",
+      "description": "4-hour nightly window for mainframe data extraction"
+    },
+    {
+      "id": "dep-1904",
+      "name": "AD Group provisioning",
+      "type": "internal",
+      "status": "active",
+      "project": "Identity Management",
+      "description": "150+ AD groups needed for row-level security"
+    }
   ],
   "iterations": [
-    { "id": "iter-1901", "name": "PI 24.4 - Iteration 1", "startDate": "2024-10-14", "endDate": "2024-10-25", "capacity": 120, "committed": 115, "completed": 108, "velocity": 108 },
-    { "id": "iter-1902", "name": "PI 24.4 - Iteration 2", "startDate": "2024-10-28", "endDate": "2024-11-08", "capacity": 115, "committed": 110, "completed": 105, "velocity": 105 },
-    { "id": "iter-1903", "name": "PI 24.4 - Iteration 3", "startDate": "2024-11-11", "endDate": "2024-11-22", "capacity": 120, "committed": 118, "completed": 0, "velocity": null },
-    { "id": "iter-1904", "name": "PI 24.4 - Iteration 4", "startDate": "2024-11-25", "endDate": "2024-12-06", "capacity": 100, "committed": 95, "completed": 0, "velocity": null },
-    { "id": "iter-1905", "name": "PI 24.4 - IP Iteration", "startDate": "2024-12-09", "endDate": "2024-12-20", "capacity": 60, "committed": 40, "completed": 0, "velocity": null }
+    {
+      "id": "iter-1901",
+      "name": "PI 24.4 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 120,
+      "committed": 115,
+      "completed": 108,
+      "velocity": 108
+    },
+    {
+      "id": "iter-1902",
+      "name": "PI 24.4 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 115,
+      "committed": 110,
+      "completed": 105,
+      "velocity": 105
+    },
+    {
+      "id": "iter-1903",
+      "name": "PI 24.4 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 120,
+      "committed": 118,
+      "completed": 0,
+      "velocity": null
+    },
+    {
+      "id": "iter-1904",
+      "name": "PI 24.4 - Iteration 4",
+      "startDate": "2024-11-25",
+      "endDate": "2024-12-06",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 0,
+      "velocity": null
+    },
+    {
+      "id": "iter-1905",
+      "name": "PI 24.4 - IP Iteration",
+      "startDate": "2024-12-09",
+      "endDate": "2024-12-20",
+      "capacity": 60,
+      "committed": 40,
+      "completed": 0,
+      "velocity": null
+    }
   ],
   "stakeholders": [
-    { "id": "sh-1901", "name": "Emma Richardson", "role": "Executive Sponsor", "department": "Group CTO Office", "influence": "high", "interest": "high" },
-    { "id": "sh-1902", "name": "David Kumar", "role": "Business Owner", "department": "Group Analytics", "influence": "high", "interest": "high" },
-    { "id": "sh-1903", "name": "Lisa Chen", "role": "Data Protection Officer", "department": "Compliance", "influence": "medium", "interest": "high" },
-    { "id": "sh-1904", "name": "Finance Leadership", "role": "Key User Group", "department": "Group Finance", "influence": "medium", "interest": "medium" },
-    { "id": "sh-1905", "name": "Division CDOs", "role": "User Representatives", "department": "All Divisions", "influence": "medium", "interest": "high" }
+    {
+      "id": "sh-1901",
+      "name": "Emma Richardson",
+      "role": "Executive Sponsor",
+      "department": "Group CTO Office",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-1902",
+      "name": "David Kumar",
+      "role": "Business Owner",
+      "department": "Group Analytics",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-1903",
+      "name": "Lisa Chen",
+      "role": "Data Protection Officer",
+      "department": "Compliance",
+      "influence": "medium",
+      "interest": "high"
+    },
+    {
+      "id": "sh-1904",
+      "name": "Finance Leadership",
+      "role": "Key User Group",
+      "department": "Group Finance",
+      "influence": "medium",
+      "interest": "medium"
+    },
+    {
+      "id": "sh-1905",
+      "name": "Division CDOs",
+      "role": "User Representatives",
+      "department": "All Divisions",
+      "influence": "medium",
+      "interest": "high"
+    }
   ],
   "financials": {
-    "capitalex": 4.0,
-    "opex": 1.0,
+    "capitalex": 4,
+    "opex": 1,
     "contingency": 0.5,
-    "npv": 42.0,
+    "npv": 42,
     "irr": 35,
     "paybackMonths": 22,
     "costBreakdown": {
@@ -356,11 +1189,31 @@
       "contingency": 0.5
     },
     "benefitProjection": [
-      { "year": 1, "benefit": 5, "cumulative": 5 },
-      { "year": 2, "benefit": 12, "cumulative": 17 },
-      { "year": 3, "benefit": 15, "cumulative": 32 },
-      { "year": 4, "benefit": 12, "cumulative": 44 },
-      { "year": 5, "benefit": 8, "cumulative": 52 }
+      {
+        "year": 1,
+        "benefit": 5,
+        "cumulative": 5
+      },
+      {
+        "year": 2,
+        "benefit": 12,
+        "cumulative": 17
+      },
+      {
+        "year": 3,
+        "benefit": 15,
+        "cumulative": 32
+      },
+      {
+        "year": 4,
+        "benefit": 12,
+        "cumulative": 44
+      },
+      {
+        "year": 5,
+        "benefit": 8,
+        "cumulative": 52
+      }
     ]
   },
   "qualityMetrics": {

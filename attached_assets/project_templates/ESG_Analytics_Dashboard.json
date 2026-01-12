@@ -78,42 +78,42 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given msci esg ratings, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given MSCI publishes daily ESG rating update, When feed processed overnight, Then updated ratings reflect in portfolio scores by market open",
+            "Given portfolio contains 500+ securities, When MSCI coverage analyzed, Then percentage covered and gaps by sector reported",
+            "Given MSCI methodology version changes, When new methodology released, Then recalibration impact analysis available within 1 week"
           ],
           "tasks": [
             {
               "id": "task-esg-001",
-              "name": "Build MSCI API connector",
+              "name": "Implement MSCI API authentication with OAuth 2.0",
               "status": "done",
-              "effortHours": 24,
-              "assignee": "David Chen",
+              "effortHours": 16,
+              "assignee": "Dr. James Foster (ESG Analyst)",
               "skills": [
-                "APIs",
-                "Python"
+                "OAuth",
+                "API Security"
               ]
             },
             {
               "id": "task-esg-002",
-              "name": "Create data normalization layer",
+              "name": "Build ESG rating normalization to 0-100 scale",
               "status": "done",
-              "effortHours": 16,
-              "assignee": "David Chen",
+              "effortHours": 24,
+              "assignee": "Sophie Mitchell (Climate Scientist)",
               "skills": [
-                "ETL",
-                "SQL"
+                "Data Transformation",
+                "Python"
               ]
             },
             {
               "id": "task-esg-003",
-              "name": "Implement daily refresh scheduler",
+              "name": "Create security identifier matching (ISIN/SEDOL/CUSIP)",
               "status": "done",
-              "effortHours": 12,
-              "assignee": "Emma Wilson",
+              "effortHours": 20,
+              "assignee": "Oliver Thompson (Portfolio Manager)",
               "skills": [
-                "Airflow",
-                "Scheduling"
+                "Reference Data",
+                "SQL"
               ]
             }
           ]
@@ -125,30 +125,31 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given sustainalytics risk scores, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given company experiences ESG controversy, When Sustainalytics updates severity, Then alert triggers to portfolio managers with exposure quantified",
+            "Given company ESG Risk Rating deteriorates to High, When threshold breach detected, Then watchlist notification includes controversy details",
+            "Given controversy status changes to resolved, When database updated, Then historical timeline displays full lifecycle"
           ],
           "tasks": [
             {
               "id": "task-esg-004",
-              "name": "Integrate Sustainalytics feed",
+              "name": "Build Sustainalytics SFTP data ingestion",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Emma Wilson",
+              "assignee": "Dr. James Foster (ESG Analyst)",
               "skills": [
-                "APIs",
-                "Data Engineering"
+                "SFTP",
+                "Python"
               ]
             },
             {
               "id": "task-esg-005",
-              "name": "Map to internal security master",
+              "name": "Map controversy categories to internal taxonomy",
               "status": "done",
-              "effortHours": 12,
-              "assignee": "David Chen",
+              "effortHours": 16,
+              "assignee": "Sophie Mitchell (Climate Scientist)",
               "skills": [
-                "Data Mapping"
+                "Data Mapping",
+                "ESG Domain"
               ]
             }
           ]
@@ -160,31 +161,31 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given climate data pipeline, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given CDP releases annual climate questionnaire, When data ingested, Then company climate scores available within 48 hours",
+            "Given company reports Scope 1/2/3 GHG emissions, When data normalized to tCO2e per million pounds revenue, Then peer comparison enabled",
+            "Given company sets SBTi-validated target, When SBTi database syncs, Then Net Zero commitment status reflects within 1 week"
           ],
           "tasks": [
             {
               "id": "task-esg-006",
-              "name": "Build climate model ingestion",
+              "name": "Parse CDP questionnaire response formats",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Climate Team",
+              "assignee": "Dr. James Foster (ESG Analyst)",
               "skills": [
-                "Climate Science",
-                "Python"
+                "XML Parsing",
+                "Climate Data"
               ]
             },
             {
               "id": "task-esg-007",
-              "name": "Create scenario analysis engine",
+              "name": "Build emissions calculation engine (Scope 1/2/3)",
               "status": "done",
-              "effortHours": 24,
-              "assignee": "Climate Team",
+              "effortHours": 28,
+              "assignee": "Sophie Mitchell (Climate Scientist)",
               "skills": [
-                "Modeling",
-                "Analytics"
+                "GHG Protocol",
+                "Python"
               ]
             }
           ]
@@ -219,30 +220,31 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given portfolio score calculator, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Portfolio Score Calculator for client mandate, When performance calculated, Then GIPS-compliant returns are generated with benchmark comparison",
+            "Given client reporting period ends, When factsheet generated, Then MiFID II cost disclosures and ESG metrics are included",
+            "Given portfolio rebalancing triggered, When trades executed, Then best execution documentation is maintained per FCA requirements"
           ],
           "tasks": [
             {
               "id": "task-esg-008",
-              "name": "Build weighted scoring engine",
+              "name": "Implement MSCI API authentication with OAuth 2.0",
               "status": "done",
-              "effortHours": 24,
-              "assignee": "David Chen",
+              "effortHours": 16,
+              "assignee": "Dr. James Foster (ESG Analyst)",
               "skills": [
-                "Python",
-                "Finance"
+                "OAuth",
+                "API Security"
               ]
             },
             {
               "id": "task-esg-009",
-              "name": "Create benchmark comparison",
+              "name": "Build ESG rating normalization to 0-100 scale",
               "status": "done",
-              "effortHours": 16,
-              "assignee": "Emma Wilson",
+              "effortHours": 24,
+              "assignee": "Sophie Mitchell (Climate Scientist)",
               "skills": [
-                "Analytics"
+                "Data Transformation",
+                "Python"
               ]
             }
           ]
@@ -254,40 +256,42 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given esg dashboard ui, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given ESG Dashboard UI processes ESG data, When SFDR reporting triggered, Then Article 8/9 fund disclosures meet regulatory requirements",
+            "Given climate metrics calculated, When TCFD alignment assessed, Then portfolio temperature alignment score is generated",
+            "Given ESG data gaps exist, When estimation applied, Then methodology disclosure meets FCA sustainability labelling requirements"
           ],
           "tasks": [
             {
               "id": "task-esg-010",
-              "name": "Design dashboard wireframes",
+              "name": "Build Sustainalytics SFTP data ingestion",
               "status": "done",
-              "effortHours": 16,
-              "assignee": "UX Team",
+              "effortHours": 20,
+              "assignee": "Dr. James Foster (ESG Analyst)",
               "skills": [
-                "UX Design"
+                "SFTP",
+                "Python"
               ]
             },
             {
               "id": "task-esg-011",
-              "name": "Build React dashboard components",
+              "name": "Map controversy categories to internal taxonomy",
               "status": "in-progress",
-              "effortHours": 32,
-              "assignee": "Frontend Team",
+              "effortHours": 16,
+              "assignee": "Sophie Mitchell (Climate Scientist)",
               "skills": [
-                "React",
-                "D3.js"
+                "Data Mapping",
+                "ESG Domain"
               ]
             },
             {
               "id": "task-esg-012",
-              "name": "Implement drill-down navigation",
+              "name": "Implement controversy alert notification service",
               "status": "pending",
-              "effortHours": 16,
-              "assignee": "Frontend Team",
+              "effortHours": 12,
+              "assignee": "Oliver Thompson (Portfolio Manager)",
               "skills": [
-                "React"
+                "Event Processing",
+                "Notifications"
               ]
             }
           ]
@@ -322,9 +326,9 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given sfdr report generation, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given SFDR Report Generation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -332,10 +336,11 @@
               "name": "Build SFDR template engine",
               "status": "planned",
               "effortHours": 32,
-              "assignee": "Regulatory Team",
+              "assignee": "Dr. Robert Turner (Enterprise Architect)",
               "skills": [
-                "Compliance",
-                "Reporting"
+                "Enterprise Architecture",
+                "TOGAF",
+                "Solution Design"
               ]
             },
             {
@@ -343,9 +348,11 @@
               "name": "Create data extraction pipelines",
               "status": "planned",
               "effortHours": 24,
-              "assignee": "David Chen",
+              "assignee": "Helen Baker (Data Governance Lead)",
               "skills": [
-                "ETL"
+                "Data Governance",
+                "MDM",
+                "Data Quality"
               ]
             },
             {
@@ -353,9 +360,11 @@
               "name": "Implement approval workflow",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Emma Wilson",
+              "assignee": "Simon Price (Security Architect)",
               "skills": [
-                "Workflow"
+                "InfoSec",
+                "Zero Trust",
+                "Identity Management"
               ]
             }
           ]
@@ -367,9 +376,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given tcfd climate disclosures, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given TCFD Climate Disclosures processes ESG data, When SFDR reporting triggered, Then Article 8/9 fund disclosures meet regulatory requirements",
+            "Given climate metrics calculated, When TCFD alignment assessed, Then portfolio temperature alignment score is generated",
+            "Given ESG data gaps exist, When estimation applied, Then methodology disclosure meets FCA sustainability labelling requirements"
           ],
           "tasks": [
             {
@@ -377,10 +386,11 @@
               "name": "Build TCFD data model",
               "status": "planned",
               "effortHours": 20,
-              "assignee": "Climate Team",
+              "assignee": "Dr. Robert Turner (Enterprise Architect)",
               "skills": [
-                "Climate",
-                "Data Modeling"
+                "Enterprise Architecture",
+                "TOGAF",
+                "Solution Design"
               ]
             },
             {
@@ -388,9 +398,11 @@
               "name": "Create disclosure templates",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Regulatory Team",
+              "assignee": "Helen Baker (Data Governance Lead)",
               "skills": [
-                "Reporting"
+                "Data Governance",
+                "MDM",
+                "Data Quality"
               ]
             }
           ]

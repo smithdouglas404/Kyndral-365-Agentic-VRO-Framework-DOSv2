@@ -78,9 +78,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given product selection, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given customer eligibility assessed, When products displayed, Then eligible products shown with features and fees clearly presented",
+            "Given product complexity requires suitability assessment, When questionnaire completed, Then suitability report generated with recommendation",
+            "Given product selected, When added to basket, Then terms and conditions and key information documents presented for acceptance"
           ],
           "tasks": [
             {
@@ -88,9 +88,11 @@
               "name": "Build product selector",
               "status": "done",
               "effortHours": 24,
-              "assignee": "UX Team",
+              "assignee": "Amanda Richards (Platform Director)",
               "skills": [
-                "UX Design"
+                "Platform Products",
+                "ISA/SIPP",
+                "GIA"
               ]
             },
             {
@@ -98,9 +100,11 @@
               "name": "Implement suitability checks",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Christopher Lee (Product Manager)",
               "skills": [
-                "Compliance"
+                "Fund Selection",
+                "Model Portfolios",
+                "Rebalancing"
               ]
             }
           ]
@@ -112,9 +116,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given application form, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Application Form is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -122,10 +126,11 @@
               "name": "Build progressive form",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Frontend Team",
+              "assignee": "Christopher Lee (Product Manager)",
               "skills": [
-                "React",
-                "Forms"
+                "Fund Selection",
+                "Model Portfolios",
+                "Rebalancing"
               ]
             },
             {
@@ -133,9 +138,11 @@
               "name": "Implement ID verification",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "KYC"
+                "Digital Journeys",
+                "Mobile App",
+                "Accessibility"
               ]
             }
           ]
@@ -147,9 +154,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given payment integration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Payment Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -157,9 +164,11 @@
               "name": "Integrate payment gateway",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Backend Team",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "Payments"
+                "Digital Journeys",
+                "Mobile App",
+                "Accessibility"
               ]
             },
             {
@@ -167,9 +176,11 @@
               "name": "Build reconciliation",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Backend Team",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "Finance"
+                "FCA Consumer Duty",
+                "COBS",
+                "PROD"
               ]
             }
           ]
@@ -204,9 +215,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given account dashboard, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Account Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -214,9 +225,11 @@
               "name": "Build customer dashboard",
               "status": "done",
               "effortHours": 28,
-              "assignee": "Frontend Team",
+              "assignee": "Christopher Lee (Product Manager)",
               "skills": [
-                "React"
+                "Fund Selection",
+                "Model Portfolios",
+                "Rebalancing"
               ]
             },
             {
@@ -224,9 +237,11 @@
               "name": "Implement valuations",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Backend Team",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "Finance"
+                "Digital Journeys",
+                "Mobile App",
+                "Accessibility"
               ]
             }
           ]
@@ -238,9 +253,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given transaction capabilities, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Transaction Capabilities is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -248,9 +263,11 @@
               "name": "Build top-up/withdrawal",
               "status": "in-progress",
               "effortHours": 24,
-              "assignee": "Backend Team",
+              "assignee": "Jessica Taylor (UX Lead)",
               "skills": [
-                "Payments"
+                "Digital Journeys",
+                "Mobile App",
+                "Accessibility"
               ]
             },
             {
@@ -258,9 +275,11 @@
               "name": "Implement fund switches",
               "status": "pending",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Laura Anderson (Compliance Manager)",
               "skills": [
-                "Trading"
+                "FCA Consumer Duty",
+                "COBS",
+                "PROD"
               ]
             }
           ]

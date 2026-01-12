@@ -78,9 +78,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given ibs dependency mapping, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Important Business Service identified, When dependency mapping runs, Then upstream and downstream dependencies visualized as network graph",
+            "Given service owner interviewed, When dependencies documented, Then technology, people, process, and third-party dependencies captured",
+            "Given dependency graph complete, When CMDB integration runs, Then linkages to infrastructure components automatically populated"
           ],
           "tasks": [
             {
@@ -88,9 +88,11 @@
               "name": "Interview service owners",
               "status": "done",
               "effortHours": 40,
-              "assignee": "Sophie Brown",
+              "assignee": "Dr. Robert Turner (Resilience Lead)",
               "skills": [
-                "Business Analysis"
+                "Operational Resilience",
+                "PS21/3",
+                "Important Business Services"
               ]
             },
             {
@@ -98,10 +100,11 @@
               "name": "Build dependency graph model",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Tech Lead",
+              "assignee": "Helen Baker (Risk Manager)",
               "skills": [
-                "Graph DB",
-                "Neo4j"
+                "Enterprise Risk",
+                "RCSA",
+                "Key Risk Indicators"
               ]
             },
             {
@@ -109,10 +112,11 @@
               "name": "Create visualization dashboard",
               "status": "done",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "Simon Price (BC/DR Manager)",
               "skills": [
-                "D3.js",
-                "React"
+                "Business Continuity",
+                "DR Testing",
+                "Crisis Management"
               ]
             }
           ]
@@ -124,9 +128,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given impact tolerance definition, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given IBS identified, When impact tolerance workshop conducted, Then maximum tolerable disruption period defined with business justification",
+            "Given impact tolerance breached during incident, When escalation triggers, Then executive notification with remediation plan initiated",
+            "Given regulatory tolerance requirement changes, When updated, Then affected IBS impact tolerances reviewed within 30 days"
           ],
           "tasks": [
             {
@@ -134,9 +138,11 @@
               "name": "Define tolerance thresholds",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Sophie Brown",
+              "assignee": "Helen Baker (Risk Manager)",
               "skills": [
-                "Risk Management"
+                "Enterprise Risk",
+                "RCSA",
+                "Key Risk Indicators"
               ]
             },
             {
@@ -144,9 +150,11 @@
               "name": "Document tolerance rationale",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Compliance",
+              "assignee": "Simon Price (BC/DR Manager)",
               "skills": [
-                "Documentation"
+                "Business Continuity",
+                "DR Testing",
+                "Crisis Management"
               ]
             }
           ]
@@ -158,9 +166,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given recovery time objectives, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given IBS has defined RTO, When tested, Then actual recovery time measured against target with variance documented",
+            "Given RTO consistently missed, When escalation triggers, Then improvement plan with investment requirements presented to exec committee",
+            "Given technology change affects recovery capability, When assessed, Then updated RTO validated before go-live"
           ],
           "tasks": [
             {
@@ -168,9 +176,11 @@
               "name": "Calculate business impact",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Sophie Brown",
+              "assignee": "Simon Price (BC/DR Manager)",
               "skills": [
-                "BIA"
+                "Business Continuity",
+                "DR Testing",
+                "Crisis Management"
               ]
             },
             {
@@ -178,9 +188,11 @@
               "name": "Define RTO/RPO targets",
               "status": "done",
               "effortHours": 16,
-              "assignee": "IT Ops",
+              "assignee": "Claire Edwards (Compliance Director)",
               "skills": [
-                "DR Planning"
+                "PRA/FCA Regulations",
+                "Self-Assessment",
+                "Remediation"
               ]
             }
           ]
@@ -215,9 +227,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given scenario library, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given operational resilience scenarios required, When scenario library accessed, Then 20 core scenarios covering cyber, supplier failure, and infrastructure disruption available",
+            "Given custom scenario needed, When configured, Then scenario parameters and expected impacts captured for testing",
+            "Given scenario executed, When results recorded, Then evidence and learnings stored for regulatory reporting"
           ],
           "tasks": [
             {
@@ -225,9 +237,11 @@
               "name": "Define 20 core scenarios",
               "status": "done",
               "effortHours": 40,
-              "assignee": "Sophie Brown",
+              "assignee": "Helen Baker (Risk Manager)",
               "skills": [
-                "Risk Scenarios"
+                "Enterprise Risk",
+                "RCSA",
+                "Key Risk Indicators"
               ]
             },
             {
@@ -235,9 +249,11 @@
               "name": "Build scenario configuration UI",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Frontend Team",
+              "assignee": "Simon Price (BC/DR Manager)",
               "skills": [
-                "React"
+                "Business Continuity",
+                "DR Testing",
+                "Crisis Management"
               ]
             }
           ]
@@ -249,9 +265,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given test execution framework, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given scenario test scheduled, When test orchestration runs, Then simulated disruption introduced with controlled rollback capability",
+            "Given test evidence captured, When review completed, Then gaps in resilience capability identified with remediation actions",
+            "Given regulatory reporting due, When ICARA extract generated, Then PRA-compliant operational resilience self-assessment produced"
           ],
           "tasks": [
             {
@@ -259,10 +275,11 @@
               "name": "Build test orchestration engine",
               "status": "in-progress",
               "effortHours": 32,
-              "assignee": "Backend Team",
+              "assignee": "Simon Price (BC/DR Manager)",
               "skills": [
-                "Node.js",
-                "Orchestration"
+                "Business Continuity",
+                "DR Testing",
+                "Crisis Management"
               ]
             },
             {
@@ -270,9 +287,11 @@
               "name": "Create evidence capture system",
               "status": "pending",
               "effortHours": 24,
-              "assignee": "Backend Team",
+              "assignee": "Claire Edwards (Compliance Director)",
               "skills": [
-                "Document Management"
+                "PRA/FCA Regulations",
+                "Self-Assessment",
+                "Remediation"
               ]
             },
             {
@@ -280,9 +299,11 @@
               "name": "Implement regulatory reporting",
               "status": "pending",
               "effortHours": 20,
-              "assignee": "Sophie Brown",
+              "assignee": "David Hughes (Technology Resilience)",
               "skills": [
-                "Compliance"
+                "IT Resilience",
+                "Cloud DR",
+                "Failover"
               ]
             }
           ]
@@ -317,9 +338,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given vendor dependency register, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given third-party vendor provides critical service, When onboarded, Then concentration risk and exit strategy documented",
+            "Given vendor risk score calculated, When threshold breached, Then enhanced due diligence workflow triggered",
+            "Given vendor incident occurs, When logged, Then impact on IBS assessed and reported to regulators if material"
           ],
           "tasks": [
             {
@@ -327,9 +348,11 @@
               "name": "Build vendor database",
               "status": "planned",
               "effortHours": 20,
-              "assignee": "Backend Team",
+              "assignee": "Simon Price (BC/DR Manager)",
               "skills": [
-                "Database"
+                "Business Continuity",
+                "DR Testing",
+                "Crisis Management"
               ]
             },
             {
@@ -337,9 +360,11 @@
               "name": "Create risk scoring model",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Sophie Brown",
+              "assignee": "Claire Edwards (Compliance Director)",
               "skills": [
-                "Risk Assessment"
+                "PRA/FCA Regulations",
+                "Self-Assessment",
+                "Remediation"
               ]
             }
           ]
@@ -351,9 +376,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given concentration risk dashboard, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given third-party dependencies aggregated, When concentration analyzed, Then single points of failure and geographic concentration identified",
+            "Given concentration risk mitigation required, When alternative vendor assessed, Then transition plan and cost-benefit documented",
+            "Given regulatory inquiry received, When concentration report generated, Then PRA/FCA-ready documentation produced within 5 days"
           ],
           "tasks": [
             {
@@ -361,9 +386,11 @@
               "name": "Build concentration analytics",
               "status": "planned",
               "effortHours": 16,
-              "assignee": "Analytics Team",
+              "assignee": "Claire Edwards (Compliance Director)",
               "skills": [
-                "Analytics"
+                "PRA/FCA Regulations",
+                "Self-Assessment",
+                "Remediation"
               ]
             },
             {
@@ -371,9 +398,11 @@
               "name": "Create alerting rules",
               "status": "planned",
               "effortHours": 8,
-              "assignee": "Backend Team",
+              "assignee": "David Hughes (Technology Resilience)",
               "skills": [
-                "Rules Engine"
+                "IT Resilience",
+                "Cloud DR",
+                "Failover"
               ]
             }
           ]

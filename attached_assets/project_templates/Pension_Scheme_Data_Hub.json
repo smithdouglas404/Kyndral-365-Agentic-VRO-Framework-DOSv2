@@ -77,9 +77,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given schema design, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Schema Design is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -87,9 +87,11 @@
               "name": "Design data model",
               "status": "done",
               "effortHours": 40,
-              "assignee": "Data Architect",
+              "assignee": "James Morrison (Pension Data Lead)",
               "skills": [
-                "Data Modeling"
+                "Pension Administration",
+                "Member Data",
+                "Record Keeping"
               ]
             },
             {
@@ -97,9 +99,11 @@
               "name": "Document schema",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Data Architect",
+              "assignee": "Emily Watson (Admin Manager)",
               "skills": [
-                "Documentation"
+                "Scheme Administration",
+                "Member Comms",
+                "Retirement Processing"
               ]
             }
           ]
@@ -111,9 +115,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given data lineage, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Data Lineage receives pension scheme data, When validation runs, Then records comply with Pensions Dashboard Programme data standards",
+            "Given data quality issues identified, When cleansing workflow triggered, Then corrections are tracked with full audit trail for TPR compliance",
+            "Given GDPR SAR request received, When member data extracted, Then complete records provided within statutory 30-day deadline"
           ],
           "tasks": [
             {
@@ -121,9 +125,11 @@
               "name": "Implement lineage tracking",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Data Team",
+              "assignee": "Emily Watson (Admin Manager)",
               "skills": [
-                "Data Lineage"
+                "Scheme Administration",
+                "Member Comms",
+                "Retirement Processing"
               ]
             },
             {
@@ -131,9 +137,11 @@
               "name": "Build lineage visualization",
               "status": "done",
               "effortHours": 16,
-              "assignee": "Frontend Team",
+              "assignee": "Rachel Green (Data Architect)",
               "skills": [
-                "D3.js"
+                "Data Architecture",
+                "MDM",
+                "Data Quality"
               ]
             }
           ]
@@ -145,9 +153,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given data migration, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Data Migration receives pension scheme data, When validation runs, Then records comply with Pensions Dashboard Programme data standards",
+            "Given data quality issues identified, When cleansing workflow triggered, Then corrections are tracked with full audit trail for TPR compliance",
+            "Given GDPR SAR request received, When member data extracted, Then complete records provided within statutory 30-day deadline"
           ],
           "tasks": [
             {
@@ -155,10 +163,11 @@
               "name": "Build migration scripts",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Data Team",
+              "assignee": "Rachel Green (Data Architect)",
               "skills": [
-                "ETL",
-                "SQL"
+                "Data Architecture",
+                "MDM",
+                "Data Quality"
               ]
             },
             {
@@ -166,9 +175,11 @@
               "name": "Validate migrated data",
               "status": "done",
               "effortHours": 24,
-              "assignee": "QA Team",
+              "assignee": "Thomas Brown (Integration Lead)",
               "skills": [
-                "Data Testing"
+                "Origo Integration",
+                "STAR",
+                "Altus"
               ]
             }
           ]
@@ -203,9 +214,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given quality rules engine, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Quality Rules Engine is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -213,9 +224,11 @@
               "name": "Define 150+ quality rules",
               "status": "done",
               "effortHours": 32,
-              "assignee": "Data Governance",
+              "assignee": "Emily Watson (Admin Manager)",
               "skills": [
-                "Data Quality"
+                "Scheme Administration",
+                "Member Comms",
+                "Retirement Processing"
               ]
             },
             {
@@ -223,9 +236,11 @@
               "name": "Build rules execution engine",
               "status": "done",
               "effortHours": 24,
-              "assignee": "Backend Team",
+              "assignee": "Rachel Green (Data Architect)",
               "skills": [
-                "Rules Engine"
+                "Data Architecture",
+                "MDM",
+                "Data Quality"
               ]
             }
           ]
@@ -237,9 +252,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given quality dashboard, When action completed, Then result is verified",
-            "Given valid configuration, When executed, Then expected behavior occurs",
-            "Given error condition, When detected, Then appropriate handling applied"
+            "Given Quality Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
+            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
+            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
           ],
           "tasks": [
             {
@@ -247,9 +262,11 @@
               "name": "Build quality scorecards",
               "status": "in-progress",
               "effortHours": 20,
-              "assignee": "Frontend Team",
+              "assignee": "Rachel Green (Data Architect)",
               "skills": [
-                "React"
+                "Data Architecture",
+                "MDM",
+                "Data Quality"
               ]
             },
             {
@@ -257,9 +274,11 @@
               "name": "Create trend analysis",
               "status": "pending",
               "effortHours": 12,
-              "assignee": "Analytics Team",
+              "assignee": "Thomas Brown (Integration Lead)",
               "skills": [
-                "Analytics"
+                "Origo Integration",
+                "STAR",
+                "Altus"
               ]
             }
           ]
