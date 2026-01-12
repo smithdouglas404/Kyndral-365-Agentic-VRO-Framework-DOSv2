@@ -21,6 +21,8 @@ import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
 import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
+import { AutonomousRiskAgent } from "@/components/AutonomousRiskAgent";
+import { MultiAgentDiscussion } from "@/components/MultiAgentDiscussion";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
@@ -620,6 +622,12 @@ function DashboardContent() {
               </div>
               </div>
             </div>
+
+            {/* Autonomous Risk Mitigation */}
+            <AutonomousRiskAgent onNavigateToProject={(id) => navigate(`/project/${id}`)} />
+
+            {/* Multi-Agent Discussion */}
+            <MultiAgentDiscussion />
 
             {/* Cross-Agent Collaboration */}
             <CrossAgentCollaboration />

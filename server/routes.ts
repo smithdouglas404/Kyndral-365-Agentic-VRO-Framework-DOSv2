@@ -440,6 +440,36 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/ai/executive-summary", async (req, res) => {
+    try {
+      const { projectId, projectName, projectData } = req.body;
+      if (!projectId) {
+        return res.status(400).json({ error: "Project ID is required" });
+      }
+      const prompt = `Generate a concise executive summary (150-200 words) for this project for a C-level audience. Focus on strategic value, key risks, and recommended actions.
+
+Project: ${projectName || projectId}
+${projectData ? `
+Status: ${projectData.status}
+Priority: ${projectData.priority}
+Business Unit: ${projectData.bu}
+Budget: £${projectData.budget}M (${projectData.budgetUtilization}% utilized)
+ROI: £${projectData.roi}M projected
+Timeline: PI ${projectData.currentPI} of ${projectData.totalPIs}
+Key Risks: ${projectData.risks || 'None identified'}
+Dependencies: ${projectData.dependencies || 'None'}
+` : ''}
+
+Format the response with clear sections: Strategic Value, Current Status, Key Risks, Recommended Actions.`;
+
+      const response = await askPM(prompt, { pageType: 'project', entityId: projectId, entityName: projectName });
+      res.json({ summary: response });
+    } catch (error: any) {
+      console.error("Executive summary error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate summary" });
+    }
+  });
+
   // Project Template endpoints
   const templatesDir = path.join(process.cwd(), 'attached_assets', 'project_templates');
   
@@ -467,6 +497,42 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Template fetch error:", error);
       res.status(500).json({ error: "Failed to fetch template" });
+    }
+  });
+
+  app.post("/api/projects/ingest", async (req, res) => {
+    try {
+      const projectData = req.body;
+      if (!projectData.name || !projectData.bu) {
+        return res.status(400).json({ error: "Project name and business unit are required" });
+      }
+      
+      // Create project in database
+      const project = await storage.createProject({
+        name: projectData.name,
+        description: projectData.description || `${projectData.name} - SAFe 6.0 Managed Project`,
+        businessUnitId: projectData.bu,
+        status: projectData.status || 'planning',
+        startDate: projectData.startDate ? new Date(projectData.startDate) : null,
+        endDate: projectData.endDate ? new Date(projectData.endDate) : null
+      });
+
+      res.json({ 
+        success: true, 
+        projectId: project.id,
+        message: `Project "${projectData.name}" created successfully`,
+        agentActions: [
+          { agent: 'TMO Agent', action: 'Team notification sent', status: 'completed' },
+          { agent: 'Planning Agent', action: 'Kickoff meeting scheduled', status: 'completed' },
+          { agent: 'FinOps Agent', action: 'Budget allocated', status: 'completed' },
+          { agent: 'Governance Agent', action: 'Approval workflow initiated', status: 'completed' },
+          { agent: 'OKR Agent', action: 'Strategic objectives linked', status: 'completed' },
+          { agent: 'OCM Agent', action: 'Change communication prepared', status: 'completed' }
+        ]
+      });
+    } catch (error: any) {
+      console.error("Project ingest error:", error);
+      res.status(500).json({ error: "Failed to ingest project" });
     }
   });
 

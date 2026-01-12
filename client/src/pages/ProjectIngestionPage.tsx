@@ -182,29 +182,51 @@ export default function ProjectIngestionPage() {
     }
   };
 
-  const handleSaveProject = useCallback(() => {
+  const handleSaveProject = useCallback(async () => {
+    if (!projectData) return;
+    
     setStep('saving');
     setAgentCascadeIndex(0);
     
-    const runCascade = (index: number) => {
-      if (index < postSaveAgentActions.length) {
-        setTimeout(() => {
-          setAgentCascadeIndex(index + 1);
-          toast.success(`${postSaveAgentActions[index].agent}: ${postSaveAgentActions[index].action.replace('...', '')}`, {
-            duration: 3000
-          });
-          runCascade(index + 1);
-        }, 1500);
-      } else {
-        setTimeout(() => {
-          toast.success('Project created successfully!');
-          navigate('/dashboard');
-        }, 2000);
+    try {
+      const response = await fetch('/api/projects/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectData)
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        toast.error(result.error || 'Failed to save project');
+        setStep('editor');
+        return;
       }
-    };
-    
-    runCascade(0);
-  }, [navigate]);
+      
+      const runCascade = (index: number) => {
+        if (index < postSaveAgentActions.length) {
+          setTimeout(() => {
+            setAgentCascadeIndex(index + 1);
+            toast.success(`${postSaveAgentActions[index].agent}: ${postSaveAgentActions[index].action.replace('...', '')}`, {
+              duration: 3000,
+              icon: <CheckCircle2 className="h-4 w-4 text-green-500" />
+            });
+            runCascade(index + 1);
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            toast.success(`${projectData.name} created successfully!`, { duration: 5000 });
+            navigate('/dashboard');
+          }, 2000);
+        }
+      };
+      
+      runCascade(0);
+    } catch (error) {
+      toast.error('Failed to save project. Please try again.');
+      setStep('editor');
+    }
+  }, [navigate, projectData]);
 
   const updateProjectField = useCallback((field: string, value: any) => {
     setProjectData(prev => prev ? { ...prev, [field]: value } : null);

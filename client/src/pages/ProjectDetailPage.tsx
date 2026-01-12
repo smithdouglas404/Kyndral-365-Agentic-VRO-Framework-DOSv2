@@ -24,7 +24,9 @@ import {
   FileText,
   Milestone as MilestoneIcon,
   Activity,
-  ExternalLink
+  ExternalLink,
+  Loader2,
+  X
 } from "lucide-react";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { Button } from "@/components/ui/button";
@@ -284,6 +286,9 @@ export default function ProjectDetailPage() {
   const [drilldownOpen, setDrilldownOpen] = useState(false);
   const [drilldownEntityType, setDrilldownEntityType] = useState('');
   const [drilldownEntityId, setDrilldownEntityId] = useState('');
+  const [showSummary, setShowSummary] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [executiveSummary, setExecutiveSummary] = useState<string | null>(null);
   
   // Try to find project in SAFe projects first, then enriched projects
   const safeProject = getSafeProjectById(params.id || '');
@@ -366,6 +371,43 @@ export default function ProjectDetailPage() {
     setDrilldownEntityId(entityId);
   };
 
+  const generateExecutiveSummary = async () => {
+    setSummaryLoading(true);
+    setShowSummary(true);
+    try {
+      const response = await fetch('/api/ai/executive-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: params.id,
+          projectName: project.name,
+          projectData: {
+            status: project.status,
+            priority: project.priority,
+            bu: project.bu,
+            budget: (project.financials.budget / 1000000).toFixed(1),
+            budgetUtilization,
+            roi: (project.financials.roi.projected / 1000000).toFixed(1),
+            currentPI: project.currentPI,
+            totalPIs: project.totalPIs,
+            risks: project.aiRecommendations?.join(', ') || 'None identified',
+            dependencies: project.dependencies?.map((d: Dependency) => d.targetProjectId).join(', ') || 'None'
+          }
+        })
+      });
+      const data = await response.json();
+      if (data.summary) {
+        setExecutiveSummary(data.summary);
+      } else {
+        setExecutiveSummary('Failed to generate summary. Please try again.');
+      }
+    } catch (error) {
+      setExecutiveSummary('Failed to generate summary. Please try again.');
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
   return (
     <>
     <DrillDownDrawer
@@ -408,9 +450,53 @@ export default function ProjectDetailPage() {
                 £{(project.financials.roi.projected / 1000000).toFixed(1)}M ROI
               </p>
             </div>
+            <Button 
+              onClick={generateExecutiveSummary}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              data-testid="button-executive-summary"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              AI Summary
+            </Button>
           </div>
         </div>
       </header>
+
+      <AnimatePresence>
+        {showSummary && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200"
+          >
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
+                    <Brain className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-purple-900">AI Executive Summary</h3>
+                  {summaryLoading && <Loader2 className="h-4 w-4 animate-spin text-purple-600" />}
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowSummary(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              {summaryLoading ? (
+                <div className="flex items-center gap-2 text-purple-700">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Generating executive summary...</span>
+                </div>
+              ) : executiveSummary ? (
+                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                  {executiveSummary}
+                </div>
+              ) : null}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
