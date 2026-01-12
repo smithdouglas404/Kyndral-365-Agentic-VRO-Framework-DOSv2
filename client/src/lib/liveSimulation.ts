@@ -332,9 +332,9 @@ export class SimulationEngine {
   }
   
   private getRandomInterval(): number {
-    // Generate new events every 3-5 minutes as requested
-    const minSeconds = 180; // 3 minutes
-    const maxSeconds = 300; // 5 minutes
+    // Generate new events every 8-20 seconds for dynamic feel
+    const minSeconds = 8;
+    const maxSeconds = 20;
     const randomSeconds = Math.random() * (maxSeconds - minSeconds) + minSeconds;
     return Math.floor(randomSeconds * 1000);
   }

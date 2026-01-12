@@ -66,7 +66,12 @@ function GlobalAIOverlay() {
   const metrics = useLiveMetrics();
   
   // Check if we should show on this route
-  const isDashboardRoute = location && (location === '/dashboard' || location.startsWith('/dashboard/'));
+  const shouldShowOverlay = location && (
+    location === '/dashboard' || 
+    location.startsWith('/dashboard/') || 
+    location.startsWith('/division/') ||
+    location.startsWith('/project/')
+  );
   
   // Handle visibility change - also collapse when hiding
   const handleSetVisible = (visible: boolean) => {
@@ -80,8 +85,8 @@ function GlobalAIOverlay() {
   const activeAlerts = metrics.activeAlerts;
   const messageCount = messages.length;
   
-  // Only show on dashboard pages
-  if (!isDashboardRoute) {
+  // Only show on specified pages
+  if (!shouldShowOverlay) {
     return null;
   }
 

@@ -29,8 +29,13 @@ export function FloatingAlertBanner() {
   const [showBanner, setShowBanner] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<SimulationEvent | null>(null);
   
-  // Only show on dashboard pages
-  const isDashboardRoute = location && (location === '/dashboard' || location.startsWith('/dashboard/'));
+  // Show on dashboard and division pages
+  const shouldShowBanner = location && (
+    location === '/dashboard' || 
+    location.startsWith('/dashboard/') || 
+    location.startsWith('/division/') ||
+    location.startsWith('/project/')
+  );
 
   useEffect(() => {
     if (latestEvent) {
@@ -58,8 +63,8 @@ export function FloatingAlertBanner() {
     setShowBanner(false);
   };
 
-  // Only show on dashboard pages
-  if (!isDashboardRoute) {
+  // Only show on specified pages
+  if (!shouldShowBanner) {
     return null;
   }
 
