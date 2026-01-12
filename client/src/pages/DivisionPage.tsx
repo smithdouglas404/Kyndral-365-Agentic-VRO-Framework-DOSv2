@@ -93,7 +93,7 @@ export default function DivisionPage() {
     return (
       <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
         <Card className="p-8">
-          <h1 className="text-2xl font-bold text-[#C50B30]">Division not found</h1>
+          <h1 className="text-2xl font-bold text-[#C50B30]">Group Function not found</h1>
           <Link href="/dashboard">
             <Button className="mt-4" onClick={() => setLocation('/dashboard')} data-testid="link-back-dashboard">Return to Dashboard</Button>
           </Link>

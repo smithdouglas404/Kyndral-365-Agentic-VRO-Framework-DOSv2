@@ -363,7 +363,7 @@ export default function OKRDashboard() {
 
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Strategic Objectives from L&G Divisions</h2>
+              <h2 className="text-lg font-semibold">Strategic Objectives from L&G Group Functions</h2>
               <Badge variant="outline" className="text-xs">Click to expand for initiative details</Badge>
             </div>
             {objectives.map((objective) => (
@@ -373,7 +373,7 @@ export default function OKRDashboard() {
 
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-lg">Division OKRs Overview</CardTitle>
+              <CardTitle className="text-lg">Group Function OKRs Overview</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

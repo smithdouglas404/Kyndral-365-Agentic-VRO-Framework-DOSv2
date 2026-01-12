@@ -92,7 +92,7 @@ function CostCategoryCard({ category, mode }: { category: TransformedCostCategor
             <div className="p-4 bg-gray-50">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Division Owner</p>
+                  <p className="text-xs text-gray-500">Group Function Owner</p>
                   <p className="font-semibold text-sm">{category.division}</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
@@ -162,7 +162,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
             <div className="p-4 bg-gray-50">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Division</p>
+                  <p className="text-xs text-gray-500">Group Function</p>
                   <p className="font-semibold text-sm">{opportunity.division}</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
@@ -358,7 +358,7 @@ export default function FinOpsDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Division Cost Performance</span>
+                  <span>Group Function Cost Performance</span>
                   <Badge variant="outline" className="text-xs">Click to expand</Badge>
                 </CardTitle>
               </CardHeader>
@@ -375,7 +375,7 @@ export default function FinOpsDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Savings Opportunities</span>
-                  <Badge variant="outline" className="text-xs">From Division Projects</Badge>
+                  <Badge variant="outline" className="text-xs">From Group Function Projects</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -390,7 +390,7 @@ export default function FinOpsDashboard() {
 
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-lg">Division Financial Performance</CardTitle>
+              <CardTitle className="text-lg">Group Function Financial Performance</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

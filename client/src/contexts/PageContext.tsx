@@ -51,7 +51,7 @@ export function PageContextProvider({ children }: { children: ReactNode }) {
       setContext({
         pageType: 'division',
         entityId: divisionId,
-        breadcrumb: ['Dashboard', 'Division']
+        breadcrumb: ['Dashboard', 'Group Function']
       });
     } else if (path.startsWith('/project/')) {
       const projectId = path.split('/')[2];

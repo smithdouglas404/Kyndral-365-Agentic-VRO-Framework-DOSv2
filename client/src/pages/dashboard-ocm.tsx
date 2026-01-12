@@ -228,7 +228,7 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
                   <p className="font-semibold text-sm">{program.duration}</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Division</p>
+                  <p className="text-xs text-gray-500">Group Function</p>
                   <p className="font-semibold text-sm">{program.division}</p>
                 </div>
               </div>
@@ -413,8 +413,8 @@ export default function OCMDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Division Stakeholders</span>
-                  <Badge variant="outline" className="text-xs">From L&G Divisions</Badge>
+                  <span>Group Function Stakeholders</span>
+                  <Badge variant="outline" className="text-xs">From L&G Group Functions</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

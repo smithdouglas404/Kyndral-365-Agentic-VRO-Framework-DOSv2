@@ -125,7 +125,7 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
                   </p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Division</p>
+                  <p className="text-xs text-gray-500">Group Function</p>
                   <p className="font-bold text-gray-700">{milestone.division}</p>
                 </div>
               </div>
@@ -186,7 +186,7 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
             <div className="p-3 bg-gray-50">
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <div className="bg-white p-2 rounded border">
-                  <p className="text-xs text-gray-500">Division</p>
+                  <p className="text-xs text-gray-500">Group Function</p>
                   <p className="font-medium text-sm">{deadline.division}</p>
                 </div>
                 <div className="bg-white p-2 rounded border">
@@ -355,7 +355,7 @@ export default function PlanningDashboard() {
                   </div>
                   <TrendingUp className="h-8 w-8 text-purple-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">across divisions</p>
+                <p className="text-xs text-gray-500 mt-2">across group functions</p>
               </CardContent>
             </Card>
           </div>
@@ -369,7 +369,7 @@ export default function PlanningDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Program Roadmap</span>
-                  <Badge variant="outline" className="text-xs">From Division Projects</Badge>
+                  <Badge variant="outline" className="text-xs">From Group Function Projects</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -400,7 +400,7 @@ export default function PlanningDashboard() {
 
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-lg">Division Projects Pipeline</CardTitle>
+              <CardTitle className="text-lg">Group Function Projects Pipeline</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
