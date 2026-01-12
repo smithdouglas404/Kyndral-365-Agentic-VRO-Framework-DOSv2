@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
-import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
 import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
@@ -650,7 +649,6 @@ function DashboardContent() {
           <TabsContent value="ai-hub">
             <div className="space-y-6">
               <AIRecommendations dataMode={dataMode} />
-              <AIProactiveInsightsSection />
               <ActionAuditTimeline maxItems={20} />
             </div>
           </TabsContent>
