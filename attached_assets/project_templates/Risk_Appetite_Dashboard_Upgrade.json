@@ -1,29 +1,404 @@
 {
-  "id": "pmo-rc-001",
+  "id": "pmo-lgc-005",
   "name": "Risk Appetite Dashboard Upgrade",
-  "bu": "Risk & Compliance",
-  "description": "Upgrading risk appetite monitoring dashboard with real-time alerts and predictive analytics.",
-  "expectedROI": "£25m risk reduction",
-  "roiValue": 25,
-  "priority": "critical",
-  "status": "amber",
-  "budget": { "spent": 0.9, "total": 1.4, "unit": "£m" },
-  "timeline": { "elapsed": 7, "total": 10, "unit": "months" },
-  "artName": "Risk Excellence ART",
-  "portfolioTheme": "Risk Modernization",
-  "safe": { "velocity": 35, "predictability": 72, "flowEfficiency": 62, "currentPI": "PI 24.4", "epicId": "EPIC-RC-101", "epicName": "Risk Dashboard", "epicProgress": 68 },
+  "bu": "LGC",
+  "division": "Group Risk",
+  "description": "Enterprise risk appetite monitoring and reporting platform with real-time risk indicators, threshold alerts, and board-level reporting.",
+  "expectedROI": "£10m risk management efficiency",
+  "roiValue": 10,
+  "priority": "high",
+  "status": "green",
+  "budget": {
+    "spent": 0.7,
+    "total": 1.4,
+    "unit": "£m",
+    "contingency": 0.1,
+    "forecastAtCompletion": 1.4
+  },
+  "timeline": {
+    "elapsed": 5,
+    "total": 8,
+    "startDate": "2024-05-01",
+    "endDate": "2025-01-01",
+    "unit": "months"
+  },
+  "artName": "Risk Technology ART",
+  "portfolioTheme": "Risk Excellence",
+  "strategicObjectives": [
+    "SO-5: Regulatory Excellence",
+    "SO-3: Operational Excellence"
+  ],
+  "safe": {
+    "velocity": 38,
+    "predictability": 79,
+    "flowEfficiency": 74,
+    "currentPI": "PI 24.2",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGC-005",
+    "epicName": "Risk Appetite Dashboard Upgrade",
+    "epicProgress": 63,
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 10,
+      "riskReduction": 7,
+      "jobSize": 8,
+      "score": 3.75
+    },
+    "solutionTrain": "Group Risk Technology",
+    "valueStream": "Risk Excellence"
+  },
   "features": [
-    { "id": "feat-701", "name": "Real-time Risk Monitoring", "status": "in-progress", "storyPoints": 21, "completedPoints": 14, "priority": "critical" },
-    { "id": "feat-702", "name": "Predictive Risk Alerts", "status": "planned", "storyPoints": 13, "completedPoints": 0, "priority": "high" }
+    {
+      "id": "feat-rad-001",
+      "name": "Risk Indicator Framework",
+      "description": "Comprehensive framework of 150+ key risk indicators with automated data feeds.",
+      "status": "done",
+      "storyPoints": 34,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given risk indicator framework is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-rad-001",
+          "name": "KRI Definition",
+          "description": "As a Risk Manager, I need defined KRIs so that I can monitor risk appetite.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given kri definition, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-rad-001",
+              "name": "Define 150 KRIs",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Risk Team",
+              "skills": [
+                "Risk Management"
+              ]
+            },
+            {
+              "id": "task-rad-002",
+              "name": "Map data sources",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Data Team",
+              "skills": [
+                "Data Integration"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-rad-002",
+          "name": "Automated Data Feeds",
+          "description": "As Operations, I need automated feeds so that KRIs are current.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given automated data feeds, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-rad-003",
+              "name": "Build data pipelines",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Data Team",
+              "skills": [
+                "ETL"
+              ]
+            },
+            {
+              "id": "task-rad-004",
+              "name": "Implement refresh scheduling",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Backend Team",
+              "skills": [
+                "Scheduling"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-rad-002",
+      "name": "Executive Risk Dashboard",
+      "description": "Board-level risk dashboard with drill-down capability and trend analysis.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 13,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given executive risk dashboard is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-rad-003",
+          "name": "Executive Summary View",
+          "description": "As the Board, I need a summary view so that I understand risk position.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given executive summary view, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-rad-005",
+              "name": "Design executive dashboard",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "UX Team",
+              "skills": [
+                "UX"
+              ]
+            },
+            {
+              "id": "task-rad-006",
+              "name": "Build summary components",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-rad-004",
+          "name": "Drill-Down Analysis",
+          "description": "As a CRO, I need drill-down so that I can investigate issues.",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given drill-down analysis, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-rad-007",
+              "name": "Build drill-down navigation",
+              "status": "in-progress",
+              "effortHours": 24,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            },
+            {
+              "id": "task-rad-008",
+              "name": "Create trend analysis",
+              "status": "pending",
+              "effortHours": 16,
+              "assignee": "Analytics Team",
+              "skills": [
+                "Analytics"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-701", "name": "Andrew Clark", "role": "Risk Analyst", "allocation": 100, "team": "Risk" },
-    { "id": "res-702", "name": "Helen Foster", "role": "Senior Developer", "allocation": 80, "team": "Engineering" }
+    {
+      "id": "res-rad-001",
+      "name": "CRO Office",
+      "role": "Sponsor",
+      "allocation": 20,
+      "team": "Risk",
+      "skills": [
+        "Risk Management"
+      ],
+      "costRate": 1100
+    },
+    {
+      "id": "res-rad-002",
+      "name": "Risk Analytics",
+      "role": "Analysts",
+      "allocation": 100,
+      "team": "Risk",
+      "skills": [
+        "Risk Analytics",
+        "Reporting"
+      ],
+      "costRate": 750
+    }
   ],
   "milestones": [
-    { "id": "ms-701", "name": "Dashboard Go-Live", "date": "2024-10-15", "status": "in-progress", "deliverables": ["Core dashboard", "Integrations"] }
+    {
+      "id": "ms-pmo-lgc-005-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-05-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgc-005-2",
+      "name": "MVP Launch",
+      "date": "2024-08-29",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgc-005-3",
+      "name": "Full Launch",
+      "date": "2025-01-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.1, "opex": 0.3, "contingency": 0.14, "npv": 20.5, "irr": 38, "paybackMonths": 16 },
-  "currentPI": 4, "totalPIs": 5, "velocity": 35, "burndownHealth": 68, "qualityScore": 75
+  "risks": [
+    {
+      "id": "risk-rad-001",
+      "name": "Data quality issues",
+      "probability": "medium",
+      "impact": "high",
+      "status": "active",
+      "mitigation": "Data validation rules; source system quality programs",
+      "owner": "Data Team"
+    },
+    {
+      "id": "risk-rad-002",
+      "name": "KRI threshold calibration",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Regular threshold review; backtesting",
+      "owner": "Risk Team"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-rad-001",
+      "name": "Source Risk Systems",
+      "type": "internal",
+      "status": "active",
+      "description": "Data feeds from risk systems"
+    },
+    {
+      "id": "dep-rad-002",
+      "name": "Data Warehouse",
+      "type": "internal",
+      "status": "resolved",
+      "description": "Central data repository"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-rad-001",
+      "name": "Group CRO",
+      "role": "Sponsor",
+      "department": "Risk",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-rad-002",
+      "name": "Board Risk Committee",
+      "role": "Governance",
+      "department": "Board",
+      "influence": "high",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-lgc-005-1",
+      "name": "PI 24.2 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-lgc-005-2",
+      "name": "PI 24.2 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-lgc-005-3",
+      "name": "PI 24.2 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 1,
+    "opex": 0.4,
+    "contingency": 0.1,
+    "npv": 8,
+    "irr": 54,
+    "paybackMonths": 10,
+    "costBreakdown": {
+      "development": 0.7,
+      "infrastructure": 0.3,
+      "licensing": 0.2,
+      "contingency": 0.1
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.7,
+    "testCoverage": 88,
+    "technicalDebtDays": 11,
+    "codeReviewCoverage": 100,
+    "documentationScore": 82
+  },
+  "currentPI": 2,
+  "totalPIs": 4,
+  "velocity": 38,
+  "burndownHealth": 82,
+  "qualityScore": 87
 }

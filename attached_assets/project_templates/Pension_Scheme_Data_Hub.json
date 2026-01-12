@@ -1,27 +1,440 @@
 {
-  "id": "pmo-ir-004",
+  "id": "pmo-lgr-003",
   "name": "Pension Scheme Data Hub",
-  "bu": "Institutional Retirement",
-  "description": "Centralized data hub for pension scheme information enabling faster deal execution.",
-  "expectedROI": "£22m operational efficiency",
-  "roiValue": 22,
+  "bu": "LGR",
+  "division": "Institutional Retirement",
+  "description": "Centralized data hub for pension scheme information with golden source governance, data quality monitoring, and self-service analytics.",
+  "expectedROI": "£15m data quality improvement + operational efficiency",
+  "roiValue": 15,
   "priority": "high",
-  "status": "amber",
-  "budget": { "spent": 1.0, "total": 1.5, "unit": "£m" },
-  "timeline": { "elapsed": 6, "total": 9, "unit": "months" },
-  "artName": "Data Excellence ART",
-  "portfolioTheme": "Data Foundation",
-  "safe": { "velocity": 40, "predictability": 78, "flowEfficiency": 65, "currentPI": "PI 24.3", "epicId": "EPIC-IR-104", "epicName": "Data Centralization", "epicProgress": 58 },
+  "status": "green",
+  "budget": {
+    "spent": 1,
+    "total": 2,
+    "unit": "£m",
+    "contingency": 0.2,
+    "forecastAtCompletion": 2
+  },
+  "timeline": {
+    "elapsed": 6,
+    "total": 10,
+    "startDate": "2024-04-01",
+    "endDate": "2025-02-01",
+    "unit": "months"
+  },
+  "artName": "Data Platform ART",
+  "portfolioTheme": "Data Excellence",
+  "strategicObjectives": [
+    "SO-3: Operational Excellence",
+    "SO-6: Digital Transformation"
+  ],
+  "safe": {
+    "velocity": 49,
+    "predictability": 85,
+    "flowEfficiency": 69,
+    "currentPI": "PI 24.3",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGR-003",
+    "epicName": "Pension Scheme Data Hub",
+    "epicProgress": 60,
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 10,
+      "riskReduction": 7,
+      "jobSize": 8,
+      "score": 3.75
+    },
+    "solutionTrain": "Institutional Retirement Technology",
+    "valueStream": "Data Excellence"
+  },
   "features": [
-    { "id": "feat-1001", "name": "Data Ingestion Pipeline", "status": "in-progress", "storyPoints": 21, "completedPoints": 12, "priority": "critical" }
+    {
+      "id": "feat-psd-001",
+      "name": "Golden Source Data Layer",
+      "description": "Authoritative data layer for scheme, member, and benefit data with lineage tracking.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given golden source data layer is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-psd-001",
+          "name": "Schema Design",
+          "description": "As a Data Architect, I need a canonical schema so that data is consistent.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given schema design, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-psd-001",
+              "name": "Design data model",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Data Architect",
+              "skills": [
+                "Data Modeling"
+              ]
+            },
+            {
+              "id": "task-psd-002",
+              "name": "Document schema",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Data Architect",
+              "skills": [
+                "Documentation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-psd-002",
+          "name": "Data Lineage",
+          "description": "As Compliance, I need lineage so that I can trace data origins.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given data lineage, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-psd-003",
+              "name": "Implement lineage tracking",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Data Team",
+              "skills": [
+                "Data Lineage"
+              ]
+            },
+            {
+              "id": "task-psd-004",
+              "name": "Build lineage visualization",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Frontend Team",
+              "skills": [
+                "D3.js"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-psd-003",
+          "name": "Data Migration",
+          "description": "As Operations, I need data migrated so that I can use the new platform.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given data migration, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-psd-005",
+              "name": "Build migration scripts",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Data Team",
+              "skills": [
+                "ETL",
+                "SQL"
+              ]
+            },
+            {
+              "id": "task-psd-006",
+              "name": "Validate migrated data",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "QA Team",
+              "skills": [
+                "Data Testing"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-psd-002",
+      "name": "Data Quality Framework",
+      "description": "Automated data quality monitoring with dimension scoring, anomaly detection, and remediation workflows.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given data quality framework is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-psd-004",
+          "name": "Quality Rules Engine",
+          "description": "As a Data Steward, I need quality rules so that I can enforce standards.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given quality rules engine, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-psd-007",
+              "name": "Define 150+ quality rules",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Data Governance",
+              "skills": [
+                "Data Quality"
+              ]
+            },
+            {
+              "id": "task-psd-008",
+              "name": "Build rules execution engine",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Backend Team",
+              "skills": [
+                "Rules Engine"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-psd-005",
+          "name": "Quality Dashboard",
+          "description": "As a Manager, I need quality dashboards so that I can monitor health.",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given quality dashboard, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-psd-009",
+              "name": "Build quality scorecards",
+              "status": "in-progress",
+              "effortHours": 20,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            },
+            {
+              "id": "task-psd-010",
+              "name": "Create trend analysis",
+              "status": "pending",
+              "effortHours": 12,
+              "assignee": "Analytics Team",
+              "skills": [
+                "Analytics"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-1001", "name": "Chris Taylor", "role": "Data Engineer", "allocation": 100, "team": "Data" }
+    {
+      "id": "res-psd-001",
+      "name": "Data Architect",
+      "role": "Technical Lead",
+      "allocation": 100,
+      "team": "Data",
+      "skills": [
+        "Data Modeling",
+        "Architecture"
+      ],
+      "costRate": 850
+    },
+    {
+      "id": "res-psd-002",
+      "name": "Data Governance",
+      "role": "Data Steward",
+      "allocation": 80,
+      "team": "Governance",
+      "skills": [
+        "Data Quality",
+        "Governance"
+      ],
+      "costRate": 700
+    }
   ],
   "milestones": [
-    { "id": "ms-1001", "name": "Hub Launch", "date": "2024-10-30", "status": "planned", "deliverables": ["Core hub", "API access"] }
+    {
+      "id": "ms-pmo-lgr-003-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-04-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgr-003-2",
+      "name": "MVP Launch",
+      "date": "2024-08-29",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgr-003-3",
+      "name": "Full Launch",
+      "date": "2025-02-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.2, "opex": 0.3, "contingency": 0.15, "npv": 18.0, "irr": 45, "paybackMonths": 13 },
-  "currentPI": 3, "totalPIs": 4, "velocity": 40, "burndownHealth": 72, "qualityScore": 78
+  "risks": [
+    {
+      "id": "risk-psd-001",
+      "name": "Data migration complexity",
+      "probability": "high",
+      "impact": "medium",
+      "status": "mitigated",
+      "mitigation": "Phased migration; extensive testing; rollback capability",
+      "owner": "Data Team"
+    },
+    {
+      "id": "risk-psd-002",
+      "name": "User adoption resistance",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Change management program; training; super-user network",
+      "owner": "Change Lead"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-psd-001",
+      "name": "Legacy Systems",
+      "type": "internal",
+      "status": "active",
+      "description": "Data extraction from legacy"
+    },
+    {
+      "id": "dep-psd-002",
+      "name": "Cloud Infrastructure",
+      "type": "internal",
+      "status": "resolved",
+      "description": "Snowflake data warehouse"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-psd-001",
+      "name": "Chief Data Officer",
+      "role": "Sponsor",
+      "department": "Data",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-psd-002",
+      "name": "Operations Teams",
+      "role": "Key Users",
+      "department": "Operations",
+      "influence": "high",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-lgr-003-1",
+      "name": "PI 24.3 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-lgr-003-2",
+      "name": "PI 24.3 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-lgr-003-3",
+      "name": "PI 24.3 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 1.5,
+    "opex": 0.5,
+    "contingency": 0.2,
+    "npv": 12,
+    "irr": 52,
+    "paybackMonths": 12,
+    "costBreakdown": {
+      "development": 1,
+      "infrastructure": 0.4,
+      "licensing": 0.3,
+      "contingency": 0.2
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.5,
+    "testCoverage": 82,
+    "technicalDebtDays": 6,
+    "codeReviewCoverage": 100,
+    "documentationScore": 83
+  },
+  "currentPI": 3,
+  "totalPIs": 4,
+  "velocity": 49,
+  "burndownHealth": 84,
+  "qualityScore": 89
 }

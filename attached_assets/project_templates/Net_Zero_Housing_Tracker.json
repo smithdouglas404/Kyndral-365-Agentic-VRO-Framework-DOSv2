@@ -1,28 +1,407 @@
 {
-  "id": "pmo-ci-001",
+  "id": "pmo-lgc-004",
   "name": "Net Zero Housing Tracker",
-  "bu": "Capital Investment",
-  "description": "Platform to track and report carbon emissions across housing portfolio for net zero targets.",
-  "expectedROI": "£8m regulatory compliance",
-  "roiValue": 8,
+  "bu": "LGC",
+  "division": "Housing",
+  "description": "Portfolio-wide carbon tracking and net-zero pathway platform for 3,500+ housing units. Monitors energy consumption, retrofit planning, and EPC ratings improvement.",
+  "expectedROI": "£12m operational savings + regulatory compliance",
+  "roiValue": 12,
   "priority": "high",
   "status": "green",
-  "budget": { "spent": 0.5, "total": 0.8, "unit": "£m" },
-  "timeline": { "elapsed": 4, "total": 7, "unit": "months" },
-  "artName": "Sustainability Tech ART",
-  "portfolioTheme": "Net Zero Commitment",
-  "safe": { "velocity": 40, "predictability": 86, "flowEfficiency": 74, "currentPI": "PI 24.3", "epicId": "EPIC-CI-101", "epicName": "Carbon Tracking", "epicProgress": 55 },
+  "budget": {
+    "spent": 0.6,
+    "total": 1.2,
+    "unit": "£m",
+    "contingency": 0.1,
+    "forecastAtCompletion": 1.2
+  },
+  "timeline": {
+    "elapsed": 5,
+    "total": 9,
+    "startDate": "2024-05-01",
+    "endDate": "2025-02-01",
+    "unit": "months"
+  },
+  "artName": "Sustainable Housing ART",
+  "portfolioTheme": "ESG Leadership",
+  "strategicObjectives": [
+    "SO-2: Climate Transition",
+    "SO-3: Operational Excellence"
+  ],
+  "safe": {
+    "velocity": 37,
+    "predictability": 86,
+    "flowEfficiency": 72,
+    "currentPI": "PI 24.2",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGC-004",
+    "epicName": "Net Zero Housing Tracker",
+    "epicProgress": 56,
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 10,
+      "riskReduction": 7,
+      "jobSize": 8,
+      "score": 3.75
+    },
+    "solutionTrain": "Housing Technology",
+    "valueStream": "ESG Leadership"
+  },
   "features": [
-    { "id": "feat-601", "name": "Emissions Calculator", "status": "done", "storyPoints": 13, "completedPoints": 13, "priority": "critical" },
-    { "id": "feat-602", "name": "Reporting Dashboard", "status": "in-progress", "storyPoints": 13, "completedPoints": 6, "priority": "high" }
+    {
+      "id": "feat-nzh-001",
+      "name": "Energy Consumption Tracking",
+      "description": "Real-time energy monitoring across housing portfolio with smart meter integration.",
+      "status": "done",
+      "storyPoints": 34,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given energy consumption tracking is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-nzh-001",
+          "name": "Smart Meter Integration",
+          "description": "As a Property Manager, I need meter data so that I can monitor consumption.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given smart meter integration, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-nzh-001",
+              "name": "Build meter API integration",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "IoT Team",
+              "skills": [
+                "IoT",
+                "APIs"
+              ]
+            },
+            {
+              "id": "task-nzh-002",
+              "name": "Create data ingestion pipeline",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Data Team",
+              "skills": [
+                "ETL"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-nzh-002",
+          "name": "Consumption Dashboard",
+          "description": "As an Asset Manager, I need consumption dashboards so that I can identify issues.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given consumption dashboard, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-nzh-003",
+              "name": "Build consumption charts",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React",
+                "Charts"
+              ]
+            },
+            {
+              "id": "task-nzh-004",
+              "name": "Create alerting for anomalies",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Backend Team",
+              "skills": [
+                "Alerting"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-nzh-002",
+      "name": "Carbon Pathway Planning",
+      "description": "Net-zero pathway modeling with retrofit scenario analysis and investment planning.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 13,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given carbon pathway planning is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-nzh-003",
+          "name": "Carbon Baseline Calculator",
+          "description": "As a Sustainability Lead, I need baseline calculations so that I can set targets.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given carbon baseline calculator, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-nzh-005",
+              "name": "Build emission calculator",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Sustainability Team",
+              "skills": [
+                "Carbon Accounting"
+              ]
+            },
+            {
+              "id": "task-nzh-006",
+              "name": "Integrate with asset database",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Backend Team",
+              "skills": [
+                "Integration"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-nzh-004",
+          "name": "Retrofit Scenario Modeling",
+          "description": "As a Planner, I need retrofit scenarios so that I can prioritize investments.",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given retrofit scenario modeling, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-nzh-007",
+              "name": "Build scenario engine",
+              "status": "in-progress",
+              "effortHours": 32,
+              "assignee": "Analytics Team",
+              "skills": [
+                "Modeling"
+              ]
+            },
+            {
+              "id": "task-nzh-008",
+              "name": "Create cost-benefit analysis",
+              "status": "pending",
+              "effortHours": 20,
+              "assignee": "Finance Team",
+              "skills": [
+                "Financial Modeling"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-601", "name": "Oliver Wright", "role": "Sustainability Engineer", "allocation": 80, "team": "Green Tech" }
+    {
+      "id": "res-nzh-001",
+      "name": "Sustainability Lead",
+      "role": "Product Owner",
+      "allocation": 80,
+      "team": "Sustainability",
+      "skills": [
+        "Carbon Accounting",
+        "ESG"
+      ],
+      "costRate": 800
+    },
+    {
+      "id": "res-nzh-002",
+      "name": "IoT Team",
+      "role": "Technical",
+      "allocation": 60,
+      "team": "Technology",
+      "skills": [
+        "IoT",
+        "Data"
+      ],
+      "costRate": 700
+    }
   ],
   "milestones": [
-    { "id": "ms-601", "name": "Regulatory Submission", "date": "2024-09-30", "status": "planned", "deliverables": ["Compliance report", "Audit trail"] }
+    {
+      "id": "ms-pmo-lgc-004-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-05-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgc-004-2",
+      "name": "MVP Launch",
+      "date": "2024-09-13",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgc-004-3",
+      "name": "Full Launch",
+      "date": "2025-02-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 0.6, "opex": 0.2, "contingency": 0.08, "npv": 6.5, "irr": 48, "paybackMonths": 14 },
-  "currentPI": 3, "totalPIs": 4, "velocity": 40, "burndownHealth": 84, "qualityScore": 88
+  "risks": [
+    {
+      "id": "risk-nzh-001",
+      "name": "Smart meter coverage gaps",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "active",
+      "mitigation": "Manual data collection fallback; phased meter rollout",
+      "owner": "IoT Team"
+    },
+    {
+      "id": "risk-nzh-002",
+      "name": "Retrofit cost estimates accuracy",
+      "probability": "medium",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "Contractor validation; regular estimate updates",
+      "owner": "Finance"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-nzh-001",
+      "name": "Smart Meter Network",
+      "type": "external",
+      "status": "active",
+      "description": "Smart meter connectivity"
+    },
+    {
+      "id": "dep-nzh-002",
+      "name": "Asset Management System",
+      "type": "internal",
+      "status": "resolved",
+      "description": "Property data integration"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-nzh-001",
+      "name": "Housing MD",
+      "role": "Sponsor",
+      "department": "Housing",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-nzh-002",
+      "name": "Sustainability Committee",
+      "role": "Governance",
+      "department": "Group",
+      "influence": "high",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-lgc-004-1",
+      "name": "PI 24.2 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-lgc-004-2",
+      "name": "PI 24.2 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-lgc-004-3",
+      "name": "PI 24.2 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 0.9,
+    "opex": 0.3,
+    "contingency": 0.1,
+    "npv": 9.6,
+    "irr": 46,
+    "paybackMonths": 11,
+    "costBreakdown": {
+      "development": 0.6,
+      "infrastructure": 0.2,
+      "licensing": 0.2,
+      "contingency": 0.1
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.7,
+    "testCoverage": 90,
+    "technicalDebtDays": 10,
+    "codeReviewCoverage": 100,
+    "documentationScore": 79
+  },
+  "currentPI": 2,
+  "totalPIs": 4,
+  "velocity": 37,
+  "burndownHealth": 80,
+  "qualityScore": 82
 }

@@ -1,28 +1,554 @@
 {
-  "id": "pmo-rc-004",
+  "id": "pmo-lgc-003",
   "name": "Operational Resilience Framework",
-  "bu": "Risk & Compliance",
-  "description": "Framework and tooling for operational resilience compliance and testing.",
-  "expectedROI": "£15m risk mitigation",
-  "roiValue": 15,
+  "bu": "LGC",
+  "division": "Group Operations",
+  "description": "Enterprise operational resilience platform meeting PRA/FCA requirements. Includes impact tolerance mapping, scenario testing, third-party dependency management, and crisis management workflows.",
+  "expectedROI": "£8m regulatory fine avoidance + £15m operational efficiency",
+  "roiValue": 23,
   "priority": "critical",
   "status": "amber",
-  "budget": { "spent": 0.9, "total": 1.4, "unit": "£m" },
-  "timeline": { "elapsed": 7, "total": 10, "unit": "months" },
-  "artName": "Risk Excellence ART",
-  "portfolioTheme": "Resilience",
-  "safe": { "velocity": 36, "predictability": 76, "flowEfficiency": 64, "currentPI": "PI 24.4", "epicId": "EPIC-RC-104", "epicName": "Op Resilience", "epicProgress": 65 },
+  "budget": {
+    "spent": 2.1,
+    "total": 3.5,
+    "unit": "£m",
+    "contingency": 0.4,
+    "forecastAtCompletion": 3.4
+  },
+  "timeline": {
+    "elapsed": 9,
+    "total": 12,
+    "startDate": "2024-01-01",
+    "endDate": "2025-01-01",
+    "unit": "months"
+  },
+  "artName": "Enterprise Resilience ART",
+  "portfolioTheme": "Operational Excellence",
+  "strategicObjectives": [
+    "SO-5: Regulatory Excellence",
+    "SO-3: Operational Excellence",
+    "SO-4: Client Trust"
+  ],
+  "safe": {
+    "velocity": 49,
+    "predictability": 79,
+    "flowEfficiency": 79,
+    "currentPI": "PI 24.4",
+    "totalPIs": 5,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGC-003",
+    "epicName": "Operational Resilience Framework",
+    "epicProgress": 75,
+    "epicWsjf": {
+      "businessValue": 21,
+      "timeCriticality": 17,
+      "riskReduction": 11,
+      "jobSize": 13,
+      "score": 3.77
+    },
+    "solutionTrain": "Group Operations Technology",
+    "valueStream": "Operational Excellence"
+  },
   "features": [
-    { "id": "feat-1801", "name": "Business Service Mapping", "status": "in-progress", "storyPoints": 21, "completedPoints": 14, "priority": "critical" },
-    { "id": "feat-1802", "name": "Impact Tolerance Testing", "status": "planned", "storyPoints": 13, "completedPoints": 0, "priority": "high" }
+    {
+      "id": "feat-opr-001",
+      "name": "Important Business Services Mapping",
+      "description": "Complete mapping of 47 important business services with dependencies, tolerances, and recovery objectives.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given important business services mapping is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-opr-001",
+          "name": "IBS Dependency Mapping",
+          "description": "As Resilience Lead, I need service dependency maps so that I understand failure cascades.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given ibs dependency mapping, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-001",
+              "name": "Interview service owners",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Sophie Brown",
+              "skills": [
+                "Business Analysis"
+              ]
+            },
+            {
+              "id": "task-opr-002",
+              "name": "Build dependency graph model",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Tech Lead",
+              "skills": [
+                "Graph DB",
+                "Neo4j"
+              ]
+            },
+            {
+              "id": "task-opr-003",
+              "name": "Create visualization dashboard",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Frontend Team",
+              "skills": [
+                "D3.js",
+                "React"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-opr-002",
+          "name": "Impact Tolerance Definition",
+          "description": "As a Regulator, I need documented impact tolerances so that I can assess compliance.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given impact tolerance definition, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-004",
+              "name": "Define tolerance thresholds",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Sophie Brown",
+              "skills": [
+                "Risk Management"
+              ]
+            },
+            {
+              "id": "task-opr-005",
+              "name": "Document tolerance rationale",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Compliance",
+              "skills": [
+                "Documentation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-opr-003",
+          "name": "Recovery Time Objectives",
+          "description": "As IT Ops, I need RTO/RPO targets so that I can design recovery procedures.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given recovery time objectives, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-006",
+              "name": "Calculate business impact",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Sophie Brown",
+              "skills": [
+                "BIA"
+              ]
+            },
+            {
+              "id": "task-opr-007",
+              "name": "Define RTO/RPO targets",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "IT Ops",
+              "skills": [
+                "DR Planning"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-opr-002",
+      "name": "Scenario Testing Engine",
+      "description": "Automated scenario testing platform for severe but plausible disruption scenarios with evidence capture.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 13,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given scenario testing engine is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-opr-004",
+          "name": "Scenario Library",
+          "description": "As a Tester, I need predefined scenarios so that I can run consistent tests.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given scenario library, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-008",
+              "name": "Define 20 core scenarios",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Sophie Brown",
+              "skills": [
+                "Risk Scenarios"
+              ]
+            },
+            {
+              "id": "task-opr-009",
+              "name": "Build scenario configuration UI",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-opr-005",
+          "name": "Test Execution Framework",
+          "description": "As a Coordinator, I need automated test orchestration so that tests run efficiently.",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given test execution framework, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-010",
+              "name": "Build test orchestration engine",
+              "status": "in-progress",
+              "effortHours": 32,
+              "assignee": "Backend Team",
+              "skills": [
+                "Node.js",
+                "Orchestration"
+              ]
+            },
+            {
+              "id": "task-opr-011",
+              "name": "Create evidence capture system",
+              "status": "pending",
+              "effortHours": 24,
+              "assignee": "Backend Team",
+              "skills": [
+                "Document Management"
+              ]
+            },
+            {
+              "id": "task-opr-012",
+              "name": "Implement regulatory reporting",
+              "status": "pending",
+              "effortHours": 20,
+              "assignee": "Sophie Brown",
+              "skills": [
+                "Compliance"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-opr-003",
+      "name": "Third Party Risk Management",
+      "description": "Centralized third-party dependency tracking with concentration risk analysis and exit planning.",
+      "status": "planned",
+      "storyPoints": 21,
+      "completedPoints": 0,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given third party risk management is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-opr-006",
+          "name": "Vendor Dependency Register",
+          "description": "As Procurement, I need a vendor register so that I can track critical suppliers.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given vendor dependency register, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-013",
+              "name": "Build vendor database",
+              "status": "planned",
+              "effortHours": 20,
+              "assignee": "Backend Team",
+              "skills": [
+                "Database"
+              ]
+            },
+            {
+              "id": "task-opr-014",
+              "name": "Create risk scoring model",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Sophie Brown",
+              "skills": [
+                "Risk Assessment"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-opr-007",
+          "name": "Concentration Risk Dashboard",
+          "description": "As Risk Officer, I need concentration analysis so that I can identify single points of failure.",
+          "storyPoints": 8,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given concentration risk dashboard, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-opr-015",
+              "name": "Build concentration analytics",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Analytics Team",
+              "skills": [
+                "Analytics"
+              ]
+            },
+            {
+              "id": "task-opr-016",
+              "name": "Create alerting rules",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Backend Team",
+              "skills": [
+                "Rules Engine"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-1801", "name": "Peter White", "role": "Resilience Lead", "allocation": 100, "team": "Risk" }
+    {
+      "id": "res-opr-001",
+      "name": "Sophie Brown",
+      "role": "Resilience Lead",
+      "allocation": 100,
+      "team": "Operations",
+      "skills": [
+        "Op Resilience",
+        "Regulation"
+      ],
+      "costRate": 850
+    },
+    {
+      "id": "res-opr-002",
+      "name": "IT Ops Team",
+      "role": "Infrastructure",
+      "allocation": 50,
+      "team": "IT",
+      "skills": [
+        "DR",
+        "Infrastructure"
+      ],
+      "costRate": 700
+    }
   ],
   "milestones": [
-    { "id": "ms-1801", "name": "Framework Complete", "date": "2024-11-30", "status": "planned", "deliverables": ["Framework", "Testing tools"] }
+    {
+      "id": "ms-pmo-lgc-003-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-01-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgc-003-2",
+      "name": "MVP Launch",
+      "date": "2024-06-29",
+      "status": "planned",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgc-003-3",
+      "name": "Full Launch",
+      "date": "2025-01-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.1, "opex": 0.3, "contingency": 0.14, "npv": 12.5, "irr": 40, "paybackMonths": 15 },
-  "currentPI": 4, "totalPIs": 5, "velocity": 36, "burndownHealth": 70, "qualityScore": 78
+  "risks": [
+    {
+      "id": "risk-opr-001",
+      "name": "Regulatory deadline pressure",
+      "probability": "high",
+      "impact": "critical",
+      "status": "active",
+      "mitigation": "Weekly regulator engagement; phased delivery",
+      "owner": "Sophie Brown"
+    },
+    {
+      "id": "risk-opr-002",
+      "name": "Third-party data gaps",
+      "probability": "medium",
+      "impact": "high",
+      "status": "active",
+      "mitigation": "Vendor outreach program; data gap remediation plan",
+      "owner": "Procurement"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-opr-001",
+      "name": "CMDB Integration",
+      "type": "internal",
+      "status": "active",
+      "description": "Configuration management database for asset data"
+    },
+    {
+      "id": "dep-opr-002",
+      "name": "Vendor Management System",
+      "type": "internal",
+      "status": "resolved",
+      "description": "Third-party contract data"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-opr-001",
+      "name": "Group COO",
+      "role": "Sponsor",
+      "department": "Operations",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-opr-002",
+      "name": "PRA Supervisor",
+      "role": "Regulator",
+      "department": "External",
+      "influence": "high",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-lgc-003-1",
+      "name": "PI 24.4 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-lgc-003-2",
+      "name": "PI 24.4 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-lgc-003-3",
+      "name": "PI 24.4 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 2.6,
+    "opex": 0.9,
+    "contingency": 0.4,
+    "npv": 18.4,
+    "irr": 45,
+    "paybackMonths": 14,
+    "costBreakdown": {
+      "development": 1.8,
+      "infrastructure": 0.7,
+      "licensing": 0.5,
+      "contingency": 0.4
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.6,
+    "testCoverage": 82,
+    "technicalDebtDays": 9,
+    "codeReviewCoverage": 100,
+    "documentationScore": 83
+  },
+  "currentPI": 4,
+  "totalPIs": 5,
+  "velocity": 49,
+  "burndownHealth": 87,
+  "qualityScore": 83
 }

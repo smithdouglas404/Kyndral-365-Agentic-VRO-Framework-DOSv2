@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 import { 
   Bot, 
   MessageSquare, 
@@ -25,7 +26,8 @@ import {
   Sparkles,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  Loader2
 } from 'lucide-react';
 
 interface RiskIntervention {
@@ -40,7 +42,8 @@ interface RiskIntervention {
   suggestedAction: string;
   impact: string;
   timestamp: Date;
-  status: 'pending' | 'approved' | 'dismissed';
+  status: 'pending' | 'approved' | 'dismissed' | 'executing';
+  agentSource: string;
 }
 
 interface AgentMessage {
@@ -58,7 +61,7 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-const riskInterventions: RiskIntervention[] = [
+const initialInterventions: RiskIntervention[] = [
   {
     id: 'int-001',
     type: 'dependency',
@@ -71,7 +74,8 @@ const riskInterventions: RiskIntervention[] = [
     suggestedAction: 'Escalate to RTE and implement interim mock API for parallel development',
     impact: '£1.2M schedule cost if unresolved',
     timestamp: new Date(),
-    status: 'pending'
+    status: 'pending',
+    agentSource: 'Planning Agent'
   },
   {
     id: 'int-002',
@@ -85,7 +89,8 @@ const riskInterventions: RiskIntervention[] = [
     suggestedAction: 'Defer AI/ML Infrastructure feature to Phase 2, release £400K contingency',
     impact: 'Saves £1.1M, maintains core deliverables',
     timestamp: new Date(),
-    status: 'pending'
+    status: 'pending',
+    agentSource: 'FinOps Agent'
   },
   {
     id: 'int-003',
@@ -99,7 +104,38 @@ const riskInterventions: RiskIntervention[] = [
     suggestedAction: 'Add 2 contractors for TCFD feature, parallel track with Net-Zero Tracker',
     impact: 'Regulatory compliance maintained',
     timestamp: new Date(),
-    status: 'pending'
+    status: 'pending',
+    agentSource: 'Governance Agent'
+  },
+  {
+    id: 'int-004',
+    type: 'resource',
+    severity: 'medium',
+    title: 'Key Resource Allocation Conflict',
+    description: 'Lead architect assigned to 3 overlapping projects with 150% allocation.',
+    projectId: 'pmo-rt-002',
+    projectName: 'AI Chatbot Implementation',
+    confidence: 78,
+    suggestedAction: 'Reassign secondary architect from Client Portal; defer non-critical design reviews',
+    impact: 'Prevents burnout, maintains quality',
+    timestamp: new Date(),
+    status: 'pending',
+    agentSource: 'Resource Agent'
+  },
+  {
+    id: 'int-005',
+    type: 'quality',
+    severity: 'high',
+    title: 'Technical Debt Threshold Exceeded',
+    description: 'Bulk Annuity Pricing Engine has 23 critical code quality issues blocking deployment.',
+    projectId: 'pmo-ir-003',
+    projectName: 'Bulk Annuity Pricing Engine',
+    confidence: 91,
+    suggestedAction: 'Allocate 1 sprint for tech debt remediation before next feature release',
+    impact: 'Reduces production incident risk by 65%',
+    timestamp: new Date(),
+    status: 'pending',
+    agentSource: 'Quality Agent'
   }
 ];
 
@@ -109,7 +145,8 @@ const agentDiscussion: AgentMessage[] = [
   { id: 'msg-3', agent: 'TMO Agent', agentColor: 'bg-teal-500', message: "Change impact assessment: Deferring AI/ML affects 8 stakeholders. I can prepare communications if we proceed.", type: 'analysis' },
   { id: 'msg-4', agent: 'Governance Agent', agentColor: 'bg-purple-500', message: "Scope reduction requires steering committee approval. I can fast-track through CAB with proper documentation.", type: 'question' },
   { id: 'msg-5', agent: 'FinOps Agent', agentColor: 'bg-green-500', message: "Deferral saves £1.1M. Combined with £400K contingency release, we're back within budget tolerance.", type: 'analysis' },
-  { id: 'msg-6', agent: 'Planning Agent', agentColor: 'bg-blue-500', message: "Consensus reached. Proposed: 1) Defer AI/ML to Phase 2, 2) Release contingency, 3) Fast-track CAB. Ready for human approval.", type: 'action' }
+  { id: 'msg-6', agent: 'OKR Agent', agentColor: 'bg-orange-500', message: "This aligns with Q4 objective 'Optimize Portfolio Delivery'. Key result KR2.3 would improve from 65% to 78% achievement.", type: 'agreement' },
+  { id: 'msg-7', agent: 'Planning Agent', agentColor: 'bg-blue-500', message: "Consensus reached. Proposed: 1) Defer AI/ML to Phase 2, 2) Release contingency, 3) Fast-track CAB. Ready for human approval.", type: 'action' }
 ];
 
 const projects = [
@@ -118,7 +155,9 @@ const projects = [
   { id: 'pmo-ir-003', name: 'Bulk Annuity Pricing Engine', status: 'green' },
   { id: 'pmo-am-003', name: 'Client Portal Modernization', status: 'green' },
   { id: 'pmo-rc-003', name: 'Regulatory Change Management', status: 'green' },
-  { id: 'pmo-rt-002', name: 'AI Chatbot Implementation', status: 'green' }
+  { id: 'pmo-rt-002', name: 'AI Chatbot Implementation', status: 'green' },
+  { id: 'pmo-lgim-001', name: 'ESG Analytics Dashboard', status: 'green' },
+  { id: 'pmo-lgc-003', name: 'Operational Resilience Framework', status: 'amber' }
 ];
 
 interface AgentCommandCenterProps {
@@ -127,13 +166,14 @@ interface AgentCommandCenterProps {
 
 export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterProps) {
   const [selectedProject, setSelectedProject] = useState<string>('all');
-  const [interventions, setInterventions] = useState(riskInterventions);
+  const [interventions, setInterventions] = useState<RiskIntervention[]>(initialInterventions);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [discussionMessages, setDiscussionMessages] = useState<AgentMessage[]>([]);
   const [isDiscussionPlaying, setIsDiscussionPlaying] = useState(true);
   const [discussionIndex, setDiscussionIndex] = useState(0);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isDiscussionPlaying || discussionIndex >= agentDiscussion.length) return;
@@ -144,13 +184,48 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     return () => clearTimeout(timer);
   }, [isDiscussionPlaying, discussionIndex]);
 
-  const handleApproveIntervention = (id: string) => {
+  const handleApproveIntervention = useCallback(async (id: string) => {
+    setProcessingId(id);
+    const intervention = interventions.find(i => i.id === id);
+    
+    setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'executing' as const } : i));
+    
+    try {
+      await fetch('/api/interventions/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interventionId: id, projectId: intervention?.projectId })
+      });
+    } catch (error) {
+      console.log('Intervention API not implemented - using local state');
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'approved' as const } : i));
-  };
+    setProcessingId(null);
+    
+    toast.success(`Intervention approved for ${intervention?.projectName}`, {
+      description: `${intervention?.agentSource} executing: ${intervention?.suggestedAction.substring(0, 50)}...`
+    });
+  }, [interventions]);
 
-  const handleDismissIntervention = (id: string) => {
+  const handleDismissIntervention = useCallback(async (id: string) => {
+    const intervention = interventions.find(i => i.id === id);
+    
+    try {
+      await fetch('/api/interventions/dismiss', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interventionId: id, projectId: intervention?.projectId })
+      });
+    } catch (error) {
+      console.log('Intervention API not implemented - using local state');
+    }
+    
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'dismissed' as const } : i));
-  };
+    toast.info(`Intervention dismissed - ${intervention?.title}`);
+  }, [interventions]);
 
   const handleSendChat = async () => {
     if (!chatInput.trim()) return;
@@ -207,6 +282,9 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     ? pendingInterventions 
     : pendingInterventions.filter(i => i.projectId === selectedProject);
 
+  const approvedCount = interventions.filter(i => i.status === 'approved').length;
+  const dismissedCount = interventions.filter(i => i.status === 'dismissed').length;
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'bg-red-500 text-white';
@@ -228,14 +306,14 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="agent-command-center">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
             <Brain className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Agent Command Center</h2>
+            <h2 className="text-2xl font-bold text-gray-900" data-testid="text-command-center-title">Agent Command Center</h2>
             <p className="text-sm text-gray-500">Autonomous AI agents managing your portfolio</p>
           </div>
         </div>
@@ -253,10 +331,18 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
             </SelectContent>
           </Select>
           
-          <Badge className="bg-green-100 text-green-800 px-3 py-1">
-            <Zap className="h-3 w-3 mr-1" />
-            6 Agents Active
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-100 text-green-800 px-3 py-1" data-testid="badge-agents-active">
+              <Zap className="h-3 w-3 mr-1" />
+              6 Agents Active
+            </Badge>
+            {approvedCount > 0 && (
+              <Badge className="bg-blue-100 text-blue-800 px-2 py-1" data-testid="badge-approved-count">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                {approvedCount} Approved
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
 
@@ -290,10 +376,15 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
             </CardHeader>
             <CardContent>
               {filteredInterventions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500" data-testid="no-interventions-message">
                   <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
                   <p className="font-medium">No pending interventions</p>
                   <p className="text-sm">All risks are being managed autonomously</p>
+                  {(approvedCount > 0 || dismissedCount > 0) && (
+                    <p className="text-xs mt-2 text-gray-400">
+                      {approvedCount} approved, {dismissedCount} dismissed this session
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -316,7 +407,11 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                               <Badge className={getSeverityColor(intervention.severity)}>{intervention.severity}</Badge>
                               <Badge variant="outline" className="text-xs">{intervention.confidence}% confidence</Badge>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{intervention.description}</p>
+                            <p className="text-sm text-gray-600 mb-2" data-testid={`intervention-description-${intervention.id}`}>{intervention.description}</p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                              <Bot className="h-3 w-3" />
+                              <span>Source: {intervention.agentSource}</span>
+                            </div>
                             <button 
                               onClick={() => onNavigateToProject?.(intervention.projectId)}
                               className="text-sm text-blue-600 hover:underline flex items-center gap-1"
@@ -342,6 +437,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                           variant="outline"
                           size="sm"
                           onClick={() => handleDismissIntervention(intervention.id)}
+                          disabled={processingId === intervention.id}
                           data-testid={`button-dismiss-${intervention.id}`}
                         >
                           <XCircle className="h-4 w-4 mr-1" />
@@ -351,10 +447,20 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => handleApproveIntervention(intervention.id)}
+                          disabled={processingId === intervention.id}
                           data-testid={`button-approve-${intervention.id}`}
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-1" />
-                          Approve Action
+                          {processingId === intervention.id ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              Executing...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                              Approve Action
+                            </>
+                          )}
                         </Button>
                       </div>
                     </motion.div>
@@ -395,7 +501,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-200 mb-4">
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-200 mb-4" data-testid="discussion-topic-banner">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
                   <span className="font-semibold text-gray-900">Topic: Enterprise Data Platform Budget Overrun</span>
@@ -421,16 +527,16 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                           <div className={`h-6 w-6 rounded-full ${msg.agentColor} flex items-center justify-center`}>
                             <Bot className="h-3 w-3 text-white" />
                           </div>
-                          <span className="font-semibold text-sm text-gray-900">{msg.agent}</span>
+                          <span className="font-semibold text-sm text-gray-900" data-testid={`agent-name-${msg.id}`}>{msg.agent}</span>
                           <Badge variant="outline" className="text-xs capitalize">{msg.type}</Badge>
                         </div>
-                        <p className="text-sm text-gray-700">{msg.message}</p>
+                        <p className="text-sm text-gray-700" data-testid={`agent-message-content-${msg.id}`}>{msg.message}</p>
                       </motion.div>
                     ))}
                   </AnimatePresence>
 
                   {isDiscussionPlaying && discussionIndex < agentDiscussion.length && (
-                    <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 py-2" data-testid="discussion-loading">
                       <div className="flex gap-1">
                         <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -445,6 +551,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="bg-green-50 border border-green-200 rounded-lg p-4 text-center"
+                      data-testid="discussion-consensus-reached"
                     >
                       <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
                       <p className="font-semibold text-green-800">Consensus Reached</p>
@@ -469,7 +576,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
             <CardContent>
               <ScrollArea className="h-[300px] pr-4 mb-4">
                 {chatMessages.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
+                  <div className="text-center py-12 text-gray-500" data-testid="chat-empty-state">
                     <Bot className="h-12 w-12 mx-auto mb-3 text-blue-400" />
                     <p className="font-medium">Start a conversation</p>
                     <p className="text-sm">Ask about project status, risks, or recommendations</p>
@@ -480,7 +587,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                           variant="outline"
                           size="sm"
                           onClick={() => setChatInput(q)}
-                          data-testid={`button-quick-question-${q.substring(0, 10)}`}
+                          data-testid={`button-quick-question-${q.replace(/\s+/g, '-').substring(0, 15)}`}
                         >
                           {q}
                         </Button>
@@ -507,7 +614,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
                       </div>
                     ))}
                     {isTyping && (
-                      <div className="flex justify-start">
+                      <div className="flex justify-start" data-testid="chat-typing-indicator">
                         <div className="bg-gray-100 rounded-lg p-3">
                           <div className="flex gap-1">
                             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />

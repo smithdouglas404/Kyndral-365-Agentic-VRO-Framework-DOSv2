@@ -23,21 +23,66 @@ interface ProjectTemplate {
   id: string;
   name: string;
   bu: string;
+  division?: string;
   description: string;
   expectedROI: string;
   roiValue: number;
   priority: string;
   status: string;
-  budget: { spent: number; total: number; unit: string };
-  timeline: { elapsed: number; total: number; unit: string };
+  budget: { spent: number; total: number; unit: string; contingency?: number };
+  timeline: { elapsed: number; total: number; unit: string; startDate?: string; endDate?: string };
   artName?: string;
   portfolioTheme?: string;
-  safe?: any;
-  features?: any[];
-  resources?: any[];
-  milestones?: any[];
-  safeDependencies?: any[];
-  financials?: any;
+  strategicObjectives?: string[];
+  safe?: {
+    velocity?: number;
+    predictability?: number;
+    flowEfficiency?: number;
+    currentPI?: string;
+    totalPIs?: number;
+    piCadence?: string;
+    epicId?: string;
+    epicName?: string;
+    epicProgress?: number;
+    epicWsjf?: { businessValue: number; timeCriticality: number; riskReduction: number; jobSize: number; score: number };
+    solutionTrain?: string;
+    valueStream?: string;
+  };
+  features?: {
+    id: string;
+    name: string;
+    description?: string;
+    status: string;
+    storyPoints: number;
+    completedPoints: number;
+    priority: string;
+    wsjf?: { businessValue: number; timeCriticality: number; riskReduction: number; jobSize: number; score: number };
+    acceptanceCriteria?: string[];
+    stories?: {
+      id: string;
+      name: string;
+      description?: string;
+      storyPoints: number;
+      status: string;
+      acceptanceCriteria?: string[];
+      tasks?: {
+        id: string;
+        name: string;
+        status: string;
+        effortHours: number;
+        assignee: string;
+        skills: string[];
+      }[];
+    }[];
+  }[];
+  resources?: { id: string; name: string; role: string; allocation: number; team: string; skills?: string[]; costRate?: number }[];
+  milestones?: { id: string; name: string; date: string; status: string; deliverables?: string[] }[];
+  risks?: { id: string; name: string; probability: string; impact: string; status: string; mitigation: string; owner: string }[];
+  dependencies?: { id: string; name: string; type: string; status: string; description: string }[];
+  stakeholders?: { id: string; name: string; role: string; department: string; influence: string; interest: string }[];
+  iterations?: { id: string; name: string; startDate: string; endDate: string; capacity: number; committed: number; completed: number; velocity: number | null }[];
+  financials?: { capitalex?: number; opex?: number; contingency?: number; npv?: number; irr?: number; paybackMonths?: number };
+  qualityMetrics?: { defectDensity?: number; testCoverage?: number; technicalDebtDays?: number; codeReviewCoverage?: number; documentationScore?: number };
   currentPI?: number;
   totalPIs?: number;
   velocity?: number;
@@ -445,24 +490,30 @@ export default function ProjectIngestionPage() {
               </div>
 
               <Tabs defaultValue="info" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="info" className="gap-1">
-                    <Building2 className="h-4 w-4" /> Info
+                <TabsList className="grid w-full grid-cols-8">
+                  <TabsTrigger value="info" className="gap-1 text-xs">
+                    <Building2 className="h-3 w-3" /> Info
                   </TabsTrigger>
-                  <TabsTrigger value="safe" className="gap-1">
-                    <Layers className="h-4 w-4" /> SAFe
+                  <TabsTrigger value="safe" className="gap-1 text-xs">
+                    <Layers className="h-3 w-3" /> SAFe
                   </TabsTrigger>
-                  <TabsTrigger value="features" className="gap-1">
-                    <Target className="h-4 w-4" /> Features
+                  <TabsTrigger value="features" className="gap-1 text-xs">
+                    <Target className="h-3 w-3" /> Features
                   </TabsTrigger>
-                  <TabsTrigger value="resources" className="gap-1">
-                    <Users className="h-4 w-4" /> Resources
+                  <TabsTrigger value="risks" className="gap-1 text-xs">
+                    <AlertTriangle className="h-3 w-3" /> Risks
                   </TabsTrigger>
-                  <TabsTrigger value="milestones" className="gap-1">
-                    <Milestone className="h-4 w-4" /> Milestones
+                  <TabsTrigger value="stakeholders" className="gap-1 text-xs">
+                    <Users className="h-3 w-3" /> Stakeholders
                   </TabsTrigger>
-                  <TabsTrigger value="financials" className="gap-1">
-                    <DollarSign className="h-4 w-4" /> Financials
+                  <TabsTrigger value="resources" className="gap-1 text-xs">
+                    <Users className="h-3 w-3" /> Team
+                  </TabsTrigger>
+                  <TabsTrigger value="milestones" className="gap-1 text-xs">
+                    <Milestone className="h-3 w-3" /> Milestones
+                  </TabsTrigger>
+                  <TabsTrigger value="financials" className="gap-1 text-xs">
+                    <DollarSign className="h-3 w-3" /> Financials
                   </TabsTrigger>
                 </TabsList>
 
@@ -622,23 +673,77 @@ export default function ProjectIngestionPage() {
                   <Card>
                     <CardContent className="p-6">
                       {projectData.features && projectData.features.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {projectData.features.map((feature, idx) => (
-                            <div key={feature.id || idx} className="p-4 border rounded-lg bg-slate-50">
+                            <div key={feature.id || idx} className="p-4 border rounded-lg bg-slate-50" data-testid={`feature-card-${feature.id || idx}`}>
                               <div className="flex items-center justify-between mb-2">
                                 <h4 className="font-semibold">{feature.name}</h4>
-                                <Badge variant={feature.status === 'done' ? 'default' : 'secondary'}>
-                                  {feature.status}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  {feature.wsjf && (
+                                    <Badge variant="outline" className="text-xs">WSJF: {feature.wsjf.score}</Badge>
+                                  )}
+                                  <Badge variant={feature.status === 'done' ? 'default' : 'secondary'}>
+                                    {feature.status}
+                                  </Badge>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              {feature.description && (
+                                <p className="text-sm text-muted-foreground mb-2">{feature.description}</p>
+                              )}
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                                 <span>{feature.completedPoints || 0} / {feature.storyPoints} points</span>
                                 <span>Priority: {feature.priority}</span>
                               </div>
                               <Progress 
-                                value={(feature.completedPoints / feature.storyPoints) * 100} 
-                                className="mt-2 h-2" 
+                                value={feature.storyPoints > 0 ? ((feature.completedPoints || 0) / feature.storyPoints) * 100 : 0} 
+                                className="h-2 mb-3" 
                               />
+                              {feature.acceptanceCriteria && feature.acceptanceCriteria.length > 0 && (
+                                <div className="mt-2 p-2 bg-white rounded border text-sm">
+                                  <p className="font-medium text-xs text-muted-foreground mb-1">Acceptance Criteria:</p>
+                                  <ul className="list-disc list-inside text-xs space-y-0.5">
+                                    {feature.acceptanceCriteria.slice(0, 3).map((ac, i) => (
+                                      <li key={i}>{ac}</li>
+                                    ))}
+                                    {feature.acceptanceCriteria.length > 3 && (
+                                      <li className="text-muted-foreground">+{feature.acceptanceCriteria.length - 3} more...</li>
+                                    )}
+                                  </ul>
+                                </div>
+                              )}
+                              {feature.stories && feature.stories.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                  <p className="text-xs font-medium text-muted-foreground">{feature.stories.length} User Stories:</p>
+                                  {feature.stories.slice(0, 2).map((story, sIdx) => (
+                                    <div key={story.id || sIdx} className="p-2 bg-white rounded border text-sm">
+                                      <div className="flex items-center justify-between">
+                                        <span className="font-medium text-xs">{story.name}</span>
+                                        <div className="flex items-center gap-1">
+                                          <Badge variant="outline" className="text-xs">{story.storyPoints} SP</Badge>
+                                          <Badge variant={story.status === 'done' ? 'default' : 'secondary'} className="text-xs">{story.status}</Badge>
+                                        </div>
+                                      </div>
+                                      {story.acceptanceCriteria && story.acceptanceCriteria.length > 0 && (
+                                        <div className="mt-1 text-xs text-muted-foreground">
+                                          {story.acceptanceCriteria[0]}
+                                        </div>
+                                      )}
+                                      {story.tasks && story.tasks.length > 0 && (
+                                        <div className="mt-2 flex flex-wrap gap-1">
+                                          {story.tasks.map((task, tIdx) => (
+                                            <Badge key={task.id || tIdx} variant="outline" className="text-xs">
+                                              {task.name} ({task.effortHours}h - {task.assignee})
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  {feature.stories.length > 2 && (
+                                    <p className="text-xs text-muted-foreground">+{feature.stories.length - 2} more stories...</p>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -646,6 +751,89 @@ export default function ProjectIngestionPage() {
                         <div className="text-center py-8 text-muted-foreground">
                           <Target className="h-12 w-12 mx-auto mb-3 opacity-30" />
                           <p>No features defined yet</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="risks" className="mt-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      {projectData.risks && projectData.risks.length > 0 ? (
+                        <div className="space-y-3">
+                          {projectData.risks.map((risk, idx) => (
+                            <div key={risk.id || idx} className="p-4 border rounded-lg" data-testid={`risk-card-${risk.id || idx}`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <AlertTriangle className={`h-4 w-4 ${
+                                    risk.impact === 'critical' || risk.impact === 'high' ? 'text-red-500' :
+                                    risk.impact === 'medium' ? 'text-amber-500' : 'text-green-500'
+                                  }`} />
+                                  <h4 className="font-semibold">{risk.name}</h4>
+                                </div>
+                                <Badge variant={risk.status === 'mitigated' ? 'default' : 'destructive'}>
+                                  {risk.status}
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">Probability:</span>
+                                  <span className="ml-1 font-medium">{risk.probability}</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Impact:</span>
+                                  <span className="ml-1 font-medium">{risk.impact}</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Owner:</span>
+                                  <span className="ml-1 font-medium">{risk.owner}</span>
+                                </div>
+                              </div>
+                              <div className="mt-2 text-sm bg-slate-50 p-2 rounded">
+                                <span className="text-muted-foreground">Mitigation:</span>
+                                <span className="ml-1">{risk.mitigation}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <AlertTriangle className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                          <p>No risks identified yet</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="stakeholders" className="mt-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      {projectData.stakeholders && projectData.stakeholders.length > 0 ? (
+                        <div className="space-y-3">
+                          {projectData.stakeholders.map((stakeholder, idx) => (
+                            <div key={stakeholder.id || idx} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`stakeholder-card-${stakeholder.id || idx}`}>
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <Users className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{stakeholder.name}</p>
+                                  <p className="text-sm text-muted-foreground">{stakeholder.role} • {stakeholder.department}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge variant="outline">Influence: {stakeholder.influence}</Badge>
+                                <Badge variant="secondary">Interest: {stakeholder.interest}</Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                          <p>No stakeholders mapped yet</p>
                         </div>
                       )}
                     </CardContent>

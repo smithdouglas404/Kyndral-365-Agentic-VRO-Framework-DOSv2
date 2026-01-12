@@ -1,27 +1,442 @@
 {
-  "id": "pmo-rt-003",
+  "id": "pmo-lgr-004",
   "name": "Protection Product Digitization",
-  "bu": "Retail",
-  "description": "Digitizing protection product application and underwriting processes.",
-  "expectedROI": "£22m processing efficiency",
-  "roiValue": 22,
+  "bu": "LGR",
+  "division": "Retail",
+  "description": "End-to-end digitization of protection product portfolio (life, critical illness, income protection) with automated underwriting and straight-through processing.",
+  "expectedROI": "£25m new business growth + cost reduction",
+  "roiValue": 25,
   "priority": "high",
-  "status": "amber",
-  "budget": { "spent": 1.3, "total": 2.0, "unit": "£m" },
-  "timeline": { "elapsed": 8, "total": 12, "unit": "months" },
-  "artName": "Product Tech ART",
-  "portfolioTheme": "Digital Transformation",
-  "safe": { "velocity": 38, "predictability": 74, "flowEfficiency": 64, "currentPI": "PI 24.3", "epicId": "EPIC-RT-103", "epicName": "Protection Digital", "epicProgress": 55 },
+  "status": "green",
+  "budget": {
+    "spent": 1.4,
+    "total": 2.5,
+    "unit": "£m",
+    "contingency": 0.3,
+    "forecastAtCompletion": 2.4
+  },
+  "timeline": {
+    "elapsed": 7,
+    "total": 12,
+    "startDate": "2024-03-01",
+    "endDate": "2025-03-01",
+    "unit": "months"
+  },
+  "artName": "Protection Products ART",
+  "portfolioTheme": "Digital Excellence",
+  "strategicObjectives": [
+    "SO-6: Digital Transformation",
+    "SO-1: Market Leadership"
+  ],
+  "safe": {
+    "velocity": 44,
+    "predictability": 85,
+    "flowEfficiency": 79,
+    "currentPI": "PI 24.3",
+    "totalPIs": 5,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGR-004",
+    "epicName": "Protection Product Digitization",
+    "epicProgress": 58,
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 10,
+      "riskReduction": 7,
+      "jobSize": 8,
+      "score": 3.75
+    },
+    "solutionTrain": "Retail Technology",
+    "valueStream": "Digital Excellence"
+  },
   "features": [
-    { "id": "feat-1301", "name": "Digital Underwriting", "status": "in-progress", "storyPoints": 34, "completedPoints": 18, "priority": "critical" }
+    {
+      "id": "feat-ppd-001",
+      "name": "Digital Application Journey",
+      "description": "Mobile-first application journey for all protection products with progressive disclosure.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given digital application journey is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-ppd-001",
+          "name": "Product Selector",
+          "description": "As a Customer, I need product guidance so that I choose the right cover.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given product selector, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-ppd-001",
+              "name": "Build needs analysis wizard",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "UX Team",
+              "skills": [
+                "UX Design"
+              ]
+            },
+            {
+              "id": "task-ppd-002",
+              "name": "Implement recommendation engine",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Backend Team",
+              "skills": [
+                "Rules Engine"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-ppd-002",
+          "name": "Quote Engine",
+          "description": "As a Customer, I need instant quotes so that I can see pricing.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given quote engine, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-ppd-003",
+              "name": "Build pricing API",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Actuarial Dev",
+              "skills": [
+                "Actuarial",
+                "APIs"
+              ]
+            },
+            {
+              "id": "task-ppd-004",
+              "name": "Create quote comparison UI",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-ppd-003",
+          "name": "Application Form",
+          "description": "As a Customer, I need a simple form so that I can apply quickly.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given application form, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-ppd-005",
+              "name": "Design progressive form flow",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "UX Team",
+              "skills": [
+                "UX"
+              ]
+            },
+            {
+              "id": "task-ppd-006",
+              "name": "Build form with validation",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React",
+                "Forms"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-ppd-002",
+      "name": "Automated Underwriting",
+      "description": "Rules-based automated underwriting with AI triage for complex cases.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given automated underwriting is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-ppd-004",
+          "name": "Rules-Based Decisions",
+          "description": "As an Underwriter, I need auto-decisions so that I focus on complex cases.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given rules-based decisions, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-ppd-007",
+              "name": "Implement underwriting rules",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Underwriting Team",
+              "skills": [
+                "Underwriting"
+              ]
+            },
+            {
+              "id": "task-ppd-008",
+              "name": "Build decision API",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Backend Team",
+              "skills": [
+                "APIs"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-ppd-005",
+          "name": "AI Triage",
+          "description": "As Ops Manager, I need AI triage so that cases route efficiently.",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given ai triage, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-ppd-009",
+              "name": "Train triage ML model",
+              "status": "in-progress",
+              "effortHours": 32,
+              "assignee": "ML Team",
+              "skills": [
+                "ML",
+                "Classification"
+              ]
+            },
+            {
+              "id": "task-ppd-010",
+              "name": "Integrate with workflow",
+              "status": "pending",
+              "effortHours": 16,
+              "assignee": "Backend Team",
+              "skills": [
+                "Integration"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-1301", "name": "Ben Patel", "role": "Underwriting Specialist", "allocation": 100, "team": "Product" }
+    {
+      "id": "res-ppd-001",
+      "name": "Protection Product Owner",
+      "role": "Product Owner",
+      "allocation": 100,
+      "team": "Product",
+      "skills": [
+        "Protection",
+        "Product Mgmt"
+      ],
+      "costRate": 800
+    },
+    {
+      "id": "res-ppd-002",
+      "name": "UX Lead",
+      "role": "Design Lead",
+      "allocation": 80,
+      "team": "Design",
+      "skills": [
+        "UX",
+        "Mobile"
+      ],
+      "costRate": 750
+    }
   ],
   "milestones": [
-    { "id": "ms-1301", "name": "Digital Launch", "date": "2024-12-15", "status": "planned", "deliverables": ["Digital workflow", "Automation"] }
+    {
+      "id": "ms-pmo-lgr-004-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-03-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgr-004-2",
+      "name": "MVP Launch",
+      "date": "2024-08-28",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgr-004-3",
+      "name": "Full Launch",
+      "date": "2025-03-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.6, "opex": 0.4, "contingency": 0.2, "npv": 18.0, "irr": 40, "paybackMonths": 16 },
-  "currentPI": 3, "totalPIs": 5, "velocity": 38, "burndownHealth": 68, "qualityScore": 76
+  "risks": [
+    {
+      "id": "risk-ppd-001",
+      "name": "Underwriting model accuracy",
+      "probability": "medium",
+      "impact": "high",
+      "status": "active",
+      "mitigation": "Extensive backtesting; human override capability",
+      "owner": "Chief Underwriter"
+    },
+    {
+      "id": "risk-ppd-002",
+      "name": "Legacy integration complexity",
+      "probability": "high",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "API layer; phased integration",
+      "owner": "Tech Lead"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-ppd-001",
+      "name": "Policy Admin System",
+      "type": "internal",
+      "status": "active",
+      "description": "Policy issuance integration"
+    },
+    {
+      "id": "dep-ppd-002",
+      "name": "Payment Gateway",
+      "type": "external",
+      "status": "resolved",
+      "description": "Direct debit setup"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-ppd-001",
+      "name": "Protection MD",
+      "role": "Sponsor",
+      "department": "Protection",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-ppd-002",
+      "name": "Underwriting Team",
+      "role": "Key Users",
+      "department": "Underwriting",
+      "influence": "high",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-lgr-004-1",
+      "name": "PI 24.3 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-lgr-004-2",
+      "name": "PI 24.3 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-lgr-004-3",
+      "name": "PI 24.3 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 1.9,
+    "opex": 0.6,
+    "contingency": 0.3,
+    "npv": 20,
+    "irr": 47,
+    "paybackMonths": 14,
+    "costBreakdown": {
+      "development": 1.3,
+      "infrastructure": 0.5,
+      "licensing": 0.4,
+      "contingency": 0.3
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.4,
+    "testCoverage": 87,
+    "technicalDebtDays": 8,
+    "codeReviewCoverage": 100,
+    "documentationScore": 78
+  },
+  "currentPI": 3,
+  "totalPIs": 5,
+  "velocity": 44,
+  "burndownHealth": 86,
+  "qualityScore": 83
 }

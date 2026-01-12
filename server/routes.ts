@@ -536,5 +536,70 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Intervention management endpoints
+  const interventionStore: Map<string, { id: string; status: string; approvedAt?: Date; dismissedAt?: Date }> = new Map();
+
+  app.post("/api/interventions/approve", async (req, res) => {
+    try {
+      const { interventionId, projectId } = req.body;
+      if (!interventionId) {
+        return res.status(400).json({ error: "Intervention ID is required" });
+      }
+      
+      interventionStore.set(interventionId, {
+        id: interventionId,
+        status: 'approved',
+        approvedAt: new Date()
+      });
+      
+      console.log(`Intervention ${interventionId} approved for project ${projectId}`);
+      res.json({ 
+        success: true, 
+        interventionId,
+        status: 'approved',
+        message: 'Intervention approved and agent cascade initiated'
+      });
+    } catch (error: any) {
+      console.error("Intervention approve error:", error);
+      res.status(500).json({ error: "Failed to approve intervention" });
+    }
+  });
+
+  app.post("/api/interventions/dismiss", async (req, res) => {
+    try {
+      const { interventionId, projectId } = req.body;
+      if (!interventionId) {
+        return res.status(400).json({ error: "Intervention ID is required" });
+      }
+      
+      interventionStore.set(interventionId, {
+        id: interventionId,
+        status: 'dismissed',
+        dismissedAt: new Date()
+      });
+      
+      console.log(`Intervention ${interventionId} dismissed for project ${projectId}`);
+      res.json({ 
+        success: true, 
+        interventionId,
+        status: 'dismissed',
+        message: 'Intervention dismissed'
+      });
+    } catch (error: any) {
+      console.error("Intervention dismiss error:", error);
+      res.status(500).json({ error: "Failed to dismiss intervention" });
+    }
+  });
+
+  app.get("/api/interventions", async (_req, res) => {
+    try {
+      const interventions = Array.from(interventionStore.values());
+      res.json({ interventions });
+    } catch (error: any) {
+      console.error("Get interventions error:", error);
+      res.status(500).json({ error: "Failed to get interventions" });
+    }
+  });
+
   return httpServer;
 }

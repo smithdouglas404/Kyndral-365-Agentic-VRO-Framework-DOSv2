@@ -1,56 +1,553 @@
 {
-  "id": "pmo-ir-001",
+  "id": "pmo-lgr-002",
   "name": "PRT Intake System Upgrade",
-  "bu": "Institutional Retirement",
-  "description": "Modernizing the Pension Risk Transfer intake system to automate initial deal assessment, reduce manual processing, and accelerate deal cycle times.",
-  "expectedROI": "£85m annual efficiency",
-  "roiValue": 85,
+  "bu": "LGR",
+  "division": "Institutional Retirement",
+  "description": "Modernization of Pension Risk Transfer intake system handling £10bn+ annual volume. Includes scheme data ingestion, automated benefit calculations, and pricing workflow optimization.",
+  "expectedROI": "£35m operational efficiency + faster deal execution",
+  "roiValue": 35,
   "priority": "critical",
-  "status": "amber",
-  "budget": { "spent": 2.4, "total": 3.5, "unit": "£m" },
-  "timeline": { "elapsed": 8, "total": 12, "unit": "months" },
-  "artName": "Institutional Retirement ART",
-  "portfolioTheme": "Digital Transformation",
+  "status": "green",
+  "budget": {
+    "spent": 2.2,
+    "total": 4,
+    "unit": "£m",
+    "contingency": 0.4,
+    "forecastAtCompletion": 3.9
+  },
+  "timeline": {
+    "elapsed": 8,
+    "total": 14,
+    "startDate": "2024-02-01",
+    "endDate": "2025-04-01",
+    "unit": "months"
+  },
+  "artName": "PRT Operations ART",
+  "portfolioTheme": "Operational Excellence",
+  "strategicObjectives": [
+    "SO-1: Market Leadership",
+    "SO-3: Operational Excellence"
+  ],
   "safe": {
-    "velocity": 48,
-    "predictability": 82,
-    "flowEfficiency": 68,
+    "velocity": 37,
+    "predictability": 81,
+    "flowEfficiency": 69,
     "currentPI": "PI 24.4",
-    "epicId": "EPIC-IR-101",
-    "epicName": "PRT Digital Transformation",
-    "epicProgress": 55
+    "totalPIs": 6,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGR-002",
+    "epicName": "PRT Intake System Upgrade",
+    "epicProgress": 57,
+    "epicWsjf": {
+      "businessValue": 21,
+      "timeCriticality": 17,
+      "riskReduction": 11,
+      "jobSize": 13,
+      "score": 3.77
+    },
+    "solutionTrain": "Institutional Retirement Technology",
+    "valueStream": "Operational Excellence"
   },
   "features": [
-    { "id": "feat-001", "name": "Automated Deal Assessment", "status": "in-progress", "storyPoints": 34, "completedPoints": 21, "priority": "high" },
-    { "id": "feat-002", "name": "Legacy API Modernization", "status": "planned", "storyPoints": 21, "completedPoints": 0, "priority": "critical" },
-    { "id": "feat-003", "name": "Real-time Dashboard", "status": "done", "storyPoints": 13, "completedPoints": 13, "priority": "medium" }
+    {
+      "id": "feat-prt-001",
+      "name": "Scheme Data Ingestion",
+      "description": "Automated ingestion of pension scheme data in multiple formats with validation and cleansing.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given scheme data ingestion is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-prt-001",
+          "name": "Multi-Format Parser",
+          "description": "As a Data Analyst, I need format-agnostic ingestion so that I can process any scheme data.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given multi-format parser, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-001",
+              "name": "Build Excel parser",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Data Team",
+              "skills": [
+                "Python",
+                "Pandas"
+              ]
+            },
+            {
+              "id": "task-prt-002",
+              "name": "Build CSV/XML parsers",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Data Team",
+              "skills": [
+                "ETL"
+              ]
+            },
+            {
+              "id": "task-prt-003",
+              "name": "Create schema mapping engine",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Data Lead",
+              "skills": [
+                "Data Engineering"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-prt-002",
+          "name": "Data Validation Rules",
+          "description": "As Data Quality, I need validation rules so that I catch errors at ingestion.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given data validation rules, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-004",
+              "name": "Define 200+ validation rules",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Business Analysts",
+              "skills": [
+                "Business Rules"
+              ]
+            },
+            {
+              "id": "task-prt-005",
+              "name": "Build validation engine",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Backend Team",
+              "skills": [
+                "Rules Engine"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-prt-003",
+          "name": "Data Cleansing Workflows",
+          "description": "As an Operator, I need cleansing tools so that I can fix data issues efficiently.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given data cleansing workflows, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-006",
+              "name": "Build data cleansing UI",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            },
+            {
+              "id": "task-prt-007",
+              "name": "Create exception queues",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Backend Team",
+              "skills": [
+                "Workflow"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-prt-002",
+      "name": "Automated Benefit Calculations",
+      "description": "Rules-based benefit calculation engine handling 50+ scheme rule variations with audit trails.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given automated benefit calculations is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-prt-004",
+          "name": "Benefit Calculation Engine",
+          "description": "As a Calculator, I need automated calculations so that I reduce manual effort.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given benefit calculation engine, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-008",
+              "name": "Build calculation framework",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Actuarial Dev",
+              "skills": [
+                "Actuarial",
+                "Java"
+              ]
+            },
+            {
+              "id": "task-prt-009",
+              "name": "Implement 50 scheme rules",
+              "status": "done",
+              "effortHours": 60,
+              "assignee": "Rules Team",
+              "skills": [
+                "Business Rules"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-prt-005",
+          "name": "Calculation Audit Trail",
+          "description": "As Compliance, I need full audit trails so that I can demonstrate calculation accuracy.",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given calculation audit trail, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-010",
+              "name": "Design audit data model",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Data Lead",
+              "skills": [
+                "Data Modeling"
+              ]
+            },
+            {
+              "id": "task-prt-011",
+              "name": "Implement audit logging",
+              "status": "in-progress",
+              "effortHours": 24,
+              "assignee": "Backend Team",
+              "skills": [
+                "Logging"
+              ]
+            },
+            {
+              "id": "task-prt-012",
+              "name": "Build audit query interface",
+              "status": "pending",
+              "effortHours": 16,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-prt-003",
+      "name": "Pricing Workflow Optimization",
+      "description": "Streamlined pricing workflow with automated handoffs, SLA tracking, and deal pipeline visibility.",
+      "status": "planned",
+      "storyPoints": 21,
+      "completedPoints": 0,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given pricing workflow optimization is configured, When triggered, Then expected outcome is achieved within SLA",
+        "Given valid inputs are provided, When processing completes, Then results are validated and persisted",
+        "Given edge cases occur, When handled, Then graceful error handling is applied with audit trail"
+      ],
+      "stories": [
+        {
+          "id": "story-prt-006",
+          "name": "Workflow Automation",
+          "description": "As a Pricer, I need automated workflows so that deals progress without manual intervention.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given workflow automation, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-013",
+              "name": "Design workflow states",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Business Analysts",
+              "skills": [
+                "Process Design"
+              ]
+            },
+            {
+              "id": "task-prt-014",
+              "name": "Implement workflow engine",
+              "status": "planned",
+              "effortHours": 32,
+              "assignee": "Backend Team",
+              "skills": [
+                "Workflow"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-prt-007",
+          "name": "Pipeline Dashboard",
+          "description": "As Deal Lead, I need pipeline visibility so that I can manage deal flow.",
+          "storyPoints": 8,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given pipeline dashboard, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-prt-015",
+              "name": "Build pipeline dashboard",
+              "status": "planned",
+              "effortHours": 24,
+              "assignee": "Frontend Team",
+              "skills": [
+                "React",
+                "D3"
+              ]
+            },
+            {
+              "id": "task-prt-016",
+              "name": "Create SLA alerting",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Backend Team",
+              "skills": [
+                "Alerting"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-001", "name": "Sarah Chen", "role": "Technical Lead", "allocation": 100, "team": "Core Platform" },
-    { "id": "res-002", "name": "James Wilson", "role": "Senior Developer", "allocation": 80, "team": "Core Platform" },
-    { "id": "res-003", "name": "Emma Thompson", "role": "Business Analyst", "allocation": 60, "team": "Product" },
-    { "id": "res-004", "name": "Michael Brown", "role": "DevOps Engineer", "allocation": 40, "team": "Platform" }
+    {
+      "id": "res-prt-001",
+      "name": "PRT Operations Lead",
+      "role": "Product Owner",
+      "allocation": 80,
+      "team": "Operations",
+      "skills": [
+        "PRT",
+        "Operations"
+      ],
+      "costRate": 900
+    },
+    {
+      "id": "res-prt-002",
+      "name": "Data Team",
+      "role": "Data Engineering",
+      "allocation": 100,
+      "team": "Data",
+      "skills": [
+        "ETL",
+        "Python"
+      ],
+      "costRate": 750
+    }
   ],
   "milestones": [
-    { "id": "ms-001", "name": "Phase 1 Complete", "date": "2024-03-15", "status": "completed", "deliverables": ["Core API endpoints", "Database schema", "Authentication"] },
-    { "id": "ms-002", "name": "UAT Phase 2", "date": "2024-08-23", "status": "in-progress", "deliverables": ["User acceptance testing", "Performance validation", "Security audit"] },
-    { "id": "ms-003", "name": "Production Go-Live", "date": "2024-11-30", "status": "planned", "deliverables": ["Full deployment", "Staff training", "Support handover"] }
+    {
+      "id": "ms-pmo-lgr-002-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-02-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgr-002-2",
+      "name": "MVP Launch",
+      "date": "2024-08-29",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-lgr-002-3",
+      "name": "Full Launch",
+      "date": "2025-04-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [
-    { "id": "dep-001", "type": "blocked-by", "targetProject": "ESG Analytics Dashboard", "description": "Requires ESG data feeds", "status": "at-risk" },
-    { "id": "dep-002", "type": "blocks", "targetProject": "Longevity Model Enhancement", "description": "Provides pricing data", "status": "on-track" }
+  "risks": [
+    {
+      "id": "risk-prt-001",
+      "name": "Legacy system integration",
+      "probability": "high",
+      "impact": "medium",
+      "status": "active",
+      "mitigation": "API adapter layer; parallel running",
+      "owner": "Tech Lead"
+    },
+    {
+      "id": "risk-prt-002",
+      "name": "Deal volume spikes",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Cloud scaling; capacity testing",
+      "owner": "Infrastructure"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-prt-001",
+      "name": "Legacy PRT System",
+      "type": "internal",
+      "status": "active",
+      "description": "Data migration from legacy"
+    },
+    {
+      "id": "dep-prt-002",
+      "name": "Pricing Engine",
+      "type": "internal",
+      "status": "resolved",
+      "description": "Integration with actuarial pricing"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-prt-001",
+      "name": "PRT MD",
+      "role": "Sponsor",
+      "department": "PRT",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-prt-002",
+      "name": "Operations Team",
+      "role": "Key Users",
+      "department": "Operations",
+      "influence": "high",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-lgr-002-1",
+      "name": "PI 24.4 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-lgr-002-2",
+      "name": "PI 24.4 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-lgr-002-3",
+      "name": "PI 24.4 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
   ],
   "financials": {
-    "capitalex": 2.1,
-    "opex": 1.4,
-    "contingency": 0.35,
-    "npv": 42.5,
-    "irr": 28,
-    "paybackMonths": 18
+    "capitalex": 3,
+    "opex": 1,
+    "contingency": 0.4,
+    "npv": 28,
+    "irr": 49,
+    "paybackMonths": 17,
+    "costBreakdown": {
+      "development": 2,
+      "infrastructure": 0.8,
+      "licensing": 0.6,
+      "contingency": 0.4
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.8,
+    "testCoverage": 81,
+    "technicalDebtDays": 11,
+    "codeReviewCoverage": 100,
+    "documentationScore": 84
   },
   "currentPI": 4,
   "totalPIs": 6,
-  "velocity": 48,
-  "burndownHealth": 72,
-  "qualityScore": 85
+  "velocity": 37,
+  "burndownHealth": 88,
+  "qualityScore": 91
 }
