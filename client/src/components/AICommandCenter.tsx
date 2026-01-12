@@ -20,6 +20,7 @@ import {
   GovernanceTask,
   CollaborationThread
 } from "@/lib/agenticOrchestration";
+import { routeToCommandCenter, AgentAction } from "@/lib/commandCenterBridge";
 import { 
   Brain, 
   Bell, 
@@ -512,11 +513,35 @@ export function AICommandCenter() {
     setActionDialog({ open: true, alertId });
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (actionDialog.alertId) {
       const alert = liveAIAlerts.find(a => a.id === actionDialog.alertId);
+      
+      // Route to unified Command Center
+      const action: AgentAction = {
+        actionType: 'approve',
+        sourceComponent: 'AI Command Center',
+        interventionData: {
+          type: alert?.category === 'risk' ? 'quality' : 
+                alert?.category === 'financial' ? 'budget' : 
+                alert?.category === 'operational' ? 'resource' : 'timeline',
+          severity: alert?.severity === 'critical' ? 'critical' : 
+                    alert?.severity === 'warning' ? 'high' : 'medium',
+          title: alert?.title || 'AI Alert Action',
+          description: alert?.insight || 'Action taken on AI alert',
+          projectId: alert?.id || actionDialog.alertId,
+          projectName: alert?.title || 'AI Alert',
+          confidence: alert?.confidence ? alert.confidence * 100 : 85,
+          suggestedAction: alert?.suggestedActions[0] || 'Follow-up required',
+          impact: alert?.insight || 'Impact analysis pending',
+          agentSource: 'AI Command Center'
+        }
+      };
+      
+      await routeToCommandCenter(action);
+      
       setAlertStatus(prev => ({ ...prev, [actionDialog.alertId!]: "actioned" }));
-      toast.success("Action taken", { 
+      toast.success("Action taken and logged to Command Center", { 
         description: `${alert?.title} - First suggested action initiated` 
       });
       
@@ -586,9 +611,38 @@ export function AICommandCenter() {
     toast.success("Task started", { description: "You can now work on this task" });
   };
 
-  const handleCompleteTask = (taskId: string) => {
+  const handleCompleteTask = async (taskId: string) => {
+    const task = governanceTasks.find(t => t.id === taskId);
+    
+    // Map priority to severity correctly: critical→critical, high→high, medium/low→medium
+    const mapPriorityToSeverity = (priority?: string): 'critical' | 'high' | 'medium' | 'low' => {
+      if (priority === 'critical') return 'critical';
+      if (priority === 'high') return 'high';
+      return 'medium';
+    };
+    
+    // Route to unified Command Center
+    const action: AgentAction = {
+      actionType: 'acknowledge',
+      sourceComponent: 'AI Command Center',
+      interventionData: {
+        type: 'timeline',
+        severity: mapPriorityToSeverity(task?.priority),
+        title: task?.title || 'Governance Task Completed',
+        description: task?.description || 'Task completed',
+        projectId: taskId,
+        projectName: task?.title || 'Governance Task',
+        confidence: 100,
+        suggestedAction: 'Task marked as complete',
+        impact: 'Governance milestone achieved',
+        agentSource: 'AI Command Center'
+      }
+    };
+    
+    await routeToCommandCenter(action);
+    
     setTaskStatus(prev => ({ ...prev, [taskId]: "completed" }));
-    toast.success("Task completed", { description: "Great work!" });
+    toast.success("Task completed and logged to Command Center", { description: "Great work!" });
   };
 
   const toggleVoice = () => {
