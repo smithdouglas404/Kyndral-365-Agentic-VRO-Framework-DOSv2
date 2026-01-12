@@ -22,6 +22,7 @@ import { safeProjects } from "@/lib/safeProjectData";
 import { useLocation } from "wouter";
 import { usePageContext, getSuggestedQuestions } from "@/contexts/PageContext";
 import { parseActionIntent, buildScenario, dispatchAgentCascade, type ActionScenario } from "@/lib/agentCascade";
+import { emitAgentIntervention } from "@/lib/commandCenterBridge";
 
 interface Message {
   id: string;
@@ -181,6 +182,19 @@ export function AskPMChat() {
       isActionConfirmation: true
     };
     setMessages(prev => [...prev, executingMessage]);
+    
+    await emitAgentIntervention({
+      type: 'resource',
+      severity: 'medium',
+      title: `PM Chat Action: ${pendingAction.trigger}`,
+      description: `User confirmed action via PM Chat: "${pendingAction.trigger}". Agent cascade initiated.`,
+      projectId: context.entityId || 'portfolio-wide',
+      projectName: context.entityName || 'Portfolio',
+      confidence: 100,
+      suggestedAction: pendingAction.confirmMessage,
+      impact: 'Action confirmed and executed via PM Chat interface.',
+      agentSource: 'PM Chat'
+    });
     
     await dispatchAgentCascade(pendingAction);
     
