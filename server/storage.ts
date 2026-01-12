@@ -236,6 +236,31 @@ export class DatabaseStorage implements IStorage {
       { id: 'proj-5', name: 'Retirement Calculator', description: 'New online retirement planning tool', status: 'active', businessUnitId: 'bu-pensions' },
       { id: 'proj-6', name: 'Investment Risk Dashboard', description: 'Real-time portfolio risk monitoring', status: 'active', businessUnitId: 'bu-wealth' },
     ]);
+    
+    await this.seedPortfolioMetrics();
+  }
+  
+  async seedPortfolioMetrics(): Promise<void> {
+    const existingMetrics = await db.select().from(projectMetrics).limit(1);
+    if (existingMetrics.length > 0) return;
+    
+    const portfolioMetrics = [
+      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.96', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },
+      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'cpi', metricName: 'Cost Performance Index', currentValue: '0.93', threshold: '0.92', criticalThreshold: '0.80', direction: 'higher_is_better', agentOwner: 'finops' },
+      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'okr_progress', metricName: 'OKR Progress', currentValue: '0.72', threshold: '0.70', criticalThreshold: '0.50', direction: 'higher_is_better', agentOwner: 'okr' },
+      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'change_adoption', metricName: 'Change Adoption Rate', currentValue: '0.78', threshold: '0.75', criticalThreshold: '0.60', direction: 'higher_is_better', agentOwner: 'ocm' },
+      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'sprint_velocity', metricName: 'Sprint Velocity Variance', currentValue: '0.08', threshold: '0.15', criticalThreshold: '0.25', direction: 'lower_is_better', agentOwner: 'planning' },
+      { projectId: 'proj-cloud-migration', projectName: 'Cloud Infrastructure Migration', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.94', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },
+      { projectId: 'proj-cloud-migration', projectName: 'Cloud Infrastructure Migration', metricKey: 'cpi', metricName: 'Cost Performance Index', currentValue: '0.88', threshold: '0.92', criticalThreshold: '0.80', direction: 'higher_is_better', agentOwner: 'finops' },
+      { projectId: 'proj-climate-analytics', projectName: 'Climate Transition Analytics', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.91', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },
+      { projectId: 'proj-climate-analytics', projectName: 'Climate Transition Analytics', metricKey: 'cpi', metricName: 'Cost Performance Index', currentValue: '0.82', threshold: '0.92', criticalThreshold: '0.80', direction: 'higher_is_better', agentOwner: 'finops' },
+      { projectId: 'proj-agile-delivery', projectName: 'Agile Delivery Program', metricKey: 'sprint_velocity', metricName: 'Sprint Velocity Variance', currentValue: '0.12', threshold: '0.15', criticalThreshold: '0.25', direction: 'lower_is_better', agentOwner: 'planning' },
+    ];
+    
+    for (const metric of portfolioMetrics) {
+      await db.insert(projectMetrics).values(metric);
+    }
+    console.log('[Storage] Seeded portfolio metrics');
   }
 
   async getAgentMemory(agentId?: string, limit: number = 100): Promise<AgentMemory[]> {

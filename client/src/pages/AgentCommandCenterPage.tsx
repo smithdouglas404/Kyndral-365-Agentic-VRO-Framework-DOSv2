@@ -273,11 +273,27 @@ export default function AgentCommandCenterPage() {
     toast.info('Refreshing discussions...');
   };
 
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'dismissed'>('all');
+  const [severityFilter, setSeverityFilter] = useState<'all' | 'critical' | 'high' | 'medium'>('all');
+  
   const pendingInterventions = interventions.filter(i => i.status === 'pending');
-  const filteredInterventions = selectedProject === 'all' 
-    ? pendingInterventions 
-    : pendingInterventions.filter(i => i.projectId === selectedProject);
   const approvedCount = interventions.filter(i => i.status === 'approved').length;
+  const criticalCount = interventions.filter(i => i.severity === 'critical' && i.status === 'pending').length;
+  const highCount = interventions.filter(i => i.severity === 'high' && i.status === 'pending').length;
+  
+  const filteredInterventions = interventions
+    .filter(i => selectedProject === 'all' || i.projectId === selectedProject)
+    .filter(i => statusFilter === 'all' || i.status === statusFilter)
+    .filter(i => severityFilter === 'all' || i.severity === severityFilter)
+    .sort((a, b) => {
+      const statusOrder = { pending: 0, executing: 1, approved: 2, dismissed: 3 };
+      const severityOrder = { critical: 0, high: 1, medium: 2 };
+      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (statusDiff !== 0) return statusDiff;
+      const severityDiff = severityOrder[a.severity] - severityOrder[b.severity];
+      if (severityDiff !== 0) return severityDiff;
+      return b.timestamp.getTime() - a.timestamp.getTime();
+    });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -349,29 +365,43 @@ export default function AgentCommandCenterPage() {
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
+          <Card 
+            className={`bg-gradient-to-br from-red-500 to-red-600 text-white cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${severityFilter === 'critical' ? 'ring-4 ring-white ring-opacity-50' : ''}`}
+            onClick={() => { setSeverityFilter(severityFilter === 'critical' ? 'all' : 'critical'); setStatusFilter('pending'); setActiveTab('interventions'); }}
+            data-testid="card-critical-alerts"
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-red-100 text-sm">Critical Alerts</p>
-                  <p className="text-3xl font-bold">{interventions.filter(i => i.severity === 'critical' && i.status === 'pending').length}</p>
+                  <p className="text-3xl font-bold">{criticalCount}</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-red-200" />
               </div>
+              <p className="text-xs text-red-200 mt-2">Click to filter</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+          <Card 
+            className={`bg-gradient-to-br from-orange-500 to-orange-600 text-white cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${severityFilter === 'high' ? 'ring-4 ring-white ring-opacity-50' : ''}`}
+            onClick={() => { setSeverityFilter(severityFilter === 'high' ? 'all' : 'high'); setStatusFilter('pending'); setActiveTab('interventions'); }}
+            data-testid="card-high-priority"
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-orange-100 text-sm">High Priority</p>
-                  <p className="text-3xl font-bold">{interventions.filter(i => i.severity === 'high' && i.status === 'pending').length}</p>
+                  <p className="text-3xl font-bold">{highCount}</p>
                 </div>
                 <Shield className="h-8 w-8 text-orange-200" />
               </div>
+              <p className="text-xs text-orange-200 mt-2">Click to filter</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+          <Card 
+            className={`bg-gradient-to-br from-blue-500 to-blue-600 text-white cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${statusFilter === 'approved' ? 'ring-4 ring-white ring-opacity-50' : ''}`}
+            onClick={() => { setStatusFilter(statusFilter === 'approved' ? 'all' : 'approved'); setSeverityFilter('all'); setActiveTab('interventions'); }}
+            data-testid="card-agent-actions"
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -380,9 +410,14 @@ export default function AgentCommandCenterPage() {
                 </div>
                 <Bot className="h-8 w-8 text-blue-200" />
               </div>
+              <p className="text-xs text-blue-200 mt-2">Click to view approved</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+          <Card 
+            className="bg-gradient-to-br from-green-500 to-green-600 text-white cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+            onClick={() => setActiveTab('discussion')}
+            data-testid="card-discussions"
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -391,9 +426,30 @@ export default function AgentCommandCenterPage() {
                 </div>
                 <MessageSquare className="h-8 w-8 text-green-200" />
               </div>
+              <p className="text-xs text-green-200 mt-2">Click to view</p>
             </CardContent>
           </Card>
         </div>
+        
+        {(statusFilter !== 'all' || severityFilter !== 'all') && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm text-gray-600">Filtering by:</span>
+            {severityFilter !== 'all' && (
+              <Badge variant="outline" className="capitalize">{severityFilter} severity</Badge>
+            )}
+            {statusFilter !== 'all' && (
+              <Badge variant="outline" className="capitalize">{statusFilter} status</Badge>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setStatusFilter('all'); setSeverityFilter('all'); }}
+              className="text-xs"
+            >
+              Clear filters
+            </Button>
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
@@ -438,8 +494,16 @@ export default function AgentCommandCenterPage() {
                 ) : filteredInterventions.length === 0 ? (
                   <div className="text-center py-12 text-gray-500" data-testid="no-interventions">
                     <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
-                    <p className="font-medium text-lg">No pending interventions</p>
-                    <p className="text-sm">All risks are being managed autonomously</p>
+                    <p className="font-medium text-lg">
+                      {statusFilter !== 'all' || severityFilter !== 'all' 
+                        ? 'No interventions match your filters' 
+                        : 'No pending interventions'}
+                    </p>
+                    <p className="text-sm">
+                      {statusFilter !== 'all' || severityFilter !== 'all' 
+                        ? 'Try adjusting your filter criteria' 
+                        : 'All risks are being managed autonomously'}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -456,10 +520,22 @@ export default function AgentCommandCenterPage() {
                             {getTypeIcon(intervention.type)}
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                               <h4 className="font-semibold text-gray-900">{intervention.title}</h4>
                               <Badge className={getSeverityColor(intervention.severity)}>{intervention.severity}</Badge>
                               <Badge variant="outline">{intervention.confidence}% confidence</Badge>
+                              {intervention.status === 'approved' && (
+                                <Badge className="bg-green-100 text-green-800 border-green-300">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Approved
+                                </Badge>
+                              )}
+                              {intervention.status === 'dismissed' && (
+                                <Badge className="bg-gray-100 text-gray-600 border-gray-300">
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Dismissed
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-sm text-gray-600 mb-3">{intervention.description}</p>
                             <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
@@ -480,35 +556,37 @@ export default function AgentCommandCenterPage() {
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-3 mt-4 justify-end">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleDismissIntervention(intervention.id)}
-                            disabled={processingId === intervention.id}
-                            data-testid={`btn-dismiss-${intervention.id}`}
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Dismiss
-                          </Button>
-                          <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => handleApproveIntervention(intervention.id)}
-                            disabled={processingId === intervention.id}
-                            data-testid={`btn-approve-${intervention.id}`}
-                          >
-                            {processingId === intervention.id ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Executing...
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Approve Action
-                              </>
-                            )}
-                          </Button>
-                        </div>
+                        {intervention.status === 'pending' && (
+                          <div className="flex items-center gap-3 mt-4 justify-end">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDismissIntervention(intervention.id)}
+                              disabled={processingId === intervention.id}
+                              data-testid={`btn-dismiss-${intervention.id}`}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Dismiss
+                            </Button>
+                            <Button
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => handleApproveIntervention(intervention.id)}
+                              disabled={processingId === intervention.id}
+                              data-testid={`btn-approve-${intervention.id}`}
+                            >
+                              {processingId === intervention.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Executing...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                                  Approve Action
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
                       </motion.div>
                     ))}
                   </div>
