@@ -187,16 +187,43 @@ ${generateImpactSummary(result)}`;
   
   // Build context hint based on current page
   let contextHint = '';
+  let currentProjectContext = '';
   if (pageContext) {
     if (pageContext.pageType === 'division' && pageContext.entityName) {
-      contextHint = `\n\nCURRENT FOCUS: The user is viewing the ${pageContext.entityName} division. Prioritize information about ${pageContext.entityName} projects when relevant, but still answer any cross-portfolio questions fully.`;
+      contextHint = `\n\nCURRENT CONTEXT: The user is currently viewing the ${pageContext.entityName} Group Function page.
+- When the user says "this division", "these projects", or refers to budget/resources without specifying which, they mean ${pageContext.entityName} projects specifically.
+- Still answer cross-portfolio questions when explicitly asked.`;
     } else if (pageContext.pageType === 'project' && pageContext.entityId) {
       const project = projectSummaries.find(p => p.id === pageContext.entityId);
       if (project) {
-        contextHint = `\n\nCURRENT FOCUS: The user is viewing the ${project.name} project (${project.id}). Prioritize information about this project and its dependencies when relevant, but still answer any cross-portfolio questions fully.`;
+        currentProjectContext = `
+CURRENT PROJECT IN VIEW:
+- Name: ${project.name}
+- ID: ${project.id}
+- Business Unit: ${project.bu}
+- Status: ${project.status.toUpperCase()}
+- Priority: ${project.priority}
+- Stage: ${project.stage}
+- Current Budget: £${project.budget}M
+- Spent: £${project.spent}M (${Math.round(project.spent/project.budget*100)}%)
+- Projected ROI: £${project.roi}M (${project.roiConf}% confidence)
+- FTEs: ${project.ftes}
+- Dependencies: ${project.deps.length > 0 ? project.deps.join(', ') : 'None'}
+- Risk Flags: ${project.riskFlags.length > 0 ? project.riskFlags.join('; ') : 'None'}`;
+
+        contextHint = `\n\nCRITICAL - USER IS VIEWING A SPECIFIC PROJECT:
+The user is currently viewing [${project.name}](${project.id}).
+
+IMPORTANT: When the user says "the project", "this project", "the project's budget", "increase the budget", or any reference to a single project without naming it, they are referring SPECIFICALLY to ${project.name} (${project.id}).
+
+${currentProjectContext}
+
+Apply all budget changes, timeline adjustments, or analysis requests to THIS project unless the user explicitly names a different project or asks about the portfolio.`;
       }
     } else if (pageContext.pageType === 'portfolio') {
-      contextHint = `\n\nCURRENT FOCUS: The user is viewing the portfolio overview. Provide portfolio-wide insights and cross-project analysis.`;
+      contextHint = `\n\nCURRENT CONTEXT: The user is viewing the portfolio overview. Provide portfolio-wide insights and cross-project analysis.`;
+    } else if (pageContext.pageType === 'dashboard') {
+      contextHint = `\n\nCURRENT CONTEXT: The user is on the main dashboard. If they ask about "the project" or "this project" without specifying which one, ask them to clarify which project they mean, or navigate to that project first.`;
     }
   }
   
@@ -228,7 +255,7 @@ When answering:
 - If asked about at-risk items, prioritize by financial impact and include status colors
 - When listing projects, always include: clickable name, status color, key risk, and financial impact
 - For "what if" scenarios, provide detailed traceable analysis with specific numbers
-- You can answer ANY question about the portfolio - the context hint below is just a focus area, not a restriction
+- PAY CLOSE ATTENTION to the CURRENT CONTEXT section below - it tells you which page the user is viewing and should be used to interpret ambiguous references like "the project" or "this division"
 
 PROJECT PORTFOLIO CONTEXT:
 ${projectContext}
