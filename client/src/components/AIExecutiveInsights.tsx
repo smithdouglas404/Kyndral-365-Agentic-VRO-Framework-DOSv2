@@ -114,20 +114,30 @@ export function AIExecutiveInsights() {
     
     if (actionRef.startsWith('OPEN_PROJECT:')) {
       const projectId = actionRef.replace('OPEN_PROJECT:', '');
-      setLocation(`/pmo/projects/${projectId}`);
-    } else if (actionRef === 'REVIEW_DEPENDENCIES' || actionRef.startsWith('REVIEW_DEP:')) {
-      setLocation('/pmo/dependencies');
-    } else if (actionRef.startsWith('REVIEW_RISK:') || actionRef === 'REVIEW_RISKS') {
-      setLocation('/pmo/risk-register');
-    } else if (actionRef.startsWith('REVIEW_PI:') || actionRef === 'REVIEW_PI') {
-      setLocation('/pmo/pi-planning');
-    } else if (actionRef.startsWith('REVIEW_OKR:') || actionRef === 'REVIEW_OKRS') {
-      setLocation('/pmo/okrs');
+      setLocation(`/project/${projectId}`);
+    } else if (actionRef.includes('DEPENDENCY') || actionRef.includes('DEP')) {
+      // Handle REVIEW_DEPENDENCIES, REVIEW_DEPENDENCY:xxx, REVIEW_DEP:xxx
+      setLocation('/');
+    } else if (actionRef.includes('RISK')) {
+      // Handle REVIEW_RISK:xxx, REVIEW_RISKS
+      setLocation('/risk');
+    } else if (actionRef.includes('PI') && actionRef.includes('REVIEW')) {
+      setLocation('/');
+    } else if (actionRef.includes('OKR')) {
+      setLocation('/');
+    } else if (actionRef.includes('EPIC') || actionRef.includes('PRIORITIZE')) {
+      // Handle PRIORITIZE_EPIC:xxx
+      setLocation('/');
+    } else if (actionRef.includes('GOVERNANCE') || actionRef.includes('IMPLEMENT')) {
+      // Handle IMPLEMENT_GOVERNANCE:xxx
+      setLocation('/');
     } else if (actionRef.startsWith('ASK_PM:')) {
       const query = actionRef.replace('ASK_PM:', '');
-      setLocation(`/pmo/ask-pm?q=${encodeURIComponent(query)}`);
+      setLocation(`/?q=${encodeURIComponent(query)}`);
     } else {
-      console.warn('Unknown action reference:', actionRef);
+      // Default: go to dashboard
+      console.log('Action clicked:', actionRef);
+      setLocation('/');
     }
   };
 
