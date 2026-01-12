@@ -1033,7 +1033,7 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
     }
   }
 
-  // Project drilldown
+  // Project drilldown - Full dossier with Traceability/Agents/History tabs
   if (entityType === 'project') {
     const project = enrichedProjects.find(p => p.id === entityId);
     if (project) {
@@ -1044,14 +1044,17 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
         level: 2,
         entityType: 'project',
         entityId: project.id,
+        isFullDossier: true,
         metrics: [
           { label: 'Status', value: project.status, trend: 'stable' },
           { label: 'Budget', value: `£${project.budget.total}${project.budget.unit}`, trend: 'stable' },
-          { label: 'ROI', value: project.expectedROI, trend: 'up' }
+          { label: 'ROI', value: project.expectedROI, trend: 'up' },
+          { label: 'Timeline', value: `${project.timeline.elapsed}/${project.timeline.total} months`, trend: 'stable' }
         ],
         actions: [
-          { id: 'proj-1', label: 'View Dependencies', type: 'navigate', targetEntityType: 'dependency', targetEntityId: project.id },
-          { id: 'proj-2', label: 'View Timeline', type: 'navigate', targetEntityType: 'timeline', targetEntityId: project.id }
+          { id: 'proj-1', label: 'View Dependencies', type: 'navigate', targetEntityType: 'dependency', targetEntityId: project.id, description: 'Explore project dependencies' },
+          { id: 'proj-2', label: 'View Full Details', type: 'navigate', targetEntityType: 'project-page', targetEntityId: project.id, description: 'Open project detail page' },
+          { id: 'proj-3', label: 'Escalate Issue', type: 'escalate', targetEntityType: 'team', targetEntityId: 'project-leads', description: 'Escalate to project leadership' }
         ],
         relatedItems: (project.dependencies || []).slice(0, 3).map(d => ({
           id: d.projectId,
@@ -1060,7 +1063,9 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
           entityType: 'project',
           entityId: d.projectId,
           status: d.health
-        }))
+        })),
+        aiInsight: `Integrated Management Agent: ${project.aiRecommendation || 'Project is being actively monitored. All AI agents are aligned on delivery strategy.'}`,
+        agentSource: 'integrated-management'
       };
     }
   }
