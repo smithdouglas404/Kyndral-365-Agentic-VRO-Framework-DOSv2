@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { 
   DollarSign, GitBranch, Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight, ChevronDown,
-  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Brain, Zap, Compass
+  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Zap, Compass
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -26,7 +26,6 @@ const coreNavItems: NavItem[] = [
   { id: "business-cases", label: "Business Cases", icon: Briefcase, modes: "all" },
   { id: "early-warning", label: "Early Warning", icon: AlertOctagon, modes: "all" },
   { id: "kpi-tracking", label: "KPIs", icon: PieChart, modes: "all" },
-  { id: "ai-hub", label: "AI Insights", icon: Brain, modes: "all" },
 ];
 
 // VRO-specific items - removed VRO-Value accordion per user request

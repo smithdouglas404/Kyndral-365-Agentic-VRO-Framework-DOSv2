@@ -23,7 +23,6 @@ import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
-import { AIRecommendations } from "@/components/AIRecommendations";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
@@ -643,14 +642,6 @@ function DashboardContent() {
           {/* KPI Tracking Tab */}
           <TabsContent value="kpi-tracking">
             <KPIAttributionPanel />
-          </TabsContent>
-
-          {/* AI Hub Tab - Actions, Insights, and Audit Trail */}
-          <TabsContent value="ai-hub">
-            <div className="space-y-6">
-              <AIRecommendations dataMode={dataMode} />
-              <ActionAuditTimeline maxItems={20} />
-            </div>
           </TabsContent>
 
           {/* Project Lifecycle Command Center - VRO Only */}
