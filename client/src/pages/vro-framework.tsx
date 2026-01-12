@@ -250,7 +250,7 @@ const roadmapPhases = [
   {
     id: 'phase-1',
     name: 'Phase 1: Foundation',
-    category: 'Q1 2025',
+    category: '2026',
     icon: Layers,
     color: 'bg-blue-500',
     description: 'Establish core agent infrastructure and basic communication protocols.',
@@ -266,7 +266,7 @@ const roadmapPhases = [
   {
     id: 'phase-2',
     name: 'Phase 2: Intelligence',
-    category: 'Q2 2025',
+    category: '2026',
     icon: Brain,
     color: 'bg-purple-500',
     description: 'Add predictive analytics and cross-agent learning capabilities.',
@@ -282,7 +282,7 @@ const roadmapPhases = [
   {
     id: 'phase-3',
     name: 'Phase 3: Autonomy',
-    category: 'Q3 2025',
+    category: '2027',
     icon: Zap,
     color: 'bg-amber-500',
     description: 'Enable self-healing workflows and autonomous decision execution.',
@@ -298,7 +298,7 @@ const roadmapPhases = [
   {
     id: 'phase-4',
     name: 'Phase 4: Scale',
-    category: 'Q4 2025',
+    category: '2027',
     icon: TrendingUp,
     color: 'bg-green-500',
     description: 'Enterprise-wide rollout with multi-portfolio support and partner ecosystem.',
