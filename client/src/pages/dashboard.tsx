@@ -650,9 +650,19 @@ function DashboardContent() {
             {/* AI Executive Intelligence - Portfolio-level insights */}
             <AIExecutiveInsights />
 
-            {/* Portfolio Value Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {divisions.map((division) => (
+            {/* Group Function Overview */}
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-purple-600" />
+                  Group Function Overview
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Click any Group Function to view detailed projects and metrics
+                </p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                {divisions.map((division) => (
                 <div 
                   key={division.id}
                   className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
@@ -707,6 +717,7 @@ function DashboardContent() {
                   </div>
                   <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
                 </div>
+              </div>
               </div>
             </div>
 
