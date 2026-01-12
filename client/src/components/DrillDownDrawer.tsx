@@ -11,6 +11,10 @@ import { AgentType } from '@/lib/dataHub';
 import { AICoPilot } from './AICoPilot';
 import { getActionLog, subscribeToActions, AgentAction } from '@/lib/agentActionEngine';
 import { enrichedProjects, getProjectById, getStageLabel, type EnrichedProject } from '@/lib/projects';
+import { 
+  strategicThemes, valueStreams, portfolioEpics, features, stories, tasks, teams, teamMembers,
+  type Feature, type Story, type Task
+} from '@/lib/safe6Data';
 
 interface DrillDownDrawerProps {
   isOpen: boolean;
@@ -95,6 +99,177 @@ function generateEntityInsight(entityType: string, entityId: string): { aiInsigh
   };
 }
 
+// Helper function to look up SAFe entities by ID
+function lookupSAFeEntity(entityType: string, entityId: string) {
+  switch (entityType) {
+    case 'feature':
+      return features.find(f => f.id === entityId);
+    case 'story':
+      return stories.find(s => s.id === entityId);
+    case 'task':
+      return tasks.find(t => t.id === entityId);
+    case 'epic':
+      return portfolioEpics.find(e => e.id === entityId);
+    case 'theme':
+      return strategicThemes.find(t => t.id === entityId);
+    case 'value-stream':
+      return valueStreams.find(vs => vs.id === entityId);
+    case 'team':
+      return teams.find(t => t.id === entityId);
+    case 'resource':
+      return teamMembers.find(m => m.id === entityId);
+    default:
+      return null;
+  }
+}
+
+// Build drill-down data for SAFe entities
+function buildSAFeDrilldown(entityType: string, entityId: string, entity: any) {
+  const baseData = {
+    entityType,
+    entityId,
+    entityName: entity.name || entity.title || entityId,
+    bu: 'Enterprise',
+    relatedAgents: ['integrated-management', 'planning'] as AgentType[],
+    events: [],
+    actions: [],
+    history: [],
+  };
+
+  switch (entityType) {
+    case 'feature':
+      const feature = entity as Feature;
+      const parentEpic = portfolioEpics.find(e => e.linkedFeatures.includes(feature.id));
+      const featureStories = stories.filter(s => s.featureId === feature.id);
+      return {
+        ...baseData,
+        entityName: feature.title,
+        metrics: {
+          'Status': feature.status,
+          'Story Points': feature.storyPoints.toString(),
+          'Progress': `${feature.completedPoints}/${feature.storyPoints} pts`,
+          'Stories': featureStories.length.toString(),
+          'Parent Epic': parentEpic?.name || 'None'
+        },
+        aiInsight: `Feature "${feature.title}" is ${feature.status}. ${featureStories.length} stories attached with ${feature.completedPoints}/${feature.storyPoints} story points completed.`,
+        summary: feature.description || 'Feature in the SAFe portfolio.',
+        relatedEntities: featureStories.map(s => ({
+          type: 'Story',
+          id: s.id,
+          name: s.title,
+          status: s.status === 'done' ? 'green' : s.status === 'in-progress' ? 'amber' : 'yellow'
+        })),
+        traceability: {
+          sourceSystem: 'SAFe Portfolio',
+          sourceId: feature.id,
+          triggeredBy: 'Feature Drilldown',
+          dataInputs: [{ source: 'Agile Backlog', freshness: '< 1 min' }],
+          linkedProjects: parentEpic ? [{ id: parentEpic.id, name: parentEpic.name, status: parentEpic.status === 'implementing' ? 'green' : 'amber' }] : []
+        }
+      };
+
+    case 'story':
+      const story = entity as Story;
+      const storyTasks = tasks.filter(t => t.storyId === story.id);
+      const parentFeature = features.find(f => f.id === story.featureId);
+      return {
+        ...baseData,
+        entityName: story.title,
+        metrics: {
+          'Status': story.status,
+          'Story Points': story.storyPoints.toString(),
+          'Tasks': storyTasks.length.toString(),
+          'Priority': story.priority,
+          'Parent Feature': parentFeature?.title || 'None'
+        },
+        aiInsight: `Story "${story.title}" is ${story.status}. ${storyTasks.length} tasks attached.`,
+        summary: story.acceptanceCriteria?.join('; ') || 'User story in the backlog.',
+        relatedEntities: storyTasks.map(t => ({
+          type: 'Task',
+          id: t.id,
+          name: t.title,
+          status: t.status === 'done' ? 'green' : t.status === 'in-progress' ? 'amber' : 'yellow'
+        })),
+        traceability: {
+          sourceSystem: 'SAFe Portfolio',
+          sourceId: story.id,
+          triggeredBy: 'Story Drilldown',
+          dataInputs: [{ source: 'Sprint Backlog', freshness: '< 1 min' }],
+          linkedProjects: parentFeature ? [{ id: parentFeature.id, name: parentFeature.title, status: 'green' }] : []
+        }
+      };
+
+    case 'task':
+      const task = entity as Task;
+      const parentStory = stories.find(s => s.id === task.storyId);
+      const assignee = teamMembers.find(m => m.id === task.assigneeId);
+      return {
+        ...baseData,
+        entityName: task.title,
+        metrics: {
+          'Status': task.status,
+          'Estimated Hours': task.estimatedHours.toString(),
+          'Actual Hours': task.actualHours?.toString() || '0',
+          'Assignee': assignee?.name || 'Unassigned',
+          'Parent Story': parentStory?.title || 'None'
+        },
+        aiInsight: `Task "${task.title}" is ${task.status}. Estimated ${task.estimatedHours}h, actual ${task.actualHours || 0}h.`,
+        summary: task.description || 'Development task.',
+        relatedEntities: assignee ? [{
+          type: 'Resource',
+          id: assignee.id,
+          name: assignee.name,
+          status: 'green'
+        }] : [],
+        traceability: {
+          sourceSystem: 'SAFe Portfolio',
+          sourceId: task.id,
+          triggeredBy: 'Task Drilldown',
+          dataInputs: [{ source: 'Task Board', freshness: '< 1 min' }],
+          linkedProjects: parentStory ? [{ id: parentStory.id, name: parentStory.title, status: 'green' }] : []
+        }
+      };
+
+    case 'agent':
+      return {
+        ...baseData,
+        entityName: agentNames[entityId as AgentType] || entityId,
+        metrics: {
+          'Status': 'Active',
+          'Actions Today': Math.floor(Math.random() * 20 + 5).toString(),
+          'Monitored Entities': Math.floor(Math.random() * 50 + 10).toString(),
+          'Confidence': `${Math.floor(Math.random() * 15 + 80)}%`
+        },
+        aiInsight: `${agentNames[entityId as AgentType] || entityId} is actively monitoring portfolio health and generating insights.`,
+        summary: `AI agent responsible for autonomous monitoring and recommendations.`,
+        relatedEntities: [],
+        traceability: {
+          sourceSystem: 'Agent Engine',
+          sourceId: entityId,
+          triggeredBy: 'Agent Drilldown',
+          dataInputs: [{ source: 'Real-time Metrics', freshness: '< 1 min' }],
+          linkedProjects: []
+        }
+      };
+
+    default:
+      return {
+        ...baseData,
+        metrics: { 'Type': entityType, 'ID': entityId },
+        aiInsight: `Entity ${entityId} is being monitored.`,
+        summary: `SAFe entity of type ${entityType}.`,
+        relatedEntities: [],
+        traceability: {
+          sourceSystem: 'SAFe Portfolio',
+          sourceId: entityId,
+          triggeredBy: 'Entity Drilldown',
+          dataInputs: [],
+          linkedProjects: []
+        }
+      };
+  }
+}
+
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO', onNavigate }: DrillDownDrawerProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
@@ -124,6 +299,10 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
           p.name.toLowerCase() === entityId.toLowerCase()
         )
       : undefined;
+  
+  // Look up SAFe entities for other entity types
+  const safeEntity = lookupSAFeEntity(entityType, entityId);
+  const safeDrilldown = safeEntity ? buildSAFeDrilldown(entityType, entityId, safeEntity) : null;
 
   // Don't render if drawer is not open or entity is not selected
   if (!isOpen || !entityType || !entityId) return null;
@@ -557,7 +736,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
   } : null;
   
   // Priority: metricDrilldown first (for configured metrics), then projectDrilldown, then drilldownData, then fallback
-  const displayData = metricDrilldown || projectDrilldown || drilldownData || fallbackDrilldown;
+  const displayData = metricDrilldown || projectDrilldown || safeDrilldown || drilldownData || fallbackDrilldown;
   if (!displayData) return null;
 
   return (
@@ -1018,6 +1197,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                             key={agentId}
                             className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                             data-testid={`agent-link-${agentId}`}
+                            onClick={() => {
+                              if (onNavigate) {
+                                onNavigate('agent', agentId);
+                              }
+                            }}
                           >
                             <div className="flex items-center gap-3">
                               <div className={`w-3 h-3 rounded-full ${agentColors[agentId]}`} />
@@ -1092,6 +1276,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                               <div 
                                 key={activity.id} 
                                 className="flex gap-3 p-2 bg-white rounded-lg border border-purple-100 hover:bg-purple-50 transition-colors cursor-pointer"
+                                onClick={() => {
+                                  if (onNavigate && activity.targetEntityId) {
+                                    onNavigate(activity.targetEntityType || 'project', activity.targetEntityId);
+                                  }
+                                }}
                               >
                                 <div className="flex flex-col items-center">
                                   <div className={`w-2 h-2 rounded-full ${agentColors[activity.agentId]}`} />
