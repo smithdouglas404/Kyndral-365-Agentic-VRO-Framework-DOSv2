@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 
 interface ExecutiveInsight {
   headline: string;
@@ -94,6 +95,14 @@ const kpiStatusColors = {
 export function AIExecutiveInsights() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerEntity, setDrawerEntity] = useState<{ type: string; id: string } | null>(null);
+
+  const openDrilldown = (type: string, id: string) => {
+    setDrawerEntity({ type, id });
+    setDrawerOpen(true);
+  };
 
   const { data: insights, isLoading, error } = useQuery<ExecutiveInsight>({
     queryKey: ['executive-insights'],
@@ -109,35 +118,50 @@ export function AIExecutiveInsights() {
     }
   });
 
-  const handleActionClick = (actionRef?: string) => {
-    if (!actionRef) return;
+  const handleRiskClick = (risk: { title: string; linkedEntity?: string }) => {
+    const id = risk.linkedEntity 
+      ? risk.linkedEntity.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      : risk.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    openDrilldown('risk', id);
+  };
+
+  const handleOpportunityClick = (opp: { title: string; linkedEntity?: string }) => {
+    const id = opp.linkedEntity 
+      ? opp.linkedEntity.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      : opp.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    openDrilldown('opportunity', id);
+  };
+
+  const handleActionClick = (actionRef?: string, action?: string) => {
+    if (!actionRef && !action) return;
     
-    if (actionRef.startsWith('OPEN_PROJECT:')) {
+    if (actionRef?.startsWith('OPEN_PROJECT:')) {
       const projectId = actionRef.replace('OPEN_PROJECT:', '');
       setLocation(`/project/${projectId}`);
-    } else if (actionRef.includes('DEPENDENCY') || actionRef.includes('DEP')) {
-      // Handle REVIEW_DEPENDENCIES, REVIEW_DEPENDENCY:xxx, REVIEW_DEP:xxx
-      setLocation('/');
-    } else if (actionRef.includes('RISK')) {
-      // Handle REVIEW_RISK:xxx, REVIEW_RISKS
-      setLocation('/risk');
-    } else if (actionRef.includes('PI') && actionRef.includes('REVIEW')) {
-      setLocation('/');
-    } else if (actionRef.includes('OKR')) {
-      setLocation('/');
-    } else if (actionRef.includes('EPIC') || actionRef.includes('PRIORITIZE')) {
-      // Handle PRIORITIZE_EPIC:xxx
-      setLocation('/');
-    } else if (actionRef.includes('GOVERNANCE') || actionRef.includes('IMPLEMENT')) {
-      // Handle IMPLEMENT_GOVERNANCE:xxx
-      setLocation('/');
-    } else if (actionRef.startsWith('ASK_PM:')) {
-      const query = actionRef.replace('ASK_PM:', '');
-      setLocation(`/?q=${encodeURIComponent(query)}`);
+    } else if (actionRef?.includes('DEPENDENCY') || actionRef?.includes('DEP')) {
+      const depId = actionRef.split(':')[1] || 'dependency-review';
+      openDrilldown('dependency', depId);
+    } else if (actionRef?.includes('RISK')) {
+      const riskId = actionRef.split(':')[1] || 'risk-review';
+      openDrilldown('risk', riskId);
+    } else if (actionRef?.includes('BUDGET') || actionRef?.includes('ALLOCATION')) {
+      const budgetId = actionRef.split(':')[1] || 'budget-analysis';
+      openDrilldown('action', budgetId);
+    } else if (actionRef?.includes('PI') && actionRef?.includes('REVIEW')) {
+      openDrilldown('metric', 'pi-review');
+    } else if (actionRef?.includes('OKR')) {
+      openDrilldown('metric', 'okr-progress');
+    } else if (actionRef?.includes('EPIC') || actionRef?.includes('PRIORITIZE')) {
+      const epicId = actionRef?.split(':')[1] || 'epic-prioritization';
+      openDrilldown('action', epicId);
+    } else if (actionRef?.includes('GOVERNANCE') || actionRef?.includes('IMPLEMENT')) {
+      const govId = actionRef?.split(':')[1] || 'governance-action';
+      openDrilldown('action', govId);
     } else {
-      // Default: go to dashboard
-      console.log('Action clicked:', actionRef);
-      setLocation('/');
+      const fallbackId = action 
+        ? action.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 30)
+        : 'action-detail';
+      openDrilldown('action', fallbackId);
     }
   };
 
@@ -272,7 +296,8 @@ export function AIExecutiveInsights() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 + i * 0.1 }}
-                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm transition-all"
+                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm transition-all cursor-pointer"
+                  onClick={() => handleRiskClick(risk)}
                   data-testid={`risk-card-${i}`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
@@ -304,7 +329,8 @@ export function AIExecutiveInsights() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.1 }}
-                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-emerald-300 hover:shadow-sm transition-all"
+                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-emerald-300 hover:shadow-sm transition-all cursor-pointer"
+                  onClick={() => handleOpportunityClick(opp)}
                   data-testid={`opportunity-card-${i}`}
                 >
                   <span className="text-sm font-medium text-gray-900">{opp.title}</span>
@@ -332,7 +358,7 @@ export function AIExecutiveInsights() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + i * 0.1 }}
                   className="p-3 rounded-lg bg-white border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group"
-                  onClick={() => handleActionClick(rec.actionRef)}
+                  onClick={() => handleActionClick(rec.actionRef, rec.action)}
                   data-testid={`recommendation-card-${i}`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
@@ -356,6 +382,18 @@ export function AIExecutiveInsights() {
           </div>
         </CardContent>
       </Card>
+      
+      {drawerEntity && (
+        <DrillDownDrawer
+          isOpen={drawerOpen}
+          onClose={() => {
+            setDrawerOpen(false);
+            setDrawerEntity(null);
+          }}
+          entityType={drawerEntity.type}
+          entityId={drawerEntity.id}
+        />
+      )}
     </motion.div>
   );
 }

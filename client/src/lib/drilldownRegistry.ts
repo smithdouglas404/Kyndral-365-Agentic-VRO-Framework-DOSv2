@@ -262,6 +262,179 @@ export const actionPlaybooks: Record<string, DrilldownContent> = {
 };
 
 // ============================================================
+// RISK DOSSIERS - Level 2/3 content for risk drilldowns
+// ============================================================
+
+export const riskDossiers: Record<string, DrilldownContent> = {
+  'default': {
+    title: 'Risk Analysis',
+    subtitle: 'Enterprise Risk Assessment',
+    description: 'Comprehensive risk assessment with impact analysis, mitigation strategies, and monitoring status.',
+    level: 2,
+    entityType: 'risk',
+    entityId: 'default',
+    isFullDossier: true,
+    metrics: [
+      { label: 'Risk Score', value: 'High', trend: 'stable', color: 'red' },
+      { label: 'Probability', value: '65%', trend: 'up' },
+      { label: 'Impact', value: '£2.5M', trend: 'stable' },
+      { label: 'Mitigation Progress', value: '45%', trend: 'up' }
+    ],
+    actions: [
+      { id: 'risk-1', label: 'View Mitigation Plan', type: 'navigate', targetEntityType: 'action', targetEntityId: 'mitigate', description: 'Review current mitigation strategies' },
+      { id: 'risk-2', label: 'Escalate to Steering', type: 'escalate', targetEntityType: 'team', targetEntityId: 'steering-committee', description: 'Raise visibility to leadership' },
+      { id: 'risk-3', label: 'Schedule Review', type: 'investigate', description: 'Set up risk review meeting' }
+    ],
+    relatedItems: [
+      { id: 'risk-proj-1', name: 'Affected Projects', type: 'Projects', entityType: 'project', entityId: 'at-risk', status: '3 projects' },
+      { id: 'risk-dep-1', name: 'Related Dependencies', type: 'Dependencies', entityType: 'dependency', entityId: 'blocking', status: '2 blockers' },
+      { id: 'risk-team-1', name: 'Risk Owners', type: 'Team', entityType: 'team', entityId: 'risk-owners', status: 'assigned' }
+    ],
+    aiInsight: 'Governance Agent: This risk has escalated 15% in the past week. Recommend immediate stakeholder notification and contingency activation.',
+    agentSource: 'governance'
+  },
+  'critical-budget-overrun': {
+    title: 'Critical Budget Overrun',
+    subtitle: 'Financial Risk - Enterprise Portfolio',
+    description: '£6.5M budget variance (18% over planned spend) detected across the enterprise portfolio requiring immediate financial controls.',
+    level: 2,
+    entityType: 'risk',
+    entityId: 'critical-budget-overrun',
+    isFullDossier: true,
+    metrics: [
+      { label: 'Variance', value: '£6.5M', trend: 'up', color: 'red' },
+      { label: 'Overspend %', value: '18%', trend: 'up', color: 'red' },
+      { label: 'Projects Affected', value: '8', trend: 'stable' },
+      { label: 'Mitigation Progress', value: '25%', trend: 'up' }
+    ],
+    actions: [
+      { id: 'budget-1', label: 'Implement Spend Controls', type: 'mitigate', description: 'Activate financial controls' },
+      { id: 'budget-2', label: 'Portfolio Prioritization', type: 'escalate', targetEntityType: 'action', targetEntityId: 'prioritize', description: 'Review and re-prioritize portfolio' },
+      { id: 'budget-3', label: 'Stakeholder Briefing', type: 'escalate', targetEntityType: 'team', targetEntityId: 'sponsors', description: 'Brief executive sponsors' }
+    ],
+    relatedItems: [
+      { id: 'fin-1', name: 'FinOps Dashboard', type: 'Report', entityType: 'report', entityId: 'finops', status: 'live' },
+      { id: 'fin-2', name: 'Budget Forecast', type: 'Metric', entityType: 'metric', entityId: 'budget-forecast', status: 'updated' }
+    ],
+    aiInsight: 'FinOps Agent: Primary drivers are 3 over-scope projects. Recommend scope freeze on non-critical features.',
+    agentSource: 'finops'
+  },
+  'enterprise-transformation-portfolio': {
+    title: 'Enterprise Transformation Risk',
+    subtitle: 'Portfolio-Level Risk Assessment',
+    description: 'Comprehensive risk analysis for the Enterprise Transformation Portfolio covering budget, timeline, and resource risks.',
+    level: 2,
+    entityType: 'risk',
+    entityId: 'enterprise-transformation-portfolio',
+    isFullDossier: true,
+    metrics: [
+      { label: 'Overall Risk Score', value: 'AMBER', trend: 'stable', color: 'amber' },
+      { label: 'Budget Risk', value: 'HIGH', trend: 'up', color: 'red' },
+      { label: 'Timeline Risk', value: 'MEDIUM', trend: 'stable', color: 'amber' },
+      { label: 'Resource Risk', value: 'LOW', trend: 'down', color: 'green' }
+    ],
+    actions: [
+      { id: 'port-1', label: 'View Risk Register', type: 'navigate', targetEntityType: 'report', targetEntityId: 'risk-register', description: 'Full portfolio risk register' },
+      { id: 'port-2', label: 'Mitigation Dashboard', type: 'navigate', targetEntityType: 'metric', targetEntityId: 'mitigation-status', description: 'Track mitigation progress' }
+    ],
+    relatedItems: enrichedProjects.filter(p => p.status === 'red' || p.status === 'amber').slice(0, 4).map(p => ({
+      id: p.id,
+      name: p.name,
+      type: 'Project',
+      entityType: 'project',
+      entityId: p.id,
+      status: p.status === 'red' ? 'At Risk' : 'Amber'
+    })),
+    aiInsight: 'Governance Agent: 3 critical risks require immediate attention. Budget overrun and dependency blockage are top priorities.',
+    agentSource: 'governance'
+  }
+};
+
+// ============================================================
+// OPPORTUNITY DOSSIERS - Level 2/3 content for opportunity drilldowns
+// ============================================================
+
+export const opportunityDossiers: Record<string, DrilldownContent> = {
+  'default': {
+    title: 'Opportunity Analysis',
+    subtitle: 'Value Creation Potential',
+    description: 'Assessment of potential value creation opportunity with implementation roadmap and resource requirements.',
+    level: 2,
+    entityType: 'opportunity',
+    entityId: 'default',
+    isFullDossier: true,
+    metrics: [
+      { label: 'Potential Value', value: '£2.5M', trend: 'up', color: 'teal' },
+      { label: 'Probability', value: '75%', trend: 'up', color: 'teal' },
+      { label: 'Time to Value', value: '3 months', trend: 'down', color: 'teal' },
+      { label: 'Investment Needed', value: '£0.5M', trend: 'stable' }
+    ],
+    actions: [
+      { id: 'opp-1', label: 'Create Business Case', type: 'accelerate', description: 'Draft business case for approval' },
+      { id: 'opp-2', label: 'Assign Champion', type: 'escalate', targetEntityType: 'team', targetEntityId: 'opportunity-owners', description: 'Identify opportunity owner' },
+      { id: 'opp-3', label: 'Schedule Review', type: 'navigate', targetEntityType: 'action', targetEntityId: 'schedule-review', description: 'Set up opportunity review' }
+    ],
+    relatedItems: [
+      { id: 'opp-rel-1', name: 'Related Projects', type: 'Projects', entityType: 'project', entityId: 'related', status: '2 aligned' },
+      { id: 'opp-rel-2', name: 'Success Metrics', type: 'Metrics', entityType: 'metric', entityId: 'success-kpis', status: 'defined' }
+    ],
+    aiInsight: 'VRO Agent: This opportunity aligns with 2 strategic OKRs and could accelerate value realization by 35%.',
+    agentSource: 'integrated-management'
+  },
+  'digital-adoption-momentum-acceleration': {
+    title: 'Digital Adoption Acceleration',
+    subtitle: 'Efficiency Opportunity',
+    description: '£2.5M additional efficiency gains available from closing 18% digital adoption gap across the organization.',
+    level: 2,
+    entityType: 'opportunity',
+    entityId: 'digital-adoption-momentum-acceleration',
+    isFullDossier: true,
+    metrics: [
+      { label: 'Potential Gain', value: '£2.5M', trend: 'up', color: 'teal' },
+      { label: 'Current Adoption', value: '62%', trend: 'up', color: 'teal' },
+      { label: 'Target Adoption', value: '80%', trend: 'stable', color: 'teal' },
+      { label: 'Gap', value: '18%', trend: 'down', color: 'teal' }
+    ],
+    actions: [
+      { id: 'dig-1', label: 'Deploy Task Force', type: 'accelerate', description: 'Launch dedicated adoption team' },
+      { id: 'dig-2', label: 'Training Program', type: 'navigate', targetEntityType: 'action', targetEntityId: 'training', description: 'Accelerate user training' },
+      { id: 'dig-3', label: 'Champions Network', type: 'escalate', targetEntityType: 'team', targetEntityId: 'digital-champions', description: 'Activate change champions' }
+    ],
+    relatedItems: [
+      { id: 'dig-theme', name: 'Digital Transformation Theme', type: 'Theme', entityType: 'theme', entityId: 'digital-transformation', status: 'active' },
+      { id: 'dig-metric', name: 'Adoption Dashboard', type: 'Metric', entityType: 'metric', entityId: 'digital-adoption', status: 'live' }
+    ],
+    aiInsight: 'VRO Agent: Quick wins available in 3 departments with lowest adoption. Targeted intervention could close 10% gap in 4 weeks.',
+    agentSource: 'integrated-management'
+  },
+  'digital-transformation-theme': {
+    title: 'Digital Transformation Theme',
+    subtitle: 'Strategic Theme Analysis',
+    description: 'Overview of Digital Transformation strategic theme progress, opportunities, and value realization.',
+    level: 2,
+    entityType: 'opportunity',
+    entityId: 'digital-transformation-theme',
+    isFullDossier: true,
+    metrics: [
+      { label: 'Theme Progress', value: '78%', trend: 'up', color: 'teal' },
+      { label: 'Value Delivered', value: '£12M', trend: 'up', color: 'teal' },
+      { label: 'Active Projects', value: '8', trend: 'stable' },
+      { label: 'OKR Achievement', value: '85%', trend: 'up', color: 'teal' }
+    ],
+    actions: [
+      { id: 'theme-1', label: 'View Theme Roadmap', type: 'navigate', targetEntityType: 'theme', targetEntityId: 'digital-transformation', description: 'Full strategic roadmap' },
+      { id: 'theme-2', label: 'Value Stream Analysis', type: 'navigate', targetEntityType: 'value-stream', targetEntityId: 'digital', description: 'Related value streams' }
+    ],
+    relatedItems: [
+      { id: 'vs-dig', name: 'Digital Services', type: 'Value Stream', entityType: 'value-stream', entityId: 'digital-services', status: 'active' },
+      { id: 'vs-cx', name: 'Customer Experience', type: 'Value Stream', entityType: 'value-stream', entityId: 'customer-experience', status: 'active' }
+    ],
+    aiInsight: 'Strategy Agent: Digital Transformation theme is outperforming targets. Consider expanding scope to capture additional opportunities.',
+    agentSource: 'integrated-management'
+  }
+};
+
+// ============================================================
 // KPI METRIC DOSSIERS - Level 2/3 content for metric drilldowns
 // ============================================================
 
@@ -662,6 +835,30 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
   // Metric dossiers - full dossiers
   if (entityType === 'metric' && metricDossiers[entityId]) {
     return { ...metricDossiers[entityId], isFullDossier: true };
+  }
+
+  // Risk dossiers - full dossiers
+  if (entityType === 'risk') {
+    if (riskDossiers[entityId]) {
+      return { ...riskDossiers[entityId], isFullDossier: true };
+    }
+    // Return default risk dossier with customized title
+    const defaultRisk = { ...riskDossiers['default'], isFullDossier: true };
+    defaultRisk.title = entityId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    defaultRisk.entityId = entityId;
+    return defaultRisk;
+  }
+
+  // Opportunity dossiers - full dossiers
+  if (entityType === 'opportunity') {
+    if (opportunityDossiers[entityId]) {
+      return { ...opportunityDossiers[entityId], isFullDossier: true };
+    }
+    // Return default opportunity dossier with customized title
+    const defaultOpp = { ...opportunityDossiers['default'], isFullDossier: true };
+    defaultOpp.title = entityId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    defaultOpp.entityId = entityId;
+    return defaultOpp;
   }
 
   // KPI - map to metric dossiers
