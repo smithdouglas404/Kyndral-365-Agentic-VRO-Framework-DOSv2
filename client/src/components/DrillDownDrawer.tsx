@@ -18,6 +18,7 @@ interface DrillDownDrawerProps {
   entityType: string;
   entityId: string;
   dataMode?: 'VRO' | 'PMO';
+  onNavigate?: (entityType: string, entityId: string) => void;
 }
 
 const agentColors: Record<AgentType, string> = {
@@ -94,7 +95,7 @@ function generateEntityInsight(entityType: string, entityId: string): { aiInsigh
   };
 }
 
-export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO' }: DrillDownDrawerProps) {
+export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO', onNavigate }: DrillDownDrawerProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
   
@@ -760,6 +761,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                                   key={entity.id}
                                   className={`flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors border ${borderColor} shadow-sm`}
                                   data-testid={`related-entity-${entity.id}`}
+                                  onClick={() => {
+                                    if (onNavigate && entity.id) {
+                                      onNavigate('project', entity.id);
+                                    }
+                                  }}
                                 >
                                   <div className="flex items-center gap-3">
                                     {entityType === 'project' ? (
@@ -922,6 +928,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                             <div 
                               key={project.id} 
                               className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-100 cursor-pointer hover:bg-green-50 transition-colors"
+                              onClick={() => {
+                                if (onNavigate && project.id) {
+                                  onNavigate('project', project.id);
+                                }
+                              }}
                             >
                               <div className="flex items-center gap-3">
                                 <div className={`w-2 h-2 rounded-full ${

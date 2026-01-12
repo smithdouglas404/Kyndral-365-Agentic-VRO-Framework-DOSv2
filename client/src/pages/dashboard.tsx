@@ -708,6 +708,9 @@ function DashboardContent() {
         entityType={drillDownEntity?.type || ""}
         entityId={drillDownEntity?.id || ""}
         dataMode={dataMode}
+        onNavigate={(type, id) => {
+          setDrillDownEntity({ type, id });
+        }}
       />
     </div>
   );
