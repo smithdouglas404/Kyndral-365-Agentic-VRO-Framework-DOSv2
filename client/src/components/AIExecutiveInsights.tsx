@@ -172,19 +172,22 @@ export function AIExecutiveInsights() {
 
   if (isLoading) {
     return (
-      <Card className="mb-6 border-2 border-blue-100 bg-gradient-to-br from-blue-50/50 to-white">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-blue-600 animate-pulse" />
-            <Skeleton className="h-6 w-48" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-20 w-full mb-4" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+      <Card className="mb-6 border border-blue-100 bg-gradient-to-r from-blue-50/30 to-white">
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-50">
+                <Brain className="h-5 w-5 text-blue-500 animate-pulse" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">AI Executive Intelligence</p>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  Analyzing portfolio data...
+                </p>
+              </div>
+            </div>
+            <Skeleton className="h-6 w-24" />
           </div>
         </CardContent>
       </Card>
