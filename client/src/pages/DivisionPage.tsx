@@ -47,6 +47,7 @@ const divisionToPortfolioMapping: Record<string, string> = {
   'institutional-retirement': 'portfolio-ir',
   'asset-management': 'portfolio-am',
   'retail': 'portfolio-retail',
+  'corporate': 'portfolio-ci',
   'corporate-investments': 'portfolio-ci',
   'capital': 'portfolio-ci',
   'insurance': 'portfolio-rc',
