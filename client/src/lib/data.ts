@@ -41,7 +41,7 @@ export const challenges: Challenge[] = [
   {
     id: "speed",
     number: 1,
-    title: "Speed Without Compromise",
+    title: "Speed Without Compromising Accuracy",
     problem: "Manual processes slow down decision-making; quality suffers when rushing.",
     solution: "Agentic automation removes manual bottlenecks while maintaining governance quality.",
     mechanism: ["Automated intake", "Smart classification", "Policy alignment", "Faster approvals"],
