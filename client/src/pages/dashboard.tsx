@@ -548,9 +548,6 @@ function DashboardContent() {
             {/* Agent Activity & Audit Trail - consolidated view */}
             <ActionAuditTimeline maxItems={12} />
 
-            {/* Cross-Agent Collaboration */}
-            <CrossAgentCollaboration />
-
           </TabsContent>
 
           {/* Portfolios Tab - BU Programs */}
