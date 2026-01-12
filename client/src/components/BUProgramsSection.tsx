@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -59,6 +60,36 @@ const actionTypeIcons: Record<ProactiveAction["type"], React.ReactNode> = {
   investigate: <Search size={12} />,
   escalate: <ArrowUpRight size={12} />
 };
+
+// ============================================================================
+// VIEW FULL DETAILS BUTTON - Uses wouter navigation
+// ============================================================================
+function ViewFullDetailsButton({ projectId, onClose }: { projectId: string; onClose: () => void }) {
+  const [, navigate] = useLocation();
+  
+  const handleClick = () => {
+    onClose();
+    navigate(`/project/${projectId}`);
+  };
+  
+  return (
+    <div className="flex items-center gap-2">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="gap-1" 
+        data-testid="button-view-full-details"
+        onClick={handleClick}
+      >
+        <ExternalLink size={14} />
+        View Full Details
+      </Button>
+      <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-project-flyout">
+        <X className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
 
 // ============================================================================
 // PROJECT DETAIL MODAL - Full AI Briefing with SAFe 6.0 Metrics
@@ -171,9 +202,7 @@ function ProjectDetailModal({
                   Source: L&G Annual Report 2024, Climate & Nature Report 2024
                 </p>
               </div>
-              <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-project-flyout">
-                <X className="h-5 w-5" />
-              </Button>
+              <ViewFullDetailsButton projectId={item.id} onClose={onClose} />
             </div>
 
             {/* Content */}

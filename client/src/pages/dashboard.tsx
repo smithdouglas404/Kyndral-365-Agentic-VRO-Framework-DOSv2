@@ -46,6 +46,7 @@ import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
+import { ProjectHighlights } from "@/components/ProjectHighlights";
 
 // L&G Design System Colors (Enterprise Transformation Team 2026)
 const LG = {
@@ -539,67 +540,6 @@ function DashboardContent() {
           <LGReportStats mode={dataMode} onDrillDown={handleDrillDown} />
         )}
 
-        {/* Division Cards - Always visible in unified view (overview tab) */}
-        {activeTab === "overview" && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mt-6">
-            {divisions.map((division) => (
-              <div 
-                key={division.id}
-                className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
-                style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
-                data-testid={`card-division-${division.id}`}
-                onClick={() => handleDrillDown("division", division.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
-                    <p className="text-lg font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
-                    <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
-                      {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
-                    </Badge>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
-                </div>
-              </div>
-            ))}
-            
-            <div 
-              className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" 
-              data-testid="card-climate"
-              onClick={() => handleDrillDown("climate", "climate-overview")}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1">
-                    <Leaf className="h-4 w-4 text-green-600" />
-                    <p className="text-xs text-green-700 font-medium">Climate</p>
-                  </div>
-                  <p className="text-lg font-bold text-green-600">-37%</p>
-                  <p className="text-xs text-green-600">emissions</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
-              </div>
-            </div>
-            
-            <div 
-              className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:shadow-md transition-all cursor-pointer group" 
-              data-testid="card-risk"
-              onClick={() => handleDrillDown("risk", "risk-overview")}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4 text-slate-600" />
-                    <p className="text-xs text-slate-700 font-medium">Risk Center</p>
-                  </div>
-                  <p className="text-lg font-bold text-slate-600">5 Categories</p>
-                  <p className="text-xs text-slate-500">3 Lines</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Tab Content - Navigation handled by sidebar */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
@@ -621,7 +561,70 @@ function DashboardContent() {
 
           {/* Portfolios Tab - BU Programs */}
           <TabsContent value="portfolios" className="space-y-6">
+            {/* Portfolio Value Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              {divisions.map((division) => (
+                <div 
+                  key={division.id}
+                  className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
+                  style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                  data-testid={`card-division-${division.id}`}
+                  onClick={() => handleDrillDown("division", division.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
+                      <p className="text-lg font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
+                      <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
+                        {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
+                      </Badge>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                  </div>
+                </div>
+              ))}
+              
+              <div 
+                className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" 
+                data-testid="card-climate"
+                onClick={() => handleDrillDown("climate", "climate-overview")}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <Leaf className="h-4 w-4 text-green-600" />
+                      <p className="text-xs text-green-700 font-medium">Climate</p>
+                    </div>
+                    <p className="text-lg font-bold text-green-600">-37%</p>
+                    <p className="text-xs text-green-600">emissions</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
+                </div>
+              </div>
+              
+              <div 
+                className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:shadow-md transition-all cursor-pointer group" 
+                data-testid="card-risk"
+                onClick={() => handleDrillDown("risk", "risk-overview")}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <Shield className="h-4 w-4 text-slate-600" />
+                      <p className="text-xs text-slate-700 font-medium">Risk Center</p>
+                    </div>
+                    <p className="text-lg font-bold text-slate-600">5 Categories</p>
+                    <p className="text-xs text-slate-500">3 Lines</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                </div>
+              </div>
+            </div>
+
             <BUProgramsSection dataMode={dataMode} onDrillDown={handleDrillDown} />
+
+            {/* Project Highlights - Moved from Lifecycle */}
+            <ProjectHighlights onDrillDown={handleDrillDown} />
           </TabsContent>
 
           {/* Business Cases Tab */}

@@ -158,6 +158,106 @@ export const actionPlaybooks: Record<string, DrilldownContent> = {
     ],
     aiInsight: 'Governance Agent recommends the contingency approach based on 78% success rate in similar situations.',
     agentSource: 'governance'
+  },
+  'analyze': {
+    title: 'Deep Dive Analysis',
+    subtitle: 'Data-Driven Insights & Patterns',
+    description: 'Comprehensive analysis of metrics, trends, and underlying data to surface actionable insights.',
+    level: 2,
+    entityType: 'action',
+    entityId: 'analyze',
+    metrics: [
+      { label: 'Data Points Analyzed', value: '2.4K', trend: 'up' },
+      { label: 'Insights Generated', value: '47', trend: 'up' },
+      { label: 'Confidence Score', value: '89%', trend: 'stable' }
+    ],
+    actions: [
+      { id: 'ana-1', label: 'Correlation Analysis', type: 'investigate', description: 'Find correlations between metrics' },
+      { id: 'ana-2', label: 'Trend Detection', type: 'investigate', targetEntityType: 'trend', targetEntityId: 'all', description: 'Identify emerging trends' },
+      { id: 'ana-3', label: 'Anomaly Detection', type: 'investigate', targetEntityType: 'alert', targetEntityId: 'anomalies', description: 'Detect outliers and anomalies' }
+    ],
+    relatedItems: [
+      { id: 'ds-1', name: 'Jira Data Feed', type: 'Data Source', entityType: 'data-source', entityId: 'jira', status: 'connected' },
+      { id: 'ds-2', name: 'ServiceNow Feed', type: 'Data Source', entityType: 'data-source', entityId: 'servicenow', status: 'connected' },
+      { id: 'ds-3', name: 'Financial Systems', type: 'Data Source', entityType: 'data-source', entityId: 'finance', status: 'connected' }
+    ],
+    aiInsight: 'Integrated Management Agent detected 3 significant correlations between sprint velocity and stakeholder engagement metrics.',
+    agentSource: 'integrated-management'
+  },
+  'forecast': {
+    title: 'Run Forecast Scenario',
+    subtitle: 'Predictive Modeling & What-If Analysis',
+    description: 'Generate predictive forecasts and run what-if scenarios to support decision-making.',
+    level: 2,
+    entityType: 'action',
+    entityId: 'forecast',
+    metrics: [
+      { label: 'Forecast Accuracy', value: '87%', trend: 'up' },
+      { label: 'Scenarios Modeled', value: '12', trend: 'stable' },
+      { label: 'Confidence Range', value: '±8%', trend: 'down' }
+    ],
+    actions: [
+      { id: 'frc-1', label: 'Revenue Forecast', type: 'accelerate', targetEntityType: 'forecast', targetEntityId: 'revenue', description: 'Project revenue outcomes' },
+      { id: 'frc-2', label: 'Timeline Forecast', type: 'accelerate', targetEntityType: 'forecast', targetEntityId: 'timeline', description: 'Predict delivery dates' },
+      { id: 'frc-3', label: 'Resource Forecast', type: 'accelerate', targetEntityType: 'forecast', targetEntityId: 'resources', description: 'Model resource needs' }
+    ],
+    relatedItems: [
+      { id: 'scn-1', name: 'Baseline Scenario', type: 'Scenario', entityType: 'scenario', entityId: 'baseline', status: 'active' },
+      { id: 'scn-2', name: 'Optimistic Scenario', type: 'Scenario', entityType: 'scenario', entityId: 'optimistic', status: 'modeled' },
+      { id: 'scn-3', name: 'Conservative Scenario', type: 'Scenario', entityType: 'scenario', entityId: 'conservative', status: 'modeled' }
+    ],
+    aiInsight: 'FinOps Agent: Monte Carlo simulation suggests 78% probability of meeting Q4 targets under current resource allocation.',
+    agentSource: 'finops'
+  },
+  'alert': {
+    title: 'Set Alert Threshold',
+    subtitle: 'Proactive Monitoring & Notifications',
+    description: 'Configure thresholds and rules for automated alerts when metrics deviate from targets.',
+    level: 2,
+    entityType: 'action',
+    entityId: 'alert',
+    metrics: [
+      { label: 'Active Alerts', value: '8', trend: 'stable' },
+      { label: 'Avg Response Time', value: '2.1 hrs', trend: 'down' },
+      { label: 'False Positive Rate', value: '4%', trend: 'down' }
+    ],
+    actions: [
+      { id: 'alt-1', label: 'Configure Thresholds', type: 'mitigate', description: 'Set alert trigger levels' },
+      { id: 'alt-2', label: 'Notification Rules', type: 'mitigate', targetEntityType: 'notification', targetEntityId: 'rules', description: 'Define who gets notified' },
+      { id: 'alt-3', label: 'View Alert History', type: 'navigate', targetEntityType: 'alert', targetEntityId: 'history', description: 'Review past alerts' }
+    ],
+    relatedItems: [
+      { id: 'alt-budget', name: 'Budget Variance Alert', type: 'Alert', entityType: 'alert', entityId: 'budget-variance', status: 'active' },
+      { id: 'alt-schedule', name: 'Schedule Slip Alert', type: 'Alert', entityType: 'alert', entityId: 'schedule-slip', status: 'active' },
+      { id: 'alt-risk', name: 'Risk Escalation Alert', type: 'Alert', entityType: 'alert', entityId: 'risk-escalation', status: 'active' }
+    ],
+    aiInsight: 'Governance Agent recommends lowering the budget variance threshold from 10% to 7% based on recent volatility patterns.',
+    agentSource: 'governance'
+  },
+  'report': {
+    title: 'Generate Report',
+    subtitle: 'Executive Reporting & Documentation',
+    description: 'Generate comprehensive reports for stakeholders, steering committees, and audit purposes.',
+    level: 2,
+    entityType: 'action',
+    entityId: 'report',
+    metrics: [
+      { label: 'Reports Generated', value: '24/mo', trend: 'up' },
+      { label: 'Avg Generation Time', value: '< 2 min', trend: 'down' },
+      { label: 'Distribution List', value: '45 users', trend: 'stable' }
+    ],
+    actions: [
+      { id: 'rpt-1', label: 'Executive Summary', type: 'escalate', targetEntityType: 'report', targetEntityId: 'executive', description: 'High-level status report' },
+      { id: 'rpt-2', label: 'Detailed Analysis', type: 'escalate', targetEntityType: 'report', targetEntityId: 'detailed', description: 'In-depth metrics report' },
+      { id: 'rpt-3', label: 'Compliance Report', type: 'escalate', targetEntityType: 'report', targetEntityId: 'compliance', description: 'Audit and governance report' }
+    ],
+    relatedItems: [
+      { id: 'rpt-weekly', name: 'Weekly Status Report', type: 'Report', entityType: 'report', entityId: 'weekly-status', status: 'scheduled' },
+      { id: 'rpt-monthly', name: 'Monthly Executive Report', type: 'Report', entityType: 'report', entityId: 'monthly-exec', status: 'scheduled' },
+      { id: 'rpt-adhoc', name: 'Ad-hoc Analysis', type: 'Report', entityType: 'report', entityId: 'adhoc', status: 'on-demand' }
+    ],
+    aiInsight: 'TMO Agent: Last executive report had 94% stakeholder satisfaction score. Recommend maintaining current format.',
+    agentSource: 'tmo'
   }
 };
 

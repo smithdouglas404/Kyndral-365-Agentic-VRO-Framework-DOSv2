@@ -1126,6 +1126,15 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                                 variant="outline"
                                 className="w-full justify-between text-left h-auto py-3"
                                 data-testid={`action-${action.id}`}
+                                onClick={() => {
+                                  if (onNavigate) {
+                                    // Check if action.id is a known playbook key first (metric actions: analyze, forecast, etc.)
+                                    // Otherwise fall back to action.type (project proactive actions: mitigate, accelerate, etc.)
+                                    const knownPlaybookIds = ['analyze', 'forecast', 'alert', 'report', 'investigate', 'escalate', 'accelerate', 'mitigate'];
+                                    const actionKey = knownPlaybookIds.includes(action.id) ? action.id : action.type;
+                                    onNavigate('action', actionKey);
+                                  }
+                                }}
                               >
                                 <div className="flex items-center gap-2">
                                   <Badge 

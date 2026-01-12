@@ -29,10 +29,8 @@ const coreNavItems: NavItem[] = [
   { id: "ai-hub", label: "AI Insights", icon: Brain, modes: "all" },
 ];
 
-// VRO-specific items - only items with existing dashboard views
-const vroNavItems: NavItem[] = [
-  { id: "lifecycle", label: "Lifecycle", icon: Zap, modes: ["VRO"] },
-];
+// VRO-specific items - removed VRO-Value accordion per user request
+const vroNavItems: NavItem[] = [];
 
 // PMO-specific items - only items with existing dashboard views
 const pmoNavItems: NavItem[] = [
@@ -212,26 +210,6 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
               onValueChange={setExpandedAccordions}
               className="space-y-1"
             >
-              {/* VRO Accordion */}
-              <AccordionItem value="vro" className="border-0">
-                <AccordionTrigger 
-                  className="px-3 py-2 rounded-lg hover:bg-teal-50 hover:no-underline text-sm font-semibold text-teal-700 bg-teal-50/50 border border-teal-200/50"
-                  data-testid="accordion-vro"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 bg-teal-500 rounded">
-                      <DollarSign className="h-3 w-3 text-white" />
-                    </div>
-                    <span>VRO - Value</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-0 pt-1">
-                  <div className="space-y-1 pl-2">
-                    {vroNavItems.map((item) => renderNavButton(item, "VRO", "bg-teal-600 text-white"))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
               {/* PMO Accordion */}
               <AccordionItem value="pmo" className="border-0">
                 <AccordionTrigger 
@@ -255,27 +233,9 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
           </div>
         )}
 
-        {/* VRO & PMO Icons - Collapsed Mode */}
-        {collapsed && (
+        {/* PMO Icons - Collapsed Mode */}
+        {collapsed && pmoNavItems.length > 0 && (
           <div className="px-2 mt-4 space-y-1">
-            {vroNavItems.map((item) => {
-              const Icon = item.icon;
-              const isItemActive = activeTab === item.id && isOnDashboard;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id, "VRO")}
-                  className={cn(
-                    "w-full p-2 rounded-lg cursor-pointer transition-all flex items-center justify-center",
-                    isItemActive ? "bg-teal-600 text-white" : "hover:bg-teal-50 text-teal-600"
-                  )}
-                  data-testid={`nav-${item.id}`}
-                  title={item.label}
-                >
-                  <Icon className="h-4 w-4" />
-                </button>
-              );
-            })}
             {pmoNavItems.map((item) => {
               const Icon = item.icon;
               const isItemActive = activeTab === item.id && isOnDashboard;
