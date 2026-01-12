@@ -1033,6 +1033,82 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                     <RegistryContentRenderer content={registryContent} onNavigate={onNavigate} />
                   ) : (
                   <div className="space-y-4 drilldown-overview">
+                    {/* PROJECT-SPECIFIC: VRO VALUE + PMO DELIVERY dual-lane metrics */}
+                    {entityType === 'project' && enrichedProject && (
+                      <>
+                        {/* Dual-lane metrics matching project card */}
+                        <div className="grid grid-cols-2 gap-3">
+                          {/* VRO VALUE section (teal) */}
+                          <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                            <div className="flex items-center gap-1 mb-2">
+                              <div className="w-2 h-2 rounded-full bg-teal-500" />
+                              <span className="text-[10px] font-bold text-teal-700">VRO VALUE</span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-teal-600">ROI</span>
+                                <span className="text-sm font-bold text-teal-700">{enrichedProject.expectedROI}</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-teal-600">Realized</span>
+                                <span className="text-sm font-bold text-emerald-700">£{Math.round(enrichedProject.budget.spent * 0.6)}m</span>
+                              </div>
+                              <Progress value={60} className="h-1.5 mt-1" />
+                            </div>
+                          </div>
+                          
+                          {/* PMO DELIVERY section (blue) */}
+                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center gap-1 mb-2">
+                              <div className="w-2 h-2 rounded-full bg-blue-500" />
+                              <span className="text-[10px] font-bold text-blue-700">PMO DELIVERY</span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-blue-600">Budget</span>
+                                <span className="text-sm font-bold text-blue-700">{Math.round((enrichedProject.budget.spent / enrichedProject.budget.total) * 100)}%</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-blue-600">Timeline</span>
+                                <span className="text-sm font-bold text-blue-700">{Math.round((enrichedProject.timeline.elapsed / enrichedProject.timeline.total) * 100)}%</span>
+                              </div>
+                              <div className="flex justify-between items-baseline">
+                                <span className="text-xs text-blue-600">Done</span>
+                                <span className="text-sm font-bold text-gray-700">{enrichedProject.deliverables.completed}/{enrichedProject.deliverables.total}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* SAFe 6.0 metrics row */}
+                        <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-100">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <GitBranch size={14} className="text-purple-600" />
+                              <span className="text-xs font-bold text-purple-700">SAFe 6.0 | {enrichedProject.safe.currentPI}</span>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] bg-purple-100 border-purple-300 text-purple-700">
+                              {enrichedProject.safe.epicId}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="p-2 bg-white rounded shadow-sm">
+                              <p className="text-lg font-bold text-purple-700">{enrichedProject.safe.velocity}</p>
+                              <p className="text-[10px] text-gray-500">Velocity</p>
+                            </div>
+                            <div className="p-2 bg-white rounded shadow-sm">
+                              <p className="text-lg font-bold text-purple-700">{enrichedProject.safe.predictability}%</p>
+                              <p className="text-[10px] text-gray-500">Predict.</p>
+                            </div>
+                            <div className="p-2 bg-white rounded shadow-sm">
+                              <p className="text-lg font-bold text-purple-700">{enrichedProject.safe.flowEfficiency}%</p>
+                              <p className="text-[10px] text-gray-500">Flow</p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
                     {displayData.aiInsight && (
                       <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
                         <CardHeader className="pb-2">
@@ -1052,7 +1128,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
                             <FileText size={16} className="text-blue-500" />
-                            Summary
+                            {enrichedProject ? 'Description' : 'Summary'}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1061,6 +1137,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                       </Card>
                     )}
 
+                    {/* Show generic Key Metrics only for non-project entities */}
+                    {entityType !== 'project' && (
                     <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">
@@ -1079,6 +1157,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                         </div>
                       </CardContent>
                     </Card>
+                    )}
 
                     {/* Project Breakdown for Metric entities */}
                     {entityType === 'metric' && metricDrilldown?.projectBreakdown && (
