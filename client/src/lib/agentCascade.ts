@@ -156,15 +156,46 @@ export async function dispatchAgentCascade(scenario: ActionScenario): Promise<vo
 export function parseActionIntent(query: string): { scenarioType: string; params: Record<string, string> } | null {
   const lowerQuery = query.toLowerCase();
   
-  const budgetMatch = lowerQuery.match(/reduce\s+(?:project\s+)?(.+?)\s+budget\s+by\s+(\d+)%?/i);
+  // Match budget reduction with percentage OR monetary amount (1M, 1 million, 500k, etc.)
+  const budgetMatch = lowerQuery.match(/reduce\s+(?:this\s+)?(?:project['s]*\s+)?(.+?)\s+budget\s+by\s+([\d.]+)\s*(m|million|mm|k|thousand|%)?/i);
   if (budgetMatch) {
     const projectName = budgetMatch[1].trim();
-    const percentage = budgetMatch[2];
-    const currentBudget = '5.0';
-    const newBudget = (parseFloat(currentBudget) * (1 - parseInt(percentage) / 100)).toFixed(1);
+    const amount = parseFloat(budgetMatch[2]);
+    const unit = (budgetMatch[3] || '%').toLowerCase();
+    const currentBudget = 5.0; // £5M default
+    
+    let percentage: number;
+    let newBudget: number;
+    
+    // Determine if this is a monetary amount or percentage
+    if (unit === 'm' || unit === 'million' || unit === 'mm') {
+      // Monetary amount in millions - convert to percentage of current budget
+      const reductionAmount = amount; // Already in millions
+      percentage = (reductionAmount / currentBudget) * 100;
+      newBudget = currentBudget - reductionAmount;
+    } else if (unit === 'k' || unit === 'thousand') {
+      // Monetary amount in thousands - convert to millions then percentage
+      const reductionAmount = amount / 1000;
+      percentage = (reductionAmount / currentBudget) * 100;
+      newBudget = currentBudget - reductionAmount;
+    } else {
+      // Percentage
+      percentage = amount;
+      newBudget = currentBudget * (1 - percentage / 100);
+    }
+    
+    // Ensure new budget doesn't go negative
+    newBudget = Math.max(0, newBudget);
+    
     return {
       scenarioType: 'reduceBudget',
-      params: { projectName, percentage, currentBudget, newBudget, dependencyCount: '4' }
+      params: { 
+        projectName, 
+        percentage: percentage.toFixed(0), 
+        currentBudget: currentBudget.toFixed(1), 
+        newBudget: newBudget.toFixed(1), 
+        dependencyCount: '4' 
+      }
     };
   }
   

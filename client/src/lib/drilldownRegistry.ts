@@ -959,7 +959,10 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
   // Dependency dossiers - marked as full dossier since buildDependencyDossier provides comprehensive content
   if (entityType === 'dependency') {
     const content = buildDependencyDossier(entityId);
-    return content ? { ...content, isFullDossier: true } : null;
+    if (content) {
+      return { ...content, isFullDossier: true };
+    }
+    // Fall through to universal fallback if no specific dependency found
   }
 
   // SAFe entities - build on demand
