@@ -567,8 +567,9 @@ function ProjectDetailModal({
 
 // ============================================================================
 // UNIFIED PORTFOLIO CARD - BU-level with BOTH VRO + PMO metrics side-by-side
+// Exported for use in Overview section
 // ============================================================================
-function PortfolioCard({ portfolio, onDrillDown }: { portfolio: BUPortfolio; onDrillDown: () => void; mode?: DataMode }) {
+export function PortfolioCard({ portfolio, onDrillDown }: { portfolio: BUPortfolio; onDrillDown: () => void; mode?: DataMode }) {
   const healthColor = portfolio.healthScore >= 80 ? "#00843D" : portfolio.healthScore >= 60 ? "#f59e0b" : "#D50032";
   
   const BU_COLORS: Record<string, string> = {

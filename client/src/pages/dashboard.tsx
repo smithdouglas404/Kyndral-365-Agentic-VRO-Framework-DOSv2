@@ -17,7 +17,8 @@ import { AIProactiveInsightsSection } from "@/components/AIProactiveInsights";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
 import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
-import { BUProgramsSection } from "@/components/BUProgramsSection";
+import { BUProgramsSection, PortfolioCard } from "@/components/BUProgramsSection";
+import { buPortfolios } from "@/lib/buPrograms";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
@@ -546,6 +547,41 @@ function DashboardContent() {
             
             {/* Unified Metrics Section - VRO and PMO side by side */}
             <UnifiedMetricsSection onDrillDown={handleDrillDown} />
+            
+            {/* Group Function Overview - Portfolio cards with dual VRO/PMO metrics */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-purple-600" />
+                    Group Function Overview
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Unified VRO value and PMO delivery metrics across business units
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {buPortfolios.map((portfolio, i) => (
+                  <motion.div
+                    key={portfolio.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <PortfolioCard 
+                      portfolio={portfolio} 
+                      onDrillDown={() => handleDrillDown('portfolio', portfolio.id)}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
             
             {/* Agent Activity & Audit Trail - consolidated view */}
             <ActionAuditTimeline maxItems={12} />
