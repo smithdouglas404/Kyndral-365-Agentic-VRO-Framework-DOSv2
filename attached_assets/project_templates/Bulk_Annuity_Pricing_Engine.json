@@ -2,27 +2,304 @@
   "id": "pmo-ir-003",
   "name": "Bulk Annuity Pricing Engine",
   "bu": "Institutional Retirement",
-  "description": "Next-generation pricing engine for bulk annuity deals with real-time market data integration.",
-  "expectedROI": "£65m competitive advantage",
+  "division": "Retirement",
+  "description": "Next-generation pricing engine for bulk purchase annuity (BPA) deals enabling real-time market data integration, ML-optimized pricing, and sub-second quote generation for pension scheme de-risking transactions ranging from £50m to £5bn.",
+  "expectedROI": "£65m competitive advantage through faster deal closure",
   "roiValue": 65,
   "priority": "critical",
   "status": "green",
-  "budget": { "spent": 1.8, "total": 2.5, "unit": "£m" },
-  "timeline": { "elapsed": 9, "total": 14, "unit": "months" },
+  "budget": { "spent": 1.8, "total": 2.5, "unit": "£m", "contingency": 0.3, "forecastAtCompletion": 2.4 },
+  "timeline": { "elapsed": 9, "total": 14, "unit": "months", "startDate": "2024-02-01", "endDate": "2025-04-01" },
   "artName": "Institutional Retirement ART",
   "portfolioTheme": "Competitive Edge",
-  "safe": { "velocity": 50, "predictability": 88, "flowEfficiency": 76, "currentPI": "PI 24.4", "epicId": "EPIC-IR-103", "epicName": "Pricing Excellence", "epicProgress": 62 },
+  "strategicObjectives": ["SO-1: Market Leadership", "SO-3: Operational Excellence", "SO-6: Digital Transformation"],
+  "safe": {
+    "velocity": 50,
+    "predictability": 88,
+    "flowEfficiency": 76,
+    "currentPI": "PI 24.4",
+    "totalPIs": 6,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-IR-103",
+    "epicName": "Pricing Excellence",
+    "epicProgress": 62,
+    "epicWsjf": { "businessValue": 21, "timeCriticality": 13, "riskReduction": 8, "jobSize": 8, "score": 5.25 },
+    "solutionTrain": "Retirement Technology",
+    "valueStream": "Institutional Business"
+  },
   "features": [
-    { "id": "feat-901", "name": "Real-time Market Integration", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
-    { "id": "feat-902", "name": "ML Pricing Optimization", "status": "in-progress", "storyPoints": 34, "completedPoints": 18, "priority": "high" }
+    {
+      "id": "feat-901",
+      "name": "Real-time Market Integration",
+      "description": "Integration with Bloomberg, Reuters, and ICE for real-time gilt yields, credit spreads, and swap rates feeding directly into pricing models.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": { "businessValue": 21, "timeCriticality": 21, "riskReduction": 8, "jobSize": 8, "score": 6.25 },
+      "acceptanceCriteria": [
+        "Gilt yields updated every 5 seconds during market hours",
+        "Credit spread curves for 50+ issuers available",
+        "Fallback to T-1 data if feed fails",
+        "Full audit trail of rates used in each quote"
+      ],
+      "stories": [
+        {
+          "id": "story-9001",
+          "name": "Bloomberg B-PIPE Integration",
+          "description": "As a Pricing Actuary, I need real-time gilt yields from Bloomberg so that quotes reflect current market conditions.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given market is open, When gilt yield requested, Then data is <5 seconds stale",
+            "Given Bloomberg feed fails, When fallback triggers, Then Reuters data is used",
+            "Given quote is generated, When audit requested, Then exact rate timestamp is available"
+          ],
+          "tasks": [
+            { "id": "task-90001", "name": "Configure Bloomberg B-PIPE connectivity", "status": "done", "effortHours": 24, "assignee": "Robert Hughes", "skills": ["Bloomberg API", "C++"] },
+            { "id": "task-90002", "name": "Build gilt yield subscription service", "status": "done", "effortHours": 32, "assignee": "Robert Hughes", "skills": ["Real-time Systems", "Java"] },
+            { "id": "task-90003", "name": "Implement rate caching with Redis", "status": "done", "effortHours": 16, "assignee": "Jennifer Liu", "skills": ["Redis", "Performance"] },
+            { "id": "task-90004", "name": "Build Reuters failover mechanism", "status": "done", "effortHours": 20, "assignee": "Robert Hughes", "skills": ["Reuters API", "Failover"] },
+            { "id": "task-90005", "name": "Create rate audit logging", "status": "done", "effortHours": 8, "assignee": "Jennifer Liu", "skills": ["Logging", "Compliance"] }
+          ]
+        },
+        {
+          "id": "story-9002",
+          "name": "Credit Spread Curve Builder",
+          "description": "As a Credit Analyst, I need automated credit spread curves so that corporate bond investments are priced accurately.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given issuer is rated, When curve built, Then spreads are available for 1-30 year tenors",
+            "Given new bond trades, When price observed, Then curve is recalibrated within 1 hour",
+            "Given curve is queried, When interpolation needed, Then cubic spline is used"
+          ],
+          "tasks": [
+            { "id": "task-90006", "name": "Build credit spread data ingestion", "status": "done", "effortHours": 24, "assignee": "Dr. Mark Evans", "skills": ["Fixed Income", "Python"] },
+            { "id": "task-90007", "name": "Implement Nelson-Siegel curve fitting", "status": "done", "effortHours": 32, "assignee": "Dr. Mark Evans", "skills": ["Quantitative Finance", "Python"] },
+            { "id": "task-90008", "name": "Build curve interpolation service", "status": "done", "effortHours": 16, "assignee": "Jennifer Liu", "skills": ["Mathematics", "APIs"] },
+            { "id": "task-90009", "name": "Create curve quality monitoring", "status": "done", "effortHours": 12, "assignee": "Dr. Mark Evans", "skills": ["Analytics", "Monitoring"] }
+          ]
+        },
+        {
+          "id": "story-9003",
+          "name": "Swap Rate Integration",
+          "description": "As a Derivatives Trader, I need live swap rates so that liability hedging costs are accurately reflected.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given swap tenor selected, When rate queried, Then live mid-market rate returned",
+            "Given bid-offer spread needed, When requested, Then spread is included",
+            "Given historical analysis needed, When queried, Then 10-year history available"
+          ],
+          "tasks": [
+            { "id": "task-90010", "name": "Integrate ICE swap rate feed", "status": "done", "effortHours": 16, "assignee": "Robert Hughes", "skills": ["ICE API", "Derivatives"] },
+            { "id": "task-90011", "name": "Build swap curve construction", "status": "done", "effortHours": 20, "assignee": "Dr. Mark Evans", "skills": ["Interest Rate Derivatives"] },
+            { "id": "task-90012", "name": "Implement historical data storage", "status": "done", "effortHours": 12, "assignee": "Jennifer Liu", "skills": ["Time Series DB", "InfluxDB"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-902",
+      "name": "ML Pricing Optimization",
+      "description": "Machine learning models that optimize pricing strategy based on deal characteristics, competitive positioning, and win probability estimation.",
+      "status": "in-progress",
+      "storyPoints": 89,
+      "completedPoints": 55,
+      "priority": "high",
+      "wsjf": { "businessValue": 21, "timeCriticality": 8, "riskReduction": 13, "jobSize": 13, "score": 3.23 },
+      "acceptanceCriteria": [
+        "Win probability model achieves 75%+ accuracy on holdout set",
+        "Pricing recommendations within 2bps of optimal",
+        "Model explainability reports available for governance",
+        "Real-time inference <100ms latency"
+      ],
+      "stories": [
+        {
+          "id": "story-9004",
+          "name": "Historical Deal Data Pipeline",
+          "description": "As a Data Scientist, I need clean historical deal data so that I can train pricing models.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given 10 years of deal data, When cleaned, Then 2,500+ deals available for training",
+            "Given data quality issues, When detected, Then flagged for manual review",
+            "Given new deal closes, When ingested, Then model retraining triggered"
+          ],
+          "tasks": [
+            { "id": "task-90013", "name": "Extract historical deal data from legacy systems", "status": "done", "effortHours": 32, "assignee": "David Kim", "skills": ["SQL", "Data Migration"] },
+            { "id": "task-90014", "name": "Build data cleaning pipeline", "status": "done", "effortHours": 24, "assignee": "David Kim", "skills": ["Python", "Pandas"] },
+            { "id": "task-90015", "name": "Create feature engineering framework", "status": "done", "effortHours": 20, "assignee": "Dr. Mark Evans", "skills": ["Feature Engineering", "ML"] },
+            { "id": "task-90016", "name": "Implement continuous data ingestion", "status": "done", "effortHours": 16, "assignee": "David Kim", "skills": ["ETL", "Airflow"] }
+          ]
+        },
+        {
+          "id": "story-9005",
+          "name": "Win Probability Model",
+          "description": "As a Deal Lead, I need win probability estimates so that I can prioritize pursuit resources effectively.",
+          "storyPoints": 34,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given deal parameters, When model predicts, Then probability is 0-100% with confidence interval",
+            "Given prediction made, When deal closes, Then model accuracy tracked",
+            "Given new market conditions, When model retrained, Then performance improves"
+          ],
+          "tasks": [
+            { "id": "task-90017", "name": "Develop XGBoost baseline model", "status": "done", "effortHours": 24, "assignee": "Dr. Mark Evans", "skills": ["XGBoost", "Classification"] },
+            { "id": "task-90018", "name": "Implement feature importance analysis", "status": "done", "effortHours": 16, "assignee": "Dr. Mark Evans", "skills": ["SHAP", "Explainability"] },
+            { "id": "task-90019", "name": "Build model validation framework", "status": "done", "effortHours": 20, "assignee": "Dr. Mark Evans", "skills": ["Model Validation", "Statistics"] },
+            { "id": "task-90020", "name": "Deploy model to production with MLflow", "status": "done", "effortHours": 16, "assignee": "David Kim", "skills": ["MLflow", "MLOps"] },
+            { "id": "task-90021", "name": "Create accuracy monitoring dashboard", "status": "done", "effortHours": 12, "assignee": "Jennifer Liu", "skills": ["Monitoring", "Grafana"] }
+          ]
+        },
+        {
+          "id": "story-9006",
+          "name": "Optimal Pricing Recommendation",
+          "description": "As a Pricing Actuary, I need optimal price recommendations so that I can maximize win probability within margin targets.",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given margin target set, When optimization runs, Then price range is recommended",
+            "Given competitive intel available, When incorporated, Then recommendations adjust",
+            "Given recommendation made, When reviewed, Then full rationale is available"
+          ],
+          "tasks": [
+            { "id": "task-90022", "name": "Develop optimization objective function", "status": "done", "effortHours": 24, "assignee": "Dr. Mark Evans", "skills": ["Optimization", "Python"] },
+            { "id": "task-90023", "name": "Build price-win probability curve generator", "status": "in-progress", "effortHours": 20, "assignee": "Dr. Mark Evans", "skills": ["Analytics", "Visualization"] },
+            { "id": "task-90024", "name": "Implement competitive positioning module", "status": "pending", "effortHours": 24, "assignee": "Dr. Mark Evans", "skills": ["Market Analysis"] },
+            { "id": "task-90025", "name": "Create recommendation explainability reports", "status": "pending", "effortHours": 16, "assignee": "Jennifer Liu", "skills": ["Reporting", "SHAP"] }
+          ]
+        },
+        {
+          "id": "story-9007",
+          "name": "Real-time Inference API",
+          "description": "As a Quote System, I need sub-100ms model inference so that pricing updates are instantaneous.",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given inference request, When model responds, Then latency <100ms at P99",
+            "Given 100 concurrent requests, When load tested, Then SLA maintained",
+            "Given model version change, When deployed, Then zero downtime"
+          ],
+          "tasks": [
+            { "id": "task-90026", "name": "Build FastAPI inference service", "status": "done", "effortHours": 16, "assignee": "David Kim", "skills": ["FastAPI", "Python"] },
+            { "id": "task-90027", "name": "Implement model caching and warm-up", "status": "in-progress", "effortHours": 12, "assignee": "David Kim", "skills": ["Performance", "Caching"] },
+            { "id": "task-90028", "name": "Create blue-green deployment pipeline", "status": "pending", "effortHours": 16, "assignee": "David Kim", "skills": ["Kubernetes", "DevOps"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-903",
+      "name": "Quote Management Portal",
+      "description": "Web portal for deal teams to generate, compare, and approve quotes with full audit trail and governance controls.",
+      "status": "planned",
+      "storyPoints": 55,
+      "completedPoints": 0,
+      "priority": "high",
+      "wsjf": { "businessValue": 13, "timeCriticality": 8, "riskReduction": 5, "jobSize": 8, "score": 3.25 },
+      "acceptanceCriteria": [
+        "Deal team can generate quote in <30 seconds",
+        "Quote approval workflow with 4-eyes principle",
+        "Version history for all quote iterations",
+        "Export to client-ready PDF format"
+      ],
+      "stories": [
+        {
+          "id": "story-9008",
+          "name": "Quote Generation Wizard",
+          "description": "As a Deal Lead, I need a guided quote generation process so that I can quickly produce accurate quotes.",
+          "storyPoints": 21,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given deal parameters entered, When quote generated, Then result displays in <30 seconds",
+            "Given quote is generated, When assumptions viewed, Then all inputs are visible",
+            "Given quote needs revision, When parameters changed, Then recalculation is instant"
+          ],
+          "tasks": [
+            { "id": "task-90029", "name": "Design quote wizard UX flow", "status": "planned", "effortHours": 16, "assignee": "UX Team", "skills": ["UX Design", "Figma"] },
+            { "id": "task-90030", "name": "Build parameter input forms", "status": "planned", "effortHours": 24, "assignee": "Frontend Team", "skills": ["React", "Forms"] },
+            { "id": "task-90031", "name": "Implement real-time quote calculation", "status": "planned", "effortHours": 32, "assignee": "Dr. Mark Evans", "skills": ["Actuarial", "APIs"] },
+            { "id": "task-90032", "name": "Create assumption transparency view", "status": "planned", "effortHours": 16, "assignee": "Frontend Team", "skills": ["React", "Data Viz"] }
+          ]
+        },
+        {
+          "id": "story-9009",
+          "name": "Quote Approval Workflow",
+          "description": "As a Risk Officer, I need approval workflows so that quotes meet governance requirements.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given quote exceeds threshold, When submitted, Then 4-eyes approval required",
+            "Given approver reviews, When decision made, Then audit trail is complete",
+            "Given quote is approved, When released, Then client team is notified"
+          ],
+          "tasks": [
+            { "id": "task-90033", "name": "Build workflow engine", "status": "planned", "effortHours": 24, "assignee": "Backend Team", "skills": ["Workflow", "State Machine"] },
+            { "id": "task-90034", "name": "Create approval UI", "status": "planned", "effortHours": 16, "assignee": "Frontend Team", "skills": ["React", "UI"] },
+            { "id": "task-90035", "name": "Implement notification system", "status": "planned", "effortHours": 12, "assignee": "Backend Team", "skills": ["Email", "Notifications"] }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-901", "name": "Dr. Mark Evans", "role": "Quantitative Analyst", "allocation": 100, "team": "Quant" }
+    { "id": "res-901", "name": "Dr. Mark Evans", "role": "Lead Quantitative Analyst", "allocation": 100, "team": "Quant", "skills": ["Actuarial Science", "ML", "Python"], "costRate": 950 },
+    { "id": "res-902", "name": "Robert Hughes", "role": "Senior Market Data Engineer", "allocation": 100, "team": "Market Data", "skills": ["Bloomberg", "Reuters", "Real-time Systems"], "costRate": 800 },
+    { "id": "res-903", "name": "Jennifer Liu", "role": "Platform Engineer", "allocation": 80, "team": "Platform", "skills": ["Redis", "Performance", "APIs"], "costRate": 750 },
+    { "id": "res-904", "name": "David Kim", "role": "ML Engineer", "allocation": 100, "team": "Quant", "skills": ["MLOps", "Python", "Kubernetes"], "costRate": 800 }
   ],
   "milestones": [
-    { "id": "ms-901", "name": "Engine Launch", "date": "2024-12-01", "status": "planned", "deliverables": ["Full engine", "Performance benchmarks"] }
+    { "id": "ms-901", "name": "Market Data Integration Complete", "date": "2024-08-31", "status": "completed", "deliverables": ["Bloomberg B-PIPE live", "Credit spread curves operational", "Swap rate integration complete"] },
+    { "id": "ms-902", "name": "ML Models in Production", "date": "2024-12-31", "status": "in-progress", "deliverables": ["Win probability model deployed", "Pricing optimization live", "Real-time inference API operational"] },
+    { "id": "ms-903", "name": "Quote Portal Launch", "date": "2025-02-28", "status": "planned", "deliverables": ["Quote generation wizard", "Approval workflows", "Client PDF export"] },
+    { "id": "ms-904", "name": "Full Platform Go-Live", "date": "2025-04-01", "status": "planned", "deliverables": ["All deal teams trained", "Legacy system decommissioned", "Performance benchmarks achieved"] }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.9, "opex": 0.6, "contingency": 0.25, "npv": 55.0, "irr": 42, "paybackMonths": 15 },
-  "currentPI": 4, "totalPIs": 6, "velocity": 50, "burndownHealth": 86, "qualityScore": 91
+  "risks": [
+    { "id": "risk-901", "name": "Bloomberg licensing costs", "probability": "low", "impact": "medium", "status": "mitigated", "mitigation": "Negotiated enterprise agreement with fixed pricing for 3 years", "owner": "Robert Hughes" },
+    { "id": "risk-902", "name": "Model accuracy below target", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Weekly model performance reviews; contingency for additional training data", "owner": "Dr. Mark Evans" },
+    { "id": "risk-903", "name": "Regulatory scrutiny of ML pricing", "probability": "medium", "impact": "high", "status": "active", "mitigation": "Full model explainability; governance documentation; regulator engagement", "owner": "Dr. Mark Evans" }
+  ],
+  "dependencies": [
+    { "id": "dep-901", "name": "Bloomberg B-PIPE license", "type": "external", "status": "resolved", "vendor": "Bloomberg", "description": "Real-time market data feed" },
+    { "id": "dep-902", "name": "Enterprise Data Platform", "type": "internal", "status": "active", "project": "pmo-grp-001", "description": "Historical data storage and ML infrastructure" },
+    { "id": "dep-903", "name": "Identity Management SSO", "type": "internal", "status": "resolved", "project": "Identity", "description": "Single sign-on for deal team access" }
+  ],
+  "stakeholders": [
+    { "id": "sh-901", "name": "Andrew Sullivan", "role": "Head of Institutional Retirement", "department": "Retirement", "influence": "high", "interest": "high" },
+    { "id": "sh-902", "name": "Pricing Actuary Team", "role": "Key Users", "department": "Actuarial", "influence": "high", "interest": "high" },
+    { "id": "sh-903", "name": "Deal Origination Team", "role": "Key Users", "department": "Business Development", "influence": "medium", "interest": "high" }
+  ],
+  "iterations": [
+    { "id": "iter-901", "name": "PI 24.4 - Iteration 1", "startDate": "2024-10-14", "endDate": "2024-10-25", "capacity": 120, "committed": 115, "completed": 112, "velocity": 112 },
+    { "id": "iter-902", "name": "PI 24.4 - Iteration 2", "startDate": "2024-10-28", "endDate": "2024-11-08", "capacity": 115, "committed": 110, "completed": 108, "velocity": 108 },
+    { "id": "iter-903", "name": "PI 24.4 - Iteration 3", "startDate": "2024-11-11", "endDate": "2024-11-22", "capacity": 120, "committed": 118, "completed": 0, "velocity": null }
+  ],
+  "financials": {
+    "capitalex": 1.9,
+    "opex": 0.6,
+    "contingency": 0.3,
+    "npv": 55.0,
+    "irr": 42,
+    "paybackMonths": 15,
+    "costBreakdown": {
+      "development": 1.2,
+      "marketDataLicenses": 0.4,
+      "infrastructure": 0.3,
+      "contingency": 0.3
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.4,
+    "testCoverage": 92,
+    "technicalDebtDays": 6,
+    "codeReviewCoverage": 100,
+    "documentationScore": 88
+  },
+  "currentPI": 4,
+  "totalPIs": 6,
+  "velocity": 50,
+  "burndownHealth": 86,
+  "qualityScore": 91
 }

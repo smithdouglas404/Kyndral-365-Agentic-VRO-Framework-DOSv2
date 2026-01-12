@@ -2,29 +2,676 @@
   "id": "pmo-rt-001",
   "name": "Digital Onboarding Redesign",
   "bu": "Retail",
-  "description": "Redesigning customer onboarding journey for protection and savings products with modern UX.",
-  "expectedROI": "£28m revenue uplift",
+  "division": "Retail",
+  "description": "Complete redesign of customer onboarding journey for protection and savings products with mobile-first UX, reduced friction, and real-time underwriting integration. Target: 40% improvement in completion rates.",
+  "expectedROI": "£28m revenue uplift through conversion improvement",
   "roiValue": 28,
   "priority": "high",
   "status": "green",
-  "budget": { "spent": 1.1, "total": 1.8, "unit": "£m" },
-  "timeline": { "elapsed": 6, "total": 10, "unit": "months" },
+  "budget": {
+    "spent": 1.1,
+    "total": 1.8,
+    "unit": "£m",
+    "contingency": 0.2,
+    "forecastAtCompletion": 1.8
+  },
+  "timeline": {
+    "elapsed": 6,
+    "total": 10,
+    "startDate": "2024-04-01",
+    "endDate": "2025-02-01",
+    "unit": "months"
+  },
   "artName": "Customer Experience ART",
   "portfolioTheme": "Digital Excellence",
-  "safe": { "velocity": 45, "predictability": 85, "flowEfficiency": 72, "currentPI": "PI 24.3", "epicId": "EPIC-RT-101", "epicName": "Digital Customer Journey", "epicProgress": 58 },
+  "strategicObjectives": [
+    "SO-6: Digital Transformation",
+    "SO-4: Client Trust",
+    "SO-1: Market Leadership"
+  ],
+  "safe": {
+    "velocity": 46,
+    "predictability": 75,
+    "flowEfficiency": 72,
+    "currentPI": "PI 24.3",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-RET-001",
+    "epicName": "Digital Onboarding Redesign",
+    "epicProgress": 60,
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 10,
+      "riskReduction": 7,
+      "jobSize": 8,
+      "score": 3.75
+    },
+    "solutionTrain": "Retail Technology",
+    "valueStream": "Digital Excellence"
+  },
   "features": [
-    { "id": "feat-401", "name": "Mobile-First Application Form", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
-    { "id": "feat-402", "name": "Document Upload & Verification", "status": "in-progress", "storyPoints": 13, "completedPoints": 8, "priority": "high" }
+    {
+      "id": "feat-401",
+      "name": "Mobile-First Application Form",
+      "description": "Responsive, progressive application form optimized for mobile completion with smart defaults and inline validation.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given mobile-first application form is initiated, When processing completes, Then expected outcome is achieved",
+        "Given valid inputs are provided, When action is triggered, Then system responds within SLA",
+        "Given edge case occurs, When handled, Then graceful error handling is displayed"
+      ],
+      "stories": [
+        {
+          "id": "story-40001",
+          "name": "Progressive Form Architecture",
+          "description": "As a Customer, I need a step-by-step form so that I am not overwhelmed by too many fields.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given progressive form architecture, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400001",
+              "name": "Design multi-step form flow",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Jessica Lee",
+              "skills": [
+                "UX Design",
+                "Figma"
+              ]
+            },
+            {
+              "id": "task-400002",
+              "name": "Build form state management",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "React",
+                "Redux"
+              ]
+            },
+            {
+              "id": "task-400003",
+              "name": "Implement progress saving",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "Backend",
+                "APIs"
+              ]
+            },
+            {
+              "id": "task-400004",
+              "name": "Create inline validation",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "React",
+                "Validation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-40002",
+          "name": "Smart Address Lookup",
+          "description": "As a Customer, I need address auto-complete so that I can enter my address quickly and accurately.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given smart address lookup, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400005",
+              "name": "Integrate PostCode Anywhere API",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Alex Turner",
+              "skills": [
+                "APIs",
+                "Integration"
+              ]
+            },
+            {
+              "id": "task-400006",
+              "name": "Build address selection UI",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "React",
+                "UX"
+              ]
+            },
+            {
+              "id": "task-400007",
+              "name": "Implement address verification",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Data Validation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-40003",
+          "name": "Mobile Responsive Design",
+          "description": "As a Mobile User, I need a form that works on my phone so that I can apply from anywhere.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given mobile responsive design, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400008",
+              "name": "Create mobile-first CSS framework",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Jessica Lee",
+              "skills": [
+                "CSS",
+                "Responsive Design"
+              ]
+            },
+            {
+              "id": "task-400009",
+              "name": "Implement touch-friendly inputs",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "Mobile UX",
+                "React"
+              ]
+            },
+            {
+              "id": "task-400010",
+              "name": "Optimize for slow connections",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Performance",
+                "PWA"
+              ]
+            },
+            {
+              "id": "task-400011",
+              "name": "Test across device matrix",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "QA Team",
+              "skills": [
+                "Testing",
+                "Mobile"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-402",
+      "name": "Document Upload & Verification",
+      "description": "Self-service document upload with AI-powered verification for ID, proof of address, and income documents.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given document upload & verification is initiated, When processing completes, Then expected outcome is achieved",
+        "Given valid inputs are provided, When action is triggered, Then system responds within SLA",
+        "Given edge case occurs, When handled, Then graceful error handling is displayed"
+      ],
+      "stories": [
+        {
+          "id": "story-40004",
+          "name": "Document Capture UI",
+          "description": "As a Customer, I need to upload documents from my phone so that I can complete verification easily.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given document capture ui, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400012",
+              "name": "Build camera capture component",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "React",
+                "Media APIs"
+              ]
+            },
+            {
+              "id": "task-400013",
+              "name": "Create document preview/crop",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "Image Processing",
+                "Canvas"
+              ]
+            },
+            {
+              "id": "task-400014",
+              "name": "Implement secure upload",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Security",
+                "S3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-40005",
+          "name": "AI Document Verification",
+          "description": "As an Underwriter, I need automatic document verification so that processing is faster.",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given ai document verification, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400015",
+              "name": "Integrate OCR for ID extraction",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "AI Team",
+              "skills": [
+                "OCR",
+                "Azure Vision"
+              ]
+            },
+            {
+              "id": "task-400016",
+              "name": "Build fraud detection checks",
+              "status": "in-progress",
+              "effortHours": 24,
+              "assignee": "AI Team",
+              "skills": [
+                "ML",
+                "Fraud Detection"
+              ]
+            },
+            {
+              "id": "task-400017",
+              "name": "Create human review queue",
+              "status": "pending",
+              "effortHours": 16,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Workflow",
+                "Backend"
+              ]
+            },
+            {
+              "id": "task-400018",
+              "name": "Implement verification audit trail",
+              "status": "pending",
+              "effortHours": 8,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Logging",
+                "Compliance"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-403",
+      "name": "Real-time Underwriting Integration",
+      "description": "Instant underwriting decisions for simple cases, with seamless escalation for complex applications.",
+      "status": "planned",
+      "storyPoints": 34,
+      "completedPoints": 0,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given real-time underwriting integration is initiated, When processing completes, Then expected outcome is achieved",
+        "Given valid inputs are provided, When action is triggered, Then system responds within SLA",
+        "Given edge case occurs, When handled, Then graceful error handling is displayed"
+      ],
+      "stories": [
+        {
+          "id": "story-40006",
+          "name": "Rules Engine Integration",
+          "description": "As a Customer, I need instant decisions so that I know immediately if I am approved.",
+          "storyPoints": 21,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given rules engine integration, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400019",
+              "name": "Connect to underwriting rules engine",
+              "status": "planned",
+              "effortHours": 24,
+              "assignee": "Integration Team",
+              "skills": [
+                "APIs",
+                "Rules Engines"
+              ]
+            },
+            {
+              "id": "task-400020",
+              "name": "Build decision display UI",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "React",
+                "UX"
+              ]
+            },
+            {
+              "id": "task-400021",
+              "name": "Implement escalation workflow",
+              "status": "planned",
+              "effortHours": 20,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Workflow",
+                "Backend"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-40007",
+          "name": "Quote Comparison Display",
+          "description": "As a Customer, I need to see my quote options so that I can choose the right coverage.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given quote comparison display, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-400022",
+              "name": "Design quote comparison UI",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Jessica Lee",
+              "skills": [
+                "UX Design"
+              ]
+            },
+            {
+              "id": "task-400023",
+              "name": "Build quote selection flow",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Ryan Mitchell",
+              "skills": [
+                "React",
+                "State Management"
+              ]
+            },
+            {
+              "id": "task-400024",
+              "name": "Implement quote persistence",
+              "status": "planned",
+              "effortHours": 8,
+              "assignee": "Alex Turner",
+              "skills": [
+                "Backend",
+                "Database"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-401", "name": "Jessica Lee", "role": "UX Designer", "allocation": 100, "team": "Design" },
-    { "id": "res-402", "name": "Ryan Mitchell", "role": "Frontend Developer", "allocation": 100, "team": "Engineering" }
+    {
+      "id": "res-401",
+      "name": "Jessica Lee",
+      "role": "Lead UX Designer",
+      "allocation": 100,
+      "team": "Design",
+      "skills": [
+        "UX Design",
+        "Figma",
+        "User Research"
+      ],
+      "costRate": 700
+    },
+    {
+      "id": "res-402",
+      "name": "Ryan Mitchell",
+      "role": "Senior Frontend Developer",
+      "allocation": 100,
+      "team": "Engineering",
+      "skills": [
+        "React",
+        "TypeScript",
+        "Mobile"
+      ],
+      "costRate": 750
+    },
+    {
+      "id": "res-403",
+      "name": "Alex Turner",
+      "role": "Backend Developer",
+      "allocation": 80,
+      "team": "Engineering",
+      "skills": [
+        "Node.js",
+        "APIs",
+        "Integration"
+      ],
+      "costRate": 700
+    }
   ],
   "milestones": [
-    { "id": "ms-401", "name": "Design Complete", "date": "2024-05-15", "status": "completed", "deliverables": ["UI designs", "User flows"] },
-    { "id": "ms-402", "name": "A/B Testing", "date": "2024-10-01", "status": "planned", "deliverables": ["Test results", "Optimization"] }
+    {
+      "id": "ms-pmo-rt-001-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-04-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-rt-001-2",
+      "name": "MVP Launch",
+      "date": "2024-08-29",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-rt-001-3",
+      "name": "Full Launch",
+      "date": "2025-02-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.4, "opex": 0.4, "contingency": 0.18, "npv": 22.0, "irr": 42, "paybackMonths": 12 },
-  "currentPI": 3, "totalPIs": 5, "velocity": 45, "burndownHealth": 82, "qualityScore": 90
+  "risks": [
+    {
+      "id": "risk-401",
+      "name": "Legacy system integration complexity",
+      "probability": "high",
+      "impact": "medium",
+      "status": "active",
+      "mitigation": "API adapter layer built; phased migration approach",
+      "owner": "Alex Turner"
+    },
+    {
+      "id": "risk-402",
+      "name": "Conversion rate not improving",
+      "probability": "medium",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "A/B testing at each stage; analytics-driven optimization",
+      "owner": "Jessica Lee"
+    },
+    {
+      "id": "risk-403",
+      "name": "Document fraud attempts",
+      "probability": "medium",
+      "impact": "high",
+      "status": "active",
+      "mitigation": "AI fraud detection + human review queue for edge cases",
+      "owner": "AI Team"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-401",
+      "name": "Underwriting Rules Engine",
+      "type": "internal",
+      "status": "active",
+      "description": "Real-time decision API for instant quotes"
+    },
+    {
+      "id": "dep-402",
+      "name": "PostCode Anywhere",
+      "type": "external",
+      "status": "resolved",
+      "description": "Address lookup service"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-401",
+      "name": "Sarah Thompson",
+      "role": "Head of Digital",
+      "department": "Retail",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-402",
+      "name": "Marketing Team",
+      "role": "Key Stakeholders",
+      "department": "Marketing",
+      "influence": "medium",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-rt-001-1",
+      "name": "PI 24.3 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-rt-001-2",
+      "name": "PI 24.3 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-rt-001-3",
+      "name": "PI 24.3 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 1.4,
+    "opex": 0.5,
+    "contingency": 0.2,
+    "npv": 22.4,
+    "irr": 43,
+    "paybackMonths": 12,
+    "costBreakdown": {
+      "development": 0.9,
+      "infrastructure": 0.4,
+      "licensing": 0.3,
+      "contingency": 0.2
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.4,
+    "testCoverage": 85,
+    "technicalDebtDays": 10,
+    "codeReviewCoverage": 100,
+    "documentationScore": 85
+  },
+  "currentPI": 3,
+  "totalPIs": 4,
+  "velocity": 46,
+  "burndownHealth": 80,
+  "qualityScore": 81
 }

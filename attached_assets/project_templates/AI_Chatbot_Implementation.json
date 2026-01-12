@@ -2,26 +2,701 @@
   "id": "pmo-rt-002",
   "name": "AI Chatbot Implementation",
   "bu": "Retail",
-  "description": "Implementing AI-powered chatbot for customer service across digital channels.",
-  "expectedROI": "£12m cost savings",
+  "division": "Retail",
+  "description": "Enterprise AI chatbot powered by large language models for customer service automation across web, mobile, and voice channels. Handles policy queries, claims status, and account management with 85% resolution rate target.",
+  "expectedROI": "£12m cost savings through automation",
   "roiValue": 12,
-  "priority": "medium",
+  "priority": "high",
   "status": "green",
-  "budget": { "spent": 0.4, "total": 0.7, "unit": "£m" },
-  "timeline": { "elapsed": 3, "total": 6, "unit": "months" },
+  "budget": {
+    "spent": 0.4,
+    "total": 0.7,
+    "unit": "£m",
+    "contingency": 0.1,
+    "forecastAtCompletion": 0.7
+  },
+  "timeline": {
+    "elapsed": 3,
+    "total": 6,
+    "startDate": "2024-07-01",
+    "endDate": "2025-01-01",
+    "unit": "months"
+  },
   "artName": "Customer Experience ART",
   "portfolioTheme": "AI Enablement",
-  "safe": { "velocity": 38, "predictability": 82, "flowEfficiency": 70, "currentPI": "PI 24.2", "epicId": "EPIC-RT-102", "epicName": "AI Customer Service", "epicProgress": 45 },
+  "strategicObjectives": [
+    "SO-6: Digital Transformation",
+    "SO-3: Operational Excellence",
+    "SO-4: Client Trust"
+  ],
+  "safe": {
+    "velocity": 38,
+    "predictability": 78,
+    "flowEfficiency": 69,
+    "currentPI": "PI 24.2",
+    "totalPIs": 3,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-RET-002",
+    "epicName": "AI Chatbot Implementation",
+    "epicProgress": 50,
+    "epicWsjf": {
+      "businessValue": 13,
+      "timeCriticality": 10,
+      "riskReduction": 7,
+      "jobSize": 8,
+      "score": 3.75
+    },
+    "solutionTrain": "Retail Technology",
+    "valueStream": "AI Enablement"
+  },
   "features": [
-    { "id": "feat-501", "name": "Natural Language Understanding", "status": "in-progress", "storyPoints": 21, "completedPoints": 12, "priority": "critical" }
+    {
+      "id": "feat-501",
+      "name": "Natural Language Understanding",
+      "description": "Core NLU engine for intent recognition, entity extraction, and context management across customer queries.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": {
+        "businessValue": 21,
+        "timeCriticality": 17,
+        "riskReduction": 11,
+        "jobSize": 13,
+        "score": 3.77
+      },
+      "acceptanceCriteria": [
+        "Given natural language understanding is initiated, When processing completes, Then expected outcome is achieved",
+        "Given valid inputs are provided, When action is triggered, Then system responds within SLA",
+        "Given edge case occurs, When handled, Then graceful error handling is displayed"
+      ],
+      "stories": [
+        {
+          "id": "story-50001",
+          "name": "Intent Classification Model",
+          "description": "As a Customer, I need the chatbot to understand my question so that I get relevant responses.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given intent classification model, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500001",
+              "name": "Train intent classifier on 50k labeled queries",
+              "status": "done",
+              "effortHours": 32,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "NLP",
+                "PyTorch"
+              ]
+            },
+            {
+              "id": "task-500002",
+              "name": "Build entity extraction pipeline",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "NER",
+                "spaCy"
+              ]
+            },
+            {
+              "id": "task-500003",
+              "name": "Implement context management",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "James Wong",
+              "skills": [
+                "Python",
+                "Redis"
+              ]
+            },
+            {
+              "id": "task-500004",
+              "name": "Deploy model to inference API",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "James Wong",
+              "skills": [
+                "FastAPI",
+                "Docker"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-50002",
+          "name": "LLM Response Generation",
+          "description": "As a Customer, I need natural conversational responses so that interactions feel human-like.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given llm response generation, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500005",
+              "name": "Fine-tune LLM on L&G tone and policies",
+              "status": "done",
+              "effortHours": 40,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "LLM",
+                "Fine-tuning"
+              ]
+            },
+            {
+              "id": "task-500006",
+              "name": "Build response generation pipeline",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "LangChain",
+                "Python"
+              ]
+            },
+            {
+              "id": "task-500007",
+              "name": "Implement guardrails and safety filters",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "James Wong",
+              "skills": [
+                "AI Safety",
+                "Moderation"
+              ]
+            },
+            {
+              "id": "task-500008",
+              "name": "Create response quality monitoring",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "Sarah Kim",
+              "skills": [
+                "Analytics",
+                "Dashboards"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-50003",
+          "name": "Multi-turn Conversation Management",
+          "description": "As a Customer, I need the chatbot to remember context so that I do not have to repeat myself.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given multi-turn conversation management, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500009",
+              "name": "Build conversation state manager",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "James Wong",
+              "skills": [
+                "State Management",
+                "Redis"
+              ]
+            },
+            {
+              "id": "task-500010",
+              "name": "Implement session persistence",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "James Wong",
+              "skills": [
+                "Backend",
+                "PostgreSQL"
+              ]
+            },
+            {
+              "id": "task-500011",
+              "name": "Create handoff to human agent",
+              "status": "done",
+              "effortHours": 16,
+              "assignee": "Sarah Kim",
+              "skills": [
+                "Integration",
+                "Contact Center"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-502",
+      "name": "Channel Integration",
+      "description": "Deploy chatbot across web widget, mobile app, and IVR voice channel with consistent experience.",
+      "status": "in-progress",
+      "storyPoints": 34,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given channel integration is initiated, When processing completes, Then expected outcome is achieved",
+        "Given valid inputs are provided, When action is triggered, Then system responds within SLA",
+        "Given edge case occurs, When handled, Then graceful error handling is displayed"
+      ],
+      "stories": [
+        {
+          "id": "story-50004",
+          "name": "Web Widget Deployment",
+          "description": "As a Website Visitor, I need a chat widget so that I can get help without leaving the page.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given web widget deployment, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500012",
+              "name": "Build React chat widget component",
+              "status": "done",
+              "effortHours": 24,
+              "assignee": "Sarah Kim",
+              "skills": [
+                "React",
+                "TypeScript"
+              ]
+            },
+            {
+              "id": "task-500013",
+              "name": "Implement WebSocket connection",
+              "status": "done",
+              "effortHours": 12,
+              "assignee": "James Wong",
+              "skills": [
+                "WebSocket",
+                "Real-time"
+              ]
+            },
+            {
+              "id": "task-500014",
+              "name": "Create widget customization options",
+              "status": "done",
+              "effortHours": 8,
+              "assignee": "Sarah Kim",
+              "skills": [
+                "CSS",
+                "Theming"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-50005",
+          "name": "Mobile App Integration",
+          "description": "As a Mobile User, I need in-app chat so that I can get help from my phone.",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given mobile app integration, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500015",
+              "name": "Build iOS chat SDK",
+              "status": "done",
+              "effortHours": 20,
+              "assignee": "Mobile Team",
+              "skills": [
+                "Swift",
+                "iOS"
+              ]
+            },
+            {
+              "id": "task-500016",
+              "name": "Build Android chat SDK",
+              "status": "in-progress",
+              "effortHours": 20,
+              "assignee": "Mobile Team",
+              "skills": [
+                "Kotlin",
+                "Android"
+              ]
+            },
+            {
+              "id": "task-500017",
+              "name": "Implement push notification triggers",
+              "status": "pending",
+              "effortHours": 12,
+              "assignee": "James Wong",
+              "skills": [
+                "Push Notifications"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-50006",
+          "name": "Voice IVR Integration",
+          "description": "As a Phone Caller, I need voice-enabled AI so that I can speak naturally instead of pressing buttons.",
+          "storyPoints": 8,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given voice ivr integration, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500018",
+              "name": "Integrate speech-to-text engine",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "Speech Recognition",
+                "Whisper"
+              ]
+            },
+            {
+              "id": "task-500019",
+              "name": "Build text-to-speech output",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "TTS",
+                "Audio"
+              ]
+            },
+            {
+              "id": "task-500020",
+              "name": "Connect to existing IVR platform",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Integration Team",
+              "skills": [
+                "Telephony",
+                "SIP"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-503",
+      "name": "Knowledge Base Integration",
+      "description": "Connect chatbot to policy documents, FAQs, and product information for accurate, up-to-date responses.",
+      "status": "planned",
+      "storyPoints": 21,
+      "completedPoints": 0,
+      "priority": "high",
+      "wsjf": {
+        "businessValue": 13,
+        "timeCriticality": 10,
+        "riskReduction": 7,
+        "jobSize": 8,
+        "score": 3.75
+      },
+      "acceptanceCriteria": [
+        "Given knowledge base integration is initiated, When processing completes, Then expected outcome is achieved",
+        "Given valid inputs are provided, When action is triggered, Then system responds within SLA",
+        "Given edge case occurs, When handled, Then graceful error handling is displayed"
+      ],
+      "stories": [
+        {
+          "id": "story-50007",
+          "name": "Document Ingestion Pipeline",
+          "description": "As a Content Manager, I need automatic document ingestion so that the chatbot has current information.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given document ingestion pipeline, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500021",
+              "name": "Build PDF/Word document parser",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "James Wong",
+              "skills": [
+                "Document Processing",
+                "Python"
+              ]
+            },
+            {
+              "id": "task-500022",
+              "name": "Create vector embedding pipeline",
+              "status": "planned",
+              "effortHours": 20,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "Embeddings",
+                "Vector DB"
+              ]
+            },
+            {
+              "id": "task-500023",
+              "name": "Implement RAG retrieval system",
+              "status": "planned",
+              "effortHours": 24,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "RAG",
+                "LangChain"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "story-50008",
+          "name": "Answer Accuracy Validation",
+          "description": "As a Quality Manager, I need answer validation so that customers receive correct information.",
+          "storyPoints": 8,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given answer accuracy validation, When action completed, Then result is verified",
+            "Given valid configuration, When executed, Then expected behavior occurs",
+            "Given error condition, When detected, Then appropriate handling applied"
+          ],
+          "tasks": [
+            {
+              "id": "task-500024",
+              "name": "Build answer verification pipeline",
+              "status": "planned",
+              "effortHours": 16,
+              "assignee": "Priya Sharma",
+              "skills": [
+                "NLP",
+                "Fact Checking"
+              ]
+            },
+            {
+              "id": "task-500025",
+              "name": "Create accuracy monitoring dashboard",
+              "status": "planned",
+              "effortHours": 12,
+              "assignee": "Sarah Kim",
+              "skills": [
+                "Dashboards",
+                "Analytics"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-501", "name": "Priya Sharma", "role": "ML Engineer", "allocation": 100, "team": "AI" }
+    {
+      "id": "res-501",
+      "name": "Priya Sharma",
+      "role": "Lead ML Engineer",
+      "allocation": 100,
+      "team": "AI",
+      "skills": [
+        "NLP",
+        "LLM",
+        "PyTorch"
+      ],
+      "costRate": 850
+    },
+    {
+      "id": "res-502",
+      "name": "James Wong",
+      "role": "Backend Developer",
+      "allocation": 100,
+      "team": "Engineering",
+      "skills": [
+        "Python",
+        "APIs",
+        "Redis"
+      ],
+      "costRate": 700
+    },
+    {
+      "id": "res-503",
+      "name": "Sarah Kim",
+      "role": "Frontend Developer",
+      "allocation": 80,
+      "team": "Engineering",
+      "skills": [
+        "React",
+        "TypeScript"
+      ],
+      "costRate": 650
+    }
   ],
   "milestones": [
-    { "id": "ms-501", "name": "Pilot Launch", "date": "2024-08-15", "status": "in-progress", "deliverables": ["Chatbot MVP", "Integration"] }
+    {
+      "id": "ms-pmo-rt-002-1",
+      "name": "Phase 1 Complete",
+      "date": "2024-07-01",
+      "status": "completed",
+      "deliverables": [
+        "Initial setup",
+        "Core infrastructure"
+      ]
+    },
+    {
+      "id": "ms-pmo-rt-002-2",
+      "name": "MVP Launch",
+      "date": "2024-09-29",
+      "status": "in-progress",
+      "deliverables": [
+        "Core features",
+        "User testing"
+      ]
+    },
+    {
+      "id": "ms-pmo-rt-002-3",
+      "name": "Full Launch",
+      "date": "2025-01-01",
+      "status": "planned",
+      "deliverables": [
+        "All features complete",
+        "Training delivered"
+      ]
+    }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 0.5, "opex": 0.2, "contingency": 0.07, "npv": 9.5, "irr": 65, "paybackMonths": 7 },
-  "currentPI": 2, "totalPIs": 3, "velocity": 38, "burndownHealth": 78, "qualityScore": 82
+  "risks": [
+    {
+      "id": "risk-501",
+      "name": "LLM hallucination risk",
+      "probability": "medium",
+      "impact": "high",
+      "status": "active",
+      "mitigation": "RAG grounding + fact verification + human escalation path",
+      "owner": "Priya Sharma"
+    },
+    {
+      "id": "risk-502",
+      "name": "Customer adoption resistance",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Gradual rollout with human backup; customer feedback loop",
+      "owner": "Sarah Kim"
+    },
+    {
+      "id": "risk-503",
+      "name": "Data privacy concerns",
+      "probability": "low",
+      "impact": "critical",
+      "status": "mitigated",
+      "mitigation": "No PII logging; conversation encryption; GDPR review completed",
+      "owner": "James Wong"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-501",
+      "name": "Azure OpenAI Access",
+      "type": "external",
+      "status": "resolved",
+      "description": "Enterprise LLM API access for response generation"
+    },
+    {
+      "id": "dep-502",
+      "name": "Contact Center Integration",
+      "type": "internal",
+      "status": "active",
+      "description": "Handoff capability to human agents"
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "sh-501",
+      "name": "Michael Harris",
+      "role": "Head of Customer Service",
+      "department": "Operations",
+      "influence": "high",
+      "interest": "high"
+    },
+    {
+      "id": "sh-502",
+      "name": "Contact Center Team",
+      "role": "Key Users",
+      "department": "Operations",
+      "influence": "medium",
+      "interest": "high"
+    }
+  ],
+  "iterations": [
+    {
+      "id": "iter-pmo-rt-002-1",
+      "name": "PI 24.2 - Iteration 1",
+      "startDate": "2024-10-14",
+      "endDate": "2024-10-25",
+      "capacity": 100,
+      "committed": 95,
+      "completed": 92,
+      "velocity": 92
+    },
+    {
+      "id": "iter-pmo-rt-002-2",
+      "name": "PI 24.2 - Iteration 2",
+      "startDate": "2024-10-28",
+      "endDate": "2024-11-08",
+      "capacity": 100,
+      "committed": 98,
+      "completed": 95,
+      "velocity": 95
+    },
+    {
+      "id": "iter-pmo-rt-002-3",
+      "name": "PI 24.2 - Iteration 3",
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-22",
+      "capacity": 100,
+      "committed": 100,
+      "completed": 0,
+      "velocity": null
+    }
+  ],
+  "financials": {
+    "capitalex": 0.5,
+    "opex": 0.2,
+    "contingency": 0.1,
+    "npv": 9.6,
+    "irr": 49,
+    "paybackMonths": 7,
+    "costBreakdown": {
+      "development": 0.4,
+      "infrastructure": 0.1,
+      "licensing": 0.1,
+      "contingency": 0.1
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.5,
+    "testCoverage": 83,
+    "technicalDebtDays": 7,
+    "codeReviewCoverage": 100,
+    "documentationScore": 79
+  },
+  "currentPI": 2,
+  "totalPIs": 3,
+  "velocity": 38,
+  "burndownHealth": 87,
+  "qualityScore": 87
 }

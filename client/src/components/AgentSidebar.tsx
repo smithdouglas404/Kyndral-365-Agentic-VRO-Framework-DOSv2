@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { 
   DollarSign, GitBranch, Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight, ChevronDown,
-  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Zap, Compass, Upload
+  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Zap, Compass, Upload, Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -26,6 +26,7 @@ const coreNavItems: NavItem[] = [
   { id: "business-cases", label: "Business Cases", icon: Briefcase, modes: "all" },
   { id: "early-warning", label: "Early Warning", icon: AlertOctagon, modes: "all" },
   { id: "kpi-tracking", label: "KPIs", icon: PieChart, modes: "all" },
+  { id: "agent-command", label: "Agent Command", icon: Bot, modes: "all" },
   { id: "ingestion", label: "Project Ingestion", icon: Upload, modes: "all" },
 ];
 

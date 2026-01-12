@@ -2,27 +2,319 @@
   "id": "pmo-am-003",
   "name": "Client Portal Modernization",
   "bu": "Asset Management",
-  "description": "Modernizing client portal with improved UX, real-time portfolio views, and self-service capabilities.",
-  "expectedROI": "£20m client retention",
-  "roiValue": 20,
+  "division": "LGIM",
+  "description": "Complete redesign of the institutional client portal with modern UX, real-time portfolio views, self-service transaction capabilities, and personalized reporting. Serving 2,500+ institutional clients managing £800bn AUM.",
+  "expectedROI": "£20m client retention + £50m operational efficiency",
+  "roiValue": 70,
   "priority": "high",
   "status": "green",
-  "budget": { "spent": 1.2, "total": 1.8, "unit": "£m" },
-  "timeline": { "elapsed": 7, "total": 11, "unit": "months" },
+  "budget": { "spent": 1.2, "total": 1.8, "unit": "£m", "contingency": 0.2, "forecastAtCompletion": 1.75 },
+  "timeline": { "elapsed": 7, "total": 11, "unit": "months", "startDate": "2024-04-01", "endDate": "2025-03-01" },
   "artName": "Client Experience ART",
   "portfolioTheme": "Client Centricity",
-  "safe": { "velocity": 44, "predictability": 85, "flowEfficiency": 73, "currentPI": "PI 24.4", "epicId": "EPIC-AM-203", "epicName": "Client Portal", "epicProgress": 62 },
+  "strategicObjectives": ["SO-4: Client Trust", "SO-6: Digital Transformation", "SO-3: Operational Excellence"],
+  "safe": {
+    "velocity": 44,
+    "predictability": 85,
+    "flowEfficiency": 73,
+    "currentPI": "PI 24.4",
+    "totalPIs": 5,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-AM-203",
+    "epicName": "Client Portal",
+    "epicProgress": 62,
+    "epicWsjf": { "businessValue": 13, "timeCriticality": 13, "riskReduction": 5, "jobSize": 8, "score": 3.88 },
+    "solutionTrain": "Client Technology",
+    "valueStream": "Client Service"
+  },
   "features": [
-    { "id": "feat-1101", "name": "Real-time Portfolio Dashboard", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
-    { "id": "feat-1102", "name": "Self-service Transactions", "status": "in-progress", "storyPoints": 21, "completedPoints": 10, "priority": "high" }
+    {
+      "id": "feat-1101",
+      "name": "Real-time Portfolio Dashboard",
+      "description": "Interactive dashboard showing real-time portfolio valuations, performance attribution, and risk metrics with drill-down capabilities.",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": { "businessValue": 21, "timeCriticality": 13, "riskReduction": 5, "jobSize": 8, "score": 4.88 },
+      "acceptanceCriteria": [
+        "Portfolio valuations updated within 15 minutes of market close",
+        "Performance attribution available at asset class, sector, and security level",
+        "Risk metrics (VaR, tracking error) displayed with trend analysis",
+        "Mobile-responsive design for on-the-go access"
+      ],
+      "stories": [
+        {
+          "id": "story-11001",
+          "name": "Portfolio Summary View",
+          "description": "As an Institutional Client, I need a summary view of my portfolio so that I can quickly understand my current position.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given client logs in, When dashboard loads, Then total AUM is displayed within 3 seconds",
+            "Given portfolio has multiple mandates, When viewed, Then each mandate shows separately",
+            "Given market is open, When viewed, Then intraday estimates are shown with timestamp"
+          ],
+          "tasks": [
+            { "id": "task-110001", "name": "Design portfolio summary wireframes", "status": "done", "effortHours": 16, "assignee": "Emily Watson", "skills": ["UX Design", "Figma"] },
+            { "id": "task-110002", "name": "Build portfolio data aggregation API", "status": "done", "effortHours": 24, "assignee": "Chris Taylor", "skills": ["Node.js", "PostgreSQL"] },
+            { "id": "task-110003", "name": "Create React portfolio summary component", "status": "done", "effortHours": 20, "assignee": "Amy Chen", "skills": ["React", "TypeScript"] },
+            { "id": "task-110004", "name": "Implement real-time update mechanism", "status": "done", "effortHours": 16, "assignee": "Chris Taylor", "skills": ["WebSockets", "Real-time"] }
+          ]
+        },
+        {
+          "id": "story-11002",
+          "name": "Performance Attribution Analysis",
+          "description": "As a Client Portfolio Manager, I need detailed performance attribution so that I can understand what drove my returns.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given period selected, When attribution calculated, Then results show allocation, selection, and interaction effects",
+            "Given attribution displayed, When user drills down, Then security-level contribution is visible",
+            "Given benchmark is set, When compared, Then relative performance is highlighted"
+          ],
+          "tasks": [
+            { "id": "task-110005", "name": "Build Brinson attribution engine", "status": "done", "effortHours": 32, "assignee": "Dr. Sarah Adams", "skills": ["Quantitative Finance", "Python"] },
+            { "id": "task-110006", "name": "Create attribution visualization components", "status": "done", "effortHours": 24, "assignee": "Amy Chen", "skills": ["React", "D3.js", "Charts"] },
+            { "id": "task-110007", "name": "Implement drill-down navigation", "status": "done", "effortHours": 16, "assignee": "Amy Chen", "skills": ["React", "UX"] },
+            { "id": "task-110008", "name": "Build benchmark comparison module", "status": "done", "effortHours": 12, "assignee": "Dr. Sarah Adams", "skills": ["Analytics"] }
+          ]
+        },
+        {
+          "id": "story-11003",
+          "name": "Risk Metrics Dashboard",
+          "description": "As a Risk Officer, I need to see portfolio risk metrics so that I can monitor exposure within guidelines.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given portfolio selected, When risk viewed, Then VaR at 95% and 99% confidence shown",
+            "Given tracking error calculated, When displayed, Then trend over 12 months is visible",
+            "Given limit breach occurs, When detected, Then alert is prominently displayed"
+          ],
+          "tasks": [
+            { "id": "task-110009", "name": "Integrate risk calculation engine", "status": "done", "effortHours": 20, "assignee": "Dr. Sarah Adams", "skills": ["Risk", "APIs"] },
+            { "id": "task-110010", "name": "Build risk metrics visualization", "status": "done", "effortHours": 16, "assignee": "Amy Chen", "skills": ["Charts", "React"] },
+            { "id": "task-110011", "name": "Implement breach alerting", "status": "done", "effortHours": 12, "assignee": "Chris Taylor", "skills": ["Alerting", "Backend"] }
+          ]
+        },
+        {
+          "id": "story-11004",
+          "name": "Mobile Responsive Design",
+          "description": "As a Client Executive, I need mobile access so that I can check portfolio status while traveling.",
+          "storyPoints": 8,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given mobile device used, When dashboard accessed, Then layout adapts appropriately",
+            "Given touch interaction, When user taps, Then responsive feedback is provided",
+            "Given limited bandwidth, When loading, Then progressive enhancement is used"
+          ],
+          "tasks": [
+            { "id": "task-110012", "name": "Create responsive design system", "status": "done", "effortHours": 16, "assignee": "Emily Watson", "skills": ["CSS", "Responsive Design"] },
+            { "id": "task-110013", "name": "Implement mobile-first components", "status": "done", "effortHours": 20, "assignee": "Amy Chen", "skills": ["React", "Mobile"] },
+            { "id": "task-110014", "name": "Optimize performance for mobile", "status": "done", "effortHours": 12, "assignee": "Chris Taylor", "skills": ["Performance", "Optimization"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-1102",
+      "name": "Self-service Transactions",
+      "description": "Enable clients to initiate transactions (rebalancing, cash movements, mandate changes) directly through the portal with appropriate controls.",
+      "status": "in-progress",
+      "storyPoints": 55,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": { "businessValue": 13, "timeCriticality": 8, "riskReduction": 8, "jobSize": 8, "score": 3.63 },
+      "acceptanceCriteria": [
+        "Clients can request cash movements up to pre-approved limits",
+        "Rebalancing requests are validated against IPS guidelines",
+        "All transactions require 4-eyes internal approval",
+        "Full audit trail from request to execution"
+      ],
+      "stories": [
+        {
+          "id": "story-11005",
+          "name": "Cash Movement Requests",
+          "description": "As a Client Treasurer, I need to request cash withdrawals so that I can fund pension payments.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given cash request initiated, When amount entered, Then pre-approved limits are validated",
+            "Given request is valid, When submitted, Then confirmation with reference number is shown",
+            "Given request submitted, When internal approval given, Then execution is scheduled"
+          ],
+          "tasks": [
+            { "id": "task-110015", "name": "Design cash movement workflow UX", "status": "done", "effortHours": 12, "assignee": "Emily Watson", "skills": ["UX Design"] },
+            { "id": "task-110016", "name": "Build cash request form and validation", "status": "done", "effortHours": 20, "assignee": "Amy Chen", "skills": ["React", "Forms"] },
+            { "id": "task-110017", "name": "Implement limit checking service", "status": "done", "effortHours": 16, "assignee": "Chris Taylor", "skills": ["Business Rules", "APIs"] },
+            { "id": "task-110018", "name": "Create approval workflow integration", "status": "done", "effortHours": 24, "assignee": "Chris Taylor", "skills": ["Workflow", "Integration"] },
+            { "id": "task-110019", "name": "Build execution scheduling", "status": "done", "effortHours": 12, "assignee": "Chris Taylor", "skills": ["Scheduling", "Backend"] }
+          ]
+        },
+        {
+          "id": "story-11006",
+          "name": "Rebalancing Requests",
+          "description": "As a Client CIO, I need to request portfolio rebalancing so that I can maintain target allocations.",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given rebalance requested, When targets entered, Then IPS validation runs",
+            "Given rebalance is within guidelines, When submitted, Then trade list is generated",
+            "Given rebalance is outside guidelines, When flagged, Then exception approval is required"
+          ],
+          "tasks": [
+            { "id": "task-110020", "name": "Build rebalancing interface", "status": "done", "effortHours": 20, "assignee": "Amy Chen", "skills": ["React", "Complex UI"] },
+            { "id": "task-110021", "name": "Implement IPS validation engine", "status": "done", "effortHours": 24, "assignee": "Dr. Sarah Adams", "skills": ["Compliance", "Rules Engine"] },
+            { "id": "task-110022", "name": "Create trade list generation", "status": "done", "effortHours": 16, "assignee": "Chris Taylor", "skills": ["Trading", "APIs"] }
+          ]
+        },
+        {
+          "id": "story-11007",
+          "name": "Mandate Change Requests",
+          "description": "As a Client Trustee, I need to request mandate changes so that I can adjust investment strategy.",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given mandate change requested, When details entered, Then impact analysis is shown",
+            "Given change is significant, When flagged, Then legal review is triggered",
+            "Given change is approved, When implemented, Then documentation is updated"
+          ],
+          "tasks": [
+            { "id": "task-110023", "name": "Design mandate change workflow", "status": "done", "effortHours": 12, "assignee": "Emily Watson", "skills": ["UX Design"] },
+            { "id": "task-110024", "name": "Build change request form", "status": "done", "effortHours": 16, "assignee": "Amy Chen", "skills": ["React", "Forms"] },
+            { "id": "task-110025", "name": "Implement impact analysis engine", "status": "in-progress", "effortHours": 24, "assignee": "Dr. Sarah Adams", "skills": ["Analytics", "Modeling"] },
+            { "id": "task-110026", "name": "Create legal review integration", "status": "pending", "effortHours": 16, "assignee": "Chris Taylor", "skills": ["Integration", "Workflow"] }
+          ]
+        },
+        {
+          "id": "story-11008",
+          "name": "Transaction Audit Trail",
+          "description": "As an Auditor, I need a complete transaction history so that I can verify all actions taken.",
+          "storyPoints": 8,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given transaction completed, When audit viewed, Then full trail from request to execution visible",
+            "Given audit exported, When downloaded, Then PDF/CSV format available",
+            "Given audit searched, When filtered, Then results return in <3 seconds"
+          ],
+          "tasks": [
+            { "id": "task-110027", "name": "Design audit trail data model", "status": "done", "effortHours": 8, "assignee": "Chris Taylor", "skills": ["Database Design"] },
+            { "id": "task-110028", "name": "Build audit logging service", "status": "done", "effortHours": 16, "assignee": "Chris Taylor", "skills": ["Logging", "Backend"] },
+            { "id": "task-110029", "name": "Create audit search and export UI", "status": "in-progress", "effortHours": 16, "assignee": "Amy Chen", "skills": ["React", "Search"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-1103",
+      "name": "Personalized Reporting",
+      "description": "Customizable report builder allowing clients to create, schedule, and receive personalized reports tailored to their specific needs.",
+      "status": "planned",
+      "storyPoints": 34,
+      "completedPoints": 0,
+      "priority": "medium",
+      "wsjf": { "businessValue": 8, "timeCriticality": 5, "riskReduction": 3, "jobSize": 8, "score": 2.0 },
+      "acceptanceCriteria": [
+        "Clients can select from 50+ report components",
+        "Report scheduling supports daily, weekly, monthly frequencies",
+        "White-label branding available for consultant-branded reports",
+        "Reports delivered via portal, email, or SFTP"
+      ],
+      "stories": [
+        {
+          "id": "story-11009",
+          "name": "Report Builder Interface",
+          "description": "As a Client Analyst, I need a drag-and-drop report builder so that I can create custom reports.",
+          "storyPoints": 21,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given report builder opened, When components browsed, Then 50+ options are available",
+            "Given component dragged, When dropped on canvas, Then preview updates in real-time",
+            "Given report saved, When retrieved, Then configuration is preserved"
+          ],
+          "tasks": [
+            { "id": "task-110030", "name": "Design report builder UX", "status": "planned", "effortHours": 16, "assignee": "Emily Watson", "skills": ["UX Design"] },
+            { "id": "task-110031", "name": "Build drag-and-drop framework", "status": "planned", "effortHours": 24, "assignee": "Amy Chen", "skills": ["React", "DnD"] },
+            { "id": "task-110032", "name": "Create report component library", "status": "planned", "effortHours": 32, "assignee": "Amy Chen", "skills": ["React", "Components"] },
+            { "id": "task-110033", "name": "Implement report persistence", "status": "planned", "effortHours": 12, "assignee": "Chris Taylor", "skills": ["Backend", "Storage"] }
+          ]
+        },
+        {
+          "id": "story-11010",
+          "name": "Report Scheduling and Delivery",
+          "description": "As a Client Administrator, I need to schedule automatic report delivery so that stakeholders receive reports without manual effort.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given report created, When schedule set, Then delivery occurs at specified frequency",
+            "Given delivery preference set, When report generated, Then delivered via chosen channel",
+            "Given delivery fails, When error occurs, Then retry with notification"
+          ],
+          "tasks": [
+            { "id": "task-110034", "name": "Build scheduling engine", "status": "planned", "effortHours": 20, "assignee": "Chris Taylor", "skills": ["Scheduling", "Cron"] },
+            { "id": "task-110035", "name": "Implement email delivery", "status": "planned", "effortHours": 12, "assignee": "Chris Taylor", "skills": ["Email", "Integration"] },
+            { "id": "task-110036", "name": "Create SFTP delivery option", "status": "planned", "effortHours": 16, "assignee": "Chris Taylor", "skills": ["SFTP", "Security"] }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-1101", "name": "Emily Watson", "role": "Product Designer", "allocation": 100, "team": "Design" }
+    { "id": "res-1101", "name": "Emily Watson", "role": "Lead Product Designer", "allocation": 100, "team": "Design", "skills": ["UX Design", "Figma", "User Research"], "costRate": 700 },
+    { "id": "res-1102", "name": "Amy Chen", "role": "Senior Frontend Developer", "allocation": 100, "team": "Frontend", "skills": ["React", "TypeScript", "D3.js"], "costRate": 750 },
+    { "id": "res-1103", "name": "Chris Taylor", "role": "Backend Developer", "allocation": 100, "team": "Backend", "skills": ["Node.js", "PostgreSQL", "APIs"], "costRate": 700 },
+    { "id": "res-1104", "name": "Dr. Sarah Adams", "role": "Quantitative Analyst", "allocation": 60, "team": "Analytics", "skills": ["Portfolio Analytics", "Python", "Risk"], "costRate": 850 }
   ],
   "milestones": [
-    { "id": "ms-1101", "name": "Portal Launch", "date": "2024-11-15", "status": "planned", "deliverables": ["New portal", "Client migration"] }
+    { "id": "ms-1101", "name": "Portfolio Dashboard MVP", "date": "2024-08-31", "status": "completed", "deliverables": ["Real-time valuations", "Performance attribution", "Mobile responsive design"] },
+    { "id": "ms-1102", "name": "Self-service Transactions Beta", "date": "2024-12-15", "status": "in-progress", "deliverables": ["Cash movements live", "Rebalancing requests", "Audit trail operational"] },
+    { "id": "ms-1103", "name": "Full Portal Launch", "date": "2025-02-15", "status": "planned", "deliverables": ["All transaction types live", "Report builder", "Client migration complete"] },
+    { "id": "ms-1104", "name": "Legacy Portal Decommission", "date": "2025-03-01", "status": "planned", "deliverables": ["All clients migrated", "Legacy portal retired", "Support documentation complete"] }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.4, "opex": 0.4, "contingency": 0.18, "npv": 16.5, "irr": 48, "paybackMonths": 14 },
-  "currentPI": 4, "totalPIs": 5, "velocity": 44, "burndownHealth": 82, "qualityScore": 88
+  "risks": [
+    { "id": "risk-1101", "name": "Client adoption resistance", "probability": "medium", "impact": "high", "status": "active", "mitigation": "Change management program; client champions identified; training videos created", "owner": "Emily Watson" },
+    { "id": "risk-1102", "name": "Security vulnerabilities", "probability": "low", "impact": "critical", "status": "mitigated", "mitigation": "Penetration testing completed; WAF implemented; security review passed", "owner": "Chris Taylor" },
+    { "id": "risk-1103", "name": "Integration with legacy systems", "probability": "high", "impact": "medium", "status": "active", "mitigation": "API adapters built; phased migration approach; rollback capability", "owner": "Chris Taylor" }
+  ],
+  "dependencies": [
+    { "id": "dep-1101", "name": "Identity Management SSO", "type": "internal", "status": "resolved", "project": "Identity", "description": "Client SAML/OIDC authentication" },
+    { "id": "dep-1102", "name": "Portfolio Accounting System", "type": "internal", "status": "active", "project": "Core Operations", "description": "Real-time position and valuation data" },
+    { "id": "dep-1103", "name": "Order Management System", "type": "internal", "status": "active", "project": "Trading Technology", "description": "Trade execution for rebalancing requests" }
+  ],
+  "stakeholders": [
+    { "id": "sh-1101", "name": "James Morrison", "role": "Head of Client Service", "department": "Client Service", "influence": "high", "interest": "high" },
+    { "id": "sh-1102", "name": "Client Advisory Board", "role": "Client Representatives", "department": "Clients", "influence": "high", "interest": "high" },
+    { "id": "sh-1103", "name": "Operations Team", "role": "Internal Users", "department": "Operations", "influence": "medium", "interest": "high" }
+  ],
+  "iterations": [
+    { "id": "iter-1101", "name": "PI 24.4 - Iteration 1", "startDate": "2024-10-14", "endDate": "2024-10-25", "capacity": 100, "committed": 95, "completed": 92, "velocity": 92 },
+    { "id": "iter-1102", "name": "PI 24.4 - Iteration 2", "startDate": "2024-10-28", "endDate": "2024-11-08", "capacity": 95, "committed": 90, "completed": 88, "velocity": 88 },
+    { "id": "iter-1103", "name": "PI 24.4 - Iteration 3", "startDate": "2024-11-11", "endDate": "2024-11-22", "capacity": 100, "committed": 98, "completed": 0, "velocity": null }
+  ],
+  "financials": {
+    "capitalex": 1.4,
+    "opex": 0.4,
+    "contingency": 0.2,
+    "npv": 16.5,
+    "irr": 48,
+    "paybackMonths": 14,
+    "costBreakdown": {
+      "development": 1.0,
+      "design": 0.2,
+      "infrastructure": 0.2,
+      "contingency": 0.2
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.6,
+    "testCoverage": 86,
+    "technicalDebtDays": 10,
+    "codeReviewCoverage": 100,
+    "documentationScore": 82
+  },
+  "currentPI": 4,
+  "totalPIs": 5,
+  "velocity": 44,
+  "burndownHealth": 82,
+  "qualityScore": 88
 }

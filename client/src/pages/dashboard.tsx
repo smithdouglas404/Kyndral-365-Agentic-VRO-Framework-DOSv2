@@ -23,6 +23,7 @@ import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { AutonomousRiskAgent } from "@/components/AutonomousRiskAgent";
 import { MultiAgentDiscussion } from "@/components/MultiAgentDiscussion";
+import { AgentCommandCenter } from "@/components/AgentCommandCenter";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
@@ -668,7 +669,12 @@ function DashboardContent() {
             <PMOPipeline onDrillDown={handleDrillDown} />
           </TabsContent>
 
-          {/* Workspace Tab - PMO Co-Pilot */}
+          {/* Agent Command Center Tab */}
+          <TabsContent value="agent-command" className="space-y-6">
+            <AgentCommandCenter onNavigateToProject={(id) => navigate(`/project/${id}`)} />
+          </TabsContent>
+
+          {/* Workspace Tab - PMO Co-Pilot (Legacy) */}
           <TabsContent value="workspace" className="space-y-6">
             <PMOCoPilotWorkspace onDrillDown={handleDrillDown} />
           </TabsContent>

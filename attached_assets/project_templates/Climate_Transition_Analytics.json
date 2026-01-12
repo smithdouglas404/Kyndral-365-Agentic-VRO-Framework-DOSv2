@@ -1,28 +1,268 @@
 {
-  "id": "pmo-grp-002",
+  "id": "pmo-lgc-002",
   "name": "Climate Transition Analytics",
-  "bu": "Group Functions",
-  "description": "Analytics platform for climate transition planning and Net Zero pathway monitoring.",
-  "expectedROI": "£30m regulatory compliance",
-  "roiValue": 30,
-  "priority": "high",
+  "bu": "LGIM",
+  "division": "Investment Management",
+  "description": "Advanced climate scenario analysis platform for portfolio decarbonization pathways, TCFD reporting automation, and net-zero alignment tracking across £1.2 trillion AUM. Enables investment teams to model transition risks and identify green investment opportunities.",
+  "expectedROI": "£15m regulatory efficiency + £200m green AUM growth",
+  "roiValue": 215,
+  "priority": "critical",
   "status": "green",
-  "budget": { "spent": 1.2, "total": 2.0, "unit": "£m" },
-  "timeline": { "elapsed": 6, "total": 10, "unit": "months" },
-  "artName": "Sustainability ART",
-  "portfolioTheme": "Climate Action",
-  "safe": { "velocity": 44, "predictability": 86, "flowEfficiency": 74, "currentPI": "PI 24.3", "epicId": "EPIC-GRP-102", "epicName": "Climate Analytics", "epicProgress": 58 },
+  "budget": { "spent": 2.1, "total": 3.5, "unit": "£m", "contingency": 0.4, "forecastAtCompletion": 3.3 },
+  "timeline": { "elapsed": 8, "total": 14, "unit": "months", "startDate": "2024-03-01", "endDate": "2025-05-01" },
+  "artName": "Sustainable Investment ART",
+  "portfolioTheme": "ESG & Sustainability",
+  "strategicObjectives": ["SO-2: Sustainable Future", "SO-4: Client Trust", "SO-5: Data-Driven Decision Making"],
+  "safe": {
+    "velocity": 38,
+    "predictability": 82,
+    "flowEfficiency": 71,
+    "currentPI": "PI 24.4",
+    "totalPIs": 5,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-LGIM-201",
+    "epicName": "Climate Analytics Platform",
+    "epicProgress": 58,
+    "epicWsjf": { "businessValue": 21, "timeCriticality": 21, "riskReduction": 13, "jobSize": 13, "score": 4.23 },
+    "solutionTrain": "Investment Technology",
+    "valueStream": "Sustainable Investment"
+  },
   "features": [
-    { "id": "feat-2001", "name": "Emissions Tracking", "status": "done", "storyPoints": 21, "completedPoints": 21, "priority": "critical" },
-    { "id": "feat-2002", "name": "Transition Pathway Modeling", "status": "in-progress", "storyPoints": 21, "completedPoints": 10, "priority": "high" }
+    {
+      "id": "feat-2101",
+      "name": "Climate Scenario Engine",
+      "description": "Multi-scenario climate modeling engine supporting NGFS scenarios, custom pathways, and stress testing for portfolio-level transition risk assessment.",
+      "status": "done",
+      "storyPoints": 89,
+      "completedPoints": 89,
+      "priority": "critical",
+      "wsjf": { "businessValue": 21, "timeCriticality": 21, "riskReduction": 13, "jobSize": 13, "score": 4.23 },
+      "acceptanceCriteria": [
+        "All 6 NGFS climate scenarios implemented",
+        "Custom scenario builder supports 50+ parameters",
+        "Portfolio stress test runs complete in <30 minutes for £100bn AUM",
+        "Results validated against third-party climate models"
+      ],
+      "stories": [
+        {
+          "id": "story-21001",
+          "name": "NGFS Scenario Implementation",
+          "description": "As a Climate Analyst, I need the NGFS reference scenarios so that I can assess portfolio alignment with standard climate pathways.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given NGFS publishes scenarios, When imported, Then all 6 scenarios are available (Orderly, Disorderly, Hot House)",
+            "Given scenario selected, When applied to portfolio, Then sector-level transition risks are calculated",
+            "Given NGFS updates scenarios, When refresh runs, Then new data is available within 5 business days"
+          ],
+          "tasks": [
+            { "id": "task-210001", "name": "Parse and import NGFS scenario data", "status": "done", "effortHours": 24, "assignee": "Dr. Sophie Laurent", "skills": ["Python", "Climate Data"] },
+            { "id": "task-210002", "name": "Build scenario interpolation engine", "status": "done", "effortHours": 32, "assignee": "Dr. Sophie Laurent", "skills": ["Financial Modeling", "Python"] },
+            { "id": "task-210003", "name": "Implement sector mapping (GICS to NGFS)", "status": "done", "effortHours": 16, "assignee": "Thomas Anderson", "skills": ["Data Mapping", "Finance"] },
+            { "id": "task-210004", "name": "Validate against MSCI climate models", "status": "done", "effortHours": 24, "assignee": "Dr. Sophie Laurent", "skills": ["Model Validation"] }
+          ]
+        },
+        {
+          "id": "story-21002",
+          "name": "Custom Scenario Builder",
+          "description": "As a Portfolio Manager, I need to create custom climate scenarios so that I can model specific transition pathways for client mandates.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given scenario builder opens, When parameters are adjusted, Then preview shows impact in real-time",
+            "Given custom scenario is saved, When applied, Then it appears alongside NGFS scenarios",
+            "Given scenario is shared, When colleague accesses, Then full configuration is available"
+          ],
+          "tasks": [
+            { "id": "task-210005", "name": "Design scenario builder UI/UX", "status": "done", "effortHours": 16, "assignee": "Rachel Kim", "skills": ["UX Design", "React"] },
+            { "id": "task-210006", "name": "Build parameter adjustment controls", "status": "done", "effortHours": 24, "assignee": "Marcus Chen", "skills": ["React", "TypeScript"] },
+            { "id": "task-210007", "name": "Implement real-time preview calculations", "status": "done", "effortHours": 20, "assignee": "Dr. Sophie Laurent", "skills": ["Python", "APIs"] },
+            { "id": "task-210008", "name": "Build scenario sharing and versioning", "status": "done", "effortHours": 12, "assignee": "Marcus Chen", "skills": ["Backend", "PostgreSQL"] }
+          ]
+        },
+        {
+          "id": "story-21003",
+          "name": "Portfolio Stress Testing",
+          "description": "As a Risk Manager, I need to stress test portfolios against climate scenarios so that I can quantify transition risk exposure.",
+          "storyPoints": 34,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given portfolio is selected, When stress test runs, Then results show VaR, expected shortfall by scenario",
+            "Given £100bn portfolio, When full analysis runs, Then completion occurs within 30 minutes",
+            "Given results are ready, When exported, Then regulatory-ready format (TCFD/ISSB) is available"
+          ],
+          "tasks": [
+            { "id": "task-210009", "name": "Build portfolio aggregation engine", "status": "done", "effortHours": 32, "assignee": "James Wilson", "skills": ["Python", "Risk"] },
+            { "id": "task-210010", "name": "Implement parallel processing for scale", "status": "done", "effortHours": 24, "assignee": "James Wilson", "skills": ["Distributed Computing", "Spark"] },
+            { "id": "task-210011", "name": "Build VaR and expected shortfall calculations", "status": "done", "effortHours": 20, "assignee": "Dr. Sophie Laurent", "skills": ["Risk Modeling"] },
+            { "id": "task-210012", "name": "Create TCFD-compliant export templates", "status": "done", "effortHours": 16, "assignee": "Sarah Evans", "skills": ["Reporting", "Compliance"] },
+            { "id": "task-210013", "name": "Performance optimization and caching", "status": "done", "effortHours": 16, "assignee": "James Wilson", "skills": ["Performance", "Redis"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-2102",
+      "name": "Net-Zero Alignment Tracker",
+      "description": "Real-time tracking of portfolio alignment to net-zero targets, including implied temperature rise (ITR), transition pathway scoring, and engagement progress.",
+      "status": "in-progress",
+      "storyPoints": 55,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": { "businessValue": 13, "timeCriticality": 13, "riskReduction": 8, "jobSize": 8, "score": 4.25 },
+      "acceptanceCriteria": [
+        "Portfolio ITR calculated for all £1.2T AUM",
+        "Alignment scores updated daily for active funds",
+        "Engagement tracker links to stewardship activities",
+        "Client-facing reports generated automatically"
+      ],
+      "stories": [
+        {
+          "id": "story-21005",
+          "name": "Implied Temperature Rise Calculation",
+          "description": "As an ESG Analyst, I need ITR calculations so that I can communicate portfolio climate alignment to clients.",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": [
+            "Given company emissions data, When ITR calculated, Then temperature score is 1.5C-4C range",
+            "Given portfolio weights, When aggregated, Then weighted average ITR is displayed",
+            "Given methodology is queried, When documentation accessed, Then full calculation transparency available"
+          ],
+          "tasks": [
+            { "id": "task-210017", "name": "Implement ITR calculation methodology (SBTi-aligned)", "status": "done", "effortHours": 32, "assignee": "Dr. Sophie Laurent", "skills": ["Climate Science", "Python"] },
+            { "id": "task-210018", "name": "Build company-level ITR database", "status": "done", "effortHours": 24, "assignee": "Thomas Anderson", "skills": ["Database", "ETL"] },
+            { "id": "task-210019", "name": "Create portfolio aggregation logic", "status": "done", "effortHours": 16, "assignee": "James Wilson", "skills": ["Portfolio Analytics"] }
+          ]
+        },
+        {
+          "id": "story-21006",
+          "name": "Client Net-Zero Dashboard",
+          "description": "As a Client Relationship Manager, I need client-facing dashboards so that I can demonstrate portfolio climate credentials.",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": [
+            "Given client logs in, When dashboard loads, Then portfolio ITR and alignment are visible",
+            "Given client selects fund, When detailed view opens, Then sector-level breakdown is available",
+            "Given client exports report, When PDF generated, Then branded, regulatory-compliant document is produced"
+          ],
+          "tasks": [
+            { "id": "task-210025", "name": "Design client dashboard UX", "status": "done", "effortHours": 16, "assignee": "Rachel Kim", "skills": ["UX Design"] },
+            { "id": "task-210026", "name": "Build portfolio summary components", "status": "in-progress", "effortHours": 24, "assignee": "Marcus Chen", "skills": ["React", "Charts"] },
+            { "id": "task-210027", "name": "Implement sector drill-down views", "status": "pending", "effortHours": 20, "assignee": "Marcus Chen", "skills": ["React", "D3.js"] },
+            { "id": "task-210028", "name": "Create PDF report generator", "status": "pending", "effortHours": 16, "assignee": "Sarah Evans", "skills": ["PDF Generation", "Branding"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-2103",
+      "name": "TCFD Reporting Automation",
+      "description": "Automated generation of TCFD-aligned climate disclosures, including governance, strategy, risk management, and metrics sections.",
+      "status": "planned",
+      "storyPoints": 34,
+      "completedPoints": 0,
+      "priority": "high",
+      "wsjf": { "businessValue": 13, "timeCriticality": 21, "riskReduction": 5, "jobSize": 8, "score": 4.88 },
+      "acceptanceCriteria": [
+        "Annual TCFD report generated in <4 hours (vs 4 weeks manual)",
+        "All 11 TCFD recommendations addressed with data-driven narratives",
+        "Audit trail for all data points and calculations",
+        "Multi-format output (PDF, XBRL, web)"
+      ],
+      "stories": [
+        {
+          "id": "story-21008",
+          "name": "TCFD Data Aggregation Pipeline",
+          "description": "As a Compliance Officer, I need automated data aggregation so that TCFD reports use consistent, auditable data.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given reporting period closes, When pipeline runs, Then all TCFD metrics are calculated",
+            "Given data point is queried, When lineage accessed, Then full source-to-report trail is visible"
+          ],
+          "tasks": [
+            { "id": "task-210030", "name": "Map TCFD metrics to data sources", "status": "planned", "effortHours": 16, "assignee": "Thomas Anderson", "skills": ["Data Mapping", "TCFD"] },
+            { "id": "task-210031", "name": "Build automated aggregation pipeline", "status": "planned", "effortHours": 24, "assignee": "Thomas Anderson", "skills": ["ETL", "Airflow"] },
+            { "id": "task-210032", "name": "Implement data lineage tracking", "status": "planned", "effortHours": 16, "assignee": "Thomas Anderson", "skills": ["Data Governance"] }
+          ]
+        },
+        {
+          "id": "story-21009",
+          "name": "AI-Powered Narrative Generation",
+          "description": "As a Report Writer, I need AI assistance so that qualitative TCFD sections are drafted efficiently.",
+          "storyPoints": 13,
+          "status": "planned",
+          "acceptanceCriteria": [
+            "Given metrics are finalized, When AI drafts narrative, Then governance section is generated",
+            "Given draft is reviewed, When editor makes changes, Then version history is maintained"
+          ],
+          "tasks": [
+            { "id": "task-210034", "name": "Fine-tune LLM for TCFD language", "status": "planned", "effortHours": 24, "assignee": "Dr. Sophie Laurent", "skills": ["NLP", "LLM"] },
+            { "id": "task-210035", "name": "Build narrative generation pipeline", "status": "planned", "effortHours": 20, "assignee": "Marcus Chen", "skills": ["AI", "Backend"] },
+            { "id": "task-210036", "name": "Create collaborative editing interface", "status": "planned", "effortHours": 16, "assignee": "Rachel Kim", "skills": ["React", "Collaboration"] }
+          ]
+        }
+      ]
+    }
   ],
   "resources": [
-    { "id": "res-2001", "name": "Dr. Emma Green", "role": "Climate Lead", "allocation": 100, "team": "Sustainability" }
+    { "id": "res-2101", "name": "Dr. Sophie Laurent", "role": "Climate Science Lead", "allocation": 100, "team": "Climate Analytics", "skills": ["Climate Modeling", "Python", "Risk"], "costRate": 950 },
+    { "id": "res-2102", "name": "James Wilson", "role": "Senior Quant Developer", "allocation": 100, "team": "Climate Analytics", "skills": ["Python", "Spark", "Risk Modeling"], "costRate": 850 },
+    { "id": "res-2103", "name": "Thomas Anderson", "role": "Data Engineer", "allocation": 100, "team": "Data Platform", "skills": ["ETL", "APIs", "Data Quality"], "costRate": 700 },
+    { "id": "res-2104", "name": "Marcus Chen", "role": "Full Stack Developer", "allocation": 80, "team": "Frontend", "skills": ["React", "TypeScript", "PostgreSQL"], "costRate": 750 },
+    { "id": "res-2105", "name": "Rachel Kim", "role": "UX Designer", "allocation": 60, "team": "Design", "skills": ["UX Design", "Figma", "React"], "costRate": 650 },
+    { "id": "res-2106", "name": "Sarah Evans", "role": "ESG Reporting Specialist", "allocation": 80, "team": "Compliance", "skills": ["TCFD", "Reporting", "Compliance"], "costRate": 700 }
   ],
   "milestones": [
-    { "id": "ms-2001", "name": "Analytics Launch", "date": "2024-10-31", "status": "planned", "deliverables": ["Platform launch", "Reporting"] }
+    { "id": "ms-2101", "name": "Scenario Engine MVP", "date": "2024-07-31", "status": "completed", "deliverables": ["NGFS scenarios implemented", "Custom scenario builder live", "Portfolio stress testing operational"] },
+    { "id": "ms-2102", "name": "Net-Zero Tracker Beta", "date": "2024-11-30", "status": "in-progress", "deliverables": ["ITR calculations complete", "Engagement tracker deployed", "Internal dashboards live"] },
+    { "id": "ms-2103", "name": "Client Dashboard Launch", "date": "2025-02-28", "status": "planned", "deliverables": ["Client-facing dashboards", "SSO integration", "Branded PDF reports"] },
+    { "id": "ms-2104", "name": "TCFD Automation Go-Live", "date": "2025-05-01", "status": "planned", "deliverables": ["Automated TCFD reports", "AI narrative generation", "Multi-format export"] }
   ],
-  "safeDependencies": [],
-  "financials": { "capitalex": 1.6, "opex": 0.4, "contingency": 0.2, "npv": 25.0, "irr": 48, "paybackMonths": 14 },
-  "currentPI": 3, "totalPIs": 5, "velocity": 44, "burndownHealth": 84, "qualityScore": 88
+  "risks": [
+    { "id": "risk-2101", "name": "Climate data provider contract renewal", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Negotiating multi-year contract with MSCI; backup evaluation of Sustainalytics", "owner": "Thomas Anderson" },
+    { "id": "risk-2102", "name": "Regulatory methodology changes", "probability": "high", "impact": "medium", "status": "active", "mitigation": "Monthly regulatory scanning; flexible calculation engine design", "owner": "Dr. Sophie Laurent" },
+    { "id": "risk-2103", "name": "Client data sensitivity concerns", "probability": "medium", "impact": "high", "status": "mitigated", "mitigation": "Data anonymization for analytics; client consent workflow implemented", "owner": "Sarah Evans" }
+  ],
+  "dependencies": [
+    { "id": "dep-2101", "name": "MSCI ESG Data Feed", "type": "external", "status": "resolved", "vendor": "MSCI", "description": "Weekly emissions and ESG score updates" },
+    { "id": "dep-2102", "name": "Client Portal SSO", "type": "internal", "status": "active", "project": "Identity Management", "description": "SAML integration for client authentication" },
+    { "id": "dep-2103", "name": "Enterprise Data Platform", "type": "internal", "status": "active", "project": "pmo-grp-001", "description": "Historical data storage and analytics infrastructure" }
+  ],
+  "stakeholders": [
+    { "id": "sh-2101", "name": "Michelle Sheridan", "role": "Chief Investment Officer", "department": "LGIM", "influence": "high", "interest": "high" },
+    { "id": "sh-2102", "name": "Robert Sheridan", "role": "Head of Stewardship", "department": "LGIM", "influence": "high", "interest": "high" },
+    { "id": "sh-2103", "name": "Client Relations Team", "role": "Key Users", "department": "LGIM Distribution", "influence": "medium", "interest": "high" }
+  ],
+  "iterations": [
+    { "id": "iter-2101", "name": "PI 24.4 - Iteration 1", "startDate": "2024-10-14", "endDate": "2024-10-25", "capacity": 100, "committed": 95, "completed": 92, "velocity": 92 },
+    { "id": "iter-2102", "name": "PI 24.4 - Iteration 2", "startDate": "2024-10-28", "endDate": "2024-11-08", "capacity": 95, "committed": 90, "completed": 88, "velocity": 88 },
+    { "id": "iter-2103", "name": "PI 24.4 - Iteration 3", "startDate": "2024-11-11", "endDate": "2024-11-22", "capacity": 100, "committed": 98, "completed": 0, "velocity": null }
+  ],
+  "financials": {
+    "capitalex": 2.5,
+    "opex": 0.6,
+    "contingency": 0.4,
+    "npv": 28.0,
+    "irr": 45,
+    "paybackMonths": 18,
+    "costBreakdown": {
+      "development": 1.5,
+      "dataLicenses": 0.6,
+      "infrastructure": 0.4,
+      "contingency": 0.4
+    }
+  },
+  "qualityMetrics": {
+    "defectDensity": 0.5,
+    "testCoverage": 88,
+    "technicalDebtDays": 8,
+    "codeReviewCoverage": 100,
+    "documentationScore": 85
+  },
+  "currentPI": 3,
+  "totalPIs": 5,
+  "velocity": 38,
+  "burndownHealth": 78,
+  "qualityScore": 85
 }
