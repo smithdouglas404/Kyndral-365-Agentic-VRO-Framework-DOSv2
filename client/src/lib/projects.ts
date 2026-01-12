@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { PMOProject, VROProgram, SAFePortfolioStage, SAFeMetrics, AISignal, ProactiveAction, TrendPoint } from './buPrograms';
-import { Feature, Resource, Milestone, Dependency, Financials } from './safeProjectData';
+import { Feature, Resource, Milestone, Dependency, Financials, safeProjects, SAFeProject } from './safeProjectData';
 
 // Cross-project dependency with health indicator
 export interface ProjectDependency {
@@ -1057,20 +1057,35 @@ export const projectSummary = {
 // Links safeProjects data to enrichedProjects for full SAFe 6.0 depth
 // ============================================================================
 
-import { safeProjects, SAFeProject } from './safeProjectData';
-
-// Mapping from enrichedProject IDs to safeProject IDs
+// Mapping from enrichedProject IDs to safeProject IDs (matching safeProjectData.ts exactly)
 const projectLinkMapping: Record<string, string> = {
-  "pmo-ir-001": "proj-prt-platform",
-  "pmo-ir-002": "proj-longevity-models",
-  "pmo-am-001": "proj-private-markets",
-  "pmo-am-002": "proj-esg-analytics",
-  "pmo-retail-001": "proj-digital-savings",
-  "pmo-retail-002": "proj-protection-platform",
-  "pmo-ci-001": "proj-clean-energy",
-  "pmo-ci-002": "proj-housing-delivery",
-  "pmo-rc-001": "proj-operational-risk",
-  "pmo-rc-002": "proj-three-lines"
+  // Institutional Retirement → Maps to IR-tagged projects in safeProjectData
+  "pmo-ir-001": "proj-prt-platform",           // PRT Platform Modernization
+  "pmo-ir-002": "proj-member-portal",          // Member Self-Service Portal
+  "pmo-ir-003": "proj-bulk-annuity-automation", // Bulk Annuity Automation
+  "pmo-ir-004": "proj-member-portal",           // Reuse for coverage
+  // Asset Management → Maps to AM-tagged projects
+  "pmo-am-001": "proj-trading-platform",       // Trading Platform Upgrade
+  "pmo-am-002": "proj-client-reporting",       // Client Reporting Automation
+  "pmo-am-003": "proj-risk-engine",            // Risk Analytics Engine
+  "pmo-am-004": "proj-alt-investments",        // Alternative Investments Portal
+  // Retail → Maps to Retail-tagged projects
+  "pmo-rt-001": "proj-digital-onboarding",     // Digital Onboarding Journey
+  "pmo-rt-002": "proj-mobile-app-refresh",     // Mobile App Refresh
+  "pmo-rt-003": "proj-advisor-portal",         // Advisor Portal 2.0
+  "pmo-rt-004": "proj-mobile-app-refresh",     // Reuse for coverage
+  // Corporate Investments → Maps to CI-tagged projects
+  "pmo-ci-001": "proj-data-foundation",        // Data Foundation Platform
+  "pmo-ci-002": "proj-api-gateway",            // Enterprise API Gateway
+  "pmo-ci-003": "proj-cloud-migration",        // Cloud Migration Program
+  // Risk & Compliance → Maps to RC-tagged projects  
+  "pmo-rc-001": "proj-regulatory-reporting",   // Regulatory Reporting Automation
+  "pmo-rc-002": "proj-fraud-detection",        // Fraud Detection AI
+  "pmo-rc-003": "proj-grc-platform",           // GRC Platform Consolidation
+  "pmo-rc-004": "proj-fraud-detection",        // Reuse for coverage
+  // Group Functions → Maps to Group-tagged projects
+  "pmo-grp-001": "proj-esg-reporting",         // ESG Reporting Dashboard
+  "pmo-grp-002": "proj-cloud-migration"        // Reuse for coverage
 };
 
 // Get SAFe hierarchy for an enriched project
@@ -1133,3 +1148,44 @@ export const safeCoverageSummary = {
     sum + (p.features?.reduce((fs, f) => 
       fs + (f.stories?.reduce((ss, s) => ss + (s.tasks?.length || 0), 0) || 0), 0) || 0), 0)
 };
+
+// ============================================================================
+// AUTO-ENRICHMENT: Populate SAFe hierarchy fields from safeProjects
+// Runs at module load time
+// ============================================================================
+
+(function enrichProjectsWithSAFe() {
+  enrichedProjects.forEach(project => {
+    const safeProject = getSafeHierarchy(project.id);
+    if (safeProject) {
+      project.artName = safeProject.artName;
+      project.portfolioTheme = safeProject.portfolioTheme;
+      project.features = safeProject.features;
+      project.resources = safeProject.resources;
+      project.milestones = safeProject.milestones;
+      project.safeDependencies = safeProject.dependencies;
+      project.financials = safeProject.financials;
+      project.currentPI = safeProject.currentPI;
+      project.totalPIs = safeProject.totalPIs;
+      project.velocity = safeProject.velocity;
+      project.burndownHealth = safeProject.burndownHealth;
+      project.qualityScore = safeProject.qualityScore;
+    } else {
+      // Synthetic SAFe hierarchy for projects without mapping
+      const syntheticART = `${project.bu} Transformation ART`;
+      project.artName = syntheticART;
+      project.portfolioTheme = project.priority === 'critical' ? 'Digital Transformation' : 'Operational Excellence';
+      const piMatch = project.safe?.currentPI?.match(/\d+\.(\d+)/);
+      project.currentPI = piMatch ? parseInt(piMatch[1]) : 1;
+      project.totalPIs = 6;
+      project.velocity = project.safe?.velocity || 45;
+      project.burndownHealth = project.safe?.flowEfficiency || 70;
+      project.qualityScore = project.safe?.predictability || 80;
+      // Ensure arrays exist for metric calculations
+      project.features = project.features || [];
+      project.resources = project.resources || [];
+      project.milestones = project.milestones || [];
+      project.safeDependencies = project.safeDependencies || [];
+    }
+  });
+})();

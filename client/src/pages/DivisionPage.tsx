@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
-import { enrichedProjects, getSafeStages, getStageLabel, type EnrichedProject } from "@/lib/projects";
+import { enrichedProjects, getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
 import { safeProjects, getProjectsByBU } from "@/lib/safeProjectData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
@@ -281,8 +281,8 @@ export default function DivisionPage() {
                           <span className="text-xl font-bold text-blue-700">{portfolioData.predictability}%</span>
                         </div>
                         <div className="flex justify-between items-baseline">
-                          <span className="text-sm text-blue-600">EPICs</span>
-                          <span className="text-xl font-bold text-blue-700">{divisionProjects.filter(p => p.safe?.epicId).length || portfolioData.activeEpics}</span>
+                          <span className="text-sm text-blue-600">Features</span>
+                          <span className="text-xl font-bold text-blue-700">{divisionProjects.reduce((sum, p) => sum + (p.features?.length || 0), 0)}</span>
                         </div>
                       </div>
                     </CardContent>
