@@ -395,6 +395,11 @@ function NavBar() {
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]" data-testid="link-dashboard">Dashboard</Link>
+          <Link href="/command-center" className="text-sm font-medium text-[#005EB8] flex items-center gap-1" data-testid="link-command-center">
+            <Brain className="h-4 w-4" />
+            Command Center
+          </Link>
+          <Link href="/ingestion" className="text-sm font-medium text-[#005EB8]" data-testid="link-ingestion">Project Ingestion</Link>
         </nav>
       </div>
       <div className="flex items-center gap-4">

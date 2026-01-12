@@ -31,6 +31,7 @@ import PlanningDashboard from "@/pages/dashboard-planning";
 import OCMDashboard from "@/pages/dashboard-ocm";
 import ProjectDetailPage from "@/pages/ProjectDetailPage";
 import ProjectIngestionPage from "@/pages/ProjectIngestionPage";
+import AgentCommandCenterPage from "@/pages/AgentCommandCenterPage";
 
 function Router() {
   return (
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/vro-framework" component={VROFramework} />
       <Route path="/project/:id" component={ProjectDetailPage} />
       <Route path="/ingestion" component={ProjectIngestionPage} />
+      <Route path="/command-center" component={AgentCommandCenterPage} />
       <Route component={NotFound} />
     </Switch>
   );

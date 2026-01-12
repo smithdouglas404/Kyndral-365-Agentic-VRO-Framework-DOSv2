@@ -536,27 +536,39 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Intervention management endpoints
-  const interventionStore: Map<string, { id: string; status: string; approvedAt?: Date; dismissedAt?: Date }> = new Map();
+  // Intervention management endpoints with database persistence
+  app.get("/api/interventions", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const interventions = await storage.getInterventions(status);
+      res.json({ interventions });
+    } catch (error: any) {
+      console.error("Get interventions error:", error);
+      res.status(500).json({ error: "Failed to get interventions" });
+    }
+  });
+
+  app.post("/api/interventions", async (req, res) => {
+    try {
+      const intervention = await storage.createIntervention(req.body);
+      res.json(intervention);
+    } catch (error: any) {
+      console.error("Create intervention error:", error);
+      res.status(500).json({ error: "Failed to create intervention" });
+    }
+  });
 
   app.post("/api/interventions/approve", async (req, res) => {
     try {
-      const { interventionId, projectId } = req.body;
+      const { interventionId, userId } = req.body;
       if (!interventionId) {
         return res.status(400).json({ error: "Intervention ID is required" });
       }
-      
-      interventionStore.set(interventionId, {
-        id: interventionId,
-        status: 'approved',
-        approvedAt: new Date()
-      });
-      
-      console.log(`Intervention ${interventionId} approved for project ${projectId}`);
+      const intervention = await storage.updateInterventionStatus(interventionId, 'approved', userId);
+      console.log(`Intervention ${interventionId} approved`);
       res.json({ 
         success: true, 
-        interventionId,
-        status: 'approved',
+        intervention,
         message: 'Intervention approved and agent cascade initiated'
       });
     } catch (error: any) {
@@ -567,22 +579,15 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.post("/api/interventions/dismiss", async (req, res) => {
     try {
-      const { interventionId, projectId } = req.body;
+      const { interventionId, userId } = req.body;
       if (!interventionId) {
         return res.status(400).json({ error: "Intervention ID is required" });
       }
-      
-      interventionStore.set(interventionId, {
-        id: interventionId,
-        status: 'dismissed',
-        dismissedAt: new Date()
-      });
-      
-      console.log(`Intervention ${interventionId} dismissed for project ${projectId}`);
+      const intervention = await storage.updateInterventionStatus(interventionId, 'dismissed', userId);
+      console.log(`Intervention ${interventionId} dismissed`);
       res.json({ 
         success: true, 
-        interventionId,
-        status: 'dismissed',
+        intervention,
         message: 'Intervention dismissed'
       });
     } catch (error: any) {
@@ -591,13 +596,48 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  app.get("/api/interventions", async (_req, res) => {
+  // Agent discussion endpoints with database persistence
+  app.get("/api/discussions", async (req, res) => {
     try {
-      const interventions = Array.from(interventionStore.values());
-      res.json({ interventions });
+      const status = req.query.status as string | undefined;
+      const discussions = await storage.getDiscussions(status);
+      res.json({ discussions });
     } catch (error: any) {
-      console.error("Get interventions error:", error);
-      res.status(500).json({ error: "Failed to get interventions" });
+      console.error("Get discussions error:", error);
+      res.status(500).json({ error: "Failed to get discussions" });
+    }
+  });
+
+  app.post("/api/discussions", async (req, res) => {
+    try {
+      const discussion = await storage.createDiscussion(req.body);
+      res.json(discussion);
+    } catch (error: any) {
+      console.error("Create discussion error:", error);
+      res.status(500).json({ error: "Failed to create discussion" });
+    }
+  });
+
+  app.get("/api/discussions/:discussionId/messages", async (req, res) => {
+    try {
+      const messages = await storage.getDiscussionMessages(req.params.discussionId);
+      res.json({ messages });
+    } catch (error: any) {
+      console.error("Get discussion messages error:", error);
+      res.status(500).json({ error: "Failed to get discussion messages" });
+    }
+  });
+
+  app.post("/api/discussions/:discussionId/messages", async (req, res) => {
+    try {
+      const message = await storage.addDiscussionMessage({
+        ...req.body,
+        discussionId: req.params.discussionId
+      });
+      res.json(message);
+    } catch (error: any) {
+      console.error("Add discussion message error:", error);
+      res.status(500).json({ error: "Failed to add discussion message" });
     }
   });
 

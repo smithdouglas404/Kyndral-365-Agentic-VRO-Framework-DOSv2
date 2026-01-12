@@ -173,3 +173,76 @@ export const insertAgentPatternSchema = createInsertSchema(agentPatterns).omit({
 
 export type InsertAgentPattern = z.infer<typeof insertAgentPatternSchema>;
 export type AgentPattern = typeof agentPatterns.$inferSelect;
+
+// Risk Interventions - AI-detected risks requiring human decision
+export const interventions = pgTable("interventions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(), // dependency, budget, timeline, resource, quality
+  severity: text("severity").notNull(), // critical, high, medium
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  projectId: text("project_id"),
+  projectName: text("project_name"),
+  confidence: text("confidence").default("0.85"),
+  suggestedAction: text("suggested_action").notNull(),
+  impact: text("impact"),
+  status: text("status").default("pending"), // pending, approved, dismissed, executing
+  agentSource: text("agent_source").notNull(), // Which agent detected this
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  dismissedBy: text("dismissed_by"),
+  dismissedAt: timestamp("dismissed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertInterventionSchema = createInsertSchema(interventions).omit({
+  id: true,
+  createdAt: true,
+  approvedAt: true,
+  dismissedAt: true,
+});
+
+export type InsertIntervention = z.infer<typeof insertInterventionSchema>;
+export type Intervention = typeof interventions.$inferSelect;
+
+// Agent Discussions - Multi-agent collaboration threads
+export const agentDiscussions = pgTable("agent_discussions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  topic: text("topic").notNull(),
+  projectId: text("project_id"),
+  projectName: text("project_name"),
+  priority: text("priority").default("medium"), // low, medium, high, critical
+  status: text("status").default("active"), // active, resolved, archived
+  consensusReached: text("consensus_reached").default("false"),
+  resolution: text("resolution"),
+  createdAt: timestamp("created_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+export const insertAgentDiscussionSchema = createInsertSchema(agentDiscussions).omit({
+  id: true,
+  createdAt: true,
+  resolvedAt: true,
+});
+
+export type InsertAgentDiscussion = z.infer<typeof insertAgentDiscussionSchema>;
+export type AgentDiscussion = typeof agentDiscussions.$inferSelect;
+
+// Discussion Messages - Individual agent contributions to a discussion
+export const discussionMessages = pgTable("discussion_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  discussionId: varchar("discussion_id").notNull(),
+  agentId: text("agent_id").notNull(), // planning, finops, governance, tmo, etc.
+  agentName: text("agent_name").notNull(),
+  messageType: text("message_type").notNull(), // analysis, recommendation, question, agreement, action
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDiscussionMessageSchema = createInsertSchema(discussionMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDiscussionMessage = z.infer<typeof insertDiscussionMessageSchema>;
+export type DiscussionMessage = typeof discussionMessages.$inferSelect;

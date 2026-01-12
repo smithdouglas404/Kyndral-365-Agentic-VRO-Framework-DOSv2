@@ -8,8 +8,11 @@ import {
   type AgentMemory, type InsertAgentMemory,
   type AgentPattern, type InsertAgentPattern,
   type AgentTaskQueue, type InsertAgentTaskQueue,
+  type Intervention, type InsertIntervention,
+  type AgentDiscussion, type InsertAgentDiscussion,
+  type DiscussionMessage, type InsertDiscussionMessage,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
-  agentMemory, agentPatterns, agentTaskQueue
+  agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -48,6 +51,15 @@ export interface IStorage {
   getAgentTasks(agentId?: string, status?: string): Promise<AgentTaskQueue[]>;
   createAgentTask(task: InsertAgentTaskQueue): Promise<AgentTaskQueue>;
   updateAgentTaskStatus(taskId: string, status: string): Promise<void>;
+  
+  getInterventions(status?: string): Promise<Intervention[]>;
+  createIntervention(intervention: InsertIntervention): Promise<Intervention>;
+  updateInterventionStatus(id: string, status: string, userId?: string): Promise<Intervention>;
+  
+  getDiscussions(status?: string): Promise<AgentDiscussion[]>;
+  createDiscussion(discussion: InsertAgentDiscussion): Promise<AgentDiscussion>;
+  getDiscussionMessages(discussionId: string): Promise<DiscussionMessage[]>;
+  addDiscussionMessage(message: InsertDiscussionMessage): Promise<DiscussionMessage>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -307,6 +319,63 @@ export class DatabaseStorage implements IStorage {
         resolvedAt: status === 'completed' || status === 'cancelled' ? new Date() : undefined
       })
       .where(eq(agentTaskQueue.id, taskId));
+  }
+
+  async getInterventions(status?: string): Promise<Intervention[]> {
+    if (status) {
+      return await db.select().from(interventions)
+        .where(eq(interventions.status, status))
+        .orderBy(desc(interventions.createdAt));
+    }
+    return await db.select().from(interventions)
+      .orderBy(desc(interventions.createdAt));
+  }
+
+  async createIntervention(intervention: InsertIntervention): Promise<Intervention> {
+    const result = await db.insert(interventions).values(intervention).returning();
+    return result[0];
+  }
+
+  async updateInterventionStatus(id: string, status: string, userId?: string): Promise<Intervention> {
+    const updates: any = { status };
+    if (status === 'approved') {
+      updates.approvedAt = new Date();
+      updates.approvedBy = userId || 'system';
+    } else if (status === 'dismissed') {
+      updates.dismissedAt = new Date();
+      updates.dismissedBy = userId || 'system';
+    }
+    const result = await db.update(interventions)
+      .set(updates)
+      .where(eq(interventions.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getDiscussions(status?: string): Promise<AgentDiscussion[]> {
+    if (status) {
+      return await db.select().from(agentDiscussions)
+        .where(eq(agentDiscussions.status, status))
+        .orderBy(desc(agentDiscussions.createdAt));
+    }
+    return await db.select().from(agentDiscussions)
+      .orderBy(desc(agentDiscussions.createdAt));
+  }
+
+  async createDiscussion(discussion: InsertAgentDiscussion): Promise<AgentDiscussion> {
+    const result = await db.insert(agentDiscussions).values(discussion).returning();
+    return result[0];
+  }
+
+  async getDiscussionMessages(discussionId: string): Promise<DiscussionMessage[]> {
+    return await db.select().from(discussionMessages)
+      .where(eq(discussionMessages.discussionId, discussionId))
+      .orderBy(discussionMessages.createdAt);
+  }
+
+  async addDiscussionMessage(message: InsertDiscussionMessage): Promise<DiscussionMessage> {
+    const result = await db.insert(discussionMessages).values(message).returning();
+    return result[0];
   }
 }
 
