@@ -861,8 +861,68 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
     return defaultOpp;
   }
 
-  // KPI - map to metric dossiers
+  // KPI - map to metric dossiers or provide PMO feed content
   if (entityType === 'kpi') {
+    // PMO Data Feed KPIs
+    if (entityId === 'pmo-feed-0') {
+      return {
+        title: 'Budget Utilization',
+        subtitle: 'Financial Performance Indicator',
+        description: 'Budget utilization measures the percentage of allocated budget that has been spent. This KPI tracks financial execution against the approved project budget, helping identify underspend or overspend conditions.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'pmo-feed-0',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Current Utilization', value: '70%', trend: 'stable', color: 'green' },
+          { label: 'Burn Rate', value: '£125K/week', trend: 'stable' },
+          { label: 'Forecast at Completion', value: '95%', trend: 'up' },
+          { label: 'Variance', value: '+2%', trend: 'up', color: 'amber' }
+        ],
+        actions: [
+          { id: 'budget-1', label: 'View Budget Breakdown', type: 'navigate', targetEntityType: 'report', targetEntityId: 'budget-breakdown', description: 'See detailed cost categories' },
+          { id: 'budget-2', label: 'Compare to Baseline', type: 'investigate', description: 'Analyze variance against original budget' },
+          { id: 'budget-3', label: 'Forecast Analysis', type: 'navigate', targetEntityType: 'report', targetEntityId: 'budget-forecast', description: 'View projected spend' }
+        ],
+        relatedItems: [
+          { id: 'fin-1', name: 'FinOps Agent', type: 'Agent', entityType: 'agent', entityId: 'finops', status: 'active' },
+          { id: 'fin-2', name: 'Cost Optimization Report', type: 'Report', entityType: 'report', entityId: 'cost-optimization' },
+          { id: 'fin-3', name: 'Resource Allocation', type: 'Metric', entityType: 'metric', entityId: 'throughput' }
+        ],
+        aiInsight: 'Budget utilization is tracking within acceptable bounds. FinOps Agent recommends monitoring vendor invoice timing as Q4 typically sees accelerated spend patterns.',
+        agentSource: 'finops'
+      };
+    }
+    if (entityId === 'pmo-feed-1') {
+      return {
+        title: 'Timeline Progress',
+        subtitle: 'Schedule Performance Indicator',
+        description: 'Timeline progress measures the percentage of elapsed time against the total project duration. This KPI helps track schedule adherence and identify potential delays before they impact delivery.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'pmo-feed-1',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Elapsed Time', value: '63%', trend: 'stable', color: 'green' },
+          { label: 'Deliverables Complete', value: '58%', trend: 'up' },
+          { label: 'Schedule Performance Index', value: '0.92', trend: 'stable' },
+          { label: 'Days to Milestone', value: '24', trend: 'down' }
+        ],
+        actions: [
+          { id: 'timeline-1', label: 'View Gantt Chart', type: 'navigate', targetEntityType: 'report', targetEntityId: 'gantt-chart', description: 'See project timeline visualization' },
+          { id: 'timeline-2', label: 'Critical Path Analysis', type: 'investigate', description: 'Review critical path dependencies' },
+          { id: 'timeline-3', label: 'Milestone Status', type: 'navigate', targetEntityType: 'report', targetEntityId: 'milestones', description: 'Check upcoming milestones' }
+        ],
+        relatedItems: [
+          { id: 'plan-1', name: 'Planning Agent', type: 'Agent', entityType: 'agent', entityId: 'planning', status: 'active' },
+          { id: 'plan-2', name: 'Dependencies Map', type: 'Report', entityType: 'report', entityId: 'dependencies' },
+          { id: 'plan-3', name: 'Cycle Time', type: 'Metric', entityType: 'metric', entityId: 'cycle-time' }
+        ],
+        aiInsight: 'Timeline is slightly behind deliverable completion. Planning Agent has identified 2 potential acceleration opportunities in the upcoming sprint to recover schedule.',
+        agentSource: 'planning'
+      };
+    }
+    
     const kpiToMetric: Record<string, string> = {
       'roi': 'roi',
       'value-realized': 'value-realized',
