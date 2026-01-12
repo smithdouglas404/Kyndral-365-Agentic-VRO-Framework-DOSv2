@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "wouter";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, 
@@ -277,6 +278,7 @@ function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const { setPageContext } = usePageContext();
   const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
   const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
   const [drilldownOpen, setDrilldownOpen] = useState(false);
@@ -289,6 +291,21 @@ export default function ProjectDetailPage() {
   
   // Use SAFe project if available, otherwise convert enriched project to compatible format
   const project: SAFeProject | undefined = safeProject || (enrichedProject ? convertEnrichedToSAFe(enrichedProject) : undefined);
+  
+  // Update page context for Ask PM chat
+  const projectName = project?.name;
+  const projectBU = project?.bu;
+  useEffect(() => {
+    if (projectName && projectBU) {
+      setPageContext({
+        pageType: 'project',
+        entityId: params.id || '',
+        entityName: projectName,
+        businessUnit: projectBU,
+        breadcrumb: ['Dashboard', projectBU, projectName]
+      });
+    }
+  }, [projectName, projectBU, params.id, setPageContext]);
   
   if (!project) {
     return (

@@ -195,6 +195,9 @@ ${generateImpactSummary(result)}`;
 - Still answer cross-portfolio questions when explicitly asked.`;
     } else if (pageContext.pageType === 'project' && pageContext.entityId) {
       const project = projectSummaries.find(p => p.id === pageContext.entityId);
+      const projectName = project?.name || pageContext.entityName || pageContext.entityId;
+      const projectId = pageContext.entityId;
+      
       if (project) {
         currentProjectContext = `
 CURRENT PROJECT IN VIEW:
@@ -210,16 +213,24 @@ CURRENT PROJECT IN VIEW:
 - FTEs: ${project.ftes}
 - Dependencies: ${project.deps.length > 0 ? project.deps.join(', ') : 'None'}
 - Risk Flags: ${project.riskFlags.length > 0 ? project.riskFlags.join('; ') : 'None'}`;
+      } else {
+        // Project not in hardcoded list - use context info
+        currentProjectContext = `
+CURRENT PROJECT IN VIEW:
+- Name: ${projectName}
+- ID: ${projectId}
+- Business Unit: ${pageContext.businessUnit || 'Not specified'}
+(Note: Detailed project metrics not available in quick-access cache. The user is still viewing this specific project.)`;
+      }
 
-        contextHint = `\n\nCRITICAL - USER IS VIEWING A SPECIFIC PROJECT:
-The user is currently viewing [${project.name}](${project.id}).
+      contextHint = `\n\nCRITICAL - USER IS VIEWING A SPECIFIC PROJECT:
+The user is currently viewing: ${projectName} (ID: ${projectId}).
 
-IMPORTANT: When the user says "the project", "this project", "the project's budget", "increase the budget", or any reference to a single project without naming it, they are referring SPECIFICALLY to ${project.name} (${project.id}).
+IMPORTANT: When the user says "the project", "this project", "the project's budget", "increase the budget", "change the budget", or any reference to a single project without naming it, they are referring SPECIFICALLY to "${projectName}".
 
 ${currentProjectContext}
 
-Apply all budget changes, timeline adjustments, or analysis requests to THIS project unless the user explicitly names a different project or asks about the portfolio.`;
-      }
+Apply all budget changes, timeline adjustments, or analysis requests to THIS project (${projectName}) unless the user explicitly names a different project or asks about the portfolio.`;
     } else if (pageContext.pageType === 'portfolio') {
       contextHint = `\n\nCURRENT CONTEXT: The user is viewing the portfolio overview. Provide portfolio-wide insights and cross-project analysis.`;
     } else if (pageContext.pageType === 'dashboard') {
