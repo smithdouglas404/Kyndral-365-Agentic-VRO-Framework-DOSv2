@@ -2,6 +2,7 @@ import { AgentType } from './dataHub';
 import { executeAction, sendAgentMessage, ActionType } from './agentActionEngine';
 import { notifyAction } from './backgroundAgentMonitor';
 import { EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
+import { emitAgentIntervention, NewIntervention } from './commandCenterBridge';
 
 export interface AgentTask {
   id: string;
@@ -439,6 +440,102 @@ function runContinuousAgentActivity(): void {
   }
 }
 
+// Agent-specific intervention scenarios that emit to Command Center
+const AGENT_INTERVENTION_SCENARIOS: NewIntervention[] = [
+  {
+    type: 'timeline',
+    severity: 'high',
+    title: 'OKR Quarterly Target Drift',
+    description: 'Key Result KR3.2 (Improve stakeholder satisfaction by 25%) showing 12% variance from target trajectory.',
+    projectId: 'proj-okr-tracking',
+    projectName: 'Strategic OKR Program',
+    confidence: 86,
+    suggestedAction: 'Schedule stakeholder feedback sessions and implement quick-win improvements identified in last survey.',
+    impact: 'Missing target affects divisional bonus pool and executive credibility.',
+    agentSource: 'OKR Agent'
+  },
+  {
+    type: 'resource',
+    severity: 'medium',
+    title: 'OCM Training Completion Gap',
+    description: 'Only 62% of affected users completed mandatory change training with 2 weeks until go-live.',
+    projectId: 'proj-ocm-readiness',
+    projectName: 'Change Management Program',
+    confidence: 79,
+    suggestedAction: 'Deploy targeted reminder campaign and offer additional training sessions during lunch hours.',
+    impact: 'Low training completion correlates with 35% higher support ticket volume post-launch.',
+    agentSource: 'OCM Agent'
+  },
+  {
+    type: 'dependency',
+    severity: 'critical',
+    title: 'Planning Sprint Capacity Conflict',
+    description: 'Three ARTs competing for same shared services team capacity in PI 26.2. Current allocation exceeds 140%.',
+    projectId: 'proj-safe-planning',
+    projectName: 'SAFe Planning Coordination',
+    confidence: 92,
+    suggestedAction: 'Convene cross-ART capacity planning session. Prioritize based on WSJF scores.',
+    impact: 'Without resolution, all three initiatives will miss PI objectives.',
+    agentSource: 'Planning Agent'
+  },
+  {
+    type: 'quality',
+    severity: 'high',
+    title: 'TMO Milestone Quality Gate Failed',
+    description: 'Transformation milestone "Phase 2 Complete" failed quality gate. 4 of 12 acceptance criteria not met.',
+    projectId: 'proj-transformation',
+    projectName: 'Digital Transformation Office',
+    confidence: 88,
+    suggestedAction: 'Extend milestone deadline by 1 sprint. Assign dedicated resources to unmet criteria.',
+    impact: 'Proceeding without resolution introduces £1.2M technical debt.',
+    agentSource: 'TMO Agent'
+  },
+  {
+    type: 'budget',
+    severity: 'medium',
+    title: 'FinOps Cost Optimization Opportunity',
+    description: 'Cloud infrastructure costs 18% above benchmark. Identified £340K annual savings potential.',
+    projectId: 'proj-cloud-optimization',
+    projectName: 'Infrastructure Cost Management',
+    confidence: 84,
+    suggestedAction: 'Implement reserved instance strategy and right-size underutilized resources.',
+    impact: 'Savings can be redirected to innovation initiatives.',
+    agentSource: 'FinOps Agent'
+  }
+];
+
+let lastInterventionEmitTime = 0;
+const INTERVENTION_EMIT_INTERVAL = 60000; // Emit new intervention every 60 seconds max
+
+async function maybeEmitAgentIntervention(): Promise<void> {
+  const now = Date.now();
+  
+  // Only emit if enough time has passed and random chance (30% per cycle)
+  if (now - lastInterventionEmitTime > INTERVENTION_EMIT_INTERVAL && Math.random() < 0.3) {
+    const scenario = AGENT_INTERVENTION_SCENARIOS[Math.floor(Math.random() * AGENT_INTERVENTION_SCENARIOS.length)];
+    const randomProject = EXPANDED_PMO_PROJECTS[Math.floor(Math.random() * EXPANDED_PMO_PROJECTS.length)];
+    
+    // Customize scenario with random project context
+    const intervention: NewIntervention = {
+      ...scenario,
+      projectId: randomProject.id,
+      projectName: randomProject.name,
+      description: scenario.description.replace(/project|initiative/gi, randomProject.name),
+      confidence: Math.max(70, Math.min(95, scenario.confidence + (Math.random() * 10 - 5)))
+    };
+    
+    try {
+      const result = await emitAgentIntervention(intervention);
+      if (result.success) {
+        lastInterventionEmitTime = now;
+        console.log(`[Orchestrator] Emitted intervention from ${intervention.agentSource}: ${intervention.title}`);
+      }
+    } catch (error) {
+      console.error('Failed to emit agent intervention:', error);
+    }
+  }
+}
+
 let dataLoaded = false;
 
 async function loadPersistedData(): Promise<void> {
@@ -497,6 +594,8 @@ async function loadPersistedData(): Promise<void> {
   }
 }
 
+let interventionEmitInterval: NodeJS.Timeout | null = null;
+
 export function startOrchestrator(taskIntervalMs: number = 5000, activityIntervalMs: number = 30000): void {
   if (isOrchestratorRunning) return;
   
@@ -508,7 +607,11 @@ export function startOrchestrator(taskIntervalMs: number = 5000, activityInterva
   
   continuousActivityInterval = setInterval(runContinuousAgentActivity, activityIntervalMs);
   
+  // Start agent intervention emission to Command Center
+  interventionEmitInterval = setInterval(maybeEmitAgentIntervention, 45000); // Check every 45 seconds
+  
   setTimeout(runContinuousAgentActivity, 2000);
+  setTimeout(maybeEmitAgentIntervention, 10000); // First intervention check after 10 seconds
 }
 
 export function stopOrchestrator(): void {
@@ -519,6 +622,10 @@ export function stopOrchestrator(): void {
   if (continuousActivityInterval) {
     clearInterval(continuousActivityInterval);
     continuousActivityInterval = null;
+  }
+  if (interventionEmitInterval) {
+    clearInterval(interventionEmitInterval);
+    interventionEmitInterval = null;
   }
   isOrchestratorRunning = false;
 }

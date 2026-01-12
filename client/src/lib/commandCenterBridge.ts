@@ -180,3 +180,47 @@ export function createAgentActionFromRisk(
     }
   };
 }
+
+// Function for agents to emit NEW interventions to Command Center
+export interface NewIntervention {
+  type: 'dependency' | 'budget' | 'timeline' | 'resource' | 'quality';
+  severity: 'critical' | 'high' | 'medium';
+  title: string;
+  description: string;
+  projectId: string;
+  projectName: string;
+  confidence: number; // 0-100
+  suggestedAction: string;
+  impact: string;
+  agentSource: string;
+}
+
+export async function emitAgentIntervention(intervention: NewIntervention): Promise<{ success: boolean; interventionId?: string }> {
+  try {
+    const confidenceStr = (intervention.confidence / 100).toFixed(2);
+    
+    const result = await persistIntervention({
+      type: intervention.type,
+      severity: intervention.severity,
+      title: intervention.title,
+      description: intervention.description,
+      projectId: intervention.projectId,
+      projectName: intervention.projectName,
+      confidence: confidenceStr,
+      suggestedAction: intervention.suggestedAction,
+      impact: intervention.impact,
+      status: 'pending',
+      agentSource: intervention.agentSource
+    });
+
+    if (result) {
+      console.log(`[Command Center] New intervention from ${intervention.agentSource}: ${intervention.title}`);
+      return { success: true, interventionId: result.id };
+    }
+    
+    return { success: false };
+  } catch (error) {
+    console.error('Failed to emit agent intervention:', error);
+    return { success: false };
+  }
+}
