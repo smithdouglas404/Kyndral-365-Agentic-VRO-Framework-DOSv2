@@ -68,13 +68,15 @@ function ProjectDetailModal({
   program,
   open, 
   onClose,
-  mode
+  mode,
+  onDrillDown
 }: { 
   project?: PMOProject; 
   program?: VROProgram;
   open: boolean; 
   onClose: () => void;
   mode: DataMode;
+  onDrillDown?: (type: string, id: string) => void;
 }) {
   const [actionsTaken, setActionsTaken] = useState<string[]>([]);
   
@@ -472,7 +474,14 @@ function ProjectDetailModal({
                         }}
                         whileHover={{ scale: 1.01, x: 4 }}
                         whileTap={{ scale: 0.99 }}
-                        onClick={() => !taken && setActionsTaken(prev => [...prev, action.id])}
+                        onClick={() => {
+                          if (!taken) {
+                            setActionsTaken(prev => [...prev, action.id]);
+                            if (onDrillDown) {
+                              onDrillDown('action', action.type);
+                            }
+                          }
+                        }}
                         data-testid={`modal-action-${action.id}`}
                       >
                         <div className="flex items-start gap-3">
@@ -1568,6 +1577,7 @@ export function BUProgramsSection({ dataMode, onDrillDown }: BUProgramsSectionPr
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         mode={dataMode}
+        onDrillDown={onDrillDown}
       />
     </div>
   );

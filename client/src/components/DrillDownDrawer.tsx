@@ -12,9 +12,10 @@ import { AICoPilot } from './AICoPilot';
 import { getActionLog, subscribeToActions, AgentAction } from '@/lib/agentActionEngine';
 import { enrichedProjects, getProjectById, getStageLabel, type EnrichedProject } from '@/lib/projects';
 import { 
-  strategicThemes, valueStreams, portfolioEpics, features, stories, tasks, teams, teamMembers,
-  type Feature, type Story, type Task
+  strategicThemes, valueStreams, portfolioEpics, features, stories, tasks, teams, teamMembers
 } from '@/lib/safe6Data';
+import type { Feature, Story, Task } from '@/lib/safe6Model';
+import { getDrilldownContent, type DrilldownContent } from '@/lib/drilldownRegistry';
 
 interface DrillDownDrawerProps {
   isOpen: boolean;
@@ -270,6 +271,181 @@ function buildSAFeDrilldown(entityType: string, entityId: string, entity: any) {
   }
 }
 
+// Registry-based content renderer for action playbooks, metric dossiers, etc.
+interface RegistryContentProps {
+  content: DrilldownContent;
+  onNavigate?: (entityType: string, entityId: string) => void;
+}
+
+function RegistryContentRenderer({ content, onNavigate }: RegistryContentProps) {
+  const handleActionClick = (action: { targetEntityType?: string; targetEntityId?: string; type: string }) => {
+    if (onNavigate && action.targetEntityType && action.targetEntityId) {
+      onNavigate(action.targetEntityType, action.targetEntityId);
+    }
+  };
+
+  const handleRelatedItemClick = (item: { entityType: string; entityId: string }) => {
+    if (onNavigate) {
+      onNavigate(item.entityType, item.entityId);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header with AI insight */}
+      <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles size={16} className="text-teal-600" />
+            {content.title}
+          </CardTitle>
+          {content.subtitle && (
+            <p className="text-xs text-teal-700">{content.subtitle}</p>
+          )}
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-700">{content.description}</p>
+          {content.aiInsight && (
+            <div className="mt-3 p-3 bg-white/80 rounded-lg border border-teal-100">
+              <div className="flex items-start gap-2">
+                <Brain size={14} className="text-teal-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-gray-600">{content.aiInsight}</p>
+              </div>
+              {content.agentSource && (
+                <Badge className="mt-2 bg-teal-500 text-white text-xs">
+                  {agentNames[content.agentSource] || content.agentSource}
+                </Badge>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Metrics Grid */}
+      {content.metrics && content.metrics.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp size={16} className="text-blue-500" />
+              Key Metrics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2">
+              {content.metrics.map((metric, idx) => (
+                <div key={idx} className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-500">{metric.label}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold" style={{ color: metric.color === 'teal' ? '#0d9488' : metric.color === 'blue' ? '#3b82f6' : undefined }}>
+                      {metric.value}
+                    </p>
+                    {metric.trend && (
+                      <span className={`text-xs ${metric.trend === 'up' ? 'text-green-600' : metric.trend === 'down' ? 'text-red-600' : 'text-gray-400'}`}>
+                        {metric.trend === 'up' ? '↑' : metric.trend === 'down' ? '↓' : '→'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Actions */}
+      {content.actions && content.actions.length > 0 && (
+        <Card className="border-amber-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Zap size={16} className="text-amber-500" />
+              Available Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {content.actions.map((action) => (
+                <div
+                  key={action.id}
+                  className="flex items-center justify-between p-3 bg-amber-50 rounded-lg hover:bg-amber-100 cursor-pointer transition-colors"
+                  onClick={() => handleActionClick(action)}
+                  data-testid={`registry-action-${action.id}`}
+                >
+                  <div>
+                    <p className="font-medium text-sm">{action.label}</p>
+                    {action.description && (
+                      <p className="text-xs text-gray-500">{action.description}</p>
+                    )}
+                  </div>
+                  <ChevronRight size={16} className="text-amber-400" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Related Items */}
+      {content.relatedItems && content.relatedItems.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <GitBranch size={16} className="text-indigo-500" />
+              Related Items ({content.relatedItems.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {content.relatedItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                  onClick={() => handleRelatedItemClick(item)}
+                  data-testid={`registry-related-${item.id}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      item.status === 'green' || item.status === 'on-track' ? 'bg-green-500' :
+                      item.status === 'amber' || item.status === 'at-risk' ? 'bg-amber-500' :
+                      item.status === 'red' || item.status === 'critical' ? 'bg-red-500' :
+                      'bg-blue-500'
+                    }`} />
+                    <div>
+                      <p className="font-medium text-sm">{item.name}</p>
+                      <p className="text-xs text-gray-500">{item.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {item.status && (
+                      <Badge variant="outline" className="text-xs">
+                        {item.status}
+                      </Badge>
+                    )}
+                    <ChevronRight size={16} className="text-indigo-400" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Navigation breadcrumb for deeper levels */}
+      {content.level > 1 && content.parentEntity && (
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2"
+            onClick={() => onNavigate?.(content.parentEntity!.entityType, content.parentEntity!.entityId)}
+          >
+            ← Back to {content.parentEntity.entityType}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO', onNavigate }: DrillDownDrawerProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
@@ -304,8 +480,16 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
   const safeEntity = lookupSAFeEntity(entityType, entityId);
   const safeDrilldown = safeEntity ? buildSAFeDrilldown(entityType, entityId, safeEntity) : null;
 
+  // Look up registry content for actions, metrics, teams, agents, dependencies
+  const registryContent = getDrilldownContent(entityType, entityId);
+
   // Don't render if drawer is not open or entity is not selected
   if (!isOpen || !entityType || !entityId) return null;
+  
+  // Determine if we should use registry-based rendering
+  // Only use registry renderer for full dossiers (action playbooks, metrics, teams, etc.)
+  // SAFe entities and projects use legacy renderer for richer detailed views
+  const useRegistryRenderer = registryContent?.isFullDossier === true;
   
   // Create a fallback for project types using enriched project data
   const projectDrilldown = enrichedProject ? {
@@ -680,63 +864,119 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     }
   } : null;
   
-  // Create a fallback for unsupported entity types with rich traceability data
-  const fallbackDrilldown = !drilldownData && !projectDrilldown && !metricDrilldown ? {
+  // Create a fallback for unsupported entity types
+  // Only create if registryContent exists (non-null) - otherwise show unavailable state
+  const hasRegistryData = registryContent !== null;
+  
+  const registryMetrics = registryContent?.metrics?.reduce((acc, m) => ({
+    ...acc,
+    [m.label]: m.value
+  }), {} as Record<string, string>) || {};
+  
+  const registryActions = registryContent?.actions?.map(a => ({
+    id: a.id,
+    label: a.label,
+    type: a.type
+  })) || [];
+  
+  // Only create fallback if we have registry data to populate it
+  // This prevents fabricated content for unknown entities
+  const fallbackDrilldown = (!drilldownData && !projectDrilldown && !metricDrilldown && hasRegistryData) ? {
     entityType: entityType as 'project' | 'program' | 'risk' | 'portfolio',
     entityId,
-    entityName: entityType === 'agent-activity' 
-      ? 'Agent Activity Details' 
-      : entityType === 'challenge' 
-        ? 'Challenge Analysis'
-        : `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`,
-    bu: 'VRO Co-Pilot',
-    relatedAgents: ['integrated-management' as AgentType, 'finops' as AgentType],
+    entityName: registryContent?.title || `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`,
+    bu: registryContent?.subtitle || 'VRO Strategy Dashboard',
+    relatedAgents: [registryContent?.agentSource || 'integrated-management' as AgentType],
     events: [],
-    metrics: {
-      'Entity Type': entityType.charAt(0).toUpperCase() + entityType.slice(1),
-      'Entity ID': entityId.slice(0, 16) + '...',
-      'Status': 'Active',
-      'Priority': 'High',
-      'Confidence': '87%',
-      'Last Updated': new Date().toLocaleTimeString()
-    },
-    actions: [
-      { id: 'investigate', label: 'Investigate Further', type: 'investigate' },
-      { id: 'escalate', label: 'Escalate to Team', type: 'escalate' },
-      { id: 'accelerate', label: 'Fast-track Resolution', type: 'accelerate' },
-      { id: 'mitigate', label: 'Apply Mitigation', type: 'mitigate' }
-    ],
+    metrics: registryMetrics,
+    actions: registryActions,
     history: [
-      { timestamp: new Date(Date.now() - 5000), action: 'Data collected from source systems', agent: 'integrated-management' as AgentType },
-      { timestamp: new Date(Date.now() - 3000), action: 'Cross-referenced with historical patterns', agent: 'integrated-management' as AgentType },
-      { timestamp: new Date(Date.now() - 1000), action: 'AI analysis completed', agent: 'integrated-management' as AgentType },
-      { timestamp: new Date(), action: 'Action triggered and recorded', agent: 'integrated-management' as AgentType }
+      { timestamp: new Date(Date.now() - 5000), action: 'Data collected from source systems', agent: registryContent?.agentSource || 'integrated-management' as AgentType },
+      { timestamp: new Date(Date.now() - 1000), action: 'Analysis completed', agent: registryContent?.agentSource || 'integrated-management' as AgentType },
+      { timestamp: new Date(), action: 'Content loaded from registry', agent: 'integrated-management' as AgentType }
     ],
-    aiInsight: generateEntityInsight(entityType, entityId).aiInsight,
-    summary: generateEntityInsight(entityType, entityId).summary,
-    relatedEntities: [
-      { type: 'Project', id: 'PRJ-' + entityId.slice(-4), name: 'Digital Transformation Initiative' },
-      { type: 'OKR', id: 'OKR-Q4-' + entityId.slice(-2), name: 'Improve Operational Efficiency' },
-      { type: 'Risk', id: 'RSK-' + entityId.slice(-3), name: 'Integration Dependency Risk' }
-    ],
+    aiInsight: registryContent?.aiInsight || '',
+    summary: registryContent?.description || '',
+    relatedEntities: registryContent?.relatedItems?.slice(0, 5).map(item => ({
+      type: item.type,
+      id: item.id,
+      name: item.name,
+      status: item.status,
+      entityType: item.entityType,
+      entityId: item.entityId
+    })) || [],
     traceability: {
-      sourceSystem: entityType === 'project' ? 'Jira' : entityType === 'metric' ? 'PowerBI' : 'ServiceNow',
-      sourceId: 'SRC-' + entityId.slice(-8).toUpperCase(),
-      triggeredBy: 'Threshold Alert',
+      sourceSystem: 'VRO Registry',
+      sourceId: `${entityType}-${String(entityId).slice(0, 8)}`,
+      triggeredBy: 'Navigation',
       dataInputs: [
-        { source: 'Real-time metrics', freshness: '< 1 min' },
-        { source: 'Historical trends (30 days)', freshness: 'Daily refresh' },
-        { source: 'Cross-agent insights', freshness: '< 5 min' }
+        { source: 'Registry Dossier', freshness: '< 1 min' }
       ],
-      linkedProjects: [
-        { id: 'PRJ-001', name: 'PRT Digital Intake', status: 'green' },
-        { id: 'PRJ-002', name: 'Longevity Model', status: 'amber' }
-      ]
+      linkedProjects: []
     }
   } : null;
   
+  // Unavailable state for entities without any data source
+  const isContentUnavailable = !drilldownData && !projectDrilldown && !metricDrilldown && !safeDrilldown && !hasRegistryData;
+  
   // Priority: metricDrilldown first (for configured metrics), then projectDrilldown, then drilldownData, then fallback
   const displayData = metricDrilldown || projectDrilldown || safeDrilldown || drilldownData || fallbackDrilldown;
+  
+  // Show explicit unavailable state when no content source exists
+  if (isContentUnavailable) {
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40"
+              onClick={onClose}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl z-50 overflow-y-auto"
+            >
+              <div className="sticky top-0 bg-white border-b z-10">
+                <div className="flex items-center justify-between p-4">
+                  <div>
+                    <Badge variant="outline" className="mb-1 text-xs">
+                      {entityType.toUpperCase()}
+                    </Badge>
+                    <h2 className="text-lg font-bold">{entityType.charAt(0).toUpperCase() + entityType.slice(1).replace(/-/g, ' ')}</h2>
+                    <p className="text-sm text-gray-500">ID: {String(entityId).slice(0, 20)}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={onClose}>
+                    <X size={20} />
+                  </Button>
+                </div>
+              </div>
+              <div className="p-6 flex flex-col items-center justify-center min-h-[300px] text-center">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <AlertTriangle size={32} className="text-amber-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Not Available</h3>
+                <p className="text-sm text-gray-600 mb-6 max-w-sm">
+                  Detailed information for this {entityType.replace(/-/g, ' ')} is not yet configured in the system.
+                </p>
+                <div className="space-y-2">
+                  <Button variant="outline" onClick={onClose} className="w-full">
+                    Close Panel
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    );
+  }
+  
   if (!displayData) return null;
 
   return (
@@ -788,7 +1028,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                 </TabsList>
 
                 <TabsContent value="overview">
-                  <div className="space-y-4">
+                  {/* Use registry-based rendering for action/metric/team/dependency entities */}
+                  {useRegistryRenderer && registryContent ? (
+                    <RegistryContentRenderer content={registryContent} onNavigate={onNavigate} />
+                  ) : (
+                  <div className="space-y-4 drilldown-overview">
                     {displayData.aiInsight && (
                       <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
                         <CardHeader className="pb-2">
@@ -1028,6 +1272,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                       </Card>
                     )}
                   </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="traceability">
