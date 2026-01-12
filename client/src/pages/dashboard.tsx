@@ -31,16 +31,11 @@ import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
-import { PMOPipeline } from "@/components/PMOPipeline";
-import { PMOGuidance } from "@/components/PMOGuidance";
-import { PMOProjectWorkspace } from "@/components/PMOProjectWorkspace";
-import { PMOCoPilotWorkspace } from "@/components/PMOCoPilotWorkspace";
 import { SimulationProvider } from "@/components/SimulationProvider";
 import { VROMetricsGrid } from "@/components/VROMetricCard";
 import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
-import { getPMOOverviewMetrics } from "@/lib/unifiedMetrics";
 import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCallback } from "@/lib/backgroundAgentMonitor";
 import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
@@ -57,7 +52,6 @@ const LG = {
   grey700: colors.neutral.grey700, // #424242 - Icons
 };
 
-type DataMode = "VRO" | "PMO";
 
 // Shared VRO metrics data - Used by both VRO and PMO views (PMO rolls up to VRO)
 const VRO_METRICS_DATA = [
@@ -222,7 +216,7 @@ function LiveIndicatorButton({ isLive, onToggle }: { isLive: boolean; onToggle: 
   );
 }
 
-function LGReportStats({ mode, onDrillDown }: { mode: DataMode; onDrillDown?: (type: string, id: string) => void }) {
+function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown?: (type: string, id: string) => void }) {
   // VRO shows value-focused metrics (ROI, NPV, Benefits Realization)
   const vroStats = [
     { 
@@ -423,8 +417,7 @@ function DashboardContent() {
   const [location, navigate] = useLocation();
   const { setPageContext } = usePageContext();
   const [selectedScenario] = useState<Scenario>(scenarios[0]);
-  const [dataMode, setDataMode] = useState<DataMode>("VRO");
-  const [activeTab, setActiveTab] = useState("overview");
+    const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
   
@@ -476,19 +469,6 @@ function DashboardContent() {
     };
   }, []);
   
-  // Handle mode changes through sidebar clicks only (not URL)
-  const handleModeChange = (newMode: DataMode) => {
-    setDataMode(newMode);
-    // Reset to overview tab if current tab is mode-specific
-    const vroOnlyTabs = ['lifecycle', 'performance'];
-    const pmoOnlyTabs = ['pipeline', 'workspace'];
-    if (newMode === 'PMO' && vroOnlyTabs.includes(activeTab)) {
-      setActiveTab('overview');
-    } else if (newMode === 'VRO' && pmoOnlyTabs.includes(activeTab)) {
-      setActiveTab('overview');
-    }
-  };
-
   const handleDrillDown = (type: string, id: string) => {
     if (type === 'division') {
       navigate(`/division/${id}?fromTab=${activeTab}`);
@@ -515,7 +495,7 @@ function DashboardContent() {
       <NavBar />
 
       <div className="flex">
-        <AgentSidebar dataMode={dataMode} onModeChange={handleModeChange} activeTab={activeTab} onTabChange={setActiveTab} />
+        <AgentSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
         <main className="flex-1 px-8 py-8 max-w-[1400px]">
         {/* Title section - Only show on Overview tab */}
@@ -665,23 +645,13 @@ function DashboardContent() {
 
           {/* Business Performance Tab */}
           <TabsContent value="performance">
-            <BusinessPerformanceSection mode={dataMode} />
+            <BusinessPerformanceSection mode="VRO" />
           </TabsContent>
 
-
-          {/* Pipeline Tab - PMO Only */}
-          <TabsContent value="pipeline" className="space-y-6">
-            <PMOPipeline onDrillDown={handleDrillDown} />
-          </TabsContent>
 
           {/* Agent Command Center Tab */}
           <TabsContent value="agent-command" className="space-y-6">
             <AgentCommandCenter onNavigateToProject={(id) => navigate(`/project/${id}`)} />
-          </TabsContent>
-
-          {/* Workspace Tab - PMO Co-Pilot (Legacy) */}
-          <TabsContent value="workspace" className="space-y-6">
-            <PMOCoPilotWorkspace onDrillDown={handleDrillDown} />
           </TabsContent>
 
         </Tabs>
@@ -722,7 +692,7 @@ function DashboardContent() {
         onClose={() => setDrillDownOpen(false)}
         entityType={drillDownEntity?.type || ""}
         entityId={drillDownEntity?.id || ""}
-        dataMode={dataMode}
+        dataMode="VRO"
         onNavigate={(type, id) => {
           setDrillDownEntity({ type, id });
         }}

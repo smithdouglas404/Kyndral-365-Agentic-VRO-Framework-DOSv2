@@ -1,42 +1,30 @@
 import { Link, useLocation } from 'wouter';
-import { useState, useEffect } from 'react';
 import { 
-  DollarSign, GitBranch, Repeat, Calculator, Target, 
-  Shield, Calendar, Users, Sparkles, ChevronRight, ChevronDown,
-  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Zap, Compass, Upload, Bot
+  Repeat, Calculator, Target, 
+  Shield, Calendar, Users, Sparkles, ChevronRight,
+  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Upload, Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-
-type DataMode = "VRO" | "PMO";
 
 interface NavItem {
   id: string;
   label: string;
   icon: React.ElementType;
-  modes: ("VRO" | "PMO")[] | "all";
 }
 
-// Core items visible to all modes
+// Core navigation items
 const coreNavItems: NavItem[] = [
-  { id: "overview", label: "Overview", icon: BarChart3, modes: "all" },
-  { id: "portfolios", label: "Portfolios", icon: Building2, modes: "all" },
-  { id: "business-cases", label: "Business Cases", icon: Briefcase, modes: "all" },
-  { id: "early-warning", label: "Early Warning", icon: AlertOctagon, modes: "all" },
-  { id: "kpi-tracking", label: "KPIs", icon: PieChart, modes: "all" },
-  { id: "agent-command", label: "Agent Command", icon: Bot, modes: "all" },
-  { id: "ingestion", label: "Project Ingestion", icon: Upload, modes: "all" },
+  { id: "overview", label: "Overview", icon: BarChart3 },
+  { id: "portfolios", label: "Portfolios", icon: Building2 },
+  { id: "business-cases", label: "Business Cases", icon: Briefcase },
+  { id: "early-warning", label: "Early Warning", icon: AlertOctagon },
+  { id: "kpi-tracking", label: "KPIs", icon: PieChart },
+  { id: "agent-command", label: "Agent Command", icon: Bot },
+  { id: "ingestion", label: "Project Ingestion", icon: Upload },
 ];
 
-// VRO-specific items - removed VRO-Value accordion per user request
-const vroNavItems: NavItem[] = [];
-
-// PMO-specific items - only items with existing dashboard views
-const pmoNavItems: NavItem[] = [
-  { id: "workspace", label: "Co-Pilot", icon: Compass, modes: ["PMO"] },
-];
 
 interface Agent {
   id: AgentType | 'policy';
@@ -115,28 +103,14 @@ const agents: Agent[] = [
 ];
 
 interface AgentSidebarProps {
-  dataMode: DataMode;
-  onModeChange: (mode: DataMode) => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   collapsed?: boolean;
 }
 
-export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", onTabChange = () => {}, collapsed = false }: AgentSidebarProps) {
+export function AgentSidebar({ activeTab = "overview", onTabChange = () => {}, collapsed = false }: AgentSidebarProps) {
   const [location, setLocation] = useLocation();
   const agentSummary = useAllAgentsSummary();
-  const [expandedAccordions, setExpandedAccordions] = useState<string[]>([dataMode.toLowerCase()]);
-  
-  // Sync accordion expansion with dataMode changes
-  useEffect(() => {
-    const modeKey = dataMode.toLowerCase();
-    setExpandedAccordions(prev => {
-      if (!prev.includes(modeKey)) {
-        return [...prev, modeKey];
-      }
-      return prev;
-    });
-  }, [dataMode]);
   
   // Check if we're on the main dashboard
   const isOnDashboard = location === '/dashboard' || location === '/';
@@ -153,32 +127,30 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
     return metrics;
   };
 
-  const handleNavClick = (itemId: string, mode?: DataMode) => {
-    // Special navigation items that go to their own routes
+  const handleNavClick = (itemId: string) => {
     if (itemId === 'ingestion') {
       setLocation('/ingestion');
       return;
     }
-    // Navigate to dashboard first if not already there
+    if (itemId === 'agent-command') {
+      setLocation('/command-center');
+      return;
+    }
     if (!isOnDashboard) {
       setLocation('/dashboard');
-    }
-    // Set mode if specified
-    if (mode) {
-      onModeChange(mode);
     }
     onTabChange(itemId);
   };
 
-  const renderNavButton = (item: NavItem, mode?: DataMode, colorClass?: string) => {
+  const renderNavButton = (item: NavItem) => {
     const Icon = item.icon;
     const isItemActive = activeTab === item.id && isOnDashboard;
-    const activeClass = colorClass || "bg-[#005EB8] text-white";
+    const activeClass = "bg-[#005EB8] text-white";
     
     return (
       <button
         key={item.id}
-        onClick={() => handleNavClick(item.id, mode)}
+        onClick={() => handleNavClick(item.id)}
         className={cn(
           "w-full px-3 py-2 rounded-lg cursor-pointer transition-all text-left flex items-center gap-3",
           isItemActive ? activeClass : "hover:bg-gray-100 text-gray-700"
@@ -207,62 +179,7 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
           {coreNavItems.map((item) => renderNavButton(item))}
         </div>
 
-        {/* VRO & PMO Accordions - Expanded Mode */}
-        {!collapsed && (
-          <div className="px-2 mt-4">
-            <Accordion 
-              type="multiple" 
-              value={expandedAccordions}
-              onValueChange={setExpandedAccordions}
-              className="space-y-1"
-            >
-              {/* PMO Accordion */}
-              <AccordionItem value="pmo" className="border-0">
-                <AccordionTrigger 
-                  className="px-3 py-2 rounded-lg hover:bg-purple-50 hover:no-underline text-sm font-semibold text-purple-700 bg-purple-50/50 border border-purple-200/50"
-                  data-testid="accordion-pmo"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 bg-purple-500 rounded">
-                      <GitBranch className="h-3 w-3 text-white" />
-                    </div>
-                    <span>PMO - Delivery</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-0 pt-1">
-                  <div className="space-y-1 pl-2">
-                    {pmoNavItems.map((item) => renderNavButton(item, "PMO", "bg-purple-600 text-white"))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        )}
-
-        {/* PMO Icons - Collapsed Mode */}
-        {collapsed && pmoNavItems.length > 0 && (
-          <div className="px-2 mt-4 space-y-1">
-            {pmoNavItems.map((item) => {
-              const Icon = item.icon;
-              const isItemActive = activeTab === item.id && isOnDashboard;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id, "PMO")}
-                  className={cn(
-                    "w-full p-2 rounded-lg cursor-pointer transition-all flex items-center justify-center",
-                    isItemActive ? "bg-purple-600 text-white" : "hover:bg-purple-50 text-purple-600"
-                  )}
-                  data-testid={`nav-${item.id}`}
-                  title={item.label}
-                >
-                  <Icon className="h-4 w-4" />
-                </button>
-              );
-            })}
-          </div>
-        )}
-
+        
         {/* AI Agents Section */}
         {!collapsed && (
           <div className="px-3 mt-4 mb-1">
@@ -277,9 +194,6 @@ export function AgentSidebar({ dataMode, onModeChange, activeTab = "overview", o
           return (
             <Link key={agent.id} href={agent.href}>
               <div
-                onClick={() => {
-                  if (agent.id === 'integrated-management') onModeChange('VRO');
-                }}
                 className={cn(
                   "mx-2 mb-1 px-3 py-2.5 rounded-lg cursor-pointer transition-all group relative",
                   active 
