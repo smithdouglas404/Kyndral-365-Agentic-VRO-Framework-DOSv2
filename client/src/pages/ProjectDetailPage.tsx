@@ -22,8 +22,10 @@ import {
   ChevronRight,
   FileText,
   Milestone as MilestoneIcon,
-  Activity
+  Activity,
+  ExternalLink
 } from "lucide-react";
+import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -277,6 +279,9 @@ export default function ProjectDetailPage() {
   const [, setLocation] = useLocation();
   const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
   const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
+  const [drilldownOpen, setDrilldownOpen] = useState(false);
+  const [drilldownEntityType, setDrilldownEntityType] = useState('');
+  const [drilldownEntityId, setDrilldownEntityId] = useState('');
   
   // Try to find project in SAFe projects first, then enriched projects
   const safeProject = getSafeProjectById(params.id || '');
@@ -321,8 +326,8 @@ export default function ProjectDetailPage() {
     });
   };
 
-  const budgetUtilization = Math.round((project.financials.spent / project.financials.budget) * 100);
-  const forecastVariance = Math.round(((project.financials.forecast - project.financials.budget) / project.financials.budget) * 100);
+  const budgetUtilization = Math.round((project.financials.spent / project.financials.budget) * 100) || 0;
+  const forecastVariance = Math.round(((project.financials.forecast - project.financials.budget) / project.financials.budget) * 100) || 0;
   
   const totalStories = project.features.reduce((sum, f) => sum + f.stories.length, 0);
   const completedStories = project.features.reduce((sum, f) => 
@@ -333,7 +338,26 @@ export default function ProjectDetailPage() {
   const completedTasks = project.features.reduce((sum, f) => 
     sum + f.stories.reduce((sSum, s) => sSum + s.tasks.filter(t => t.status === 'done').length, 0), 0);
 
+  const openDrilldown = (entityType: string, entityId: string) => {
+    setDrilldownEntityType(entityType);
+    setDrilldownEntityId(entityId);
+    setDrilldownOpen(true);
+  };
+
+  const handleDrilldownNavigate = (entityType: string, entityId: string) => {
+    setDrilldownEntityType(entityType);
+    setDrilldownEntityId(entityId);
+  };
+
   return (
+    <>
+    <DrillDownDrawer
+      isOpen={drilldownOpen}
+      onClose={() => setDrilldownOpen(false)}
+      entityType={drilldownEntityType}
+      entityId={drilldownEntityId}
+      onNavigate={handleDrilldownNavigate}
+    />
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b-4 border-purple-600">
         <div className="container mx-auto px-4 py-4">
@@ -373,11 +397,18 @@ export default function ProjectDetailPage() {
 
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow hover:border-teal-300"
+            onClick={() => openDrilldown('kpi', 'budget-analysis')}
+            data-testid="card-kpi-budget"
+          >
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
-                <DollarSign className="h-4 w-4" />
-                <span className="text-sm">Budget</span>
+              <div className="flex items-center justify-between text-gray-600 mb-1">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="text-sm">Budget</span>
+                </div>
+                <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
               <p className="text-2xl font-bold">£{(project.financials.budget / 1000000).toFixed(1)}M</p>
               <Progress value={budgetUtilization} className="h-2 mt-2" />
@@ -385,33 +416,54 @@ export default function ProjectDetailPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300"
+            onClick={() => openDrilldown('kpi', 'velocity-metrics')}
+            data-testid="card-kpi-velocity"
+          >
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
-                <Activity className="h-4 w-4" />
-                <span className="text-sm">Velocity</span>
+              <div className="flex items-center justify-between text-gray-600 mb-1">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  <span className="text-sm">Velocity</span>
+                </div>
+                <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
               <p className="text-2xl font-bold">{project.velocity}</p>
               <p className="text-xs text-gray-500 mt-1">story points/sprint</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow hover:border-purple-300"
+            onClick={() => openDrilldown('kpi', 'resource-allocation')}
+            data-testid="card-kpi-resources"
+          >
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
-                <Users className="h-4 w-4" />
-                <span className="text-sm">Resources</span>
+              <div className="flex items-center justify-between text-gray-600 mb-1">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span className="text-sm">Resources</span>
+                </div>
+                <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
               <p className="text-2xl font-bold">{project.totalFTE}</p>
               <p className="text-xs text-gray-500 mt-1">FTE allocated</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow hover:border-green-300"
+            onClick={() => openDrilldown('kpi', 'quality-score')}
+            data-testid="card-kpi-quality"
+          >
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
-                <Target className="h-4 w-4" />
-                <span className="text-sm">Quality Score</span>
+              <div className="flex items-center justify-between text-gray-600 mb-1">
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  <span className="text-sm">Quality Score</span>
+                </div>
+                <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
               <p className="text-2xl font-bold">{project.qualityScore}%</p>
               <Progress value={project.qualityScore} className="h-2 mt-2" />
@@ -442,20 +494,48 @@ export default function ProjectDetailPage() {
                 <CardContent>
                   <p className="text-gray-700 leading-relaxed">{project.description}</p>
                   <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Start Date</p>
+                    <div 
+                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => openDrilldown('kpi', 'project-timeline')}
+                      data-testid="tile-start-date"
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-500">Start Date</p>
+                        <ExternalLink className="h-3 w-3 text-gray-400" />
+                      </div>
                       <p className="font-medium">{project.startDate}</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Target End Date</p>
+                    <div 
+                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => openDrilldown('kpi', 'project-timeline')}
+                      data-testid="tile-end-date"
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-500">Target End Date</p>
+                        <ExternalLink className="h-3 w-3 text-gray-400" />
+                      </div>
                       <p className="font-medium">{project.targetEndDate}</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Portfolio Theme</p>
+                    <div 
+                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => openDrilldown('theme', project.portfolioTheme)}
+                      data-testid="tile-theme"
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-500">Portfolio Theme</p>
+                        <ExternalLink className="h-3 w-3 text-gray-400" />
+                      </div>
                       <p className="font-medium">{project.portfolioTheme}</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Agile Release Train</p>
+                    <div 
+                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => openDrilldown('team', project.artName)}
+                      data-testid="tile-art"
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-500">Agile Release Train</p>
+                        <ExternalLink className="h-3 w-3 text-gray-400" />
+                      </div>
                       <p className="font-medium">{project.artName}</p>
                     </div>
                   </div>
@@ -470,30 +550,46 @@ export default function ProjectDetailPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
+                  <div 
+                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
+                    onClick={() => openDrilldown('kpi', 'features-summary')}
+                    data-testid="progress-features"
+                  >
                     <div className="flex justify-between text-sm mb-1">
-                      <span>Features</span>
+                      <span className="flex items-center gap-1">Features <ExternalLink className="h-3 w-3 text-gray-400" /></span>
                       <span>{project.features.filter(f => f.status === 'done').length}/{project.features.length}</span>
                     </div>
                     <Progress value={(project.features.filter(f => f.status === 'done').length / Math.max(1, project.features.length)) * 100} className="h-2" />
                   </div>
-                  <div>
+                  <div 
+                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
+                    onClick={() => openDrilldown('kpi', 'stories-summary')}
+                    data-testid="progress-stories"
+                  >
                     <div className="flex justify-between text-sm mb-1">
-                      <span>Stories</span>
+                      <span className="flex items-center gap-1">Stories <ExternalLink className="h-3 w-3 text-gray-400" /></span>
                       <span>{completedStories}/{totalStories}</span>
                     </div>
                     <Progress value={(completedStories / Math.max(1, totalStories)) * 100} className="h-2" />
                   </div>
-                  <div>
+                  <div 
+                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
+                    onClick={() => openDrilldown('kpi', 'tasks-summary')}
+                    data-testid="progress-tasks"
+                  >
                     <div className="flex justify-between text-sm mb-1">
-                      <span>Tasks</span>
+                      <span className="flex items-center gap-1">Tasks <ExternalLink className="h-3 w-3 text-gray-400" /></span>
                       <span>{completedTasks}/{totalTasks}</span>
                     </div>
                     <Progress value={(completedTasks / Math.max(1, totalTasks)) * 100} className="h-2" />
                   </div>
-                  <div>
+                  <div 
+                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
+                    onClick={() => openDrilldown('kpi', 'burndown-health')}
+                    data-testid="progress-burndown"
+                  >
                     <div className="flex justify-between text-sm mb-1">
-                      <span>Burndown Health</span>
+                      <span className="flex items-center gap-1">Burndown Health <ExternalLink className="h-3 w-3 text-gray-400" /></span>
                       <span>{project.burndownHealth}%</span>
                     </div>
                     <Progress value={project.burndownHealth} className="h-2" />
@@ -534,9 +630,15 @@ export default function ProjectDetailPage() {
                 <CardContent>
                   <ul className="space-y-3">
                     {project.vroInsights.map((insight, idx) => (
-                      <li key={idx} className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
+                      <li 
+                        key={idx} 
+                        className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => openDrilldown('kpi', `vro-insight-${idx}`)}
+                        data-testid={`vro-insight-${idx}`}
+                      >
                         <Sparkles className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-blue-800">{insight}</span>
+                        <span className="text-sm text-blue-800 flex-1">{insight}</span>
+                        <ExternalLink className="h-3 w-3 text-blue-400 mt-0.5 flex-shrink-0" />
                       </li>
                     ))}
                   </ul>
@@ -553,9 +655,15 @@ export default function ProjectDetailPage() {
                 <CardContent>
                   <ul className="space-y-3">
                     {project.pmoDataFeeds.map((feed, idx) => (
-                      <li key={idx} className="flex items-start gap-2 p-2 bg-green-50 rounded-lg">
+                      <li 
+                        key={idx} 
+                        className="flex items-start gap-2 p-2 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition-colors"
+                        onClick={() => openDrilldown('kpi', `pmo-feed-${idx}`)}
+                        data-testid={`pmo-feed-${idx}`}
+                      >
                         <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-green-800">{feed}</span>
+                        <span className="text-sm text-green-800 flex-1">{feed}</span>
+                        <ExternalLink className="h-3 w-3 text-green-400 mt-0.5 flex-shrink-0" />
                       </li>
                     ))}
                   </ul>
@@ -1059,5 +1167,6 @@ export default function ProjectDetailPage() {
         </Tabs>
       </main>
     </div>
+    </>
   );
 }
