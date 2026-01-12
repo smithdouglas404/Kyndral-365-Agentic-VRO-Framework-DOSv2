@@ -8,6 +8,7 @@ import {
   Target,
   RefreshCw,
   ChevronRight,
+  ChevronDown,
   ArrowUpRight,
   Clock,
   Zap,
@@ -98,6 +99,7 @@ export function AIExecutiveInsights() {
   
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerEntity, setDrawerEntity] = useState<{ type: string; id: string } | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const openDrilldown = (type: string, id: string) => {
     setDrawerEntity({ type, id });
@@ -223,7 +225,11 @@ export function AIExecutiveInsights() {
       className="mb-6"
     >
       <Card className={`border-2 ${health.border} bg-gradient-to-br from-slate-50 to-white shadow-lg`}>
-        <CardHeader className="pb-3">
+        <CardHeader 
+          className="pb-3 cursor-pointer hover:bg-gray-50/50 transition-colors"
+          onClick={() => setIsExpanded(!isExpanded)}
+          data-testid="accordion-ai-insights-header"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`p-2 rounded-lg ${health.light}`}>
@@ -240,23 +246,41 @@ export function AIExecutiveInsights() {
                 <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                   <Clock className="h-3 w-3" />
                   Generated {new Date(insights.generatedAt).toLocaleTimeString()}
+                  {!isExpanded && <span className="ml-2 text-blue-500">Click to expand</span>}
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => refreshMutation.mutate()}
-              disabled={refreshMutation.isPending}
-              className="text-gray-500 hover:text-blue-600"
-              data-testid="button-refresh-insights"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); refreshMutation.mutate(); }}
+                disabled={refreshMutation.isPending}
+                className="text-gray-500 hover:text-blue-600"
+                data-testid="button-refresh-insights"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+              </Button>
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className={`h-5 w-5 ${health.text}`} />
+              </motion.div>
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-5">
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{ overflow: "hidden" }}
+            >
+              <CardContent className="space-y-5">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -383,7 +407,10 @@ export function AIExecutiveInsights() {
               ))}
             </div>
           </div>
-        </CardContent>
+              </CardContent>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
       
       {drawerEntity && (
