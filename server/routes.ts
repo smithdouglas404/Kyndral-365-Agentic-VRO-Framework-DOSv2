@@ -433,7 +433,67 @@ export async function registerRoutes(
 
       const { question, pageContext } = parsed.data;
       const response = await askPM(question, pageContext);
-      res.json({ response });
+      
+      // Detect action keywords in user question and create agent cascade
+      const actionKeywords = ['increase budget', 'extend deadline', 'reallocate', 'add resources', 'change priority', 'escalate', 'approve', 'delay', 'accelerate'];
+      const questionLower = question.toLowerCase();
+      const triggersAction = actionKeywords.some(keyword => questionLower.includes(keyword));
+      
+      let agentCascade = null;
+      if (triggersAction && pageContext?.entityId && pageContext?.entityName) {
+        // Create an intervention based on PM Chat action
+        const interventionType = questionLower.includes('budget') ? 'budget' : 
+                                 questionLower.includes('deadline') || questionLower.includes('delay') ? 'timeline' :
+                                 questionLower.includes('resource') ? 'resource' : 'quality';
+        
+        try {
+          const intervention = await storage.createIntervention({
+            type: interventionType,
+            severity: 'medium',
+            title: `PM Chat Action: ${pageContext.entityName}`,
+            description: `Action requested via PM Chat: "${question.substring(0, 100)}..."`,
+            projectId: pageContext.entityId,
+            projectName: pageContext.entityName,
+            confidence: '0.85',
+            suggestedAction: `Review and approve the requested change for ${pageContext.entityName}.`,
+            impact: 'Impact analysis pending - review recommended.',
+            status: 'pending',
+            agentSource: 'PM Chat Assistant'
+          });
+          
+          // Also create a discussion about this action
+          const discussion = await storage.createDiscussion({
+            topic: `PM Chat Request: ${pageContext.entityName}`,
+            status: 'active',
+            projectId: pageContext.entityId,
+            projectName: pageContext.entityName,
+            priority: 'medium'
+          });
+          
+          await storage.addDiscussionMessage({
+            discussionId: discussion.id,
+            agentId: 'pm-chat',
+            agentName: 'PM Chat Assistant',
+            content: `User requested: "${question}". AI analysis provided. Recommending agent review.`,
+            messageType: 'analysis'
+          });
+          
+          await storage.addDiscussionMessage({
+            discussionId: discussion.id,
+            agentId: 'integrated-management',
+            agentName: 'Integrated Management Agent',
+            content: `Acknowledged. Evaluating impact on portfolio and dependent projects.`,
+            messageType: 'agreement'
+          });
+          
+          agentCascade = { interventionId: intervention.id, discussionId: discussion.id };
+          console.log(`PM Chat triggered agent cascade for ${pageContext.entityName}`);
+        } catch (cascadeError) {
+          console.error('Failed to create agent cascade:', cascadeError);
+        }
+      }
+      
+      res.json({ response, agentCascade });
     } catch (error: any) {
       console.error("Ask PM error:", error);
       res.status(500).json({ error: error.message || "Failed to get AI response" });
@@ -596,8 +656,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Agent discussion endpoints with database persistence
-  app.get("/api/discussions", async (req, res) => {
+  // Agent discussion endpoints with database persistence (both /api/discussions and /api/agent-discussions)
+  const discussionsHandler = async (req: any, res: any) => {
     try {
       const status = req.query.status as string | undefined;
       const discussions = await storage.getDiscussions(status);
@@ -606,9 +666,11 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       console.error("Get discussions error:", error);
       res.status(500).json({ error: "Failed to get discussions" });
     }
-  });
+  };
+  app.get("/api/discussions", discussionsHandler);
+  app.get("/api/agent-discussions", discussionsHandler);
 
-  app.post("/api/discussions", async (req, res) => {
+  const createDiscussionHandler = async (req: any, res: any) => {
     try {
       const discussion = await storage.createDiscussion(req.body);
       res.json(discussion);
@@ -616,9 +678,11 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       console.error("Create discussion error:", error);
       res.status(500).json({ error: "Failed to create discussion" });
     }
-  });
+  };
+  app.post("/api/discussions", createDiscussionHandler);
+  app.post("/api/agent-discussions", createDiscussionHandler);
 
-  app.get("/api/discussions/:discussionId/messages", async (req, res) => {
+  const getMessagesHandler = async (req: any, res: any) => {
     try {
       const messages = await storage.getDiscussionMessages(req.params.discussionId);
       res.json({ messages });
@@ -626,9 +690,11 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       console.error("Get discussion messages error:", error);
       res.status(500).json({ error: "Failed to get discussion messages" });
     }
-  });
+  };
+  app.get("/api/discussions/:discussionId/messages", getMessagesHandler);
+  app.get("/api/agent-discussions/:discussionId/messages", getMessagesHandler);
 
-  app.post("/api/discussions/:discussionId/messages", async (req, res) => {
+  const addMessageHandler = async (req: any, res: any) => {
     try {
       const message = await storage.addDiscussionMessage({
         ...req.body,
@@ -638,6 +704,128 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     } catch (error: any) {
       console.error("Add discussion message error:", error);
       res.status(500).json({ error: "Failed to add discussion message" });
+    }
+  };
+  app.post("/api/discussions/:discussionId/messages", addMessageHandler);
+  app.post("/api/agent-discussions/:discussionId/messages", addMessageHandler);
+
+  // Seed Command Center with sample data endpoint
+  app.post("/api/command-center/seed", async (_req, res) => {
+    try {
+      const sampleInterventions = [
+        {
+          type: 'budget',
+          severity: 'critical',
+          title: 'Climate Analytics Budget Overrun Detected',
+          description: 'The Climate Transition Analytics project is trending 18% over budget due to expanded TCFD compliance requirements.',
+          projectId: 'proj-climate-analytics',
+          projectName: 'Climate Transition Analytics',
+          confidence: '0.92',
+          suggestedAction: 'Reallocate £450K from contingency reserve and accelerate Phase 2 deliverables to recover timeline.',
+          impact: 'Without intervention, project NPV decreases by £2.1M and TCFD compliance deadline at risk.',
+          status: 'pending',
+          agentSource: 'FinOps Agent'
+        },
+        {
+          type: 'timeline',
+          severity: 'high',
+          title: 'Bulk Annuity Pricing Engine Milestone Slip',
+          description: 'Critical path analysis indicates 3-week delay risk for PRA regulatory submission milestone.',
+          projectId: 'proj-pricing-engine',
+          projectName: 'Bulk Annuity Pricing Engine',
+          confidence: '0.87',
+          suggestedAction: 'Deploy additional actuarial resources and implement parallel testing tracks.',
+          impact: 'Delay may result in £1.8M penalty and reputational risk with regulator.',
+          status: 'pending',
+          agentSource: 'TMO Agent'
+        },
+        {
+          type: 'dependency',
+          severity: 'high',
+          title: 'Data Platform Integration Blocker',
+          description: 'Enterprise Data Platform dependency blocking 4 downstream projects. SFDR reporting capability delayed.',
+          projectId: 'proj-data-platform',
+          projectName: 'Enterprise Data Platform',
+          confidence: '0.94',
+          suggestedAction: 'Escalate to Architecture Board and implement temporary data bridge solution.',
+          impact: '£3.2M in blocked project value across portfolio.',
+          status: 'pending',
+          agentSource: 'Integrated Management Agent'
+        },
+        {
+          type: 'resource',
+          severity: 'medium',
+          title: 'Client Portal Resource Contention',
+          description: 'Key senior developers allocated to multiple concurrent sprints. Velocity at risk.',
+          projectId: 'proj-client-portal',
+          projectName: 'Client Portal Modernization',
+          confidence: '0.78',
+          suggestedAction: 'Request dedicated team allocation for Q2 sprint cycle.',
+          impact: 'Current trajectory shows 15% velocity reduction.',
+          status: 'pending',
+          agentSource: 'OCM Agent'
+        }
+      ];
+
+      const createdInterventions = [];
+      for (const intervention of sampleInterventions) {
+        const created = await storage.createIntervention(intervention as any);
+        createdInterventions.push(created);
+      }
+
+      // Create a sample agent discussion
+      const discussion = await storage.createDiscussion({
+        topic: 'Climate Analytics Risk Assessment',
+        status: 'active',
+        projectId: 'proj-climate-analytics',
+        projectName: 'Climate Transition Analytics',
+        priority: 'high'
+      });
+
+      const discussionMessages = [
+        {
+          discussionId: discussion.id,
+          agentId: 'finops',
+          agentName: 'FinOps Agent',
+          content: 'I\'ve detected an 18% budget overrun on Climate Analytics. This aligns with the expanded TCFD scope approved last month. Recommending contingency reallocation.',
+          messageType: 'analysis'
+        },
+        {
+          discussionId: discussion.id,
+          agentId: 'governance',
+          agentName: 'Governance Agent',
+          content: 'Confirmed. The TCFD compliance expansion was Board-approved. However, we should document the variance in our regulatory risk register.',
+          messageType: 'agreement'
+        },
+        {
+          discussionId: discussion.id,
+          agentId: 'integrated-management',
+          agentName: 'Integrated Management Agent',
+          content: 'I can see this impacts our portfolio health score. Should we create an intervention for executive review?',
+          messageType: 'question'
+        },
+        {
+          discussionId: discussion.id,
+          agentId: 'finops',
+          agentName: 'FinOps Agent',
+          content: 'Yes, creating critical intervention now. Recommending the £450K contingency reallocation pathway.',
+          messageType: 'action'
+        }
+      ];
+
+      for (const msg of discussionMessages) {
+        await storage.addDiscussionMessage(msg as any);
+      }
+
+      res.json({ 
+        success: true, 
+        interventionsCreated: createdInterventions.length,
+        discussionCreated: discussion.id,
+        message: 'Command Center seeded with sample data'
+      });
+    } catch (error: any) {
+      console.error("Seed command center error:", error);
+      res.status(500).json({ error: "Failed to seed command center" });
     }
   });
 

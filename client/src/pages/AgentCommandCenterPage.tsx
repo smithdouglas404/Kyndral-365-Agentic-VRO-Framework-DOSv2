@@ -98,19 +98,34 @@ async function fetchInterventions(): Promise<RiskIntervention[]> {
   }));
 }
 
+const AGENT_COLORS: Record<string, string> = {
+  'finops': 'bg-blue-500',
+  'governance': 'bg-purple-500',
+  'integrated-management': 'bg-green-500',
+  'tmo': 'bg-orange-500',
+  'ocm': 'bg-pink-500',
+  'okr': 'bg-indigo-500',
+  'planning': 'bg-cyan-500',
+  'pm-chat': 'bg-indigo-500'
+};
+
+function getAgentColor(agentId: string): string {
+  return AGENT_COLORS[agentId] || 'bg-blue-500';
+}
+
 async function fetchDiscussions(): Promise<AgentMessage[]> {
-  const response = await fetch('/api/discussions');
+  const response = await fetch('/api/agent-discussions');
   if (!response.ok) throw new Error('Failed to fetch discussions');
   const data = await response.json();
   if (!data.discussions || data.discussions.length === 0) return [];
   const latestDiscussion = data.discussions[0];
-  const messagesResponse = await fetch(`/api/discussions/${latestDiscussion.id}/messages`);
+  const messagesResponse = await fetch(`/api/agent-discussions/${latestDiscussion.id}/messages`);
   if (!messagesResponse.ok) return [];
   const messagesData = await messagesResponse.json();
   return (messagesData.messages || []).map((m: any) => ({
     id: m.id,
     agent: m.agentName,
-    agentColor: m.agentColor || 'bg-blue-500',
+    agentColor: getAgentColor(m.agentId || 'finops'),
     message: m.content,
     type: m.messageType || 'analysis'
   }));
@@ -140,13 +155,13 @@ export default function AgentCommandCenterPage() {
   const { data: interventions = [], isLoading: isLoadingInterventions, error: interventionsError } = useQuery({
     queryKey: ['interventions'],
     queryFn: fetchInterventions,
-    refetchInterval: 30000
+    refetchInterval: 5000
   });
 
   const { data: discussionMessages = [], isLoading: isLoadingDiscussions } = useQuery({
     queryKey: ['discussions'],
     queryFn: fetchDiscussions,
-    refetchInterval: 30000
+    refetchInterval: 5000
   });
 
   const handleApproveIntervention = async (id: string) => {
