@@ -240,7 +240,7 @@ export default function DivisionPage() {
             {portfolioData && (
               <div className="space-y-4" data-testid="division-vro-pmo-section">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* VRO VALUE section (teal) */}
+                  {/* VRO VALUE section (teal) - uses actual project data */}
                   <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-3">
@@ -254,7 +254,7 @@ export default function DivisionPage() {
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Programs</span>
-                          <span className="text-xl font-bold text-teal-700">{portfolioData.programCount}</span>
+                          <span className="text-xl font-bold text-teal-700">{divisionProjects.length}</span>
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Value Score</span>
@@ -264,7 +264,7 @@ export default function DivisionPage() {
                     </CardContent>
                   </Card>
                   
-                  {/* PMO DELIVERY section (blue) */}
+                  {/* PMO DELIVERY section (blue) - uses actual project data */}
                   <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-3">
@@ -274,7 +274,7 @@ export default function DivisionPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">Projects</span>
-                          <span className="text-xl font-bold text-blue-700">{portfolioData.projectCount}</span>
+                          <span className="text-xl font-bold text-blue-700">{divisionProjects.length}</span>
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">On-Time</span>
@@ -282,7 +282,7 @@ export default function DivisionPage() {
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">EPICs</span>
-                          <span className="text-xl font-bold text-blue-700">{portfolioData.activeEpics}</span>
+                          <span className="text-xl font-bold text-blue-700">{divisionProjects.filter(p => p.safe?.epicId).length || portfolioData.activeEpics}</span>
                         </div>
                       </div>
                     </CardContent>

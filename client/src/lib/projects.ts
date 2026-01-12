@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { PMOProject, VROProgram, SAFePortfolioStage, SAFeMetrics, AISignal, ProactiveAction, TrendPoint } from './buPrograms';
+import { Feature, Resource, Milestone, Dependency, Financials } from './safeProjectData';
 
 // Cross-project dependency with health indicator
 export interface ProjectDependency {
@@ -42,6 +43,20 @@ export interface EnrichedProject {
   // SAFe 6.0 metrics
   safe: SAFeMetrics;
   safeStage: SAFePortfolioStage;
+  
+  // SAFe 6.0 Hierarchy (Full Depth)
+  artName?: string; // Agile Release Train name
+  portfolioTheme?: string; // Strategic theme
+  features?: Feature[]; // Features with nested stories and tasks
+  resources?: Resource[]; // Team allocation
+  milestones?: Milestone[]; // PI milestones with deliverables
+  safeDependencies?: Dependency[]; // Cross-project dependencies (SAFe format)
+  financials?: Financials; // Detailed financials including ROI
+  currentPI?: number; // Current Program Increment (1-4)
+  totalPIs?: number; // Total planned PIs
+  velocity?: number; // Story points per sprint
+  burndownHealth?: number; // 0-100
+  qualityScore?: number; // 0-100
   
   // AI Enhancement
   aiSignals: AISignal[];
@@ -1035,4 +1050,86 @@ export const projectSummary = {
   totalSpent: enrichedProjects.reduce((sum, p) => sum + p.budget.spent, 0),
   totalExpectedROI: enrichedProjects.reduce((sum, p) => sum + p.roiValue, 0),
   dependencyHealth: getDependencyHealthSummary()
+};
+
+// ============================================================================
+// SAFe HIERARCHY ENRICHMENT
+// Links safeProjects data to enrichedProjects for full SAFe 6.0 depth
+// ============================================================================
+
+import { safeProjects, SAFeProject } from './safeProjectData';
+
+// Mapping from enrichedProject IDs to safeProject IDs
+const projectLinkMapping: Record<string, string> = {
+  "pmo-ir-001": "proj-prt-platform",
+  "pmo-ir-002": "proj-longevity-models",
+  "pmo-am-001": "proj-private-markets",
+  "pmo-am-002": "proj-esg-analytics",
+  "pmo-retail-001": "proj-digital-savings",
+  "pmo-retail-002": "proj-protection-platform",
+  "pmo-ci-001": "proj-clean-energy",
+  "pmo-ci-002": "proj-housing-delivery",
+  "pmo-rc-001": "proj-operational-risk",
+  "pmo-rc-002": "proj-three-lines"
+};
+
+// Get SAFe hierarchy for an enriched project
+export function getSafeHierarchy(projectId: string): SAFeProject | undefined {
+  const safeProjectId = projectLinkMapping[projectId];
+  if (safeProjectId) {
+    return safeProjects.find(sp => sp.id === safeProjectId);
+  }
+  return undefined;
+}
+
+// Get total features count for a project
+export function getProjectFeatureCount(projectId: string): number {
+  const safeProject = getSafeHierarchy(projectId);
+  return safeProject?.features?.length || 0;
+}
+
+// Get total stories count for a project (sum of stories across all features)
+export function getProjectStoryCount(projectId: string): number {
+  const safeProject = getSafeHierarchy(projectId);
+  if (!safeProject) return 0;
+  return safeProject.features?.reduce((sum, f) => sum + (f.stories?.length || 0), 0) || 0;
+}
+
+// Get total tasks count for a project (sum of tasks across all stories)
+export function getProjectTaskCount(projectId: string): number {
+  const safeProject = getSafeHierarchy(projectId);
+  if (!safeProject) return 0;
+  return safeProject.features?.reduce((sum, f) => 
+    sum + (f.stories?.reduce((s, story) => s + (story.tasks?.length || 0), 0) || 0), 0) || 0;
+}
+
+// Get ART name for a project
+export function getProjectART(projectId: string): string {
+  const safeProject = getSafeHierarchy(projectId);
+  return safeProject?.artName || 'Transformation ART';
+}
+
+// Get total resources for a project
+export function getProjectResources(projectId: string): Resource[] {
+  const safeProject = getSafeHierarchy(projectId);
+  return safeProject?.resources || [];
+}
+
+// Get milestones for a project
+export function getProjectMilestones(projectId: string): Milestone[] {
+  const safeProject = getSafeHierarchy(projectId);
+  return safeProject?.milestones || [];
+}
+
+// Summary of SAFe coverage across all projects
+export const safeCoverageSummary = {
+  projectsWithFullSAFe: Object.keys(projectLinkMapping).length,
+  totalProjects: enrichedProjects.length,
+  coveragePercentage: Math.round((Object.keys(projectLinkMapping).length / enrichedProjects.length) * 100),
+  totalFeatures: safeProjects.reduce((sum, p) => sum + (p.features?.length || 0), 0),
+  totalStories: safeProjects.reduce((sum, p) => 
+    sum + (p.features?.reduce((fs, f) => fs + (f.stories?.length || 0), 0) || 0), 0),
+  totalTasks: safeProjects.reduce((sum, p) => 
+    sum + (p.features?.reduce((fs, f) => 
+      fs + (f.stories?.reduce((ss, s) => ss + (s.tasks?.length || 0), 0) || 0), 0) || 0), 0)
 };
