@@ -69,8 +69,11 @@ const stageLabels: Record<string, string> = {
 };
 
 function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
-  const budgetAmount = enriched.budget.total * (enriched.budget.unit === '£M' ? 1000000 : 1);
-  const spentAmount = enriched.budget.spent * (enriched.budget.unit === '£M' ? 1000000 : 1);
+  // Handle both £m and £M units (case-insensitive) - convert millions to actual value
+  const isMillions = enriched.budget.unit.toLowerCase().includes('m');
+  const budgetAmount = enriched.budget.total * (isMillions ? 1000000 : 1);
+  // For backlog projects with no spend, use 0 but keep total budget from business case
+  const spentAmount = enriched.budget.spent * (isMillions ? 1000000 : 1);
   
   const createTask = (id: string, storyId: string, title: string, status: 'todo' | 'in-progress' | 'done' | 'blocked', assignee: string, estimatedHours: number, actualHours: number): Task => ({
     id,
