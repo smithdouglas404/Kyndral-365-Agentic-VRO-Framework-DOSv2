@@ -13,6 +13,8 @@ import { safeProjects, getProjectsByBU } from "@/lib/safeProjectData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { usePageContext } from "@/contexts/PageContext";
+import { buPortfolios, type BUPortfolio } from "@/lib/buPrograms";
+import { Brain } from "lucide-react";
 
 // Legacy slug mapping for backward compatibility
 const legacySlugs: Record<string, string> = {
@@ -38,6 +40,17 @@ const buNameMapping: Record<string, string[]> = {
   'group-functions': ['Group Functions'],
   'technology': ['Group Functions'],
   'default': ['Institutional Retirement', 'Asset Management', 'Retail', 'Corporate Investments', 'Risk & Compliance', 'Group Functions']
+};
+
+// Division ID to Portfolio ID mapping for VRO/PMO metrics
+const divisionToPortfolioMapping: Record<string, string> = {
+  'institutional-retirement': 'portfolio-ir',
+  'asset-management': 'portfolio-am',
+  'retail': 'portfolio-retail',
+  'corporate-investments': 'portfolio-ci',
+  'capital': 'portfolio-ci',
+  'insurance': 'portfolio-rc',
+  'risk-center': 'portfolio-rc',
 };
 
 export default function DivisionPage() {
@@ -103,6 +116,10 @@ export default function DivisionPage() {
   }
 
   const divisionAlerts = aiAlerts.filter(a => a.division === division.name);
+  
+  // Get portfolio data for VRO/PMO metrics
+  const portfolioId = divisionToPortfolioMapping[resolvedId || ''];
+  const portfolioData = portfolioId ? buPortfolios.find(p => p.id === portfolioId) : undefined;
   
   const kpiChartData = division.kpis.slice(0, 4).map(kpi => ({
     name: kpi.name.length > 15 ? kpi.name.slice(0, 15) + "..." : kpi.name,
@@ -217,6 +234,119 @@ export default function DivisionPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* VRO VALUE + PMO DELIVERY Dual-Lane Metrics */}
+            {portfolioData && (
+              <div className="space-y-4" data-testid="division-vro-pmo-section">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* VRO VALUE section (teal) */}
+                  <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-3 h-3 rounded-full bg-teal-500" />
+                        <span className="text-sm font-bold text-teal-700">VRO VALUE</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm text-teal-600">Realized</span>
+                          <span className="text-xl font-bold text-teal-700">£{portfolioData.valueRealized}m</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm text-teal-600">Programs</span>
+                          <span className="text-xl font-bold text-teal-700">{portfolioData.programCount}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm text-teal-600">Value Score</span>
+                          <span className="text-xl font-bold text-teal-700">{portfolioData.healthScore}%</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* PMO DELIVERY section (blue) */}
+                  <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-3 h-3 rounded-full bg-blue-500" />
+                        <span className="text-sm font-bold text-blue-700">PMO DELIVERY</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm text-blue-600">Projects</span>
+                          <span className="text-xl font-bold text-blue-700">{portfolioData.projectCount}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm text-blue-600">On-Time</span>
+                          <span className="text-xl font-bold text-blue-700">{portfolioData.predictability}%</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm text-blue-600">EPICs</span>
+                          <span className="text-xl font-bold text-blue-700">{portfolioData.activeEpics}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* SAFe 6.0 Metrics */}
+                  <Card className="border-gray-200 bg-white">
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-amber-600">{portfolioData.velocity}</p>
+                          <p className="text-xs text-gray-500">Velocity</p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-amber-600">{portfolioData.predictability}%</p>
+                          <p className="text-xs text-gray-500">Predict.</p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-purple-600">{portfolioData.currentPI}</p>
+                          <p className="text-xs text-gray-500">Current PI</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* OKRs */}
+                {portfolioData.okrs.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {portfolioData.okrs.map((okr, idx) => (
+                      <Card key={idx} className="border-gray-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-800">{okr.objective}</span>
+                            <Badge 
+                              variant="outline" 
+                              className={
+                                okr.status === 'on-track' ? 'bg-green-100 text-green-700 border-green-300' :
+                                okr.status === 'at-risk' ? 'bg-amber-100 text-amber-700 border-amber-300' :
+                                'bg-red-100 text-red-700 border-red-300'
+                              }
+                            >
+                              {okr.status}
+                            </Badge>
+                          </div>
+                          <Progress value={okr.progress} className="h-2" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {/* AI Signal */}
+                {portfolioData.topAISignal && (
+                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Brain className="h-5 w-5 text-purple-600 mt-0.5" />
+                        <p className="text-sm text-purple-800">{portfolioData.topAISignal.message}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
 
             {divisionAlerts.length > 0 && (
               <Card className="border-l-4" style={{ borderLeftColor: division.color }}>
