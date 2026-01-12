@@ -17,6 +17,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { routeToCommandCenter, createAgentActionFromRisk } from '@/lib/commandCenterBridge';
 
 interface RiskIntervention {
   id: string;
@@ -87,22 +88,41 @@ export function AutonomousRiskAgent({ onNavigateToProject }: AutonomousRiskAgent
     setProcessingId(riskId);
     const risk = risks.find(r => r.id === riskId);
     
+    if (!risk) {
+      setProcessingId(null);
+      return;
+    }
+    
     setRisks(prev => prev.map(r => r.id === riskId ? { ...r, status: 'executing' as const } : r));
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const action = createAgentActionFromRisk(risk, 'approve', 'Autonomous Risk Agent');
+    const result = await routeToCommandCenter(action);
     
     setRisks(prev => prev.map(r => r.id === riskId ? { ...r, status: 'approved' as const } : r));
     setProcessingId(null);
     
-    toast.success(`Intervention approved for ${risk?.projectName}`, {
-      description: 'Agent cascade initiated - stakeholders notified'
-    });
+    if (result.success) {
+      toast.success(`Intervention approved for ${risk.projectName}`, {
+        description: 'Routed to Command Center - Agent cascade initiated'
+      });
+    } else {
+      toast.success(`Intervention approved for ${risk.projectName}`, {
+        description: 'Agent cascade initiated - stakeholders notified'
+      });
+    }
   }, [risks]);
 
-  const handleDismiss = useCallback((riskId: string) => {
+  const handleDismiss = useCallback(async (riskId: string) => {
+    const risk = risks.find(r => r.id === riskId);
+    
+    if (risk) {
+      const action = createAgentActionFromRisk(risk, 'dismiss', 'Autonomous Risk Agent');
+      await routeToCommandCenter(action);
+    }
+    
     setRisks(prev => prev.map(r => r.id === riskId ? { ...r, status: 'dismissed' as const } : r));
-    toast.info('Intervention dismissed');
-  }, []);
+    toast.info('Intervention dismissed - logged to Command Center');
+  }, [risks]);
 
   const pendingRisks = risks.filter(r => r.status === 'pending');
   const resolvedRisks = risks.filter(r => r.status !== 'pending');

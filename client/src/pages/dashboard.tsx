@@ -19,7 +19,6 @@ import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioS
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
-import { EarlyWarningDashboard } from "@/components/EarlyWarningDashboard";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { AutonomousRiskAgent } from "@/components/AutonomousRiskAgent";
 import { MultiAgentDiscussion } from "@/components/MultiAgentDiscussion";
@@ -626,11 +625,6 @@ function DashboardContent() {
           {/* Business Cases Tab */}
           <TabsContent value="business-cases">
             <BusinessCaseAssessment />
-          </TabsContent>
-
-          {/* Early Warning Tab */}
-          <TabsContent value="early-warning">
-            <EarlyWarningDashboard />
           </TabsContent>
 
           {/* KPI Tracking Tab */}

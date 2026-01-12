@@ -2,7 +2,7 @@ import { Link, useLocation } from 'wouter';
 import { 
   Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight,
-  BarChart3, Building2, Briefcase, AlertOctagon, PieChart, Upload, Bot
+  BarChart3, Building2, Briefcase, PieChart, Upload, Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -19,7 +19,6 @@ const coreNavItems: NavItem[] = [
   { id: "overview", label: "Overview", icon: BarChart3 },
   { id: "portfolios", label: "Portfolios", icon: Building2 },
   { id: "business-cases", label: "Business Cases", icon: Briefcase },
-  { id: "early-warning", label: "Early Warning", icon: AlertOctagon },
   { id: "kpi-tracking", label: "KPIs", icon: PieChart },
   { id: "agent-command", label: "Agent Command", icon: Bot },
   { id: "ingestion", label: "Project Ingestion", icon: Upload },
