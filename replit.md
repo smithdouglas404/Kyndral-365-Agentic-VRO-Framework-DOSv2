@@ -60,6 +60,18 @@ The storage layer uses an interface pattern (`IStorage`) allowing easy swapping 
 2. **Storage Interface Pattern**: Abstract storage operations behind an interface for flexibility
 3. **Component Composition**: shadcn/ui components using Radix primitives with Tailwind styling
 4. **Simulated Data**: Dashboard uses generated/simulated data in `client/src/lib/simulation.ts` for demonstration purposes
+5. **Registry-Based Drill-Down Navigation**: All clickable entities resolve through `drilldownRegistry.ts` for consistent content
+
+### Drill-Down Navigation System
+The dashboard implements comprehensive 1-3 level drill-down navigation:
+
+- **Registry Pattern**: `client/src/lib/drilldownRegistry.ts` maps 25+ entity types to structured dossiers
+- **Content Resolution**: `getDrilldownContent()` returns registry data or null (no fabricated content)
+- **Rendering Strategy**: 
+  - `isFullDossier: true` → RegistryContentRenderer (action playbooks, metrics, teams, dependencies)
+  - SAFe entities (theme, value-stream, feature, story, task) → Legacy renderer with contextual data
+  - Unknown entities → Explicit "Content Not Available" guardrail state
+- **Supported Entity Types**: action, metric, team, dependency, agent, data-source, agent-log, resource, scope, approval, contingency, risk, alert, report, system, benefit, bottleneck, stage, timeline, impact, trend, capability, and more
 
 ## External Dependencies
 
