@@ -7,7 +7,7 @@ export interface PersistableIntervention {
   description: string;
   projectId: string;
   projectName: string;
-  confidence: number;
+  confidence: string;
   suggestedAction: string;
   impact: string;
   status: 'pending' | 'approved' | 'dismissed' | 'executing';
@@ -126,7 +126,10 @@ const AGENT_COLORS: Record<string, string> = {
   'okr': 'bg-indigo-500',
   'governance': 'bg-purple-500',
   'planning': 'bg-cyan-500',
-  'ocm': 'bg-pink-500'
+  'ocm': 'bg-pink-500',
+  'autonomous-risk': 'bg-red-500',
+  'multi-agent': 'bg-amber-500',
+  'pm-chat': 'bg-indigo-500'
 };
 
 const AGENT_DISPLAY_NAMES: Record<string, string> = {
@@ -136,7 +139,10 @@ const AGENT_DISPLAY_NAMES: Record<string, string> = {
   'okr': 'OKR Agent',
   'governance': 'Governance Agent',
   'planning': 'Planning Agent',
-  'ocm': 'OCM Agent'
+  'ocm': 'OCM Agent',
+  'autonomous-risk': 'Autonomous Risk Agent',
+  'multi-agent': 'Multi-Agent Coordinator',
+  'pm-chat': 'PM Chat Assistant'
 };
 
 export function getAgentDisplayName(agentId: AgentType): string {
@@ -159,6 +165,7 @@ export async function createAgentIntervention(
   impact: string,
   confidence: number = 85
 ): Promise<any> {
+  const confidenceStr = (confidence / 100).toFixed(2);
   return persistIntervention({
     type,
     severity,
@@ -166,7 +173,7 @@ export async function createAgentIntervention(
     description,
     projectId,
     projectName,
-    confidence,
+    confidence: confidenceStr,
     suggestedAction,
     impact,
     status: 'pending',

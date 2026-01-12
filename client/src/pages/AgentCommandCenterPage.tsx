@@ -81,21 +81,28 @@ async function fetchInterventions(): Promise<RiskIntervention[]> {
   if (!response.ok) throw new Error('Failed to fetch interventions');
   const data = await response.json();
   if (!data.interventions) return [];
-  return data.interventions.map((i: any) => ({
-    id: i.id,
-    type: i.type || 'dependency',
-    severity: i.severity || 'medium',
-    title: i.title,
-    description: i.description,
-    projectId: i.projectId,
-    projectName: i.projectName || 'Unknown Project',
-    confidence: i.confidence || 75,
-    suggestedAction: i.suggestedAction,
-    impact: i.impact || '',
-    timestamp: new Date(i.createdAt),
-    status: i.status || 'pending',
-    agentSource: i.agentSource || 'System'
-  }));
+  return data.interventions.map((i: any) => {
+    let confidence = 75;
+    if (i.confidence) {
+      const parsed = parseFloat(i.confidence);
+      confidence = parsed <= 1 ? Math.round(parsed * 100) : parsed;
+    }
+    return {
+      id: i.id,
+      type: i.type || 'dependency',
+      severity: i.severity || 'medium',
+      title: i.title,
+      description: i.description,
+      projectId: i.projectId,
+      projectName: i.projectName || 'Unknown Project',
+      confidence,
+      suggestedAction: i.suggestedAction,
+      impact: i.impact || '',
+      timestamp: new Date(i.createdAt),
+      status: i.status || 'pending',
+      agentSource: i.agentSource || 'System'
+    };
+  });
 }
 
 const AGENT_COLORS: Record<string, string> = {
@@ -106,7 +113,9 @@ const AGENT_COLORS: Record<string, string> = {
   'ocm': 'bg-pink-500',
   'okr': 'bg-indigo-500',
   'planning': 'bg-cyan-500',
-  'pm-chat': 'bg-indigo-500'
+  'pm-chat': 'bg-indigo-500',
+  'autonomous-risk': 'bg-red-500',
+  'multi-agent': 'bg-amber-500'
 };
 
 function getAgentColor(agentId: string): string {
