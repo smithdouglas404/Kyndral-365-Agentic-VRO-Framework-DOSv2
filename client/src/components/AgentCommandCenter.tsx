@@ -167,7 +167,8 @@ interface AgentCommandCenterProps {
 
 export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterProps) {
   const [selectedProject, setSelectedProject] = useState<string>('all');
-  const [interventions, setInterventions] = useState<RiskIntervention[]>(initialInterventions);
+  const [interventions, setInterventions] = useState<RiskIntervention[]>([]);
+  const [selectedIntervention, setSelectedIntervention] = useState<RiskIntervention | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -175,6 +176,57 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
   const [isDiscussionPlaying, setIsDiscussionPlaying] = useState(true);
   const [discussionIndex, setDiscussionIndex] = useState(0);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch interventions from database
+  useEffect(() => {
+    const fetchInterventions = async () => {
+      try {
+        const response = await fetch('/api/interventions');
+        if (response.ok) {
+          const data = await response.json();
+          const dbInterventions = data.interventions || [];
+          
+          // Map database interventions to component format
+          const mappedInterventions: RiskIntervention[] = dbInterventions.map((i: any) => ({
+            id: i.id,
+            type: i.type as 'dependency' | 'budget' | 'timeline' | 'resource' | 'quality',
+            severity: i.severity as 'critical' | 'high' | 'medium',
+            title: i.title,
+            description: i.description,
+            projectId: i.projectId || '',
+            projectName: i.projectName || 'Unknown Project',
+            confidence: parseFloat(i.confidence) * 100 || 85,
+            suggestedAction: i.suggestedAction,
+            impact: i.impact || 'Impact assessment pending',
+            timestamp: new Date(i.createdAt),
+            status: i.status as 'pending' | 'approved' | 'dismissed' | 'executing',
+            agentSource: i.agentSource
+          }));
+          
+          // Combine with initial demo data for richer display if DB is sparse
+          if (mappedInterventions.length < 3) {
+            setInterventions([...mappedInterventions, ...initialInterventions.slice(0, 3 - mappedInterventions.length)]);
+          } else {
+            setInterventions(mappedInterventions);
+          }
+        } else {
+          // Fallback to demo data
+          setInterventions(initialInterventions);
+        }
+      } catch (error) {
+        console.error('Failed to fetch interventions:', error);
+        setInterventions(initialInterventions);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchInterventions();
+    // Poll for updates every 15 seconds
+    const interval = setInterval(fetchInterventions, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!isDiscussionPlaying || discussionIndex >= agentDiscussion.length) return;
@@ -195,6 +247,10 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     }
     
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'executing' as const } : i));
+    // Sync selected intervention if it's the one being approved
+    if (selectedIntervention?.id === id) {
+      setSelectedIntervention(prev => prev ? { ...prev, status: 'executing' as const } : null);
+    }
     
     // Route to unified Command Center
     const action: AgentAction = {
@@ -220,12 +276,16 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'approved' as const } : i));
+    // Sync selected intervention to approved status
+    if (selectedIntervention?.id === id) {
+      setSelectedIntervention(prev => prev ? { ...prev, status: 'approved' as const } : null);
+    }
     setProcessingId(null);
     
     toast.success(`Intervention approved for ${intervention?.projectName}`, {
       description: `${intervention?.agentSource} executing: ${intervention?.suggestedAction.substring(0, 50)}...`
     });
-  }, [interventions]);
+  }, [interventions, selectedIntervention]);
 
   const handleDismissIntervention = useCallback(async (id: string) => {
     const intervention = interventions.find(i => i.id === id);
@@ -254,8 +314,12 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     }
     
     setInterventions(prev => prev.map(i => i.id === id ? { ...i, status: 'dismissed' as const } : i));
+    // Sync selected intervention to dismissed status
+    if (selectedIntervention?.id === id) {
+      setSelectedIntervention(prev => prev ? { ...prev, status: 'dismissed' as const } : null);
+    }
     toast.info(`Intervention dismissed - logged to Command Center`);
-  }, [interventions]);
+  }, [interventions, selectedIntervention]);
 
   const handleSendChat = async () => {
     if (!chatInput.trim()) return;
@@ -307,13 +371,41 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     setIsDiscussionPlaying(true);
   };
 
-  const pendingInterventions = interventions.filter(i => i.status === 'pending');
-  const filteredInterventions = selectedProject === 'all' 
-    ? pendingInterventions 
-    : pendingInterventions.filter(i => i.projectId === selectedProject);
+  // Filter by project, then sort pending first
+  const filteredByProject = selectedProject === 'all' 
+    ? interventions 
+    : interventions.filter(i => i.projectId === selectedProject);
+  
+  // Sort: pending first, then by severity (critical > high > medium), then by timestamp
+  const severityOrder = { critical: 0, high: 1, medium: 2 };
+  const statusOrder = { pending: 0, executing: 1, approved: 2, dismissed: 3 };
+  
+  const filteredInterventions = [...filteredByProject].sort((a, b) => {
+    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+    if (statusDiff !== 0) return statusDiff;
+    const severityDiff = severityOrder[a.severity] - severityOrder[b.severity];
+    if (severityDiff !== 0) return severityDiff;
+    return b.timestamp.getTime() - a.timestamp.getTime();
+  });
 
-  const approvedCount = interventions.filter(i => i.status === 'approved').length;
-  const dismissedCount = interventions.filter(i => i.status === 'dismissed').length;
+  const pendingInterventions = filteredInterventions.filter(i => i.status === 'pending');
+  const approvedCount = filteredInterventions.filter(i => i.status === 'approved').length;
+  const dismissedCount = filteredInterventions.filter(i => i.status === 'dismissed').length;
+
+  // Auto-select first intervention when list changes
+  useEffect(() => {
+    if (filteredInterventions.length > 0 && !selectedIntervention) {
+      setSelectedIntervention(filteredInterventions[0]);
+    } else if (filteredInterventions.length > 0 && selectedIntervention) {
+      // Check if selected is still in filtered list
+      const stillExists = filteredInterventions.find(i => i.id === selectedIntervention.id);
+      if (!stillExists) {
+        setSelectedIntervention(filteredInterventions[0]);
+      }
+    } else if (filteredInterventions.length === 0) {
+      setSelectedIntervention(null);
+    }
+  }, [filteredInterventions.length, selectedProject]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -396,109 +488,217 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
         </TabsList>
 
         <TabsContent value="interventions" className="mt-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Shield className="h-5 w-5 text-purple-600" />
-                Proactive Risk Interventions
-                <span className="text-sm font-normal text-gray-500">— AI-detected issues requiring your decision</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filteredInterventions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500" data-testid="no-interventions-message">
-                  <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
-                  <p className="font-medium">No pending interventions</p>
-                  <p className="text-sm">All risks are being managed autonomously</p>
-                  {(approvedCount > 0 || dismissedCount > 0) && (
-                    <p className="text-xs mt-2 text-gray-400">
-                      {approvedCount} approved, {dismissedCount} dismissed this session
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredInterventions.map((intervention) => (
-                    <motion.div
-                      key={intervention.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="border rounded-lg p-4 bg-white shadow-sm"
-                      data-testid={`intervention-card-${intervention.id}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-full ${getSeverityColor(intervention.severity)}`}>
-                            {getTypeIcon(intervention.type)}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1" data-testid={`intervention-header-${intervention.id}`}>
-                              <h4 className="font-semibold text-gray-900" data-testid={`intervention-title-${intervention.id}`}>{intervention.title}</h4>
-                              <Badge className={getSeverityColor(intervention.severity)}>{intervention.severity}</Badge>
-                              <Badge variant="outline" className="text-xs">{intervention.confidence}% confidence</Badge>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-2" data-testid={`intervention-description-${intervention.id}`}>{intervention.description}</p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                              <Bot className="h-3 w-3" />
-                              <span>Source: {intervention.agentSource}</span>
-                            </div>
-                            <button 
-                              onClick={() => onNavigateToProject?.(intervention.projectId)}
-                              className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                              data-testid={`link-project-${intervention.id}`}
-                            >
-                              {intervention.projectName} <ChevronRight className="h-3 w-3" />
-                            </button>
-                            
-                            <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                              <div className="flex items-center gap-2 mb-1" data-testid={`recommendation-header-${intervention.id}`}>
-                                <Sparkles className="h-4 w-4 text-purple-600" />
-                                <span className="font-medium text-purple-800 text-sm">AI Recommendation</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Intervention List */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-purple-600" />
+                    All Interventions
+                    <span className="text-sm font-normal text-gray-500">
+                      — {filteredInterventions.length} shown ({pendingInterventions.length} pending)
+                      {selectedProject !== 'all' && ` for ${projects.find(p => p.id === selectedProject)?.name || 'selected project'}`}
+                    </span>
+                  </CardTitle>
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {['budget', 'timeline', 'dependency', 'resource', 'quality'].map(type => {
+                      const count = filteredInterventions.filter(i => i.type === type).length;
+                      if (count === 0) return null;
+                      return (
+                        <Badge key={type} variant="outline" className="capitalize">
+                          {getTypeIcon(type)} <span className="ml-1">{type}: {count}</span>
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" />
+                      <p>Loading interventions...</p>
+                    </div>
+                  ) : filteredInterventions.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500" data-testid="no-interventions-message">
+                      <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+                      <p className="font-medium">No pending interventions</p>
+                      <p className="text-sm">{selectedProject === 'all' ? 'All risks are being managed autonomously' : 'No pending items for this project'}</p>
+                      {(approvedCount > 0 || dismissedCount > 0) && (
+                        <p className="text-xs mt-2 text-gray-400">
+                          {approvedCount} approved, {dismissedCount} dismissed this session
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[500px]">
+                      <div className="space-y-3 pr-4">
+                        {filteredInterventions.map((intervention) => (
+                          <motion.div
+                            key={intervention.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            onClick={() => setSelectedIntervention(intervention)}
+                            className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                              selectedIntervention?.id === intervention.id 
+                                ? 'border-purple-500 bg-purple-50 shadow-md' 
+                                : 'bg-white shadow-sm hover:shadow-md hover:border-gray-300'
+                            }`}
+                            data-testid={`intervention-card-${intervention.id}`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-full ${getSeverityColor(intervention.severity)}`}>
+                                {getTypeIcon(intervention.type)}
                               </div>
-                              <p className="text-sm text-purple-700" data-testid={`recommendation-text-${intervention.id}`}>{intervention.suggestedAction}</p>
-                              <p className="text-xs text-purple-600 mt-1">Impact: {intervention.impact}</p>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <h4 className="font-semibold text-gray-900 truncate" data-testid={`intervention-title-${intervention.id}`}>{intervention.title}</h4>
+                                  <Badge className={getSeverityColor(intervention.severity)} data-testid={`severity-${intervention.id}`}>{intervention.severity}</Badge>
+                                  <Badge variant="outline" className={`text-xs ${
+                                    intervention.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                    intervention.status === 'dismissed' ? 'bg-gray-100 text-gray-600' :
+                                    intervention.status === 'executing' ? 'bg-blue-100 text-blue-800' :
+                                    'bg-yellow-100 text-yellow-800'
+                                  }`}>{intervention.status}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 line-clamp-2">{intervention.description}</p>
+                                <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                  <span className="flex items-center gap-1">
+                                    <Bot className="h-3 w-3" />
+                                    {intervention.agentSource}
+                                  </span>
+                                  <span>{intervention.projectName}</span>
+                                </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
                             </div>
-                          </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detail Panel */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-4">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-indigo-600" />
+                    Intervention Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedIntervention ? (
+                    <div className="space-y-4">
+                      {/* Header */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={getSeverityColor(selectedIntervention.severity)}>
+                            {selectedIntervention.severity.toUpperCase()}
+                          </Badge>
+                          <Badge variant="outline" className="capitalize">{selectedIntervention.type}</Badge>
+                        </div>
+                        <h3 className="font-bold text-lg text-gray-900">{selectedIntervention.title}</h3>
+                      </div>
+
+                      {/* Status */}
+                      <div className="p-3 rounded-lg bg-gray-50 border">
+                        <div className="text-xs text-gray-500 mb-1">Current Status</div>
+                        <div className={`font-semibold capitalize ${
+                          selectedIntervention.status === 'approved' ? 'text-green-600' :
+                          selectedIntervention.status === 'dismissed' ? 'text-gray-600' :
+                          selectedIntervention.status === 'executing' ? 'text-blue-600' :
+                          'text-yellow-600'
+                        }`}>
+                          {selectedIntervention.status === 'pending' && <Clock className="inline h-4 w-4 mr-1" />}
+                          {selectedIntervention.status === 'approved' && <CheckCircle2 className="inline h-4 w-4 mr-1" />}
+                          {selectedIntervention.status === 'executing' && <Loader2 className="inline h-4 w-4 mr-1 animate-spin" />}
+                          {selectedIntervention.status === 'dismissed' && <XCircle className="inline h-4 w-4 mr-1" />}
+                          {selectedIntervention.status}
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-2 mt-4 justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDismissIntervention(intervention.id)}
-                          disabled={processingId === intervention.id}
-                          data-testid={`button-dismiss-${intervention.id}`}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Dismiss
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => handleApproveIntervention(intervention.id)}
-                          disabled={processingId === intervention.id}
-                          data-testid={`button-approve-${intervention.id}`}
-                        >
-                          {processingId === intervention.id ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                              Executing...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className="h-4 w-4 mr-1" />
-                              Approve Action
-                            </>
-                          )}
-                        </Button>
+
+                      {/* Description */}
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Description</div>
+                        <p className="text-sm text-gray-700">{selectedIntervention.description}</p>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+                      {/* Source */}
+                      <div className="flex items-center gap-2 text-sm">
+                        <Bot className="h-4 w-4 text-purple-600" />
+                        <span className="font-medium">{selectedIntervention.agentSource}</span>
+                        <span className="text-gray-400">|</span>
+                        <span className="text-gray-600">{selectedIntervention.confidence}% confidence</span>
+                      </div>
+
+                      {/* Project */}
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Project</div>
+                        <button 
+                          onClick={() => onNavigateToProject?.(selectedIntervention.projectId)}
+                          className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                        >
+                          {selectedIntervention.projectName} <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </div>
+
+                      {/* AI Recommendation */}
+                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="h-4 w-4 text-purple-600" />
+                          <span className="font-medium text-purple-800 text-sm">AI Recommendation</span>
+                        </div>
+                        <p className="text-sm text-purple-700">{selectedIntervention.suggestedAction}</p>
+                        <div className="mt-2 pt-2 border-t border-purple-200">
+                          <span className="text-xs text-purple-600 font-medium">Impact: </span>
+                          <span className="text-xs text-purple-700">{selectedIntervention.impact}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      {selectedIntervention.status === 'pending' && (
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleDismissIntervention(selectedIntervention.id)}
+                            disabled={processingId === selectedIntervention.id}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Dismiss
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            onClick={() => handleApproveIntervention(selectedIntervention.id)}
+                            disabled={processingId === selectedIntervention.id}
+                          >
+                            {processingId === selectedIntervention.id ? (
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                            )}
+                            Approve
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Shield className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p className="font-medium">Select an intervention</p>
+                      <p className="text-sm">Click on any item to view details</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="discussion" className="mt-4">
