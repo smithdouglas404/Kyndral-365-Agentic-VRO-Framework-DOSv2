@@ -710,6 +710,9 @@ function DashboardContent() {
             {/* AI Executive Intelligence - Portfolio-level insights */}
             <AIExecutiveInsights />
 
+            {/* Cross-Agent Collaboration */}
+            <CrossAgentCollaboration />
+
           </TabsContent>
 
           {/* Business Cases Tab */}
