@@ -153,9 +153,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Valuation Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given quarterly valuation due per AIFMD, When external valuer report ingested, Then asset NAV updated with variance analysis vs internal model",
+            "Given valuation methodology documented, When reviewed, Then IPEV Guidelines compliance confirmed with assumptions audit trail",
+            "Given valuation dispute arises, When escalated, Then resolution workflow tracks to conclusion with governance approval"
           ],
           "tasks": [
             {
@@ -214,9 +214,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Energy Asset Data is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given renewable energy asset operates, When generation data ingested, Then MWh output tracked against PPA contract volumes",
+            "Given grid constraint curtails output, When logged, Then compensation claim calculation triggered per connection agreement",
+            "Given asset performance reviewed, When compared to P50 forecast, Then variance analysis informs O&M optimization"
           ],
           "tasks": [
             {
@@ -252,9 +252,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Transport Asset Data is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given transport asset (toll road/airport) operates, When traffic data ingested, Then volume trends analyzed against RAB regulatory settlement",
+            "Given regulatory price review approaches, When modeled, Then allowed revenue scenarios compared with capex requirements",
+            "Given concession term milestone reached, When reported, Then asset reversion planning triggered per concession agreement"
           ],
           "tasks": [
             {

@@ -276,9 +276,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Neural Network Ensemble is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given mortality prediction model ensemble trained, When validated, Then model performance metrics reported per IFoA mortality working party standards",
+            "Given ensemble member disagrees significantly, When detected, Then investigation triggered to understand driver per SS1/23 model risk",
+            "Given new mortality data available, When retraining scheduled, Then model governance approval required before production deployment"
           ],
           "tasks": [
             {
@@ -349,9 +349,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Backtesting Framework is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given mortality model backtested against historical experience, When run, Then A/E ratios calculated by age/sex/cohort per actuarial standards",
+            "Given backtesting reveals systematic bias, When identified, Then model adjustment recommendation generated with governance review",
+            "Given backtesting results documented, When filed, Then regulatory audit evidence maintained per PRA requirements"
           ],
           "tasks": [
             {
@@ -387,9 +387,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Stress Testing Suite is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given pandemic stress scenario defined, When applied to mortality model, Then reserve impact quantified per PRA stress testing requirements",
+            "Given longevity improvement shock modeled, When calculated, Then BPA liability sensitivity displayed with capital impact",
+            "Given stress test results reviewed by Risk Committee, When approved, Then results submitted to PRA as required"
           ],
           "tasks": [
             {

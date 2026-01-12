@@ -256,9 +256,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given ESG Dashboard UI processes ESG data, When SFDR reporting triggered, Then Article 8/9 fund disclosures meet regulatory requirements",
-            "Given climate metrics calculated, When TCFD alignment assessed, Then portfolio temperature alignment score is generated",
-            "Given ESG data gaps exist, When estimation applied, Then methodology disclosure meets FCA sustainability labelling requirements"
+            "Given portfolio manager accesses ESG dashboard, When loaded, Then portfolio ESG score with SFDR Article 8/9 classification displays prominently",
+            "Given sector drill-down selected, When expanded, Then ESG contributors and detractors by GICS sector visualized",
+            "Given comparison benchmark selected, When analyzed, Then active ESG contribution from security selection quantified"
           ],
           "tasks": [
             {
@@ -326,9 +326,9 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given SFDR Report Generation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given SFDR reporting deadline approaches, When report generated, Then Article 8/9 pre-contractual and periodic disclosures meet regulatory template requirements",
+            "Given PAI indicators calculated, When reported, Then mandatory and opt-in indicators disclosed per SFDR RTS",
+            "Given report review completed, When approved by compliance, Then submission-ready PDF generated with audit trail"
           ],
           "tasks": [
             {
@@ -376,9 +376,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given TCFD Climate Disclosures processes ESG data, When SFDR reporting triggered, Then Article 8/9 fund disclosures meet regulatory requirements",
-            "Given climate metrics calculated, When TCFD alignment assessed, Then portfolio temperature alignment score is generated",
-            "Given ESG data gaps exist, When estimation applied, Then methodology disclosure meets FCA sustainability labelling requirements"
+            "Given TCFD disclosure required for fund, When report generated, Then governance, strategy, risk management, and metrics sections populated per TCFD recommendations",
+            "Given scenario analysis included, When calculated, Then NGFS-aligned pathway impacts disclosed with methodology",
+            "Given disclosure published, When archived, Then version control maintained for regulatory evidence"
           ],
           "tasks": [
             {

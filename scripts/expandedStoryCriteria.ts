@@ -1260,6 +1260,261 @@ const allStoryCriteria: Record<string, string[]> = {
     'Given protection application approved and initial premium collected, When policy documents generated, Then policy schedule with FCA Key Facts document available in secure portal',
     'Given customer requests mid-term alteration per life event, When change processed, Then premium recalculates with pro-rata adjustment and amended schedule issued',
     'Given annual renewal date approaches, When renewal notice sent per FCA ICOBS, Then customer can confirm continuation, adjust cover, or cancel online'
+  ],
+
+  // ========== REMAINING 45 STORIES FOR 100% COVERAGE ==========
+  
+  // AI Chatbot
+  'Answer Accuracy Validation': [
+    'Given chatbot response generated for pension query, When accuracy checked against knowledge base, Then response validated with 95%+ factual accuracy per FCA SYSC 3.2',
+    'Given hallucination detected in AI response, When flagged, Then response blocked and escalated to human review with audit log',
+    'Given customer receives answer, When feedback submitted, Then response quality tracked for continuous model improvement'
+  ],
+
+  // Bulk Annuity
+  'Real-time Inference API': [
+    'Given pricing request received via API, When ML model invoked, Then prediction returned within 200ms SLA per PRA operational resilience requirements',
+    'Given API rate limit exceeded, When throttled, Then graceful degradation with queue position returned',
+    'Given model version updated, When deployed via blue-green, Then zero-downtime transition with rollback capability'
+  ],
+  'Quote Generation Wizard': [
+    'Given scheme data uploaded by pricing actuary, When wizard launched, Then step-by-step guided workflow captures all required inputs per TPR bulk transfer requirements',
+    'Given mandatory field missing, When validation triggered, Then clear error message with field-level guidance displayed',
+    'Given quote parameters confirmed, When submitted, Then quote generation job queued with estimated completion time'
+  ],
+  'Quote Approval Workflow': [
+    'Given quote generated exceeds delegated authority, When escalation triggered, Then approval routed to Chief Actuary per PRA SM&CR requirements',
+    'Given approver reviews quote, When decision made, Then approval/rejection recorded with rationale in audit trail',
+    'Given approved quote expires, When validity period lapses, Then re-approval required with updated market rates'
+  ],
+
+  // Client Portal
+  'Mandate Change Requests': [
+    'Given institutional client requests IPS amendment, When change submitted, Then dual authorization workflow triggers per MiFID II suitability requirements',
+    'Given change impacts asset allocation limits, When validated, Then compliance pre-clearance required before implementation',
+    'Given change approved, When effective, Then updated IPS document generated with version control'
+  ],
+  'Transaction Audit Trail': [
+    'Given any client transaction executed, When logged, Then immutable audit record created with timestamp, user, and action per FCA SYSC requirements',
+    'Given audit trail queried, When filtered by date range, Then complete transaction history exportable for regulatory review',
+    'Given suspicious activity detected, When flagged, Then MLRO notification triggered per MLR 2017 requirements'
+  ],
+  'Report Builder Interface': [
+    'Given client selects report parameters, When builder accessed, Then drag-drop interface allows custom report construction with MiFID II compliant data fields',
+    'Given custom report saved, When template created, Then reusable template available for scheduled generation',
+    'Given report preview requested, When rendered, Then sample data displayed with formatting options'
+  ],
+  'Report Scheduling and Delivery': [
+    'Given report schedule configured, When trigger time reached, Then report auto-generated and delivered via secure channel per data protection policy',
+    'Given delivery fails, When retry exhausted, Then escalation notification sent to client relationship manager',
+    'Given client preferences updated, When saved, Then future deliveries reflect preferred format and channel'
+  ],
+
+  // Climate Transition
+  'Client Net-Zero Dashboard': [
+    'Given client selects Net Zero portfolio view, When dashboard loads, Then current carbon footprint vs NZAM-aligned pathway displays with TCFD-compliant metrics',
+    'Given drill-down requested by sector, When expanded, Then GICS sector contribution to portfolio emissions shown with engagement priorities',
+    'Given export requested, When generated, Then TCFD-compliant PDF report produced with methodology disclosure'
+  ],
+  'TCFD Data Aggregation Pipeline': [
+    'Given company TCFD disclosures published, When ingested from CDP/company reports, Then structured data extracted and normalized per TCFD recommendations',
+    'Given data gap identified for holding, When flagged, Then estimation methodology applied with data quality score disclosed',
+    'Given TCFD reporting period ends, When aggregation runs, Then portfolio-level TCFD metrics calculated for client reporting'
+  ],
+  'AI-Powered Narrative Generation': [
+    'Given climate metrics calculated for client portfolio, When narrative requested, Then AI generates TCFD-compliant commentary with risk/opportunity analysis',
+    'Given AI narrative reviewed by analyst, When approved, Then narrative included in client report with human oversight attestation',
+    'Given narrative contains factual error, When detected, Then correction logged and model feedback loop triggered'
+  ],
+
+  // Digital Onboarding
+  'AI Document Verification': [
+    'Given customer uploads identity document, When AI verification runs, Then authenticity check completes within 30 seconds per MLR 2017 CDD requirements',
+    'Given document quality insufficient, When detected, Then clear guidance provided for re-upload with acceptable formats',
+    'Given verification fails automated check, When escalated, Then manual review queue notified with pre-extracted data'
+  ],
+  'Rules Engine Integration': [
+    'Given customer data collected, When rules engine invoked, Then eligibility determination made per FCA COBS suitability requirements',
+    'Given rule outcome is decline, When communicated, Then clear explanation provided with alternative options per Consumer Duty',
+    'Given rules version updated, When deployed, Then audit trail captures rule changes with effective date'
+  ],
+  'Quote Comparison Display': [
+    'Given multiple product options available, When comparison view loaded, Then side-by-side feature and cost comparison displays per FCA PROD requirements',
+    'Given customer selects product, When confirmed, Then selection recorded with rationale capture for suitability file',
+    'Given comparison saved, When retrieved later, Then timestamp and product versions displayed for accuracy'
+  ],
+
+  // ESG Analytics
+  'ESG Dashboard UI': [
+    'Given portfolio manager accesses ESG dashboard, When loaded, Then portfolio ESG score with SFDR Article 8/9 classification displays prominently',
+    'Given sector drill-down selected, When expanded, Then ESG contributors and detractors by GICS sector visualized',
+    'Given comparison benchmark selected, When analyzed, Then active ESG contribution from security selection quantified'
+  ],
+  'SFDR Report Generation': [
+    'Given SFDR reporting deadline approaches, When report generated, Then Article 8/9 pre-contractual and periodic disclosures meet regulatory template requirements',
+    'Given PAI indicators calculated, When reported, Then mandatory and opt-in indicators disclosed per SFDR RTS',
+    'Given report review completed, When approved by compliance, Then submission-ready PDF generated with audit trail'
+  ],
+  'TCFD Climate Disclosures': [
+    'Given TCFD disclosure required for fund, When report generated, Then governance, strategy, risk management, and metrics sections populated per TCFD recommendations',
+    'Given scenario analysis included, When calculated, Then NGFS-aligned pathway impacts disclosed with methodology',
+    'Given disclosure published, When archived, Then version control maintained for regulatory evidence'
+  ],
+
+  // Enterprise Data Platform
+  'Power BI Premium Workspace Setup': [
+    'Given Power BI Premium capacity provisioned, When workspace configured, Then row-level security aligns with AD groups per data governance policy',
+    'Given report deployed to workspace, When accessed, Then data refresh schedule maintains currency per SLA',
+    'Given capacity exceeded, When alert triggered, Then auto-scale or admin notification per operational policy'
+  ],
+  'Row-Level Security Implementation': [
+    'Given data access matrix defined, When RLS applied, Then users see only authorized data per GDPR data minimization principle',
+    'Given new user provisioned, When AD group assigned, Then RLS inheritance applies automatically within 15 minutes',
+    'Given RLS audit requested, When generated, Then access permissions report available for data protection review'
+  ],
+  'Executive Dashboard Suite': [
+    'Given executive accesses dashboard, When loaded, Then KPIs across divisions display with drill-down to BU level per governance reporting requirements',
+    'Given metric threshold breached, When detected, Then visual alert highlights exception with trend context',
+    'Given board pack export requested, When generated, Then formatted PDF suitable for board submission produced'
+  ],
+  'MLflow Tracking and Registry': [
+    'Given ML experiment run, When logged to MLflow, Then parameters, metrics, and artifacts captured with lineage per PRA SS1/23 model risk requirements',
+    'Given model promoted to registry, When staged, Then model version tracked with approval workflow before production deployment',
+    'Given model retired, When archived, Then version history maintained for audit with deprecation notice'
+  ],
+  'Model Monitoring and Drift Detection': [
+    'Given production model predictions monitored, When drift detected, Then alert triggers to data science team per SS1/23 model performance requirements',
+    'Given concept drift exceeds threshold, When confirmed, Then model retraining workflow initiated with governance sign-off',
+    'Given monitoring dashboard accessed, When viewed, Then prediction distribution and accuracy trends displayed'
+  ],
+  'GPU Compute Cluster': [
+    'Given deep learning training job submitted, When GPU cluster allocated, Then job starts within 5 minutes per SLA with cost tracking',
+    'Given cluster utilization exceeds 80%, When capacity constrained, Then job queue prioritization applies based on business priority',
+    'Given job completes, When resources released, Then cost attribution logged to project code'
+  ],
+
+  // Infrastructure Asset Management
+  'Valuation Integration': [
+    'Given quarterly valuation due per AIFMD, When external valuer report ingested, Then asset NAV updated with variance analysis vs internal model',
+    'Given valuation methodology documented, When reviewed, Then IPEV Guidelines compliance confirmed with assumptions audit trail',
+    'Given valuation dispute arises, When escalated, Then resolution workflow tracks to conclusion with governance approval'
+  ],
+  'Energy Asset Data': [
+    'Given renewable energy asset operates, When generation data ingested, Then MWh output tracked against PPA contract volumes',
+    'Given grid constraint curtails output, When logged, Then compensation claim calculation triggered per connection agreement',
+    'Given asset performance reviewed, When compared to P50 forecast, Then variance analysis informs O&M optimization'
+  ],
+  'Transport Asset Data': [
+    'Given transport asset (toll road/airport) operates, When traffic data ingested, Then volume trends analyzed against RAB regulatory settlement',
+    'Given regulatory price review approaches, When modeled, Then allowed revenue scenarios compared with capex requirements',
+    'Given concession term milestone reached, When reported, Then asset reversion planning triggered per concession agreement'
+  ],
+
+  // Investment Research AI
+  'Document Ingestion': [
+    'Given research document uploaded (PDF/Excel/Word), When processed, Then content extracted with 95%+ accuracy and indexed for semantic search',
+    'Given document contains tables, When parsed, Then tabular data structured for quantitative analysis queries',
+    'Given document source is external (broker research), When ingested, Then MiFID II inducement rules compliance verified'
+  ],
+  'Research Q&A': [
+    'Given analyst queries research database, When AI search invoked, Then semantically relevant passages retrieved with source citations',
+    'Given answer synthesized from multiple sources, When displayed, Then attribution to original documents provided per research integrity policy',
+    'Given answer confidence low, When flagged, Then human analyst review suggested before client communication'
+  ],
+
+  // Longevity Model
+  'Neural Network Ensemble': [
+    'Given mortality prediction model ensemble trained, When validated, Then model performance metrics reported per IFoA mortality working party standards',
+    'Given ensemble member disagrees significantly, When detected, Then investigation triggered to understand driver per SS1/23 model risk',
+    'Given new mortality data available, When retraining scheduled, Then model governance approval required before production deployment'
+  ],
+  'Backtesting Framework': [
+    'Given mortality model backtested against historical experience, When run, Then A/E ratios calculated by age/sex/cohort per actuarial standards',
+    'Given backtesting reveals systematic bias, When identified, Then model adjustment recommendation generated with governance review',
+    'Given backtesting results documented, When filed, Then regulatory audit evidence maintained per PRA requirements'
+  ],
+  'Stress Testing Suite': [
+    'Given pandemic stress scenario defined, When applied to mortality model, Then reserve impact quantified per PRA stress testing requirements',
+    'Given longevity improvement shock modeled, When calculated, Then BPA liability sensitivity displayed with capital impact',
+    'Given stress test results reviewed by Risk Committee, When approved, Then results submitted to PRA as required'
+  ],
+
+  // PRT Intake
+  'Benefit Calculation Engine': [
+    'Given member benefit calculation required, When engine invoked, Then pension computed per scheme rules with GMP, revaluation, and increases applied correctly',
+    'Given calculation differs from administrator figure, When variance detected, Then reconciliation workflow triggered with itemized difference analysis',
+    'Given bulk calculation batch processed, When complete, Then calculation audit trail available per TPR record-keeping requirements'
+  ],
+  'Calculation Audit Trail': [
+    'Given benefit calculation performed, When logged, Then complete input parameters, assumptions, and output captured per TPR governance requirements',
+    'Given audit query for specific member, When searched, Then full calculation history retrievable with version comparison',
+    'Given regulatory review requested, When exported, Then calculation evidence package generated in standardized format'
+  ],
+  'Workflow Automation': [
+    'Given PRT intake process initiated, When workflow triggered, Then automated task assignment routes work to appropriate specialists per SLA',
+    'Given task overdue, When escalation threshold reached, Then manager notification sent with case priority adjustment',
+    'Given workflow complete, When signed off, Then case status updated with completion timestamp and quality metrics captured'
+  ],
+  'Pipeline Dashboard': [
+    'Given PRT pipeline reviewed by management, When dashboard accessed, Then deal flow by stage displayed with expected revenue and completion dates',
+    'Given deal slips from expected close date, When detected, Then exception report highlights delay reason and mitigation',
+    'Given capacity planning required, When analyzed, Then resource allocation vs pipeline demand forecasted'
+  ],
+
+  // Private Markets
+  'Report Templates': [
+    'Given quarterly investor report due, When template selected, Then ILPA-compliant report structure pre-populated with fund data',
+    'Given custom reporting requirement exists, When configured, Then template variant saved for specific investor per side letter',
+    'Given report generation triggered, When complete, Then PDF and Excel outputs available with data validation checks'
+  ],
+  'Investor Portal': [
+    'Given LP accesses investor portal, When authenticated, Then fund-specific documents and capital account statements displayed per AIFMD disclosure requirements',
+    'Given capital call notice issued, When published to portal, Then LP notification sent with secure download link',
+    'Given portal access audit requested, When generated, Then login history and document access log exportable'
+  ],
+
+  // Protection Product
+  'Rules-Based Decisions': [
+    'Given protection application submitted, When rules engine evaluates, Then underwriting decision made per actuarial pricing and FCA treating customers fairly principles',
+    'Given rule outcome is refer, When routed, Then case assigned to underwriter with pre-populated risk assessment summary',
+    'Given rules updated, When deployed, Then version control maintained with audit trail of rule changes'
+  ],
+  'AI Triage': [
+    'Given medical disclosure made in application, When AI triage invoked, Then risk category assigned with 85%+ accuracy vs experienced underwriter benchmark',
+    'Given AI confidence below threshold, When flagged, Then mandatory human review required before decision',
+    'Given AI decision appealed, When reviewed, Then outcome logged for model improvement with feedback loop'
+  ],
+
+  // Regulatory Change
+  'Collaborative Assessment Form': [
+    'Given regulatory change identified, When assessment initiated, Then multi-stakeholder input form routes to affected business units per RACI matrix',
+    'Given BU assessment submitted, When consolidated, Then aggregate impact score calculated with conflicting assessments highlighted',
+    'Given assessment deadline approaching, When reminder sent, Then outstanding responses tracked with escalation to compliance'
+  ],
+  'Consolidated Impact Dashboard': [
+    'Given multiple regulatory changes in flight, When dashboard accessed, Then cross-regulation view shows cumulative change burden by BU and function',
+    'Given resource conflict identified, When flagged, Then prioritization recommendation generated based on deadline and penalty risk',
+    'Given board reporting required, When exported, Then regulatory change heatmap and narrative summary generated'
+  ],
+  'SLA Tracking and Escalation': [
+    'Given regulatory implementation milestone set, When SLA timer starts, Then countdown displayed with RAG status per governance framework',
+    'Given SLA breach imminent, When 80% elapsed, Then escalation to second line with mitigation plan request',
+    'Given SLA breached, When logged, Then incident record created with root cause analysis required per operational risk policy'
+  ],
+  'Implementation Task Management': [
+    'Given regulatory implementation project created, When tasks defined, Then work breakdown structure with dependencies and resource assignments captured',
+    'Given task status updated, When saved, Then project timeline and critical path recalculated in real-time',
+    'Given task blocked, When impediment logged, Then escalation workflow routes to appropriate resolver'
+  ],
+  'Evidence Capture and Storage': [
+    'Given implementation evidence required, When document uploaded, Then metadata tagged and stored in immutable audit repository per records management policy',
+    'Given evidence search required, When queried, Then full-text search across documents with regulatory classification filter available',
+    'Given evidence retention period defined, When expiry approaches, Then archive or destroy workflow triggered per policy'
+  ],
+  'Completion Sign-off Workflow': [
+    'Given regulatory implementation complete, When sign-off initiated, Then attestation workflow routes through first line owner, second line compliance, and third line audit as required',
+    'Given sign-off rejected, When comments provided, Then remediation actions assigned with revised deadline',
+    'Given sign-off approved, When complete, Then regulatory compliance status updated with evidence package archived'
   ]
 };
 

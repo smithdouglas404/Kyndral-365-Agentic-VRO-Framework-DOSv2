@@ -347,9 +347,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Client Net-Zero Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given client selects Net Zero portfolio view, When dashboard loads, Then current carbon footprint vs NZAM-aligned pathway displays with TCFD-compliant metrics",
+            "Given drill-down requested by sector, When expanded, Then GICS sector contribution to portfolio emissions shown with engagement priorities",
+            "Given export requested, When generated, Then TCFD-compliant PDF report produced with methodology disclosure"
           ],
           "tasks": [
             {
@@ -432,9 +432,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given TCFD Data Aggregation Pipeline is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given company TCFD disclosures published, When ingested from CDP/company reports, Then structured data extracted and normalized per TCFD recommendations",
+            "Given data gap identified for holding, When flagged, Then estimation methodology applied with data quality score disclosed",
+            "Given TCFD reporting period ends, When aggregation runs, Then portfolio-level TCFD metrics calculated for client reporting"
           ],
           "tasks": [
             {
@@ -481,9 +481,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given AI-Powered Narrative Generation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given climate metrics calculated for client portfolio, When narrative requested, Then AI generates TCFD-compliant commentary with risk/opportunity analysis",
+            "Given AI narrative reviewed by analyst, When approved, Then narrative included in client report with human oversight attestation",
+            "Given narrative contains factual error, When detected, Then correction logged and model feedback loop triggered"
           ],
           "tasks": [
             {

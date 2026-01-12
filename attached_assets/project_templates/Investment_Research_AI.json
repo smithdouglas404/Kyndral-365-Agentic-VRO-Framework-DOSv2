@@ -214,9 +214,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Document Ingestion is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given research document uploaded (PDF/Excel/Word), When processed, Then content extracted with 95%+ accuracy and indexed for semantic search",
+            "Given document contains tables, When parsed, Then tabular data structured for quantitative analysis queries",
+            "Given document source is external (broker research), When ingested, Then MiFID II inducement rules compliance verified"
           ],
           "tasks": [
             {
@@ -252,9 +252,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Research Q&A for client mandate, When performance calculated, Then GIPS-compliant returns are generated with benchmark comparison",
-            "Given client reporting period ends, When factsheet generated, Then MiFID II cost disclosures and ESG metrics are included",
-            "Given portfolio rebalancing triggered, When trades executed, Then best execution documentation is maintained per FCA requirements"
+            "Given analyst queries research database, When AI search invoked, Then semantically relevant passages retrieved with source citations",
+            "Given answer synthesized from multiple sources, When displayed, Then attribution to original documents provided per research integrity policy",
+            "Given answer confidence low, When flagged, Then human analyst review suggested before client communication"
           ],
           "tasks": [
             {

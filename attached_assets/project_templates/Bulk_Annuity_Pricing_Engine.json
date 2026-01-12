@@ -481,9 +481,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Real-time Inference API is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given pricing request received via API, When ML model invoked, Then prediction returned within 200ms SLA per PRA operational resilience requirements",
+            "Given API rate limit exceeded, When throttled, Then graceful degradation with queue position returned",
+            "Given model version updated, When deployed via blue-green, Then zero-downtime transition with rollback capability"
           ],
           "tasks": [
             {
@@ -554,9 +554,9 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Quote Generation Wizard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given scheme data uploaded by pricing actuary, When wizard launched, Then step-by-step guided workflow captures all required inputs per TPR bulk transfer requirements",
+            "Given mandatory field missing, When validation triggered, Then clear error message with field-level guidance displayed",
+            "Given quote parameters confirmed, When submitted, Then quote generation job queued with estimated completion time"
           ],
           "tasks": [
             {
@@ -615,9 +615,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Quote Approval Workflow is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given quote generated exceeds delegated authority, When escalation triggered, Then approval routed to Chief Actuary per PRA SM&CR requirements",
+            "Given approver reviews quote, When decision made, Then approval/rejection recorded with rationale in audit trail",
+            "Given approved quote expires, When validity period lapses, Then re-approval required with updated market rates"
           ],
           "tasks": [
             {

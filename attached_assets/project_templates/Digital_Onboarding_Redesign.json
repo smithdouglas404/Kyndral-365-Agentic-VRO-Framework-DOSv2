@@ -325,9 +325,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given AI Document Verification is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer uploads identity document, When AI verification runs, Then authenticity check completes within 30 seconds per MLR 2017 CDD requirements",
+            "Given document quality insufficient, When detected, Then clear guidance provided for re-upload with acceptable formats",
+            "Given verification fails automated check, When escalated, Then manual review queue notified with pre-extracted data"
           ],
           "tasks": [
             {
@@ -410,9 +410,9 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Rules Engine Integration is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given customer data collected, When rules engine invoked, Then eligibility determination made per FCA COBS suitability requirements",
+            "Given rule outcome is decline, When communicated, Then clear explanation provided with alternative options per Consumer Duty",
+            "Given rules version updated, When deployed, Then audit trail captures rule changes with effective date"
           ],
           "tasks": [
             {
@@ -460,9 +460,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Quote Comparison Display is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given multiple product options available, When comparison view loaded, Then side-by-side feature and cost comparison displays per FCA PROD requirements",
+            "Given customer selects product, When confirmed, Then selection recorded with rationale capture for suitability file",
+            "Given comparison saved, When retrieved later, Then timestamp and product versions displayed for accuracy"
           ],
           "tasks": [
             {

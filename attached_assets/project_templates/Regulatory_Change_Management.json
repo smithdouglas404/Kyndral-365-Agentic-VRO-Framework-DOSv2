@@ -363,9 +363,9 @@
           "storyPoints": 13,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Collaborative Assessment Form is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given regulatory change identified, When assessment initiated, Then multi-stakeholder input form routes to affected business units per RACI matrix",
+            "Given BU assessment submitted, When consolidated, Then aggregate impact score calculated with conflicting assessments highlighted",
+            "Given assessment deadline approaching, When reminder sent, Then outstanding responses tracked with escalation to compliance"
           ],
           "tasks": [
             {
@@ -425,9 +425,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Consolidated Impact Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given multiple regulatory changes in flight, When dashboard accessed, Then cross-regulation view shows cumulative change burden by BU and function",
+            "Given resource conflict identified, When flagged, Then prioritization recommendation generated based on deadline and penalty risk",
+            "Given board reporting required, When exported, Then regulatory change heatmap and narrative summary generated"
           ],
           "tasks": [
             {
@@ -499,9 +499,9 @@
           "storyPoints": 8,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given SLA Tracking and Escalation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given regulatory implementation milestone set, When SLA timer starts, Then countdown displayed with RAG status per governance framework",
+            "Given SLA breach imminent, When 80% elapsed, Then escalation to second line with mitigation plan request",
+            "Given SLA breached, When logged, Then incident record created with root cause analysis required per operational risk policy"
           ],
           "tasks": [
             {
@@ -573,9 +573,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Implementation Task Management is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given regulatory implementation project created, When tasks defined, Then work breakdown structure with dependencies and resource assignments captured",
+            "Given task status updated, When saved, Then project timeline and critical path recalculated in real-time",
+            "Given task blocked, When impediment logged, Then escalation workflow routes to appropriate resolver"
           ],
           "tasks": [
             {
@@ -635,9 +635,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Evidence Capture and Storage is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given implementation evidence required, When document uploaded, Then metadata tagged and stored in immutable audit repository per records management policy",
+            "Given evidence search required, When queried, Then full-text search across documents with regulatory classification filter available",
+            "Given evidence retention period defined, When expiry approaches, Then archive or destroy workflow triggered per policy"
           ],
           "tasks": [
             {
@@ -697,9 +697,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Completion Sign-off Workflow is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given regulatory implementation complete, When sign-off initiated, Then attestation workflow routes through first line owner, second line compliance, and third line audit as required",
+            "Given sign-off rejected, When comments provided, Then remediation actions assigned with revised deadline",
+            "Given sign-off approved, When complete, Then regulatory compliance status updated with evidence package archived"
           ],
           "tasks": [
             {

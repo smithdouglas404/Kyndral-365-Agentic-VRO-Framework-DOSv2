@@ -220,9 +220,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Benefit Calculation Engine is initiated for pension scheme, When actuarial assumptions applied, Then results comply with TPR and FCA regulatory standards",
-            "Given calculation parameters are set, When processing completes, Then member-level outputs are validated against expected ranges with variance reporting",
-            "Given scheme-specific rules apply, When overrides configured, Then custom calculation logic reflects scheme deed amendments"
+            "Given member benefit calculation required, When engine invoked, Then pension computed per scheme rules with GMP, revaluation, and increases applied correctly",
+            "Given calculation differs from administrator figure, When variance detected, Then reconciliation workflow triggered with itemized difference analysis",
+            "Given bulk calculation batch processed, When complete, Then calculation audit trail available per TPR record-keeping requirements"
           ],
           "tasks": [
             {
@@ -256,9 +256,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Calculation Audit Trail is initiated for pension scheme, When actuarial assumptions applied, Then results comply with TPR and FCA regulatory standards",
-            "Given calculation parameters are set, When processing completes, Then member-level outputs are validated against expected ranges with variance reporting",
-            "Given scheme-specific rules apply, When overrides configured, Then custom calculation logic reflects scheme deed amendments"
+            "Given benefit calculation performed, When logged, Then complete input parameters, assumptions, and output captured per TPR governance requirements",
+            "Given audit query for specific member, When searched, Then full calculation history retrievable with version comparison",
+            "Given regulatory review requested, When exported, Then calculation evidence package generated in standardized format"
           ],
           "tasks": [
             {
@@ -326,9 +326,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Workflow Automation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given PRT intake process initiated, When workflow triggered, Then automated task assignment routes work to appropriate specialists per SLA",
+            "Given task overdue, When escalation threshold reached, Then manager notification sent with case priority adjustment",
+            "Given workflow complete, When signed off, Then case status updated with completion timestamp and quality metrics captured"
           ],
           "tasks": [
             {
@@ -362,9 +362,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Pipeline Dashboard is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given PRT pipeline reviewed by management, When dashboard accessed, Then deal flow by stage displayed with expected revenue and completion dates",
+            "Given deal slips from expected close date, When detected, Then exception report highlights delay reason and mitigation",
+            "Given capacity planning required, When analyzed, Then resource allocation vs pipeline demand forecasted"
           ],
           "tasks": [
             {

@@ -214,9 +214,9 @@
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Rules-Based Decisions is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given protection application submitted, When rules engine evaluates, Then underwriting decision made per actuarial pricing and FCA treating customers fairly principles",
+            "Given rule outcome is refer, When routed, Then case assigned to underwriter with pre-populated risk assessment summary",
+            "Given rules updated, When deployed, Then version control maintained with audit trail of rule changes"
           ],
           "tasks": [
             {
@@ -252,9 +252,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given AI Triage is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given medical disclosure made in application, When AI triage invoked, Then risk category assigned with 85%+ accuracy vs experienced underwriter benchmark",
+            "Given AI confidence below threshold, When flagged, Then mandatory human review required before decision",
+            "Given AI decision appealed, When reviewed, Then outcome logged for model improvement with feedback loop"
           ],
           "tasks": [
             {

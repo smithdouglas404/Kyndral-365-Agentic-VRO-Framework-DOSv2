@@ -408,9 +408,9 @@
           "storyPoints": 8,
           "status": "done",
           "acceptanceCriteria": [
-            "Given Power BI Premium Workspace Setup is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given Power BI Premium capacity provisioned, When workspace configured, Then row-level security aligns with AD groups per data governance policy",
+            "Given report deployed to workspace, When accessed, Then data refresh schedule maintains currency per SLA",
+            "Given capacity exceeded, When alert triggered, Then auto-scale or admin notification per operational policy"
           ],
           "tasks": [
             {
@@ -457,9 +457,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Row-Level Security Implementation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given data access matrix defined, When RLS applied, Then users see only authorized data per GDPR data minimization principle",
+            "Given new user provisioned, When AD group assigned, Then RLS inheritance applies automatically within 15 minutes",
+            "Given RLS audit requested, When generated, Then access permissions report available for data protection review"
           ],
           "tasks": [
             {
@@ -518,9 +518,9 @@
           "storyPoints": 21,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Executive Dashboard Suite is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given executive accesses dashboard, When loaded, Then KPIs across divisions display with drill-down to BU level per governance reporting requirements",
+            "Given metric threshold breached, When detected, Then visual alert highlights exception with trend context",
+            "Given board pack export requested, When generated, Then formatted PDF suitable for board submission produced"
           ],
           "tasks": [
             {
@@ -615,9 +615,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given MLflow Tracking and Registry is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given ML experiment run, When logged to MLflow, Then parameters, metrics, and artifacts captured with lineage per PRA SS1/23 model risk requirements",
+            "Given model promoted to registry, When staged, Then model version tracked with approval workflow before production deployment",
+            "Given model retired, When archived, Then version history maintained for audit with deprecation notice"
           ],
           "tasks": [
             {
@@ -737,9 +737,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Model Monitoring and Drift Detection is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given production model predictions monitored, When drift detected, Then alert triggers to data science team per SS1/23 model performance requirements",
+            "Given concept drift exceeds threshold, When confirmed, Then model retraining workflow initiated with governance sign-off",
+            "Given monitoring dashboard accessed, When viewed, Then prediction distribution and accuracy trends displayed"
           ],
           "tasks": [
             {
@@ -787,9 +787,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given GPU Compute Cluster is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given deep learning training job submitted, When GPU cluster allocated, Then job starts within 5 minutes per SLA with cost tracking",
+            "Given cluster utilization exceeds 80%, When capacity constrained, Then job queue prioritization applies based on business priority",
+            "Given job completes, When resources released, Then cost attribution logged to project code"
           ],
           "tasks": [
             {

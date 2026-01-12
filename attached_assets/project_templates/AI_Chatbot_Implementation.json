@@ -495,9 +495,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Answer Accuracy Validation is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given chatbot response generated for pension query, When accuracy checked against knowledge base, Then response validated with 95%+ factual accuracy per FCA SYSC 3.2",
+            "Given hallucination detected in AI response, When flagged, Then response blocked and escalated to human review with audit log",
+            "Given customer receives answer, When feedback submitted, Then response quality tracked for continuous model improvement"
           ],
           "tasks": [
             {

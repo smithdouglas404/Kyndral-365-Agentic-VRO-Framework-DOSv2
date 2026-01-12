@@ -440,9 +440,9 @@
           "storyPoints": 13,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Mandate Change Requests for client mandate, When performance calculated, Then GIPS-compliant returns are generated with benchmark comparison",
-            "Given client reporting period ends, When factsheet generated, Then MiFID II cost disclosures and ESG metrics are included",
-            "Given portfolio rebalancing triggered, When trades executed, Then best execution documentation is maintained per FCA requirements"
+            "Given institutional client requests IPS amendment, When change submitted, Then dual authorization workflow triggers per MiFID II suitability requirements",
+            "Given change impacts asset allocation limits, When validated, Then compliance pre-clearance required before implementation",
+            "Given change approved, When effective, Then updated IPS document generated with version control"
           ],
           "tasks": [
             {
@@ -500,9 +500,9 @@
           "storyPoints": 8,
           "status": "in-progress",
           "acceptanceCriteria": [
-            "Given Transaction Audit Trail is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given any client transaction executed, When logged, Then immutable audit record created with timestamp, user, and action per FCA SYSC requirements",
+            "Given audit trail queried, When filtered by date range, Then complete transaction history exportable for regulatory review",
+            "Given suspicious activity detected, When flagged, Then MLRO notification triggered per MLR 2017 requirements"
           ],
           "tasks": [
             {
@@ -573,9 +573,9 @@
           "storyPoints": 21,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Report Builder Interface is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given client selects report parameters, When builder accessed, Then drag-drop interface allows custom report construction with MiFID II compliant data fields",
+            "Given custom report saved, When template created, Then reusable template available for scheduled generation",
+            "Given report preview requested, When rendered, Then sample data displayed with formatting options"
           ],
           "tasks": [
             {
@@ -633,9 +633,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Report Scheduling and Delivery is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given report schedule configured, When trigger time reached, Then report auto-generated and delivered via secure channel per data protection policy",
+            "Given delivery fails, When retry exhausted, Then escalation notification sent to client relationship manager",
+            "Given client preferences updated, When saved, Then future deliveries reflect preferred format and channel"
           ],
           "tasks": [
             {

@@ -325,9 +325,9 @@
           "storyPoints": 13,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Report Templates is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given quarterly investor report due, When template selected, Then ILPA-compliant report structure pre-populated with fund data",
+            "Given custom reporting requirement exists, When configured, Then template variant saved for specific investor per side letter",
+            "Given report generation triggered, When complete, Then PDF and Excel outputs available with data validation checks"
           ],
           "tasks": [
             {
@@ -363,9 +363,9 @@
           "storyPoints": 8,
           "status": "planned",
           "acceptanceCriteria": [
-            "Given Investor Portal is executed, When all validations pass, Then processing completes within defined SLA with full audit trail",
-            "Given business rules apply, When evaluated, Then outcomes align with regulatory requirements and internal policies",
-            "Given exception occurs, When handled, Then appropriate escalation and notification processes are triggered"
+            "Given LP accesses investor portal, When authenticated, Then fund-specific documents and capital account statements displayed per AIFMD disclosure requirements",
+            "Given capital call notice issued, When published to portal, Then LP notification sent with secure download link",
+            "Given portal access audit requested, When generated, Then login history and document access log exportable"
           ],
           "tasks": [
             {
