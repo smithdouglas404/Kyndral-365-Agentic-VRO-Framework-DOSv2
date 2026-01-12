@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ReactiveAgentDemo } from '@/components/ReactiveAgentDemo';
 
 const agents = [
   {
@@ -545,6 +546,9 @@ export default function VROFramework() {
             <TabsTrigger value="value-benefits" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700" data-testid="tab-value-benefits">
               Value & Benefits
             </TabsTrigger>
+            <TabsTrigger value="reactive-demo" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700" data-testid="tab-reactive-demo">
+              Live Demo
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="agent-lineage">
@@ -584,6 +588,57 @@ export default function VROFramework() {
               {valueAgents.map((agent, index) => (
                 <AgentCard key={agent.id} agent={agent} index={index} />
               ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reactive-demo">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ReactiveAgentDemo />
+              <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50/50 to-cyan-50/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Lightbulb className="h-5 w-5 text-blue-600" />
+                    How Reactive Agents Work
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm text-gray-700">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">1</div>
+                      <div>
+                        <p className="font-medium">Data Change Detected</p>
+                        <p className="text-gray-500">Metrics are continuously monitored. When a value crosses a threshold, the system detects the change.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-xs">2</div>
+                      <div>
+                        <p className="font-medium">Agent Intervention Created</p>
+                        <p className="text-gray-500">The responsible agent creates an intervention with analysis, recommended action, and impact assessment.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs">3</div>
+                      <div>
+                        <p className="font-medium">Command Center Notification</p>
+                        <p className="text-gray-500">The intervention appears in the Command Center and floating alert banner for immediate visibility.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xs">4</div>
+                      <div>
+                        <p className="font-medium">Autonomous Action</p>
+                        <p className="text-gray-500">For critical thresholds, agents can execute pre-approved actions automatically (escalate, notify, update status).</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-xs text-blue-700">
+                      <strong>Try it:</strong> Use the sliders to set metrics below their warning/critical thresholds, then click "Trigger" to see the reactive agent flow in action.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>

@@ -3,6 +3,7 @@ import { executeAction, sendAgentMessage, ActionType } from './agentActionEngine
 import { notifyAction } from './backgroundAgentMonitor';
 import { EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
 import { emitAgentIntervention, NewIntervention } from './commandCenterBridge';
+import { initializeDefaultThresholds, simulateMetricChange } from './reactiveMetricMonitor';
 
 export interface AgentTask {
   id: string;
@@ -595,6 +596,7 @@ async function loadPersistedData(): Promise<void> {
 }
 
 let interventionEmitInterval: NodeJS.Timeout | null = null;
+let metricSimulationInterval: NodeJS.Timeout | null = null;
 
 export function startOrchestrator(taskIntervalMs: number = 5000, activityIntervalMs: number = 30000): void {
   if (isOrchestratorRunning) return;
@@ -602,16 +604,33 @@ export function startOrchestrator(taskIntervalMs: number = 5000, activityInterva
   isOrchestratorRunning = true;
   
   loadPersistedData();
+  initializeDefaultThresholds();
   
   orchestratorInterval = setInterval(processTaskQueue, taskIntervalMs);
   
   continuousActivityInterval = setInterval(runContinuousAgentActivity, activityIntervalMs);
   
   // Start agent intervention emission to Command Center
-  interventionEmitInterval = setInterval(maybeEmitAgentIntervention, 45000); // Check every 45 seconds
+  interventionEmitInterval = setInterval(maybeEmitAgentIntervention, 45000);
+  
+  // Simulate metric changes periodically (every 60 seconds, random metric)
+  metricSimulationInterval = setInterval(() => {
+    const metrics = ['schedule-performance', 'cost-performance', 'okr-progress', 'change-adoption', 'sprint-velocity'];
+    const randomMetric = metrics[Math.floor(Math.random() * metrics.length)];
+    
+    // Generate realistic fluctuating values
+    let value: number;
+    if (randomMetric === 'sprint-velocity') {
+      value = 5 + Math.random() * 25; // 5-30% variance
+    } else {
+      value = 0.6 + Math.random() * 0.4; // 0.6-1.0 performance index
+    }
+    
+    simulateMetricChange(randomMetric, value);
+  }, 60000);
   
   setTimeout(runContinuousAgentActivity, 2000);
-  setTimeout(maybeEmitAgentIntervention, 10000); // First intervention check after 10 seconds
+  setTimeout(maybeEmitAgentIntervention, 10000);
 }
 
 export function stopOrchestrator(): void {
@@ -627,7 +646,16 @@ export function stopOrchestrator(): void {
     clearInterval(interventionEmitInterval);
     interventionEmitInterval = null;
   }
+  if (metricSimulationInterval) {
+    clearInterval(metricSimulationInterval);
+    metricSimulationInterval = null;
+  }
   isOrchestratorRunning = false;
+}
+
+// Export function to trigger immediate metric simulation for demo purposes
+export function triggerMetricSimulation(metricId: string, value: number): void {
+  simulateMetricChange(metricId, value);
 }
 
 export function getTaskQueue(): AgentTask[] {
