@@ -650,79 +650,97 @@ export default function AgentCommandCenterPage() {
           </TabsContent>
 
           <TabsContent value="activity">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-green-600" />
-                  Live Agent Activity Feed
-                  <span className="relative flex h-2 w-2 ml-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                </CardTitle>
-                <CardDescription>Real-time autonomous agent actions and detections</CardDescription>
+            <Card className="bg-gray-900 border-gray-700">
+              <CardHeader className="border-b border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <CardTitle className="flex items-center gap-2 text-green-400 font-mono text-sm">
+                      <Activity className="h-4 w-4" />
+                      AGENT_ACTIVITY_STREAM
+                      <span className="relative flex h-2 w-2 ml-1">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                    </CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+                    <span className="text-green-400">{agentActivities.length}</span> events
+                    <span className="mx-1">|</span>
+                    <span>polling: 3s</span>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {isLoadingActivities ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                    <span className="ml-2 text-gray-600">Loading activity feed...</span>
+                    <Loader2 className="h-6 w-6 animate-spin text-green-400" />
+                    <span className="ml-2 text-green-400 font-mono text-sm">Connecting to agent network...</span>
                   </div>
                 ) : agentActivities.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="font-medium text-gray-600">No agent activity yet</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Use the Live Demo tab to trigger autonomous agent actions
+                  <div className="text-center py-12 font-mono">
+                    <Activity className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400 text-sm">No agent activity detected</p>
+                    <p className="text-gray-600 text-xs mt-1">
+                      Use Live Demo tab to trigger agent actions
                     </p>
                   </div>
                 ) : (
-                  <ScrollArea className="h-[500px]">
-                    <div className="space-y-3">
-                      {agentActivities.map((activity, index) => (
-                        <motion.div
-                          key={activity.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`flex items-start gap-3 p-3 rounded-lg border ${
-                            activity.eventType === 'detection' ? 'bg-amber-50 border-amber-200' :
-                            activity.eventType === 'autonomous_action' ? 'bg-green-50 border-green-200' :
-                            activity.eventType === 'agent_to_agent' ? 'bg-purple-50 border-purple-200' :
-                            'bg-blue-50 border-blue-200'
-                          }`}
-                        >
-                          <div className={`p-2 rounded-full ${
-                            activity.eventType === 'detection' ? 'bg-amber-500' :
-                            activity.eventType === 'autonomous_action' ? 'bg-green-500' :
-                            activity.eventType === 'agent_to_agent' ? 'bg-purple-500' :
-                            'bg-blue-500'
-                          } text-white`}>
-                            {activity.eventType === 'detection' ? <AlertTriangle className="h-4 w-4" /> :
-                             activity.eventType === 'autonomous_action' ? <Zap className="h-4 w-4" /> :
-                             activity.eventType === 'agent_to_agent' ? <Users className="h-4 w-4" /> :
-                             <Bot className="h-4 w-4" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">{activity.primaryAgentName}</span>
-                              {activity.secondaryAgentName && (
-                                <>
-                                  <ChevronRight className="h-3 w-3 text-gray-400" />
-                                  <span className="font-medium text-sm">{activity.secondaryAgentName}</span>
-                                </>
-                              )}
-                              <Badge variant="outline" className="text-xs capitalize">
-                                {activity.eventType.replace('_', ' ')}
-                              </Badge>
+                  <ScrollArea className="h-[550px]">
+                    <div className="font-mono text-xs">
+                      {agentActivities.slice().reverse().map((activity, index) => {
+                        const time = activity.createdAt.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        const msec = activity.createdAt.getMilliseconds().toString().padStart(3, '0');
+                        
+                        const eventColor = activity.eventType === 'detection' ? 'text-amber-400' :
+                          activity.eventType === 'autonomous_action' ? 'text-green-400' :
+                          activity.eventType === 'agent_to_agent' ? 'text-purple-400' :
+                          'text-blue-400';
+                        
+                        const eventIcon = activity.eventType === 'detection' ? '🔍' :
+                          activity.eventType === 'autonomous_action' ? '⚡' :
+                          activity.eventType === 'agent_to_agent' ? '↔️' :
+                          '🤖';
+                        
+                        const eventLabel = activity.eventType === 'detection' ? 'DETECT' :
+                          activity.eventType === 'autonomous_action' ? 'ACTION' :
+                          activity.eventType === 'agent_to_agent' ? 'A2A' :
+                          'EVENT';
+
+                        return (
+                          <motion.div
+                            key={activity.id}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.02 }}
+                            className="px-4 py-2 border-b border-gray-800 hover:bg-gray-800/50 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <span className="text-gray-600 whitespace-nowrap">{time}.{msec}</span>
+                              <span className={`${eventColor} font-bold w-16`}>[{eventLabel}]</span>
+                              <div className="flex-1">
+                                <span className="text-cyan-400">{activity.primaryAgentName}</span>
+                                {activity.secondaryAgentName && (
+                                  <>
+                                    <span className="text-gray-500 mx-1">→</span>
+                                    <span className="text-pink-400">{activity.secondaryAgentName}</span>
+                                  </>
+                                )}
+                                <span className="text-gray-500 mx-2">:</span>
+                                <span className="text-gray-300">{activity.summary}</span>
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-700">{activity.summary}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {activity.createdAt.toLocaleTimeString()}
-                            </p>
-                          </div>
-                        </motion.div>
-                      ))}
+                          </motion.div>
+                        );
+                      })}
+                      <div className="px-4 py-3 flex items-center gap-2 text-green-400">
+                        <span className="animate-pulse">▋</span>
+                        <span className="text-gray-500">Listening for agent activity...</span>
+                      </div>
                     </div>
                   </ScrollArea>
                 )}
