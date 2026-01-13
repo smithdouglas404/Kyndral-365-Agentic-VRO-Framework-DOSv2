@@ -558,6 +558,13 @@ export class DatabaseStorage implements IStorage {
     }
 
     const demoActivities: InsertAgentActivityLog[] = [
+      // Stream 1: FinOps detecting and acting on budget issues
+      {
+        eventType: 'detection',
+        primaryAgentId: 'finops',
+        primaryAgentName: 'FinOps Agent',
+        summary: 'Scanning 21 portfolio projects for financial anomalies...',
+      },
       {
         eventType: 'detection',
         primaryAgentId: 'finops',
@@ -566,10 +573,25 @@ export class DatabaseStorage implements IStorage {
         details: JSON.stringify({ metric: 'CPI', value: 0.82, threshold: 0.85 })
       },
       {
+        eventType: 'agent_to_agent',
+        primaryAgentId: 'finops',
+        primaryAgentName: 'FinOps Agent',
+        secondaryAgentId: 'tmo',
+        secondaryAgentName: 'TMO Agent',
+        summary: 'Notifying TMO Agent of budget variance - may impact schedule',
+      },
+      {
         eventType: 'autonomous_action',
         primaryAgentId: 'finops',
         primaryAgentName: 'FinOps Agent',
-        summary: 'Created intervention for budget overrun - awaiting approval',
+        summary: 'Created intervention for budget overrun - awaiting human approval',
+      },
+      // Stream 2: TMO detecting schedule slippage
+      {
+        eventType: 'detection',
+        primaryAgentId: 'tmo',
+        primaryAgentName: 'TMO Agent',
+        summary: 'Analyzing sprint velocity trends across Climate Analytics...',
       },
       {
         eventType: 'detection',
@@ -580,17 +602,88 @@ export class DatabaseStorage implements IStorage {
       },
       {
         eventType: 'agent_to_agent',
+        primaryAgentId: 'tmo',
+        primaryAgentName: 'TMO Agent',
+        secondaryAgentId: 'governance',
+        secondaryAgentName: 'Governance Agent',
+        summary: 'Alerting Governance - regulatory deadline at risk',
+      },
+      {
+        eventType: 'autonomous_action',
+        primaryAgentId: 'tmo',
+        primaryAgentName: 'TMO Agent',
+        summary: 'Auto-generated schedule recovery plan for review',
+      },
+      // Stream 3: Cross-ART dependency chain
+      {
+        eventType: 'detection',
+        primaryAgentId: 'planning',
+        primaryAgentName: 'Planning Agent',
+        summary: 'Scanning inter-team dependencies across 5 ARTs...',
+      },
+      {
+        eventType: 'agent_to_agent',
         primaryAgentId: 'planning',
         primaryAgentName: 'Planning Agent',
         secondaryAgentId: 'governance',
         secondaryAgentName: 'Governance Agent',
-        summary: 'Escalated cross-ART dependency to Governance for resolution',
+        summary: 'Escalated cross-ART dependency blocking 3 teams',
+      },
+      {
+        eventType: 'agent_to_agent',
+        primaryAgentId: 'governance',
+        primaryAgentName: 'Governance Agent',
+        secondaryAgentId: 'ocm',
+        secondaryAgentName: 'OCM Agent',
+        summary: 'Requesting change impact assessment for dependency resolution',
       },
       {
         eventType: 'autonomous_action',
         primaryAgentId: 'governance',
         primaryAgentName: 'Governance Agent',
         summary: 'Created high-priority intervention for dependency resolution',
+      },
+      // Stream 4: Quality monitoring
+      {
+        eventType: 'detection',
+        primaryAgentId: 'integrated',
+        primaryAgentName: 'Integrated Management Agent',
+        summary: 'Running quality gate checks on Customer 360 Platform...',
+      },
+      {
+        eventType: 'detection',
+        primaryAgentId: 'integrated',
+        primaryAgentName: 'Integrated Management Agent',
+        summary: 'Test coverage dropped to 62% - below 80% threshold',
+      },
+      {
+        eventType: 'agent_to_agent',
+        primaryAgentId: 'integrated',
+        primaryAgentName: 'Integrated Management Agent',
+        secondaryAgentId: 'ocm',
+        secondaryAgentName: 'OCM Agent',
+        summary: 'Notifying OCM - team may need capacity reallocation',
+      },
+      // Stream 5: Resource monitoring
+      {
+        eventType: 'detection',
+        primaryAgentId: 'ocm',
+        primaryAgentName: 'OCM Agent',
+        summary: 'Analyzing team velocity patterns for change fatigue signals...',
+      },
+      {
+        eventType: 'agent_to_agent',
+        primaryAgentId: 'ocm',
+        primaryAgentName: 'OCM Agent',
+        secondaryAgentId: 'finops',
+        secondaryAgentName: 'FinOps Agent',
+        summary: 'Velocity decline detected - may impact cost projections',
+      },
+      {
+        eventType: 'autonomous_action',
+        primaryAgentId: 'ocm',
+        primaryAgentName: 'OCM Agent',
+        summary: 'Generated change fatigue assessment report',
       }
     ];
 
