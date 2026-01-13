@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   XCircle,
   Bot,
-  Database
+  Database,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,17 +88,30 @@ export function ReactiveAgentDemo() {
   const [simulationLog, setSimulationLog] = useState<string[]>([]);
   const [simulatingMetrics, setSimulatingMetrics] = useState<Set<string>>(new Set());
   const [isResetting, setIsResetting] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   const handleResetDemo = async () => {
     setIsResetting(true);
     try {
       await apiRequest('POST', '/api/demo/reset', {});
       setMetrics(DEMO_METRICS);
-      setSimulationLog([`[${new Date().toLocaleTimeString()}] Demo reset - ready for presentation!`]);
+      setSimulationLog([`[${new Date().toLocaleTimeString()}] Demo reset - ALL interventions cleared!`]);
     } catch (error) {
       setSimulationLog(prev => [`[${new Date().toLocaleTimeString()}] Reset failed`, ...prev]);
     } finally {
       setIsResetting(false);
+    }
+  };
+
+  const handleSeedDemo = async () => {
+    setIsSeeding(true);
+    try {
+      await apiRequest('POST', '/api/demo/seed', {});
+      setSimulationLog(prev => [`[${new Date().toLocaleTimeString()}] Demo seeded with [AUTONOMOUS] examples!`, ...prev]);
+    } catch (error) {
+      setSimulationLog(prev => [`[${new Date().toLocaleTimeString()}] Seed failed`, ...prev]);
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -296,6 +310,22 @@ export function ReactiveAgentDemo() {
               <>
                 <RefreshCw className="h-4 w-4 mr-1" />
                 Reset
+              </>
+            )}
+          </Button>
+          <Button 
+            onClick={handleSeedDemo} 
+            variant="outline"
+            disabled={isSeeding}
+            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+            data-testid="button-seed-demo"
+          >
+            {isSeeding ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-1" />
+                Seed Demo
               </>
             )}
           </Button>

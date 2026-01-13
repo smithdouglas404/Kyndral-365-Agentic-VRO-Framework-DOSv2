@@ -162,7 +162,7 @@ export async function updateMetricAndCheck(
   const interventionData: InsertIntervention = {
     type: config.interventionType,
     severity: breachResult.severity!,
-    title: `${getMetricDisplayName(metricKey)} ${breachResult.severity!.toUpperCase()} Alert`,
+    title: `[AUTONOMOUS] ${getMetricDisplayName(metricKey)} ${breachResult.severity!.toUpperCase()} Alert`,
     description: `${getMetricDisplayName(metricKey)} has dropped to ${(newValue * 100).toFixed(1)}% (${breachResult.changePercent.toFixed(1)}% change). Immediate action required.`,
     projectId,
     projectName,
@@ -170,11 +170,22 @@ export async function updateMetricAndCheck(
     suggestedAction: config.suggestedAction,
     impact: `${breachResult.severity === 'critical' ? 'Critical' : 'High'} threshold breach may impact project delivery and stakeholder commitments.`,
     status: 'pending',
-    agentSource: config.agentName
+    agentSource: config.agentName,
+    isAutonomous: 'true',
+    triggerSource: 'metric_breach'
   };
 
   const intervention = await storage.createIntervention(interventionData);
   console.log(`[ReactiveWatcher] Intervention created: ${intervention.id}`);
+
+  await storage.createAgentActivityLog({
+    eventType: 'detection',
+    primaryAgentId: config.agentOwner,
+    primaryAgentName: config.agentName,
+    interventionId: intervention.id,
+    summary: `Detected ${metricKey} breach: ${(newValue * 100).toFixed(1)}% (threshold: ${(config.criticalThreshold * 100).toFixed(0)}%)`,
+    details: JSON.stringify({ metric: metricKey, value: newValue, threshold: config.criticalThreshold })
+  });
 
   let autonomousActionResult = null;
   if (breachResult.severity === 'critical' && config.autonomousAction) {
@@ -183,18 +194,28 @@ export async function updateMetricAndCheck(
     const actionIntervention: InsertIntervention = {
       type: config.interventionType,
       severity: 'medium',
-      title: `Autonomous Action Executed: ${config.autonomousAction.type}`,
+      title: `[AUTONOMOUS] Action Executed: ${config.autonomousAction.type}`,
       description: `Agent ${config.agentName} automatically executed "${config.autonomousAction.description}" in response to ${metricKey} breach.`,
       projectId,
       projectName,
       confidence: '0.95',
       suggestedAction: 'Action completed automatically - no further action needed.',
       impact: 'Proactive intervention to prevent further degradation.',
-      status: 'pending',
-      agentSource: config.agentName
+      status: 'approved',
+      agentSource: config.agentName,
+      isAutonomous: 'true',
+      triggerSource: 'metric_breach'
     };
     
     autonomousActionResult = await storage.createIntervention(actionIntervention);
+
+    await storage.createAgentActivityLog({
+      eventType: 'autonomous_action',
+      primaryAgentId: config.agentOwner,
+      primaryAgentName: config.agentName,
+      interventionId: autonomousActionResult.id,
+      summary: `Executed autonomous action: ${config.autonomousAction.description}`,
+    });
     
     await storage.createAgentTask({
       assignedAgent: config.agentOwner,

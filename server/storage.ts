@@ -12,9 +12,10 @@ import {
   type AgentDiscussion, type InsertAgentDiscussion,
   type DiscussionMessage, type InsertDiscussionMessage,
   type ProjectMetric, type InsertProjectMetric,
+  type AgentActivityLog, type InsertAgentActivityLog,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
-  projectMetrics
+  projectMetrics, agentActivityLog
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -66,6 +67,13 @@ export interface IStorage {
   getProjectMetrics(projectId: string): Promise<ProjectMetric[]>;
   getAllProjectMetrics(): Promise<ProjectMetric[]>;
   upsertProjectMetric(metric: InsertProjectMetric): Promise<ProjectMetric>;
+  
+  getAgentActivityLog(limit?: number): Promise<AgentActivityLog[]>;
+  createAgentActivityLog(activity: InsertAgentActivityLog): Promise<AgentActivityLog>;
+  clearAgentActivityLog(): Promise<void>;
+  
+  seedDemoInterventions(): Promise<void>;
+  clearInterventions(): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -441,6 +449,153 @@ export class DatabaseStorage implements IStorage {
     } else {
       const result = await db.insert(projectMetrics).values(metric).returning();
       return result[0];
+    }
+  }
+
+  async getAgentActivityLog(limit?: number): Promise<AgentActivityLog[]> {
+    const query = db.select().from(agentActivityLog).orderBy(desc(agentActivityLog.createdAt));
+    if (limit) {
+      return await query.limit(limit);
+    }
+    return await query;
+  }
+
+  async createAgentActivityLog(activity: InsertAgentActivityLog): Promise<AgentActivityLog> {
+    const result = await db.insert(agentActivityLog).values(activity).returning();
+    return result[0];
+  }
+
+  async clearAgentActivityLog(): Promise<void> {
+    await db.delete(agentActivityLog);
+  }
+
+  async clearInterventions(): Promise<void> {
+    await db.delete(interventions);
+  }
+
+  async seedDemoInterventions(): Promise<void> {
+    const demoInterventions: InsertIntervention[] = [
+      {
+        type: 'budget',
+        severity: 'critical',
+        title: '[AUTONOMOUS] Budget Overrun Detected',
+        description: 'FinOps Agent detected CPI dropped below 0.85 threshold. Automatic cost analysis triggered.',
+        projectId: 'proj-data-platform',
+        projectName: 'Enterprise Data Platform',
+        confidence: '0.95',
+        suggestedAction: 'Reallocate £200K from contingency reserve and implement cost controls on external contractors.',
+        impact: 'Without intervention, project will exceed budget by £1.2M by Q2.',
+        status: 'pending',
+        agentSource: 'FinOps Agent',
+        isAutonomous: 'true',
+        triggerSource: 'metric_breach'
+      },
+      {
+        type: 'timeline',
+        severity: 'critical',
+        title: '[AUTONOMOUS] Schedule Variance Alert',
+        description: 'TMO Agent detected SPI at 0.78, below critical threshold of 0.85.',
+        projectId: 'proj-climate-analytics',
+        projectName: 'Climate Analytics Platform',
+        confidence: '0.92',
+        suggestedAction: 'Fast-track critical path activities and add parallel workstreams.',
+        impact: 'Current trajectory shows 6-week delay to regulatory deadline.',
+        status: 'pending',
+        agentSource: 'TMO Agent',
+        isAutonomous: 'true',
+        triggerSource: 'metric_breach'
+      },
+      {
+        type: 'dependency',
+        severity: 'high',
+        title: '[AGENT→AGENT] Cross-ART Dependency Risk',
+        description: 'Planning Agent escalated to Governance Agent: API dependency blocking 3 downstream teams.',
+        projectId: 'proj-data-platform',
+        projectName: 'Enterprise Data Platform',
+        confidence: '0.88',
+        suggestedAction: 'Convene emergency dependency resolution meeting with all ART leads.',
+        impact: 'Blocking 12 story points across 3 teams.',
+        status: 'pending',
+        agentSource: 'Governance Agent',
+        isAutonomous: 'true',
+        triggerSource: 'agent_escalation',
+        escalatedFromAgentId: 'planning'
+      },
+      {
+        type: 'quality',
+        severity: 'high',
+        title: '[AUTONOMOUS] Quality Gate Failure',
+        description: 'Integrated Management Agent detected test coverage dropped to 62%, below 80% threshold.',
+        projectId: 'proj-customer-360',
+        projectName: 'Customer 360 Platform',
+        confidence: '0.91',
+        suggestedAction: 'Pause feature development and allocate sprint capacity to test coverage.',
+        impact: 'Risk of production defects increased by 40%.',
+        status: 'pending',
+        agentSource: 'Integrated Management Agent',
+        isAutonomous: 'true',
+        triggerSource: 'metric_breach'
+      },
+      {
+        type: 'resource',
+        severity: 'medium',
+        title: '[AUTONOMOUS] Resource Utilization Warning',
+        description: 'OCM Agent detected team velocity declining 15% over last 3 sprints.',
+        projectId: 'proj-digital-transform',
+        projectName: 'Digital Transformation Program',
+        confidence: '0.85',
+        suggestedAction: 'Review team capacity and consider change fatigue interventions.',
+        impact: 'Continued decline will delay delivery by 2 sprints.',
+        status: 'pending',
+        agentSource: 'OCM Agent',
+        isAutonomous: 'true',
+        triggerSource: 'agent_detection'
+      }
+    ];
+
+    for (const intervention of demoInterventions) {
+      await db.insert(interventions).values(intervention);
+    }
+
+    const demoActivities: InsertAgentActivityLog[] = [
+      {
+        eventType: 'detection',
+        primaryAgentId: 'finops',
+        primaryAgentName: 'FinOps Agent',
+        summary: 'Detected CPI breach on Enterprise Data Platform (0.82 < 0.85)',
+        details: JSON.stringify({ metric: 'CPI', value: 0.82, threshold: 0.85 })
+      },
+      {
+        eventType: 'autonomous_action',
+        primaryAgentId: 'finops',
+        primaryAgentName: 'FinOps Agent',
+        summary: 'Created intervention for budget overrun - awaiting approval',
+      },
+      {
+        eventType: 'detection',
+        primaryAgentId: 'tmo',
+        primaryAgentName: 'TMO Agent',
+        summary: 'Detected SPI breach on Climate Analytics (0.78 < 0.85)',
+        details: JSON.stringify({ metric: 'SPI', value: 0.78, threshold: 0.85 })
+      },
+      {
+        eventType: 'agent_to_agent',
+        primaryAgentId: 'planning',
+        primaryAgentName: 'Planning Agent',
+        secondaryAgentId: 'governance',
+        secondaryAgentName: 'Governance Agent',
+        summary: 'Escalated cross-ART dependency to Governance for resolution',
+      },
+      {
+        eventType: 'autonomous_action',
+        primaryAgentId: 'governance',
+        primaryAgentName: 'Governance Agent',
+        summary: 'Created high-priority intervention for dependency resolution',
+      }
+    ];
+
+    for (const activity of demoActivities) {
+      await db.insert(agentActivityLog).values(activity);
     }
   }
 }

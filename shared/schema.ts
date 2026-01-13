@@ -215,6 +215,9 @@ export const interventions = pgTable("interventions", {
   impact: text("impact"),
   status: text("status").default("pending"), // pending, approved, dismissed, executing
   agentSource: text("agent_source").notNull(), // Which agent detected this
+  isAutonomous: text("is_autonomous").default("false"), // true if created by agent without human input
+  triggerSource: text("trigger_source").default("manual"), // metric_breach, agent_detection, agent_escalation, manual
+  escalatedFromAgentId: text("escalated_from_agent_id"), // If escalated from another agent
   approvedBy: text("approved_by"),
   approvedAt: timestamp("approved_at"),
   dismissedBy: text("dismissed_by"),
@@ -273,3 +276,25 @@ export const insertDiscussionMessageSchema = createInsertSchema(discussionMessag
 
 export type InsertDiscussionMessage = z.infer<typeof insertDiscussionMessageSchema>;
 export type DiscussionMessage = typeof discussionMessages.$inferSelect;
+
+// Agent Activity Log - Real-time log of autonomous agent actions
+export const agentActivityLog = pgTable("agent_activity_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventType: text("event_type").notNull(), // detection, escalation, autonomous_action, agent_to_agent, approval_executed
+  primaryAgentId: text("primary_agent_id").notNull(), // The agent that initiated the action
+  primaryAgentName: text("primary_agent_name").notNull(),
+  secondaryAgentId: text("secondary_agent_id"), // For agent-to-agent interactions
+  secondaryAgentName: text("secondary_agent_name"),
+  interventionId: text("intervention_id"), // Link to intervention if applicable
+  summary: text("summary").notNull(), // Human-readable summary
+  details: text("details"), // JSON payload with additional context
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAgentActivityLogSchema = createInsertSchema(agentActivityLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAgentActivityLog = z.infer<typeof insertAgentActivityLogSchema>;
+export type AgentActivityLog = typeof agentActivityLog.$inferSelect;

@@ -829,29 +829,47 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Reset demo data for presentations
+  // Reset demo data for presentations - clears EVERYTHING
   app.post("/api/demo/reset", async (_req, res) => {
     try {
-      // Clear all pending interventions from reactive demo
-      const allInterventions = await storage.getInterventions();
-      const demoInterventions = allInterventions.filter(i => 
-        i.projectId === 'proj-reactive-demo' || 
-        i.projectName?.includes('Reactive') ||
-        i.title?.includes('Alert')
-      );
-      
-      for (const intervention of demoInterventions) {
-        await storage.updateInterventionStatus(intervention.id, 'dismissed', 'demo-reset');
-      }
+      // Clear ALL interventions and activity logs
+      await storage.clearInterventions();
+      await storage.clearAgentActivityLog();
       
       res.json({ 
         success: true, 
-        message: `Demo reset complete. Cleared ${demoInterventions.length} interventions.`,
-        clearedCount: demoInterventions.length
+        message: 'Demo reset complete. All interventions and activity logs cleared.',
       });
     } catch (error: any) {
       console.error("Demo reset error:", error);
       res.status(500).json({ error: "Failed to reset demo" });
+    }
+  });
+
+  // Seed demo data with autonomy labels
+  app.post("/api/demo/seed", async (_req, res) => {
+    try {
+      await storage.seedDemoInterventions();
+      
+      res.json({ 
+        success: true, 
+        message: 'Demo seeded with autonomous intervention examples.',
+      });
+    } catch (error: any) {
+      console.error("Demo seed error:", error);
+      res.status(500).json({ error: "Failed to seed demo" });
+    }
+  });
+
+  // Get agent activity log
+  app.get("/api/agent-activity", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const activities = await storage.getAgentActivityLog(limit);
+      res.json({ activities });
+    } catch (error: any) {
+      console.error("Get agent activity error:", error);
+      res.status(500).json({ error: "Failed to get agent activity" });
     }
   });
 
