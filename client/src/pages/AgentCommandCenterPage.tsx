@@ -59,6 +59,9 @@ interface RiskIntervention {
   timestamp: Date;
   status: 'pending' | 'approved' | 'dismissed' | 'executing';
   agentSource: string;
+  isAutonomous: boolean;
+  triggerSource: 'metric_breach' | 'agent_detection' | 'agent_escalation' | 'manual';
+  escalatedFromAgentId?: string;
 }
 
 interface AgentMessage {
@@ -100,7 +103,10 @@ async function fetchInterventions(): Promise<RiskIntervention[]> {
       impact: i.impact || '',
       timestamp: new Date(i.createdAt),
       status: i.status || 'pending',
-      agentSource: i.agentSource || 'System'
+      agentSource: i.agentSource || 'System',
+      isAutonomous: i.isAutonomous === 'true' || i.isAutonomous === true || i.title?.includes('[AUTONOMOUS]') || i.title?.includes('[AGENT'),
+      triggerSource: i.triggerSource || 'manual',
+      escalatedFromAgentId: i.escalatedFromAgentId
     };
   });
 }
@@ -120,6 +126,29 @@ const AGENT_COLORS: Record<string, string> = {
 
 function getAgentColor(agentId: string): string {
   return AGENT_COLORS[agentId] || 'bg-blue-500';
+}
+
+interface AgentActivity {
+  id: string;
+  eventType: 'detection' | 'escalation' | 'autonomous_action' | 'agent_to_agent' | 'approval_executed';
+  primaryAgentId: string;
+  primaryAgentName: string;
+  secondaryAgentId?: string;
+  secondaryAgentName?: string;
+  interventionId?: string;
+  summary: string;
+  details?: string;
+  createdAt: Date;
+}
+
+async function fetchAgentActivity(): Promise<AgentActivity[]> {
+  const response = await fetch('/api/agent-activity?limit=50');
+  if (!response.ok) return [];
+  const data = await response.json();
+  return (data.activities || []).map((a: any) => ({
+    ...a,
+    createdAt: new Date(a.createdAt)
+  }));
 }
 
 async function fetchDiscussions(): Promise<AgentMessage[]> {
@@ -171,6 +200,12 @@ export default function AgentCommandCenterPage() {
     queryKey: ['discussions'],
     queryFn: fetchDiscussions,
     refetchInterval: 5000
+  });
+
+  const { data: agentActivities = [], isLoading: isLoadingActivities } = useQuery({
+    queryKey: ['agent-activity'],
+    queryFn: fetchAgentActivity,
+    refetchInterval: 3000
   });
 
   const handleApproveIntervention = async (id: string) => {
@@ -452,13 +487,21 @@ export default function AgentCommandCenterPage() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="interventions" className="flex items-center gap-2 py-3" data-testid="tab-interventions">
               <AlertTriangle className="h-4 w-4" />
               Risk Interventions
               {pendingInterventions.length > 0 && (
                 <Badge className="bg-red-500 text-white text-xs ml-1">{pendingInterventions.length}</Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="flex items-center gap-2 py-3" data-testid="tab-activity">
+              <Activity className="h-4 w-4" />
+              Live Activity
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
             </TabsTrigger>
             <TabsTrigger value="discussion" className="flex items-center gap-2 py-3" data-testid="tab-discussion">
               <Users className="h-4 w-4" />
@@ -521,7 +564,18 @@ export default function AgentCommandCenterPage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <h4 className="font-semibold text-gray-900">{intervention.title}</h4>
+                              <h4 className="font-semibold text-gray-900">{intervention.title.replace('[AUTONOMOUS] ', '').replace('[AGENT→AGENT] ', '')}</h4>
+                              {intervention.isAutonomous && intervention.triggerSource === 'agent_escalation' ? (
+                                <Badge className="bg-purple-600 text-white animate-pulse">
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  AGENT→AGENT
+                                </Badge>
+                              ) : intervention.isAutonomous ? (
+                                <Badge className="bg-indigo-600 text-white animate-pulse">
+                                  <Bot className="h-3 w-3 mr-1" />
+                                  AUTONOMOUS
+                                </Badge>
+                              ) : null}
                               <Badge className={getSeverityColor(intervention.severity)}>{intervention.severity}</Badge>
                               <Badge variant="outline">{intervention.confidence}% confidence</Badge>
                               {intervention.status === 'approved' && (
@@ -590,6 +644,87 @@ export default function AgentCommandCenterPage() {
                       </motion.div>
                     ))}
                   </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-green-600" />
+                  Live Agent Activity Feed
+                  <span className="relative flex h-2 w-2 ml-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                </CardTitle>
+                <CardDescription>Real-time autonomous agent actions and detections</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingActivities ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+                    <span className="ml-2 text-gray-600">Loading activity feed...</span>
+                  </div>
+                ) : agentActivities.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="font-medium text-gray-600">No agent activity yet</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Use the Live Demo tab to trigger autonomous agent actions
+                    </p>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-3">
+                      {agentActivities.map((activity, index) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className={`flex items-start gap-3 p-3 rounded-lg border ${
+                            activity.eventType === 'detection' ? 'bg-amber-50 border-amber-200' :
+                            activity.eventType === 'autonomous_action' ? 'bg-green-50 border-green-200' :
+                            activity.eventType === 'agent_to_agent' ? 'bg-purple-50 border-purple-200' :
+                            'bg-blue-50 border-blue-200'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-full ${
+                            activity.eventType === 'detection' ? 'bg-amber-500' :
+                            activity.eventType === 'autonomous_action' ? 'bg-green-500' :
+                            activity.eventType === 'agent_to_agent' ? 'bg-purple-500' :
+                            'bg-blue-500'
+                          } text-white`}>
+                            {activity.eventType === 'detection' ? <AlertTriangle className="h-4 w-4" /> :
+                             activity.eventType === 'autonomous_action' ? <Zap className="h-4 w-4" /> :
+                             activity.eventType === 'agent_to_agent' ? <Users className="h-4 w-4" /> :
+                             <Bot className="h-4 w-4" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{activity.primaryAgentName}</span>
+                              {activity.secondaryAgentName && (
+                                <>
+                                  <ChevronRight className="h-3 w-3 text-gray-400" />
+                                  <span className="font-medium text-sm">{activity.secondaryAgentName}</span>
+                                </>
+                              )}
+                              <Badge variant="outline" className="text-xs capitalize">
+                                {activity.eventType.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-700">{activity.summary}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {activity.createdAt.toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 )}
               </CardContent>
             </Card>
