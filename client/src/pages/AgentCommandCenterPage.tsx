@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -182,6 +182,7 @@ const projects = [
 
 export default function AgentCommandCenterPage() {
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("interventions");
   const [selectedProject, setSelectedProject] = useState("all");
@@ -189,6 +190,21 @@ export default function AgentCommandCenterPage() {
   const [chatInput, setChatInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Handle deep-linking from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    const highlightParam = params.get('highlight');
+    if (highlightParam) {
+      setHighlightedId(highlightParam);
+      setActiveTab('interventions');
+      // Clear highlight after 5 seconds
+      const timer = setTimeout(() => setHighlightedId(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchString]);
 
   const { data: interventions = [], isLoading: isLoadingInterventions, error: interventionsError } = useQuery({
     queryKey: ['interventions'],
@@ -207,6 +223,19 @@ export default function AgentCommandCenterPage() {
     queryFn: fetchAgentActivity,
     refetchInterval: 3000
   });
+
+  // Scroll to highlighted intervention (runs after data loads)
+  useEffect(() => {
+    if (highlightedId && interventions.length > 0) {
+      // Small delay to ensure DOM is rendered
+      const timer = setTimeout(() => {
+        if (highlightRef.current) {
+          highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedId, interventions]);
 
   const handleApproveIntervention = async (id: string) => {
     setProcessingId(id);
@@ -553,9 +582,23 @@ export default function AgentCommandCenterPage() {
                     {filteredInterventions.map((intervention) => (
                       <motion.div
                         key={intervention.id}
+                        ref={highlightedId === intervention.id ? highlightRef : undefined}
                         initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="border rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow"
+                        animate={{ 
+                          opacity: 1, 
+                          y: 0,
+                          scale: highlightedId === intervention.id ? [1, 1.02, 1] : 1,
+                          boxShadow: highlightedId === intervention.id 
+                            ? ['0 0 0 0 rgba(99, 102, 241, 0)', '0 0 0 4px rgba(99, 102, 241, 0.4)', '0 0 0 0 rgba(99, 102, 241, 0)']
+                            : '0 1px 2px rgba(0, 0, 0, 0.05)'
+                        }}
+                        transition={{ 
+                          duration: highlightedId === intervention.id ? 1.5 : 0.3,
+                          repeat: highlightedId === intervention.id ? 2 : 0
+                        }}
+                        className={`border rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow ${
+                          highlightedId === intervention.id ? 'ring-2 ring-indigo-500 ring-offset-2' : ''
+                        }`}
                         data-testid={`intervention-${intervention.id}`}
                       >
                         <div className="flex items-start gap-4">

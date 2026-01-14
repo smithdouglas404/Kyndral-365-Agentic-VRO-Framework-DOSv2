@@ -131,8 +131,8 @@ export function FloatingAlertBanner() {
         clearTimeout(hideTimeoutRef.current);
       }
       setShowBanner(false);
-      // Navigate to Command Center
-      setLocation('/command-center');
+      // Navigate to Command Center with intervention ID for deep-linking
+      setLocation(`/command-center?highlight=${currentIntervention.id}`);
     }
   };
 

@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { startAgentSimulation } from "./agentSimulation";
 
 const app = express();
 const httpServer = createServer(app);
@@ -93,6 +94,11 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      
+      // Start continuous agent simulation (generates activity every 12 seconds)
+      startAgentSimulation(12000).catch(err => {
+        console.error("Failed to start agent simulation:", err);
+      });
     },
   );
 })();
