@@ -1071,7 +1071,7 @@ interface LiveAgentAlert {
   timestamp: Date;
 }
 
-// Alert banner with proper SPA navigation
+// Alert banner with proper SPA navigation - deep links to specific intervention
 function AlertBannerWithNavigation({ 
   liveAlert, 
   alertColors, 
@@ -1082,6 +1082,62 @@ function AlertBannerWithNavigation({
   projectId: string;
 }) {
   const [, setLocation] = useLocation();
+  const [interventionId, setInterventionId] = useState<string | null>(null);
+  
+  // Find a related intervention for deep-linking - use robust matching
+  useEffect(() => {
+    const findIntervention = async () => {
+      try {
+        const response = await fetch('/api/interventions');
+        if (response.ok) {
+          const interventions = await response.json();
+          // Map alert agent name to agent ID for matching
+          const agentIdMap: Record<string, string> = {
+            'integrated management': 'integrated',
+            'finops': 'finops',
+            'tmo': 'tmo',
+            'governance': 'governance',
+            'okr': 'planning',
+            'planning': 'planning',
+            'ocm': 'ocm',
+            'risk': 'risk'
+          };
+          const agentKey = liveAlert.agentName.toLowerCase().replace(/\s*agent\s*/gi, '').trim();
+          const expectedAgentId = agentIdMap[agentKey] || agentKey;
+          
+          // Priority-based matching
+          const exactProjectMatch = interventions.find((i: any) => i.projectId === projectId);
+          if (exactProjectMatch) {
+            setInterventionId(exactProjectMatch.id);
+            return;
+          }
+          
+          const agentMatch = interventions.find((i: any) => i.agentId === expectedAgentId);
+          if (agentMatch) {
+            setInterventionId(agentMatch.id);
+            return;
+          }
+          
+          // Fallback to most recent intervention for visibility
+          if (interventions.length > 0) {
+            setInterventionId(interventions[0].id);
+          }
+        }
+      } catch (e) {
+        // Fallback to no specific intervention
+      }
+    };
+    findIntervention();
+  }, [projectId, liveAlert.agentName]);
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (interventionId) {
+      setLocation(`/command-center?highlight=${interventionId}`);
+    } else {
+      setLocation('/command-center');
+    }
+  };
   
   return (
     <motion.div
@@ -1089,10 +1145,7 @@ function AlertBannerWithNavigation({
       initial={{ y: -30 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', bounce: 0.4 }}
-      onClick={(e) => {
-        e.stopPropagation();
-        setLocation('/command-center');
-      }}
+      onClick={handleClick}
       data-testid={`alert-${projectId}`}
     >
       <motion.div

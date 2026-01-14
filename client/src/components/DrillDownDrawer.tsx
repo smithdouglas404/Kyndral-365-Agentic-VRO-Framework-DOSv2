@@ -452,6 +452,47 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
+  const [relatedInterventionId, setRelatedInterventionId] = useState<string | null>(null);
+  
+  // Fetch interventions to find one related to this entity for deep-linking
+  useEffect(() => {
+    if (!isOpen || !entityId) return;
+    
+    const fetchRelatedIntervention = async () => {
+      try {
+        const response = await fetch('/api/interventions');
+        if (response.ok) {
+          const interventions = await response.json();
+          const entityLower = entityId.toLowerCase();
+          
+          // Find an intervention related to this entity with broad matching
+          const match = interventions.find((i: any) => {
+            // Match by project ID
+            if (i.projectId === entityId) return true;
+            // Match by project name
+            if (i.projectName?.toLowerCase().includes(entityLower)) return true;
+            if (entityLower.includes(i.projectName?.toLowerCase() || '')) return true;
+            // Match by description
+            if (i.description?.toLowerCase().includes(entityLower)) return true;
+            // Match by agent ID or name containing entity
+            if (i.agentId?.toLowerCase().includes(entityLower)) return true;
+            return false;
+          });
+          
+          if (match) {
+            setRelatedInterventionId(match.id);
+          } else {
+            // Fallback: use the most recent pending intervention for visibility
+            const pending = interventions.find((i: any) => i.status === 'pending');
+            setRelatedInterventionId(pending?.id || null);
+          }
+        }
+      } catch (e) {
+        setRelatedInterventionId(null);
+      }
+    };
+    fetchRelatedIntervention();
+  }, [isOpen, entityId]);
   
   // Fetch and subscribe to agent activities for the History tab
   useEffect(() => {
@@ -1646,7 +1687,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                             className="bg-purple-600 hover:bg-purple-700"
                             onClick={() => {
                               onClose();
-                              setLocation('/command-center');
+                              if (relatedInterventionId) {
+                                setLocation(`/command-center?highlight=${relatedInterventionId}`);
+                              } else {
+                                setLocation('/command-center');
+                              }
                             }}
                             data-testid="btn-view-command-center"
                           >
