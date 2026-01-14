@@ -165,7 +165,6 @@ export interface PageContext {
   entityId?: string;
   entityName?: string;
   businessUnit?: string;
-  entityType?: string; // 'Operating Segment' or 'Group Function' for division pages
 }
 
 export async function askPM(question: string, pageContext?: PageContext): Promise<string> {
@@ -191,9 +190,8 @@ ${generateImpactSummary(result)}`;
   let currentProjectContext = '';
   if (pageContext) {
     if (pageContext.pageType === 'division' && pageContext.entityName) {
-      const entityType = pageContext.entityType || 'Operating Segment';
-      contextHint = `\n\nCURRENT CONTEXT: The user is currently viewing the ${pageContext.entityName} ${entityType} page.
-- When the user says "this division", "this segment", "these projects", or refers to budget/resources without specifying which, they mean ${pageContext.entityName} projects specifically.
+      contextHint = `\n\nCURRENT CONTEXT: The user is currently viewing the ${pageContext.entityName} Group Function page.
+- When the user says "this division", "these projects", or refers to budget/resources without specifying which, they mean ${pageContext.entityName} projects specifically.
 - Still answer cross-portfolio questions when explicitly asked.`;
     } else if (pageContext.pageType === 'project' && pageContext.entityId) {
       const project = projectSummaries.find(p => p.id === pageContext.entityId);

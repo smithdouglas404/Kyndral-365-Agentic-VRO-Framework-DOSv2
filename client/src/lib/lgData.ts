@@ -23,7 +23,7 @@ export const lgCompanyOverview = {
 };
 
 // ============================================================================
-// OPERATING SEGMENTS - Each with KPIs, OKRs, and Projects
+// BUSINESS DIVISIONS - Each with KPIs, OKRs, and Projects
 // ============================================================================
 
 export interface DivisionData {
@@ -413,7 +413,7 @@ export const riskData = {
   threeLines: [
     { 
       line: 1, 
-      name: "Operating Segments", 
+      name: "Business Divisions", 
       role: "Risk taking within appetite parameters",
       accountable: "Managing risks in line with risk policies"
     },

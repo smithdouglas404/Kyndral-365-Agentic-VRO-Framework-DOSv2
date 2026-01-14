@@ -26,10 +26,6 @@ const legacySlugs: Record<string, string> = {
   'lgi': 'insurance'
 };
 
-// The 4 Operating Segments (profit-generating units) vs Group Functions (central services)
-// Only include the canonical division IDs from lgData.ts, NOT aliases
-const operatingSegmentIds = ['institutional-retirement', 'asset-management', 'retail', 'corporate'];
-
 // BU name mapping for filtering enriched projects (covers all division IDs)
 const buNameMapping: Record<string, string[]> = {
   'institutional-retirement': ['Institutional Retirement'],
@@ -74,10 +70,6 @@ export default function DivisionPage() {
   const division = divisions.find(d => d.id === resolvedId);
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
   
-  // Determine if this is an Operating Segment or Group Function
-  const isOperatingSegment = operatingSegmentIds.includes(resolvedId || '');
-  const entityTypeLabel = isOperatingSegment ? 'Operating Segment' : 'Group Function';
-  
   // Update page context for Ask PM
   useEffect(() => {
     if (division) {
@@ -85,11 +77,10 @@ export default function DivisionPage() {
         pageType: 'division',
         entityId: division.id,
         entityName: division.name,
-        breadcrumb: ['Dashboard', division.name],
-        entityType: entityTypeLabel
+        breadcrumb: ['Dashboard', division.name]
       });
     }
-  }, [division, setPageContext, entityTypeLabel]);
+  }, [division, setPageContext]);
   
   // Get enriched projects for this business unit (supports multiple BU mappings)
   const buNames = buNameMapping[resolvedId || ''] || buNameMapping['default'] || [];
@@ -117,7 +108,7 @@ export default function DivisionPage() {
     return (
       <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
         <Card className="p-8">
-          <h1 className="text-2xl font-bold text-[#C50B30]">Page not found</h1>
+          <h1 className="text-2xl font-bold text-[#C50B30]">Group Function not found</h1>
           <Link href="/dashboard">
             <Button className="mt-4" onClick={() => setLocation('/dashboard')} data-testid="link-back-dashboard">Return to Dashboard</Button>
           </Link>
@@ -197,7 +188,7 @@ export default function DivisionPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>{entityTypeLabel} Overview</CardTitle>
+                  <CardTitle>Group Function Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-700 mb-6" data-testid="text-description">{division.description}</p>
