@@ -32,6 +32,7 @@ const buNameMapping: Record<string, string[]> = {
   'asset-management': ['Asset Management'],
   'retail': ['Retail'],
   'corporate-investments': ['Corporate Investments'],
+  'corporate': ['Corporate Investments'],
   'capital': ['Corporate Investments'],
   'insurance': ['Risk & Compliance'],
   'fintech': ['Group Functions'],
