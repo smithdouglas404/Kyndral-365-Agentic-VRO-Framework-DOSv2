@@ -134,7 +134,7 @@ function getAgentColor(agentId: string): string {
 
 interface AgentActivity {
   id: string;
-  eventType: 'detection' | 'escalation' | 'autonomous_action' | 'agent_to_agent' | 'approval_executed' | 'cascade_response';
+  eventType: 'detection' | 'escalation' | 'autonomous_action' | 'agent_to_agent' | 'approval_executed';
   primaryAgentId: string;
   primaryAgentName: string;
   secondaryAgentId?: string;
@@ -795,19 +795,16 @@ export default function AgentCommandCenterPage() {
                         const eventColor = activity.eventType === 'detection' ? 'text-amber-400' :
                           activity.eventType === 'autonomous_action' ? 'text-green-400' :
                           activity.eventType === 'agent_to_agent' ? 'text-purple-400' :
-                          activity.eventType === 'cascade_response' ? 'text-orange-400' :
                           'text-blue-400';
                         
                         const eventIcon = activity.eventType === 'detection' ? '🔍' :
                           activity.eventType === 'autonomous_action' ? '⚡' :
                           activity.eventType === 'agent_to_agent' ? '↔️' :
-                          activity.eventType === 'cascade_response' ? '🔗' :
                           '🤖';
                         
                         const eventLabel = activity.eventType === 'detection' ? 'DETECT' :
                           activity.eventType === 'autonomous_action' ? 'ACTION' :
                           activity.eventType === 'agent_to_agent' ? 'A2A' :
-                          activity.eventType === 'cascade_response' ? 'CASCADE' :
                           'EVENT';
 
                         return (

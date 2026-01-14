@@ -153,19 +153,6 @@ function generateWorkflowActivity(): InsertAgentActivityLog {
 }
 
 const INTERVENTION_TYPES: string[] = ['budget', 'timeline', 'resource', 'quality', 'dependency'];
-
-// Interventions that REQUIRE user approval (human-in-the-loop)
-const APPROVAL_NEEDED_INTERVENTIONS = [
-  { type: 'budget', severity: 'high', title: 'Budget Reallocation Required', description: 'FinOps Agent detected a 15% budget variance. Recommending reallocation from contingency reserves.', action: 'Approve £250K reallocation from contingency to delivery', impact: 'Prevents 2-week delay on critical path' },
-  { type: 'timeline', severity: 'medium', title: 'Sprint Scope Adjustment Needed', description: 'TMO Agent identified velocity drop. Recommending scope reduction for next sprint.', action: 'Approve moving 3 stories to next sprint', impact: 'Maintains delivery quality and team morale' },
-  { type: 'resource', severity: 'high', title: 'Resource Conflict Resolution', description: 'Planning Agent found shared architect assigned to 3 concurrent projects at 150% capacity.', action: 'Approve temporary contractor for 6 weeks', impact: 'Unblocks all three projects' },
-  { type: 'dependency', severity: 'critical', title: 'Dependency Override Approval', description: 'Governance Agent detected blocked dependency on external API. Emergency workaround available.', action: 'Approve temporary mock integration', impact: 'Allows testing to proceed while API team resolves' },
-  { type: 'quality', severity: 'medium', title: 'Quality Gate Exception Request', description: 'Integrated Management Agent found test coverage at 72% vs 80% target. Feature is low-risk.', action: 'Approve exception with remediation plan', impact: 'Enables release while maintaining quality trajectory' },
-  { type: 'budget', severity: 'medium', title: 'Vendor Contract Extension', description: 'FinOps Agent identified expiring license. Renewal with 10% discount available.', action: 'Approve 2-year renewal at £180K', impact: 'Saves £40K vs annual renewal' },
-  { type: 'timeline', severity: 'high', title: 'Milestone Date Change Request', description: 'TMO Agent forecasting 1-week delay due to integration complexity.', action: 'Approve revised milestone date', impact: 'Maintains stakeholder trust with proactive communication' },
-  { type: 'resource', severity: 'low', title: 'Training Investment Approval', description: 'OCM Agent identified skill gap affecting velocity. Training course available.', action: 'Approve team training (3 days, £15K)', impact: 'Expected 20% velocity improvement post-training' },
-];
-
 const SELF_APPROVED_ACTIONS = [
   // Optimizations
   { action: 'Optimized cloud resource allocation', impact: 'Reduced monthly costs by 12%' },
@@ -190,144 +177,6 @@ const SELF_APPROVED_ACTIONS = [
 let simulationInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
 let selfApprovedCounter = 0;
-let approvalNeededCounter = 0;
-
-// Seed initial interventions when app starts - checks DB state not memory flag
-async function seedInitialInterventions(): Promise<void> {
-  try {
-    // Check if we have recent pending interventions (within last hour)
-    const existing = await storage.getInterventions();
-    const recentPending = existing.filter(i => {
-      const createdAt = new Date(i.createdAt || 0);
-      const hourAgo = Date.now() - 60 * 60 * 1000;
-      return i.status === 'pending' && createdAt.getTime() > hourAgo;
-    });
-    
-    if (recentPending.length >= 3) {
-      console.log(`[AgentSimulation] Found ${recentPending.length} recent pending interventions, skipping seed`);
-      return;
-    }
-    
-    console.log('[AgentSimulation] Seeding initial interventions (found only ' + recentPending.length + ' recent pending)...');
-  
-  // Create 3-4 interventions needing approval
-  const shuffled = [...APPROVAL_NEEDED_INTERVENTIONS].sort(() => Math.random() - 0.5);
-  const initialInterventions = shuffled.slice(0, 4);
-  
-  const agentMap: Record<string, typeof AGENTS[0]> = {
-    'budget': AGENTS.find(a => a.id === 'finops')!,
-    'timeline': AGENTS.find(a => a.id === 'tmo')!,
-    'resource': AGENTS.find(a => a.id === 'planning')!,
-    'quality': AGENTS.find(a => a.id === 'integrated')!,
-    'dependency': AGENTS.find(a => a.id === 'governance')!,
-  };
-  
-  for (const template of initialInterventions) {
-    const project = pickRandom(PROJECTS);
-    const agent = agentMap[template.type] || pickRandom(AGENTS);
-    
-    const intervention: InsertIntervention = {
-      type: template.type,
-      severity: template.severity as 'low' | 'medium' | 'high' | 'critical',
-      title: template.title,
-      description: template.description,
-      projectId: `proj-${project.toLowerCase().replace(/\s+/g, '-')}`,
-      projectName: project,
-      confidence: String((0.82 + Math.random() * 0.15).toFixed(2)),
-      suggestedAction: template.action,
-      impact: template.impact,
-      status: 'pending',
-      agentSource: agent.name,
-      isAutonomous: 'false',
-      selfApproved: 'false',
-      triggerSource: 'agent_detection',
-    };
-    
-    try {
-      await storage.createIntervention(intervention);
-      console.log(`[AgentSimulation] Seeded intervention: ${template.title}`);
-    } catch (error) {
-      console.error('[AgentSimulation] Error seeding intervention:', error);
-    }
-  }
-  
-  // Also create 2 self-approved actions to show agent activity
-  for (let i = 0; i < 2; i++) {
-    const agent = pickRandom(AGENTS.filter(a => a.autonomy === 'full'));
-    const project = pickRandom(PROJECTS);
-    const actionTemplate = pickRandom(SELF_APPROVED_ACTIONS);
-    
-    const intervention: InsertIntervention = {
-      type: pickRandom(INTERVENTION_TYPES),
-      severity: 'low',
-      title: `[Agent Self Approved] ${actionTemplate.action}`,
-      description: `${agent.name} autonomously executed this action based on continuous monitoring.`,
-      projectId: `proj-${project.toLowerCase().replace(/\s+/g, '-')}`,
-      projectName: project,
-      confidence: String((0.88 + Math.random() * 0.1).toFixed(2)),
-      suggestedAction: actionTemplate.action,
-      impact: actionTemplate.impact,
-      status: 'approved',
-      agentSource: agent.name,
-      isAutonomous: 'true',
-      selfApproved: 'true',
-      triggerSource: 'agent_detection',
-      approvedBy: `${agent.name} (Autonomous)`
-    };
-    
-    try {
-      await storage.createIntervention(intervention);
-    } catch (error) {
-      console.error('[AgentSimulation] Error seeding self-approved:', error);
-    }
-  }
-  
-  console.log('[AgentSimulation] Initial interventions seeded successfully');
-  } catch (error) {
-    console.error('[AgentSimulation] Error checking/seeding interventions:', error);
-  }
-}
-
-// Create an intervention that needs user approval
-async function maybeCreateApprovalNeededIntervention(): Promise<void> {
-  approvalNeededCounter++;
-  if (approvalNeededCounter % 8 !== 0) return; // Create one every 8 cycles (~1.5 minutes)
-  
-  const template = pickRandom(APPROVAL_NEEDED_INTERVENTIONS);
-  const project = pickRandom(PROJECTS);
-  const agentMap: Record<string, typeof AGENTS[0]> = {
-    'budget': AGENTS.find(a => a.id === 'finops')!,
-    'timeline': AGENTS.find(a => a.id === 'tmo')!,
-    'resource': AGENTS.find(a => a.id === 'planning')!,
-    'quality': AGENTS.find(a => a.id === 'integrated')!,
-    'dependency': AGENTS.find(a => a.id === 'governance')!,
-  };
-  const agent = agentMap[template.type] || pickRandom(AGENTS);
-  
-  const intervention: InsertIntervention = {
-    type: template.type,
-    severity: template.severity as 'low' | 'medium' | 'high' | 'critical',
-    title: template.title,
-    description: template.description,
-    projectId: `proj-${project.toLowerCase().replace(/\s+/g, '-')}`,
-    projectName: project,
-    confidence: String((0.82 + Math.random() * 0.15).toFixed(2)),
-    suggestedAction: template.action,
-    impact: template.impact,
-    status: 'pending',
-    agentSource: agent.name,
-    isAutonomous: 'false',
-    selfApproved: 'false',
-    triggerSource: 'agent_detection',
-  };
-  
-  try {
-    await storage.createIntervention(intervention);
-    console.log(`[AgentSimulation] Created approval-needed intervention: ${template.title}`);
-  } catch (error) {
-    console.error('[AgentSimulation] Error creating approval-needed intervention:', error);
-  }
-}
 
 async function maybeCreateSelfApprovedIntervention(): Promise<void> {
   selfApprovedCounter++;
@@ -373,9 +222,6 @@ export async function startAgentSimulation(intervalMs: number = 12000): Promise<
 
   isRunning = true;
   console.log(`[AgentSimulation] Starting continuous simulation (interval: ${intervalMs}ms)`);
-  
-  // Seed initial interventions when starting
-  await seedInitialInterventions();
 
   const generateActivity = async () => {
     try {
@@ -383,9 +229,8 @@ export async function startAgentSimulation(intervalMs: number = 12000): Promise<
       await storage.createAgentActivityLog(activity);
       console.log(`[AgentSimulation] Generated: ${activity.summary}`);
       
-      // Occasionally create interventions
+      // Occasionally create a self-approved intervention
       await maybeCreateSelfApprovedIntervention();
-      await maybeCreateApprovalNeededIntervention();
     } catch (error) {
       console.error('[AgentSimulation] Error generating activity:', error);
     }
@@ -394,90 +239,6 @@ export async function startAgentSimulation(intervalMs: number = 12000): Promise<
   await generateActivity();
   
   simulationInterval = setInterval(generateActivity, intervalMs);
-}
-
-// Agent cascade - triggered when user approves an intervention
-export async function triggerAgentCascade(approvedIntervention: any): Promise<void> {
-  console.log(`[AgentCascade] Triggered by approval of: ${approvedIntervention.title}`);
-  
-  // Determine which agents should respond based on intervention type
-  const cascadeAgents: string[] = [];
-  
-  switch (approvedIntervention.type) {
-    case 'budget':
-      cascadeAgents.push('tmo', 'planning'); // TMO updates forecasts, Planning adjusts capacity
-      break;
-    case 'timeline':
-      cascadeAgents.push('finops', 'ocm'); // FinOps recalculates costs, OCM notifies stakeholders
-      break;
-    case 'resource':
-      cascadeAgents.push('tmo', 'finops'); // TMO adjusts velocity, FinOps updates budget
-      break;
-    case 'dependency':
-      cascadeAgents.push('planning', 'governance'); // Planning updates roadmap, Governance logs exception
-      break;
-    case 'quality':
-      cascadeAgents.push('governance', 'ocm'); // Governance tracks exception, OCM communicates
-      break;
-    default:
-      cascadeAgents.push('planning');
-  }
-  
-  // Create cascade activity events
-  for (const agentId of cascadeAgents) {
-    const agent = AGENTS.find(a => a.id === agentId);
-    if (!agent) continue;
-    
-    const cascadeActions = [
-      `${agent.name} acknowledged approval and updating forecasts`,
-      `${agent.name} recalculating projections based on approved change`,
-      `${agent.name} notifying downstream dependencies of update`,
-      `${agent.name} updating dashboards with new baseline`,
-    ];
-    
-    const activity: InsertAgentActivityLog = {
-      eventType: 'cascade_response',
-      primaryAgentId: agent.id,
-      primaryAgentName: agent.name,
-      secondaryAgentId: approvedIntervention.agentSource?.toLowerCase().replace(/\s+agent$/i, ''),
-      secondaryAgentName: approvedIntervention.agentSource,
-      summary: pickRandom(cascadeActions),
-    };
-    
-    try {
-      await storage.createAgentActivityLog(activity);
-      console.log(`[AgentCascade] ${agent.name} responding to approval`);
-    } catch (error) {
-      console.error('[AgentCascade] Error creating cascade activity:', error);
-    }
-  }
-  
-  // Create a follow-up self-approved action showing cascade completion
-  const followUpAgent = AGENTS.find(a => a.id === cascadeAgents[0]) || AGENTS[0];
-  const followUpIntervention: InsertIntervention = {
-    type: approvedIntervention.type,
-    severity: 'low',
-    title: `[Cascade Complete] Follow-up to: ${approvedIntervention.title}`,
-    description: `${followUpAgent.name} completed cascade actions following your approval.`,
-    projectId: approvedIntervention.projectId,
-    projectName: approvedIntervention.projectName,
-    confidence: '0.95',
-    suggestedAction: 'Cascade actions completed - no action required',
-    impact: 'All affected systems updated successfully',
-    status: 'approved',
-    agentSource: followUpAgent.name,
-    isAutonomous: 'true',
-    selfApproved: 'true',
-    triggerSource: 'cascade_response',
-    approvedBy: `${followUpAgent.name} (Auto-cascade)`
-  };
-  
-  try {
-    await storage.createIntervention(followUpIntervention);
-    console.log('[AgentCascade] Created cascade completion intervention');
-  } catch (error) {
-    console.error('[AgentCascade] Error creating cascade intervention:', error);
-  }
 }
 
 export function stopAgentSimulation(): void {
