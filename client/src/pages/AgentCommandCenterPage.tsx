@@ -346,8 +346,10 @@ export default function AgentCommandCenterPage() {
   
   const pendingInterventions = interventions.filter(i => i.status === 'pending');
   const approvedCount = interventions.filter(i => i.status === 'approved').length;
-  const criticalCount = interventions.filter(i => i.severity === 'critical' && i.status === 'pending').length;
-  const highCount = interventions.filter(i => i.severity === 'high' && i.status === 'pending').length;
+  const criticalCount = interventions.filter(i => i.severity === 'critical').length;
+  const highCount = interventions.filter(i => i.severity === 'high').length;
+  const mediumCount = interventions.filter(i => i.severity === 'medium').length;
+  const lowCount = interventions.filter(i => i.severity === 'low').length;
   
   const filteredInterventions = interventions
     .filter(i => selectedProject === 'all' || i.projectId === selectedProject)
