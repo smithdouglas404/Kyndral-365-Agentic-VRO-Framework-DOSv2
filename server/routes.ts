@@ -5,6 +5,7 @@ import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } 
 import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
 import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";
+import { triggerAgentCascade } from "./agentSimulation";
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
@@ -626,6 +627,14 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       }
       const intervention = await storage.updateInterventionStatus(interventionId, 'approved', userId);
       console.log(`Intervention ${interventionId} approved`);
+      
+      // Trigger agent cascade - other agents respond to the approval
+      if (intervention) {
+        triggerAgentCascade(intervention).catch(err => {
+          console.error('Agent cascade error:', err);
+        });
+      }
+      
       res.json({ 
         success: true, 
         intervention,
