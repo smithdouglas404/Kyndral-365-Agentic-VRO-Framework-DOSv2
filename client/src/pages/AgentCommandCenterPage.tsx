@@ -554,6 +554,44 @@ export default function AgentCommandCenterPage() {
                   Autonomous Agent Actions
                 </CardTitle>
                 <CardDescription>Agent-driven decisions, optimizations, communications, and proactive measures</CardDescription>
+                
+                {/* Quick Filter Buttons */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <Button 
+                    variant={statusFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('all')}
+                    className={statusFilter === 'all' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                  >
+                    All Actions ({interventions.length})
+                  </Button>
+                  <Button 
+                    variant={statusFilter === 'pending' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('pending')}
+                    className={statusFilter === 'pending' ? 'bg-red-600 hover:bg-red-700' : 'border-red-300 text-red-700 hover:bg-red-50'}
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    Needs Decision ({pendingInterventions.length})
+                  </Button>
+                  <Button 
+                    variant={statusFilter === 'approved' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('approved')}
+                    className={statusFilter === 'approved' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                    Completed ({interventions.filter(i => i.status === 'approved').length})
+                  </Button>
+                  <Button 
+                    variant={statusFilter === 'dismissed' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('dismissed')}
+                    className={statusFilter === 'dismissed' ? 'bg-gray-600 hover:bg-gray-700' : ''}
+                  >
+                    Dismissed ({interventions.filter(i => i.status === 'dismissed').length})
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {isLoadingInterventions ? (
