@@ -501,20 +501,20 @@ export default function AgentCommandCenterPage() {
         
         {(statusFilter !== 'all' || severityFilter !== 'all') && (
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm text-gray-600">Filtering by:</span>
+            <span className="text-sm text-gray-600">Currently showing:</span>
             {severityFilter !== 'all' && (
               <Badge variant="outline" className="capitalize">{severityFilter} severity</Badge>
             )}
             {statusFilter !== 'all' && (
-              <Badge variant="outline" className="capitalize">{statusFilter} status</Badge>
+              <Badge variant="outline" className="capitalize">{statusFilter} items</Badge>
             )}
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
               onClick={() => { setStatusFilter('all'); setSeverityFilter('all'); }}
               className="text-xs"
             >
-              Clear filters
+              ← Show All
             </Button>
           </div>
         )}
