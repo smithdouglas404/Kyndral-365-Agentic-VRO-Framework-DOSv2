@@ -12,6 +12,7 @@ export interface ProactiveAction {
   impact: string;
   urgency: "immediate" | "this-week" | "this-month";
   type: "mitigate" | "accelerate" | "investigate" | "escalate";
+  isAutonomous?: boolean;
 }
 
 export interface AISignal {
