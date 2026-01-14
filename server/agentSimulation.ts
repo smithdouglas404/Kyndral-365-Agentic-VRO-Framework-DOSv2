@@ -191,14 +191,24 @@ let simulationInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
 let selfApprovedCounter = 0;
 let approvalNeededCounter = 0;
-let hasSeededInitialInterventions = false;
 
-// Seed initial interventions when app starts
+// Seed initial interventions when app starts - checks DB state not memory flag
 async function seedInitialInterventions(): Promise<void> {
-  if (hasSeededInitialInterventions) return;
-  hasSeededInitialInterventions = true;
-  
-  console.log('[AgentSimulation] Seeding initial interventions...');
+  try {
+    // Check if we have recent pending interventions (within last hour)
+    const existing = await storage.getInterventions();
+    const recentPending = existing.filter(i => {
+      const createdAt = new Date(i.createdAt || 0);
+      const hourAgo = Date.now() - 60 * 60 * 1000;
+      return i.status === 'pending' && createdAt.getTime() > hourAgo;
+    });
+    
+    if (recentPending.length >= 3) {
+      console.log(`[AgentSimulation] Found ${recentPending.length} recent pending interventions, skipping seed`);
+      return;
+    }
+    
+    console.log('[AgentSimulation] Seeding initial interventions (found only ' + recentPending.length + ' recent pending)...');
   
   // Create 3-4 interventions needing approval
   const shuffled = [...APPROVAL_NEEDED_INTERVENTIONS].sort(() => Math.random() - 0.5);
@@ -273,6 +283,9 @@ async function seedInitialInterventions(): Promise<void> {
   }
   
   console.log('[AgentSimulation] Initial interventions seeded successfully');
+  } catch (error) {
+    console.error('[AgentSimulation] Error checking/seeding interventions:', error);
+  }
 }
 
 // Create an intervention that needs user approval
