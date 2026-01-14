@@ -178,7 +178,7 @@ export default function DivisionPage() {
           <TabsList className="bg-white shadow-sm">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="outcomes" data-testid="tab-outcomes">Outcomes & Alignment</TabsTrigger>
-            <TabsTrigger value="projects" data-testid="tab-projects">Projects</TabsTrigger>
+            <TabsTrigger value="projects" data-testid="tab-projects">Projects ({divisionProjects.length})</TabsTrigger>
             <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
             <TabsTrigger value="alerts" data-testid="tab-alerts">AI Alerts ({divisionAlerts.length})</TabsTrigger>
           </TabsList>
