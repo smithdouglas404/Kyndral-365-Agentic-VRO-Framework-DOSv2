@@ -522,10 +522,10 @@ export default function AgentCommandCenterPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="interventions" className="flex items-center gap-2 py-3" data-testid="tab-interventions">
-              <AlertTriangle className="h-4 w-4" />
-              Risk Interventions
+              <Sparkles className="h-4 w-4" />
+              Agent Actions
               {pendingInterventions.length > 0 && (
-                <Badge className="bg-red-500 text-white text-xs ml-1">{pendingInterventions.length}</Badge>
+                <Badge className="bg-purple-500 text-white text-xs ml-1">{pendingInterventions.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="activity" className="flex items-center gap-2 py-3" data-testid="tab-activity">
@@ -550,10 +550,10 @@ export default function AgentCommandCenterPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-purple-600" />
-                  Proactive Risk Interventions
+                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  Autonomous Agent Actions
                 </CardTitle>
-                <CardDescription>AI-detected issues requiring your decision</CardDescription>
+                <CardDescription>Agent-driven decisions, optimizations, communications, and proactive measures</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingInterventions ? (
@@ -572,13 +572,13 @@ export default function AgentCommandCenterPage() {
                     <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-500" />
                     <p className="font-medium text-lg">
                       {statusFilter !== 'all' || severityFilter !== 'all' 
-                        ? 'No interventions match your filters' 
-                        : 'No pending interventions'}
+                        ? 'No actions match your filters' 
+                        : 'No pending actions'}
                     </p>
                     <p className="text-sm">
                       {statusFilter !== 'all' || severityFilter !== 'all' 
                         ? 'Try adjusting your filter criteria' 
-                        : 'All risks are being managed autonomously'}
+                        : 'Agents are working smoothly in the background'}
                     </p>
                   </div>
                 ) : (

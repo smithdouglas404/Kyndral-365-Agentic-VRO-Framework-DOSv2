@@ -71,6 +71,26 @@ const WORKFLOW_TEMPLATES = {
     '{agent} applied {action} to {project}',
     '{agent} completed {action} autonomously',
   ],
+  // Positive communications and celebrations
+  celebration: [
+    '{agent} sent milestone celebration to team: {project} on track!',
+    '{agent} recognized team achievement in {project}',
+    '{agent} shared success story from {project} with stakeholders',
+    '{agent} announced early delivery forecast for {project}',
+  ],
+  communication: [
+    '{agent} scheduled alignment meeting with {target}',
+    '{agent} prepared executive summary for {project}',
+    '{agent} shared best practices with {target}',
+    '{agent} coordinated retrospective for {project}',
+    '{agent} distributed weekly progress report',
+  ],
+  optimization: [
+    '{agent} optimized resource allocation for {project}',
+    '{agent} automated {count} routine tasks',
+    '{agent} streamlined workflow between teams',
+    '{agent} improved {metric} by consolidating processes',
+  ],
 };
 
 const METRICS = ['CPI', 'SPI', 'velocity', 'test coverage', 'defect rate', 'resource utilization', 'burn rate'];
@@ -134,12 +154,24 @@ function generateWorkflowActivity(): InsertAgentActivityLog {
 
 const INTERVENTION_TYPES: string[] = ['budget', 'timeline', 'resource', 'quality', 'dependency'];
 const SELF_APPROVED_ACTIONS = [
+  // Optimizations
   { action: 'Optimized cloud resource allocation', impact: 'Reduced monthly costs by 12%' },
   { action: 'Rebalanced sprint capacity across teams', impact: 'Prevented 2-day delay on critical path' },
   { action: 'Automated test coverage expansion', impact: 'Increased coverage from 68% to 82%' },
   { action: 'Consolidated redundant meetings', impact: 'Recovered 6 hours/week team time' },
   { action: 'Applied automated dependency resolution', impact: 'Unblocked 3 downstream teams' },
+  // Positive Communications & Celebrations
+  { action: 'Scheduled stakeholder alignment meeting', impact: 'Coordinated 5 key stakeholders for next sprint' },
+  { action: 'Sent milestone celebration update to team', impact: 'Recognized on-time delivery of Phase 2' },
+  { action: 'Notified leadership of early delivery forecast', impact: 'Project tracking 2 weeks ahead of schedule' },
+  { action: 'Shared best practices across teams', impact: 'Distributed learnings from successful integration' },
+  { action: 'Generated executive status summary', impact: 'Prepared board-ready progress report' },
+  { action: 'Coordinated cross-team retrospective', impact: 'Gathered feedback from 3 delivery teams' },
+  { action: 'Arranged team recognition ceremony', impact: 'Celebrated 100% sprint completion' },
+  // Proactive Measures
   { action: 'Initiated proactive risk mitigation', impact: 'Reduced risk exposure by 25%' },
+  { action: 'Pre-emptively escalated timeline concern', impact: 'Gained early approval for contingency plan' },
+  { action: 'Automated compliance documentation', impact: 'Updated TCFD/SFDR records ahead of audit' },
 ];
 
 let simulationInterval: NodeJS.Timeout | null = null;
