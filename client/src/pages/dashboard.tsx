@@ -537,15 +537,15 @@ function DashboardContent() {
             {/* AI Executive Intelligence - Portfolio-level insights */}
             <AIExecutiveInsights />
 
-            {/* Group Function Overview */}
+            {/* Operating Segments & Group Function Overview */}
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-purple-600" />
-                  Group Function Overview
+                  Operating Segments & Group Function Overview
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Click any Group Function to view detailed projects and metrics
+                  Click any Operating Segment to view detailed projects and metrics
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
