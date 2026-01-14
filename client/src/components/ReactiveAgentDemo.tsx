@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { toast } from "sonner";
 import { apiRequest } from "@/lib/queryClient";
 
 interface MetricSimulator {
@@ -201,9 +202,17 @@ export function ReactiveAgentDemo() {
 
   const handleTriggerAll = () => {
     const metricsSnapshot = [...metrics];
+    toast.info(`Triggering ${metricsSnapshot.length} metric simulations...`, {
+      description: 'Watch the Command Center for agent interventions'
+    });
     metricsSnapshot.forEach((metric, index) => {
       setTimeout(() => handleTriggerSimulation(metric), index * 800);
     });
+    setTimeout(() => {
+      toast.success('All metric simulations completed', {
+        description: 'Check Agent Actions for new interventions'
+      });
+    }, metricsSnapshot.length * 800 + 500);
   };
 
   return (

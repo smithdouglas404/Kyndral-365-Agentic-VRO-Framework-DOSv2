@@ -1071,6 +1071,43 @@ interface LiveAgentAlert {
   timestamp: Date;
 }
 
+// Alert banner with proper SPA navigation
+function AlertBannerWithNavigation({ 
+  liveAlert, 
+  alertColors, 
+  projectId 
+}: { 
+  liveAlert: LiveAgentAlert; 
+  alertColors: Record<string, { bg: string; border: string; text: string }>;
+  projectId: string;
+}) {
+  const [, setLocation] = useLocation();
+  
+  return (
+    <motion.div
+      className={`absolute top-0 left-0 right-0 px-3 py-1.5 ${alertColors[liveAlert.type].bg} text-white text-xs flex items-center gap-2 z-10 cursor-pointer hover:brightness-110`}
+      initial={{ y: -30 }}
+      animate={{ y: 0 }}
+      transition={{ type: 'spring', bounce: 0.4 }}
+      onClick={(e) => {
+        e.stopPropagation();
+        setLocation('/command-center');
+      }}
+      data-testid={`alert-${projectId}`}
+    >
+      <motion.div
+        animate={{ scale: [1, 1.3, 1] }}
+        transition={{ duration: 0.5, repeat: Infinity }}
+      >
+        <Sparkles size={12} />
+      </motion.div>
+      <span className="font-medium">{liveAlert.agentName}:</span>
+      <span className="truncate flex-1">{liveAlert.message}</span>
+      <span className="text-[10px] opacity-75 hover:opacity-100">View in Command Center →</span>
+    </motion.div>
+  );
+}
+
 function UnifiedProjectCard({ project, onViewDetails, liveAlert }: { project: UnifiedProject; onViewDetails: () => void; liveAlert?: LiveAgentAlert }) {
   const statusColors = {
     green: "#00843D",
@@ -1111,23 +1148,13 @@ function UnifiedProjectCard({ project, onViewDetails, liveAlert }: { project: Un
         data-testid={`card-unified-${project.id}`}
         onClick={onViewDetails}
       >
-        {/* Live Alert Banner */}
+        {/* Live Alert Banner - clickable to Command Center */}
         {liveAlert && (
-          <motion.div
-            className={`absolute top-0 left-0 right-0 px-3 py-1.5 ${alertColors[liveAlert.type].bg} text-white text-xs flex items-center gap-2 z-10`}
-            initial={{ y: -30 }}
-            animate={{ y: 0 }}
-            transition={{ type: 'spring', bounce: 0.4 }}
-          >
-            <motion.div
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ duration: 0.5, repeat: Infinity }}
-            >
-              <Sparkles size={12} />
-            </motion.div>
-            <span className="font-medium">{liveAlert.agentName}:</span>
-            <span className="truncate">{liveAlert.message}</span>
-          </motion.div>
+          <AlertBannerWithNavigation
+            liveAlert={liveAlert}
+            alertColors={alertColors}
+            projectId={project.id}
+          />
         )}
         
         

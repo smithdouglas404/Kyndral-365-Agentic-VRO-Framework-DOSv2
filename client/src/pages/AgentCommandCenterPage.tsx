@@ -48,7 +48,7 @@ const LG = {
 interface RiskIntervention {
   id: string;
   type: 'dependency' | 'budget' | 'timeline' | 'resource' | 'quality';
-  severity: 'critical' | 'high' | 'medium';
+  severity: 'critical' | 'high' | 'medium' | 'low';
   title: string;
   description: string;
   projectId: string;
@@ -60,8 +60,10 @@ interface RiskIntervention {
   status: 'pending' | 'approved' | 'dismissed' | 'executing';
   agentSource: string;
   isAutonomous: boolean;
+  selfApproved: boolean;
   triggerSource: 'metric_breach' | 'agent_detection' | 'agent_escalation' | 'manual';
   escalatedFromAgentId?: string;
+  approvedBy?: string;
 }
 
 interface AgentMessage {
@@ -105,8 +107,10 @@ async function fetchInterventions(): Promise<RiskIntervention[]> {
       status: i.status || 'pending',
       agentSource: i.agentSource || 'System',
       isAutonomous: i.isAutonomous === 'true' || i.isAutonomous === true || i.title?.includes('[AUTONOMOUS]') || i.title?.includes('[AGENT'),
+      selfApproved: i.selfApproved === 'true' || i.selfApproved === true || i.title?.includes('[Agent Self Approved]'),
       triggerSource: i.triggerSource || 'manual',
-      escalatedFromAgentId: i.escalatedFromAgentId
+      escalatedFromAgentId: i.escalatedFromAgentId,
+      approvedBy: i.approvedBy
     };
   });
 }
@@ -350,11 +354,11 @@ export default function AgentCommandCenterPage() {
     .filter(i => statusFilter === 'all' || i.status === statusFilter)
     .filter(i => severityFilter === 'all' || i.severity === severityFilter)
     .sort((a, b) => {
-      const statusOrder = { pending: 0, executing: 1, approved: 2, dismissed: 3 };
-      const severityOrder = { critical: 0, high: 1, medium: 2 };
-      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+      const statusOrder: Record<string, number> = { pending: 0, executing: 1, approved: 2, dismissed: 3 };
+      const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+      const statusDiff = (statusOrder[a.status] || 9) - (statusOrder[b.status] || 9);
       if (statusDiff !== 0) return statusDiff;
-      const severityDiff = severityOrder[a.severity] - severityOrder[b.severity];
+      const severityDiff = (severityOrder[a.severity] || 9) - (severityOrder[b.severity] || 9);
       if (severityDiff !== 0) return severityDiff;
       return b.timestamp.getTime() - a.timestamp.getTime();
     });
@@ -607,8 +611,13 @@ export default function AgentCommandCenterPage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <h4 className="font-semibold text-gray-900">{intervention.title.replace('[AUTONOMOUS] ', '').replace('[AGENT→AGENT] ', '')}</h4>
-                              {intervention.isAutonomous && intervention.triggerSource === 'agent_escalation' ? (
+                              <h4 className="font-semibold text-gray-900">{intervention.title.replace('[AUTONOMOUS] ', '').replace('[AGENT→AGENT] ', '').replace('[Agent Self Approved] ', '')}</h4>
+                              {intervention.selfApproved ? (
+                                <Badge className="bg-emerald-600 text-white">
+                                  <Bot className="h-3 w-3 mr-1" />
+                                  Agent Self Approved
+                                </Badge>
+                              ) : intervention.isAutonomous && intervention.triggerSource === 'agent_escalation' ? (
                                 <Badge className="bg-purple-600 text-white animate-pulse">
                                   <Zap className="h-3 w-3 mr-1" />
                                   AGENT→AGENT
@@ -621,7 +630,7 @@ export default function AgentCommandCenterPage() {
                               ) : null}
                               <Badge className={getSeverityColor(intervention.severity)}>{intervention.severity}</Badge>
                               <Badge variant="outline">{intervention.confidence}% confidence</Badge>
-                              {intervention.status === 'approved' && (
+                              {intervention.status === 'approved' && !intervention.selfApproved && (
                                 <Badge className="bg-green-100 text-green-800 border-green-300">
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
                                   Approved
@@ -640,6 +649,12 @@ export default function AgentCommandCenterPage() {
                               <span>Source: {intervention.agentSource}</span>
                               <span className="mx-2">•</span>
                               <span>{intervention.projectName}</span>
+                              {intervention.selfApproved && intervention.approvedBy && (
+                                <>
+                                  <span className="mx-2">•</span>
+                                  <span className="text-emerald-600 font-medium">Executed by: {intervention.approvedBy}</span>
+                                </>
+                              )}
                             </div>
                             
                             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">

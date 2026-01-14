@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight, Sparkles, FileText, Link2, ExternalLink, History, Database, Activity, GitBranch } from 'lucide-react';
+import { X, Clock, AlertTriangle, CheckCircle2, TrendingUp, Users, Zap, Brain, ChevronRight, Sparkles, FileText, Link2, ExternalLink, History, Database, Activity, GitBranch, Bot, ArrowRight, MessageSquare } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -448,6 +449,7 @@ function RegistryContentRenderer({ content, onNavigate }: RegistryContentProps) 
 }
 
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO', onNavigate }: DrillDownDrawerProps) {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
   
@@ -1625,36 +1627,122 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                 </TabsContent>
 
                 <TabsContent value="agents">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Users size={16} className="text-purple-500" />
-                        Connected Agents
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {displayData.relatedAgents.map((agentId) => (
-                          <div
-                            key={agentId}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                            data-testid={`agent-link-${agentId}`}
-                            onClick={() => {
-                              if (onNavigate) {
-                                onNavigate('agent', agentId);
-                              }
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-3 h-3 rounded-full ${agentColors[agentId]}`} />
-                              <span className="font-medium">{agentNames[agentId]}</span>
+                  <div className="space-y-4">
+                    {/* View in Command Center link */}
+                    <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                              <Bot size={20} className="text-purple-600" />
                             </div>
-                            <Badge variant="outline">Active</Badge>
+                            <div>
+                              <p className="font-medium text-purple-900">Agent Command Center</p>
+                              <p className="text-xs text-purple-600">View interventions and agent activity</p>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                          <Button 
+                            size="sm" 
+                            className="bg-purple-600 hover:bg-purple-700"
+                            onClick={() => {
+                              onClose();
+                              setLocation('/command-center');
+                            }}
+                            data-testid="btn-view-command-center"
+                          >
+                            View <ArrowRight size={14} className="ml-1" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Agent-to-Agent Communication Trail */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <MessageSquare size={16} className="text-indigo-500" />
+                          Agent Communication Trail
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {/* Simulated agent communication based on related agents */}
+                          {displayData.relatedAgents.slice(0, 2).map((agentId, index) => {
+                            const nextAgent = displayData.relatedAgents[(index + 1) % displayData.relatedAgents.length];
+                            return (
+                              <div key={`comm-${agentId}-${index}`} className="relative pl-4 border-l-2 border-indigo-200">
+                                <div className="text-xs text-gray-500 mb-1">{new Date(Date.now() - (index * 3600000)).toLocaleTimeString()}</div>
+                                <div className="flex items-start gap-2">
+                                  <div className={`w-2 h-2 rounded-full mt-1.5 ${agentColors[agentId]}`} />
+                                  <div>
+                                    <span className="font-medium text-sm">{agentNames[agentId]}</span>
+                                    <span className="text-sm text-gray-600"> → </span>
+                                    <span className="font-medium text-sm">{agentNames[nextAgent]}</span>
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                      {index === 0 
+                                        ? `Requested review of ${entityType} status and dependencies`
+                                        : `Confirmed analysis complete, escalating to governance`
+                                      }
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {displayData.relatedAgents.length > 0 && (
+                            <div className="relative pl-4 border-l-2 border-green-200">
+                              <div className="text-xs text-gray-500 mb-1">{new Date(Date.now() - 7200000).toLocaleTimeString()}</div>
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 rounded-full mt-1.5 bg-green-500" />
+                                <div>
+                                  <span className="font-medium text-sm text-green-700">System</span>
+                                  <p className="text-xs text-gray-500 mt-0.5">
+                                    Action approved and executed autonomously
+                                  </p>
+                                  <Badge className="mt-1 bg-emerald-100 text-emerald-700 text-[10px]">
+                                    <CheckCircle2 size={10} className="mr-1" />
+                                    Completed
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Connected Agents */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Users size={16} className="text-purple-500" />
+                          Connected Agents
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {displayData.relatedAgents.map((agentId) => (
+                            <div
+                              key={agentId}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                              data-testid={`agent-link-${agentId}`}
+                              onClick={() => {
+                                if (onNavigate) {
+                                  onNavigate('agent', agentId);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${agentColors[agentId]}`} />
+                                <span className="font-medium">{agentNames[agentId]}</span>
+                              </div>
+                              <Badge variant="outline">Active</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="history">

@@ -216,6 +216,7 @@ export const interventions = pgTable("interventions", {
   status: text("status").default("pending"), // pending, approved, dismissed, executing
   agentSource: text("agent_source").notNull(), // Which agent detected this
   isAutonomous: text("is_autonomous").default("false"), // true if created by agent without human input
+  selfApproved: text("self_approved").default("false"), // true if agent self-approved (full autonomy)
   triggerSource: text("trigger_source").default("manual"), // metric_breach, agent_detection, agent_escalation, manual
   escalatedFromAgentId: text("escalated_from_agent_id"), // If escalated from another agent
   approvedBy: text("approved_by"),

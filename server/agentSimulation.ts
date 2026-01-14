@@ -1,14 +1,14 @@
 import { storage } from "./storage";
-import type { InsertAgentActivityLog } from "@shared/schema";
+import type { InsertAgentActivityLog, InsertIntervention } from "@shared/schema";
 
 const AGENTS = [
-  { id: 'finops', name: 'FinOps Agent', focus: 'budget, cost, CPI, spending, financial' },
-  { id: 'tmo', name: 'TMO Agent', focus: 'schedule, timeline, SPI, velocity, sprints' },
-  { id: 'governance', name: 'Governance Agent', focus: 'compliance, approvals, escalations, policies' },
-  { id: 'planning', name: 'Planning Agent', focus: 'dependencies, roadmap, capacity, resources' },
-  { id: 'ocm', name: 'OCM Agent', focus: 'change management, adoption, training, communication' },
-  { id: 'integrated', name: 'Integrated Management Agent', focus: 'quality, testing, defects, coverage' },
-  { id: 'risk', name: 'Risk Agent', focus: 'risks, mitigation, contingency, threats' },
+  { id: 'finops', name: 'FinOps Agent', focus: 'budget, cost, CPI, spending, financial', autonomy: 'full' },
+  { id: 'tmo', name: 'TMO Agent', focus: 'schedule, timeline, SPI, velocity, sprints', autonomy: 'full' },
+  { id: 'governance', name: 'Governance Agent', focus: 'compliance, approvals, escalations, policies', autonomy: 'supervised' },
+  { id: 'planning', name: 'Planning Agent', focus: 'dependencies, roadmap, capacity, resources', autonomy: 'supervised' },
+  { id: 'ocm', name: 'OCM Agent', focus: 'change management, adoption, training, communication', autonomy: 'full' },
+  { id: 'integrated', name: 'Integrated Management Agent', focus: 'quality, testing, defects, coverage', autonomy: 'full' },
+  { id: 'risk', name: 'Risk Agent', focus: 'risks, mitigation, contingency, threats', autonomy: 'supervised' },
 ];
 
 const PROJECTS = [
@@ -132,8 +132,55 @@ function generateWorkflowActivity(): InsertAgentActivityLog {
   };
 }
 
+const INTERVENTION_TYPES: string[] = ['budget', 'timeline', 'resource', 'quality', 'dependency'];
+const SELF_APPROVED_ACTIONS = [
+  { action: 'Optimized cloud resource allocation', impact: 'Reduced monthly costs by 12%' },
+  { action: 'Rebalanced sprint capacity across teams', impact: 'Prevented 2-day delay on critical path' },
+  { action: 'Automated test coverage expansion', impact: 'Increased coverage from 68% to 82%' },
+  { action: 'Consolidated redundant meetings', impact: 'Recovered 6 hours/week team time' },
+  { action: 'Applied automated dependency resolution', impact: 'Unblocked 3 downstream teams' },
+  { action: 'Initiated proactive risk mitigation', impact: 'Reduced risk exposure by 25%' },
+];
+
 let simulationInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
+let selfApprovedCounter = 0;
+
+async function maybeCreateSelfApprovedIntervention(): Promise<void> {
+  selfApprovedCounter++;
+  if (selfApprovedCounter % 5 !== 0) return; // Create one every 5 cycles (every minute)
+  
+  const fullAutonomyAgents = AGENTS.filter(a => a.autonomy === 'full');
+  const agent = pickRandom(fullAutonomyAgents);
+  const project = pickRandom(PROJECTS);
+  const actionTemplate = pickRandom(SELF_APPROVED_ACTIONS);
+  const interventionType = pickRandom(INTERVENTION_TYPES);
+  
+  const intervention: InsertIntervention = {
+    type: interventionType,
+    severity: 'low',
+    title: `[Agent Self Approved] ${actionTemplate.action}`,
+    description: `${agent.name} autonomously executed this action based on continuous monitoring.`,
+    projectId: `proj-${project.toLowerCase().replace(/\s+/g, '-')}`,
+    projectName: project,
+    confidence: String((0.88 + Math.random() * 0.1).toFixed(2)),
+    suggestedAction: actionTemplate.action,
+    impact: actionTemplate.impact,
+    status: 'approved',
+    agentSource: agent.name,
+    isAutonomous: 'true',
+    selfApproved: 'true',
+    triggerSource: 'agent_detection',
+    approvedBy: `${agent.name} (Autonomous)`
+  };
+  
+  try {
+    await storage.createIntervention(intervention);
+    console.log(`[AgentSimulation] Created self-approved action: ${agent.name} - ${actionTemplate.action}`);
+  } catch (error) {
+    console.error('[AgentSimulation] Error creating self-approved intervention:', error);
+  }
+}
 
 export async function startAgentSimulation(intervalMs: number = 12000): Promise<void> {
   if (isRunning) {
@@ -149,6 +196,9 @@ export async function startAgentSimulation(intervalMs: number = 12000): Promise<
       const activity = generateWorkflowActivity();
       await storage.createAgentActivityLog(activity);
       console.log(`[AgentSimulation] Generated: ${activity.summary}`);
+      
+      // Occasionally create a self-approved intervention
+      await maybeCreateSelfApprovedIntervention();
     } catch (error) {
       console.error('[AgentSimulation] Error generating activity:', error);
     }
