@@ -790,7 +790,7 @@ export default function AgentCommandCenterPage() {
                 ) : (
                   <ScrollArea className="h-[550px]">
                     <div className="font-mono text-xs">
-                      {agentActivities.slice().reverse().map((activity, index) => {
+                      {agentActivities.map((activity, index) => {
                         const time = activity.createdAt.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
                         const msec = activity.createdAt.getMilliseconds().toString().padStart(3, '0');
                         
