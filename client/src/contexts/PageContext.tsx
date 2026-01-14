@@ -6,6 +6,7 @@ export interface PageContextData {
   entityId?: string;
   entityName?: string;
   businessUnit?: string;
+  entityType?: string; // 'Operating Segment' or 'Group Function' for division pages
   breadcrumb: string[];
 }
 
@@ -47,11 +48,25 @@ export function PageContextProvider({ children }: { children: ReactNode }) {
         breadcrumb: ['Dashboard']
       });
     } else if (path.startsWith('/division/')) {
-      const divisionId = path.split('/')[2];
+      const rawDivisionId = path.split('/')[2];
+      // Legacy slug mapping (same as DivisionPage)
+      const legacySlugs: Record<string, string> = {
+        'lgim': 'asset-management',
+        'lgc': 'capital',
+        'lgri': 'institutional-retirement',
+        'lgr': 'retail',
+        'lgf': 'fintech',
+        'lgi': 'insurance'
+      };
+      const resolvedId = legacySlugs[rawDivisionId] || rawDivisionId;
+      // The 4 Operating Segments vs Group Functions
+      const operatingSegmentIds = ['institutional-retirement', 'asset-management', 'retail', 'corporate'];
+      const isOperatingSegment = operatingSegmentIds.includes(resolvedId);
       setContext({
         pageType: 'division',
-        entityId: divisionId,
-        breadcrumb: ['Dashboard', 'Group Function']
+        entityId: resolvedId,
+        entityType: isOperatingSegment ? 'Operating Segment' : 'Group Function',
+        breadcrumb: ['Dashboard', isOperatingSegment ? 'Operating Segment' : 'Group Function']
       });
     } else if (path.startsWith('/project/')) {
       const projectId = path.split('/')[2];
