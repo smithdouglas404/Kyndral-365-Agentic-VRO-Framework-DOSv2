@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { startAgentSimulation } from "./agentSimulation";
+import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 
 const app = express();
@@ -109,6 +110,11 @@ app.use((req, res, next) => {
       // Start continuous agent simulation (generates activity every 12 seconds)
       startAgentSimulation(12000).catch(err => {
         console.error("Failed to start agent simulation:", err);
+      });
+      
+      // Start MCP sync scheduler for cron-based sync jobs
+      startSyncScheduler().catch(err => {
+        console.error("Failed to start sync scheduler:", err);
       });
     },
   );

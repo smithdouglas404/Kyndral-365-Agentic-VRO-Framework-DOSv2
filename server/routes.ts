@@ -2293,5 +2293,614 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // MCP SYNC JOBS API - Scheduled sync configurations with cron triggers
+  // ============================================================================
+
+  app.get("/api/mcp/sync-jobs", async (req, res) => {
+    try {
+      const mcpAdapterId = req.query.adapterId as string | undefined;
+      const jobs = await storage.getSyncJobs(mcpAdapterId);
+      res.json({ syncJobs: jobs });
+    } catch (error: any) {
+      console.error("Get sync jobs error:", error);
+      res.status(500).json({ error: "Failed to get sync jobs" });
+    }
+  });
+
+  app.get("/api/mcp/sync-jobs/:id", async (req, res) => {
+    try {
+      const job = await storage.getSyncJob(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: "Sync job not found" });
+      }
+      res.json(job);
+    } catch (error: any) {
+      console.error("Get sync job error:", error);
+      res.status(500).json({ error: "Failed to get sync job" });
+    }
+  });
+
+  app.post("/api/mcp/sync-jobs", async (req, res) => {
+    try {
+      const { insertSyncJobSchema } = await import("@shared/schema");
+      const { reloadScheduledJobs } = await import("./syncScheduler");
+      const parsed = insertSyncJobSchema.parse(req.body);
+      const job = await storage.createSyncJob(parsed);
+      
+      // Reload scheduler to pick up new job
+      await reloadScheduledJobs();
+      
+      res.status(201).json(job);
+    } catch (error: any) {
+      console.error("Create sync job error:", error);
+      res.status(400).json({ error: "Failed to create sync job", details: error.message });
+    }
+  });
+
+  app.patch("/api/mcp/sync-jobs/:id", async (req, res) => {
+    try {
+      const { reloadScheduledJobs } = await import("./syncScheduler");
+      const updated = await storage.updateSyncJob(req.params.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Sync job not found" });
+      }
+      
+      // Reload scheduler to pick up changes
+      await reloadScheduledJobs();
+      
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Update sync job error:", error);
+      res.status(500).json({ error: "Failed to update sync job" });
+    }
+  });
+
+  app.delete("/api/mcp/sync-jobs/:id", async (req, res) => {
+    try {
+      const { reloadScheduledJobs } = await import("./syncScheduler");
+      await storage.deleteSyncJob(req.params.id);
+      
+      // Reload scheduler to remove deleted job
+      await reloadScheduledJobs();
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Delete sync job error:", error);
+      res.status(500).json({ error: "Failed to delete sync job" });
+    }
+  });
+
+  // Trigger a sync job manually
+  app.post("/api/mcp/sync-jobs/:id/trigger", async (req, res) => {
+    try {
+      const job = await storage.getSyncJob(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: "Sync job not found" });
+      }
+
+      // Create a new sync job run
+      const run = await storage.createSyncJobRun({
+        syncJobId: job.id,
+        triggeredBy: "manual",
+        status: "running",
+        startedAt: new Date()
+      });
+
+      // Simulate sync execution (in production, this would call MCP tools)
+      setTimeout(async () => {
+        const recordsProcessed = Math.floor(Math.random() * 100) + 10;
+        const recordsCreated = Math.floor(recordsProcessed * 0.2);
+        const recordsUpdated = Math.floor(recordsProcessed * 0.6);
+        
+        await storage.updateSyncJobRun(run.id, {
+          status: "success",
+          completedAt: new Date(),
+          recordsProcessed,
+          recordsCreated,
+          recordsUpdated,
+          recordsDeleted: 0,
+          recordsFailed: 0,
+          summary: JSON.stringify({ 
+            duration: "2.3s", 
+            entityTypes: JSON.parse(job.entityTypes || "[]")
+          })
+        });
+
+        await storage.updateSyncJobLastRun(job.id, "success");
+      }, 2000);
+
+      res.json({ 
+        message: "Sync job triggered", 
+        runId: run.id,
+        status: "running"
+      });
+    } catch (error: any) {
+      console.error("Trigger sync job error:", error);
+      res.status(500).json({ error: "Failed to trigger sync job" });
+    }
+  });
+
+  // Get sync job run history
+  app.get("/api/mcp/sync-jobs/:id/runs", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const runs = await storage.getSyncJobRuns(req.params.id, limit);
+      res.json({ runs });
+    } catch (error: any) {
+      console.error("Get sync job runs error:", error);
+      res.status(500).json({ error: "Failed to get sync job runs" });
+    }
+  });
+
+  // Get all sync job runs
+  app.get("/api/mcp/sync-runs", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const runs = await storage.getSyncJobRuns(undefined, limit);
+      res.json({ runs });
+    } catch (error: any) {
+      console.error("Get all sync runs error:", error);
+      res.status(500).json({ error: "Failed to get sync runs" });
+    }
+  });
+
+  // ============================================================================
+  // WEBHOOK ENDPOINTS API - Incoming webhook handlers for external PPM tools
+  // ============================================================================
+
+  app.get("/api/mcp/webhooks", async (req, res) => {
+    try {
+      const sourceSystemId = req.query.sourceSystemId as string | undefined;
+      const endpoints = await storage.getWebhookEndpoints(sourceSystemId);
+      res.json({ webhooks: endpoints });
+    } catch (error: any) {
+      console.error("Get webhooks error:", error);
+      res.status(500).json({ error: "Failed to get webhooks" });
+    }
+  });
+
+  app.get("/api/mcp/webhooks/:id", async (req, res) => {
+    try {
+      const endpoint = await storage.getWebhookEndpoint(req.params.id);
+      if (!endpoint) {
+        return res.status(404).json({ error: "Webhook endpoint not found" });
+      }
+      res.json(endpoint);
+    } catch (error: any) {
+      console.error("Get webhook error:", error);
+      res.status(500).json({ error: "Failed to get webhook" });
+    }
+  });
+
+  app.post("/api/mcp/webhooks", async (req, res) => {
+    try {
+      const { insertWebhookEndpointSchema } = await import("@shared/schema");
+      const parsed = insertWebhookEndpointSchema.parse(req.body);
+      const endpoint = await storage.createWebhookEndpoint(parsed);
+      res.status(201).json(endpoint);
+    } catch (error: any) {
+      console.error("Create webhook error:", error);
+      res.status(400).json({ error: "Failed to create webhook", details: error.message });
+    }
+  });
+
+  app.patch("/api/mcp/webhooks/:id", async (req, res) => {
+    try {
+      const updated = await storage.updateWebhookEndpoint(req.params.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Webhook endpoint not found" });
+      }
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Update webhook error:", error);
+      res.status(500).json({ error: "Failed to update webhook" });
+    }
+  });
+
+  app.delete("/api/mcp/webhooks/:id", async (req, res) => {
+    try {
+      await storage.deleteWebhookEndpoint(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Delete webhook error:", error);
+      res.status(500).json({ error: "Failed to delete webhook" });
+    }
+  });
+
+  // Dynamic webhook receiver - handles incoming webhooks from external systems
+  app.post("/api/webhooks/:path(*)", async (req, res) => {
+    try {
+      const webhookPath = `/webhooks/${req.params.path}`;
+      const endpoint = await storage.getWebhookEndpointByPath(webhookPath);
+      
+      if (!endpoint) {
+        return res.status(404).json({ error: "Webhook endpoint not found" });
+      }
+
+      if (endpoint.isEnabled !== "true") {
+        return res.status(403).json({ error: "Webhook endpoint is disabled" });
+      }
+
+      // Log the webhook event
+      const event = await storage.createWebhookEvent({
+        webhookEndpointId: endpoint.id,
+        eventType: req.body.event_type || req.body.webhookEvent || "unknown",
+        externalEventId: req.body.id || req.body.event_id,
+        payload: JSON.stringify(req.body),
+        headers: JSON.stringify({
+          'content-type': req.headers['content-type'],
+          'user-agent': req.headers['user-agent'],
+          'x-webhook-signature': req.headers['x-webhook-signature']
+        }),
+        signature: req.headers['x-webhook-signature'] as string,
+        signatureValid: "not_verified",
+        status: "received"
+      });
+
+      // Increment webhook stats
+      await storage.incrementWebhookStats(endpoint.id, true);
+
+      // If webhook is configured to trigger a sync job, do so
+      if (endpoint.triggerSyncJobId) {
+        const run = await storage.createSyncJobRun({
+          syncJobId: endpoint.triggerSyncJobId,
+          triggeredBy: "webhook",
+          status: "running",
+          startedAt: new Date()
+        });
+
+        await storage.updateWebhookEventStatus(event.id, "processing", undefined, run.id);
+
+        // Simulate processing
+        setTimeout(async () => {
+          await storage.updateSyncJobRun(run.id, {
+            status: "success",
+            completedAt: new Date(),
+            recordsProcessed: 1,
+            recordsCreated: req.body.action === "created" ? 1 : 0,
+            recordsUpdated: req.body.action === "updated" ? 1 : 0,
+            recordsDeleted: req.body.action === "deleted" ? 1 : 0
+          });
+          await storage.updateWebhookEventStatus(event.id, "processed");
+        }, 500);
+      } else {
+        await storage.updateWebhookEventStatus(event.id, "processed");
+      }
+
+      res.json({ 
+        received: true, 
+        eventId: event.id,
+        message: "Webhook processed successfully"
+      });
+    } catch (error: any) {
+      console.error("Webhook receiver error:", error);
+      res.status(500).json({ error: "Failed to process webhook" });
+    }
+  });
+
+  // Get webhook events
+  app.get("/api/mcp/webhooks/:id/events", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const events = await storage.getWebhookEvents(req.params.id, limit);
+      res.json({ events });
+    } catch (error: any) {
+      console.error("Get webhook events error:", error);
+      res.status(500).json({ error: "Failed to get webhook events" });
+    }
+  });
+
+  // ============================================================================
+  // MCP PPM ADAPTERS SEED - Pre-configured adapters for recommended PPM tools
+  // ============================================================================
+
+  app.post("/api/mcp/seed-ppm-adapters", async (_req, res) => {
+    try {
+      // Check existing entities for idempotent seeding
+      const existingAdapters = await storage.getMcpAdapters();
+      const existingSyncJobs = await storage.getSyncJobs();
+      const existingWebhooks = await storage.getWebhookEndpoints();
+      const existingSystems = await storage.getSourceSystems();
+      
+      let adaptersSeeded = 0;
+      let syncJobsSeeded = 0;
+      let webhooksSeeded = 0;
+      let systemsSeeded = 0;
+
+      // Source system definitions
+      const sourceSystemsData: { name: string; type: string; status?: string; capabilities?: string }[] = [
+        { name: "Jira Cloud", type: "jira", status: "active", capabilities: JSON.stringify(["issues", "sprints", "boards", "epics"]) },
+        { name: "Azure DevOps", type: "azure-devops", status: "active", capabilities: JSON.stringify(["work-items", "iterations", "pipelines"]) },
+        { name: "ServiceNow SPM", type: "servicenow", status: "active", capabilities: JSON.stringify(["demands", "portfolios", "projects"]) },
+        { name: "Confluence", type: "confluence", status: "active", capabilities: JSON.stringify(["pages", "spaces", "comments"]) },
+        { name: "SharePoint", type: "sharepoint", status: "inactive", capabilities: JSON.stringify(["files", "folders", "lists"]) },
+        { name: "Jira Align (SAFe)", type: "jira-align", status: "inactive", capabilities: JSON.stringify(["portfolios", "arts", "pis", "epics"]) },
+        { name: "Tempo Timesheets", type: "tempo", status: "inactive", capabilities: JSON.stringify(["worklogs", "teams", "capacity"]) }
+      ];
+
+      // Create source systems only if they don't exist (idempotent by type)
+      const existingSystemTypes = new Set(existingSystems.map(s => s.type));
+      const allSystems: { id: string; type: string }[] = existingSystems.map(s => ({ id: s.id, type: s.type }));
+      
+      for (const ss of sourceSystemsData) {
+        if (!existingSystemTypes.has(ss.type)) {
+          const created = await storage.createSourceSystem(ss);
+          allSystems.push({ id: created.id, type: ss.type });
+          systemsSeeded++;
+        }
+      }
+
+      // Helper to find source system ID by type
+      const getSystemId = (type: string) => allSystems.find(s => s.type === type)?.id;
+
+      // Create MCP adapters for each source system
+      const adaptersData = [
+        {
+          sourceSystemId: getSystemId("jira"),
+          name: "Jira MCP Adapter",
+          adapterType: "jira-mcp",
+          version: "1.2.0",
+          serverUrl: "mcp://jira.atlassian.com",
+          status: "active",
+          supportedTools: JSON.stringify([
+            "jira_create_issue", "jira_update_issue", "jira_get_issue", "jira_search_issues",
+            "jira_get_sprint", "jira_create_sprint", "jira_move_issues_to_sprint",
+            "jira_get_board", "jira_get_epics", "jira_link_issues"
+          ]),
+          supportedResources: JSON.stringify(["issues", "projects", "sprints", "boards", "epics"]),
+          healthStatus: "healthy"
+        },
+        {
+          sourceSystemId: getSystemId("azure-devops"),
+          name: "Azure DevOps MCP Adapter",
+          adapterType: "azure-devops-mcp",
+          version: "1.1.0",
+          serverUrl: "mcp://dev.azure.com",
+          status: "active",
+          supportedTools: JSON.stringify([
+            "ado_create_work_item", "ado_update_work_item", "ado_get_work_item", "ado_query_work_items",
+            "ado_get_iteration", "ado_create_iteration", "ado_get_backlog",
+            "ado_create_pipeline", "ado_get_builds"
+          ]),
+          supportedResources: JSON.stringify(["work-items", "iterations", "backlogs", "pipelines", "builds"]),
+          healthStatus: "healthy"
+        },
+        {
+          sourceSystemId: getSystemId("servicenow"),
+          name: "ServiceNow SPM MCP Adapter",
+          adapterType: "servicenow-mcp",
+          version: "1.0.0",
+          serverUrl: "mcp://instance.servicenow.com",
+          status: "active",
+          supportedTools: JSON.stringify([
+            "snow_create_demand", "snow_update_demand", "snow_get_portfolio",
+            "snow_create_project", "snow_update_project", "snow_get_resource_plan",
+            "snow_create_task", "snow_get_financials"
+          ]),
+          supportedResources: JSON.stringify(["demands", "portfolios", "projects", "resources", "financials"]),
+          healthStatus: "healthy"
+        },
+        {
+          sourceSystemId: getSystemId("confluence"),
+          name: "Confluence MCP Adapter",
+          adapterType: "confluence-mcp",
+          version: "1.0.0",
+          serverUrl: "mcp://confluence.atlassian.com",
+          status: "active",
+          supportedTools: JSON.stringify([
+            "confluence_create_page", "confluence_update_page", "confluence_get_page",
+            "confluence_search", "confluence_get_space", "confluence_add_comment"
+          ]),
+          supportedResources: JSON.stringify(["pages", "spaces", "comments", "attachments"]),
+          healthStatus: "healthy"
+        },
+        {
+          sourceSystemId: getSystemId("sharepoint"),
+          name: "SharePoint MCP Adapter",
+          adapterType: "sharepoint-mcp",
+          version: "1.0.0",
+          serverUrl: "mcp://sharepoint.microsoft.com",
+          status: "inactive",
+          supportedTools: JSON.stringify([
+            "sp_upload_file", "sp_get_file", "sp_create_folder",
+            "sp_search_files", "sp_get_list_items", "sp_create_list_item"
+          ]),
+          supportedResources: JSON.stringify(["files", "folders", "lists", "sites"]),
+          healthStatus: "unknown"
+        },
+        {
+          sourceSystemId: getSystemId("jira-align"),
+          name: "Jira Align MCP Adapter (SAFe)",
+          adapterType: "jira-align-mcp",
+          version: "1.0.0",
+          serverUrl: "mcp://jiraalign.com",
+          status: "inactive",
+          supportedTools: JSON.stringify([
+            "align_get_portfolio", "align_get_value_stream", "align_get_art",
+            "align_get_pi", "align_create_epic", "align_get_features",
+            "align_sync_safe_hierarchy"
+          ]),
+          supportedResources: JSON.stringify(["portfolios", "value-streams", "arts", "pis", "epics", "features"]),
+          healthStatus: "unknown"
+        },
+        {
+          sourceSystemId: getSystemId("tempo"),
+          name: "Tempo Timesheets MCP Adapter",
+          adapterType: "tempo-mcp",
+          version: "1.0.0",
+          serverUrl: "mcp://tempo.io",
+          status: "inactive",
+          supportedTools: JSON.stringify([
+            "tempo_log_time", "tempo_get_worklogs", "tempo_get_team_schedule",
+            "tempo_get_capacity", "tempo_create_plan"
+          ]),
+          supportedResources: JSON.stringify(["worklogs", "teams", "plans", "capacity"]),
+          healthStatus: "unknown"
+        }
+      ];
+
+      // Create adapters only if they don't exist (idempotent by adapterType)
+      const existingAdapterTypes = new Set(existingAdapters.map(a => a.adapterType));
+      const allAdapters: { id: string; type: string }[] = existingAdapters.map(a => ({ id: a.id, type: a.adapterType }));
+      
+      for (const adapter of adaptersData) {
+        if (!existingAdapterTypes.has(adapter.adapterType)) {
+          const created = await storage.createMcpAdapter(adapter);
+          allAdapters.push({ id: created.id, type: adapter.adapterType });
+          adaptersSeeded++;
+        }
+      }
+
+      // Helper to find adapter ID by type
+      const getAdapterId = (type: string) => allAdapters.find(a => a.type === type)?.id;
+
+      // Create default sync jobs for active adapters (idempotent - check by name)
+      const existingJobNames = new Set(existingSyncJobs.map(j => j.name));
+      const syncJobsData = [
+        {
+          name: "Jira Daily Sync",
+          description: "Full bidirectional sync of epics, features, stories, and sprints with Jira",
+          mcpAdapterId: getAdapterId("jira-mcp"),
+          sourceSystemId: getSystemId("jira"),
+          syncType: "incremental",
+          syncDirection: "bidirectional",
+          cronExpression: "0 6 * * *", // Daily at 6 AM
+          isEnabled: "true",
+          entityTypes: JSON.stringify(["epic", "feature", "story", "task", "sprint"]),
+          conflictResolutionStrategy: "last_write_wins"
+        },
+        {
+          name: "Azure DevOps Hourly Sync",
+          description: "Incremental sync of work items and iterations with Azure DevOps",
+          mcpAdapterId: getAdapterId("azure-devops-mcp"),
+          sourceSystemId: getSystemId("azure-devops"),
+          syncType: "incremental",
+          syncDirection: "bidirectional",
+          cronExpression: "0 * * * *", // Every hour
+          isEnabled: "true",
+          entityTypes: JSON.stringify(["epic", "feature", "story", "task"]),
+          conflictResolutionStrategy: "last_write_wins"
+        },
+        {
+          name: "ServiceNow Weekly Portfolio Sync",
+          description: "Weekly full sync of portfolio, demands, and financials with ServiceNow SPM",
+          mcpAdapterId: getAdapterId("servicenow-mcp"),
+          sourceSystemId: getSystemId("servicenow"),
+          syncType: "full",
+          syncDirection: "inbound",
+          cronExpression: "0 2 * * 0", // Sundays at 2 AM
+          isEnabled: "true",
+          entityTypes: JSON.stringify(["portfolio", "epic", "resource"]),
+          conflictResolutionStrategy: "source_wins"
+        }
+      ];
+
+      for (const job of syncJobsData) {
+        if (!existingJobNames.has(job.name)) {
+          await storage.createSyncJob(job);
+          syncJobsSeeded++;
+        }
+      }
+
+      // Create webhook endpoints for real-time updates (idempotent - check by path)
+      const existingWebhookPaths = new Set(existingWebhooks.map(w => w.endpointPath));
+      const webhooksData = [
+        {
+          name: "Jira Issue Webhook",
+          description: "Receives real-time issue updates from Jira",
+          sourceSystemId: getSystemId("jira"),
+          mcpAdapterId: getAdapterId("jira-mcp"),
+          endpointPath: "/webhooks/jira/issues",
+          isEnabled: "true",
+          eventTypes: JSON.stringify(["issue_created", "issue_updated", "issue_deleted", "sprint_started", "sprint_closed"])
+        },
+        {
+          name: "Azure DevOps Work Item Webhook",
+          description: "Receives work item change notifications from Azure DevOps",
+          sourceSystemId: getSystemId("azure-devops"),
+          mcpAdapterId: getAdapterId("azure-devops-mcp"),
+          endpointPath: "/webhooks/azure-devops/workitems",
+          isEnabled: "true",
+          eventTypes: JSON.stringify(["workitem.created", "workitem.updated", "workitem.deleted"])
+        },
+        {
+          name: "ServiceNow Demand Webhook",
+          description: "Receives demand and project updates from ServiceNow",
+          sourceSystemId: getSystemId("servicenow"),
+          mcpAdapterId: getAdapterId("servicenow-mcp"),
+          endpointPath: "/webhooks/servicenow/demands",
+          isEnabled: "true",
+          eventTypes: JSON.stringify(["demand.created", "demand.updated", "project.status_changed"])
+        }
+      ];
+
+      for (const webhook of webhooksData) {
+        if (!existingWebhookPaths.has(webhook.endpointPath)) {
+          await storage.createWebhookEndpoint(webhook);
+          webhooksSeeded++;
+        }
+      }
+
+      // Reload scheduler to pick up new jobs
+      const { reloadScheduledJobs } = await import("./syncScheduler");
+      await reloadScheduledJobs();
+
+      res.json({
+        success: true,
+        message: "PPM adapters, sync jobs, and webhooks seeded successfully",
+        data: {
+          sourceSystems: systemsSeeded,
+          adapters: adaptersSeeded,
+          syncJobs: syncJobsSeeded,
+          webhooks: webhooksSeeded,
+          totals: {
+            sourceSystems: sourceSystemsData.length,
+            adapters: adaptersData.length,
+            syncJobs: syncJobsData.length,
+            webhooks: webhooksData.length
+          }
+        }
+      });
+    } catch (error: any) {
+      console.error("Seed PPM adapters error:", error);
+      res.status(500).json({ error: "Failed to seed PPM adapters", details: error.message });
+    }
+  });
+
+  // Get MCP integration overview
+  app.get("/api/mcp/overview", async (_req, res) => {
+    try {
+      const [sourceSystems, adapters, syncJobs, webhooks, recentRuns] = await Promise.all([
+        storage.getSourceSystems(),
+        storage.getMcpAdapters(),
+        storage.getSyncJobs(),
+        storage.getWebhookEndpoints(),
+        storage.getSyncJobRuns(undefined, 10)
+      ]);
+
+      res.json({
+        sourceSystems: sourceSystems.length,
+        adapters: {
+          total: adapters.length,
+          active: adapters.filter(a => a.status === "active").length,
+          healthy: adapters.filter(a => a.healthStatus === "healthy").length
+        },
+        syncJobs: {
+          total: syncJobs.length,
+          enabled: syncJobs.filter(j => j.isEnabled === "true").length
+        },
+        webhooks: {
+          total: webhooks.length,
+          enabled: webhooks.filter(w => w.isEnabled === "true").length
+        },
+        recentRuns: recentRuns.slice(0, 5)
+      });
+    } catch (error: any) {
+      console.error("Get MCP overview error:", error);
+      res.status(500).json({ error: "Failed to get MCP overview" });
+    }
+  });
+
   return httpServer;
 }

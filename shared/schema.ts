@@ -1313,3 +1313,134 @@ export const insertMcpToolMappingSchema = createInsertSchema(mcpToolMappings).om
 
 export type InsertMcpToolMapping = z.infer<typeof insertMcpToolMappingSchema>;
 export type McpToolMapping = typeof mcpToolMappings.$inferSelect;
+
+// ============================================================================
+// MCP SYNC JOBS - Scheduled sync configurations with cron expressions
+// ============================================================================
+
+export const syncJobs = pgTable("sync_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  mcpAdapterId: varchar("mcp_adapter_id").references(() => mcpAdapters.id),
+  sourceSystemId: varchar("source_system_id").references(() => sourceSystems.id),
+  syncType: text("sync_type").notNull(), // full, incremental, delta
+  syncDirection: text("sync_direction").notNull(), // inbound, outbound, bidirectional
+  cronExpression: text("cron_expression"), // e.g., "0 */6 * * *" (every 6 hours)
+  isEnabled: text("is_enabled").default("true"),
+  entityTypes: text("entity_types"), // JSON array of SAFe entity types to sync
+  filterCriteria: text("filter_criteria"), // JSON query filters
+  fieldMappingOverrides: text("field_mapping_overrides"), // JSON field mapping customizations
+  conflictResolutionStrategy: text("conflict_resolution_strategy").default("last_write_wins"), // last_write_wins, source_wins, target_wins, manual
+  retryPolicy: text("retry_policy"), // JSON: maxRetries, backoffMs, etc.
+  lastRunAt: timestamp("last_run_at"),
+  lastRunStatus: text("last_run_status"), // success, failed, partial
+  lastRunError: text("last_run_error"),
+  nextRunAt: timestamp("next_run_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSyncJobSchema = createInsertSchema(syncJobs).omit({
+  id: true,
+  lastRunAt: true,
+  lastRunStatus: true,
+  lastRunError: true,
+  nextRunAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSyncJob = z.infer<typeof insertSyncJobSchema>;
+export type SyncJob = typeof syncJobs.$inferSelect;
+
+// Sync Job Runs - Execution history for sync jobs
+export const syncJobRuns = pgTable("sync_job_runs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  syncJobId: varchar("sync_job_id").references(() => syncJobs.id),
+  triggeredBy: text("triggered_by").notNull(), // schedule, manual, webhook
+  status: text("status").default("pending"), // pending, running, success, failed, cancelled
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  recordsProcessed: integer("records_processed").default(0),
+  recordsCreated: integer("records_created").default(0),
+  recordsUpdated: integer("records_updated").default(0),
+  recordsDeleted: integer("records_deleted").default(0),
+  recordsFailed: integer("records_failed").default(0),
+  conflictsDetected: integer("conflicts_detected").default(0),
+  conflictsResolved: integer("conflicts_resolved").default(0),
+  errorLog: text("error_log"), // JSON array of errors
+  summary: text("summary"), // JSON summary of sync results
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSyncJobRunSchema = createInsertSchema(syncJobRuns).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSyncJobRun = z.infer<typeof insertSyncJobRunSchema>;
+export type SyncJobRun = typeof syncJobRuns.$inferSelect;
+
+// ============================================================================
+// WEBHOOK ENDPOINTS - Incoming webhook handlers for external PPM tools
+// ============================================================================
+
+export const webhookEndpoints = pgTable("webhook_endpoints", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  sourceSystemId: varchar("source_system_id").references(() => sourceSystems.id),
+  mcpAdapterId: varchar("mcp_adapter_id").references(() => mcpAdapters.id),
+  endpointPath: text("endpoint_path").notNull(), // e.g., "/webhooks/jira/issues"
+  secretToken: text("secret_token"), // For webhook signature verification
+  isEnabled: text("is_enabled").default("true"),
+  eventTypes: text("event_types"), // JSON array of event types to handle
+  triggerSyncJobId: varchar("trigger_sync_job_id").references(() => syncJobs.id), // Optional: trigger a sync job on webhook
+  transformScript: text("transform_script"), // Optional JS/JSON transform for payload
+  retryPolicy: text("retry_policy"), // JSON retry config
+  lastReceivedAt: timestamp("last_received_at"),
+  totalReceived: integer("total_received").default(0),
+  totalProcessed: integer("total_processed").default(0),
+  totalFailed: integer("total_failed").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWebhookEndpointSchema = createInsertSchema(webhookEndpoints).omit({
+  id: true,
+  lastReceivedAt: true,
+  totalReceived: true,
+  totalProcessed: true,
+  totalFailed: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWebhookEndpoint = z.infer<typeof insertWebhookEndpointSchema>;
+export type WebhookEndpoint = typeof webhookEndpoints.$inferSelect;
+
+// Webhook Events - Log of received webhook events
+export const webhookEvents = pgTable("webhook_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  webhookEndpointId: varchar("webhook_endpoint_id").references(() => webhookEndpoints.id),
+  eventType: text("event_type"),
+  externalEventId: text("external_event_id"), // ID from the source system
+  payload: text("payload").notNull(), // JSON webhook payload
+  headers: text("headers"), // JSON of relevant headers
+  signature: text("signature"), // Webhook signature if provided
+  signatureValid: text("signature_valid"), // true, false, not_verified
+  status: text("status").default("received"), // received, processing, processed, failed, ignored
+  processingError: text("processing_error"),
+  syncJobRunId: varchar("sync_job_run_id").references(() => syncJobRuns.id), // If this triggered a sync
+  receivedAt: timestamp("received_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+});
+
+export const insertWebhookEventSchema = createInsertSchema(webhookEvents).omit({
+  id: true,
+  receivedAt: true,
+});
+
+export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
+export type WebhookEvent = typeof webhookEvents.$inferSelect;

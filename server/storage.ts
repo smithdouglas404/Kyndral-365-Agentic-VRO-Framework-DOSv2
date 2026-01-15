@@ -47,6 +47,10 @@ import {
   type ClimateMetric, type InsertClimateMetric,
   type EnterpriseRiskCategory, type InsertEnterpriseRiskCategory,
   type EnterpriseRisk, type InsertEnterpriseRisk,
+  type SyncJob, type InsertSyncJob,
+  type SyncJobRun, type InsertSyncJobRun,
+  type WebhookEndpoint, type InsertWebhookEndpoint,
+  type WebhookEvent, type InsertWebhookEvent,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -54,7 +58,8 @@ import {
   portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints, strategicThemes,
   sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings,
   divisions, divisionKpis, divisionOkrs, divisionRisks,
-  companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks
+  companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks,
+  syncJobs, syncJobRuns, webhookEndpoints, webhookEvents
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -238,6 +243,35 @@ export interface IStorage {
   
   // Seed company/climate/risk data
   seedCompanyData(): Promise<void>;
+  
+  // Sync Job Methods (MCP Scheduling)
+  getSyncJobs(mcpAdapterId?: string): Promise<SyncJob[]>;
+  getSyncJob(id: string): Promise<SyncJob | undefined>;
+  createSyncJob(job: InsertSyncJob): Promise<SyncJob>;
+  updateSyncJob(id: string, updates: Partial<SyncJob>): Promise<SyncJob | undefined>;
+  deleteSyncJob(id: string): Promise<void>;
+  getEnabledSyncJobs(): Promise<SyncJob[]>;
+  updateSyncJobLastRun(id: string, status: string, error?: string): Promise<void>;
+  
+  // Sync Job Run Methods (Execution History)
+  getSyncJobRuns(syncJobId?: string, limit?: number): Promise<SyncJobRun[]>;
+  getSyncJobRun(id: string): Promise<SyncJobRun | undefined>;
+  createSyncJobRun(run: InsertSyncJobRun): Promise<SyncJobRun>;
+  updateSyncJobRun(id: string, updates: Partial<SyncJobRun>): Promise<SyncJobRun | undefined>;
+  
+  // Webhook Endpoint Methods
+  getWebhookEndpoints(sourceSystemId?: string): Promise<WebhookEndpoint[]>;
+  getWebhookEndpoint(id: string): Promise<WebhookEndpoint | undefined>;
+  getWebhookEndpointByPath(path: string): Promise<WebhookEndpoint | undefined>;
+  createWebhookEndpoint(endpoint: InsertWebhookEndpoint): Promise<WebhookEndpoint>;
+  updateWebhookEndpoint(id: string, updates: Partial<WebhookEndpoint>): Promise<WebhookEndpoint | undefined>;
+  deleteWebhookEndpoint(id: string): Promise<void>;
+  incrementWebhookStats(id: string, processed: boolean): Promise<void>;
+  
+  // Webhook Event Methods
+  getWebhookEvents(webhookEndpointId?: string, limit?: number): Promise<WebhookEvent[]>;
+  createWebhookEvent(event: InsertWebhookEvent): Promise<WebhookEvent>;
+  updateWebhookEventStatus(id: string, status: string, error?: string, syncJobRunId?: string): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -1910,6 +1944,144 @@ export class DatabaseStorage implements IStorage {
     }
 
     console.log("[Seed] Seeded company overview, climate metrics, and enterprise risks");
+  }
+
+  // Sync Job Methods
+  async getSyncJobs(mcpAdapterId?: string): Promise<SyncJob[]> {
+    if (mcpAdapterId) {
+      return await db.select().from(syncJobs).where(eq(syncJobs.mcpAdapterId, mcpAdapterId)).orderBy(desc(syncJobs.createdAt));
+    }
+    return await db.select().from(syncJobs).orderBy(desc(syncJobs.createdAt));
+  }
+
+  async getSyncJob(id: string): Promise<SyncJob | undefined> {
+    const result = await db.select().from(syncJobs).where(eq(syncJobs.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createSyncJob(job: InsertSyncJob): Promise<SyncJob> {
+    const result = await db.insert(syncJobs).values(job).returning();
+    return result[0];
+  }
+
+  async updateSyncJob(id: string, updates: Partial<SyncJob>): Promise<SyncJob | undefined> {
+    const result = await db.update(syncJobs).set({ ...updates, updatedAt: new Date() }).where(eq(syncJobs.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteSyncJob(id: string): Promise<void> {
+    await db.delete(syncJobs).where(eq(syncJobs.id, id));
+  }
+
+  async getEnabledSyncJobs(): Promise<SyncJob[]> {
+    return await db.select().from(syncJobs).where(eq(syncJobs.isEnabled, "true"));
+  }
+
+  async updateSyncJobLastRun(id: string, status: string, error?: string): Promise<void> {
+    await db.update(syncJobs).set({
+      lastRunAt: new Date(),
+      lastRunStatus: status,
+      lastRunError: error || null,
+      updatedAt: new Date()
+    }).where(eq(syncJobs.id, id));
+  }
+
+  // Sync Job Run Methods
+  async getSyncJobRuns(syncJobId?: string, limit?: number): Promise<SyncJobRun[]> {
+    const query = syncJobId 
+      ? db.select().from(syncJobRuns).where(eq(syncJobRuns.syncJobId, syncJobId)).orderBy(desc(syncJobRuns.createdAt))
+      : db.select().from(syncJobRuns).orderBy(desc(syncJobRuns.createdAt));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    return await query;
+  }
+
+  async getSyncJobRun(id: string): Promise<SyncJobRun | undefined> {
+    const result = await db.select().from(syncJobRuns).where(eq(syncJobRuns.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createSyncJobRun(run: InsertSyncJobRun): Promise<SyncJobRun> {
+    const result = await db.insert(syncJobRuns).values(run).returning();
+    return result[0];
+  }
+
+  async updateSyncJobRun(id: string, updates: Partial<SyncJobRun>): Promise<SyncJobRun | undefined> {
+    const result = await db.update(syncJobRuns).set(updates).where(eq(syncJobRuns.id, id)).returning();
+    return result[0];
+  }
+
+  // Webhook Endpoint Methods
+  async getWebhookEndpoints(sourceSystemId?: string): Promise<WebhookEndpoint[]> {
+    if (sourceSystemId) {
+      return await db.select().from(webhookEndpoints).where(eq(webhookEndpoints.sourceSystemId, sourceSystemId)).orderBy(desc(webhookEndpoints.createdAt));
+    }
+    return await db.select().from(webhookEndpoints).orderBy(desc(webhookEndpoints.createdAt));
+  }
+
+  async getWebhookEndpoint(id: string): Promise<WebhookEndpoint | undefined> {
+    const result = await db.select().from(webhookEndpoints).where(eq(webhookEndpoints.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getWebhookEndpointByPath(path: string): Promise<WebhookEndpoint | undefined> {
+    const result = await db.select().from(webhookEndpoints).where(eq(webhookEndpoints.endpointPath, path)).limit(1);
+    return result[0];
+  }
+
+  async createWebhookEndpoint(endpoint: InsertWebhookEndpoint): Promise<WebhookEndpoint> {
+    const result = await db.insert(webhookEndpoints).values(endpoint).returning();
+    return result[0];
+  }
+
+  async updateWebhookEndpoint(id: string, updates: Partial<WebhookEndpoint>): Promise<WebhookEndpoint | undefined> {
+    const result = await db.update(webhookEndpoints).set({ ...updates, updatedAt: new Date() }).where(eq(webhookEndpoints.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteWebhookEndpoint(id: string): Promise<void> {
+    await db.delete(webhookEndpoints).where(eq(webhookEndpoints.id, id));
+  }
+
+  async incrementWebhookStats(id: string, processed: boolean): Promise<void> {
+    const endpoint = await this.getWebhookEndpoint(id);
+    if (endpoint) {
+      await db.update(webhookEndpoints).set({
+        totalReceived: (endpoint.totalReceived || 0) + 1,
+        totalProcessed: processed ? (endpoint.totalProcessed || 0) + 1 : endpoint.totalProcessed,
+        totalFailed: !processed ? (endpoint.totalFailed || 0) + 1 : endpoint.totalFailed,
+        lastReceivedAt: new Date(),
+        updatedAt: new Date()
+      }).where(eq(webhookEndpoints.id, id));
+    }
+  }
+
+  // Webhook Event Methods
+  async getWebhookEvents(webhookEndpointId?: string, limit?: number): Promise<WebhookEvent[]> {
+    const query = webhookEndpointId
+      ? db.select().from(webhookEvents).where(eq(webhookEvents.webhookEndpointId, webhookEndpointId)).orderBy(desc(webhookEvents.receivedAt))
+      : db.select().from(webhookEvents).orderBy(desc(webhookEvents.receivedAt));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    return await query;
+  }
+
+  async createWebhookEvent(event: InsertWebhookEvent): Promise<WebhookEvent> {
+    const result = await db.insert(webhookEvents).values(event).returning();
+    return result[0];
+  }
+
+  async updateWebhookEventStatus(id: string, status: string, error?: string, syncJobRunId?: string): Promise<void> {
+    await db.update(webhookEvents).set({
+      status,
+      processingError: error || null,
+      syncJobRunId: syncJobRunId || null,
+      processedAt: status === 'processed' || status === 'failed' ? new Date() : null
+    }).where(eq(webhookEvents.id, id));
   }
 }
 
