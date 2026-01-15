@@ -30,8 +30,8 @@ export default function Home() {
             className="text-white space-y-6"
           >
             {/* Logo */}
-            <div className="mb-2">
-              <img src={nexteraLogo} alt="NextEra Energy" className="h-12 mix-blend-multiply brightness-0 invert" />
+            <div className="mb-2 backdrop-blur-sm bg-white/80 rounded-lg px-3 py-2 inline-block">
+              <img src={nexteraLogo} alt="NextEra Energy" className="h-10" />
             </div>
             
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
