@@ -36,25 +36,25 @@ import {
   PieChart as PieChartIcon, 
   Target, 
   Leaf,
-  PoundSterling,
+  DollarSign,
   BarChart3,
   Globe,
   Info
 } from "lucide-react";
 
-const LG_BLUE = "#005EB8";
-const LG_TEAL = "#00843D";
+const NEE_BLUE = "#0072CE";
+const NEE_GREEN = "#00A651";
 
 function CorporateKPIs() {
   const kpis = [
     { 
-      label: "PRT Volume", 
+      label: "Generation Capacity", 
       value: lgAnnualReportData.prtVolume.actual2025,
       unit: lgAnnualReportData.prtVolume.unit,
-      baseline: `2024: £${lgAnnualReportData.prtVolume.baseline2024}bn`,
-      target: `Target: £${lgAnnualReportData.prtVolume.target2026}bn`,
+      baseline: `2024: ${lgAnnualReportData.prtVolume.baseline2024}GW`,
+      target: `Target: ${lgAnnualReportData.prtVolume.target2026}GW`,
       progress: Math.round((lgAnnualReportData.prtVolume.actual2025 / lgAnnualReportData.prtVolume.target2026) * 100),
-      color: "text-[#005EB8]",
+      color: "text-[#0072CE]",
       source: lgAnnualReportData.prtVolume.source
     },
     { 
@@ -64,27 +64,27 @@ function CorporateKPIs() {
       baseline: `2024: ${lgAnnualReportData.forecastAccuracy.baseline2024}%`,
       target: `Target: ${lgAnnualReportData.forecastAccuracy.target2026}%`,
       progress: Math.round((lgAnnualReportData.forecastAccuracy.actual2025 / lgAnnualReportData.forecastAccuracy.target2026) * 100),
-      color: "text-[#00843D]",
+      color: "text-[#00A651]",
       source: lgAnnualReportData.forecastAccuracy.source
     },
     { 
       label: "Cost Savings", 
       value: lgAnnualReportData.costSavings.actual2025,
-      unit: "£m",
-      baseline: `2024: £${lgAnnualReportData.costSavings.baseline2024}m`,
-      target: `Target: £${lgAnnualReportData.costSavings.target2026}m`,
+      unit: "$m",
+      baseline: `2024: $${lgAnnualReportData.costSavings.baseline2024}m`,
+      target: `Target: $${lgAnnualReportData.costSavings.target2026}m`,
       progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100),
-      color: "text-[#00843D]",
+      color: "text-[#00A651]",
       source: lgAnnualReportData.costSavings.source
     },
     { 
       label: "Digital Investment", 
       value: lgAnnualReportData.digitalInvestment.actual2025,
-      unit: "£m",
-      baseline: `2024: £${lgAnnualReportData.digitalInvestment.baseline2024}m`,
-      target: `Target: £${lgAnnualReportData.digitalInvestment.target2026}m`,
+      unit: "$m",
+      baseline: `2024: $${lgAnnualReportData.digitalInvestment.baseline2024}m`,
+      target: `Target: $${lgAnnualReportData.digitalInvestment.target2026}m`,
       progress: Math.round((lgAnnualReportData.digitalInvestment.actual2025 / lgAnnualReportData.digitalInvestment.target2026) * 100),
-      color: "text-[#005EB8]",
+      color: "text-[#0072CE]",
       source: lgAnnualReportData.digitalInvestment.source
     }
   ];
@@ -93,7 +93,7 @@ function CorporateKPIs() {
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <Building2 className="h-4 w-4 text-gray-500" />
-        <span className="text-sm font-medium text-gray-600">Corporate KPIs (L&G Annual Report)</span>
+        <span className="text-sm font-medium text-gray-600">Corporate KPIs (NextEra Energy Annual Report)</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {kpis.map((kpi, i) => (
@@ -115,7 +115,7 @@ function CorporateKPIs() {
               </div>
             </div>
             <div className="mt-2 pt-2 border-t border-gray-200">
-              <p className="text-[10px] font-semibold text-[#005EB8]">{kpi.source}</p>
+              <p className="text-[10px] font-semibold text-[#0072CE]">{kpi.source}</p>
             </div>
           </div>
         ))}
@@ -156,8 +156,8 @@ function MetricCard({
               </div>
             )}
           </div>
-          <div className="p-2 bg-[#005EB8]/10 rounded-lg">
-            <Icon size={20} className="text-[#005EB8]" />
+          <div className="p-2 bg-[#0072CE]/10 rounded-lg">
+            <Icon size={20} className="text-[#0072CE]" />
           </div>
         </div>
         {source && (
@@ -182,7 +182,7 @@ function DivisionalProfitChart() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 size={18} className="text-[#005EB8]" />
+              <BarChart3 size={18} className="text-[#0072CE]" />
               Operating Profit by Division
             </CardTitle>
             <CardDescription>2023 vs 2024 comparison (£m)</CardDescription>
@@ -203,7 +203,7 @@ function DivisionalProfitChart() {
               />
               <Legend />
               <Bar dataKey="2023" fill="#94a3b8" name="2023" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="2024" fill={LG_BLUE} name="2024" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="2024" fill={NEE_BLUE} name="2024" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -235,7 +235,7 @@ function AUMBreakdownChart() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <PieChartIcon size={18} className="text-[#00843D]" />
+              <PieChartIcon size={18} className="text-[#00A651]" />
               Assets Under Management
             </CardTitle>
             <CardDescription>Key AUM segments (£bn)</CardDescription>
@@ -284,8 +284,8 @@ function AUMBreakdownChart() {
 
 function GlobalPRTChart() {
   const data = [
-    { region: "UK", value: globalPRTData.ukPRT2024, color: LG_BLUE },
-    { region: "US", value: globalPRTData.usPRT2024, color: LG_TEAL },
+    { region: "UK", value: globalPRTData.ukPRT2024, color: NEE_BLUE },
+    { region: "US", value: globalPRTData.usPRT2024, color: NEE_GREEN },
     { region: "Canada", value: globalPRTData.canadaPRT2024, color: "#6366f1" }
   ];
 
@@ -293,7 +293,7 @@ function GlobalPRTChart() {
     <Card className="bg-card" data-testid="card-global-prt">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Globe size={18} className="text-[#005EB8]" />
+          <Globe size={18} className="text-[#0072CE]" />
           Global PRT Written 2024
         </CardTitle>
         <CardDescription>£{globalPRTData.totalGlobal2024}bn total across regions</CardDescription>
@@ -320,11 +320,11 @@ function GlobalPRTChart() {
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3 pt-3 border-t">
           <div className="text-center">
-            <span className="text-lg font-bold text-[#005EB8]">{globalPRTData.ukSolvencyMargin2024}%</span>
+            <span className="text-lg font-bold text-[#0072CE]">{globalPRTData.ukSolvencyMargin2024}%</span>
             <p className="text-xs text-muted-foreground">UK Solvency II Margin</p>
           </div>
           <div className="text-center">
-            <span className="text-lg font-bold text-[#00843D]">{globalPRTData.ifrsNewBusinessMargin2024}%</span>
+            <span className="text-lg font-bold text-[#00A651]">{globalPRTData.ifrsNewBusinessMargin2024}%</span>
             <p className="text-xs text-muted-foreground">IFRS New Business Margin</p>
           </div>
         </div>
@@ -424,14 +424,14 @@ function ShareholderReturnsCard() {
     <Card className="bg-card" data-testid="card-shareholder-returns">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
-          <PoundSterling size={18} className="text-[#005EB8]" />
+          <PoundSterling size={18} className="text-[#0072CE]" />
           Shareholder Returns
         </CardTitle>
         <CardDescription>Capital allocation 2024-2027</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="text-center mb-4">
-          <span className="text-3xl font-bold text-[#005EB8]">£{(shareholderReturns.totalReturnTarget2024_27 / 1000).toFixed(0)}bn+</span>
+          <span className="text-3xl font-bold text-[#0072CE]">£{(shareholderReturns.totalReturnTarget2024_27 / 1000).toFixed(0)}bn+</span>
           <p className="text-sm text-muted-foreground">Total Return Target (40% of market cap)</p>
         </div>
         <div className="space-y-2">
@@ -441,11 +441,11 @@ function ShareholderReturnsCard() {
           </div>
           <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
             <span className="text-sm">New Buyback (Announced)</span>
-            <Badge className="bg-[#005EB8]">£{shareholderReturns.buybackAnnounced}m</Badge>
+            <Badge className="bg-[#0072CE]">£{shareholderReturns.buybackAnnounced}m</Badge>
           </div>
           <div className="flex justify-between items-center p-2 bg-green-50 rounded">
             <span className="text-sm">Post-US Sale Buyback</span>
-            <Badge className="bg-[#00843D]">£{(shareholderReturns.additionalBuybackPostUSSale / 1000).toFixed(0)}bn</Badge>
+            <Badge className="bg-[#00A651]">£{(shareholderReturns.additionalBuybackPostUSSale / 1000).toFixed(0)}bn</Badge>
           </div>
         </div>
         <div className="mt-3 text-center text-xs text-muted-foreground">
@@ -474,7 +474,7 @@ export function BusinessPerformanceSection({ mode = "VRO" }: { mode?: DataMode }
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">
-            {mode === "VRO" ? "L&G Business Performance (VRO)" : "L&G Business Performance (PMO)"}
+            {mode === "VRO" ? "NextEra Energy Business Performance (VRO)" : "NextEra Energy Business Performance (PMO)"}
           </h2>
           <p className="text-muted-foreground">
             {mode === "VRO" 

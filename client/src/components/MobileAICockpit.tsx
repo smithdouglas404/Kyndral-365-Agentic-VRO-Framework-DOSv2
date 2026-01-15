@@ -783,7 +783,7 @@ export function MobileAICockpit({
         <div className="flex items-center gap-2">
           <span className="font-medium">9:41</span>
         </div>
-        <span className="font-semibold">L&G AI Cockpit</span>
+        <span className="font-semibold">NEE AI Cockpit</span>
         <div className="flex items-center gap-2">
           {criticalCount > 0 && (
             <div className="flex items-center gap-1">

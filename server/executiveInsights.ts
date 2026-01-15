@@ -151,7 +151,7 @@ export async function generateExecutiveInsights(): Promise<ExecutiveInsight> {
 
   const context = buildExecutiveContext();
   
-  const systemPrompt = `You are the Enterprise Transformation Intelligence Agent for Legal & General.
+  const systemPrompt = `You are the Enterprise Transformation Intelligence Agent for NextEra Energy.
 Your role is to provide executive-level insights that are:
 1. ACTIONABLE - Every insight should lead to a clear decision or action
 2. QUANTIFIED - Include specific numbers, percentages, and financial impacts

@@ -37,9 +37,9 @@ import {
   Leaf
 } from "lucide-react";
 
-const LG = {
-  blue: "#005EB8",
-  teal: "#00843D",
+const NEE = {
+  blue: "#0072CE",
+  teal: "#00A651",
   red: "#D50032",
   yellow: "#FFD700",
   grey: "#757575",
@@ -901,11 +901,11 @@ export default function AgentCommandCenterPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`border-l-4 pl-4 py-3 rounded-r-lg bg-white shadow-sm`}
-                            style={{ borderLeftColor: msg.agentColor?.includes('green') ? LG.teal : 
-                                                       msg.agentColor?.includes('blue') ? LG.blue : 
+                            style={{ borderLeftColor: msg.agentColor?.includes('green') ? NEE.teal : 
+                                                       msg.agentColor?.includes('blue') ? NEE.blue : 
                                                        msg.agentColor?.includes('purple') ? '#9333ea' :
                                                        msg.agentColor?.includes('orange') ? '#f97316' :
-                                                       msg.agentColor?.includes('teal') ? '#14b8a6' : LG.grey }}
+                                                       msg.agentColor?.includes('teal') ? '#14b8a6' : NEE.grey }}
                             data-testid={`discussion-msg-${msg.id}`}
                           >
                             <div className="flex items-center gap-2 mb-2">

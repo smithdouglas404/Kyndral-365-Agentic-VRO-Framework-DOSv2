@@ -62,8 +62,8 @@ export async function extractPolicyMetadata(policyText: string, filename?: strin
     system: `You are an expert at extracting metadata from insurance and legal policy documents. 
 Extract the following information and return ONLY a JSON object with these exact keys:
 - policyName: A clear, descriptive name for this policy (e.g., "Life Insurance and Critical Illness Cover")
-- provider: The company/organization that provides this policy (e.g., "Legal & General")
-- documentId: Any document reference number, policy number, or version identifier found in the text. If none exists, generate a plausible one based on the provider and policy type (e.g., "LG-LICI-2024-001")
+- provider: The company/organization that provides this policy (e.g., "NextEra Energy")
+- documentId: Any document reference number, policy number, or version identifier found in the text. If none exists, generate a plausible one based on the provider and policy type (e.g., "NEE-POL-2024-001")
 
 Return ONLY valid JSON, no additional text.`,
     messages: [
@@ -134,7 +134,7 @@ export async function generateLifecycleInsight(
   funnel: { stage: string; label: string; count: number }[],
   recentChanges: { entityName: string; field: string; oldValue: number; newValue: number; trend: string }[]
 ): Promise<string> {
-  const systemPrompt = `You are the VRO (Value Realization Office) AI agent for Legal & General's Enterprise Transformation. Provide a concise, actionable insight about the project portfolio health based on the metrics provided. Be specific and executive-focused. Keep the response to 2-3 sentences maximum.`;
+  const systemPrompt = `You are the VRO (Value Realization Office) AI agent for NextEra Energy's Enterprise Transformation. Provide a concise, actionable insight about the project portfolio health based on the metrics provided. Be specific and executive-focused. Keep the response to 2-3 sentences maximum.`;
 
   const dataContext = `
 Portfolio Metrics:

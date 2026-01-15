@@ -41,10 +41,10 @@ import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
 
-// L&G Design System Colors (Enterprise Transformation Team 2026)
-const LG = {
-  blue: colors.brand.blue,      // #005EB8 - Primary actions, links, navigation
-  teal: colors.brand.teal,      // #00843D - Positive trends, success states
+// NextEra Design System Colors (Enterprise Transformation Team 2026)
+const NEE = {
+  blue: colors.brand.blue,      // #0072CE - Primary actions, links, navigation
+  teal: colors.brand.teal,      // #00A651 - Positive trends, success states
   red: colors.brand.red,        // #D50032 - Alerts, errors, negative trends
   yellow: colors.brand.yellow,  // #FFD700 - Subtle highlights
   grey500: colors.neutral.grey500, // #757575 - Secondary text
@@ -67,7 +67,7 @@ const VRO_METRICS_DATA = [
     label: "Net Present Value", 
     value: "$36.25",
     unit: "M",
-    color: "text-[#005EB8]",
+    color: "text-[#0072CE]",
     source: "5-year projection"
   },
   { 
@@ -75,7 +75,7 @@ const VRO_METRICS_DATA = [
     label: "Timeline Progress", 
     value: "69",
     unit: "%",
-    color: "text-[#00843D]",
+    color: "text-[#00A651]",
     source: "Value Stream Mapping"
   },
   { 
@@ -97,7 +97,7 @@ function VROMetricsSummaryLive() {
     <div className="mt-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-[#005EB8]" />
+          <TrendingUp className="h-4 w-4 text-[#0072CE]" />
           <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
           {state.isLive && (
             <motion.div
@@ -158,7 +158,7 @@ function VROMetricsSummary() {
   return (
     <div className="mt-4">
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="h-4 w-4 text-[#005EB8]" />
+        <TrendingUp className="h-4 w-4 text-[#0072CE]" />
         <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -174,7 +174,7 @@ function VROMetricsSummary() {
               <span className="text-sm text-gray-500">{kpi.unit}</span>
             </div>
             <div className="mt-2 pt-2 border-t border-blue-200">
-              <p className="text-[10px] font-semibold text-[#005EB8]">{kpi.source}</p>
+              <p className="text-[10px] font-semibold text-[#0072CE]">{kpi.source}</p>
             </div>
           </div>
         ))}
@@ -191,7 +191,7 @@ function LiveIndicatorButton({ isLive, onToggle }: { isLive: boolean; onToggle: 
       onClick={onToggle}
       className={cn(
         "gap-2 transition-all",
-        isLive ? "border-[#00843D] text-[#00843D] bg-[#00843D]/10" : "border-gray-300"
+        isLive ? "border-[#00A651] text-[#00A651] bg-[#00A651]/10" : "border-gray-300"
       )}
       data-testid="button-live-toggle"
     >
@@ -239,7 +239,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
       baseline: "$0",
       target: "$50M",
       icon: Activity, 
-      color: "text-[#005EB8]",
+      color: "text-[#0072CE]",
       source: "5-year projection",
       progress: 73,
       delta: "+$60K"
@@ -252,7 +252,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
       baseline: "Phase 1",
       target: "Phase 4",
       icon: Clock, 
-      color: "text-[#00843D]",
+      color: "text-[#00A651]",
       source: "Value Stream Mapping",
       progress: 69,
       delta: "Phase 2 of 4, -6%"
@@ -282,7 +282,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
       baseline: "35 days",
       target: "10 days",
       icon: Clock, 
-      color: "text-[#005EB8]",
+      color: "text-[#0072CE]",
       source: "PMO Flow Metrics",
       progress: 64,
       delta: "+8 days vs target"
@@ -308,7 +308,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
       baseline: "8 items/week",
       target: "25 items/week",
       icon: TrendingUp, 
-      color: "text-[#00843D]",
+      color: "text-[#00A651]",
       source: "Sprint Analytics",
       progress: 44,
       delta: "+3 vs last week"
@@ -321,7 +321,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
       baseline: "12 items",
       target: "8 items",
       icon: Target, 
-      color: "text-[#005EB8]",
+      color: "text-[#0072CE]",
       source: "Kanban Board",
       progress: 75,
       delta: "3 slots available"
@@ -362,15 +362,15 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
             <div className="w-full mt-3">
               <div className="flex justify-between text-xs mb-1">
                 <span className="text-muted-foreground">2024: {stat.baseline}</span>
-                <span className="font-medium text-[#00843D]">2026: {stat.target}</span>
+                <span className="font-medium text-[#00A651]">2026: {stat.target}</span>
               </div>
               <Progress value={stat.progress} className="h-2" />
-              <div className="text-xs text-right mt-1 font-medium" style={{ color: mode === "VRO" ? "#00843D" : "#757575" }}>
+              <div className="text-xs text-right mt-1 font-medium" style={{ color: mode === "VRO" ? "#00A651" : "#757575" }}>
                 {stat.progress}% to target
               </div>
             </div>
             <div className="mt-3 pt-2 border-t border-gray-100">
-              <p className="text-[11px] font-semibold text-[#005EB8]">{stat.source}</p>
+              <p className="text-[11px] font-semibold text-[#0072CE]">{stat.source}</p>
             </div>
           </motion.div>
         );
@@ -384,15 +384,15 @@ function NavBar() {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap" data-testid="link-home">Legal & General</div>
+          <div className="font-bold text-2xl text-[#0072CE] tracking-tight cursor-pointer whitespace-nowrap" data-testid="link-home">NextEra Energy</div>
         </Link>
         <nav className="hidden md:flex gap-6">
-          <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]" data-testid="link-dashboard">Dashboard</Link>
-          <Link href="/command-center" className="text-sm font-medium text-[#005EB8] flex items-center gap-1" data-testid="link-command-center">
+          <Link href="/dashboard" className="text-sm font-medium text-[#0072CE]" data-testid="link-dashboard">Dashboard</Link>
+          <Link href="/command-center" className="text-sm font-medium text-[#0072CE] flex items-center gap-1" data-testid="link-command-center">
             <Brain className="h-4 w-4" />
             Command Center
           </Link>
-          <Link href="/ingestion" className="text-sm font-medium text-[#005EB8]" data-testid="link-ingestion">Project Ingestion</Link>
+          <Link href="/ingestion" className="text-sm font-medium text-[#0072CE]" data-testid="link-ingestion">Project Ingestion</Link>
         </nav>
       </div>
       <div className="flex items-center gap-4">
@@ -658,11 +658,11 @@ function DashboardContent() {
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Data Sources & Citations</p>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p>† PRT volume target (£10bn): L&G Annual Report 2024, p.12</p>
-                <p>† Forecast accuracy target (85%): L&G Annual Report 2024, p.45</p>
-                <p>† Cost savings target (£200m): L&G Annual Report 2024, p.23</p>
-                <p>† Transformation risk: L&G Annual Report 2024, Principal Risks (p.78)</p>
-                <p>† Digital investment (£150m): L&G Annual Report 2024, p.34</p>
+                <p>† Revenue target ($28bn): NextEra Energy Annual Report 2024</p>
+                <p>† Clean Energy Capacity (75GW): NextEra Energy 10-K 2024</p>
+                <p>† Cost efficiency target: NextEra Energy Annual Report 2024</p>
+                <p>† Operational risk: NextEra Energy Annual Report 2024, Risk Factors</p>
+                <p>† Capital investment: NextEra Energy Annual Report 2024</p>
               </div>
             </div>
             <div className="text-right">
@@ -673,7 +673,7 @@ function DashboardContent() {
             </div>
           </div>
           <div className="flex justify-between items-center text-sm text-muted-foreground border-t border-border pt-4">
-            <p>© 2026 Legal & General. Internal Use Only.</p>
+            <p>© 2026 NextEra Energy. Internal Use Only.</p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-primary">Privacy Policy</a>
             </div>

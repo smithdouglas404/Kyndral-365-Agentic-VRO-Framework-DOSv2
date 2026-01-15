@@ -1,11 +1,11 @@
-// L&G Design System - Enterprise Transformation Team 2026 Edition
+// NextEra Energy Design System - Enterprise Transformation Team 2026 Edition
 // All designs MUST use these tokens - no deviations without approval
 
 export const colors = {
   // Brand Colors - Primary Palette
   brand: {
-    blue: "#005EB8",      // Primary actions, links, focus states, navigation accents
-    teal: "#00843D",      // Positive trends, success states
+    blue: "#0072CE",      // Primary actions, links, focus states, navigation accents
+    teal: "#00A651",      // Positive trends, success states (NextEra Green)
     red: "#D50032",       // Alerts, errors, negative trends
     yellow: "#FFD700",    // Subtle highlights, secondary CTAs (use sparingly)
   },
@@ -22,10 +22,10 @@ export const colors = {
   
   // Semantic Colors (mapped from brand)
   semantic: {
-    success: "#00843D",   // Brand Teal
+    success: "#00A651",   // NextEra Green
     warning: "#FFC107",   // Amber
     error: "#D50032",     // Brand Red
-    info: "#005EB8",      // Brand Blue
+    info: "#0072CE",      // NextEra Blue
   },
   
   // Mobile Prototype ONLY (Art of the Possible section)

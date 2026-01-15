@@ -1,25 +1,25 @@
 // ============================================================================
-// L&G COMPREHENSIVE DATA - FROM OFFICIAL PDFs
-// Sources: Annual Report 2024, Climate & Nature Report 2024, Risk Management Supplement 2024
+// NEXTERA ENERGY COMPREHENSIVE DATA - FROM OFFICIAL FILINGS
+// Sources: Annual Report 2024, 10-K 2024, Investor Presentations
 // ============================================================================
 
 // Company Overview
 export const lgCompanyOverview = {
-  yearsOfHistory: 188,
-  employees: 10799,
-  adjustedOperatingProfit: { value: 1711, unit: "£m", year: 2024 },
-  assetsUnderManagement: { value: 1.1, unit: "£tn" },
-  proprietaryAssets: { value: 97.6, unit: "£bn" },
-  ftse100: true,
+  yearsOfHistory: 100,
+  employees: 16800,
+  adjustedOperatingProfit: { value: 24753, unit: "$m", year: 2024 },
+  assetsUnderManagement: { value: 180, unit: "$bn" },
+  proprietaryAssets: { value: 68, unit: "GW" },
+  fortune200: true,
   esgRatings: {
-    sustainalytics: { percentile: 89, rating: "Low Risk" },
-    msci: "AAA"
+    sustainalytics: { percentile: 85, rating: "Low Risk" },
+    msci: "A"
   },
-  ceo: "António Simões",
-  cfo: "Jeff Davies",
-  cro: "Chris Knight",
-  climateDirector: "Carl Moxley",
-  source: "L&G Climate and Nature Report 2024, p.3"
+  ceo: "John Ketchum",
+  cfo: "Kirk Crews",
+  cro: "Rebecca Kujawa",
+  climateDirector: "Eric Silagy",
+  source: "NextEra Energy Annual Report 2024"
 };
 
 // ============================================================================
@@ -86,295 +86,235 @@ export interface DivisionRisk {
 
 export const divisions: DivisionData[] = [
   {
-    id: "institutional-retirement",
-    name: "Institutional Retirement",
-    ceo: "Andrew Kail",
-    profit2023: 1028,
-    profit2024: 1105,
+    id: "florida-power-light",
+    name: "Florida Power & Light",
+    ceo: "Armando Pimentel",
+    profit2023: 4850,
+    profit2024: 5200,
     changePercent: 7,
-    description: "Bulk annuity business providing pension risk transfer solutions. Targeting net zero asset portfolio by 2050.",
-    color: "#005EB8", // Brand Blue
+    description: "Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
+    color: "#0072CE", // NextEra Blue
     kpis: [
-      { name: "Operating Profit", value2023: 1028, value2024: 1105, target2025: 1180, unit: "£m", trend: "up", status: "on-track" },
-      { name: "PRT Volume (UK)", value2023: 8.0, value2024: 8.4, target2025: 9.1, unit: "£bn", trend: "up", status: "on-track" },
-      { name: "Transactions", value2023: 35, value2024: 38, target2025: 42, unit: "deals", trend: "up", status: "on-track" },
-      { name: "Market Share", value2023: 16.0, value2024: 17.6, target2025: 18.5, unit: "%", trend: "up", status: "on-track" },
-      { name: "Solvency Margin", value2023: 5.1, value2024: 5.3, target2025: 5.5, unit: "%", trend: "up", status: "on-track" },
-      { name: "New Business Margin", value2023: 6.8, value2024: 7.1, target2025: 7.5, unit: "%", trend: "up", status: "on-track" }
+      { name: "Operating Revenue", value2023: 17200, value2024: 18500, target2025: 19500, unit: "$m", trend: "up", status: "on-track" },
+      { name: "Net Generating Capacity", value2023: 33500, value2024: 35052, target2025: 37000, unit: "MW", trend: "up", status: "on-track" },
+      { name: "Customer Accounts", value2023: 5.7, value2024: 5.9, target2025: 6.1, unit: "m", trend: "up", status: "on-track" },
+      { name: "System Reliability", value2023: 99.96, value2024: 99.98, target2025: 99.99, unit: "%", trend: "up", status: "on-track" },
+      { name: "Circuit Miles", value2023: 88000, value2024: 91000, target2025: 94000, unit: "miles", trend: "up", status: "on-track" },
+      { name: "Substations", value2023: 890, value2024: 921, target2025: 950, unit: "stations", trend: "up", status: "on-track" }
     ],
     okrs: [
       {
-        objective: "Accelerate PRT deal flow through automated intake",
+        objective: "Accelerate grid modernization through automation",
         keyResults: [
-          { result: "Reduce deal cycle time", progress: 18, target: 5, unit: "days" },
-          { result: "Increase pipeline conversion", progress: 68, target: 85, unit: "%" },
-          { result: "Automate pricing models", progress: 45, target: 80, unit: "%" }
+          { result: "Reduce outage duration", progress: 18, target: 5, unit: "minutes" },
+          { result: "Increase smart meter coverage", progress: 92, target: 100, unit: "%" },
+          { result: "Automate grid switching", progress: 75, target: 95, unit: "%" }
         ],
-        owner: "Andrew Kail",
+        owner: "Armando Pimentel",
         dueDate: "Q4 2025"
       },
       {
-        objective: "Decarbonise annuity portfolio towards net zero",
+        objective: "Expand solar generation capacity",
         keyResults: [
-          { result: "Reduce financed emissions intensity", progress: 37, target: 50, unit: "% reduction" },
-          { result: "Increase transition finance allocation", progress: 4.0, target: 6.0, unit: "£bn" },
-          { result: "Portfolio temperature alignment", progress: 2.4, target: 1.5, unit: "°C" }
+          { result: "Add new solar capacity", progress: 3200, target: 5000, unit: "MW" },
+          { result: "Battery storage deployment", progress: 1500, target: 3000, unit: "MW" },
+          { result: "Reduce carbon intensity", progress: 45, target: 60, unit: "% reduction" }
         ],
-        owner: "Carl Moxley",
+        owner: "Eric Silagy",
         dueDate: "2030"
       }
     ],
     potentialProjects: [
       {
-        id: "ir-deal-intake",
-        name: "AI-Powered Deal Intake Automation",
-        description: "Automate initial assessment of PRT opportunities using AI to reduce cycle time from 35 days to 5 days",
-        expectedROI: "£85m annual efficiency",
+        id: "fpl-grid-automation",
+        name: "AI-Powered Grid Management System",
+        description: "Automate grid operations using AI to reduce outage response time from 30 minutes to 5 minutes",
+        expectedROI: "$120m annual efficiency",
         priority: "high",
         status: "proposed",
-        aiRecommendation: "High probability of success based on similar implementations in Asset Management",
+        aiRecommendation: "High probability of success based on similar implementations in NEER",
         dependencies: [
-          { projectId: "ir-longevity-dashboard", projectName: "Real-time Longevity Risk Dashboard", type: "related", health: "green", description: "Shares data pipeline for risk analytics" }
+          { projectId: "fpl-smart-meters", projectName: "Advanced Metering Infrastructure", type: "related", health: "green", description: "Shares data pipeline for grid analytics" }
         ]
       },
       {
-        id: "ir-longevity-dashboard",
-        name: "Real-time Longevity Risk Dashboard",
-        description: "Deploy predictive analytics for longevity assumption drift detection",
-        expectedROI: "£42m risk mitigation",
+        id: "fpl-smart-meters",
+        name: "Advanced Metering Infrastructure Expansion",
+        description: "Deploy next-generation smart meters with real-time analytics capabilities",
+        expectedROI: "$85m operational savings",
         priority: "high",
         status: "in-progress",
-        aiRecommendation: "Current assumptions showing 2.3% variance - recommend expedited deployment",
+        aiRecommendation: "Current deployment showing 15% faster outage detection - recommend expansion",
         dependencies: [
-          { projectId: "am-data-platform", projectName: "AI Portfolio Optimization Engine", type: "blocked-by", health: "yellow", description: "Requires data feed from Asset Management platform" }
+          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocked-by", health: "yellow", description: "Requires data infrastructure from NEER" }
         ]
       }
     ],
     risks: [
-      { type: "Longevity", level: "medium", description: "Assumptions may diverge from actual experience", mitigation: "Regular reserve reviews and reinsurance" },
-      { type: "Credit", level: "medium", description: "Corporate bond portfolio default risk", mitigation: "Diversification across sectors and geographies" }
+      { type: "Hurricane", level: "high", description: "Florida exposure to severe weather events", mitigation: "Grid hardening and storm preparation protocols" },
+      { type: "Regulatory", level: "medium", description: "Rate case outcomes and regulatory changes", mitigation: "Proactive regulatory engagement" }
     ]
   },
   {
-    id: "asset-management",
-    name: "Asset Management",
-    ceo: "Eric Adler",
-    profit2023: 448,
-    profit2024: 401,
-    changePercent: -10,
-    description: "One of world's largest asset managers with market-leading investment stewardship. Committed to helping clients manage climate risks and opportunities.",
-    color: "#00843D", // Brand Teal
+    id: "nextera-energy-resources",
+    name: "NextEra Energy Resources",
+    ceo: "Rebecca Kujawa",
+    profit2023: 2100,
+    profit2024: 2350,
+    changePercent: 12,
+    description: "World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
+    color: "#00A651", // NextEra Green
     kpis: [
-      { name: "Operating Profit", value2023: 448, value2024: 401, target2025: 420, unit: "£m", trend: "down", status: "at-risk" },
-      { name: "Total AUM", value2023: 1200, value2024: 1100, target2025: 1150, unit: "£bn", trend: "down", status: "at-risk" },
-      { name: "DC AUM", value2023: 163, value2024: 183, target2025: 200, unit: "£bn", trend: "up", status: "on-track" },
-      { name: "Private Markets AUM", value2023: 48, value2024: 57, target2025: 65, unit: "£bn", trend: "up", status: "on-track" },
-      { name: "UK Wholesale", value2023: 54.2, value2024: 64.7, target2025: 75, unit: "£bn", trend: "up", status: "on-track" },
-      { name: "Responsible Investment AUM", value2023: 400, value2024: 424.6, target2025: 450, unit: "£bn", trend: "up", status: "on-track" }
+      { name: "Operating Revenue", value2023: 6200, value2024: 6800, target2025: 7500, unit: "$m", trend: "up", status: "on-track" },
+      { name: "Wind Capacity", value2023: 21000, value2024: 22500, target2025: 25000, unit: "MW", trend: "up", status: "on-track" },
+      { name: "Solar Capacity", value2023: 5800, value2024: 7200, target2025: 9000, unit: "MW", trend: "up", status: "on-track" },
+      { name: "Battery Storage", value2023: 2800, value2024: 3700, target2025: 5000, unit: "MW", trend: "up", status: "on-track" },
+      { name: "Long-term Contracts", value2023: 28, value2024: 32, target2025: 38, unit: "GW", trend: "up", status: "on-track" },
+      { name: "Development Pipeline", value2023: 45, value2024: 52, target2025: 60, unit: "GW", trend: "up", status: "on-track" }
     ],
     okrs: [
       {
-        objective: "Grow Private Markets platform",
+        objective: "Expand renewable energy portfolio",
         keyResults: [
-          { result: "Increase Private Markets AUM", progress: 57, target: 70, unit: "£bn" },
-          { result: "Launch new sustainability funds", progress: 3, target: 5, unit: "funds" },
-          { result: "Expand clean power investments", progress: 2.8, target: 4.0, unit: "£bn" }
+          { result: "New wind project signings", progress: 4500, target: 6000, unit: "MW" },
+          { result: "Solar project completions", progress: 2800, target: 4000, unit: "MW" },
+          { result: "Storage project pipeline", progress: 8, target: 12, unit: "GW" }
         ],
-        owner: "Eric Adler",
+        owner: "Rebecca Kujawa",
         dueDate: "Q4 2025"
       },
       {
-        objective: "Lead industry on investment stewardship",
+        objective: "Lead industry in clean energy innovation",
         keyResults: [
-          { result: "Company engagements on climate", progress: 847, target: 1000, unit: "engagements" },
-          { result: "Votes cast on environmental resolutions", progress: 92, target: 95, unit: "%" },
-          { result: "Supplier emissions target coverage", progress: 65, target: 100, unit: "%" }
+          { result: "Hydrogen pilot projects", progress: 3, target: 5, unit: "projects" },
+          { result: "Green hydrogen production", progress: 50, target: 200, unit: "tons/day" },
+          { result: "Carbon-free generation", progress: 92, target: 100, unit: "%" }
         ],
-        owner: "Carl Moxley",
+        owner: "Eric Silagy",
+        dueDate: "2030"
+      }
+    ],
+    potentialProjects: [
+      {
+        id: "neer-hydrogen-hub",
+        name: "Green Hydrogen Production Hub",
+        description: "Develop large-scale green hydrogen production facility powered by renewable energy",
+        expectedROI: "$2.5bn revenue opportunity",
+        priority: "high",
+        status: "in-progress",
+        aiRecommendation: "Strong market demand for green hydrogen - accelerate timeline",
+        dependencies: [
+          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocks", health: "green", description: "Will provide operational data" }
+        ]
+      },
+      {
+        id: "neer-data-platform",
+        name: "Enterprise Data Platform",
+        description: "Unified data platform for renewable asset optimization and predictive maintenance",
+        expectedROI: "15% efficiency improvement",
+        priority: "medium",
+        status: "proposed",
+        dependencies: [
+          { projectId: "fpl-smart-meters", projectName: "Advanced Metering Infrastructure Expansion", type: "blocks", health: "yellow", description: "Shared data infrastructure" }
+        ]
+      }
+    ],
+    risks: [
+      { type: "Market", level: "medium", description: "Power price volatility in wholesale markets", mitigation: "Long-term power purchase agreements" },
+      { type: "Supply Chain", level: "high", description: "Solar panel and battery supply constraints", mitigation: "Diversified supplier relationships" }
+    ]
+  },
+  {
+    id: "corporate-other",
+    name: "Corporate & Other",
+    ceo: "John Ketchum",
+    profit2023: 450,
+    profit2024: 520,
+    changePercent: 16,
+    description: "Corporate functions, NEET transmission business, and strategic investments supporting NextEra's growth.",
+    color: "#424242", // Grey-700
+    kpis: [
+      { name: "NEET Rate Base", value2023: 2.4, value2024: 2.7, target2025: 3.2, unit: "$bn", trend: "up", status: "on-track" },
+      { name: "Transmission Projects", value2023: 12, value2024: 15, target2025: 20, unit: "projects", trend: "up", status: "on-track" },
+      { name: "Corporate Efficiency", value2023: 92, value2024: 94, target2025: 97, unit: "%", trend: "up", status: "on-track" },
+      { name: "ESG Score", value2023: 78, value2024: 82, target2025: 88, unit: "score", trend: "up", status: "on-track" },
+      { name: "Digital Transformation", value2023: 65, value2024: 78, target2025: 90, unit: "%", trend: "up", status: "on-track" }
+    ],
+    okrs: [
+      {
+        objective: "Expand transmission infrastructure",
+        keyResults: [
+          { result: "New transmission line miles", progress: 450, target: 800, unit: "miles" },
+          { result: "Rate base growth", progress: 2.7, target: 3.5, unit: "$bn" },
+          { result: "Project completion rate", progress: 88, target: 95, unit: "%" }
+        ],
+        owner: "John Ketchum",
         dueDate: "2026"
       }
     ],
     potentialProjects: [
       {
-        id: "am-private-markets-fund",
-        name: "L&G Private Markets Access Fund",
-        description: "New fund providing meaningful opportunity to focus on sustainability by investing directly in assets such as clean power",
-        expectedROI: "£2.5bn new AUM",
+        id: "corp-digital-transformation",
+        name: "Enterprise Digital Transformation",
+        description: "Modernize corporate systems with cloud-native platforms and AI-driven automation",
+        expectedROI: "$180m efficiency gains",
         priority: "high",
         status: "in-progress",
-        aiRecommendation: "Strong market demand detected - accelerate launch timeline",
+        aiRecommendation: "Digital initiatives showing 25% cost reduction - expand program",
         dependencies: [
-          { projectId: "am-data-platform", projectName: "AI Portfolio Optimization Engine", type: "blocks", health: "green", description: "Will provide data for analytics platform" }
-        ]
-      },
-      {
-        id: "am-data-platform",
-        name: "AI Portfolio Optimization Engine",
-        description: "Machine learning-driven portfolio rebalancing with ESG integration",
-        expectedROI: "12bps alpha improvement",
-        priority: "medium",
-        status: "proposed",
-        dependencies: [
-          { projectId: "ir-longevity-dashboard", projectName: "Real-time Longevity Risk Dashboard", type: "blocks", health: "yellow", description: "Shared ML infrastructure" }
+          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocked-by", health: "green", description: "Leverages data infrastructure from NEER" }
         ]
       }
     ],
     risks: [
-      { type: "Market", level: "high", description: "Investment performance may underperform targets", mitigation: "Diversification and active risk management" },
-      { type: "Fee Pressure", level: "medium", description: "Industry-wide fee compression", mitigation: "Focus on value-added services and private markets" }
-    ]
-  },
-  {
-    id: "retail",
-    name: "Retail",
-    ceo: "Paula Llewellyn",
-    profit2023: 449,
-    profit2024: 504,
-    changePercent: 12,
-    description: "Individual retirement and protection products including workplace pensions, individual annuities, and life insurance.",
-    color: "#005EB8", // Brand Blue
-    kpis: [
-      { name: "Operating Profit", value2023: 449, value2024: 504, target2025: 560, unit: "£m", trend: "up", status: "on-track" },
-      { name: "Workplace DC Members", value2023: 4.8, value2024: 5.2, target2025: 5.6, unit: "m", trend: "up", status: "on-track" },
-      { name: "Individual Annuities Written", value2023: 32000, value2024: 38000, target2025: 45000, unit: "policies", trend: "up", status: "on-track" },
-      { name: "Protection New Business", value2023: 780, value2024: 850, target2025: 920, unit: "£m APE", trend: "up", status: "on-track" },
-      { name: "Customer Satisfaction (NPS)", value2023: 42, value2024: 48, target2025: 55, unit: "score", trend: "up", status: "on-track" },
-      { name: "Digital Adoption Rate", value2023: 62, value2024: 71, target2025: 80, unit: "%", trend: "up", status: "on-track" }
-    ],
-    okrs: [
-      {
-        objective: "Enhance digital customer experience",
-        keyResults: [
-          { result: "Increase digital adoption", progress: 71, target: 85, unit: "%" },
-          { result: "Reduce call center volume", progress: 25, target: 40, unit: "% reduction" },
-          { result: "Launch AI chatbot for queries", progress: 60, target: 100, unit: "% deployed" }
-        ],
-        owner: "Paula Llewellyn",
-        dueDate: "Q2 2025"
-      }
-    ],
-    potentialProjects: [
-      {
-        id: "retail-digital-onboarding",
-        name: "Digitizing Customer Onboarding",
-        description: "Transform paper-based onboarding to fully digital journey with AI-assisted form completion",
-        expectedROI: "£28m efficiency + improved NPS",
-        priority: "high",
-        status: "proposed",
-        aiRecommendation: "Customer feedback analysis shows 78% prefer digital-first - prioritize immediately",
-        dependencies: [
-          { projectId: "retail-ai-chatbot", projectName: "AI Customer Service Chatbot", type: "related", health: "green", description: "Shared customer interaction platform" }
-        ]
-      },
-      {
-        id: "retail-ai-chatbot",
-        name: "AI Customer Service Chatbot",
-        description: "Deploy intelligent chatbot for 24/7 customer query resolution and claims processing",
-        expectedROI: "£15m annual savings",
-        priority: "medium",
-        status: "in-progress",
-        aiRecommendation: "Current pilot showing 85% resolution rate - ready for full rollout",
-        dependencies: [
-          { projectId: "retail-digital-onboarding", projectName: "Digitizing Customer Onboarding", type: "related", health: "green", description: "Shared customer data integration" }
-        ]
-      }
-    ],
-    risks: [
-      { type: "Persistency", level: "medium", description: "Policies may lapse earlier than anticipated", mitigation: "Enhanced customer engagement programs" },
-      { type: "Mortality", level: "low", description: "Protection claims experience", mitigation: "Robust underwriting and reinsurance" }
-    ]
-  },
-  {
-    id: "corporate",
-    name: "Corporate Investments",
-    ceo: "Laura Mason",
-    profit2023: 136,
-    profit2024: 95,
-    changePercent: -30,
-    description: "Strategic investments including housing, later living, clean energy, and SME finance supporting UK economic growth.",
-    color: "#424242", // Grey-700
-    kpis: [
-      { name: "Operating Profit", value2023: 136, value2024: 95, target2025: 110, unit: "£m", trend: "down", status: "at-risk" },
-      { name: "Housing Completions", value2023: 3200, value2024: 3800, target2025: 4500, unit: "homes", trend: "up", status: "on-track" },
-      { name: "Affordable Homes Delivered", value2023: 1100, value2024: 1400, target2025: 1800, unit: "homes", trend: "up", status: "on-track" },
-      { name: "Clean Energy Investments", value2023: 1.8, value2024: 2.3, target2025: 3.0, unit: "£bn", trend: "up", status: "on-track" },
-      { name: "SME Finance Outstanding", value2023: 2.1, value2024: 2.4, target2025: 2.8, unit: "£bn", trend: "up", status: "on-track" }
-    ],
-    okrs: [
-      {
-        objective: "Deliver net zero carbon homes by 2030",
-        keyResults: [
-          { result: "Gas-free homes (LGAH)", progress: 61, target: 100, unit: "%" },
-          { result: "Gas-free homes (SBTR)", progress: 100, target: 100, unit: "%" },
-          { result: "Install ground source heat pumps", progress: 450, target: 1000, unit: "units" }
-        ],
-        owner: "Laura Mason",
-        dueDate: "2030"
-      }
-    ],
-    potentialProjects: [
-      {
-        id: "corp-net-zero-expansion",
-        name: "Inspired Villages Net Zero Expansion",
-        description: "Scale UK's first net zero carbon retirement community model (Millfield Green) to 5 additional sites",
-        expectedROI: "£180m new development value",
-        priority: "high",
-        status: "in-progress",
-        aiRecommendation: "ESG investor demand analysis shows 340% increase in sustainable housing interest",
-        dependencies: [
-          { projectId: "am-private-markets-fund", projectName: "L&G Private Markets Access Fund", type: "blocked-by", health: "red", description: "Awaiting funding allocation from Private Markets" }
-        ]
-      }
-    ],
-    risks: [
-      { type: "Property", level: "medium", description: "Exposure to house price fluctuations", mitigation: "Geographic and segment diversification" },
-      { type: "Construction", level: "medium", description: "Project delivery and cost overruns", mitigation: "Fixed-price contracts and milestone monitoring" }
+      { type: "Interest Rate", level: "medium", description: "Rising interest rates impact financing costs", mitigation: "Fixed-rate debt and hedging strategies" },
+      { type: "Regulatory", level: "low", description: "Federal transmission policy changes", mitigation: "Active participation in policy discussions" }
     ]
   }
 ];
 
 // ============================================================================
-// CLIMATE & NATURE DATA - From Climate and Nature Report 2024
+// CLIMATE & SUSTAINABILITY DATA - From NextEra Energy Reports 2024
 // ============================================================================
 
 export const climateData = {
   // Key headline metrics
   headline: {
-    operationalFootprintReduction: { value: 30, unit: "%", baseYear: 2021, description: "Reduction from base year" },
-    financedEmissionsReduction: { value: 37, unit: "%", baseYear: 2019, description: "Financed emissions intensity reduction" },
-    transitionFinance: { value: 4.0, unit: "£bn", description: "Transition finance investments" },
-    netZeroTargetYear: 2050,
+    operationalFootprintReduction: { value: 65, unit: "%", baseYear: 2005, description: "CO2 emissions rate reduction since 2005" },
+    renewableCapacity: { value: 33, unit: "GW", description: "Total renewable generation capacity" },
+    cleanEnergyInvestment: { value: 12, unit: "$bn", description: "Annual clean energy investment" },
+    netZeroTargetYear: 2045,
     sbtiValidated: true,
-    source: "L&G Climate and Nature Report 2024, p.21"
+    source: "NextEra Energy Sustainability Report 2024"
   },
   
   // Operational emissions
   operational: {
-    totalFootprint2024: { value: 24647, unit: "tCO2e", description: "Total operational carbon footprint" },
-    largestContributor: "Private Markets real estate portfolio",
-    scope1And2Reduction: { value: 10, unit: "%", vsYear: 2023, description: "Housing business reduction" },
-    automaticMeterReaders: { value: 239, unit: "assets", changeFrom2023: 41, changeUnit: "%" },
-    viztaPlatformAssets: { value: 427, unit: "assets", description: "Occupier engagement platform coverage" },
-    iesProjects: { value: 27, unit: "assets", description: "Integrated Energy Solutions projects" },
-    source: "L&G Climate and Nature Report 2024, p.19-20"
+    totalFootprint2024: { value: 25000000, unit: "tCO2e", description: "Total operational carbon footprint" },
+    largestContributor: "Natural gas power generation",
+    scope1And2Reduction: { value: 12, unit: "%", vsYear: 2023, description: "Fleet-wide emissions reduction" },
+    smartGridAssets: { value: 5900000, unit: "meters", changeFrom2023: 8, changeUnit: "%" },
+    solarInstallations: { value: 7200, unit: "MW", description: "Utility-scale solar capacity" },
+    batteryStorage: { value: 3700, unit: "MW", description: "Grid-scale battery storage" },
+    source: "NextEra Energy 10-K 2024"
   },
   
   // Targets and commitments
   targets: {
-    scope3OccupierReduction: { target: 55, unit: "%", by: 2030, baseYear: 2019, progress: 30 },
-    supplierEngagement: { target: 100, unit: "%", by: 2026, progress: 65, description: "Suppliers with science-based targets" },
-    realEstateNetZero: { by: 2050, description: "Real estate equity portfolio" },
-    portfolioTemperature: { current: 2.4, target: 1.5, unit: "°C", description: "Implied portfolio temperature alignment" },
-    source: "L&G Climate and Nature Report 2024, p.23-29"
+    carbonIntensityReduction: { target: 70, unit: "%", by: 2025, baseYear: 2005, progress: 65 },
+    renewableExpansion: { target: 50, unit: "GW", by: 2030, progress: 33, description: "Total renewable capacity target" },
+    realZeroOperations: { by: 2045, description: "Net zero carbon emissions from operations" },
+    portfolioTemperature: { current: 1.8, target: 1.5, unit: "°C", description: "Implied portfolio temperature alignment" },
+    source: "NextEra Energy Sustainability Report 2024"
   },
   
-  // Housing sustainability
-  housing: {
-    lgahGasFree: { value: 61, unit: "%", description: "LGAH homes transacted that are gas-free" },
-    sbtrGasFree: { value: 100, unit: "%", description: "SBTR homes that are gas-free" },
-    millfieldGreen: { description: "UK's first net zero carbon retirement community", opened: "early 2024" },
-    groundSourceHeatPumps: { supplier: "Kensa (L&G portfolio company)" },
-    source: "L&G Climate and Nature Report 2024, p.20"
+  // Clean energy portfolio
+  cleanEnergy: {
+    windCapacity: { value: 22500, unit: "MW", description: "Wind generation capacity" },
+    solarCapacity: { value: 7200, unit: "MW", description: "Solar generation capacity" },
+    floridaSolar: { description: "One of the largest utility solar programs in U.S.", installed: "3,200 MW" },
+    hydrogenProjects: { projects: 5, description: "Green hydrogen pilot initiatives" },
+    source: "NextEra Energy Annual Report 2024"
   },
   
   // Climate context
@@ -383,15 +323,15 @@ export const climateData = {
     temperatureBreached: { value: 1.5, unit: "°C", description: "First calendar year to breach 1.5°C" },
     probabilityOf1_5Breach: { timeframe: "2030s", likelihood: "highly likely" },
     worstCaseWarming: { value: 3.1, unit: "°C", description: "Temperature increase on current trajectory" },
-    source: "L&G Climate and Nature Report 2024, p.22"
+    source: "IPCC Climate Report 2024"
   },
   
-  // Nature initiatives
+  // Nature and environmental initiatives
   nature: {
-    ecuadorDebtConversion: { value: 460, unit: "$m", duration: "17 years", description: "Debt conversion for nature in Ecuador" },
-    tnfdAdopter: true,
-    biodiversityNetGain: { aligned: true, description: "BNG planning requirements alignment" },
-    source: "L&G Climate and Nature Report 2024, p.22"
+    landConservation: { value: 50000, unit: "acres", description: "Protected habitat and conservation lands" },
+    wildlifeSafePrograms: true,
+    manateeProtection: { projects: 12, description: "Manatee habitat protection initiatives" },
+    source: "NextEra Energy Environmental Report 2024"
   }
 };
 
@@ -402,11 +342,11 @@ export const climateData = {
 export const riskData = {
   // Risk landscape overview
   overview: {
-    largestExposures: ["Credit", "Longevity"],
-    measurementBasis: "Undiversified solvency capital",
-    cro: "Chris Knight",
-    philosophy: "Our risk management approach supports informed risk taking by our businesses",
-    source: "L&G Risk Management Supplement 2024, p.1-2"
+    largestExposures: ["Operational", "Regulatory", "Market"],
+    measurementBasis: "Enterprise risk capital",
+    cro: "Rebecca Kujawa",
+    philosophy: "Our risk management approach supports strategic growth while protecting stakeholder value",
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
   
   // Three Lines of Defence

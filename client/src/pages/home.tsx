@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@assets/generated_images/london_city_skyline_with_digital_data_overlay_corporate_blue.png";
+import heroImage from "@assets/generated_images/florida_clean_energy_landscape.png";
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -12,8 +12,8 @@ export default function Home() {
       {/* Navigation */}
       <header className="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-white/20">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="text-2xl font-bold text-[hsl(209,100%,36%)] tracking-tight">
-            Legal & General
+          <div className="text-2xl font-bold text-[#0072CE] tracking-tight">
+            NextEra Energy
           </div>
         </div>
       </header>
@@ -26,7 +26,7 @@ export default function Home() {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(209,100%,15%)]/90 via-[hsl(209,100%,20%)]/80 to-[hsl(209,100%,36%)]/40 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(205,100%,15%)]/90 via-[hsl(205,100%,25%)]/80 to-[hsl(152,100%,33%)]/40 mix-blend-multiply" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
 
@@ -57,7 +57,7 @@ export default function Home() {
               <Link href="/dashboard">
                 <Button 
                   size="lg" 
-                  className="h-14 px-8 text-lg bg-white text-[hsl(209,100%,36%)] hover:bg-blue-50 border-0"
+                  className="h-14 px-8 text-lg bg-white text-[#0072CE] hover:bg-blue-50 border-0"
                   onClick={() => navigate('/dashboard')}
                   data-testid="button-explore-dashboard"
                 >
@@ -77,7 +77,7 @@ export default function Home() {
             {/* Decorative elements simulating dashboard interface */}
             <div className="absolute top-10 right-10 w-80 p-6 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl transform rotate-3">
               <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 rounded-lg bg-[hsl(209,100%,36%)] text-white">
+                <div className="p-3 rounded-lg bg-[#0072CE] text-white">
                   <Zap size={24} />
                 </div>
                 <div>
@@ -124,7 +124,7 @@ export default function Home() {
       <section className="py-24 bg-background">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-[hsl(209,100%,36%)] mb-4">Strategic Pillars</h2>
+            <h2 className="text-3xl font-bold text-[#0072CE] mb-4">Strategic Pillars</h2>
             <p className="text-muted-foreground text-lg">
               Our approach balances speed with control, leveraging automation to drive certainty across the portfolio.
             </p>
@@ -149,7 +149,7 @@ export default function Home() {
               }
             ].map((pillar, i) => (
               <div key={i} className="bg-white p-8 rounded-lg border border-border hover:shadow-lg transition-shadow duration-300">
-                <div className="w-12 h-12 rounded-lg bg-[hsl(209,100%,36%)]/10 text-[hsl(209,100%,36%)] flex items-center justify-center mb-6">
+                <div className="w-12 h-12 rounded-lg bg-[#0072CE]/10 text-[#0072CE] flex items-center justify-center mb-6">
                   <pillar.icon size={24} />
                 </div>
                 <h3 className="text-xl font-bold mb-3">{pillar.title}</h3>

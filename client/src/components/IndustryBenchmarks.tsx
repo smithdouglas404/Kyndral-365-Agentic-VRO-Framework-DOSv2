@@ -23,20 +23,20 @@ import {
 import { motion } from "framer-motion";
 import { TrendingUp, Building2, Trophy, Target, Info } from "lucide-react";
 
-const LG_BLUE = "#005EB8";
-const LG_TEAL = "#00843D";
+const NEE_BLUE = "#0072CE";
+const NEE_GREEN = "#00A651";
 const COMPETITOR_GRAY = "#94a3b8";
 
 function getBarColor(name: string): string {
-  return name === "Legal & General" ? LG_BLUE : COMPETITOR_GRAY;
+  return name === "NextEra Energy" ? NEE_BLUE : COMPETITOR_GRAY;
 }
 
 export function MarketShareChart() {
   const data = industryBenchmarks.map(c => ({
-    name: c.name.replace("Legal & General", "L&G").replace("Pension Insurance Corp (PIC)", "PIC").replace("Phoenix/Standard Life", "Phoenix"),
+    name: c.name.replace("NextEra Energy", "NEE").replace("Duke Energy", "Duke").replace("Southern Company", "Southern"),
     volume: c.prtVolume2024,
     share: c.marketShare,
-    isLG: c.name === "Legal & General"
+    isNEE: c.name === "NextEra Energy"
   })).sort((a, b) => b.volume - a.volume);
 
   return (
@@ -45,13 +45,13 @@ export function MarketShareChart() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 size={18} className="text-[#005EB8]" />
-              UK PRT Market Share 2024
+              <Building2 size={18} className="text-[#0072CE]" />
+              US Clean Energy Market Share 2024
             </CardTitle>
-            <CardDescription>L&G vs competitors by premium volume (£bn)</CardDescription>
+            <CardDescription>NextEra vs competitors by generation capacity (GW)</CardDescription>
           </div>
           <Badge variant="outline" className="text-xs">
-            Total: £{ukPrtMarketData.totalVolume2024}bn
+            Total: {ukPrtMarketData.totalVolume2024}GW
           </Badge>
         </div>
       </CardHeader>
@@ -60,15 +60,15 @@ export function MarketShareChart() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-              <XAxis type="number" domain={[0, 10]} tickFormatter={(v) => `£${v}bn`} />
+              <XAxis type="number" domain={[0, 10]} tickFormatter={(v) => `${v}GW`} />
               <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 12 }} />
               <RechartsTooltip 
-                formatter={(value: number, name: string) => [`£${value}bn`, 'PRT Volume']}
+                formatter={(value: number, name: string) => [`${value}GW`, 'Capacity']}
                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb' }}
               />
               <Bar dataKey="volume" radius={[0, 4, 4, 0]}>
                 {data.map((entry, index) => (
-                  <Cell key={index} fill={entry.isLG ? LG_BLUE : COMPETITOR_GRAY} />
+                  <Cell key={index} fill={entry.isNEE ? NEE_BLUE : COMPETITOR_GRAY} />
                 ))}
               </Bar>
             </BarChart>
@@ -76,8 +76,8 @@ export function MarketShareChart() {
         </div>
         <div className="mt-4 flex items-center justify-center gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: LG_BLUE }} />
-            <span>Legal & General</span>
+            <div className="w-3 h-3 rounded" style={{ backgroundColor: NEE_BLUE }} />
+            <span>NextEra Energy</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded" style={{ backgroundColor: COMPETITOR_GRAY }} />
@@ -96,10 +96,10 @@ export function YearOverYearChart() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp size={18} className="text-[#00843D]" />
-              L&G Year-over-Year Performance
+              <TrendingUp size={18} className="text-[#00A651]" />
+              NextEra Year-over-Year Performance
             </CardTitle>
-            <CardDescription>PRT volume and operating profit trajectory</CardDescription>
+            <CardDescription>Clean energy capacity and operating revenue trajectory</CardDescription>
           </div>
           <TooltipProvider>
             <Tooltip>
@@ -107,7 +107,7 @@ export function YearOverYearChart() {
                 <Info size={16} className="text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>2023 & 2024 are actuals from L&G Annual Reports. 2025 projections and 2026 targets are VRO strategy goals.</p>
+                <p>2023 & 2024 are actuals from NextEra Annual Reports. 2025 projections and 2026 targets are VRO strategy goals.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -122,21 +122,21 @@ export function YearOverYearChart() {
               <YAxis 
                 yAxisId="left" 
                 domain={[0, 15]} 
-                tickFormatter={(v) => `£${v}bn`}
-                label={{ value: 'PRT Volume', angle: -90, position: 'insideLeft', offset: -5 }}
+                tickFormatter={(v) => `${v}GW`}
+                label={{ value: 'Capacity', angle: -90, position: 'insideLeft', offset: -5 }}
               />
               <YAxis 
                 yAxisId="right" 
                 orientation="right" 
                 domain={[900, 1400]} 
-                tickFormatter={(v) => `£${v}m`}
-                label={{ value: 'Operating Profit', angle: 90, position: 'insideRight', offset: -5 }}
+                tickFormatter={(v) => `$${v}m`}
+                label={{ value: 'Operating Revenue', angle: 90, position: 'insideRight', offset: -5 }}
               />
               <RechartsTooltip 
                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb' }}
                 formatter={(value: number, name: string) => {
-                  if (name === 'prtVolume') return [`£${value}bn`, 'PRT Volume'];
-                  if (name === 'operatingProfit') return [`£${value}m`, 'Operating Profit'];
+                  if (name === 'prtVolume') return [`${value}GW`, 'Capacity'];
+                  if (name === 'operatingProfit') return [`$${value}m`, 'Operating Revenue'];
                   return [value, name];
                 }}
               />
@@ -145,19 +145,19 @@ export function YearOverYearChart() {
                 yAxisId="left" 
                 type="monotone" 
                 dataKey="prtVolume" 
-                stroke={LG_BLUE} 
+                stroke={NEE_BLUE} 
                 strokeWidth={3}
-                dot={{ fill: LG_BLUE, strokeWidth: 2 }}
-                name="PRT Volume"
+                dot={{ fill: NEE_BLUE, strokeWidth: 2 }}
+                name="Capacity"
               />
               <Line 
                 yAxisId="right" 
                 type="monotone" 
                 dataKey="operatingProfit" 
-                stroke={LG_TEAL} 
+                stroke={NEE_GREEN} 
                 strokeWidth={3}
-                dot={{ fill: LG_TEAL, strokeWidth: 2 }}
-                name="Operating Profit"
+                dot={{ fill: NEE_GREEN, strokeWidth: 2 }}
+                name="Operating Revenue"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -168,8 +168,8 @@ export function YearOverYearChart() {
 }
 
 export function CompetitorCards() {
-  const topCompetitors = industryBenchmarks.filter(c => c.name !== "Legal & General").slice(0, 4);
-  const lg = industryBenchmarks.find(c => c.name === "Legal & General")!;
+  const topCompetitors = industryBenchmarks.filter(c => c.name !== "NextEra Energy").slice(0, 4);
+  const nee = industryBenchmarks.find(c => c.name === "NextEra Energy")!;
 
   return (
     <Card className="bg-card" data-testid="card-competitor-comparison">
@@ -180,24 +180,24 @@ export function CompetitorCards() {
               <Trophy size={18} className="text-amber-500" />
               Competitive Positioning
             </CardTitle>
-            <CardDescription>L&G market leadership vs key competitors</CardDescription>
+            <CardDescription>NextEra market leadership vs key competitors</CardDescription>
           </div>
-          <Badge className="bg-[#005EB8]">#1 Market Leader</Badge>
+          <Badge className="bg-[#0072CE]">#1 Clean Energy Leader</Badge>
         </div>
       </CardHeader>
       <CardContent>
         <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-[#005EB8]">Legal & General</span>
-            <span className="text-2xl font-bold text-[#005EB8]">£{lg.prtVolume2024}bn</span>
+            <span className="font-semibold text-[#0072CE]">NextEra Energy</span>
+            <span className="text-2xl font-bold text-[#0072CE]">{nee.prtVolume2024}GW</span>
           </div>
           <div className="flex gap-4 text-sm text-muted-foreground">
-            <span>{lg.transactions2024} transactions</span>
+            <span>{nee.transactions2024} projects</span>
             <span>•</span>
-            <span>{lg.marketShare}% market share</span>
+            <span>{nee.marketShare}% market share</span>
           </div>
           <div className="mt-2 flex flex-wrap gap-1">
-            {lg.notableDeals.map((deal, i) => (
+            {nee.notableDeals.map((deal, i) => (
               <Badge key={i} variant="secondary" className="text-xs">{deal}</Badge>
             ))}
           </div>
@@ -241,24 +241,24 @@ export function MarketOverview() {
     <Card className="bg-card" data-testid="card-market-overview">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Target size={18} className="text-[#005EB8]" />
-          UK PRT Market Overview
+          <Target size={18} className="text-[#0072CE]" />
+          US Clean Energy Market Overview
         </CardTitle>
-        <CardDescription>Source: LCP PRT Report 2024, IPE Analysis</CardDescription>
+        <CardDescription>Source: EIA Energy Data 2024, S&P Global Energy Research</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="text-2xl font-bold text-[#005EB8]">£{ukPrtMarketData.totalVolume2024}bn</div>
-            <div className="text-xs text-muted-foreground">2024 Total Volume</div>
+            <div className="text-2xl font-bold text-[#0072CE]">{ukPrtMarketData.totalVolume2024}GW</div>
+            <div className="text-xs text-muted-foreground">2024 Total Capacity</div>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="text-2xl font-bold text-[#00843D]">{ukPrtMarketData.totalTransactions2024}</div>
-            <div className="text-xs text-muted-foreground">Transactions (Record)</div>
+            <div className="text-2xl font-bold text-[#00A651]">{ukPrtMarketData.totalTransactions2024}</div>
+            <div className="text-xs text-muted-foreground">Projects (Record)</div>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="text-2xl font-bold text-amber-600">{ukPrtMarketData.largeDeals2024}</div>
-            <div className="text-xs text-muted-foreground">Deals Over £1bn</div>
+            <div className="text-xs text-muted-foreground">Deals Over $1bn</div>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="text-2xl font-bold text-purple-600">{ukPrtMarketData.marketGrowthRate}%</div>
@@ -266,7 +266,7 @@ export function MarketOverview() {
           </div>
         </div>
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          2023: £{ukPrtMarketData.totalVolume2023}bn (record year) → 2024: £{ukPrtMarketData.totalVolume2024}bn → 2025 Est: £{ukPrtMarketData.projectedVolume2025}bn
+          2023: {ukPrtMarketData.totalVolume2023}GW (record year) → 2024: {ukPrtMarketData.totalVolume2024}GW → 2025 Est: {ukPrtMarketData.projectedVolume2025}GW
         </div>
       </CardContent>
     </Card>
@@ -284,7 +284,7 @@ export function IndustryBenchmarksSection() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Industry Benchmarks & Comparison</h2>
-          <p className="text-muted-foreground">L&G performance vs UK PRT market competitors (2023-2026)</p>
+          <p className="text-muted-foreground">NextEra performance vs US clean energy market competitors (2023-2026)</p>
         </div>
       </div>
 

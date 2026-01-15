@@ -238,7 +238,7 @@ Apply all budget changes, timeline adjustments, or analysis requests to THIS pro
     }
   }
   
-  const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office) at Legal & General. You have access to the complete portfolio of enterprise transformation projects following SAFe 6.0 methodology.
+  const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office) at NextEra Energy. You have access to the complete portfolio of enterprise transformation projects following SAFe 6.0 methodology.
 
 Your role is to:
 1. Answer questions about projects, dependencies, status, and financials
