@@ -5,10 +5,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Layout, Activity, Database, ArrowUp, ArrowDown, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { Settings, Layout, Activity, Database, ArrowUp, ArrowDown, Eye, EyeOff, RefreshCw, Download, FileSpreadsheet, FileJson, Loader2 } from "lucide-react";
 import { useDashboardWidgets, useUpdateDashboardWidget, useReorderDashboardWidgets } from "@/hooks/useDashboardWidgets";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
 import { usePortfolioMetrics } from "@/hooks/usePortfolioMetrics";
+import { useExportJobs, useCreateExportJob } from "@/hooks/useExportJobs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -241,6 +242,151 @@ function PortfolioStats() {
   );
 }
 
+function DataExport() {
+  const { data: jobs = [], isLoading, refetch } = useExportJobs();
+  const createExport = useCreateExportJob();
+
+  const handleExport = async (exportType: 'projects' | 'metrics' | 'reports' | 'full_backup', format: 'csv' | 'json') => {
+    try {
+      await createExport.mutateAsync({ exportType, format });
+      toast.success(`Export job created. Check back in a moment.`);
+      setTimeout(() => refetch(), 3000);
+    } catch (error) {
+      toast.error("Failed to create export job");
+    }
+  };
+
+  const recentJobs = jobs.slice(0, 10);
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h3 className="font-medium">Export Data</h3>
+        <p className="text-sm text-gray-600">Download your data in various formats for backup or analysis.</p>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Projects</CardTitle>
+              <CardDescription className="text-xs">Export all project data</CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleExport('projects', 'csv')}
+                disabled={createExport.isPending}
+                data-testid="button-export-projects-csv"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-1" />
+                CSV
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleExport('projects', 'json')}
+                disabled={createExport.isPending}
+                data-testid="button-export-projects-json"
+              >
+                <FileJson className="h-4 w-4 mr-1" />
+                JSON
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Metrics</CardTitle>
+              <CardDescription className="text-xs">Export VRO metrics data</CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleExport('metrics', 'csv')}
+                disabled={createExport.isPending}
+                data-testid="button-export-metrics-csv"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-1" />
+                CSV
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleExport('metrics', 'json')}
+                disabled={createExport.isPending}
+                data-testid="button-export-metrics-json"
+              >
+                <FileJson className="h-4 w-4 mr-1" />
+                JSON
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="font-medium">Recent Exports</h3>
+          <Button variant="ghost" size="sm" onClick={() => refetch()} data-testid="button-refresh-exports">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          </div>
+        ) : recentJobs.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center py-4">No exports yet. Create one above.</p>
+        ) : (
+          <div className="space-y-2">
+            {recentJobs.map(job => (
+              <div 
+                key={job.id} 
+                className="flex items-center justify-between p-3 border rounded-lg bg-white"
+                data-testid={`export-job-${job.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  {job.format === 'json' ? (
+                    <FileJson className="h-5 w-5 text-blue-500" />
+                  ) : (
+                    <FileSpreadsheet className="h-5 w-5 text-green-500" />
+                  )}
+                  <div>
+                    <p className="font-medium text-sm capitalize">{job.exportType}</p>
+                    <p className="text-xs text-gray-500">
+                      {job.createdAt ? new Date(job.createdAt).toLocaleString() : 'Just now'}
+                      {job.rowCount && ` • ${job.rowCount} rows`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge 
+                    variant={job.status === 'completed' ? 'default' : job.status === 'failed' ? 'destructive' : 'secondary'}
+                  >
+                    {job.status}
+                  </Badge>
+                  {job.status === 'completed' && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(`/api/export-jobs/${job.id}/download`, '_blank')}
+                      data-testid={`button-download-${job.id}`}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -253,14 +399,18 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="widgets" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="widgets" className="flex items-center gap-2" data-testid="tab-widgets">
             <Layout className="h-4 w-4" />
-            Dashboard Widgets
+            Widgets
           </TabsTrigger>
           <TabsTrigger value="metrics" className="flex items-center gap-2" data-testid="tab-metrics">
             <Database className="h-4 w-4" />
-            Portfolio Metrics
+            Metrics
+          </TabsTrigger>
+          <TabsTrigger value="export" className="flex items-center gap-2" data-testid="tab-export">
+            <Download className="h-4 w-4" />
+            Export
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2" data-testid="tab-system">
             <Activity className="h-4 w-4" />
@@ -292,6 +442,20 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <PortfolioStats />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="export">
+          <Card>
+            <CardHeader>
+              <CardTitle>Data Export</CardTitle>
+              <CardDescription>
+                Export your project and metrics data for backup or external analysis.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataExport />
             </CardContent>
           </Card>
         </TabsContent>

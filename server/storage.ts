@@ -58,6 +58,10 @@ import {
   type Benchmark, type InsertBenchmark,
   type AppConfig, type InsertAppConfig,
   type DashboardWidget, type InsertDashboardWidget,
+  type Notification, type InsertNotification,
+  type UserRole, type InsertUserRole,
+  type ScheduledReport, type InsertScheduledReport,
+  type ExportJob, type InsertExportJob,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -68,7 +72,8 @@ import {
   companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks,
   syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
   ingestionSessions, qaReviews, clarifyingQuestions,
-  vroMetrics, benchmarks, appConfig, dashboardWidgets
+  vroMetrics, benchmarks, appConfig, dashboardWidgets,
+  notifications, userRoles, scheduledReports, exportJobs
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -2400,6 +2405,140 @@ export class DatabaseStorage implements IStorage {
       await this.createDashboardWidget(widget);
     }
     console.log("[Seed] Dashboard widgets seeded successfully");
+  }
+
+  // ============================================================================
+  // NOTIFICATIONS
+  // ============================================================================
+
+  async getNotifications(userId?: string, includeRead = false): Promise<Notification[]> {
+    if (userId) {
+      if (includeRead) {
+        return await db.select().from(notifications)
+          .where(and(eq(notifications.userId, userId), eq(notifications.isDismissed, false)))
+          .orderBy(desc(notifications.createdAt));
+      }
+      return await db.select().from(notifications)
+        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false), eq(notifications.isDismissed, false)))
+        .orderBy(desc(notifications.createdAt));
+    }
+    if (includeRead) {
+      return await db.select().from(notifications)
+        .where(eq(notifications.isDismissed, false))
+        .orderBy(desc(notifications.createdAt));
+    }
+    return await db.select().from(notifications)
+      .where(and(eq(notifications.isRead, false), eq(notifications.isDismissed, false)))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const result = await db.insert(notifications).values(notification).returning();
+    return result[0];
+  }
+
+  async markNotificationRead(id: string): Promise<void> {
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
+  }
+
+  async markAllNotificationsRead(userId?: string): Promise<void> {
+    if (userId) {
+      await db.update(notifications).set({ isRead: true }).where(eq(notifications.userId, userId));
+    } else {
+      await db.update(notifications).set({ isRead: true });
+    }
+  }
+
+  async dismissNotification(id: string): Promise<void> {
+    await db.update(notifications).set({ isDismissed: true }).where(eq(notifications.id, id));
+  }
+
+  // ============================================================================
+  // USER ROLES
+  // ============================================================================
+
+  async getUserRole(userId: string): Promise<UserRole | undefined> {
+    const result = await db.select().from(userRoles).where(eq(userRoles.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async getAllUserRoles(): Promise<UserRole[]> {
+    return await db.select().from(userRoles).orderBy(userRoles.createdAt);
+  }
+
+  async upsertUserRole(role: InsertUserRole): Promise<UserRole> {
+    const existing = await this.getUserRole(role.userId);
+    if (existing) {
+      const result = await db.update(userRoles)
+        .set({ role: role.role, permissions: role.permissions, updatedAt: new Date() })
+        .where(eq(userRoles.userId, role.userId))
+        .returning();
+      return result[0];
+    }
+    const result = await db.insert(userRoles).values(role).returning();
+    return result[0];
+  }
+
+  async deleteUserRole(userId: string): Promise<void> {
+    await db.delete(userRoles).where(eq(userRoles.userId, userId));
+  }
+
+  // ============================================================================
+  // SCHEDULED REPORTS
+  // ============================================================================
+
+  async getScheduledReports(): Promise<ScheduledReport[]> {
+    return await db.select().from(scheduledReports).orderBy(scheduledReports.name);
+  }
+
+  async getScheduledReport(id: string): Promise<ScheduledReport | undefined> {
+    const result = await db.select().from(scheduledReports).where(eq(scheduledReports.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createScheduledReport(report: InsertScheduledReport): Promise<ScheduledReport> {
+    const result = await db.insert(scheduledReports).values(report).returning();
+    return result[0];
+  }
+
+  async updateScheduledReport(id: string, updates: Partial<ScheduledReport>): Promise<ScheduledReport | undefined> {
+    const result = await db.update(scheduledReports)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(scheduledReports.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteScheduledReport(id: string): Promise<void> {
+    await db.delete(scheduledReports).where(eq(scheduledReports.id, id));
+  }
+
+  // ============================================================================
+  // EXPORT JOBS
+  // ============================================================================
+
+  async getExportJobs(userId?: string): Promise<ExportJob[]> {
+    if (userId) {
+      return await db.select().from(exportJobs)
+        .where(eq(exportJobs.requestedBy, userId))
+        .orderBy(desc(exportJobs.createdAt));
+    }
+    return await db.select().from(exportJobs).orderBy(desc(exportJobs.createdAt));
+  }
+
+  async getExportJob(id: string): Promise<ExportJob | undefined> {
+    const result = await db.select().from(exportJobs).where(eq(exportJobs.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createExportJob(job: InsertExportJob): Promise<ExportJob> {
+    const result = await db.insert(exportJobs).values(job).returning();
+    return result[0];
+  }
+
+  async updateExportJob(id: string, updates: Partial<ExportJob>): Promise<ExportJob | undefined> {
+    const result = await db.update(exportJobs).set(updates).where(eq(exportJobs.id, id)).returning();
+    return result[0];
   }
 }
 

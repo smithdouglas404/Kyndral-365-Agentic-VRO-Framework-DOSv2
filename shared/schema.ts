@@ -1632,3 +1632,113 @@ export const insertDashboardWidgetSchema = createInsertSchema(dashboardWidgets).
 
 export type InsertDashboardWidget = z.infer<typeof insertDashboardWidgetSchema>;
 export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
+
+// ============================================================================
+// NOTIFICATIONS - System notifications for alerts, sync failures, etc.
+// ============================================================================
+
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"), // null = broadcast to all
+  type: text("type").notNull(), // sync_failure, alert, info, warning, success
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  severity: text("severity").default("info"), // info, warning, error, critical
+  source: text("source"), // sync_job, system, agent, manual
+  sourceId: text("source_id"), // reference to source entity
+  isRead: boolean("is_read").default(false),
+  isDismissed: boolean("is_dismissed").default(false),
+  actionUrl: text("action_url"), // optional link to relevant page
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+
+// ============================================================================
+// USER ROLES - Role-based access control
+// ============================================================================
+
+export const userRoles = pgTable("user_roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  role: text("role").notNull().default("viewer"), // admin, editor, viewer
+  permissions: text("permissions"), // JSON array of specific permissions
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+export type UserRole = typeof userRoles.$inferSelect;
+
+// ============================================================================
+// SCHEDULED REPORTS - Report scheduling and distribution
+// ============================================================================
+
+export const scheduledReports = pgTable("scheduled_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  reportType: text("report_type").notNull(), // portfolio_summary, project_status, financial, custom
+  schedule: text("schedule").notNull(), // cron expression
+  recipients: text("recipients"), // JSON array of email addresses
+  format: text("format").default("pdf"), // pdf, excel, csv
+  filters: text("filters"), // JSON object with report filters
+  lastRunAt: timestamp("last_run_at"),
+  nextRunAt: timestamp("next_run_at"),
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertScheduledReportSchema = createInsertSchema(scheduledReports).omit({
+  id: true,
+  lastRunAt: true,
+  nextRunAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertScheduledReport = z.infer<typeof insertScheduledReportSchema>;
+export type ScheduledReport = typeof scheduledReports.$inferSelect;
+
+// ============================================================================
+// EXPORT JOBS - Track data export requests
+// ============================================================================
+
+export const exportJobs = pgTable("export_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  exportType: text("export_type").notNull(), // projects, metrics, reports, full_backup
+  format: text("format").notNull().default("csv"), // csv, excel, json
+  status: text("status").default("pending"), // pending, processing, completed, failed
+  filters: text("filters"), // JSON object with export filters
+  filePath: text("file_path"), // path to generated file
+  fileSize: integer("file_size"), // in bytes
+  rowCount: integer("row_count"),
+  errorMessage: text("error_message"),
+  requestedBy: varchar("requested_by"),
+  completedAt: timestamp("completed_at"),
+  expiresAt: timestamp("expires_at"), // when the file will be deleted
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertExportJobSchema = createInsertSchema(exportJobs).omit({
+  id: true,
+  completedAt: true,
+  createdAt: true,
+});
+
+export type InsertExportJob = z.infer<typeof insertExportJobSchema>;
+export type ExportJob = typeof exportJobs.$inferSelect;

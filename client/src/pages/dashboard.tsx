@@ -44,6 +44,7 @@ import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 
 // NextEra Design System Colors (Enterprise Transformation Team 2026)
 const NEE = {
@@ -417,7 +418,7 @@ function NavBar() {
           </DropdownMenu>
         </nav>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <div className="relative w-64 hidden md:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -426,6 +427,7 @@ function NavBar() {
             data-testid="input-search"
           />
         </div>
+        <NotificationsDropdown />
         <Button size="icon" variant="ghost" className="rounded-full" data-testid="button-user" onClick={() => alert('User Profile\n\nAccount settings, preferences, and logout options would appear here.')}>
           <User className="h-5 w-5 text-muted-foreground" />
         </Button>

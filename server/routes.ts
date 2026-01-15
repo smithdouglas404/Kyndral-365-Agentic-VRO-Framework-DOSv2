@@ -3631,5 +3631,357 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // NOTIFICATIONS API
+  // ============================================================================
+
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const includeRead = req.query.includeRead === 'true';
+      const userId = req.query.userId as string | undefined;
+      const notificationsList = await storage.getNotifications(userId, includeRead);
+      res.json(notificationsList);
+    } catch (error: any) {
+      console.error("Get notifications error:", error);
+      res.status(500).json({ error: "Failed to get notifications" });
+    }
+  });
+
+  const createNotificationSchema = z.object({
+    userId: z.string().optional(),
+    type: z.enum(['sync_failure', 'alert', 'info', 'warning', 'success']),
+    title: z.string().min(1),
+    message: z.string().min(1),
+    severity: z.enum(['info', 'warning', 'error', 'critical']).optional(),
+    source: z.string().optional(),
+    sourceId: z.string().optional(),
+    actionUrl: z.string().optional(),
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    try {
+      const parseResult = createNotificationSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const notification = await storage.createNotification(parseResult.data);
+      res.status(201).json(notification);
+    } catch (error: any) {
+      console.error("Create notification error:", error);
+      res.status(500).json({ error: "Failed to create notification" });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", async (req, res) => {
+    try {
+      await storage.markNotificationRead(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Mark notification read error:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", async (req, res) => {
+    try {
+      const userId = req.query.userId as string | undefined;
+      await storage.markAllNotificationsRead(userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Mark all notifications read error:", error);
+      res.status(500).json({ error: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", async (req, res) => {
+    try {
+      await storage.dismissNotification(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Dismiss notification error:", error);
+      res.status(500).json({ error: "Failed to dismiss notification" });
+    }
+  });
+
+  // ============================================================================
+  // USER ROLES API
+  // ============================================================================
+
+  app.get("/api/user-roles", async (req, res) => {
+    try {
+      const roles = await storage.getAllUserRoles();
+      res.json(roles);
+    } catch (error: any) {
+      console.error("Get user roles error:", error);
+      res.status(500).json({ error: "Failed to get user roles" });
+    }
+  });
+
+  app.get("/api/user-roles/:userId", async (req, res) => {
+    try {
+      const role = await storage.getUserRole(req.params.userId);
+      if (!role) {
+        return res.json({ userId: req.params.userId, role: 'viewer', permissions: null });
+      }
+      res.json(role);
+    } catch (error: any) {
+      console.error("Get user role error:", error);
+      res.status(500).json({ error: "Failed to get user role" });
+    }
+  });
+
+  const upsertUserRoleSchema = z.object({
+    userId: z.string().min(1),
+    role: z.enum(['admin', 'editor', 'viewer']),
+    permissions: z.string().optional(),
+  });
+
+  app.put("/api/user-roles/:userId", async (req, res) => {
+    try {
+      const parseResult = upsertUserRoleSchema.safeParse({ ...req.body, userId: req.params.userId });
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const role = await storage.upsertUserRole(parseResult.data);
+      res.json(role);
+    } catch (error: any) {
+      console.error("Update user role error:", error);
+      res.status(500).json({ error: "Failed to update user role" });
+    }
+  });
+
+  app.delete("/api/user-roles/:userId", async (req, res) => {
+    try {
+      await storage.deleteUserRole(req.params.userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Delete user role error:", error);
+      res.status(500).json({ error: "Failed to delete user role" });
+    }
+  });
+
+  // ============================================================================
+  // SCHEDULED REPORTS API
+  // ============================================================================
+
+  app.get("/api/scheduled-reports", async (req, res) => {
+    try {
+      const reports = await storage.getScheduledReports();
+      res.json(reports);
+    } catch (error: any) {
+      console.error("Get scheduled reports error:", error);
+      res.status(500).json({ error: "Failed to get scheduled reports" });
+    }
+  });
+
+  app.get("/api/scheduled-reports/:id", async (req, res) => {
+    try {
+      const report = await storage.getScheduledReport(req.params.id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      res.json(report);
+    } catch (error: any) {
+      console.error("Get scheduled report error:", error);
+      res.status(500).json({ error: "Failed to get scheduled report" });
+    }
+  });
+
+  const createScheduledReportSchema = z.object({
+    name: z.string().min(1),
+    reportType: z.enum(['portfolio_summary', 'project_status', 'financial', 'custom']),
+    schedule: z.string().min(1),
+    recipients: z.string().optional(),
+    format: z.enum(['pdf', 'excel', 'csv']).optional(),
+    filters: z.string().optional(),
+    isActive: z.boolean().optional(),
+    createdBy: z.string().optional(),
+  });
+
+  app.post("/api/scheduled-reports", async (req, res) => {
+    try {
+      const parseResult = createScheduledReportSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const report = await storage.createScheduledReport(parseResult.data);
+      res.status(201).json(report);
+    } catch (error: any) {
+      console.error("Create scheduled report error:", error);
+      res.status(500).json({ error: "Failed to create scheduled report" });
+    }
+  });
+
+  app.put("/api/scheduled-reports/:id", async (req, res) => {
+    try {
+      const parseResult = createScheduledReportSchema.partial().safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const report = await storage.updateScheduledReport(req.params.id, parseResult.data);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      res.json(report);
+    } catch (error: any) {
+      console.error("Update scheduled report error:", error);
+      res.status(500).json({ error: "Failed to update scheduled report" });
+    }
+  });
+
+  app.delete("/api/scheduled-reports/:id", async (req, res) => {
+    try {
+      await storage.deleteScheduledReport(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Delete scheduled report error:", error);
+      res.status(500).json({ error: "Failed to delete scheduled report" });
+    }
+  });
+
+  // ============================================================================
+  // EXPORT JOBS API
+  // ============================================================================
+
+  app.get("/api/export-jobs", async (req, res) => {
+    try {
+      const userId = req.query.userId as string | undefined;
+      const jobs = await storage.getExportJobs(userId);
+      res.json(jobs);
+    } catch (error: any) {
+      console.error("Get export jobs error:", error);
+      res.status(500).json({ error: "Failed to get export jobs" });
+    }
+  });
+
+  app.get("/api/export-jobs/:id", async (req, res) => {
+    try {
+      const job = await storage.getExportJob(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: "Export job not found" });
+      }
+      res.json(job);
+    } catch (error: any) {
+      console.error("Get export job error:", error);
+      res.status(500).json({ error: "Failed to get export job" });
+    }
+  });
+
+  const createExportJobSchema = z.object({
+    exportType: z.enum(['projects', 'metrics', 'reports', 'full_backup']),
+    format: z.enum(['csv', 'excel', 'json']).optional(),
+    filters: z.string().optional(),
+    requestedBy: z.string().optional(),
+  });
+
+  app.post("/api/export-jobs", async (req, res) => {
+    try {
+      const parseResult = createExportJobSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      
+      const job = await storage.createExportJob({
+        ...parseResult.data,
+        status: 'pending',
+      });
+
+      // Simulate export processing (in production, this would be a background job)
+      setTimeout(async () => {
+        try {
+          let data: any[] = [];
+          let rowCount = 0;
+          
+          switch (parseResult.data.exportType) {
+            case 'projects':
+              data = await storage.getProjects();
+              rowCount = data.length;
+              break;
+            case 'metrics':
+              data = await storage.getVroMetrics();
+              rowCount = data.length;
+              break;
+            default:
+              data = await storage.getProjects();
+              rowCount = data.length;
+          }
+
+          await storage.updateExportJob(job.id, {
+            status: 'completed',
+            rowCount,
+            completedAt: new Date(),
+          });
+
+          // Create notification for completed export
+          await storage.createNotification({
+            type: 'success',
+            title: 'Export Complete',
+            message: `Your ${parseResult.data.exportType} export is ready for download.`,
+            severity: 'info',
+            source: 'export_job',
+            sourceId: job.id,
+            actionUrl: `/api/export-jobs/${job.id}/download`,
+          });
+        } catch (error) {
+          await storage.updateExportJob(job.id, {
+            status: 'failed',
+            errorMessage: 'Export processing failed',
+          });
+        }
+      }, 2000);
+
+      res.status(201).json(job);
+    } catch (error: any) {
+      console.error("Create export job error:", error);
+      res.status(500).json({ error: "Failed to create export job" });
+    }
+  });
+
+  app.get("/api/export-jobs/:id/download", async (req, res) => {
+    try {
+      const job = await storage.getExportJob(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: "Export job not found" });
+      }
+      if (job.status !== 'completed') {
+        return res.status(400).json({ error: "Export not yet complete" });
+      }
+
+      // Generate data based on export type
+      let data: any[] = [];
+      switch (job.exportType) {
+        case 'projects':
+          data = await storage.getProjects();
+          break;
+        case 'metrics':
+          data = await storage.getVroMetrics();
+          break;
+        default:
+          data = await storage.getProjects();
+      }
+
+      if (job.format === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="${job.exportType}_export.json"`);
+        res.json(data);
+      } else {
+        // CSV format
+        if (data.length === 0) {
+          return res.status(404).json({ error: "No data to export" });
+        }
+        const headers = Object.keys(data[0]).join(',');
+        const rows = data.map(row => Object.values(row).map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','));
+        const csv = [headers, ...rows].join('\n');
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${job.exportType}_export.csv"`);
+        res.send(csv);
+      }
+    } catch (error: any) {
+      console.error("Download export error:", error);
+      res.status(500).json({ error: "Failed to download export" });
+    }
+  });
+
   return httpServer;
 }
