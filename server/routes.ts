@@ -1170,6 +1170,163 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Alerts API
+  app.get("/api/alerts", async (req, res) => {
+    try {
+      const { status, category } = req.query;
+      const alertsList = await storage.getAlerts(
+        status as string | undefined,
+        category as string | undefined
+      );
+      res.json({ alerts: alertsList });
+    } catch (error: any) {
+      console.error("Get alerts error:", error);
+      res.status(500).json({ error: "Failed to get alerts" });
+    }
+  });
+
+  app.post("/api/alerts", async (req, res) => {
+    try {
+      const alert = await storage.createAlert(req.body);
+      res.json({ success: true, alert });
+    } catch (error: any) {
+      console.error("Create alert error:", error);
+      res.status(500).json({ error: "Failed to create alert" });
+    }
+  });
+
+  app.patch("/api/alerts/:id/status", async (req, res) => {
+    try {
+      const { status, userId } = req.body;
+      const alert = await storage.updateAlertStatus(req.params.id, status, userId);
+      res.json({ success: true, alert });
+    } catch (error: any) {
+      console.error("Update alert status error:", error);
+      res.status(500).json({ error: "Failed to update alert status" });
+    }
+  });
+
+  app.post("/api/demo/seed-alerts", async (_req, res) => {
+    try {
+      const demoAlerts = [
+        {
+          title: 'Budget Threshold Exceeded',
+          message: 'Grid Modernization Initiative has exceeded 90% of allocated budget with only 65% completion. Immediate review required.',
+          severity: 'critical',
+          category: 'budget',
+          status: 'active',
+          source: 'FinOps Agent',
+          sourceEntityType: 'project',
+          sourceEntityId: 'grid-mod-001',
+          metadata: JSON.stringify({ budgetSpent: 112.5, budgetTotal: 125, completion: 65 })
+        },
+        {
+          title: 'Sync Conflict Detected',
+          message: 'Azure DevOps sync detected 3 conflicting field updates in Customer Experience stories. Manual resolution required.',
+          severity: 'high',
+          category: 'sync',
+          status: 'active',
+          source: 'Sync Engine',
+          sourceEntityType: 'story',
+          metadata: JSON.stringify({ conflicts: 3, sourceSystem: 'azure_devops' })
+        },
+        {
+          title: 'Schedule Variance Warning',
+          message: 'ERP Modernization SPI dropped to 0.82, below 0.85 threshold. 3-week delay projected without intervention.',
+          severity: 'high',
+          category: 'schedule',
+          status: 'acknowledged',
+          source: 'TMO Agent',
+          sourceEntityType: 'project',
+          sourceEntityId: 'erp-mod-001',
+          acknowledgedBy: 'system',
+          metadata: JSON.stringify({ spi: 0.82, projectedDelay: 21 })
+        },
+        {
+          title: 'Dependency Risk Escalation',
+          message: 'API Gateway dependency blocking 5 downstream features across 2 ARTs. Cross-ART coordination needed.',
+          severity: 'high',
+          category: 'risk',
+          status: 'active',
+          source: 'Planning Agent',
+          sourceEntityType: 'dependency',
+          metadata: JSON.stringify({ blockedFeatures: 5, affectedArts: 2 })
+        },
+        {
+          title: 'Quality Gate Failed',
+          message: 'Data Platform feature "Real-time Analytics" failed QA gate with 78% test coverage (minimum 80% required).',
+          severity: 'medium',
+          category: 'quality',
+          status: 'active',
+          source: 'QA Agent',
+          sourceEntityType: 'feature',
+          sourceEntityId: 'feat-analytics-001',
+          metadata: JSON.stringify({ testCoverage: 78, required: 80 })
+        },
+        {
+          title: 'New Integration Connected',
+          message: 'Jira Cloud integration successfully connected. 245 epics and 1,842 stories ready for sync.',
+          severity: 'info',
+          category: 'sync',
+          status: 'resolved',
+          source: 'MCP Connector',
+          resolvedBy: 'auto',
+          metadata: JSON.stringify({ epics: 245, stories: 1842 })
+        },
+        {
+          title: 'Agent Collaboration Completed',
+          message: 'Resource Agent and FinOps Agent completed joint analysis of Cloud Infrastructure allocation. Report available.',
+          severity: 'info',
+          category: 'agent',
+          status: 'resolved',
+          source: 'Orchestration Engine',
+          resolvedBy: 'auto',
+          metadata: JSON.stringify({ participants: ['resource-agent', 'finops-agent'], duration: 45 })
+        },
+        {
+          title: 'Risk Score Increased',
+          message: 'Climate Analytics Platform risk score increased from 3.2 to 5.8 due to regulatory timeline changes.',
+          severity: 'high',
+          category: 'risk',
+          status: 'active',
+          source: 'Risk Agent',
+          sourceEntityType: 'project',
+          sourceEntityId: 'climate-001',
+          metadata: JSON.stringify({ previousScore: 3.2, newScore: 5.8, trigger: 'regulatory_change' })
+        },
+        {
+          title: 'Resource Overallocation',
+          message: 'Senior Architect team member allocated at 145% across 3 projects. Rebalancing recommended.',
+          severity: 'medium',
+          category: 'resource',
+          status: 'active',
+          source: 'Resource Agent',
+          sourceEntityType: 'resource',
+          metadata: JSON.stringify({ allocation: 145, projects: 3 })
+        },
+        {
+          title: 'PI Planning Reminder',
+          message: 'PI 2025-Q2 planning session scheduled in 5 days. 8 teams, 42 features pending prioritization.',
+          severity: 'low',
+          category: 'system',
+          status: 'active',
+          source: 'Planning Agent',
+          sourceEntityType: 'program_increment',
+          metadata: JSON.stringify({ teams: 8, features: 42, daysUntil: 5 })
+        }
+      ];
+
+      for (const alert of demoAlerts) {
+        await storage.createAlert(alert);
+      }
+
+      res.json({ success: true, count: demoAlerts.length });
+    } catch (error: any) {
+      console.error("Seed alerts error:", error);
+      res.status(500).json({ error: "Failed to seed alerts" });
+    }
+  });
+
   // Reactive Metric Watcher Routes
   const { updateMetricAndCheck, getThresholdConfigs } = await import("./reactiveMetricWatcher");
 
@@ -1713,6 +1870,63 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       res.json({ history });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to get sync history" });
+    }
+  });
+
+  // AI-Powered Data Analysis for MCP
+  app.post("/api/sync/ai-analyze", async (req, res) => {
+    try {
+      const { sampleData, sourceSystem, sourceEntityType } = req.body;
+      if (!sampleData || !sourceSystem || !sourceEntityType) {
+        return res.status(400).json({ error: "sampleData, sourceSystem, and sourceEntityType are required" });
+      }
+      
+      const { analyzeExternalDataForMCP } = await import("./anthropic");
+      const records = Array.isArray(sampleData) ? sampleData : [sampleData];
+      const analysis = await analyzeExternalDataForMCP(records, sourceSystem, sourceEntityType);
+      
+      await storage.createAgentActivityLog({
+        eventType: 'ai_analysis',
+        primaryAgentId: 'mcp-ai-analyzer',
+        primaryAgentName: 'MCP AI Analyzer',
+        summary: `AI analysis completed for ${sourceSystem} ${sourceEntityType} data`,
+        details: JSON.stringify({ 
+          recordCount: records.length, 
+          qualityScore: analysis.dataQuality.score,
+          suggestedMapping: analysis.safeMapping.suggestedEntityType
+        }),
+      });
+      
+      res.json({ success: true, analysis });
+    } catch (error: any) {
+      console.error("AI analysis error:", error);
+      res.status(500).json({ error: "Failed to analyze data with AI" });
+    }
+  });
+
+  // QA Gate Approval Workflow
+  app.post("/api/sync/qa-gate", async (req, res) => {
+    try {
+      const { dataAnalysis, userResponses } = req.body;
+      if (!dataAnalysis) {
+        return res.status(400).json({ error: "dataAnalysis is required" });
+      }
+      
+      const { generateQAGateResponse } = await import("./anthropic");
+      const qaResult = await generateQAGateResponse(dataAnalysis, userResponses || {});
+      
+      await storage.createAgentActivityLog({
+        eventType: 'qa_gate_decision',
+        primaryAgentId: 'qa-gate-agent',
+        primaryAgentName: 'QA Gate Agent',
+        summary: `QA Gate ${qaResult.approved ? 'APPROVED' : 'PENDING'}: ${qaResult.feedback.slice(0, 100)}`,
+        details: JSON.stringify(qaResult),
+      });
+      
+      res.json({ success: true, qaResult });
+    } catch (error: any) {
+      console.error("QA Gate error:", error);
+      res.status(500).json({ error: "Failed to process QA gate" });
     }
   });
 

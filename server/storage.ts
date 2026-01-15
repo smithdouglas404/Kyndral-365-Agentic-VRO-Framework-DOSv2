@@ -13,6 +13,7 @@ import {
   type DiscussionMessage, type InsertDiscussionMessage,
   type ProjectMetric, type InsertProjectMetric,
   type AgentActivityLog, type InsertAgentActivityLog,
+  type Alert, type InsertAlert,
   type Feature, type InsertFeature,
   type Story, type InsertStory,
   type Task, type InsertTask,
@@ -39,7 +40,7 @@ import {
   type McpToolMapping, type InsertMcpToolMapping,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
-  projectMetrics, agentActivityLog, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
+  projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
   okrs, keyResults, kpis,
   portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints,
   sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings
@@ -108,6 +109,10 @@ export interface IStorage {
   getAgentActivityLog(limit?: number): Promise<AgentActivityLog[]>;
   createAgentActivityLog(activity: InsertAgentActivityLog): Promise<AgentActivityLog>;
   clearAgentActivityLog(): Promise<void>;
+  
+  getAlerts(status?: string, category?: string): Promise<Alert[]>;
+  createAlert(alert: InsertAlert): Promise<Alert>;
+  updateAlertStatus(id: string, status: string, userId?: string): Promise<Alert>;
   
   seedDemoInterventions(): Promise<void>;
   clearInterventions(): Promise<void>;
@@ -574,6 +579,45 @@ export class DatabaseStorage implements IStorage {
 
   async clearAgentActivityLog(): Promise<void> {
     await db.delete(agentActivityLog);
+  }
+
+  async getAlerts(status?: string, category?: string): Promise<Alert[]> {
+    let query = db.select().from(alerts).orderBy(desc(alerts.createdAt));
+    if (status && category) {
+      return await db.select().from(alerts)
+        .where(and(eq(alerts.status, status), eq(alerts.category, category)))
+        .orderBy(desc(alerts.createdAt));
+    } else if (status) {
+      return await db.select().from(alerts)
+        .where(eq(alerts.status, status))
+        .orderBy(desc(alerts.createdAt));
+    } else if (category) {
+      return await db.select().from(alerts)
+        .where(eq(alerts.category, category))
+        .orderBy(desc(alerts.createdAt));
+    }
+    return await query;
+  }
+
+  async createAlert(alert: InsertAlert): Promise<Alert> {
+    const result = await db.insert(alerts).values(alert).returning();
+    return result[0];
+  }
+
+  async updateAlertStatus(id: string, status: string, userId?: string): Promise<Alert> {
+    const updates: any = { status };
+    if (status === 'acknowledged') {
+      updates.acknowledgedBy = userId;
+      updates.acknowledgedAt = new Date();
+    } else if (status === 'resolved') {
+      updates.resolvedBy = userId;
+      updates.resolvedAt = new Date();
+    }
+    const result = await db.update(alerts)
+      .set(updates)
+      .where(eq(alerts.id, id))
+      .returning();
+    return result[0];
   }
 
   async clearInterventions(): Promise<void> {

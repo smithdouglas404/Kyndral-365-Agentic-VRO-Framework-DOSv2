@@ -484,6 +484,34 @@ export const insertAgentActivityLogSchema = createInsertSchema(agentActivityLog)
 export type InsertAgentActivityLog = z.infer<typeof insertAgentActivityLogSchema>;
 export type AgentActivityLog = typeof agentActivityLog.$inferSelect;
 
+// Alerts - System alerts and notifications from agents and integrations
+export const alerts = pgTable("alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  severity: text("severity").default("medium"), // critical, high, medium, low, info
+  category: text("category").default("system"), // system, sync, agent, risk, budget, schedule, quality
+  status: text("status").default("active"), // active, acknowledged, resolved, dismissed
+  source: text("source"), // which agent or system generated it
+  sourceEntityType: text("source_entity_type"), // project, feature, story, task, etc.
+  sourceEntityId: text("source_entity_id"),
+  metadata: text("metadata"), // JSON with additional alert context
+  acknowledgedBy: text("acknowledged_by"),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedBy: text("resolved_by"),
+  resolvedAt: timestamp("resolved_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAlertSchema = createInsertSchema(alerts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAlert = z.infer<typeof insertAlertSchema>;
+export type Alert = typeof alerts.$inferSelect;
+
 // OKRs - Objectives and Key Results with source attribution
 export const okrs = pgTable("okrs", {
   id: varchar("id").primaryKey(),

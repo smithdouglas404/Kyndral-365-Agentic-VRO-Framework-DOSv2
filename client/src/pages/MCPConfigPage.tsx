@@ -138,6 +138,9 @@ export default function MCPConfigPage() {
     },
   });
 
+  const [selectedSourceType, setSelectedSourceType] = useState('jira_epic');
+  const [useAI, setUseAI] = useState(true);
+
   const analyzeData = async () => {
     if (!sampleData.trim()) {
       toast.error('Please paste sample data to analyze');
@@ -149,19 +152,39 @@ export default function MCPConfigPage() {
       const parsed = JSON.parse(sampleData);
       const records = Array.isArray(parsed) ? parsed : [parsed];
       
-      const res = await fetch('/api/sync/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sourceSystemId: 'analysis',
-          sampleRecords: records,
-          sourceEntityType: 'jira_epic',
-        }),
-      });
-      
-      const result = await res.json();
-      setAnalysisResult(result.analysis);
-      toast.success('Data analyzed successfully');
+      if (useAI) {
+        const res = await fetch('/api/sync/ai-analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sampleData: records,
+            sourceSystem: selectedSourceType.split('_')[0],
+            sourceEntityType: selectedSourceType,
+          }),
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+          setAnalysisResult(result.analysis);
+          toast.success('AI analysis completed');
+        } else {
+          toast.error('AI analysis failed');
+        }
+      } else {
+        const res = await fetch('/api/sync/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sourceSystemId: 'analysis',
+            sampleRecords: records,
+            sourceEntityType: selectedSourceType,
+          }),
+        });
+        
+        const result = await res.json();
+        setAnalysisResult(result.analysis);
+        toast.success('Data analyzed successfully');
+      }
     } catch (e) {
       toast.error('Invalid JSON data');
     } finally {
@@ -506,11 +529,41 @@ export default function MCPConfigPage() {
                         AI Data Analysis & POV Generation
                       </CardTitle>
                       <CardDescription>
-                        Paste sample data from your PPM tool for AI-powered analysis and SAFe mapping recommendations
+                        Paste sample data from your PPM tool for Anthropic-powered analysis and SAFe mapping recommendations
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Source Entity Type
+                            </label>
+                            <select
+                              value={selectedSourceType}
+                              onChange={(e) => setSelectedSourceType(e.target.value)}
+                              className="w-full px-3 py-2 border rounded-lg text-sm"
+                              data-testid="select-source-type"
+                            >
+                              <option value="jira_epic">Jira Epic</option>
+                              <option value="jira_story">Jira Story</option>
+                              <option value="azure_work_item">Azure DevOps Work Item</option>
+                              <option value="servicenow_project">ServiceNow Project</option>
+                            </select>
+                          </div>
+                          <div className="flex items-end">
+                            <label className="flex items-center gap-2 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={useAI}
+                                onChange={(e) => setUseAI(e.target.checked)}
+                                className="rounded"
+                              />
+                              Use AI-powered analysis (Anthropic)
+                            </label>
+                          </div>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Paste Sample JSON Data
@@ -534,12 +587,12 @@ export default function MCPConfigPage() {
                           {isAnalyzing ? (
                             <>
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Analyzing with AI...
+                              {useAI ? 'Analyzing with Anthropic AI...' : 'Analyzing...'}
                             </>
                           ) : (
                             <>
                               <Sparkles className="h-4 w-4 mr-2" />
-                              Analyze Data Structure
+                              {useAI ? 'Analyze with AI' : 'Analyze Data Structure'}
                             </>
                           )}
                         </Button>
@@ -550,25 +603,56 @@ export default function MCPConfigPage() {
                             animate={{ opacity: 1, y: 0 }}
                             className="mt-6 space-y-4"
                           >
+                            {analysisResult.summary && (
+                              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <h4 className="font-medium text-blue-800 mb-2">Summary</h4>
+                                <p className="text-sm text-blue-700">{analysisResult.summary}</p>
+                              </div>
+                            )}
+
+                            {analysisResult.pov && (
+                              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                                <h4 className="font-medium text-purple-800 mb-2">AI Point of View</h4>
+                                <p className="text-sm text-purple-700">{analysisResult.pov}</p>
+                              </div>
+                            )}
+
                             <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                               <h4 className="font-medium text-indigo-800 mb-3">Analysis Results</h4>
                               
                               <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div className="p-3 bg-white rounded border">
-                                  <div className="text-sm text-gray-600">Match Confidence</div>
+                                  <div className="text-sm text-gray-600">
+                                    {analysisResult.safeMapping ? 'Mapping Confidence' : 'Match Confidence'}
+                                  </div>
                                   <div className="text-xl font-bold text-indigo-600">
-                                    {Math.round(analysisResult.matchConfidence * 100)}%
+                                    {Math.round((analysisResult.safeMapping?.confidence || analysisResult.matchConfidence || 0) * 100)}%
                                   </div>
                                 </div>
                                 <div className="p-3 bg-white rounded border">
-                                  <div className="text-sm text-gray-600">Detected Fields</div>
+                                  <div className="text-sm text-gray-600">
+                                    {analysisResult.dataQuality ? 'Data Quality Score' : 'Detected Fields'}
+                                  </div>
                                   <div className="text-xl font-bold text-indigo-600">
-                                    {analysisResult.detectedFields?.length || 0}
+                                    {analysisResult.dataQuality?.score || analysisResult.detectedFields?.length || 0}
+                                    {analysisResult.dataQuality ? '/100' : ''}
                                   </div>
                                 </div>
                               </div>
 
-                              {analysisResult.suggestedMapping && (
+                              {analysisResult.safeMapping && (
+                                <div className="mb-4">
+                                  <div className="text-sm font-medium text-indigo-700 mb-2">SAFe Mapping Recommendation</div>
+                                  <Badge className="bg-indigo-100 text-indigo-700">
+                                    {selectedSourceType} → {analysisResult.safeMapping.suggestedEntityType}
+                                  </Badge>
+                                  {analysisResult.safeMapping.reasoning && (
+                                    <p className="text-xs text-gray-600 mt-2">{analysisResult.safeMapping.reasoning}</p>
+                                  )}
+                                </div>
+                              )}
+
+                              {analysisResult.suggestedMapping && !analysisResult.safeMapping && (
                                 <div className="mb-4">
                                   <div className="text-sm font-medium text-indigo-700 mb-2">Suggested Mapping</div>
                                   <Badge className="bg-indigo-100 text-indigo-700">
@@ -577,7 +661,21 @@ export default function MCPConfigPage() {
                                 </div>
                               )}
 
-                              {analysisResult.recommendations?.length > 0 && (
+                              {analysisResult.dataQuality?.issues?.length > 0 && (
+                                <div className="mb-4">
+                                  <div className="text-sm font-medium text-red-700 mb-2">Data Quality Issues</div>
+                                  <ul className="text-sm text-red-600 space-y-1">
+                                    {analysisResult.dataQuality.issues.map((issue: string, i: number) => (
+                                      <li key={i} className="flex items-start gap-2">
+                                        <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                        {issue}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {(analysisResult.dataQuality?.recommendations?.length > 0 || analysisResult.recommendations?.length > 0) && (
                                 <div>
                                   <div className="text-sm font-medium text-indigo-700 mb-2">Recommendations</div>
                                   <ul className="text-sm text-indigo-600 space-y-1">
@@ -592,21 +690,35 @@ export default function MCPConfigPage() {
                               )}
                             </div>
 
-                            <div className="p-4 bg-gray-50 border rounded-lg">
-                              <h4 className="font-medium text-gray-700 mb-2">Detected Fields</h4>
-                              <div className="flex flex-wrap gap-1">
-                                {analysisResult.detectedFields?.slice(0, 20).map((field: string) => (
-                                  <Badge key={field} variant="outline" className="text-xs">
-                                    {field}
-                                  </Badge>
-                                ))}
-                                {analysisResult.detectedFields?.length > 20 && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    +{analysisResult.detectedFields.length - 20} more
-                                  </Badge>
-                                )}
+                            {analysisResult.clarifyingQuestions?.length > 0 && (
+                              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <h4 className="font-medium text-yellow-800 mb-2">Clarifying Questions</h4>
+                                <p className="text-xs text-yellow-600 mb-3">Please answer these questions to proceed with QA Gate approval:</p>
+                                <ol className="text-sm text-yellow-700 space-y-2 list-decimal ml-4">
+                                  {analysisResult.clarifyingQuestions.map((q: string, i: number) => (
+                                    <li key={i}>{q}</li>
+                                  ))}
+                                </ol>
                               </div>
-                            </div>
+                            )}
+
+                            {analysisResult.detectedFields?.length > 0 && (
+                              <div className="p-4 bg-gray-50 border rounded-lg">
+                                <h4 className="font-medium text-gray-700 mb-2">Detected Fields</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {analysisResult.detectedFields.slice(0, 20).map((field: string) => (
+                                    <Badge key={field} variant="outline" className="text-xs">
+                                      {field}
+                                    </Badge>
+                                  ))}
+                                  {analysisResult.detectedFields.length > 20 && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{analysisResult.detectedFields.length - 20} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </motion.div>
                         )}
                       </div>
