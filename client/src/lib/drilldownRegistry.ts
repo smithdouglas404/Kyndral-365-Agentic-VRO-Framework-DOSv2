@@ -6,7 +6,6 @@
 
 import { AgentType } from './dataHub';
 import { strategicThemes, valueStreams, portfolioEpics, features, stories, tasks, teams, teamMembers } from './safe6Data';
-import { enrichedProjects } from './projects';
 
 export type DrilldownLevel = 1 | 2 | 3;
 
@@ -337,14 +336,7 @@ export const riskDossiers: Record<string, DrilldownContent> = {
       { id: 'port-1', label: 'View Risk Register', type: 'navigate', targetEntityType: 'report', targetEntityId: 'risk-register', description: 'Full portfolio risk register' },
       { id: 'port-2', label: 'Mitigation Dashboard', type: 'navigate', targetEntityType: 'metric', targetEntityId: 'mitigation-status', description: 'Track mitigation progress' }
     ],
-    relatedItems: enrichedProjects.filter(p => p.status === 'red' || p.status === 'amber').slice(0, 4).map(p => ({
-      id: p.id,
-      name: p.name,
-      type: 'Project',
-      entityType: 'project',
-      entityId: p.id,
-      status: p.status === 'red' ? 'At Risk' : 'Amber'
-    })),
+    relatedItems: [],
     aiInsight: 'Governance Agent: 3 critical risks require immediate attention. Budget overrun and dependency blockage are top priorities.',
     agentSource: 'governance'
   }
@@ -457,14 +449,7 @@ export const metricDossiers: Record<string, DrilldownContent> = {
       { id: 'roi-2', label: 'View by BU', type: 'navigate', targetEntityType: 'metric-breakdown', targetEntityId: 'roi-by-bu' },
       { id: 'roi-3', label: 'Trend Analysis', type: 'navigate', targetEntityType: 'trend', targetEntityId: 'roi-trend' }
     ],
-    relatedItems: enrichedProjects.slice(0, 4).map(p => ({
-      id: p.id,
-      name: p.name,
-      type: 'Project',
-      entityType: 'project',
-      entityId: p.id,
-      status: `ROI: ${p.expectedROI}`
-    })),
+    relatedItems: [],
     aiInsight: 'VRO Agent: Top 3 projects contributing 68% of total portfolio ROI. Consider accelerating these for faster value realization.',
     agentSource: 'integrated-management'
   },
@@ -775,8 +760,14 @@ export const agentDossiers: Record<AgentType, DrilldownContent> = {
 // DEPENDENCY CHAIN DOSSIERS - Level 2/3 for dependency drilldowns
 // ============================================================
 
-export function buildDependencyDossier(projectId: string): DrilldownContent {
-  const project = enrichedProjects.find(p => p.id === projectId);
+interface ProjectWithDependencies {
+  id: string;
+  name: string;
+  dependencies?: Array<{ projectId: string; projectName: string; type: string; health: string }>;
+}
+
+export function buildDependencyDossier(projectId: string, projects: ProjectWithDependencies[] = []): DrilldownContent {
+  const project = projects.find((p: ProjectWithDependencies) => p.id === projectId);
   if (!project) {
     return {
       title: 'Dependency Analysis',
@@ -799,15 +790,15 @@ export function buildDependencyDossier(projectId: string): DrilldownContent {
     entityId: projectId,
     metrics: [
       { label: 'Total Dependencies', value: `${deps.length}`, trend: 'stable' },
-      { label: 'Healthy', value: `${deps.filter(d => d.health === 'green').length}`, trend: 'up', color: 'green' },
-      { label: 'At Risk', value: `${deps.filter(d => d.health === 'yellow').length}`, trend: 'stable', color: 'amber' },
-      { label: 'Critical', value: `${deps.filter(d => d.health === 'red').length}`, trend: 'down', color: 'red' }
+      { label: 'Healthy', value: `${deps.filter((d: { health: string }) => d.health === 'green').length}`, trend: 'up', color: 'green' },
+      { label: 'At Risk', value: `${deps.filter((d: { health: string }) => d.health === 'yellow').length}`, trend: 'stable', color: 'amber' },
+      { label: 'Critical', value: `${deps.filter((d: { health: string }) => d.health === 'red').length}`, trend: 'down', color: 'red' }
     ],
     actions: [
       { id: 'dep-1', label: 'View Impact Analysis', type: 'navigate', targetEntityType: 'impact', targetEntityId: projectId },
       { id: 'dep-2', label: 'Notify Owners', type: 'escalate', description: 'Alert dependency owners' }
     ],
-    relatedItems: deps.map(d => ({
+    relatedItems: deps.map((d: { projectId: string; projectName: string; type: string; health: string }) => ({
       id: d.projectId,
       name: d.projectName,
       type: d.type,
@@ -816,7 +807,7 @@ export function buildDependencyDossier(projectId: string): DrilldownContent {
       status: d.health
     })),
     aiInsight: deps.length > 0 
-      ? `PMO Agent: ${deps.filter(d => d.health !== 'green').length} dependencies require attention. Recommend proactive stakeholder communication.`
+      ? `PMO Agent: ${deps.filter((d: { health: string }) => d.health !== 'green').length} dependencies require attention. Recommend proactive stakeholder communication.`
       : 'No dependencies identified for this project.',
     agentSource: 'tmo'
   };
@@ -1096,41 +1087,10 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
     }
   }
 
-  // Project drilldown - Full dossier with Traceability/Agents/History tabs
+  // Project drilldown - handled by React components with useEnrichedProjects hook
+  // Return null to allow component-level rendering with fresh data
   if (entityType === 'project') {
-    const project = enrichedProjects.find(p => p.id === entityId);
-    if (project) {
-      return {
-        title: project.name,
-        subtitle: `${project.bu} - ${project.priority} priority`,
-        description: project.description,
-        level: 2,
-        entityType: 'project',
-        entityId: project.id,
-        isFullDossier: true,
-        metrics: [
-          { label: 'Status', value: project.status, trend: 'stable' },
-          { label: 'Budget', value: `$${project.budget.total}${project.budget.unit}`, trend: 'stable' },
-          { label: 'ROI', value: project.expectedROI, trend: 'up' },
-          { label: 'Timeline', value: `${project.timeline.elapsed}/${project.timeline.total} months`, trend: 'stable' }
-        ],
-        actions: [
-          { id: 'proj-1', label: 'View Dependencies', type: 'navigate', targetEntityType: 'dependency', targetEntityId: project.id, description: 'Explore project dependencies' },
-          { id: 'proj-2', label: 'View Full Details', type: 'navigate', targetEntityType: 'project-page', targetEntityId: project.id, description: 'Open project detail page' },
-          { id: 'proj-3', label: 'Escalate Issue', type: 'escalate', targetEntityType: 'team', targetEntityId: 'project-leads', description: 'Escalate to project leadership' }
-        ],
-        relatedItems: (project.dependencies || []).slice(0, 3).map(d => ({
-          id: d.projectId,
-          name: d.projectName,
-          type: d.type,
-          entityType: 'project',
-          entityId: d.projectId,
-          status: d.health
-        })),
-        aiInsight: `Integrated Management Agent: ${project.aiRecommendation || 'Project is being actively monitored. All AI agents are aligned on delivery strategy.'}`,
-        agentSource: 'integrated-management'
-      };
-    }
+    return null;
   }
 
   // Extended entity types - Level 3 content for action-referenced items

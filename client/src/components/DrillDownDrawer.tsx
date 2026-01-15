@@ -11,7 +11,8 @@ import { useEntityDrilldown } from '@/hooks/useAgentData';
 import { AgentType } from '@/lib/dataHub';
 import { AICoPilot } from './AICoPilot';
 import { getActionLog, subscribeToActions, AgentAction } from '@/lib/agentActionEngine';
-import { enrichedProjects, getProjectById, getStageLabel, type EnrichedProject } from '@/lib/projects';
+import { getStageLabel, type EnrichedProject } from '@/lib/projects';
+import { useEnrichedProjects } from '@/hooks/useProjects';
 import { buPortfolios, type BUPortfolio } from '@/lib/buPrograms';
 import { 
   strategicThemes, valueStreams, portfolioEpics, features, stories, tasks, teams, teamMembers
@@ -450,6 +451,7 @@ function RegistryContentRenderer({ content, onNavigate }: RegistryContentProps) 
 
 export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMode = 'VRO', onNavigate }: DrillDownDrawerProps) {
   const [, setLocation] = useLocation();
+  const { data: enrichedProjects = [] } = useEnrichedProjects();
   const [activeTab, setActiveTab] = useState('overview');
   const [agentActivities, setAgentActivities] = useState<AgentAction[]>([]);
   const [relatedInterventionId, setRelatedInterventionId] = useState<string | null>(null);
@@ -514,7 +516,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
   // Look up enriched project data by ID or exact name match only (no fuzzy matching)
   const enrichedProject: EnrichedProject | undefined = 
     entityType === 'project' 
-      ? getProjectById(entityId) || enrichedProjects.find(p => 
+      ? enrichedProjects.find(p => 
           p.id === entityId ||
           p.name.toLowerCase() === entityId.toLowerCase()
         )

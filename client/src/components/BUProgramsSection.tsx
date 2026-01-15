@@ -14,7 +14,8 @@ import {
   buPortfolios, BUPortfolio
 } from "@/lib/buPrograms";
 import { challenges, VROMetric } from "@/lib/data";
-import { enrichedProjects, getProjectById, type ProjectDependency } from "@/lib/projects";
+import { type ProjectDependency } from "@/lib/projects";
+import { useEnrichedProjects } from "@/hooks/useProjects";
 import { 
   Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, 
   DollarSign, Brain, Users, Target, Sparkles, Shield,
