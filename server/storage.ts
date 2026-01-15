@@ -42,13 +42,18 @@ import {
   type DivisionKpi, type InsertDivisionKpi,
   type DivisionOkr, type InsertDivisionOkr,
   type DivisionRisk, type InsertDivisionRisk,
+  type CompanyOverview, type InsertCompanyOverview,
+  type ClimateMetric, type InsertClimateMetric,
+  type EnterpriseRiskCategory, type InsertEnterpriseRiskCategory,
+  type EnterpriseRisk, type InsertEnterpriseRisk,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
   okrs, keyResults, kpis,
   portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints,
   sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings,
-  divisions, divisionKpis, divisionOkrs, divisionRisks
+  divisions, divisionKpis, divisionOkrs, divisionRisks,
+  companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -209,6 +214,26 @@ export interface IStorage {
     risks: DivisionRisk[];
   } | undefined>;
   seedDivisions(): Promise<void>;
+  
+  // Company Overview Methods (NextEra Corporate Info)
+  getCompanyOverview(): Promise<CompanyOverview | undefined>;
+  createCompanyOverview(overview: InsertCompanyOverview): Promise<CompanyOverview>;
+  
+  // Climate Metrics Methods (Sustainability Data)
+  getClimateMetrics(category?: string): Promise<ClimateMetric[]>;
+  createClimateMetric(metric: InsertClimateMetric): Promise<ClimateMetric>;
+  
+  // Enterprise Risk Methods (Corporate Risk Registry)
+  getEnterpriseRiskCategories(): Promise<EnterpriseRiskCategory[]>;
+  createEnterpriseRiskCategory(category: InsertEnterpriseRiskCategory): Promise<EnterpriseRiskCategory>;
+  getEnterpriseRisks(categoryId?: string): Promise<EnterpriseRisk[]>;
+  createEnterpriseRisk(risk: InsertEnterpriseRisk): Promise<EnterpriseRisk>;
+  getFullEnterpriseRiskProfile(): Promise<{
+    categories: (EnterpriseRiskCategory & { risks: EnterpriseRisk[] })[];
+  }>;
+  
+  // Seed company/climate/risk data
+  seedCompanyData(): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -1680,6 +1705,181 @@ export class DatabaseStorage implements IStorage {
 
     console.log("[Seed] Seeded 3 divisions with KPIs, OKRs, and risks");
   }
+
+  // ============================================================================
+  // Company Overview Methods
+  // ============================================================================
+  
+  async getCompanyOverview(): Promise<CompanyOverview | undefined> {
+    const result = await db.select().from(companyOverview).limit(1);
+    return result[0];
+  }
+
+  async createCompanyOverview(overview: InsertCompanyOverview): Promise<CompanyOverview> {
+    const result = await db.insert(companyOverview).values(overview).returning();
+    return result[0];
+  }
+
+  // ============================================================================
+  // Climate Metrics Methods
+  // ============================================================================
+  
+  async getClimateMetrics(category?: string): Promise<ClimateMetric[]> {
+    if (category) {
+      return await db.select().from(climateMetrics).where(eq(climateMetrics.category, category));
+    }
+    return await db.select().from(climateMetrics);
+  }
+
+  async createClimateMetric(metric: InsertClimateMetric): Promise<ClimateMetric> {
+    const result = await db.insert(climateMetrics).values(metric).returning();
+    return result[0];
+  }
+
+  // ============================================================================
+  // Enterprise Risk Methods
+  // ============================================================================
+  
+  async getEnterpriseRiskCategories(): Promise<EnterpriseRiskCategory[]> {
+    return await db.select().from(enterpriseRiskCategories);
+  }
+
+  async createEnterpriseRiskCategory(category: InsertEnterpriseRiskCategory): Promise<EnterpriseRiskCategory> {
+    const result = await db.insert(enterpriseRiskCategories).values(category).returning();
+    return result[0];
+  }
+
+  async getEnterpriseRisks(categoryId?: string): Promise<EnterpriseRisk[]> {
+    if (categoryId) {
+      return await db.select().from(enterpriseRisks).where(eq(enterpriseRisks.categoryId, categoryId));
+    }
+    return await db.select().from(enterpriseRisks);
+  }
+
+  async createEnterpriseRisk(risk: InsertEnterpriseRisk): Promise<EnterpriseRisk> {
+    const result = await db.insert(enterpriseRisks).values(risk).returning();
+    return result[0];
+  }
+
+  async getFullEnterpriseRiskProfile(): Promise<{
+    categories: (EnterpriseRiskCategory & { risks: EnterpriseRisk[] })[];
+  }> {
+    const allCategories = await this.getEnterpriseRiskCategories();
+    const allRisks = await this.getEnterpriseRisks();
+    
+    const categoriesWithRisks = allCategories.map(cat => ({
+      ...cat,
+      risks: allRisks.filter(r => r.categoryId === cat.id)
+    }));
+    
+    return { categories: categoriesWithRisks };
+  }
+
+  // ============================================================================
+  // Seed Company Data (Overview, Climate, Risks)
+  // ============================================================================
+  
+  async seedCompanyData(): Promise<void> {
+    // Check if already seeded
+    const existing = await db.select().from(companyOverview).limit(1);
+    if (existing.length > 0) {
+      console.log("[Seed] Company data already exists, skipping...");
+      return;
+    }
+
+    // Seed company overview
+    await db.insert(companyOverview).values({
+      companyName: "NextEra Energy",
+      yearsOfHistory: 100,
+      employees: 16800,
+      adjustedOperatingProfitValue: 24753,
+      adjustedOperatingProfitUnit: "$m",
+      adjustedOperatingProfitYear: 2024,
+      assetsUnderManagementValue: 180,
+      assetsUnderManagementUnit: "$bn",
+      proprietaryAssetsValue: 68,
+      proprietaryAssetsUnit: "GW",
+      fortune200: true,
+      ceo: "John Ketchum",
+      cfo: "Kirk Crews",
+      cro: "Rebecca Kujawa",
+      climateDirector: "Eric Silagy",
+      source: "NextEra Energy Annual Report 2024",
+      sustainalyticsPercentile: 85,
+      sustainalyticsRating: "Low Risk",
+      msciRating: "A"
+    });
+
+    // Seed climate metrics
+    const climateData: InsertClimateMetric[] = [
+      // Headline metrics
+      { category: "headline", metricName: "Operational Footprint Reduction", value: 65, unit: "%", description: "CO2 emissions rate reduction since 2005", baseYear: 2005 },
+      { category: "headline", metricName: "Renewable Capacity", value: 33, unit: "GW", description: "Total renewable generation capacity" },
+      { category: "headline", metricName: "Clean Energy Investment", value: 12, unit: "$bn", description: "Annual clean energy investment" },
+      { category: "headline", metricName: "Net Zero Target Year", value: 2045, unit: "year", description: "Target year for net zero operations" },
+      // Operational metrics
+      { category: "operational", metricName: "Total Carbon Footprint", value: 25000000, unit: "tCO2e", description: "Total operational carbon footprint 2024" },
+      { category: "operational", metricName: "Scope 1&2 Reduction", value: 12, unit: "%", description: "Fleet-wide emissions reduction vs 2023" },
+      { category: "operational", metricName: "Smart Grid Assets", value: 5900000, unit: "meters", description: "Smart meters deployed" },
+      { category: "operational", metricName: "Solar Installations", value: 7200, unit: "MW", description: "Utility-scale solar capacity" },
+      { category: "operational", metricName: "Battery Storage", value: 3700, unit: "MW", description: "Grid-scale battery storage" },
+      // Targets
+      { category: "targets", metricName: "Carbon Intensity Reduction", value: 65, targetValue: 70, unit: "%", targetYear: 2025, baseYear: 2005, progress: 65 },
+      { category: "targets", metricName: "Renewable Expansion", value: 33, targetValue: 50, unit: "GW", targetYear: 2030, progress: 66 },
+      // Clean energy
+      { category: "cleanEnergy", metricName: "Wind Capacity", value: 22500, unit: "MW", description: "Wind generation capacity" },
+      { category: "cleanEnergy", metricName: "Solar Capacity", value: 7200, unit: "MW", description: "Solar generation capacity" },
+      { category: "cleanEnergy", metricName: "Hydrogen Projects", value: 5, unit: "projects", description: "Green hydrogen pilot initiatives" },
+      // Nature
+      { category: "nature", metricName: "Land Conservation", value: 50000, unit: "acres", description: "Protected habitat and conservation lands" },
+      { category: "nature", metricName: "Manatee Protection", value: 12, unit: "projects", description: "Manatee habitat protection initiatives" }
+    ];
+
+    for (const metric of climateData) {
+      await db.insert(climateMetrics).values(metric);
+    }
+
+    // Seed enterprise risk categories
+    const riskCategories: InsertEnterpriseRiskCategory[] = [
+      { id: "operational", name: "Operational Risk", subtitle: "Infrastructure and execution", icon: "Shield", color: "#C50B30" },
+      { id: "regulatory", name: "Regulatory Risk", subtitle: "Policy and compliance", icon: "TrendingUp", color: "#007FAA" },
+      { id: "market", name: "Market Risk", subtitle: "Economic and competitive", icon: "BarChart2", color: "#8B5CF6" },
+      { id: "credit", name: "Credit Risk", subtitle: "Counterparty exposure", icon: "CreditCard", color: "#F59E0B" },
+      { id: "strategic", name: "Strategic Risk", subtitle: "Business model", icon: "Target", color: "#10B981" }
+    ];
+
+    for (const cat of riskCategories) {
+      await db.insert(enterpriseRiskCategories).values(cat);
+    }
+
+    // Seed enterprise risks
+    const riskItems: InsertEnterpriseRisk[] = [
+      // Operational risks
+      { categoryId: "operational", name: "Hurricane and severe weather exposure", description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event.", severity: "high", trend: "worsening" },
+      { categoryId: "operational", name: "Project execution and development", description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays and interconnection queue backlogs.", severity: "high", trend: "stable" },
+      { categoryId: "operational", name: "Equipment and infrastructure reliability", description: "Critical dependence on generation, transmission, and distribution infrastructure. Equipment failures or extended maintenance periods impact reliability.", severity: "high", trend: "improving" },
+      { categoryId: "operational", name: "Nuclear operations", description: "Point Beach and other nuclear facilities require NRC compliance, safe operations, and extended license renewals.", severity: "medium", trend: "stable" },
+      // Regulatory risks
+      { categoryId: "regulatory", name: "Rate case outcomes", description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE. Current ROE range 10.15-11.15%.", severity: "high", trend: "stable" },
+      { categoryId: "regulatory", name: "Federal energy policy changes", description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact NEER economics.", severity: "high", trend: "worsening" },
+      { categoryId: "regulatory", name: "Environmental compliance", description: "EPA regulations on emissions, water usage, and waste disposal. Coal combustion residuals management at legacy sites.", severity: "medium", trend: "stable" },
+      // Market risks  
+      { categoryId: "market", name: "Power price volatility", description: "NEER merchant power exposure to wholesale electricity price fluctuations. Basis risk between contracted prices and delivery points.", severity: "high", trend: "stable" },
+      { categoryId: "market", name: "Interest rate exposure", description: "Rate increases impact cost of capital and refinancing. Significant impact on $35B+ development capital program.", severity: "medium", trend: "worsening" },
+      { categoryId: "market", name: "Supply chain constraints", description: "Solar panel, battery, and transformer availability. Global competition for clean energy equipment.", severity: "high", trend: "improving" },
+      // Credit risks
+      { categoryId: "credit", name: "Counterparty credit risk", description: "Long-term PPA counterparty creditworthiness. Large utility and corporate offtakers concentration.", severity: "medium", trend: "stable" },
+      // Strategic risks
+      { categoryId: "strategic", name: "Technology disruption", description: "Emerging technologies in storage, hydrogen, and distributed generation may disrupt current business models.", severity: "medium", trend: "stable" },
+      { categoryId: "strategic", name: "Talent and succession", description: "Competition for skilled workforce in growing clean energy sector. Leadership succession planning.", severity: "medium", trend: "stable" }
+    ];
+
+    for (const risk of riskItems) {
+      await db.insert(enterpriseRisks).values(risk);
+    }
+
+    console.log("[Seed] Seeded company overview, climate metrics, and enterprise risks");
+  }
 }
 
 export const storage = new DatabaseStorage();
@@ -1690,4 +1890,8 @@ storage.seedDemoData().catch(err => {
 
 storage.seedDivisions().catch(err => {
   console.error("Failed to seed divisions:", err);
+});
+
+storage.seedCompanyData().catch(err => {
+  console.error("Failed to seed company data:", err);
 });

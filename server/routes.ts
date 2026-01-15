@@ -2034,5 +2034,82 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // COMPANY OVERVIEW API - NextEra Corporate Info (DB-backed)
+  // ============================================================================
+  
+  app.get("/api/company/overview", async (_req, res) => {
+    try {
+      const overview = await storage.getCompanyOverview();
+      if (!overview) {
+        return res.status(404).json({ error: "Company overview not found" });
+      }
+      res.json(overview);
+    } catch (error: any) {
+      console.error("Get company overview error:", error);
+      res.status(500).json({ error: "Failed to get company overview" });
+    }
+  });
+
+  // ============================================================================
+  // CLIMATE METRICS API - Sustainability Data (DB-backed)
+  // ============================================================================
+  
+  app.get("/api/climate/metrics", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const metrics = await storage.getClimateMetrics(category);
+      res.json(metrics);
+    } catch (error: any) {
+      console.error("Get climate metrics error:", error);
+      res.status(500).json({ error: "Failed to get climate metrics" });
+    }
+  });
+
+  app.get("/api/climate/metrics/:category", async (req, res) => {
+    try {
+      const metrics = await storage.getClimateMetrics(req.params.category);
+      res.json(metrics);
+    } catch (error: any) {
+      console.error("Get climate metrics by category error:", error);
+      res.status(500).json({ error: "Failed to get climate metrics" });
+    }
+  });
+
+  // ============================================================================
+  // ENTERPRISE RISKS API - Corporate Risk Registry (DB-backed)
+  // ============================================================================
+  
+  app.get("/api/enterprise-risks/categories", async (_req, res) => {
+    try {
+      const categories = await storage.getEnterpriseRiskCategories();
+      res.json(categories);
+    } catch (error: any) {
+      console.error("Get enterprise risk categories error:", error);
+      res.status(500).json({ error: "Failed to get enterprise risk categories" });
+    }
+  });
+
+  app.get("/api/enterprise-risks", async (req, res) => {
+    try {
+      const categoryId = req.query.categoryId as string | undefined;
+      const risks = await storage.getEnterpriseRisks(categoryId);
+      res.json(risks);
+    } catch (error: any) {
+      console.error("Get enterprise risks error:", error);
+      res.status(500).json({ error: "Failed to get enterprise risks" });
+    }
+  });
+
+  app.get("/api/enterprise-risks/profile", async (_req, res) => {
+    try {
+      const profile = await storage.getFullEnterpriseRiskProfile();
+      res.json(profile);
+    } catch (error: any) {
+      console.error("Get enterprise risk profile error:", error);
+      res.status(500).json({ error: "Failed to get enterprise risk profile" });
+    }
+  });
+
   return httpServer;
 }

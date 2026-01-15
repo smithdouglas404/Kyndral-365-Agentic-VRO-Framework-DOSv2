@@ -26,7 +26,8 @@ import { AgentCommandCenter } from "@/components/AgentCommandCenter";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
-import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
+import { aiAlerts } from "@/lib/lgData";
+import { useDivisions } from "@/hooks/useNexteraData";
 import { formatMoney } from "@/lib/formatters";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
@@ -424,6 +425,9 @@ function DashboardContent() {
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
   
   const { state, toggleLive, forceUpdate } = useSimulation();
+  
+  // Fetch divisions from API (DB-backed)
+  const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
 
   // Update page context for Ask PM
   useEffect(() => {
@@ -552,20 +556,24 @@ function DashboardContent() {
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                {divisions.map((division) => (
+                {divisionsLoading ? (
+                  <div className="col-span-3 flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+                  </div>
+                ) : divisions.map((division) => (
                 <div 
                   key={division.id}
                   className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
-                  style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                  style={{ borderLeftColor: division.color || '#666', borderLeftWidth: '4px' }}
                   data-testid={`card-division-${division.id}`}
                   onClick={() => handleDrillDown("division", division.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
-                      <p className="text-lg font-bold" style={{ color: division.color }}>{formatMoney(division.profit2024)}</p>
-                      <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
-                        {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
+                      <p className="text-lg font-bold" style={{ color: division.color || '#333' }}>{formatMoney(division.profit2024 ?? 0)}</p>
+                      <Badge variant={(division.changePercent ?? 0) >= 0 ? "default" : "destructive"} className="text-xs mt-1">
+                        {(division.changePercent ?? 0) >= 0 ? "+" : ""}{division.changePercent ?? 0}%
                       </Badge>
                     </div>
                     <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />

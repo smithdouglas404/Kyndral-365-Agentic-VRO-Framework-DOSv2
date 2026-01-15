@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, real } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, real, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -138,6 +138,110 @@ export const insertDivisionRiskSchema = createInsertSchema(divisionRisks).omit({
 
 export type InsertDivisionRisk = z.infer<typeof insertDivisionRiskSchema>;
 export type DivisionRisk = typeof divisionRisks.$inferSelect;
+
+// ============================================================================
+// COMPANY OVERVIEW - NextEra Energy Corporate Info (from official filings)
+// ============================================================================
+
+export const companyOverview = pgTable("company_overview", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: text("company_name").notNull().default("NextEra Energy"),
+  yearsOfHistory: integer("years_of_history"),
+  employees: integer("employees"),
+  adjustedOperatingProfitValue: real("adjusted_operating_profit_value"), // in millions
+  adjustedOperatingProfitUnit: text("adjusted_operating_profit_unit").default("$m"),
+  adjustedOperatingProfitYear: integer("adjusted_operating_profit_year"),
+  assetsUnderManagementValue: real("assets_under_management_value"), // in billions
+  assetsUnderManagementUnit: text("assets_under_management_unit").default("$bn"),
+  proprietaryAssetsValue: real("proprietary_assets_value"), // in GW
+  proprietaryAssetsUnit: text("proprietary_assets_unit").default("GW"),
+  fortune200: boolean("fortune_200").default(false),
+  ceo: text("ceo"),
+  cfo: text("cfo"),
+  cro: text("cro"),
+  climateDirector: text("climate_director"),
+  source: text("source"),
+  // ESG Ratings
+  sustainalyticsPercentile: integer("sustainalytics_percentile"),
+  sustainalyticsRating: text("sustainalytics_rating"),
+  msciRating: text("msci_rating"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCompanyOverviewSchema = createInsertSchema(companyOverview).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCompanyOverview = z.infer<typeof insertCompanyOverviewSchema>;
+export type CompanyOverview = typeof companyOverview.$inferSelect;
+
+// ============================================================================
+// CLIMATE DATA - Sustainability & Environmental Metrics (from official filings)
+// ============================================================================
+
+export const climateMetrics = pgTable("climate_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: text("category").notNull(), // headline, operational, targets, cleanEnergy, context, nature
+  metricName: text("metric_name").notNull(),
+  value: real("value"),
+  unit: text("unit"),
+  description: text("description"),
+  targetValue: real("target_value"),
+  targetYear: integer("target_year"),
+  baseYear: integer("base_year"),
+  progress: real("progress"),
+  source: text("source"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertClimateMetricSchema = createInsertSchema(climateMetrics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertClimateMetric = z.infer<typeof insertClimateMetricSchema>;
+export type ClimateMetric = typeof climateMetrics.$inferSelect;
+
+// ============================================================================
+// ENTERPRISE RISKS - Corporate Risk Registry (from official filings)
+// ============================================================================
+
+export const enterpriseRiskCategories = pgTable("enterprise_risk_categories", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  subtitle: text("subtitle"),
+  icon: text("icon"),
+  color: text("color"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEnterpriseRiskCategorySchema = createInsertSchema(enterpriseRiskCategories).omit({
+  createdAt: true,
+});
+
+export type InsertEnterpriseRiskCategory = z.infer<typeof insertEnterpriseRiskCategorySchema>;
+export type EnterpriseRiskCategory = typeof enterpriseRiskCategories.$inferSelect;
+
+export const enterpriseRisks = pgTable("enterprise_risks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").notNull().references(() => enterpriseRiskCategories.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  severity: text("severity").default("medium"), // low, medium, high
+  trend: text("trend").default("stable"), // improving, stable, worsening
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEnterpriseRiskSchema = createInsertSchema(enterpriseRisks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertEnterpriseRisk = z.infer<typeof insertEnterpriseRiskSchema>;
+export type EnterpriseRisk = typeof enterpriseRisks.$inferSelect;
 
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

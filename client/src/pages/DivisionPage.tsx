@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
+import { aiAlerts, industryBenchmarks } from "@/lib/lgData";
+import { useFullDivision } from "@/hooks/useNexteraData";
 import { formatMoney } from "@/lib/formatters";
 import { getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
 import { useEnrichedProjects } from "@/hooks/useProjects";
@@ -56,6 +57,23 @@ const divisionToPortfolioMapping: Record<string, string> = {
   'risk-center': 'portfolio-rc',
 };
 
+// Helper to parse keyResults JSON string
+interface ParsedKeyResult {
+  result: string;
+  progress: number;
+  target: number;
+  unit: string;
+}
+
+function parseKeyResults(keyResults: string | null): ParsedKeyResult[] {
+  if (!keyResults) return [];
+  try {
+    return JSON.parse(keyResults);
+  } catch {
+    return [];
+  }
+}
+
 export default function DivisionPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
@@ -70,8 +88,15 @@ export default function DivisionPage() {
   const fromTab = searchParams.get('fromTab') || 'portfolios';
   
   // Resolve legacy slugs to new IDs
-  const resolvedId = legacySlugs[params.id || ''] || params.id;
-  const division = divisions.find(d => d.id === resolvedId);
+  const resolvedId = legacySlugs[params.id || ''] || params.id || '';
+  
+  // Fetch division from database API
+  const { data: fullDivisionData, isLoading: isLoadingDivision } = useFullDivision(resolvedId);
+  const division = fullDivisionData?.division;
+  const divisionKpis = fullDivisionData?.kpis || [];
+  const divisionOkrs = fullDivisionData?.okrs || [];
+  const divisionRisks = fullDivisionData?.risks || [];
+  
   const [selectedEntity, setSelectedEntity] = useState<{ type: string; id: string } | null>(null);
   
   // Update page context for Ask PM
@@ -108,6 +133,19 @@ export default function DivisionPage() {
     setSelectedEntity({ type, id });
   };
   
+  // Show loading state while fetching division data
+  if (isLoadingDivision) {
+    return (
+      <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+          <p className="text-muted-foreground">Loading division data...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Show not found only after loading completes with no data
   if (!division) {
     return (
       <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
@@ -127,22 +165,22 @@ export default function DivisionPage() {
   const portfolioId = divisionToPortfolioMapping[resolvedId || ''];
   const portfolioData = portfolioId ? buPortfolios.find(p => p.id === portfolioId) : undefined;
   
-  const kpiChartData = division.kpis.slice(0, 4).map(kpi => ({
+  const kpiChartData = divisionKpis.slice(0, 4).map(kpi => ({
     name: kpi.name.length > 15 ? kpi.name.slice(0, 15) + "..." : kpi.name,
-    "2023": typeof kpi.value2023 === "number" ? kpi.value2023 : 0,
-    "2024": typeof kpi.value2024 === "number" ? kpi.value2024 : 0,
-    "Target": typeof kpi.target2025 === "number" ? kpi.target2025 : 0
+    "2023": parseFloat(kpi.value2023 || '0') || 0,
+    "2024": parseFloat(kpi.value2024 || '0') || 0,
+    "Target": parseFloat(kpi.target2025 || '0') || 0
   }));
 
   const profitTrend = [
-    { year: "2023", profit: division.profit2023 },
-    { year: "2024", profit: division.profit2024 },
-    { year: "2025 (Proj)", profit: Math.round(division.profit2024 * (1 + (division.changePercent > 0 ? 0.08 : 0.05))) }
+    { year: "2023", profit: division.profit2023 ?? 0 },
+    { year: "2024", profit: division.profit2024 ?? 0 },
+    { year: "2025 (Proj)", profit: Math.round((division.profit2024 ?? 0) * (1 + ((division.changePercent ?? 0) > 0 ? 0.08 : 0.05))) }
   ];
 
   return (
     <div className="min-h-screen bg-[#F6F6F6]">
-      <header className="bg-white shadow-sm border-b-4" style={{ borderColor: division.color }}>
+      <header className="bg-white shadow-sm border-b-4" style={{ borderColor: division.color || '#666' }}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button 
@@ -155,23 +193,23 @@ export default function DivisionPage() {
             </Button>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold" style={{ color: division.color }} data-testid="text-division-name">
+                <h1 className="text-2xl font-bold" style={{ color: division.color || '#666' }} data-testid="text-division-name">
                   {division.name}
                 </h1>
                 <Badge 
-                  variant={division.changePercent >= 0 ? "default" : "destructive"}
+                  variant={(division.changePercent ?? 0) >= 0 ? "default" : "destructive"}
                   className="text-sm"
                   data-testid="badge-change-percent"
                 >
-                  {division.changePercent >= 0 ? "+" : ""}{division.changePercent}% YoY
+                  {(division.changePercent ?? 0) >= 0 ? "+" : ""}{division.changePercent ?? 0}% YoY
                 </Badge>
               </div>
               <p className="text-gray-600 mt-1">CEO: {division.ceo}</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Operating Profit 2024</p>
-              <p className="text-3xl font-bold" style={{ color: division.color }} data-testid="text-profit">
-                {formatMoney(division.profit2024)}
+              <p className="text-3xl font-bold" style={{ color: division.color || '#666' }} data-testid="text-profit">
+                {formatMoney(division.profit2024 ?? 0)}
               </p>
             </div>
           </div>
@@ -198,10 +236,10 @@ export default function DivisionPage() {
                   <p className="text-gray-700 mb-6" data-testid="text-description">{division.description}</p>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {division.kpis.slice(0, 4).map((kpi, i) => (
+                    {divisionKpis.slice(0, 4).map((kpi, i) => (
                       <div key={i} className="p-4 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-500">{kpi.name}</p>
-                        <p className="text-2xl font-bold" style={{ color: division.color }}>
+                        <p className="text-2xl font-bold" style={{ color: division.color || '#666' }}>
                           {kpi.value2024}{kpi.unit}
                         </p>
                         <div className="flex items-center gap-1 mt-1">
@@ -210,8 +248,8 @@ export default function DivisionPage() {
                           ) : kpi.trend === "down" ? (
                             <TrendingDown className="h-4 w-4 text-red-600" />
                           ) : null}
-                          <span className={`text-xs ${kpi.status === "on-track" ? "text-green-600" : kpi.status === "at-risk" ? "text-amber-600" : "text-red-600"}`}>
-                            {kpi.status.replace("-", " ")}
+                          <span className={`text-xs ${(kpi.status || 'on-track') === "on-track" ? "text-green-600" : (kpi.status || 'on-track') === "at-risk" ? "text-amber-600" : "text-red-600"}`}>
+                            {(kpi.status || 'on-track').replace("-", " ")}
                           </span>
                         </div>
                       </div>
@@ -223,7 +261,7 @@ export default function DivisionPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" style={{ color: division.color }} />
+                    <TrendingUp className="h-5 w-5" style={{ color: division.color || '#666' }} />
                     Profit Trend
                   </CardTitle>
                 </CardHeader>
@@ -234,7 +272,7 @@ export default function DivisionPage() {
                       <XAxis dataKey="year" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
                       <Tooltip formatter={(value) => [formatMoney(value as number), "Profit"]} />
-                      <Line type="monotone" dataKey="profit" stroke={division.color} strokeWidth={3} dot={{ fill: division.color, strokeWidth: 2, r: 6 }} />
+                      <Line type="monotone" dataKey="profit" stroke={division.color || '#666'} strokeWidth={3} dot={{ fill: division.color || '#666', strokeWidth: 2, r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -355,7 +393,7 @@ export default function DivisionPage() {
             )}
 
             {divisionAlerts.length > 0 && (
-              <Card className="border-l-4" style={{ borderLeftColor: division.color }}>
+              <Card className="border-l-4" style={{ borderLeftColor: division.color || '#666' }}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Lightbulb className="h-5 w-5 text-amber-500" />
@@ -376,7 +414,7 @@ export default function DivisionPage() {
                                 key={i} 
                                 size="sm" 
                                 variant={action.type === "primary" ? "default" : "outline"} 
-                                style={action.type === "primary" ? { backgroundColor: division.color } : {}}
+                                style={action.type === "primary" ? { backgroundColor: division.color || '#666' } : {}}
                                 onClick={() => handleDrillDown('alert-action', `${alert.id}-${action.label}`)}
                                 data-testid={`alert-action-${alert.id}-${i}`}
                               >
@@ -401,7 +439,7 @@ export default function DivisionPage() {
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-slate-700">OKR to KPI Mapping:</span>
-                    {division.okrs.map((okr, i) => {
+                    {divisionOkrs.map((okr, i) => {
                       const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
                       return (
                         <div key={i} className="flex items-center gap-1.5">
@@ -430,18 +468,18 @@ export default function DivisionPage() {
                       Strategic Objectives (OKRs)
                     </CardTitle>
                     <CardDescription className="text-blue-700">
-                      {division.okrs.length} objectives driving {division.kpis.length} measurable KPIs
+                      {divisionOkrs.length} objectives driving {divisionKpis.length} measurable KPIs
                     </CardDescription>
                   </CardHeader>
                 </Card>
                 
-                {division.okrs.map((okr, i) => {
+                {divisionOkrs.map((okr, i) => {
                   const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
                   const okrColor = okrColors[i % okrColors.length];
                   const overallProgress = Math.round(
-                    okr.keyResults.reduce((sum, kr) => sum + (kr.progress / kr.target) * 100, 0) / okr.keyResults.length
+                    parseKeyResults(okr.keyResults).reduce((sum: number, kr: ParsedKeyResult) => sum + (kr.progress / kr.target) * 100, 0) / (parseKeyResults(okr.keyResults).length || 1)
                   );
-                  const linkedKpiCount = division.kpis.filter((_, ki) => ki % division.okrs.length === i).length;
+                  const linkedKpiCount = divisionKpis.filter((_, ki) => ki % divisionOkrs.length === i).length;
                   
                   return (
                     <Card 
@@ -485,7 +523,7 @@ export default function DivisionPage() {
                       </CardHeader>
                       <CardContent className="pt-0">
                         <div className="space-y-3">
-                          {okr.keyResults.map((kr, j) => {
+                          {parseKeyResults(okr.keyResults).map((kr: ParsedKeyResult, j: number) => {
                             const krProgress = Math.round((kr.progress / kr.target) * 100);
                             return (
                               <div key={j} className="p-3 bg-gray-50 rounded-lg">
@@ -518,7 +556,7 @@ export default function DivisionPage() {
                       Key Performance Indicators (KPIs)
                     </CardTitle>
                     <CardDescription className="text-emerald-700">
-                      {division.kpis.length} metrics measuring progress against 2025 targets
+                      {divisionKpis.length} metrics measuring progress against 2025 targets
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -539,17 +577,20 @@ export default function DivisionPage() {
 
                 {/* KPI Cards with OKR Linkage - Color Coded */}
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                  {division.kpis.map((kpi, i) => {
+                  {divisionKpis.map((kpi, i) => {
                     const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
-                    const linkedOkrIndex = i % division.okrs.length;
-                    const linkedOkr = division.okrs[linkedOkrIndex];
+                    const linkedOkrIndex = i % divisionOkrs.length;
+                    const linkedOkr = divisionOkrs[linkedOkrIndex];
                     const okrColor = okrColors[linkedOkrIndex % okrColors.length];
                     
-                    const progressPercent = typeof kpi.value2024 === "number" && typeof kpi.target2025 === "number"
-                      ? Math.round((kpi.value2024 / kpi.target2025) * 100)
+                    const value2024 = parseFloat(kpi.value2024 || '0') || 0;
+                    const value2023 = parseFloat(kpi.value2023 || '0') || 0;
+                    const target2025 = parseFloat(kpi.target2025 || '0') || 0;
+                    const progressPercent = target2025 > 0
+                      ? Math.round((value2024 / target2025) * 100)
                       : 0;
-                    const variance = typeof kpi.value2024 === "number" && typeof kpi.value2023 === "number"
-                      ? Math.round(((kpi.value2024 - kpi.value2023) / kpi.value2023) * 100)
+                    const variance = value2023 > 0
+                      ? Math.round(((value2024 - value2023) / value2023) * 100)
                       : 0;
                     
                     return (
@@ -639,12 +680,12 @@ export default function DivisionPage() {
                   <div>
                     <h4 className="font-semibold text-purple-900">AI-Generated Alignment Summary</h4>
                     <p className="text-sm text-purple-800 mt-1">
-                      {division.okrs.length} strategic objectives are driving {division.kpis.filter(k => k.status === 'on-track').length} of {division.kpis.length} KPIs on track. 
-                      {division.kpis.filter(k => k.status === 'at-risk').length > 0 && (
-                        <span className="text-amber-700"> {division.kpis.filter(k => k.status === 'at-risk').length} KPIs require attention to meet 2025 targets.</span>
+                      {divisionOkrs.length} strategic objectives are driving {divisionKpis.filter(k => k.status === 'on-track').length} of {divisionKpis.length} KPIs on track. 
+                      {divisionKpis.filter(k => k.status === 'at-risk').length > 0 && (
+                        <span className="text-amber-700"> {divisionKpis.filter(k => k.status === 'at-risk').length} KPIs require attention to meet 2025 targets.</span>
                       )}
-                      {division.kpis.filter(k => k.status === 'off-track').length > 0 && (
-                        <span className="text-red-700"> {division.kpis.filter(k => k.status === 'off-track').length} KPIs are off-track and may impact objective completion.</span>
+                      {divisionKpis.filter(k => k.status === 'off-track').length > 0 && (
+                        <span className="text-red-700"> {divisionKpis.filter(k => k.status === 'off-track').length} KPIs are off-track and may impact objective completion.</span>
                       )}
                     </p>
                   </div>
@@ -979,7 +1020,7 @@ export default function DivisionPage() {
                         </Button>
                         <Button 
                           size="sm" 
-                          style={{ backgroundColor: division.color }}
+                          style={{ backgroundColor: division.color || '#666' }}
                           onClick={() => setLocation(`/project/${project.id}`)}
                           data-testid={`view-project-${project.id}`}
                         >
@@ -996,7 +1037,7 @@ export default function DivisionPage() {
 
           <TabsContent value="risks" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {division.risks.map((risk, i) => (
+              {divisionRisks.map((risk, i) => (
                 <Card key={i} className={`border-t-4 ${risk.level === "high" ? "border-t-red-500" : risk.level === "medium" ? "border-t-amber-500" : "border-t-green-500"}`}>
                   <CardHeader>
                     <div className="flex justify-between items-center">
@@ -1054,7 +1095,7 @@ export default function DivisionPage() {
                               key={i} 
                               size="sm" 
                               variant={action.type === "primary" ? "default" : "outline"} 
-                              style={action.type === "primary" ? { backgroundColor: division.color } : {}}
+                              style={action.type === "primary" ? { backgroundColor: division.color || '#666' } : {}}
                               onClick={() => handleDrillDown('alert-action', `${alert.id}-${action.label}`)}
                               data-testid={`alert-btn-${alert.id}-${i}`}
                             >
