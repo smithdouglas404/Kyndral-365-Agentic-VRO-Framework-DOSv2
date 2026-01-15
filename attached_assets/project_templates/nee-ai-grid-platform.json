@@ -2,8 +2,8 @@
   "project": {
     "id": "nee-ai-001",
     "name": "AI Grid Management Platform",
-    "description": "Joint development with Google Cloud of AI-powered grid management platform using TimesFM 2.5 and WeatherNext 2 models. First commercial product launching via Google Cloud Marketplace mid-2026 for predictive maintenance, supply chain optimization, and weather response.",
-    "status": "green",
+    "description": "As part of the December 2025 Google Cloud partnership, NextEra gained access to Google's advanced AI models including TimesFM 2.5 for time-series forecasting, WeatherNext 2 for weather prediction, and security-constrained power flow modeling. The first commercial AI grid management product is expected to launch via Google Cloud Marketplace by mid-2026. The platform enables AI-powered field operations including predictive maintenance 30+ days in advance, supply chain optimization, and weather response automation. For FPL hurricane operations, integration with WeatherNext 2 enables improved storm preparation, resource positioning, and restoration optimization. This product represents a potential new revenue stream by licensing NextEra's operational expertise combined with Google AI to other utilities facing similar grid management challenges.",
+    "status": "amber",
     "businessUnitId": "Corporate & Other",
     "startDate": "2025-12-08",
     "endDate": "2027-06-30",
@@ -12,7 +12,7 @@
     "roiValue": "125",
     "artName": "Digital Innovation ART",
     "portfolioTheme": "Digital Transformation",
-    "safeStage": "implementing",
+    "safeStage": "funnel",
     "currentPi": "PI 25.1",
     "totalPis": "6",
     "velocity": "48",
@@ -172,14 +172,14 @@
       "id": "dep-ai-001",
       "name": "Google Cloud AI Models",
       "dependencyType": "blocked-by",
-      "status": "green",
+      "status": "amber",
       "description": "Access to TimesFM 2.5 and WeatherNext 2 models granted under partnership"
     },
     {
       "id": "dep-ai-002",
       "name": "Internal Data Platform",
       "dependencyType": "related",
-      "status": "green",
+      "status": "amber",
       "description": "Requires NextEra Enterprise Data Platform for ML training data access"
     }
   ],

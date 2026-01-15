@@ -2,7 +2,7 @@
   "project": {
     "id": "nee-nuclear-001",
     "name": "Duane Arnold Nuclear Restart",
-    "description": "Feasibility and restart of the 615 MW Duane Arnold Energy Center in Iowa. 25-year power purchase agreement with Google to provide zero-carbon baseload power for AI data centers. Expected return to service by 2029.",
+    "description": "NextEra is evaluating the restart of the 615 MW Duane Arnold Energy Center in Iowa, which was prematurely shut down in 2020. Google has signed a 25-year power purchase agreement to buy power from the plant if NextEra proceeds with the restart. The nuclear facility would provide zero-carbon baseload power essential for AI data center operations that require 24/7 reliable electricity. Expected return to service by 2029 pending NRC regulatory approval. This follows a broader industry trend including the Palisades restart in Michigan and Constellation's Three Mile Island Unit 1 restart for Microsoft. The project addresses growing demand for 'firm' carbon-free power that renewables alone cannot provide, with nuclear operating at 90%+ capacity factors compared to 25-35% for solar and wind.",
     "status": "amber",
     "businessUnitId": "NextEra Energy Resources",
     "startDate": "2024-06-01",
@@ -12,7 +12,7 @@
     "roiValue": "1800",
     "artName": "Nuclear Development ART",
     "portfolioTheme": "Zero-Carbon Baseload",
-    "safeStage": "analyzing",
+    "safeStage": "funnel",
     "currentPi": "PI 25.1",
     "totalPis": "16",
     "velocity": "28",

@@ -2,8 +2,8 @@
   "project": {
     "id": "nee-meta-001",
     "name": "Meta Clean Energy Partnership",
-    "description": "Strategic clean energy partnership with Meta for approximately 2.5 GW of capacity via 11 power purchase agreements and 2 energy storage agreements. Projects span ERCOT, SPP, MISO, and New Mexico markets, coming online 2026-2028.",
-    "status": "green",
+    "description": "Announced December 8, 2025, NextEra Energy signed a significant clean energy partnership with Meta for approximately 2.5 GW of capacity. The deal includes 11 power purchase agreements (PPAs) and 2 energy storage agreements (ESAs) deployed across ERCOT, SPP, MISO, and New Mexico markets. Four integrated solar and battery storage projects are being developed in New Mexico specifically for Meta data centers. Projects are scheduled to come online between 2026 and 2028, adding to nearly 500 MW of projects Meta previously contracted with NextEra. This partnership supports Meta's 100% renewable energy commitment for its data center operations and represents one of the largest corporate renewable energy deals in the industry.",
+    "status": "amber",
     "businessUnitId": "NextEra Energy Resources",
     "startDate": "2025-12-08",
     "endDate": "2028-12-31",
@@ -12,7 +12,7 @@
     "roiValue": "890",
     "artName": "Commercial Renewables ART",
     "portfolioTheme": "Hyperscaler Partnerships",
-    "safeStage": "implementing",
+    "safeStage": "funnel",
     "currentPi": "PI 25.1",
     "totalPis": "12",
     "velocity": "55",
@@ -152,7 +152,7 @@
       "id": "dep-meta-001",
       "name": "New Mexico Transmission Upgrades",
       "dependencyType": "blocked-by",
-      "status": "green",
+      "status": "amber",
       "description": "PNM transmission upgrades required for full capacity interconnection"
     }
   ],

@@ -2,8 +2,8 @@
   "project": {
     "id": "nee-ccus-001",
     "name": "ExxonMobil Natural Gas + CCUS Partnership",
-    "description": "Partnership with ExxonMobil to develop 1.2 GW natural gas plant with integrated carbon capture, utilization and storage (CCUS). Addresses data center 24/7 firm power requirements while maintaining decarbonization commitments.",
-    "status": "green",
+    "description": "NextEra announced a partnership with ExxonMobil to develop a 1.2 GW natural gas plant with integrated carbon capture, utilization and storage (CCUS) technology. The project addresses the critical need for 24/7 'firm' power for AI data centers while maintaining decarbonization commitments required by hyperscaler customers like Google and Meta. The facility will use combined-cycle gas technology with ExxonMobil's proven CCUS capturing 90%+ of CO2 emissions for permanent sequestration. The project qualifies for 45Q carbon capture tax credits which have bipartisan support and are expected to survive potential IRA modifications. This represents NextEra's 'all-of-the-above' energy strategy, combining renewables, storage, natural gas with carbon capture, and nuclear to meet growing AI infrastructure power demands.",
+    "status": "amber",
     "businessUnitId": "NextEra Energy Resources",
     "startDate": "2025-06-01",
     "endDate": "2029-12-31",
@@ -12,7 +12,7 @@
     "roiValue": "380",
     "artName": "Low-Carbon Generation ART",
     "portfolioTheme": "Technology Innovation",
-    "safeStage": "analyzing",
+    "safeStage": "funnel",
     "currentPi": "PI 25.1",
     "totalPis": "16",
     "velocity": "32",
@@ -132,7 +132,7 @@
       "id": "dep-ccus-001",
       "name": "45Q Tax Credit Availability",
       "dependencyType": "blocked-by",
-      "status": "green",
+      "status": "amber",
       "description": "Project economics depend on 45Q carbon capture tax credits - bipartisan support expected to continue"
     },
     {
