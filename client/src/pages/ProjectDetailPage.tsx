@@ -35,21 +35,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  getProjectById as getSafeProjectById, 
-  SAFeProject, 
-  Feature, 
-  Story, 
-  Task,
-  Milestone,
-  Resource,
-  Dependency,
-  safeProjects
-} from "@/lib/safeProjectData";
-import { 
-  getProjectById as getEnrichedProjectById, 
-  EnrichedProject 
-} from "@/lib/projects";
+import { useFullProject } from "@/hooks/useProjects";
+import type { Feature, Story, Task, Milestone, Resource, Dependency } from "@/lib/safeProjectData";
 
 const statusColors = {
   green: 'bg-green-500',
@@ -283,12 +270,120 @@ export default function ProjectDetailPage() {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [executiveSummary, setExecutiveSummary] = useState<string | null>(null);
   
-  // Try to find project in SAFe projects first, then enriched projects
-  const safeProject = getSafeProjectById(params.id || '');
-  const enrichedProject = getEnrichedProjectById(params.id || '');
+  // Fetch project from database API
+  const { data: fullProject, isLoading: isLoadingProject } = useFullProject(params.id || '');
   
-  // Use SAFe project if available, otherwise convert enriched project to compatible format
-  const project: SAFeProject | undefined = safeProject || (enrichedProject ? convertEnrichedToSAFe(enrichedProject) : undefined);
+  // Transform API data to SAFeProject format for rendering
+  const project = useMemo(() => {
+    if (!fullProject?.project) return undefined;
+    const p = fullProject.project;
+    const features = fullProject.features || [];
+    const stories = fullProject.stories || [];
+    const tasks = fullProject.tasks || [];
+    
+    const mappedFeatures = features.map((f: any) => ({
+      id: f.id,
+      epicId: p.epicId || '',
+      title: f.name,
+      description: f.description || '',
+      status: f.status || 'backlog',
+      targetPI: parseFloat(p.currentPi?.replace(/[^\d.]/g, '') || '25.1'),
+      wsjfScore: parseInt(f.wsjfScore) || 0,
+      benefitHypothesis: '',
+      acceptanceCriteria: f.acceptanceCriteria ? JSON.parse(f.acceptanceCriteria) : [],
+      dependencies: [],
+      stories: stories.filter((s: any) => s.featureId === f.id).map((s: any) => ({
+        id: s.id,
+        featureId: s.featureId,
+        title: s.name,
+        description: s.description || '',
+        status: s.status || 'backlog',
+        storyPoints: parseInt(s.storyPoints) || 0,
+        sprint: 1,
+        assignedTeam: s.assignedTeam || 'Unassigned',
+        acceptanceCriteria: s.acceptanceCriteria ? JSON.parse(s.acceptanceCriteria) : [],
+        tasks: tasks.filter((t: any) => t.storyId === s.id).map((t: any) => ({
+          id: t.id,
+          storyId: t.storyId,
+          title: t.name,
+          description: t.description || '',
+          status: t.status || 'todo',
+          assignee: t.assignee || 'Unassigned',
+          estimatedHours: parseInt(t.estimatedHours) || 0,
+          actualHours: parseInt(t.actualHours) || 0,
+          priority: t.priority || 'medium'
+        }))
+      }))
+    }));
+    
+    const budgetSpent = parseInt(p.budgetSpent) || 0;
+    const budgetTotal = parseInt(p.budgetTotal) || 1;
+    
+    return {
+      id: p.id,
+      name: p.name,
+      bu: p.businessUnitId as any,
+      artName: p.artName || '',
+      description: p.description || '',
+      status: p.status as any,
+      priority: p.priority as any,
+      safeStage: p.safeStage as any || 'backlog',
+      startDate: p.startDate?.split('T')[0] || '',
+      targetEndDate: p.endDate?.split('T')[0] || '',
+      currentPI: parseFloat(p.currentPi?.replace(/[^\d.]/g, '') || '25.1'),
+      totalPIs: parseInt(p.totalPis) || 4,
+      portfolioTheme: p.portfolioTheme || '',
+      velocity: parseInt(p.velocity) || 0,
+      totalFTE: (fullProject.resources || []).length,
+      qualityScore: 80,
+      burndownHealth: 75,
+      financials: {
+        budget: budgetTotal * 1000000,
+        spent: budgetSpent * 1000000,
+        forecast: budgetTotal * 1100000,
+        currency: '$',
+        laborCost: budgetSpent * 700000,
+        vendorCost: budgetSpent * 200000,
+        infrastructureCost: budgetSpent * 100000,
+        contingency: budgetTotal * 100000,
+        roi: {
+          projected: parseInt(p.roiValue) * 1000000 || 0,
+          confidence: 75,
+          paybackMonths: 24
+        }
+      },
+      features: mappedFeatures,
+      milestones: (fullProject.milestones || []).map((m: any) => ({
+        id: m.id,
+        name: m.name,
+        targetDate: m.targetDate,
+        status: m.status || 'on-track',
+        deliverables: m.deliverables ? JSON.parse(m.deliverables) : [],
+        piNumber: parseFloat(m.piNumber || '25.1')
+      })),
+      resources: (fullProject.resources || []).map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        role: r.role,
+        allocation: parseInt(r.allocation) || 100,
+        team: r.team || 'Unassigned',
+        costRate: parseInt(r.costRate) || 0
+      })),
+      dependencies: (fullProject.dependencies || []).map((d: any) => ({
+        id: d.id,
+        sourceProjectId: d.sourceProjectId,
+        targetProjectId: d.targetProjectId,
+        type: d.type || 'related',
+        health: d.health || 'green',
+        description: d.description || '',
+        impactIfDelayed: d.impactIfDelayed || ''
+      })),
+      riskFlags: (fullProject.risks || []).map((r: any) => r.description || r.name),
+      aiRecommendations: [`Expected ROI: ${p.expectedRoi}`],
+      vroInsights: [`Value aligned with ${p.portfolioTheme} strategic priorities`],
+      pmoDataFeeds: [`Budget utilization: ${Math.round((budgetSpent / budgetTotal) * 100)}%`]
+    };
+  }, [fullProject]);
   
   // Update page context for Ask PM chat
   const projectName = project?.name;
@@ -304,6 +399,19 @@ export default function ProjectDetailPage() {
       });
     }
   }, [projectName, projectBU, params.id, setPageContext]);
+  
+  if (isLoadingProject) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="p-8">
+          <div className="flex items-center gap-3">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            <span className="text-gray-600">Loading project...</span>
+          </div>
+        </Card>
+      </div>
+    );
+  }
   
   if (!project) {
     return (
