@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
-import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@assets/generated_images/florida_clean_energy_landscape.png";
 import nexteraLogo from "@assets/nextera_logo.png";
@@ -10,8 +10,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 h-16 border-b border-border bg-white flex items-center px-8 justify-between z-50">
+        <div className="flex items-center gap-8">
+          <Link href="/">
+            <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" />
+          </Link>
+          <nav className="hidden md:flex gap-6">
+            <Link href="/dashboard" className="text-sm font-medium text-[#0072CE]">Dashboard</Link>
+            <Link href="/command-center" className="text-sm font-medium text-[#0072CE] flex items-center gap-1">
+              <Brain className="h-4 w-4" />
+              Command Center
+            </Link>
+          </nav>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <div 
@@ -29,11 +45,6 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-white space-y-6"
           >
-            {/* Logo */}
-            <div className="mb-2 backdrop-blur-sm bg-white/80 rounded-lg px-3 py-2 inline-block">
-              <img src={nexteraLogo} alt="NextEra Energy" className="h-10" />
-            </div>
-            
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[hsl(148,100%,50%)] animate-pulse" />
               <span className="text-sm font-medium tracking-wide">Enterprise Transformation Co-Pilot</span>
