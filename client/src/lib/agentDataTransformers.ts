@@ -89,7 +89,7 @@ export function getSavingsOpportunitiesFromProjects(mode: DataMode): Transformed
   );
   
   return allProjects.slice(0, 6).map((project, i) => {
-    const roiMatch = project.expectedROI.match(/$?(\d+(?:\.\d+)?)/);
+    const roiMatch = project.expectedROI.match(/\$?(\d+(?:\.\d+)?)/);
     const baseRoi = roiMatch ? parseFloat(roiMatch[1]) : 5 + i * 2;
     
     const baseConfidence = 50 + (project.status === 'completed' ? 40 : project.status === 'in-progress' ? 20 : 0);
@@ -514,7 +514,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
   ];
   
   return allProjects.map((project, i) => {
-    const roiMatch = project.expectedROI.match(/$?(\d+(?:\.\d+)?)/);
+    const roiMatch = project.expectedROI.match(/\$?(\d+(?:\.\d+)?)/);
     const roiValue = roiMatch ? parseFloat(roiMatch[1]) : 25;
     
     const baseProgress = project.status === 'completed' ? 100 : project.status === 'in-progress' ? 50 : 10;

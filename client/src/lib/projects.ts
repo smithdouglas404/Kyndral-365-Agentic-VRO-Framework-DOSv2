@@ -361,7 +361,7 @@ export const enrichedProjects: EnrichedProject[] = [
     ],
     trendData: [{ week: "W28", value: 28 }, { week: "W29", value: 30 }, { week: "W30", value: 32 }, { week: "W31", value: 33 }, { week: "W32", value: 35 }],
     dependencies: [
-      { projectId: "pmo-neer-001", projectName: "Wind Portfolio Expansion", type: "blocked-by", health: "amber", description: "Requires dedicated renewable supply", impactIfDelayed: "Hydrogen production delayed" }
+      { projectId: "pmo-neer-001", projectName: "Wind Portfolio Expansion", type: "blocked-by", health: "yellow", description: "Requires dedicated renewable supply", impactIfDelayed: "Hydrogen production delayed" }
     ],
     linkedVROProgramId: "vro-neer-003"
   },
@@ -574,12 +574,6 @@ export const enrichedProjects: EnrichedProject[] = [
 export const buMapping: Record<string, string> = {
   'Florida Power & Light': 'Florida Power & Light',
   'NextEra Energy Resources': 'NextEra Energy Resources',
-  'Florida Power & Light': 'Florida Power & Light',
-  'Corporate & Other': 'Corporate & Other',
-  'Corporate & Other': 'Corporate & Other',
-  'Corporate & Other': 'Corporate & Other',
-  'Florida Power & Light': 'Florida Power & Light',
-  'NextEra Energy Resources': 'NextEra Energy Resources',
   'Corporate & Other': 'Corporate & Other'
 };
 
@@ -595,11 +589,7 @@ export function getProjectsByBU(bu: string): EnrichedProject[] {
 // ============================================================================
 
 // Legacy project type alias for backward compatibility
-export type {
-  EnrichedProject as Project,
-  ProjectDependency,
-  ProjectPriority
-};
+export type { EnrichedProject as Project };
 
 // ============================================================================
 // HELPER FUNCTIONS

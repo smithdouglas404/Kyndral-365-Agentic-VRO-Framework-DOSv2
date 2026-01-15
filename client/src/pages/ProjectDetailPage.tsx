@@ -194,16 +194,9 @@ function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
     'portfolio-review': 'reviewing'
   };
 
-  const buMap: Record<string, 'Florida Power & Light' | 'NextEra Energy Resources' | 'Florida Power & Light' | 'Corporate & Other' | 'Corporate & Other' | 'Corporate & Other'> = {
+  const buMap: Record<string, 'Florida Power & Light' | 'NextEra Energy Resources' | 'Corporate & Other'> = {
     'Florida Power & Light': 'Florida Power & Light',
     'NextEra Energy Resources': 'NextEra Energy Resources',
-    'Florida Power & Light': 'Florida Power & Light',
-    'Corporate & Other': 'Corporate & Other',
-    'Corporate & Other': 'Corporate & Other',
-    'Corporate & Other': 'Corporate & Other',
-    'Group HR': 'Corporate & Other',
-    'Group Finance': 'Corporate & Other',
-    'Group Technology': 'Corporate & Other',
     'Corporate & Other': 'Corporate & Other'
   };
 
