@@ -8,8 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
-import { enrichedProjects, getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
-import { safeProjects, getProjectsByBU } from "@/lib/safeProjectData";
+import { getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
+import { useEnrichedProjects } from "@/hooks/useProjects";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { usePageContext } from "@/contexts/PageContext";
@@ -61,6 +61,9 @@ export default function DivisionPage() {
   const { setPageContext } = usePageContext();
   const [stageFilter, setStageFilter] = useState<string>("all");
   
+  // Fetch projects from database API
+  const { data: enrichedProjects = [], isLoading: isLoadingProjects } = useEnrichedProjects();
+  
   // Get the fromTab query parameter to know where to navigate back
   const searchParams = new URLSearchParams(window.location.search);
   const fromTab = searchParams.get('fromTab') || 'portfolios';
@@ -87,7 +90,7 @@ export default function DivisionPage() {
   const divisionProjects = useMemo(() => {
     if (buNames.length === 0) return enrichedProjects;
     return enrichedProjects.filter(p => buNames.includes(p.bu));
-  }, [buNames]);
+  }, [buNames, enrichedProjects]);
   
   // Apply stage filter
   const filteredProjects = useMemo(() => {
