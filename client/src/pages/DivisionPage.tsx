@@ -133,6 +133,13 @@ export default function DivisionPage() {
     "Target": typeof kpi.target2025 === "number" ? kpi.target2025 : 0
   }));
 
+  const formatMoney = (valueInMillions: number): string => {
+    if (valueInMillions >= 1000) {
+      return `$${(valueInMillions / 1000).toFixed(1)}B`;
+    }
+    return `$${valueInMillions}m`;
+  };
+
   const profitTrend = [
     { year: "2023", profit: division.profit2023 },
     { year: "2024", profit: division.profit2024 },
@@ -170,7 +177,7 @@ export default function DivisionPage() {
             <div className="text-right">
               <p className="text-sm text-gray-500">Operating Profit 2024</p>
               <p className="text-3xl font-bold" style={{ color: division.color }} data-testid="text-profit">
-                ${division.profit2024}m
+                {formatMoney(division.profit2024)}
               </p>
             </div>
           </div>
