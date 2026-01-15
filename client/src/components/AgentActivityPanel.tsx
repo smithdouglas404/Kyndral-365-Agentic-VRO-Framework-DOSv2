@@ -392,7 +392,7 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
     { agent: 'tmo' as AgentType, action: 'accelerate' as ActionType, target: 'API Migration Wave 3', targetType: 'project' as const, reason: 'Dependency cleared - recommending fast-track to capture Q4 window' },
     { agent: 'planning' as AgentType, action: 'create-task' as ActionType, target: 'Q1 Roadmap Review', targetType: 'task' as const, reason: 'Scheduling strategic alignment sessions with division leads' },
     { agent: 'ocm' as AgentType, action: 'notify' as ActionType, target: 'Longevity Platform Rollout', targetType: 'project' as const, reason: 'Change readiness assessment complete - 92% stakeholder alignment' },
-    { agent: 'integrated-management' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified £1.2M potential value at risk in delayed integrations' },
+    { agent: 'integrated-management' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified $1.2M potential value at risk in delayed integrations' },
     { agent: 'integrated-management' as AgentType, action: 'reassign' as ActionType, target: 'Resource Optimization', targetType: 'task' as const, reason: 'Balancing workload across sprint teams' },
     { agent: 'finops' as AgentType, action: 'mitigate' as ActionType, target: 'Budget Variance', targetType: 'risk' as const, reason: 'Implementing cost controls to address 5% overspend' },
     { agent: 'governance' as AgentType, action: 'investigate' as ActionType, target: 'Data Privacy Compliance Project', targetType: 'project' as const, reason: 'Reviewing GDPR alignment for customer data handling' },

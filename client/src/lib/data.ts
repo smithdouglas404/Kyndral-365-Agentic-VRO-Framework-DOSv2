@@ -89,7 +89,7 @@ export const challenges: Challenge[] = [
     icon: Target,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["certainty", "prioritization"],
-    strategicAlignment: ["Simplification", "Asset Management"]
+    strategicAlignment: ["Simplification", "NextEra Energy Resources"]
   },
   {
     id: "agility",
@@ -140,7 +140,7 @@ export const challenges: Challenge[] = [
     icon: ShieldCheck,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["planning", "visibility"],
-    strategicAlignment: ["PRT Pipeline", "Asset Management"]
+    strategicAlignment: ["PRT Pipeline", "NextEra Energy Resources"]
   },
   {
     id: "visibility",
@@ -200,7 +200,7 @@ export const challenges: Challenge[] = [
     solution: "Automated data collection + Automated classification + Automated reporting.",
     mechanism: ["Automation of routine tasks", "Reallocation of effort"],
     metrics: [
-      { label: "Cost of Portfolio Management", before: "£2.4M", after: "£0.8M" },
+      { label: "Cost of Portfolio Management", before: "$2.4M", after: "$0.8M" },
       { label: "Automation Rate", before: "15%", after: "85%" }
     ],
     vroMetrics: [

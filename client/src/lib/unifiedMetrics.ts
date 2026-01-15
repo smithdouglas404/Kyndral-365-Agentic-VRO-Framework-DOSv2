@@ -44,14 +44,14 @@ export interface VROAggregatedMetric {
 }
 
 export const GROUP_FUNCTIONS = [
-  'Institutional Retirement',
-  'Asset Management',
-  'Retail',
-  'Corporate Investments',
-  'Risk & Compliance',
+  'Florida Power & Light',
+  'NextEra Energy Resources',
+  'Florida Power & Light',
+  'Corporate & Other',
+  'Corporate & Other',
   'Group Technology',
   'Group HR',
-  'Group Legal',
+  'Corporate & Other',
   'Group Finance',
   'Group Investments'
 ] as const;
@@ -83,7 +83,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "Cloud Migration Program",
     bu: "Group Technology",
     status: "green" as const,
-    budget: { spent: 3.2, total: 4.5, unit: "£m" },
+    budget: { spent: 3.2, total: 4.5, unit: "$m" },
     timeline: { elapsed: 10, total: 18, unit: "months" },
     deliverables: { completed: 14, total: 24 },
     risks: ["Legacy system dependencies", "Data migration complexity"],
@@ -113,7 +113,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "API Gateway Modernization",
     bu: "Group Technology",
     status: "amber" as const,
-    budget: { spent: 1.1, total: 1.8, unit: "£m" },
+    budget: { spent: 1.1, total: 1.8, unit: "$m" },
     timeline: { elapsed: 4, total: 8, unit: "months" },
     deliverables: { completed: 5, total: 12 },
     risks: ["Third-party API compatibility"],
@@ -143,7 +143,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "Workforce Analytics Platform",
     bu: "Group HR",
     status: "green" as const,
-    budget: { spent: 0.8, total: 1.2, unit: "£m" },
+    budget: { spent: 0.8, total: 1.2, unit: "$m" },
     timeline: { elapsed: 5, total: 7, unit: "months" },
     deliverables: { completed: 8, total: 11 },
     risks: ["GDPR compliance validation"],
@@ -173,7 +173,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "Learning Management Refresh",
     bu: "Group HR",
     status: "amber" as const,
-    budget: { spent: 0.4, total: 0.6, unit: "£m" },
+    budget: { spent: 0.4, total: 0.6, unit: "$m" },
     timeline: { elapsed: 3, total: 5, unit: "months" },
     deliverables: { completed: 4, total: 8 },
     risks: ["Content migration from legacy LMS"],
@@ -201,9 +201,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-gl-001",
     name: "Contract Lifecycle Management",
-    bu: "Group Legal",
+    bu: "Corporate & Other",
     status: "green" as const,
-    budget: { spent: 1.5, total: 2.0, unit: "£m" },
+    budget: { spent: 1.5, total: 2.0, unit: "$m" },
     timeline: { elapsed: 8, total: 10, unit: "months" },
     deliverables: { completed: 12, total: 15 },
     risks: ["Integration with existing document management"],
@@ -214,7 +214,7 @@ export const EXPANDED_PMO_PROJECTS = [
       flowEfficiency: 75,
       currentPI: "PI 24.3",
       epicId: "EPIC-GL-001",
-      epicName: "Legal Operations Automation",
+      epicName: "Regulatory Operations Automation",
       epicProgress: 82,
       okr: { objective: "Automate 70% of contract workflows", keyResult: "Reduce cycle time by 50%", progress: 78 },
       piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 82 }, { pi: "PI 24.2", velocity: 50, predictability: 84 }, { pi: "PI 24.3", velocity: 52, predictability: 86 }, { pi: "PI 24.4", velocity: 55, predictability: 88 }]
@@ -231,9 +231,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-gl-002",
     name: "Regulatory Change Tracker",
-    bu: "Group Legal",
+    bu: "Corporate & Other",
     status: "amber" as const,
-    budget: { spent: 0.6, total: 0.9, unit: "£m" },
+    budget: { spent: 0.6, total: 0.9, unit: "$m" },
     timeline: { elapsed: 4, total: 7, unit: "months" },
     deliverables: { completed: 5, total: 10 },
     risks: ["Regulatory data feed reliability"],
@@ -263,7 +263,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "Finance Automation Suite",
     bu: "Group Finance",
     status: "green" as const,
-    budget: { spent: 2.2, total: 3.0, unit: "£m" },
+    budget: { spent: 2.2, total: 3.0, unit: "$m" },
     timeline: { elapsed: 9, total: 12, unit: "months" },
     deliverables: { completed: 15, total: 20 },
     risks: ["Audit trail requirements"],
@@ -293,7 +293,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "Treasury Management Upgrade",
     bu: "Group Finance",
     status: "amber" as const,
-    budget: { spent: 0.9, total: 1.4, unit: "£m" },
+    budget: { spent: 0.9, total: 1.4, unit: "$m" },
     timeline: { elapsed: 5, total: 8, unit: "months" },
     deliverables: { completed: 6, total: 12 },
     risks: ["Bank connectivity testing"],
@@ -323,7 +323,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "Investment Analytics Platform",
     bu: "Group Investments",
     status: "green" as const,
-    budget: { spent: 1.8, total: 2.5, unit: "£m" },
+    budget: { spent: 1.8, total: 2.5, unit: "$m" },
     timeline: { elapsed: 7, total: 10, unit: "months" },
     deliverables: { completed: 11, total: 16 },
     risks: ["Real-time data feed latency"],
@@ -353,7 +353,7 @@ export const EXPANDED_PMO_PROJECTS = [
     name: "ESG Scoring Integration",
     bu: "Group Investments",
     status: "green" as const,
-    budget: { spent: 0.5, total: 0.8, unit: "£m" },
+    budget: { spent: 0.5, total: 0.8, unit: "$m" },
     timeline: { elapsed: 4, total: 6, unit: "months" },
     deliverables: { completed: 7, total: 10 },
     risks: ["Third-party ESG data quality"],
@@ -381,9 +381,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-rt-funnel-001",
     name: "Customer Journey Reimagination",
-    bu: "Retail",
+    bu: "Florida Power & Light",
     status: "green" as const,
-    budget: { spent: 0.1, total: 0.5, unit: "£m" },
+    budget: { spent: 0.1, total: 0.5, unit: "$m" },
     timeline: { elapsed: 1, total: 8, unit: "months" },
     deliverables: { completed: 1, total: 12 },
     risks: ["Scope definition"],
@@ -411,9 +411,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-am-funnel-001",
     name: "Alternative Assets Expansion",
-    bu: "Asset Management",
+    bu: "NextEra Energy Resources",
     status: "amber" as const,
-    budget: { spent: 0.2, total: 1.2, unit: "£m" },
+    budget: { spent: 0.2, total: 1.2, unit: "$m" },
     timeline: { elapsed: 2, total: 14, unit: "months" },
     deliverables: { completed: 2, total: 18 },
     risks: ["Regulatory approval timeline"],
@@ -441,9 +441,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-ir-reviewing-001",
     name: "Bulk Annuity Platform v2",
-    bu: "Institutional Retirement",
+    bu: "Florida Power & Light",
     status: "green" as const,
-    budget: { spent: 0.3, total: 2.8, unit: "£m" },
+    budget: { spent: 0.3, total: 2.8, unit: "$m" },
     timeline: { elapsed: 2, total: 16, unit: "months" },
     deliverables: { completed: 3, total: 22 },
     risks: ["Technical architecture decisions pending"],
@@ -456,7 +456,7 @@ export const EXPANDED_PMO_PROJECTS = [
       epicId: "EPIC-IR-REVIEW",
       epicName: "Next Gen Bulk Annuity",
       epicProgress: 15,
-      okr: { objective: "Double bulk annuity capacity", keyResult: "Process £20bn annually", progress: 12 },
+      okr: { objective: "Double bulk annuity capacity", keyResult: "Process $20bn annually", progress: 12 },
       piTrend: [{ pi: "PI 24.4", velocity: 38, predictability: 72 }]
     },
     safeStage: "reviewing" as const,
@@ -471,9 +471,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-ci-analyzing-001",
     name: "Build-to-Rent Platform Enhancement",
-    bu: "Corporate Investments",
+    bu: "Corporate & Other",
     status: "amber" as const,
-    budget: { spent: 0.4, total: 1.6, unit: "£m" },
+    budget: { spent: 0.4, total: 1.6, unit: "$m" },
     timeline: { elapsed: 3, total: 10, unit: "months" },
     deliverables: { completed: 4, total: 14 },
     risks: ["Integration with property management systems"],
@@ -501,9 +501,9 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-rc-backlog-001",
     name: "Operational Resilience Framework",
-    bu: "Risk & Compliance",
+    bu: "Corporate & Other",
     status: "green" as const,
-    budget: { spent: 0.5, total: 1.8, unit: "£m" },
+    budget: { spent: 0.5, total: 1.8, unit: "$m" },
     timeline: { elapsed: 4, total: 12, unit: "months" },
     deliverables: { completed: 5, total: 16 },
     risks: ["Cross-Group coordination"],
@@ -539,8 +539,8 @@ export const PROJECT_KPIS: Record<string, ProjectKPI[]> = {
   ],
   "pmo-am-001": [
     { id: "kpi-am-001-1", name: "Platform Uptime", value: 99.2, target: 99.9, unit: "%", weight: 0.30, trend: "stable", lastUpdated: new Date() },
-    { id: "kpi-am-001-2", name: "Transaction Volume", value: 2.8, target: 5.0, unit: "£bn", weight: 0.35, trend: "up", lastUpdated: new Date() },
-    { id: "kpi-am-001-3", name: "Cost per Transaction", value: 45, target: 30, unit: "£", weight: 0.20, trend: "down", lastUpdated: new Date() },
+    { id: "kpi-am-001-2", name: "Transaction Volume", value: 2.8, target: 5.0, unit: "$bn", weight: 0.35, trend: "up", lastUpdated: new Date() },
+    { id: "kpi-am-001-3", name: "Cost per Transaction", value: 45, target: 30, unit: "$", weight: 0.20, trend: "down", lastUpdated: new Date() },
     { id: "kpi-am-001-4", name: "Time to Settle", value: 3.2, target: 1.0, unit: "days", weight: 0.15, trend: "down", lastUpdated: new Date() }
   ],
   "pmo-rt-001": [
@@ -569,20 +569,20 @@ export const OKRS: OKR[] = [
     overallProgress: 78,
     strategicPriority: "critical",
     owner: "Andrew Kail",
-    buAlignment: ["Institutional Retirement"]
+    buAlignment: ["Florida Power & Light"]
   },
   {
     id: "okr-002",
     objective: "Build Private Markets Capability",
     keyResults: [
-      { id: "kr-002-1", description: "Platform operational for £5bn transactions", progress: 56, target: 100, unit: "%", contributingKPIs: ["kpi-am-001-2"], calculationMethod: "Transaction volume / target volume * 100" },
+      { id: "kr-002-1", description: "Platform operational for $5bn transactions", progress: 56, target: 100, unit: "%", contributingKPIs: ["kpi-am-001-2"], calculationMethod: "Transaction volume / target volume * 100" },
       { id: "kr-002-2", description: "Achieve 99.9% platform uptime", progress: 99, target: 100, unit: "%", contributingKPIs: ["kpi-am-001-1"], calculationMethod: "Current uptime / target uptime * 100" },
       { id: "kr-002-3", description: "Reduce transaction costs by 35%", progress: 45, target: 100, unit: "%", contributingKPIs: ["kpi-am-001-3"], calculationMethod: "Cost reduction achieved / target reduction * 100" }
     ],
     overallProgress: 67,
     strategicPriority: "high",
     owner: "Eric Adler",
-    buAlignment: ["Asset Management"]
+    buAlignment: ["NextEra Energy Resources"]
   },
   {
     id: "okr-003",
@@ -595,7 +595,7 @@ export const OKRS: OKR[] = [
     overallProgress: 63,
     strategicPriority: "high",
     owner: "Bernie Hickman",
-    buAlignment: ["Retail"]
+    buAlignment: ["Florida Power & Light"]
   },
   {
     id: "okr-004",

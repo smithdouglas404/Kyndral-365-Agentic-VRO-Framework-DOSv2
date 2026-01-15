@@ -43,7 +43,7 @@ const discussionTopics: DiscussionTopic[] = [
   {
     id: 'topic-1',
     title: 'Enterprise Data Foundation Budget Overrun',
-    context: 'Data Foundation project £1.2M over budget, blocking 4 other initiatives',
+    context: 'Data Foundation project $1.2M over budget, blocking 4 other initiatives',
     status: 'active',
     priority: 'high'
   }
@@ -54,7 +54,7 @@ const simulatedDiscussion: AgentMessage[] = [
     id: 'msg-1',
     agent: 'FinOps Agent',
     agentColor: 'bg-green-500',
-    message: "I've analyzed the Enterprise Data Foundation budget trajectory. Current burn rate suggests £2.3M overrun by PI 25.2 unless we intervene.",
+    message: "I've analyzed the Enterprise Data Foundation budget trajectory. Current burn rate suggests $2.3M overrun by PI 25.2 unless we intervene.",
     timestamp: new Date(),
     type: 'analysis',
     referencedProject: 'proj-data-foundation'
@@ -87,7 +87,7 @@ const simulatedDiscussion: AgentMessage[] = [
     id: 'msg-5',
     agent: 'FinOps Agent',
     agentColor: 'bg-green-500',
-    message: "If we defer MDM Phase 2, projected savings are £1.4M. Combined with £400K contingency release, we're back within 5% of original budget.",
+    message: "If we defer MDM Phase 2, projected savings are $1.4M. Combined with $400K contingency release, we're back within 5% of original budget.",
     timestamp: new Date(),
     type: 'analysis'
   },
@@ -103,7 +103,7 @@ const simulatedDiscussion: AgentMessage[] = [
     id: 'msg-7',
     agent: 'Planning Agent',
     agentColor: 'bg-blue-500',
-    message: "Consensus reached. Proposed action: 1) Defer MDM Phase 2, 2) Release £400K contingency, 3) Fast-track CAB approval, 4) Notify stakeholders. Ready for human approval.",
+    message: "Consensus reached. Proposed action: 1) Defer MDM Phase 2, 2) Release $400K contingency, 3) Fast-track CAB approval, 4) Notify stakeholders. Ready for human approval.",
     timestamp: new Date(),
     type: 'action'
   }
@@ -157,8 +157,8 @@ export function MultiAgentDiscussion() {
         projectId: 'proj-data-foundation',
         projectName: 'Enterprise Data Foundation',
         confidence: 92,
-        suggestedAction: 'Defer MDM Phase 2, release £400K contingency, fast-track CAB approval, notify stakeholders',
-        impact: '£1.4M savings, back within 5% of original budget',
+        suggestedAction: 'Defer MDM Phase 2, release $400K contingency, fast-track CAB approval, notify stakeholders',
+        impact: '$1.4M savings, back within 5% of original budget',
         agentSource: 'Multi-Agent Consensus'
       }
     };

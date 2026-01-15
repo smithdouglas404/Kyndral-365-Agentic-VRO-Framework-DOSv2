@@ -44,7 +44,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
   reduceBudget: (params) => ({
     id: `budget-reduction-${Date.now()}`,
     trigger: `Reduce ${params.projectName} budget by ${params.percentage}%`,
-    confirmMessage: `Budget for ${params.projectName} will be reduced from £${params.currentBudget}M to £${params.newBudget}M. This may impact timeline and scope.`,
+    confirmMessage: `Budget for ${params.projectName} will be reduced from $${params.currentBudget}M to $${params.newBudget}M. This may impact timeline and scope.`,
     actions: [
       { agentId: 'finops', agentName: 'Finance Agent', icon: '💰', action: 'Budget Updated', detail: `${params.projectName} budget reduced by ${params.percentage}%`, delay: 1000 },
       { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '🎛️', action: 'PM Notified', detail: `Project Manager alerted to budget change`, delay: 2000 },
@@ -58,7 +58,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
   increaseBudget: (params) => ({
     id: `budget-increase-${Date.now()}`,
     trigger: `Increase ${params.projectName} budget by ${params.percentage}%`,
-    confirmMessage: `Budget for ${params.projectName} will be increased from £${params.currentBudget}M to £${params.newBudget}M. This requires portfolio approval.`,
+    confirmMessage: `Budget for ${params.projectName} will be increased from $${params.currentBudget}M to $${params.newBudget}M. This requires portfolio approval.`,
     actions: [
       { agentId: 'finops', agentName: 'Finance Agent', icon: '💰', action: 'Budget Request Created', detail: `${params.projectName} budget increase of ${params.percentage}% submitted`, delay: 1000 },
       { agentId: 'governance', agentName: 'Governance Agent', icon: '🛡️', action: 'Approval Workflow Started', detail: `Budget change requires steering committee approval`, delay: 2500 },
@@ -77,7 +77,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
       { agentId: 'planning', agentName: 'Planning Agent', icon: '📅', action: 'Timeline Updated', detail: `End date extended by ${params.weeks} weeks`, delay: 1000 },
       { agentId: 'tmo', agentName: 'Dependency Agent', icon: '🔗', action: 'Dependencies Recalculated', detail: `${params.dependencyCount || 5} downstream projects impacted`, delay: 2500 },
       { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '🎛️', action: 'Cascade Analysis', detail: `Portfolio timeline impacts calculated`, delay: 3500 },
-      { agentId: 'finops', agentName: 'Finance Agent', icon: '💷', action: 'Cost Recalculated', detail: `Extended timeline adds £${params.additionalCost || '0.3'}M to project`, delay: 4500 },
+      { agentId: 'finops', agentName: 'Finance Agent', icon: '💵', action: 'Cost Recalculated', detail: `Extended timeline adds $${params.additionalCost || '0.3'}M to project`, delay: 4500 },
       { agentId: 'governance', agentName: 'Risk Agent', icon: '⚠️', action: 'Risk Updated', detail: `Timeline risk status changed to amber`, delay: 5500 },
       { agentId: 'ocm', agentName: 'OCM Agent', icon: '📧', action: 'Stakeholders Notified', detail: `Timeline change communicated to sponsors`, delay: 6500 }
     ]
@@ -127,7 +127,7 @@ export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>)
     confirmMessage: `A new ${params.resourceType || 'developer'} will be assigned to ${params.projectName}.`,
     actions: [
       { agentId: 'planning', agentName: 'Resource Agent', icon: '👤', action: 'Resource Assigned', detail: `${params.resourceName || 'New team member'} added to ${params.projectName}`, delay: 1000 },
-      { agentId: 'finops', agentName: 'Finance Agent', icon: '💷', action: 'Budget Updated', detail: `Resource cost added to project forecast`, delay: 2000 },
+      { agentId: 'finops', agentName: 'Finance Agent', icon: '💵', action: 'Budget Updated', detail: `Resource cost added to project forecast`, delay: 2000 },
       { agentId: 'tmo', agentName: 'Capacity Agent', icon: '📊', action: 'Capacity Recalculated', detail: `Team velocity projection increased`, delay: 3000 },
       { agentId: 'integrated-management', agentName: 'Integrated Management', icon: '📧', action: 'Onboarding Initiated', detail: `Welcome materials sent to new team member`, delay: 4000 }
     ]
@@ -209,7 +209,7 @@ export async function dispatchAgentCascade(scenario: ActionScenario): Promise<vo
 export function parseActionIntent(query: string, pageContext?: { entityName?: string; entityId?: string }): { scenarioType: string; params: Record<string, string> } | null {
   const lowerQuery = query.toLowerCase();
   const contextProjectName = pageContext?.entityName || 'this project';
-  const currentBudget = 1.0; // £1M default for demo
+  const currentBudget = 1.0; // $1M default for demo
   
   // Helper to extract project name or use context
   const getProjectName = (explicitName?: string) => {

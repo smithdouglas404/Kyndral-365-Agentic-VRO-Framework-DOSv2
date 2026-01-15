@@ -333,8 +333,8 @@ async function triggerBudgetBreachScenario(): Promise<void> {
     'Budget variance detected: 23% over allocated spend due to unexpected infrastructure costs.',
     'proj-001',
     'Cloud Migration Phase 2',
-    'Conduct scope review and reallocate £350K from contingency reserve.',
-    'Without intervention, project NPV decreases by £1.5M.',
+    'Conduct scope review and reallocate $350K from contingency reserve.',
+    'Without intervention, project NPV decreases by $1.5M.',
     92
   );
   
@@ -397,7 +397,7 @@ async function triggerCriticalProjectScenario(): Promise<void> {
     'proj-003',
     'Legacy System Decommission',
     'Deploy recovery task force and reassign transformation specialists. Schedule emergency steering committee review.',
-    'Estimated £2.3M annual savings at risk if not addressed within 2 weeks.',
+    'Estimated $2.3M annual savings at risk if not addressed within 2 weeks.',
     95
   );
   
@@ -410,7 +410,7 @@ async function triggerCriticalProjectScenario(): Promise<void> {
   
   setTimeout(() => {
     executeAction('integrated-management', 'investigate', 'project', 'proj-003', 'Legacy System Decommission',
-      'Assessing value impact. Estimated £2.3M annual savings at risk.', 90,
+      'Assessing value impact. Estimated $2.3M annual savings at risk.', 90,
       'integrated-management');
     notifyAction('integrated-management', 'investigate', 'Legacy System Decommission');
   }, 2500);
@@ -441,11 +441,11 @@ async function triggerValueAtRiskScenario(): Promise<void> {
     'quality',
     'high',
     'Q4 Value Realization Gap Detected',
-    'Value realization trending 18% below forecast. Three key projects underperforming with combined impact of £4.2M value gap.',
+    'Value realization trending 18% below forecast. Three key projects underperforming with combined impact of $4.2M value gap.',
     'portfolio-q4',
     'Q4 Portfolio Performance',
     'Reallocate budget from lower-priority initiatives and accelerate high-value projects.',
-    'Without intervention, Q4 value realization target will be missed by £4.2M.',
+    'Without intervention, Q4 value realization target will be missed by $4.2M.',
     88
   );
   
@@ -456,18 +456,18 @@ async function triggerValueAtRiskScenario(): Promise<void> {
     'Q4 Portfolio Performance',
     'high',
     'integrated-management',
-    'Value realization trending 18% below forecast. Three key projects underperforming: Cloud Migration (-12%), Digital Transformation (-8%), Customer Platform (-6%). Combined impact: £4.2M value gap.'
+    'Value realization trending 18% below forecast. Three key projects underperforming: Cloud Migration (-12%), Digital Transformation (-8%), Customer Platform (-6%). Combined impact: $4.2M value gap.'
   );
   
   setTimeout(() => {
     sendAgentMessage('integrated-management', ['integrated-management', 'finops'], 'insight',
       'Value Realization Gap Analysis',
-      'Three key projects underperforming: Cloud Migration (-12%), Digital Transformation (-8%), Customer Platform (-6%). Combined impact: £4.2M value gap.',
+      'Three key projects underperforming: Cloud Migration (-12%), Digital Transformation (-8%), Customer Platform (-6%). Combined impact: $4.2M value gap.',
       'high');
     
     if (discussionResult) {
       continueDiscussion(discussionResult.discussion.id, 'finops', 
-        'Analyzing budget reallocation options. We have £1.2M in uncommitted contingency that could be redirected.', 
+        'Analyzing budget reallocation options. We have $1.2M in uncommitted contingency that could be redirected.', 
         'analysis');
     }
   }, 1500);
@@ -493,7 +493,7 @@ async function triggerValueAtRiskScenario(): Promise<void> {
     
     if (discussionResult) {
       continueDiscussion(discussionResult.discussion.id, 'finops', 
-        'Recommending immediate reallocation of £800K to accelerate Digital Transformation. ROI analysis supports this investment.', 
+        'Recommending immediate reallocation of $800K to accelerate Digital Transformation. ROI analysis supports this investment.', 
         'recommendation');
     }
   }, 4500);

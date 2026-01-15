@@ -10,7 +10,7 @@ export interface Resource {
   role: 'RTE' | 'PM' | 'PO' | 'Architect' | 'Developer' | 'QA' | 'BA' | 'Scrum Master';
   allocation: number; // 0-100 percentage
   team: string;
-  costRate: number; // daily rate in £
+  costRate: number; // daily rate in $
 }
 
 export interface Milestone {
@@ -32,14 +32,14 @@ export interface Dependency {
   health: 'green' | 'yellow' | 'red';
   description: string;
   impactIfDelayed: string;
-  financialImpact?: number; // £ impact if delayed
+  financialImpact?: number; // $ impact if delayed
 }
 
 export interface Financials {
   budget: number;
   spent: number;
   forecast: number;
-  currency: '£';
+  currency: '$';
   laborCost: number;
   vendorCost: number;
   infrastructureCost: number;
@@ -100,7 +100,7 @@ export interface SAFeProject {
   id: string;
   name: string;
   description: string;
-  bu: 'Institutional Retirement' | 'Asset Management' | 'Retail' | 'Corporate Investments' | 'Risk & Compliance' | 'Group Functions';
+  bu: 'Florida Power & Light' | 'NextEra Energy Resources' | 'Corporate & Other';
   portfolioTheme: string;
   artName: string; // Agile Release Train name
   
@@ -153,8 +153,8 @@ export const safeProjects: SAFeProject[] = [
   {
     id: 'proj-prt-platform',
     name: 'PRT Platform Modernization',
-    description: 'Complete modernization of the Pension Risk Transfer platform to support £10bn+ annual volume. Includes API-first architecture, real-time pricing engine, and automated underwriting workflows.',
-    bu: 'Institutional Retirement',
+    description: 'Complete modernization of the Pension Risk Transfer platform to support $10bn+ annual volume. Includes API-first architecture, real-time pricing engine, and automated underwriting workflows.',
+    bu: 'Florida Power & Light',
     portfolioTheme: 'Digital Transformation',
     artName: 'Retirement Solutions ART',
     safeStage: 'implementing',
@@ -277,7 +277,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 8500000,
       spent: 4200000,
       forecast: 8900000,
-      currency: '£',
+      currency: '$',
       laborCost: 3800000,
       vendorCost: 1200000,
       infrastructureCost: 800000,
@@ -291,7 +291,7 @@ export const safeProjects: SAFeProject[] = [
     ],
     vroInsights: [
       'VRO pattern match: Similar PRT modernization at competitor achieved 23% cost savings',
-      'Value tracking: Current velocity suggests 85% probability of hitting £45M ROI target',
+      'Value tracking: Current velocity suggests 85% probability of hitting $45M ROI target',
       'Risk-adjusted timeline: 72% confidence in June 2026 delivery based on dependency health'
     ],
     pmoDataFeeds: [
@@ -312,7 +312,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-member-portal',
     name: 'Pensioner Digital Portal',
     description: 'Self-service portal for 500,000+ pensioners to manage their retirement benefits, update personal details, and access payment information.',
-    bu: 'Institutional Retirement',
+    bu: 'Florida Power & Light',
     portfolioTheme: 'Customer Experience',
     artName: 'Member Services ART',
     safeStage: 'implementing',
@@ -401,7 +401,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 3200000,
       spent: 1400000,
       forecast: 3100000,
-      currency: '£',
+      currency: '$',
       laborCost: 1100000,
       vendorCost: 400000,
       infrastructureCost: 300000,
@@ -430,7 +430,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-bulk-annuity-automation',
     name: 'Bulk Annuity Processing Automation',
     description: 'End-to-end automation of bulk annuity administration including member onboarding, benefit calculations, and payment setup for scheme transfers.',
-    bu: 'Institutional Retirement',
+    bu: 'Florida Power & Light',
     portfolioTheme: 'Operational Excellence',
     artName: 'Operations Excellence ART',
     safeStage: 'analyzing',
@@ -470,7 +470,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 2800000,
       spent: 280000,
       forecast: 2800000,
-      currency: '£',
+      currency: '$',
       laborCost: 200000,
       vendorCost: 0,
       infrastructureCost: 50000,
@@ -482,7 +482,7 @@ export const safeProjects: SAFeProject[] = [
       'Consider RPA for legacy system integration as interim solution'
     ],
     vroInsights: [
-      'Value opportunity: £4M annual savings from reduced manual processing',
+      'Value opportunity: $4M annual savings from reduced manual processing',
       'Risk pattern: Similar automation projects average 20% scope creep - recommend fixed scope gates'
     ],
     pmoDataFeeds: [
@@ -500,7 +500,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-trading-platform',
     name: 'Next-Gen Trading Platform',
     description: 'Unified multi-asset trading platform supporting equities, fixed income, and derivatives with real-time risk analytics.',
-    bu: 'Asset Management',
+    bu: 'NextEra Energy Resources',
     portfolioTheme: 'Digital Transformation',
     artName: 'Trading Technology ART',
     safeStage: 'implementing',
@@ -544,7 +544,7 @@ export const safeProjects: SAFeProject[] = [
         epicId: 'proj-trading-platform',
         title: 'Fixed Income Trading',
         description: 'Bond trading with pricing, inventory, and RFQ workflows',
-        benefitHypothesis: 'Enable best execution across bond markets, saving £2M/year in spreads',
+        benefitHypothesis: 'Enable best execution across bond markets, saving $2M/year in spreads',
         acceptanceCriteria: ['Multi-dealer RFQ', 'Real-time pricing', 'Inventory management'],
         wsjfScore: 30,
         status: 'implementing',
@@ -589,7 +589,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 15000000,
       spent: 9500000,
       forecast: 16200000,
-      currency: '£',
+      currency: '$',
       laborCost: 7500000,
       vendorCost: 3500000,
       infrastructureCost: 2000000,
@@ -602,7 +602,7 @@ export const safeProjects: SAFeProject[] = [
       'Resource conflict with Risk Engine project on shared architect'
     ],
     vroInsights: [
-      'Value at risk: £5M annual benefit delayed due to data dependency',
+      'Value at risk: $5M annual benefit delayed due to data dependency',
       'Benchmark: Platform is 15% over budget - typical for trading platform programs',
       'Pattern match: Similar programs show 80% of value in first 2 asset classes'
     ],
@@ -623,7 +623,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-client-reporting',
     name: 'Institutional Client Reporting Platform',
     description: 'Automated client reporting with customizable templates, performance attribution, and ESG metrics.',
-    bu: 'Asset Management',
+    bu: 'NextEra Energy Resources',
     portfolioTheme: 'Customer Experience',
     artName: 'Client Solutions ART',
     safeStage: 'implementing',
@@ -676,7 +676,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 2500000,
       spent: 1600000,
       forecast: 2400000,
-      currency: '£',
+      currency: '$',
       laborCost: 1300000,
       vendorCost: 200000,
       infrastructureCost: 200000,
@@ -704,7 +704,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-risk-engine',
     name: 'Real-Time Risk Analytics Engine',
     description: 'Unified risk calculation engine providing VaR, stress testing, and limit monitoring across all asset classes.',
-    bu: 'Asset Management',
+    bu: 'NextEra Energy Resources',
     portfolioTheme: 'Risk Management',
     artName: 'Risk Technology ART',
     safeStage: 'implementing',
@@ -744,7 +744,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 8000000,
       spent: 6200000,
       forecast: 8500000,
-      currency: '£',
+      currency: '$',
       laborCost: 5000000,
       vendorCost: 1800000,
       infrastructureCost: 700000,
@@ -776,9 +776,9 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-digital-onboarding',
     name: 'Digital Customer Onboarding',
     description: 'Fully digital onboarding journey for retail customers including ID verification, risk assessment, and instant account opening.',
-    bu: 'Retail',
+    bu: 'Florida Power & Light',
     portfolioTheme: 'Customer Experience',
-    artName: 'Digital Retail ART',
+    artName: 'FPL Digital ART',
     safeStage: 'implementing',
     status: 'green',
     priority: 'high',
@@ -802,7 +802,7 @@ export const safeProjects: SAFeProject[] = [
       }
     ],
     resources: [
-      { id: 'res-do-001', name: 'Emma Roberts', role: 'PM', allocation: 100, team: 'Digital Retail ART', costRate: 750 }
+      { id: 'res-do-001', name: 'Emma Roberts', role: 'PM', allocation: 100, team: 'FPL Digital ART', costRate: 750 }
     ],
     totalFTE: 4.0,
     milestones: [
@@ -814,7 +814,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 2200000,
       spent: 1100000,
       forecast: 2100000,
-      currency: '£',
+      currency: '$',
       laborCost: 850000,
       vendorCost: 450000,
       infrastructureCost: 150000,
@@ -842,7 +842,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-mobile-app-refresh',
     name: 'Retail Mobile App Modernization',
     description: 'Complete refresh of the retail mobile app with modern UX, biometric login, and expanded self-service capabilities.',
-    bu: 'Retail',
+    bu: 'Florida Power & Light',
     portfolioTheme: 'Digital Transformation',
     artName: 'Mobile Experience ART',
     safeStage: 'backlog',
@@ -867,7 +867,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 3500000,
       spent: 75000,
       forecast: 3500000,
-      currency: '£',
+      currency: '$',
       laborCost: 50000,
       vendorCost: 0,
       infrastructureCost: 0,
@@ -895,7 +895,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-advisor-portal',
     name: 'Financial Advisor Portal',
     description: 'B2B portal for financial advisors to manage client portfolios, submit applications, and access commission statements.',
-    bu: 'Retail',
+    bu: 'Florida Power & Light',
     portfolioTheme: 'Partner Ecosystem',
     artName: 'Partner Solutions ART',
     safeStage: 'reviewing',
@@ -918,7 +918,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 2800000,
       spent: 45000,
       forecast: 2800000,
-      currency: '£',
+      currency: '$',
       laborCost: 30000,
       vendorCost: 0,
       infrastructureCost: 0,
@@ -947,7 +947,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-data-foundation',
     name: 'Enterprise Data Foundation',
     description: 'Unified data lake and master data management platform providing single source of truth across all business units.',
-    bu: 'Group Functions',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Data & Analytics',
     artName: 'Data Platform ART',
     safeStage: 'implementing',
@@ -1017,7 +1017,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 12000000,
       spent: 8500000,
       forecast: 13200000,
-      currency: '£',
+      currency: '$',
       laborCost: 6500000,
       vendorCost: 3000000,
       infrastructureCost: 2000000,
@@ -1030,17 +1030,17 @@ export const safeProjects: SAFeProject[] = [
       'Data quality issues in source systems causing 30% rework'
     ],
     vroInsights: [
-      'Value enabler: £40M+ downstream value dependent on this platform',
+      'Value enabler: $40M+ downstream value dependent on this platform',
       'Pattern: 70% of enterprise data projects miss original deadline - plan for contingency',
       'Strategic priority: CEO visibility on this initiative'
     ],
     pmoDataFeeds: [
       'Jira: 178 stories completed, 28 in progress, 56 in backlog',
-      'AWS Cost Explorer: £85K/month cloud spend'
+      'AWS Cost Explorer: $85K/month cloud spend'
     ],
     riskFlags: [
       'Full data lake milestone at-risk - 15 sources still pending',
-      'Budget overrun of £1.2M expected',
+      'Budget overrun of $1.2M expected',
       'Key architect shared with Trading Platform project'
     ],
     velocity: 52,
@@ -1052,7 +1052,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-api-gateway',
     name: 'Enterprise API Gateway',
     description: 'Centralized API management platform for internal and external API consumption with security, rate limiting, and analytics.',
-    bu: 'Group Functions',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Digital Infrastructure',
     artName: 'Platform Services ART',
     safeStage: 'implementing',
@@ -1090,7 +1090,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 1800000,
       spent: 950000,
       forecast: 1750000,
-      currency: '£',
+      currency: '$',
       laborCost: 750000,
       vendorCost: 300000,
       infrastructureCost: 200000,
@@ -1118,7 +1118,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-cloud-migration',
     name: 'Cloud Infrastructure Migration',
     description: 'Migration of on-premises infrastructure to AWS with hybrid connectivity, disaster recovery, and cost optimization.',
-    bu: 'Group Functions',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Digital Infrastructure',
     artName: 'Infrastructure ART',
     safeStage: 'implementing',
@@ -1142,7 +1142,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 6500000,
       spent: 4200000,
       forecast: 6200000,
-      currency: '£',
+      currency: '$',
       laborCost: 2800000,
       vendorCost: 1500000,
       infrastructureCost: 1200000,
@@ -1150,7 +1150,7 @@ export const safeProjects: SAFeProject[] = [
       roi: { projected: 15000000, confidence: 80, paybackMonths: 18 }
     },
     aiRecommendations: [
-      'Reserved instance purchases could save £400K annually',
+      'Reserved instance purchases could save $400K annually',
       'Consider Spot instances for batch workloads'
     ],
     vroInsights: [
@@ -1171,7 +1171,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-regulatory-reporting',
     name: 'Regulatory Reporting Automation',
     description: 'Automated generation of regulatory returns for PRA, FCA, and EIOPA with data lineage and audit trails.',
-    bu: 'Risk & Compliance',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Regulatory Excellence',
     artName: 'Regulatory Tech ART',
     safeStage: 'implementing',
@@ -1229,7 +1229,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 4500000,
       spent: 3100000,
       forecast: 4800000,
-      currency: '£',
+      currency: '$',
       laborCost: 2400000,
       vendorCost: 800000,
       infrastructureCost: 400000,
@@ -1242,7 +1242,7 @@ export const safeProjects: SAFeProject[] = [
       'Data Foundation dependency causing 2-week delays'
     ],
     vroInsights: [
-      'Compliance risk: Late filing penalties could exceed £5M',
+      'Compliance risk: Late filing penalties could exceed $5M',
       'Process improvement: Automation will free 12 FTE annually',
       'Pattern: Similar projects show highest risk in data mapping phase'
     ],
@@ -1263,7 +1263,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-fraud-detection',
     name: 'AI-Powered Fraud Detection',
     description: 'Machine learning platform for real-time fraud detection across all transaction types with automated alerting.',
-    bu: 'Risk & Compliance',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Risk Management',
     artName: 'Security Intelligence ART',
     safeStage: 'analyzing',
@@ -1288,7 +1288,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 3200000,
       spent: 120000,
       forecast: 3200000,
-      currency: '£',
+      currency: '$',
       laborCost: 80000,
       vendorCost: 0,
       infrastructureCost: 20000,
@@ -1300,7 +1300,7 @@ export const safeProjects: SAFeProject[] = [
       'Consider ensemble model approach for best accuracy'
     ],
     vroInsights: [
-      'Value potential: £8M annual fraud loss reduction',
+      'Value potential: $8M annual fraud loss reduction',
       'Benchmark: Industry leaders achieving 95% detection rate'
     ],
     pmoDataFeeds: [
@@ -1316,7 +1316,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-grc-platform',
     name: 'Integrated GRC Platform',
     description: 'Unified Governance, Risk, and Compliance platform consolidating policy management, risk registers, and control testing.',
-    bu: 'Risk & Compliance',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Regulatory Excellence',
     artName: 'GRC Technology ART',
     safeStage: 'funnel',
@@ -1339,7 +1339,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 5000000,
       spent: 25000,
       forecast: 5000000,
-      currency: '£',
+      currency: '$',
       laborCost: 15000,
       vendorCost: 0,
       infrastructureCost: 0,
@@ -1368,7 +1368,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-esg-reporting',
     name: 'ESG Analytics & Reporting',
     description: 'Comprehensive ESG scoring, carbon footprint tracking, and sustainability reporting for investment portfolios.',
-    bu: 'Corporate Investments',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Sustainable Finance',
     artName: 'Sustainable Investment ART',
     safeStage: 'implementing',
@@ -1384,7 +1384,7 @@ export const safeProjects: SAFeProject[] = [
         epicId: 'proj-esg-reporting',
         title: 'ESG Scoring Engine',
         description: 'Proprietary ESG scoring methodology with third-party data integration',
-        benefitHypothesis: 'Differentiated ESG insights driving £500M+ in sustainable AUM',
+        benefitHypothesis: 'Differentiated ESG insights driving $500M+ in sustainable AUM',
         acceptanceCriteria: ['Score 10,000+ securities', 'Monthly refresh', 'Audit trail'],
         wsjfScore: 30,
         status: 'implementing',
@@ -1422,7 +1422,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 2200000,
       spent: 850000,
       forecast: 2100000,
-      currency: '£',
+      currency: '$',
       laborCost: 650000,
       vendorCost: 350000,
       infrastructureCost: 150000,
@@ -1451,7 +1451,7 @@ export const safeProjects: SAFeProject[] = [
     id: 'proj-alt-investments',
     name: 'Alternative Investments Platform',
     description: 'Platform for managing private equity, real estate, and infrastructure investments with valuation and reporting.',
-    bu: 'Corporate Investments',
+    bu: 'Corporate & Other',
     portfolioTheme: 'Investment Capability',
     artName: 'Private Markets ART',
     safeStage: 'backlog',
@@ -1474,7 +1474,7 @@ export const safeProjects: SAFeProject[] = [
       budget: 4500000,
       spent: 50000,
       forecast: 4500000,
-      currency: '£',
+      currency: '$',
       laborCost: 35000,
       vendorCost: 0,
       infrastructureCost: 0,

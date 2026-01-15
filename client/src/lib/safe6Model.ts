@@ -243,7 +243,7 @@ export interface TeamMember {
   name: string;
   role: 'RTE' | 'PM' | 'PO' | 'Architect' | 'Developer' | 'QA' | 'BA' | 'Scrum Master' | 'UX' | 'DevOps';
   allocation: number; // 0-100 percentage to this team
-  dailyCostRate: number; // £ per day
+  dailyCostRate: number; // $ per day
   skills: string[];
   availability: number; // 0-100 percentage (accounting for PTO, meetings, etc.)
 }
@@ -385,7 +385,7 @@ export interface FinancialSnapshot {
   roiConfidence: number;
   paybackMonths: number;
   
-  currency: '£' | '$' | '€';
+  currency: '$' | '$' | '€';
 }
 
 // ===================== CROSS-CUTTING: RISK =====================

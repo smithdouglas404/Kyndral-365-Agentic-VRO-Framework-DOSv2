@@ -119,10 +119,10 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
     { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'alert_forward', entity: 'CRM Migration', message: 'Stakeholder resistance detected in Sales division - change plan adjustment needed', priority: 'high' },
     
     // FinOps ↔ VRO: Financial-Value Integration
-    { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - £2.1m under forecast, ROI improving', priority: 'low' },
-    { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Cloud Infrastructure', message: 'Cost overrun detected - £450k above baseline, value at risk', priority: 'critical' },
+    { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - $2.1m under forecast, ROI improving', priority: 'low' },
+    { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Cloud Infrastructure', message: 'Cost overrun detected - $450k above baseline, value at risk', priority: 'critical' },
     { fromAgent: 'integrated-management', toAgent: 'finops', messageType: 'recommendation', entity: 'Portfolio Optimization', message: 'Low-ROI projects identified - recommend cost reallocation to high-value initiatives', priority: 'high' },
-    { fromAgent: 'finops', toAgent: 'planning', messageType: 'data_sync', entity: 'Q4 Budget', message: 'Forecast updated - £3.2m available for new initiatives', priority: 'medium' },
+    { fromAgent: 'finops', toAgent: 'planning', messageType: 'data_sync', entity: 'Q4 Budget', message: 'Forecast updated - $3.2m available for new initiatives', priority: 'medium' },
     
     // OKR ↔ Multiple Agents: Strategy Alignment
     { fromAgent: 'okr', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'OKR-001', message: 'Key Result "Reduce deal cycle time" progress calculated at 68% from project KPIs', priority: 'medium' },
@@ -132,9 +132,9 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
     
     // Governance ↔ Multiple Agents: Risk & Compliance
     { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Private Markets Platform', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
-    { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'action_request', entity: 'Risk Assessment', message: 'High-value program requires governance review - £25m threshold exceeded', priority: 'high' },
+    { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'action_request', entity: 'Risk Assessment', message: 'High-value program requires governance review - $25m threshold exceeded', priority: 'high' },
     { fromAgent: 'governance', toAgent: 'finops', messageType: 'recommendation', entity: 'Audit Findings', message: 'Cost allocation audit complete - 3 remediation items identified', priority: 'medium' },
-    { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'data_sync', entity: 'Longevity Risk Intelligence', message: 'Value realization at £15m - governance review triggered', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'data_sync', entity: 'Longevity Risk Intelligence', message: 'Value realization at $15m - governance review triggered', priority: 'medium' },
     { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'status_update', entity: 'Regulatory Project', message: 'Milestone achieved - ready for compliance validation', priority: 'medium' },
     
     // Planning ↔ Multiple Agents: Capacity & Resources
@@ -288,7 +288,7 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
   switch (agentId) {
     case 'governance':
       filteredRisks = riskIssues;
-      filteredProjects = pmoProjects.filter(p => p.bu === 'Risk & Compliance' || p.risks.length > 1);
+      filteredProjects = pmoProjects.filter(p => p.bu === 'Corporate & Other' || p.risks.length > 1);
       break;
     case 'finops':
       filteredProjects = pmoProjects.filter(p => p.budget.spent / p.budget.total > 0.7);
@@ -342,7 +342,7 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
 const PROJECT_BREAKDOWNS = {
   claims: { id: 'claims', name: 'Claims', bu: 'Insurance' },
   workplacePensions: { id: 'workplace-pensions', name: 'Workplace Pensions', bu: 'Workplace' },
-  customer: { id: 'customer', name: 'Customer', bu: 'Group Functions' },
+  customer: { id: 'customer', name: 'Customer', bu: 'Corporate & Other' },
   aiPoweredPricing: { id: 'ai-powered-pricing', name: 'AI Powered Pricing', bu: 'Insurance' }
 };
 
@@ -364,7 +364,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'On Track' },
         { project: 'Workplace Pensions', bu: 'Workplace', value: '72%', contribution: '35%', status: 'On Track' },
-        { project: 'Customer', bu: 'Group Functions', value: '45%', contribution: '22%', status: 'At Risk' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '45%', contribution: '22%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '61%', contribution: '15%', status: 'On Track' }
       ];
       metrics = {
@@ -383,10 +383,10 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       relatedAgents.push('integrated-management', 'finops');
       calculationMethod = 'Sum of discounted cash flows across all projects (8% discount rate, 5-year horizon)';
       projectBreakdown = [
-        { project: 'Claims', bu: 'Insurance', value: '£12.5M', contribution: '34%', status: 'On Track' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '£14.2M', contribution: '39%', status: 'On Track' },
-        { project: 'Customer', bu: 'Group Functions', value: '£5.8M', contribution: '16%', status: 'At Risk' },
-        { project: 'AI Powered Pricing', bu: 'Insurance', value: '£3.75M', contribution: '11%', status: 'On Track' }
+        { project: 'Claims', bu: 'Insurance', value: '$12.5M', contribution: '34%', status: 'On Track' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '$14.2M', contribution: '39%', status: 'On Track' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '$5.8M', contribution: '16%', status: 'At Risk' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '$3.75M', contribution: '11%', status: 'On Track' }
       ];
       metrics = {
         'Total NPV': '$36.25M',
@@ -407,7 +407,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '82%', contribution: '30%', status: 'Phase 3' },
         { project: 'Workplace Pensions', bu: 'Workplace', value: '75%', contribution: '28%', status: 'Phase 3' },
-        { project: 'Customer', bu: 'Group Functions', value: '48%', contribution: '25%', status: 'Phase 2' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '48%', contribution: '25%', status: 'Phase 2' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '65%', contribution: '17%', status: 'Phase 2' }
       ];
       metrics = {
@@ -427,18 +427,18 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       relatedAgents.push('integrated-management', 'finops');
       calculationMethod = 'Total spend across all projects as percentage of allocated budget';
       projectBreakdown = [
-        { project: 'Claims', bu: 'Insurance', value: '£10.8M / £11.2M', contribution: '26%', status: '96%' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '£15.4M / £16.5M', contribution: '37%', status: '93%' },
-        { project: 'Customer', bu: 'Group Functions', value: '£9.2M / £10.0M', contribution: '22%', status: '92%' },
-        { project: 'AI Powered Pricing', bu: 'Insurance', value: '£5.8M / £6.1M', contribution: '14%', status: '95%' }
+        { project: 'Claims', bu: 'Insurance', value: '$10.8M / $11.2M', contribution: '26%', status: '96%' },
+        { project: 'Workplace Pensions', bu: 'Workplace', value: '$15.4M / $16.5M', contribution: '37%', status: '93%' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '$9.2M / $10.0M', contribution: '22%', status: '92%' },
+        { project: 'AI Powered Pricing', bu: 'Insurance', value: '$5.8M / $6.1M', contribution: '14%', status: '95%' }
       ];
       metrics = {
-        'Total Utilized': '£41.2M',
-        'Total Budget': '£43.8M',
+        'Total Utilized': '$41.2M',
+        'Total Budget': '$43.8M',
         'Utilization Rate': '94%',
-        'Baseline (2024)': '£0',
-        'Target (2026)': '£41.2M',
-        'Remaining': '£2.6M',
+        'Baseline (2024)': '$0',
+        'Target (2026)': '$41.2M',
+        'Remaining': '$2.6M',
         'Variance': '+6% efficiency gain'
       };
       relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -452,7 +452,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '14 days', contribution: '25%', status: 'On Track' },
         { project: 'Workplace Pensions', bu: 'Workplace', value: '22 days', contribution: '30%', status: 'At Risk' },
-        { project: 'Customer', bu: 'Group Functions', value: '24 days', contribution: '28%', status: 'At Risk' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '24 days', contribution: '28%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '16 days', contribution: '17%', status: 'On Track' }
       ];
       metrics = {
@@ -473,7 +473,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'Exceeds' },
         { project: 'Workplace Pensions', bu: 'Workplace', value: '65%', contribution: '26%', status: 'On Track' },
-        { project: 'Customer', bu: 'Group Functions', value: '58%', contribution: '24%', status: 'On Track' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '58%', contribution: '24%', status: 'On Track' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '72%', contribution: '22%', status: 'Exceeds' }
       ];
       metrics = {
@@ -494,7 +494,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '4 items/week', contribution: '36%', status: 'On Track' },
         { project: 'Workplace Pensions', bu: 'Workplace', value: '3 items/week', contribution: '27%', status: 'At Risk' },
-        { project: 'Customer', bu: 'Group Functions', value: '2 items/week', contribution: '18%', status: 'At Risk' },
+        { project: 'Customer', bu: 'Corporate & Other', value: '2 items/week', contribution: '18%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '2 items/week', contribution: '18%', status: 'On Track' }
       ];
       metrics = {
@@ -546,14 +546,14 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         project: p.name,
         bu: p.bu,
         value: `${Math.round((p.deliverables.completed / p.deliverables.total) * 100)}% complete`,
-        contribution: `£${p.budget.spent}m / £${p.budget.total}m`,
+        contribution: `$${p.budget.spent}m / $${p.budget.total}m`,
         status: p.safeStage
       }));
       metrics = {
         'On Track': `${onTrackProjects.length} projects`,
         'Total Projects': `${allProjects.length} projects`,
         'Health Rate': `${Math.round((onTrackProjects.length / allProjects.length) * 100)}%`,
-        'Total Budget': `£${onTrackProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Total Budget': `$${onTrackProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
         'Avg Velocity': `${Math.round(onTrackProjects.reduce((sum, p) => sum + p.safe.velocity, 0) / Math.max(onTrackProjects.length, 1))}`
       };
       relatedEntities = onTrackProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -578,7 +578,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'At Risk': `${atRiskProjects.length} projects`,
         'Total Projects': `${allProjects.length} projects`,
         'Risk Rate': `${Math.round((atRiskProjects.length / allProjects.length) * 100)}%`,
-        'Total Budget at Risk': `£${atRiskProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Total Budget at Risk': `$${atRiskProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
         'Avg Predictability': `${Math.round(atRiskProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / Math.max(atRiskProjects.length, 1))}%`
       };
       relatedEntities = atRiskProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -602,7 +602,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Critical': `${criticalProjects.length} projects`,
         'Total Projects': `${allProjects.length} projects`,
         'Critical Rate': `${Math.round((criticalProjects.length / allProjects.length) * 100)}%`,
-        'Total Budget at Risk': `£${criticalProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`
+        'Total Budget at Risk': `$${criticalProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`
       };
       relatedEntities = criticalProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
@@ -618,7 +618,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         project: p.name,
         bu: p.bu,
         value: `${Math.round((p.deliverables.completed / p.deliverables.total) * 100)}% complete`,
-        contribution: `£${p.budget.spent}m / £${p.budget.total}m`,
+        contribution: `$${p.budget.spent}m / $${p.budget.total}m`,
         status: p.status === 'green' ? 'On Track' : p.status === 'amber' ? 'At Risk' : 'Critical'
       }));
       metrics = {
@@ -626,7 +626,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'On Track': allProjects.filter(p => p.status === 'green').length,
         'At Risk': allProjects.filter(p => p.status === 'amber').length,
         'Critical': allProjects.filter(p => p.status === 'red').length,
-        'Total Budget': `£${allProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Total Budget': `$${allProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
         'Implementing': allProjects.filter(p => p.safeStage === 'implementing').length
       };
       relatedEntities = allProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -708,8 +708,8 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
     case 'value':
       entityName = `${config.name} - Value Portfolio`;
       metrics = {
-        'Total Value': `£${agentData.metrics.totalValue}m`,
-        'Realized Value': `£${agentData.metrics.realizedValue}m`,
+        'Total Value': `$${agentData.metrics.totalValue}m`,
+        'Realized Value': `$${agentData.metrics.realizedValue}m`,
         'Realization Rate': `${Math.round((agentData.metrics.realizedValue / Math.max(agentData.metrics.totalValue, 1)) * 100)}%`,
         'Programs Tracked': agentData.programs.length
       };
@@ -752,9 +752,9 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
       const totalBudget = agentData.projects.reduce((sum, p) => sum + p.budget.total, 0);
       const spentBudget = agentData.projects.reduce((sum, p) => sum + p.budget.spent, 0);
       metrics = {
-        'Total Budget': `£${totalBudget.toFixed(1)}m`,
-        'Spent': `£${spentBudget.toFixed(1)}m`,
-        'Remaining': `£${(totalBudget - spentBudget).toFixed(1)}m`,
+        'Total Budget': `$${totalBudget.toFixed(1)}m`,
+        'Spent': `$${spentBudget.toFixed(1)}m`,
+        'Remaining': `$${(totalBudget - spentBudget).toFixed(1)}m`,
         'Burn Rate': `${Math.round((spentBudget / Math.max(totalBudget, 1)) * 100)}%`
       };
       relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -765,7 +765,7 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
         'Avg Confidence': `${agentData.metrics.avgConfidence}%`,
         'Healthy Projects': agentData.metrics.healthyProjects,
         'At Risk': agentData.metrics.atRiskProjects,
-        'Value Realized': `£${agentData.metrics.realizedValue}m`
+        'Value Realized': `$${agentData.metrics.realizedValue}m`
       };
       relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
       break;
@@ -826,7 +826,7 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
       metrics = {
         'Total Projects': agentData.metrics.totalProjects,
         'Active Alerts': agentData.metrics.activeAlerts,
-        'Value Realized': `£${agentData.metrics.realizedValue}m`,
+        'Value Realized': `$${agentData.metrics.realizedValue}m`,
         'Confidence': `${agentData.metrics.avgConfidence}%`
       };
       relatedEntities = agentData.projects.slice(0, 3).map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -887,7 +887,7 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
         relatedAgents = ['integrated-management', 'finops', 'okr'];
         metrics = {
           'Expected ROI': prog.expectedROI,
-          'Value Realized': `£${prog.valueRealized}m`,
+          'Value Realized': `$${prog.valueRealized}m`,
           'Strategic Alignment': `${prog.strategicAlignment}%`,
           'Status': prog.valueStatus,
           'Velocity': prog.safe.velocity,
@@ -916,8 +916,8 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
         metrics = {
           'Total Programs': portfolio.programCount,
           'Total Projects': portfolio.projectCount,
-          'Total Budget': `£${portfolio.totalBudget}m`,
-          'Realized Value': `£${portfolio.valueRealized}m`
+          'Total Budget': `$${portfolio.totalBudget}m`,
+          'Realized Value': `$${portfolio.valueRealized}m`
         };
       }
       break;
@@ -997,7 +997,7 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
         'Identify backup vendors for critical components',
         'Update risk register with Governance Agent findings'
       ],
-      metrics: { 'Risk Reduction': '67%', 'Cost Avoided': '£2.3m', 'Vendor Alternatives': '3 identified', 'Review Status': 'In Progress' }
+      metrics: { 'Risk Reduction': '67%', 'Cost Avoided': '$2.3m', 'Vendor Alternatives': '3 identified', 'Review Status': 'In Progress' }
     },
     'gd-003': {
       title: 'Cross-Group Knowledge Share',
@@ -1021,7 +1021,7 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
         'Run automated WCAG audit on Customer Portal',
         'Add accessibility checkpoint to project templates'
       ],
-      metrics: { 'Compliance Gap': '23%', 'Delay Risk': '2-3 weeks', 'Projects Affected': '6', 'Remediation Cost': '£45k' }
+      metrics: { 'Compliance Gap': '23%', 'Delay Risk': '2-3 weeks', 'Projects Affected': '6', 'Remediation Cost': '$45k' }
     }
   };
   
@@ -1170,7 +1170,7 @@ function getBlockerDrilldown(blockerId: string, events: SimulationEvent[]): Enti
     'blocker-legacy': {
       title: 'Legacy System Integration Delays',
       description: 'Integration with legacy mainframe systems causing 2-4 week delays due to limited API availability and batch processing constraints.',
-      impact: '4 projects affected, £1.2m cost impact',
+      impact: '4 projects affected, $1.2m cost impact',
       affectedProjects: ['Claims Processing', 'Policy Admin', 'Data Migration'],
       mitigations: ['Implement API gateway layer', 'Parallel processing queues', 'Legacy modernization roadmap']
     },

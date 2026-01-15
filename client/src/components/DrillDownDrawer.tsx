@@ -63,7 +63,7 @@ function generateEntityInsight(entityType: string, entityId: string): { aiInsigh
   if (entityName.includes('cost') || entityName.includes('variance') || entityName.includes('budget')) {
     return {
       aiInsight: "Budget overrun alert. FinOps agent detected 40.8% cost variance against 5% target threshold. Root cause analysis points to scope changes in Q3 and unplanned infrastructure costs. Recommend immediate cost control measures and scope freeze.",
-      summary: "Cost variance is over budget at 40.8%. FinOps agent flagged this as critical. VRO agent estimates £2.3M value at risk if not addressed. 4 projects are contributing to the overrun."
+      summary: "Cost variance is over budget at 40.8%. FinOps agent flagged this as critical. VRO agent estimates $2.3M value at risk if not addressed. 4 projects are contributing to the overrun."
     };
   }
   
@@ -83,14 +83,14 @@ function generateEntityInsight(entityType: string, entityId: string): { aiInsigh
   
   if (entityName.includes('roi') || entityName.includes('value')) {
     return {
-      aiInsight: "Value realization trending positive. VRO agent calculates portfolio ROI at 127%, exceeding 100% target. FinOps agent confirms cost savings of £4.2M realized YTD. Recommend accelerating high-performing initiatives.",
+      aiInsight: "Value realization trending positive. VRO agent calculates portfolio ROI at 127%, exceeding 100% target. FinOps agent confirms cost savings of $4.2M realized YTD. Recommend accelerating high-performing initiatives.",
       summary: "ROI performance is strong at 127%. VRO agent identified 3 initiatives exceeding expectations. FinOps validates financial impact. 8 projects driving positive returns."
     };
   }
   
   if (entityName.includes('risk') || entityName.includes('mitigation')) {
     return {
-      aiInsight: "Risk mitigation actions required. Governance agent identified 12 active risks, 3 rated as critical. VRO agent estimates £1.8M potential value impact. Recommend immediate risk review with stakeholders.",
+      aiInsight: "Risk mitigation actions required. Governance agent identified 12 active risks, 3 rated as critical. VRO agent estimates $1.8M potential value impact. Recommend immediate risk review with stakeholders.",
       summary: "Risk exposure is elevated with 3 critical items. Governance agent tracking mitigation progress at 67%. OCM agent flagged change resistance as emerging risk factor."
     };
   }
@@ -619,11 +619,11 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Last Updated': new Date().toLocaleTimeString()
       },
       projectBreakdown: [
-        { name: 'PRT Digital Intake', value: '+£8.2M', budget: '£12.4M' },
-        { name: 'Claims Automation', value: '+£5.7M', budget: '£7.2M' },
-        { name: 'Customer Portal', value: '+£4.1M', budget: '£6.8M' }
+        { name: 'PRT Digital Intake', value: '+$8.2M', budget: '$12.4M' },
+        { name: 'Claims Automation', value: '+$5.7M', budget: '$7.2M' },
+        { name: 'Customer Portal', value: '+$4.1M', budget: '$6.8M' }
       ],
-      insight: 'ROI is trending positive at 64% against an 85% target. VRO agent analysis shows 3 initiatives exceeding expectations, with Claims Automation delivering the highest marginal return. FinOps agent recommends reallocating £2.1M from underperforming initiatives to accelerate top performers.',
+      insight: 'ROI is trending positive at 64% against an 85% target. VRO agent analysis shows 3 initiatives exceeding expectations, with Claims Automation delivering the highest marginal return. FinOps agent recommends reallocating $2.1M from underperforming initiatives to accelerate top performers.',
       summary: 'Portfolio ROI performance is on track. The VRO agent identified strong value realization from digital transformation initiatives, while FinOps validates cost efficiency improvements across 8 projects.'
     },
     'net-present-value': {
@@ -669,22 +669,22 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       label: 'Budget Utilization',
       category: 'VRO',
       metrics: {
-        'Total Utilized': '£41.2M',
-        'Total Budget': '£43.8M',
+        'Total Utilized': '$41.2M',
+        'Total Budget': '$43.8M',
         'Utilization Rate': '94%',
-        'Baseline (2024)': '£0',
-        'Target (2026)': '£41.2M',
-        'Remaining': '£2.6M',
+        'Baseline (2024)': '$0',
+        'Target (2026)': '$41.2M',
+        'Remaining': '$2.6M',
         'Variance': '+6% efficiency gain'
       },
       projectBreakdown: [
-        { name: 'Claims', value: '£12.2M', budget: '£14.2M' },
-        { name: 'Digital', value: '£9.8M', budget: '£10.5M' },
-        { name: 'Infrastructure', value: '£8.4M', budget: '£8.9M' },
-        { name: 'Analytics', value: '£5.2M', budget: '£5.6M' },
-        { name: 'Other', value: '£5.6M', budget: '£4.6M' }
+        { name: 'Claims', value: '$12.2M', budget: '$14.2M' },
+        { name: 'Digital', value: '$9.8M', budget: '$10.5M' },
+        { name: 'Infrastructure', value: '$8.4M', budget: '$8.9M' },
+        { name: 'Analytics', value: '$5.2M', budget: '$5.6M' },
+        { name: 'Other', value: '$5.6M', budget: '$4.6M' }
       ],
-      insight: 'Budget utilization is healthy at 94% with £2.6M remaining. FinOps agent detected 6% efficiency gains through vendor consolidation. Recommend reallocating £1.2M surplus to high-priority initiatives in Q4.',
+      insight: 'Budget utilization is healthy at 94% with $2.6M remaining. FinOps agent detected 6% efficiency gains through vendor consolidation. Recommend reallocating $1.2M surplus to high-priority initiatives in Q4.',
       summary: 'Budget tracking shows strong fiscal discipline. FinOps agent confirms no overruns, with cost savings identified in infrastructure and licensing categories.'
     },
     'cycle-time': {
@@ -779,9 +779,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Last Updated': new Date().toLocaleTimeString()
       },
       projectBreakdown: [
-        { name: 'Claims Digital Transformation', value: '+£12.4M', budget: '£18.2M' },
-        { name: 'Customer Experience Platform', value: '+£8.7M', budget: '£12.1M' },
-        { name: 'Operational Excellence', value: '+£5.2M', budget: '£7.8M' }
+        { name: 'Claims Digital Transformation', value: '+$12.4M', budget: '$18.2M' },
+        { name: 'Customer Experience Platform', value: '+$8.7M', budget: '$12.1M' },
+        { name: 'Operational Excellence', value: '+$5.2M', budget: '$7.8M' }
       ],
       insight: 'Strategic ROI is near target at 84%. VRO agent analysis shows digital transformation initiatives are driving the majority of returns. FinOps recommends continued investment in Claims and CX portfolios.',
       summary: 'Portfolio ROI performance is strong. The VRO agent identified 12 initiatives exceeding expectations with Claims Automation delivering the highest marginal return.'
@@ -1102,7 +1102,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                               </div>
                               <div className="flex justify-between items-baseline">
                                 <span className="text-xs text-teal-600">Realized</span>
-                                <span className="text-sm font-bold text-emerald-700">£{Math.round(enrichedProject.budget.spent * 0.6)}m</span>
+                                <span className="text-sm font-bold text-emerald-700">${Math.round(enrichedProject.budget.spent * 0.6)}m</span>
                               </div>
                               <Progress value={60} className="h-1.5 mt-1" />
                             </div>
@@ -1173,7 +1173,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                             <div className="space-y-2">
                               <div className="flex justify-between items-baseline">
                                 <span className="text-xs text-teal-600">Realized</span>
-                                <span className="text-sm font-bold text-teal-700">£{portfolioData.valueRealized}m</span>
+                                <span className="text-sm font-bold text-teal-700">${portfolioData.valueRealized}m</span>
                               </div>
                               <div className="flex justify-between items-baseline">
                                 <span className="text-xs text-teal-600">Programs</span>

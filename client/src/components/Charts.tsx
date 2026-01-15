@@ -162,13 +162,13 @@ export function ValueRealizationChart({ mode, refreshKey }: ChartProps) {
           </Badge>
         </div>
         <CardDescription className="flex items-center gap-2">
-          Forecasted benefits vs. actual realized value (£M)
+          Forecasted benefits vs. actual realized value ($M)
           <Citation citation={citations.prtVolume} />
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4 mb-4">
-          <div className="text-3xl font-bold text-foreground">£{latestRealized}m</div>
+          <div className="text-3xl font-bold text-foreground">${latestRealized}m</div>
           <div className={`text-sm font-medium ${realizationRate >= 95 ? 'text-green-600' : realizationRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
             {realizationRate}% of forecast
           </div>
@@ -178,7 +178,7 @@ export function ValueRealizationChart({ mode, refreshKey }: ChartProps) {
             <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e0e0e0" />
               <XAxis dataKey="quarter" stroke="#757575" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#757575" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `£${value}m`} />
+              <YAxis stroke="#757575" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}m`} />
               <Tooltip 
                 cursor={{ fill: 'rgba(0,0,0,0.05)' }}
                 contentStyle={{ backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}

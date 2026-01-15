@@ -37,7 +37,7 @@ const agentMessages: AgentMessage[] = [
     toColor: 'bg-blue-500',
     direction: 'incoming',
     message: 'Digital Platform milestone delay detected - Customer Portal launch pushed by 10 days',
-    impact: '-£450K',
+    impact: '-$450K',
     impactType: 'negative',
     delay: '+10 days',
     confidence: 82,
@@ -53,7 +53,7 @@ const agentMessages: AgentMessage[] = [
     toColor: 'bg-blue-500',
     direction: 'incoming',
     message: 'Retail division adoption velocity below target - training completion at 68%',
-    impact: '-£180K',
+    impact: '-$180K',
     impactType: 'negative',
     confidence: 75,
     timestamp: '5 min ago'

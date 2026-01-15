@@ -111,12 +111,12 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500">Planned Budget</p>
-                  <p className="font-bold text-blue-600">£{milestone.budget.planned}M</p>
+                  <p className="font-bold text-blue-600">${milestone.budget.planned}M</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500">Actual Spend</p>
                   <p className={`font-bold ${budgetVariance > 10 ? 'text-red-600' : budgetVariance < 0 ? 'text-green-600' : 'text-blue-600'}`}>
-                    £{milestone.budget.actual.toFixed(1)}M
+                    ${milestone.budget.actual.toFixed(1)}M
                     {milestone.budget.actual > 0 && (
                       <span className="text-xs ml-1">
                         ({budgetVariance > 0 ? '+' : ''}{budgetVariance.toFixed(0)}%)
@@ -322,11 +322,11 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Budget Status</p>
-                    <p className="text-2xl font-bold text-blue-600">£{liveData.metrics.realizedValue || totalSpent.toFixed(1)}M</p>
+                    <p className="text-2xl font-bold text-blue-600">${liveData.metrics.realizedValue || totalSpent.toFixed(1)}M</p>
                   </div>
                   <BarChart3 className="h-8 w-8 text-blue-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">of £{liveData.metrics.totalValue || totalBudget}M planned</p>
+                <p className="text-xs text-gray-500 mt-2">of ${liveData.metrics.totalValue || totalBudget}M planned</p>
               </CardContent>
             </Card>
             <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-deadlines')} data-testid="metric-deadlines">

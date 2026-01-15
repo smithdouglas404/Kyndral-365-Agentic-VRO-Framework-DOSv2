@@ -39,7 +39,7 @@ export function ScenarioParameters() {
       value: 125,
       min: 50,
       max: 200,
-      unit: '£M',
+      unit: '$M',
       description: 'Budget changes require Governance approval',
       affectsAgents: ['VRO', 'Governance', 'FinOps']
     },
@@ -135,7 +135,7 @@ export function ScenarioParameters() {
                     <span className="text-sm font-medium text-gray-700">{param.label}</span>
                   </div>
                   <span className="text-sm font-bold text-[#005EB8]">
-                    {param.id === 'investment' ? '£' : ''}{param.value}{param.id === 'investment' ? 'M' : param.unit === '%' ? '%' : ` ${param.unit}`}
+                    {param.id === 'investment' ? '$' : ''}{param.value}{param.id === 'investment' ? 'M' : param.unit === '%' ? '%' : ` ${param.unit}`}
                   </span>
                 </div>
                 

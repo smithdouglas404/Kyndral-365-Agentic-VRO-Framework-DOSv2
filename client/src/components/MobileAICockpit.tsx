@@ -80,9 +80,9 @@ const PRESENTER_NOTES: Record<MobileTab, string[]> = {
 // Voice command scenarios for demo
 const VOICE_SCENARIOS = [
   { trigger: "Show critical alerts", response: "Showing 2 critical alerts requiring immediate attention", action: "alerts" as MobileTab },
-  { trigger: "Brief me on climate risks", response: "Climate exposure at £2.4B. Stranded asset risk flagged in energy portfolio", action: "alerts" as MobileTab },
+  { trigger: "Brief me on climate risks", response: "Climate exposure at $2.4B. Stranded asset risk flagged in energy portfolio", action: "alerts" as MobileTab },
   { trigger: "What's the sentiment on the merger?", response: "Stakeholder sentiment trending negative. 3 risk flags detected in recent communications", action: "sentiment" as MobileTab },
-  { trigger: "Show opportunities pipeline", response: "4 high-value opportunities identified. Combined value £180M", action: "alerts" as MobileTab },
+  { trigger: "Show opportunities pipeline", response: "4 high-value opportunities identified. Combined value $180M", action: "alerts" as MobileTab },
   { trigger: "Run governance health check", response: "Governance score: 87%. 2 controls require attestation this week", action: "home" as MobileTab },
 ];
 
@@ -118,11 +118,11 @@ type ScenarioFilter = "all" | "critical" | "opportunities" | "climate" | "risk";
 
 // Phase-specific content for the mobile experience
 const PHASE_CONTENT = [
-  { title: "Strategic Alignment", highlight: "Baseline capture complete", metric: "£2.4B under management" },
-  { title: "Value Discovery", highlight: "12 opportunities identified", metric: "£180M potential value" },
+  { title: "Strategic Alignment", highlight: "Baseline capture complete", metric: "$2.4B under management" },
+  { title: "Value Discovery", highlight: "12 opportunities identified", metric: "$180M potential value" },
   { title: "Delivery Excellence", highlight: "4 programs on track", metric: "92% milestone hit rate" },
   { title: "Continuous Improvement", highlight: "AI insights active", metric: "37% efficiency gain" },
-  { title: "Value Realization", highlight: "Benefits captured", metric: "£156M realized" },
+  { title: "Value Realization", highlight: "Benefits captured", metric: "$156M realized" },
 ];
 
 export function MobileAICockpit({ 

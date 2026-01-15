@@ -958,7 +958,7 @@ export default function ProjectIngestionPage() {
                             <div className="grid grid-cols-2 gap-3">
                               <div className="p-3 bg-slate-50 rounded-lg">
                                 <p className="text-sm text-muted-foreground">NPV</p>
-                                <p className="text-xl font-bold">£{projectData.financials.npv}m</p>
+                                <p className="text-xl font-bold">${projectData.financials.npv}m</p>
                               </div>
                               <div className="p-3 bg-slate-50 rounded-lg">
                                 <p className="text-sm text-muted-foreground">IRR</p>
@@ -970,7 +970,7 @@ export default function ProjectIngestionPage() {
                               </div>
                               <div className="p-3 bg-slate-50 rounded-lg">
                                 <p className="text-sm text-muted-foreground">Contingency</p>
-                                <p className="text-xl font-bold">£{projectData.financials.contingency}m</p>
+                                <p className="text-xl font-bold">${projectData.financials.contingency}m</p>
                               </div>
                             </div>
                           </div>

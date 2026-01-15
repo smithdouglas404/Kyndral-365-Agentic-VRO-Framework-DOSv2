@@ -64,13 +64,13 @@ const POSITIVE_EVENTS: EventTemplate[] = [
       },
       {
         title: 'Synergy Opportunity Identified',
-        message: 'Potential £2.5m synergy identified with {entity}',
+        message: 'Potential $2.5m synergy identified with {entity}',
         detail: 'Cross-functional analysis reveals shared capabilities that could be leveraged. Collaboration between teams could unlock significant efficiency gains.',
         source: 'Synergy Detection'
       },
       {
         title: 'Cost Savings Detected',
-        message: '{entity} showing potential for £1.8m operational savings',
+        message: '{entity} showing potential for $1.8m operational savings',
         detail: 'AI analysis of vendor contracts and operational metrics indicates optimization opportunities. Quick wins available within current PI.',
         source: 'Cost Intelligence'
       }
@@ -83,7 +83,7 @@ const POSITIVE_EVENTS: EventTemplate[] = [
     templates: [
       {
         title: 'Value Milestone Achieved',
-        message: '{entity} achieved £5m value milestone ahead of schedule',
+        message: '{entity} achieved $5m value milestone ahead of schedule',
         detail: 'Cumulative value realization has crossed significant threshold. ROI tracking shows 23% above initial projections. Success pattern captured for replication.',
         source: 'Value Tracking'
       },
@@ -241,10 +241,10 @@ const ACTIONS_BY_TYPE: Record<SimulationEventType, { id: string; label: string; 
 };
 
 const CITATIONS = [
-  'L&G Annual Report 2024, p.42',
+  'NextEra Energy Annual Report 2024, p.42',
   'Climate & Nature Report 2024, p.18',
   'Risk Management Supplement 2024, p.8',
-  'L&G Annual Report 2024, p.67',
+  'NextEra Energy Annual Report 2024, p.67',
   'SAFe 6.0 Framework, Flow Metrics',
   'Portfolio Analytics Dashboard',
   'Real-time Monitoring System'
@@ -286,7 +286,7 @@ export function generateSimulationEvent(): SimulationEvent {
   
   const message = template.message.replace('{entity}', entity.name);
   
-  const impactValues = ['£2.5m savings', '15% efficiency gain', '3-week acceleration', '£8m risk mitigation', '12% ROI improvement'];
+  const impactValues = ['$2.5m savings', '15% efficiency gain', '3-week acceleration', '$8m risk mitigation', '12% ROI improvement'];
   const timeframes = ['immediate', 'this week', 'next 2 weeks', 'this PI', 'Q4 2024'];
   
   return {
@@ -308,7 +308,7 @@ export function generateSimulationEvent(): SimulationEvent {
     metrics: {
       impact: getRandomItem(impactValues),
       timeframe: getRandomItem(timeframes),
-      value: Math.random() > 0.5 ? `£${(Math.random() * 10 + 1).toFixed(1)}m` : undefined
+      value: Math.random() > 0.5 ? `$${(Math.random() * 10 + 1).toFixed(1)}m` : undefined
     },
     actions: ACTIONS_BY_TYPE[eventCategory.type],
     citations: [getRandomItem(CITATIONS), getRandomItem(CITATIONS)],

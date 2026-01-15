@@ -215,7 +215,7 @@ export function CompetitorCards() {
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="font-medium text-sm truncate">{competitor.name.replace("Pension Insurance Corp (PIC)", "PIC").replace("Phoenix/Standard Life", "Phoenix")}</span>
-                <span className="font-semibold">£{competitor.prtVolume2024}bn</span>
+                <span className="font-semibold">${competitor.prtVolume2024}bn</span>
               </div>
               <div className="flex gap-2 text-xs text-muted-foreground">
                 <span>{competitor.transactions2024} deals</span>

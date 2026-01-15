@@ -1,6 +1,6 @@
 // ============================================================================
 // L&G BUSINESS UNIT PROGRAMS - PMO vs VRO DIFFERENTIATION
-// Source: L&G Annual Report 2024, Risk Management Supplement, Climate Report
+// Source: NextEra Energy Annual Report 2024, Risk Management Supplement, Climate Report
 // ============================================================================
 
 // PMO = Traditional Project Management: timelines, budgets, deliverables
@@ -93,9 +93,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-ir-001",
     name: "PRT Intake System Upgrade",
-    bu: "Institutional Retirement",
+    bu: "Florida Power & Light",
     status: "amber",
-    budget: { spent: 2.4, total: 3.5, unit: "£m" },
+    budget: { spent: 2.4, total: 3.5, unit: "$m" },
     timeline: { elapsed: 8, total: 12, unit: "months" },
     deliverables: { completed: 6, total: 14 },
     risks: ["Integration delays with legacy systems", "Resource constraints in Q3"],
@@ -125,9 +125,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-ir-002",
     name: "Longevity Model Enhancement",
-    bu: "Institutional Retirement",
+    bu: "Florida Power & Light",
     status: "green",
-    budget: { spent: 0.8, total: 1.2, unit: "£m" },
+    budget: { spent: 0.8, total: 1.2, unit: "$m" },
     timeline: { elapsed: 5, total: 6, unit: "months" },
     deliverables: { completed: 8, total: 10 },
     risks: ["Actuarial sign-off pending"],
@@ -157,9 +157,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-am-001",
     name: "Private Markets Platform Build",
-    bu: "Asset Management",
+    bu: "NextEra Energy Resources",
     status: "red",
-    budget: { spent: 4.2, total: 4.0, unit: "£m" },
+    budget: { spent: 4.2, total: 4.0, unit: "$m" },
     timeline: { elapsed: 14, total: 18, unit: "months" },
     deliverables: { completed: 12, total: 22 },
     risks: ["Budget overrun by 5%", "Key vendor dependency", "Scope creep from stakeholders"],
@@ -172,13 +172,13 @@ export const pmoProjects: PMOProject[] = [
       epicId: "EPIC-AM-201",
       epicName: "Private Markets Capability Build",
       epicProgress: 45,
-      okr: { objective: "Grow private markets AUM by 20%", keyResult: "Platform operational for £5bn transactions", progress: 35 },
+      okr: { objective: "Grow private markets AUM by 20%", keyResult: "Platform operational for $5bn transactions", progress: 35 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 42, predictability: 72 }, { pi: "PI 24.3", velocity: 40, predictability: 68 }, { pi: "PI 24.4", velocity: 38, predictability: 65 }]
     },
     safeStage: "implementing",
     aiSignals: [
       { type: "warning", message: "Vendor showing financial stress signals - backup plan needed", confidence: 78, dataSource: "Vendor risk monitoring" },
-      { type: "warning", message: "Scope creep adding £800k unless controlled now", confidence: 91, dataSource: "Change request analysis" },
+      { type: "warning", message: "Scope creep adding $800k unless controlled now", confidence: 91, dataSource: "Change request analysis" },
       { type: "prediction", message: "Timeline likely to slip 6 weeks without intervention", confidence: 85, dataSource: "Delivery analytics" }
     ],
     proactiveActions: [
@@ -191,9 +191,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-am-002",
     name: "ESG Analytics Dashboard",
-    bu: "Asset Management",
+    bu: "NextEra Energy Resources",
     status: "green",
-    budget: { spent: 0.6, total: 0.9, unit: "£m" },
+    budget: { spent: 0.6, total: 0.9, unit: "$m" },
     timeline: { elapsed: 4, total: 8, unit: "months" },
     deliverables: { completed: 5, total: 11 },
     risks: ["Data quality from third parties"],
@@ -223,9 +223,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-rt-001",
     name: "Digital Onboarding Redesign",
-    bu: "Retail",
+    bu: "Florida Power & Light",
     status: "amber",
-    budget: { spent: 1.8, total: 2.5, unit: "£m" },
+    budget: { spent: 1.8, total: 2.5, unit: "$m" },
     timeline: { elapsed: 6, total: 10, unit: "months" },
     deliverables: { completed: 7, total: 16 },
     risks: ["Mobile app testing delays", "Accessibility compliance gaps"],
@@ -255,9 +255,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-rt-002",
     name: "AI Chatbot Implementation",
-    bu: "Retail",
+    bu: "Florida Power & Light",
     status: "green",
-    budget: { spent: 0.4, total: 0.7, unit: "£m" },
+    budget: { spent: 0.4, total: 0.7, unit: "$m" },
     timeline: { elapsed: 3, total: 5, unit: "months" },
     deliverables: { completed: 4, total: 7 },
     risks: ["Training data quality"],
@@ -288,9 +288,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-ci-001",
     name: "Net Zero Housing Tracker",
-    bu: "Corporate Investments",
+    bu: "Corporate & Other",
     status: "green",
-    budget: { spent: 0.5, total: 0.8, unit: "£m" },
+    budget: { spent: 0.5, total: 0.8, unit: "$m" },
     timeline: { elapsed: 4, total: 6, unit: "months" },
     deliverables: { completed: 6, total: 9 },
     risks: ["Sensor integration with older properties"],
@@ -321,9 +321,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-rc-001",
     name: "Risk Appetite Dashboard Upgrade",
-    bu: "Risk & Compliance",
+    bu: "Corporate & Other",
     status: "amber",
-    budget: { spent: 1.1, total: 1.5, unit: "£m" },
+    budget: { spent: 1.1, total: 1.5, unit: "$m" },
     timeline: { elapsed: 7, total: 9, unit: "months" },
     deliverables: { completed: 9, total: 15 },
     risks: ["Data lineage documentation incomplete", "Regulatory changes pending"],
@@ -353,9 +353,9 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-rc-002",
     name: "Three Lines of Defence Automation",
-    bu: "Risk & Compliance",
+    bu: "Corporate & Other",
     status: "green",
-    budget: { spent: 0.7, total: 1.0, unit: "£m" },
+    budget: { spent: 0.7, total: 1.0, unit: "$m" },
     timeline: { elapsed: 5, total: 8, unit: "months" },
     deliverables: { completed: 6, total: 10 },
     risks: ["User adoption in Business Lines"],
@@ -392,13 +392,13 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-ir-001",
     name: "AI-Powered Deal Acceleration",
-    bu: "Institutional Retirement",
+    bu: "Florida Power & Light",
     valueStatus: "accelerating",
-    expectedROI: "£85m annual efficiency",
+    expectedROI: "$85m annual efficiency",
     roiValue: 85,
     valueRealized: 28,
     strategicAlignment: 94,
-    aiInsight: "ML model detecting 3 deals with pricing anomalies - early intervention preventing £12m reserve gap",
+    aiInsight: "ML model detecting 3 deals with pricing anomalies - early intervention preventing $12m reserve gap",
     prediction: "Q3 pipeline suggests 15% deal volume increase - recommend pre-positioning underwriting capacity",
     keyOutcomes: [
       { outcome: "Deal cycle reduction", progress: 18, target: 5, unit: "days" },
@@ -419,11 +419,11 @@ export const vroPrograms: VROProgram[] = [
       piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 85 }, { pi: "PI 24.2", velocity: 52, predictability: 88 }, { pi: "PI 24.3", velocity: 55, predictability: 90 }, { pi: "PI 25.2", velocity: 58, predictability: 92 }]
     },
     aiSignals: [
-      { type: "opportunity", message: "3 deals showing pricing anomalies - £12m reserve gap preventable", confidence: 92, dataSource: "ML pricing model" },
+      { type: "opportunity", message: "3 deals showing pricing anomalies - $12m reserve gap preventable", confidence: 92, dataSource: "ML pricing model" },
       { type: "prediction", message: "Q3 deal volume up 15% - capacity planning needed now", confidence: 87, dataSource: "Pipeline analytics" }
     ],
     proactiveActions: [
-      { id: "vpa-001", action: "Intervene on 3 flagged deals immediately", impact: "Prevent £12m reserve gap", urgency: "immediate", type: "mitigate" },
+      { id: "vpa-001", action: "Intervene on 3 flagged deals immediately", impact: "Prevent $12m reserve gap", urgency: "immediate", type: "mitigate" },
       { id: "vpa-002", action: "Pre-position underwriting capacity for Q3 surge", impact: "Capture 15% more deals", urgency: "this-week", type: "accelerate" }
     ],
     trendData: [{ week: "W28", value: 28 }, { week: "W29", value: 32 }, { week: "W30", value: 38 }, { week: "W31", value: 45 }, { week: "W32", value: 52 }]
@@ -431,9 +431,9 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-ir-002",
     name: "Longevity Risk Intelligence",
-    bu: "Institutional Retirement",
+    bu: "Florida Power & Light",
     valueStatus: "on-track",
-    expectedROI: "£42m risk mitigation",
+    expectedROI: "$42m risk mitigation",
     roiValue: 42,
     valueRealized: 15,
     strategicAlignment: 88,
@@ -442,7 +442,7 @@ export const vroPrograms: VROProgram[] = [
     keyOutcomes: [
       { outcome: "Reserve accuracy", progress: 96, target: 99, unit: "%" },
       { outcome: "Early warning detections", progress: 8, target: 12, unit: "/quarter" },
-      { outcome: "Reinsurance optimization", progress: 4.2, target: 6, unit: "£m savings" }
+      { outcome: "Reinsurance optimization", progress: 4.2, target: 6, unit: "$m savings" }
     ],
     collaborators: ["Chris Knight (CRO)", "Actuarial", "Finance"],
     riskMitigation: "AI monitoring 847 longevity cohorts in real-time",
@@ -462,7 +462,7 @@ export const vroPrograms: VROProgram[] = [
       { type: "warning", message: "North-West cohort demographic shift detected", confidence: 76, dataSource: "Population analytics" }
     ],
     proactiveActions: [
-      { id: "vpa-003", action: "Commission reserve release review with actuaries", impact: "Unlock £8m capital", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-003", action: "Commission reserve release review with actuaries", impact: "Unlock $8m capital", urgency: "this-week", type: "accelerate" },
       { id: "vpa-004", action: "Engage reinsurance broker for 2026 renewals", impact: "Hedge demographic risk", urgency: "this-month", type: "mitigate" }
     ],
     trendData: [{ week: "W28", value: 15 }, { week: "W29", value: 18 }, { week: "W30", value: 22 }, { week: "W31", value: 28 }, { week: "W32", value: 35 }]
@@ -472,17 +472,17 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-am-001",
     name: "Private Markets Growth Engine",
-    bu: "Asset Management",
+    bu: "NextEra Energy Resources",
     valueStatus: "accelerating",
-    expectedROI: "£2.5bn new AUM by 2028",
+    expectedROI: "$2.5bn new AUM by 2028",
     roiValue: 2500,
     valueRealized: 890,
     strategicAlignment: 96,
     aiInsight: "ESG investor demand analysis shows 340% increase in sustainable infrastructure interest - accelerate clean power fund",
-    prediction: "DC pension consolidation trend creating £18bn addressable market - first-mover advantage critical",
+    prediction: "DC pension consolidation trend creating $18bn addressable market - first-mover advantage critical",
     keyOutcomes: [
-      { outcome: "Private Markets AUM", progress: 57, target: 85, unit: "£bn" },
-      { outcome: "Clean power allocation", progress: 2.8, target: 4.0, unit: "£bn" },
+      { outcome: "Private Markets AUM", progress: 57, target: 85, unit: "$bn" },
+      { outcome: "Clean power allocation", progress: 2.8, target: 4.0, unit: "$bn" },
       { outcome: "Fee-related earnings", progress: 9, target: 15, unit: "% CAGR" }
     ],
     collaborators: ["Eric Adler", "Sustainability", "Distribution"],
@@ -495,23 +495,23 @@ export const vroPrograms: VROProgram[] = [
       epicId: "EPIC-VRO-AM-01",
       epicName: "Private Markets Expansion",
       epicProgress: 58,
-      okr: { objective: "Grow Private Markets AUM to £85bn", keyResult: "Launch 3 new fund products", progress: 62 },
+      okr: { objective: "Grow Private Markets AUM to $85bn", keyResult: "Launch 3 new fund products", progress: 62 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 52, predictability: 82 }, { pi: "PI 25.1", velocity: 55, predictability: 85 }]
     },
     aiSignals: [
       { type: "opportunity", message: "ESG demand up 340% - accelerate clean power fund launch", confidence: 94, dataSource: "Investor sentiment AI" },
-      { type: "prediction", message: "£18bn DC consolidation market emerging - first-mover wins", confidence: 88, dataSource: "Market intelligence" }
+      { type: "prediction", message: "$18bn DC consolidation market emerging - first-mover wins", confidence: 88, dataSource: "Market intelligence" }
     ],
     proactiveActions: [
-      { id: "vpa-005", action: "Fast-track clean power fund to market", impact: "Capture £800m inflows", urgency: "immediate", type: "accelerate" },
-      { id: "vpa-006", action: "Target top 5 consolidating DC schemes", impact: "£4bn AUM potential", urgency: "this-week", type: "accelerate" }
+      { id: "vpa-005", action: "Fast-track clean power fund to market", impact: "Capture $800m inflows", urgency: "immediate", type: "accelerate" },
+      { id: "vpa-006", action: "Target top 5 consolidating DC schemes", impact: "$4bn AUM potential", urgency: "this-week", type: "accelerate" }
     ],
     trendData: [{ week: "W28", value: 750 }, { week: "W29", value: 790 }, { week: "W30", value: 820 }, { week: "W31", value: 860 }, { week: "W32", value: 890 }]
   },
   {
     id: "vro-am-002",
     name: "Stewardship Leadership",
-    bu: "Asset Management",
+    bu: "NextEra Energy Resources",
     valueStatus: "on-track",
     expectedROI: "Industry-leading ESG positioning",
     roiValue: 0,
@@ -552,9 +552,9 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-rt-001",
     name: "Digital Customer Experience",
-    bu: "Retail",
+    bu: "Florida Power & Light",
     valueStatus: "accelerating",
-    expectedROI: "£28m efficiency + NPS lift",
+    expectedROI: "$28m efficiency + NPS lift",
     roiValue: 28,
     valueRealized: 12,
     strategicAlignment: 90,
@@ -591,9 +591,9 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-rt-002",
     name: "Workplace Pension Growth",
-    bu: "Retail",
+    bu: "Florida Power & Light",
     valueStatus: "on-track",
-    expectedROI: "£183bn DC AUM target",
+    expectedROI: "$183bn DC AUM target",
     roiValue: 183000,
     valueRealized: 0,
     strategicAlignment: 94,
@@ -602,10 +602,10 @@ export const vroPrograms: VROProgram[] = [
     keyOutcomes: [
       { outcome: "DC members", progress: 5.2, target: 5.6, unit: "m" },
       { outcome: "Individual annuities", progress: 38000, target: 45000, unit: "policies" },
-      { outcome: "Protection APE", progress: 850, target: 920, unit: "£m" }
+      { outcome: "Protection APE", progress: 850, target: 920, unit: "$m" }
     ],
     collaborators: ["Workplace Team", "Distribution", "Finance"],
-    riskMitigation: "Persistency monitoring active - early lapse detection saving £3.2m annually",
+    riskMitigation: "Persistency monitoring active - early lapse detection saving $3.2m annually",
     safe: {
       velocity: 52,
       predictability: 86,
@@ -622,7 +622,7 @@ export const vroPrograms: VROProgram[] = [
       { type: "prediction", message: "12% AUM growth projected from auto-enrollment trends", confidence: 86, dataSource: "Contribution analytics" }
     ],
     proactiveActions: [
-      { id: "vpa-011", action: "Prioritize top 3 acquisition targets for outreach", impact: "£2bn potential AUM", urgency: "immediate", type: "accelerate" },
+      { id: "vpa-011", action: "Prioritize top 3 acquisition targets for outreach", impact: "$2bn potential AUM", urgency: "immediate", type: "accelerate" },
       { id: "vpa-012", action: "Scale infrastructure for 12% growth", impact: "Avoid capacity constraints", urgency: "this-month", type: "mitigate" }
     ],
     trendData: [{ week: "W28", value: 5.05 }, { week: "W29", value: 5.08 }, { week: "W30", value: 5.12 }, { week: "W31", value: 5.16 }, { week: "W32", value: 5.2 }]
@@ -632,9 +632,9 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-ci-001",
     name: "Net Zero Homes Acceleration",
-    bu: "Corporate Investments",
+    bu: "Corporate & Other",
     valueStatus: "accelerating",
-    expectedROI: "£180m development value",
+    expectedROI: "$180m development value",
     roiValue: 180,
     valueRealized: 45,
     strategicAlignment: 98,
@@ -643,7 +643,7 @@ export const vroPrograms: VROProgram[] = [
     keyOutcomes: [
       { outcome: "Gas-free homes (LGAH)", progress: 61, target: 100, unit: "%" },
       { outcome: "Housing completions", progress: 3800, target: 4500, unit: "homes" },
-      { outcome: "Clean energy investment", progress: 2.3, target: 3.0, unit: "£bn" }
+      { outcome: "Clean energy investment", progress: 2.3, target: 3.0, unit: "$bn" }
     ],
     collaborators: ["Laura Mason", "Sustainability", "Planning"],
     riskMitigation: "Supply chain risk monitored - ground source heat pump delivery on track via Kensa partnership",
@@ -663,7 +663,7 @@ export const vroPrograms: VROProgram[] = [
       { type: "opportunity", message: "85% planning approval sentiment in target councils", confidence: 83, dataSource: "Sentiment analysis" }
     ],
     proactiveActions: [
-      { id: "vpa-013", action: "Replicate Millfield Green model at 5 new sites", impact: "£90m additional value", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-013", action: "Replicate Millfield Green model at 5 new sites", impact: "$90m additional value", urgency: "this-week", type: "accelerate" },
       { id: "vpa-014", action: "Accelerate land acquisition in favorable councils", impact: "First-mover on sites", urgency: "immediate", type: "accelerate" }
     ],
     trendData: [{ week: "W28", value: 35 }, { week: "W29", value: 38 }, { week: "W30", value: 40 }, { week: "W31", value: 43 }, { week: "W32", value: 45 }]
@@ -673,9 +673,9 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-rc-001",
     name: "Intelligent Risk Monitoring",
-    bu: "Risk & Compliance",
+    bu: "Corporate & Other",
     valueStatus: "accelerating",
-    expectedROI: "£60m+ annual risk savings",
+    expectedROI: "$60m+ annual risk savings",
     roiValue: 60,
     valueRealized: 22,
     strategicAlignment: 95,
@@ -704,7 +704,7 @@ export const vroPrograms: VROProgram[] = [
       { type: "prediction", message: "23% increase in insurance-sector cyber attacks expected", confidence: 84, dataSource: "Threat intelligence" }
     ],
     proactiveActions: [
-      { id: "vpa-015", action: "Execute sector rotation from at-risk BBB issuers", impact: "Avoid £15m credit losses", urgency: "immediate", type: "mitigate" },
+      { id: "vpa-015", action: "Execute sector rotation from at-risk BBB issuers", impact: "Avoid $15m credit losses", urgency: "immediate", type: "mitigate" },
       { id: "vpa-016", action: "Expand SOC coverage for enhanced monitoring", impact: "Reduce cyber exposure", urgency: "this-week", type: "mitigate" }
     ],
     trendData: [{ week: "W28", value: 15 }, { week: "W29", value: 17 }, { week: "W30", value: 19 }, { week: "W31", value: 21 }, { week: "W32", value: 22 }]
@@ -712,13 +712,13 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-rc-002",
     name: "Climate Risk Integration",
-    bu: "Risk & Compliance",
+    bu: "Corporate & Other",
     valueStatus: "on-track",
-    expectedROI: "Regulatory compliance + £15m efficiency",
+    expectedROI: "Regulatory compliance + $15m efficiency",
     roiValue: 15,
     valueRealized: 5,
     strategicAlignment: 92,
-    aiInsight: "Portfolio temperature alignment at 2.4°C - transition pathway modelling shows 1.5°C achievable with £2.1bn reallocation",
+    aiInsight: "Portfolio temperature alignment at 2.4°C - transition pathway modelling shows 1.5°C achievable with $2.1bn reallocation",
     prediction: "TCFD+ requirements expected 2026 - current readiness at 82%, recommend accelerating nature risk disclosures",
     keyOutcomes: [
       { outcome: "Portfolio temperature", progress: 2.4, target: 1.5, unit: "°C" },
@@ -739,11 +739,11 @@ export const vroPrograms: VROProgram[] = [
       piTrend: [{ pi: "PI 24.1", velocity: 35, predictability: 75 }, { pi: "PI 24.2", velocity: 38, predictability: 78 }, { pi: "PI 24.3", velocity: 40, predictability: 80 }, { pi: "PI 25.1", velocity: 42, predictability: 82 }]
     },
     aiSignals: [
-      { type: "insight", message: "1.5°C pathway achievable with £2.1bn reallocation", confidence: 88, dataSource: "Climate model" },
+      { type: "insight", message: "1.5°C pathway achievable with $2.1bn reallocation", confidence: 88, dataSource: "Climate model" },
       { type: "warning", message: "TCFD+ requirements in 2026 - readiness gap exists", confidence: 90, dataSource: "Regulatory intelligence" }
     ],
     proactiveActions: [
-      { id: "vpa-017", action: "Commission £2.1bn transition pathway analysis", impact: "Achieve 1.5°C alignment", urgency: "this-month", type: "accelerate" },
+      { id: "vpa-017", action: "Commission $2.1bn transition pathway analysis", impact: "Achieve 1.5°C alignment", urgency: "this-month", type: "accelerate" },
       { id: "vpa-018", action: "Accelerate TNFD disclosure preparation", impact: "Regulatory compliance", urgency: "this-week", type: "mitigate" }
     ],
     trendData: [{ week: "W28", value: 3 }, { week: "W29", value: 3.5 }, { week: "W30", value: 4 }, { week: "W31", value: 4.5 }, { week: "W32", value: 5 }]
@@ -778,7 +778,7 @@ export const riskIssues: RiskIssue[] = [
     severity: "high",
     trend: "stable",
     description: "Significant corporate bond portfolio backing PRT and annuities. Diversified across sectors and geographies but carries inherent default risk.",
-    exposure: "£42bn portfolio",
+    exposure: "$42bn portfolio",
     mitigation: "Diversification limits, credit rating floors, sector concentration caps",
     owner: "Chris Knight",
     aiAlert: "BBB cohort showing 0.3% deterioration - 12 issuers on watchlist",
@@ -793,7 +793,7 @@ export const riskIssues: RiskIssue[] = [
     severity: "high",
     trend: "stable",
     description: "Pricing of long-term life insurance requires assumptions for future trends in life expectancy. Risk that actual experience may diverge from assumptions.",
-    exposure: "£97.6bn proprietary assets",
+    exposure: "$97.6bn proprietary assets",
     mitigation: "Regular reserve reviews, reinsurance partnerships, dynamic hedging",
     owner: "Andrew Kail",
     aiAlert: "Mortality variance at 2.3% - within tolerance but trending upward",
@@ -823,7 +823,7 @@ export const riskIssues: RiskIssue[] = [
     severity: "high",
     trend: "worsening",
     description: "Described as 'the biggest challenge our generation faces'. Physical and transition risks across investment portfolio and operations.",
-    exposure: "£1.1tn AUM",
+    exposure: "$1.1tn AUM",
     mitigation: "Net zero roadmap, TCFD disclosure, portfolio decarbonization, transition finance",
     owner: "Carl Moxley",
     aiAlert: "2024 warmest year on record - physical risk models updated",
@@ -931,14 +931,14 @@ const getBUPrograms = (bu: string) => vroPrograms.filter(p => p.bu === bu);
 export const buPortfolios: BUPortfolio[] = [
   {
     id: "portfolio-ir",
-    name: "Institutional Retirement",
-    description: "PRT deals, longevity risk management, and pension scheme solutions - £335bn AUM",
-    projectCount: getBUProjects("Institutional Retirement").length,
-    programCount: getBUPrograms("Institutional Retirement").length,
-    totalBudget: getBUProjects("Institutional Retirement").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Institutional Retirement").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Institutional Retirement").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Institutional Retirement").reduce((s, p) => s + p.roiValue, 0),
+    name: "Florida Power & Light",
+    description: "PRT deals, longevity risk management, and pension scheme solutions - $335bn AUM",
+    projectCount: getBUProjects("Florida Power & Light").length,
+    programCount: getBUPrograms("Florida Power & Light").length,
+    totalBudget: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 78,
     strategicAlignment: 92,
     activeEpics: 8,
@@ -948,7 +948,7 @@ export const buPortfolios: BUPortfolio[] = [
     predictability: 87,
     flowEfficiency: 72,
     topAISignal: { type: "opportunity", message: "PRT pipeline expansion could accelerate value realization by 35%", confidence: 88, dataSource: "Market analysis" },
-    topAction: { id: "port-ir-001", action: "Fast-track PRT digital intake to capture Q1 pipeline", impact: "+£2.5m value", urgency: "immediate", type: "accelerate" },
+    topAction: { id: "port-ir-001", action: "Fast-track PRT digital intake to capture Q1 pipeline", impact: "+$2.5m value", urgency: "immediate", type: "accelerate" },
     okrs: [
       { objective: "Expand PRT market share to 25%", progress: 72, status: "on-track" },
       { objective: "Reduce processing time by 40%", progress: 55, status: "at-risk" }
@@ -956,14 +956,14 @@ export const buPortfolios: BUPortfolio[] = [
   },
   {
     id: "portfolio-am",
-    name: "Asset Management",
-    description: "LGIM investment strategies, ESG integration, and private markets expansion - £1.1tn AUM",
-    projectCount: getBUProjects("Asset Management").length,
-    programCount: getBUPrograms("Asset Management").length,
-    totalBudget: getBUProjects("Asset Management").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Asset Management").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Asset Management").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Asset Management").reduce((s, p) => s + p.roiValue, 0),
+    name: "NextEra Energy Resources",
+    description: "LGIM investment strategies, ESG integration, and private markets expansion - $1.1tn AUM",
+    projectCount: getBUProjects("NextEra Energy Resources").length,
+    programCount: getBUPrograms("NextEra Energy Resources").length,
+    totalBudget: getBUProjects("NextEra Energy Resources").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("NextEra Energy Resources").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("NextEra Energy Resources").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("NextEra Energy Resources").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 65,
     strategicAlignment: 88,
     activeEpics: 12,
@@ -973,7 +973,7 @@ export const buPortfolios: BUPortfolio[] = [
     predictability: 75,
     flowEfficiency: 68,
     topAISignal: { type: "warning", message: "Private Markets platform budget overrun requires steering committee decision", confidence: 91, dataSource: "Financial tracking" },
-    topAction: { id: "port-am-001", action: "Convene steering committee on Private Markets scope", impact: "Prevent £800k overrun", urgency: "immediate", type: "escalate" },
+    topAction: { id: "port-am-001", action: "Convene steering committee on Private Markets scope", impact: "Prevent $800k overrun", urgency: "immediate", type: "escalate" },
     okrs: [
       { objective: "Launch 5 new ESG fund products", progress: 60, status: "on-track" },
       { objective: "Grow private markets AUM by 20%", progress: 35, status: "behind" }
@@ -981,14 +981,14 @@ export const buPortfolios: BUPortfolio[] = [
   },
   {
     id: "portfolio-retail",
-    name: "Retail",
+    name: "Florida Power & Light",
     description: "Consumer protection, insurance products, and direct-to-customer digital services",
-    projectCount: getBUProjects("Retail").length,
-    programCount: getBUPrograms("Retail").length,
-    totalBudget: getBUProjects("Retail").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Retail").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Retail").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Retail").reduce((s, p) => s + p.roiValue, 0),
+    projectCount: getBUProjects("Florida Power & Light").length,
+    programCount: getBUPrograms("Florida Power & Light").length,
+    totalBudget: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 82,
     strategicAlignment: 85,
     activeEpics: 6,
@@ -1006,14 +1006,14 @@ export const buPortfolios: BUPortfolio[] = [
   },
   {
     id: "portfolio-ci",
-    name: "Corporate Investments",
+    name: "Corporate & Other",
     description: "Alternative investments, real estate, infrastructure, and clean energy projects - Millfield Green",
-    projectCount: getBUProjects("Corporate Investments").length,
-    programCount: getBUPrograms("Corporate Investments").length,
-    totalBudget: getBUProjects("Corporate Investments").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Corporate Investments").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Corporate Investments").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Corporate Investments").reduce((s, p) => s + p.roiValue, 0),
+    projectCount: getBUProjects("Corporate & Other").length,
+    programCount: getBUPrograms("Corporate & Other").length,
+    totalBudget: getBUProjects("Corporate & Other").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Corporate & Other").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Corporate & Other").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Corporate & Other").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 88,
     strategicAlignment: 95,
     activeEpics: 5,
@@ -1023,22 +1023,22 @@ export const buPortfolios: BUPortfolio[] = [
     predictability: 89,
     flowEfficiency: 75,
     topAISignal: { type: "prediction", message: "Net Zero Housing scheme on track for early completion - case study value high", confidence: 92, dataSource: "Project analytics" },
-    topAction: { id: "port-ci-001", action: "Prepare Millfield Green case study for COP presentation", impact: "Brand value +£5m", urgency: "this-month", type: "accelerate" },
+    topAction: { id: "port-ci-001", action: "Prepare Millfield Green case study for COP presentation", impact: "Brand value +$5m", urgency: "this-month", type: "accelerate" },
     okrs: [
-      { objective: "Deploy £500m in clean energy infrastructure", progress: 78, status: "on-track" },
+      { objective: "Deploy $500m in clean energy infrastructure", progress: 78, status: "on-track" },
       { objective: "Achieve carbon neutral portfolio by 2030", progress: 45, status: "on-track" }
     ]
   },
   {
     id: "portfolio-rc",
-    name: "Risk & Compliance",
+    name: "Corporate & Other",
     description: "Enterprise risk management, regulatory compliance, and operational resilience",
-    projectCount: getBUProjects("Risk & Compliance").length,
-    programCount: getBUPrograms("Risk & Compliance").length,
-    totalBudget: getBUProjects("Risk & Compliance").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Risk & Compliance").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Risk & Compliance").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Risk & Compliance").reduce((s, p) => s + p.roiValue, 0),
+    projectCount: getBUProjects("Corporate & Other").length,
+    programCount: getBUPrograms("Corporate & Other").length,
+    totalBudget: getBUProjects("Corporate & Other").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Corporate & Other").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Corporate & Other").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Corporate & Other").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 75,
     strategicAlignment: 90,
     activeEpics: 7,

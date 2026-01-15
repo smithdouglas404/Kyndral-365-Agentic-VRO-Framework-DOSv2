@@ -106,14 +106,14 @@ export const liveAIAlerts: AIAlert[] = [
     status: "pending",
     title: "PRT Pipeline Acceleration Opportunity",
     message: "AI detected 3 FTSE 350 pension schemes showing stress signals consistent with buy-out readiness",
-    insight: "Based on funding level analysis and sponsor covenant assessment, these schemes represent £2.1bn potential PRT volume",
+    insight: "Based on funding level analysis and sponsor covenant assessment, these schemes represent $2.1bn potential PRT volume",
     prediction: "78% probability of transaction within 6 months if engaged within 2 weeks",
     confidence: 0.85,
     targetPersona: "ceo",
     timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 min ago
     source: "Portfolio Analytics Engine",
     dataPoints: [
-      { label: "Potential Volume", value: "£2.1bn", trend: "up" },
+      { label: "Potential Volume", value: "$2.1bn", trend: "up" },
       { label: "Avg Funding Level", value: "98%", trend: "up" },
       { label: "Sponsor Risk Score", value: "Low", trend: "flat" },
     ],
@@ -131,14 +131,14 @@ export const liveAIAlerts: AIAlert[] = [
     status: "acknowledged",
     title: "Longevity Assumption Deviation Detected",
     message: "CMI_2023 mortality projections indicate 2.3% lighter trend vs current reserving basis",
-    insight: "If sustained, this represents £340m additional reserve requirement across annuity book",
+    insight: "If sustained, this represents $340m additional reserve requirement across annuity book",
     prediction: "65% probability trend continues based on medical advancement trajectory",
     confidence: 0.72,
     targetPersona: "cro",
     timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 min ago
     source: "Actuarial Monitoring System",
     dataPoints: [
-      { label: "Reserve Impact", value: "£340m", trend: "up" },
+      { label: "Reserve Impact", value: "$340m", trend: "up" },
       { label: "Trend Deviation", value: "2.3%", trend: "up" },
       { label: "Confidence Band", value: "±0.8%", trend: "flat" },
     ],
@@ -156,7 +156,7 @@ export const liveAIAlerts: AIAlert[] = [
     status: "pending",
     title: "Asset Management Fee Pressure Alert",
     message: "DC platform fee compression accelerating: average fee down 8bps YTD vs 5bps forecast",
-    insight: "Revenue impact of £12m if trend continues. Offset partially by £183bn DC AUM growth (+12%)",
+    insight: "Revenue impact of $12m if trend continues. Offset partially by $183bn DC AUM growth (+12%)",
     prediction: "Fee pressure likely to stabilize Q3 as market consolidation completes",
     confidence: 0.68,
     targetPersona: "cfo",
@@ -164,7 +164,7 @@ export const liveAIAlerts: AIAlert[] = [
     source: "Revenue Analytics Platform",
     dataPoints: [
       { label: "Fee Compression", value: "-8bps", trend: "down" },
-      { label: "Revenue Impact", value: "£12m", trend: "down" },
+      { label: "Revenue Impact", value: "$12m", trend: "down" },
       { label: "AUM Growth", value: "+12%", trend: "up" },
     ],
     suggestedActions: [
@@ -230,15 +230,15 @@ export const liveAIAlerts: AIAlert[] = [
     status: "pending",
     title: "US Business Sale - Governance Checkpoint",
     message: "Major transaction governance checkpoint: US protection sale completion approaching",
-    insight: "£1.9bn post-tax proceeds expected. Capital allocation decision required for buyback execution",
+    insight: "$1.9bn post-tax proceeds expected. Capital allocation decision required for buyback execution",
     prediction: "Market conditions optimal for buyback announcement within 48 hours of completion",
     confidence: 0.88,
     targetPersona: "ceo",
     timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
     source: "Transaction Management Office",
     dataPoints: [
-      { label: "Proceeds", value: "£1.9bn", trend: "up" },
-      { label: "Buyback Allocation", value: "£1.0bn", trend: "flat" },
+      { label: "Proceeds", value: "$1.9bn", trend: "up" },
+      { label: "Buyback Allocation", value: "$1.0bn", trend: "flat" },
       { label: "Completion Status", value: "95%", trend: "up" },
     ],
     suggestedActions: [
@@ -276,7 +276,7 @@ export const collaborationThreads: CollaborationThread[] = [
       {
         id: "msg-003",
         personaId: "cfo",
-        content: "Confirmed. We have £3bn capacity with current capital position.",
+        content: "Confirmed. We have $3bn capacity with current capital position.",
         timestamp: new Date(Date.now() - 1000 * 60 * 2),
         isAI: false,
       },

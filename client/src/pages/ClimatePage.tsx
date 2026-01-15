@@ -152,7 +152,7 @@ export default function ClimatePage() {
                 <div>
                   <p className="text-sm text-gray-500">Transition Finance</p>
                   <p className="text-2xl font-bold text-purple-600" data-testid="text-transition-finance">
-                    £{climateData.headline.transitionFinance.value}bn
+                    ${climateData.headline.transitionFinance.value}bn
                   </p>
                   <p className="text-xs text-gray-400">invested in transition</p>
                 </div>

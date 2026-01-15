@@ -342,7 +342,7 @@ function ValueSummaryBanner() {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold">£{totalValueProtected}m+</div>
+          <div className="text-3xl font-bold">${totalValueProtected}m+</div>
           <p className="text-white/80 text-sm">Value at risk identified & protected</p>
           <div className="mt-2 flex gap-2 justify-end">
             <Button 

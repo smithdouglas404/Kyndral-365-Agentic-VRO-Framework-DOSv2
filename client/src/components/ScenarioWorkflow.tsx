@@ -224,7 +224,7 @@ export function ScenarioWorkflow({ onScenarioChange, initialScenario, initialSta
                 {selectedScenario.name} — {stages.find(s => s.id === activeStage)?.name} Phase
               </CardTitle>
               <CardDescription>
-                Key Performance Indicators with L&G Annual Report benchmarks
+                Key Performance Indicators with NextEra Energy Annual Report benchmarks
               </CardDescription>
             </div>
             <Badge 

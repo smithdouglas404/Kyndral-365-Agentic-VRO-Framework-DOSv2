@@ -66,15 +66,15 @@ function CostCategoryCard({ category, mode }: { category: TransformedCostCategor
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-xs text-gray-500">Budget</p>
-            <p className="font-bold">£{category.budget}M</p>
+            <p className="font-bold">${category.budget}M</p>
           </div>
           <div>
             <p className="text-xs text-gray-500">YTD Spend</p>
-            <p className="font-bold">£{category.spent}M</p>
+            <p className="font-bold">${category.spent}M</p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Forecast</p>
-            <p className={`font-bold ${isOverBudget ? 'text-red-600' : 'text-green-600'}`}>£{category.forecast}M</p>
+            <p className={`font-bold ${isOverBudget ? 'text-red-600' : 'text-green-600'}`}>${category.forecast}M</p>
           </div>
         </div>
         <Progress value={(category.spent / category.budget) * 100} className="h-1.5 mt-3" />
@@ -97,7 +97,7 @@ function CostCategoryCard({ category, mode }: { category: TransformedCostCategor
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500">Savings Identified</p>
-                  <p className="font-bold text-green-600">£{category.savings}M</p>
+                  <p className="font-bold text-green-600">${category.savings}M</p>
                 </div>
               </div>
               
@@ -140,7 +140,7 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xl font-bold text-green-600">£{opportunity.potential.toFixed(1)}M</p>
+            <p className="text-xl font-bold text-green-600">${opportunity.potential.toFixed(1)}M</p>
             <p className="text-xs text-gray-500">potential savings</p>
           </div>
           <div className="text-right">
@@ -285,7 +285,7 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Total Budget</p>
-                    <p className="text-2xl font-bold text-blue-600">£{liveData.metrics.totalValue || totalBudget}M</p>
+                    <p className="text-2xl font-bold text-blue-600">${liveData.metrics.totalValue || totalBudget}M</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-blue-200" />
                 </div>
@@ -297,7 +297,7 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">YTD Spend</p>
-                    <p className="text-2xl font-bold text-green-600">£{liveData.metrics.realizedValue || totalSpent}M</p>
+                    <p className="text-2xl font-bold text-green-600">${liveData.metrics.realizedValue || totalSpent}M</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-green-200" />
                 </div>
@@ -312,7 +312,7 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Forecast</p>
-                    <p className={`text-2xl font-bold ${forecastVariance > 0 ? 'text-amber-600' : 'text-green-600'}`}>£{totalForecast}M</p>
+                    <p className={`text-2xl font-bold ${forecastVariance > 0 ? 'text-amber-600' : 'text-green-600'}`}>${totalForecast}M</p>
                   </div>
                   <BarChart3 className="h-8 w-8 text-amber-200" />
                 </div>
@@ -326,7 +326,7 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Savings Identified</p>
-                    <p className="text-2xl font-bold text-purple-600">£{totalSavings.toFixed(1)}M</p>
+                    <p className="text-2xl font-bold text-purple-600">${totalSavings.toFixed(1)}M</p>
                   </div>
                   <PieChart className="h-8 w-8 text-purple-200" />
                 </div>
@@ -341,7 +341,7 @@ export default function FinOpsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Group Profit</p>
-                    <p className="text-2xl font-bold text-blue-600">£{companyMetrics.totalProfit}M</p>
+                    <p className="text-2xl font-bold text-blue-600">${companyMetrics.totalProfit}M</p>
                   </div>
                   <Building2 className="h-8 w-8 text-blue-200" />
                 </div>
@@ -401,7 +401,7 @@ export default function FinOpsDashboard() {
                       style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
                     >
                       <p className="text-sm font-medium text-gray-500">{division.name}</p>
-                      <p className="text-2xl font-bold" style={{ color: division.color }}>£{division.profit2024}M</p>
+                      <p className="text-2xl font-bold" style={{ color: division.color }}>${division.profit2024}M</p>
                       <div className="flex items-center gap-1 mt-1">
                         {division.changePercent >= 0 ? (
                           <ArrowUpRight className="h-4 w-4 text-green-500" />

@@ -218,7 +218,7 @@ export function VROMetricCard({ metric, index }: VROMetricCardProps) {
                               <div className="flex items-center gap-3">
                                 <span className="text-sm font-medium text-gray-900">
                                   {typeof item.value === 'number' && item.value > 100 
-                                    ? `£${item.value.toLocaleString()}m` 
+                                    ? `$${item.value.toLocaleString()}m` 
                                     : item.value}
                                 </span>
                                 <Badge variant="outline" className="text-xs">

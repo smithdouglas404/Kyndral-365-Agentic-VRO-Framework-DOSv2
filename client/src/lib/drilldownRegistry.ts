@@ -277,7 +277,7 @@ export const riskDossiers: Record<string, DrilldownContent> = {
     metrics: [
       { label: 'Risk Score', value: 'High', trend: 'stable', color: 'red' },
       { label: 'Probability', value: '65%', trend: 'up' },
-      { label: 'Impact', value: '£2.5M', trend: 'stable' },
+      { label: 'Impact', value: '$2.5M', trend: 'stable' },
       { label: 'Mitigation Progress', value: '45%', trend: 'up' }
     ],
     actions: [
@@ -296,13 +296,13 @@ export const riskDossiers: Record<string, DrilldownContent> = {
   'critical-budget-overrun': {
     title: 'Critical Budget Overrun',
     subtitle: 'Financial Risk - Enterprise Portfolio',
-    description: '£6.5M budget variance (18% over planned spend) detected across the enterprise portfolio requiring immediate financial controls.',
+    description: '$6.5M budget variance (18% over planned spend) detected across the enterprise portfolio requiring immediate financial controls.',
     level: 2,
     entityType: 'risk',
     entityId: 'critical-budget-overrun',
     isFullDossier: true,
     metrics: [
-      { label: 'Variance', value: '£6.5M', trend: 'up', color: 'red' },
+      { label: 'Variance', value: '$6.5M', trend: 'up', color: 'red' },
       { label: 'Overspend %', value: '18%', trend: 'up', color: 'red' },
       { label: 'Projects Affected', value: '8', trend: 'stable' },
       { label: 'Mitigation Progress', value: '25%', trend: 'up' }
@@ -364,10 +364,10 @@ export const opportunityDossiers: Record<string, DrilldownContent> = {
     entityId: 'default',
     isFullDossier: true,
     metrics: [
-      { label: 'Potential Value', value: '£2.5M', trend: 'up', color: 'teal' },
+      { label: 'Potential Value', value: '$2.5M', trend: 'up', color: 'teal' },
       { label: 'Probability', value: '75%', trend: 'up', color: 'teal' },
       { label: 'Time to Value', value: '3 months', trend: 'down', color: 'teal' },
-      { label: 'Investment Needed', value: '£0.5M', trend: 'stable' }
+      { label: 'Investment Needed', value: '$0.5M', trend: 'stable' }
     ],
     actions: [
       { id: 'opp-1', label: 'Create Business Case', type: 'accelerate', description: 'Draft business case for approval' },
@@ -384,13 +384,13 @@ export const opportunityDossiers: Record<string, DrilldownContent> = {
   'digital-adoption-momentum-acceleration': {
     title: 'Digital Adoption Acceleration',
     subtitle: 'Efficiency Opportunity',
-    description: '£2.5M additional efficiency gains available from closing 18% digital adoption gap across the organization.',
+    description: '$2.5M additional efficiency gains available from closing 18% digital adoption gap across the organization.',
     level: 2,
     entityType: 'opportunity',
     entityId: 'digital-adoption-momentum-acceleration',
     isFullDossier: true,
     metrics: [
-      { label: 'Potential Gain', value: '£2.5M', trend: 'up', color: 'teal' },
+      { label: 'Potential Gain', value: '$2.5M', trend: 'up', color: 'teal' },
       { label: 'Current Adoption', value: '62%', trend: 'up', color: 'teal' },
       { label: 'Target Adoption', value: '80%', trend: 'stable', color: 'teal' },
       { label: 'Gap', value: '18%', trend: 'down', color: 'teal' }
@@ -417,7 +417,7 @@ export const opportunityDossiers: Record<string, DrilldownContent> = {
     isFullDossier: true,
     metrics: [
       { label: 'Theme Progress', value: '78%', trend: 'up', color: 'teal' },
-      { label: 'Value Delivered', value: '£12M', trend: 'up', color: 'teal' },
+      { label: 'Value Delivered', value: '$12M', trend: 'up', color: 'teal' },
       { label: 'Active Projects', value: '8', trend: 'stable' },
       { label: 'OKR Achievement', value: '85%', trend: 'up', color: 'teal' }
     ],
@@ -448,9 +448,9 @@ export const metricDossiers: Record<string, DrilldownContent> = {
     entityId: 'roi',
     metrics: [
       { label: 'Portfolio ROI', value: '127%', trend: 'up', color: 'teal' },
-      { label: 'Value Realized', value: '£4.2M', trend: 'up', color: 'teal' },
-      { label: 'Investment to Date', value: '£3.3M', trend: 'stable', color: 'teal' },
-      { label: 'Projected Annual', value: '£8.5M', trend: 'up', color: 'teal' }
+      { label: 'Value Realized', value: '$4.2M', trend: 'up', color: 'teal' },
+      { label: 'Investment to Date', value: '$3.3M', trend: 'stable', color: 'teal' },
+      { label: 'Projected Annual', value: '$8.5M', trend: 'up', color: 'teal' }
     ],
     actions: [
       { id: 'roi-1', label: 'View by Project', type: 'navigate', targetEntityType: 'metric-breakdown', targetEntityId: 'roi-by-project' },
@@ -476,19 +476,19 @@ export const metricDossiers: Record<string, DrilldownContent> = {
     entityType: 'metric',
     entityId: 'value-realized',
     metrics: [
-      { label: 'Total Realized', value: '£4.2M', trend: 'up', color: 'teal' },
-      { label: 'Target', value: '£5.8M', trend: 'stable', color: 'teal' },
+      { label: 'Total Realized', value: '$4.2M', trend: 'up', color: 'teal' },
+      { label: 'Target', value: '$5.8M', trend: 'stable', color: 'teal' },
       { label: 'Realization Rate', value: '72%', trend: 'up', color: 'teal' },
-      { label: 'At Risk', value: '£0.8M', trend: 'down', color: 'teal' }
+      { label: 'At Risk', value: '$0.8M', trend: 'down', color: 'teal' }
     ],
     actions: [
       { id: 'val-1', label: 'Benefits Register', type: 'navigate', targetEntityType: 'benefits', targetEntityId: 'register' },
       { id: 'val-2', label: 'Unrealized Analysis', type: 'navigate', targetEntityType: 'benefits', targetEntityId: 'unrealized' }
     ],
     relatedItems: [
-      { id: 'ben-1', name: 'Cost Savings', type: 'Benefit', entityType: 'benefit', entityId: 'cost-savings', status: '£2.1M realized' },
-      { id: 'ben-2', name: 'Revenue Growth', type: 'Benefit', entityType: 'benefit', entityId: 'revenue', status: '£1.4M realized' },
-      { id: 'ben-3', name: 'Efficiency Gains', type: 'Benefit', entityType: 'benefit', entityId: 'efficiency', status: '£0.7M realized' }
+      { id: 'ben-1', name: 'Cost Savings', type: 'Benefit', entityType: 'benefit', entityId: 'cost-savings', status: '$2.1M realized' },
+      { id: 'ben-2', name: 'Revenue Growth', type: 'Benefit', entityType: 'benefit', entityId: 'revenue', status: '$1.4M realized' },
+      { id: 'ben-3', name: 'Efficiency Gains', type: 'Benefit', entityType: 'benefit', entityId: 'efficiency', status: '$0.7M realized' }
     ],
     aiInsight: 'FinOps Agent: Value realization is tracking 8% ahead of schedule. Recommend benefit tracking review in Week 32.',
     agentSource: 'finops'
@@ -688,7 +688,7 @@ export const agentDossiers: Record<AgentType, DrilldownContent> = {
     entityType: 'agent',
     entityId: 'finops',
     metrics: [
-      { label: 'Budget Monitored', value: '£42M', trend: 'stable' },
+      { label: 'Budget Monitored', value: '$42M', trend: 'stable' },
       { label: 'Cost Alerts', value: '2', trend: 'down' },
       { label: 'Forecast Accuracy', value: '94%', trend: 'up' }
     ],
@@ -875,7 +875,7 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
         isFullDossier: true,
         metrics: [
           { label: 'Current Utilization', value: '70%', trend: 'stable', color: 'green' },
-          { label: 'Burn Rate', value: '£125K/week', trend: 'stable' },
+          { label: 'Burn Rate', value: '$125K/week', trend: 'stable' },
           { label: 'Forecast at Completion', value: '95%', trend: 'up' },
           { label: 'Variance', value: '+2%', trend: 'up', color: 'amber' }
         ],
@@ -1003,7 +1003,7 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
         entityType: 'value-stream',
         entityId: vs.id,
         metrics: [
-          { label: 'Annual Budget', value: `£${(vs.annualBudget / 1000000).toFixed(1)}M`, trend: 'stable' },
+          { label: 'Annual Budget', value: `$${(vs.annualBudget / 1000000).toFixed(1)}M`, trend: 'stable' },
           { label: 'Owner', value: vs.owner, trend: 'stable' },
           { label: 'Linked ARTs', value: `${vs.linkedARTs.length}`, trend: 'stable' }
         ],
@@ -1110,7 +1110,7 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
         isFullDossier: true,
         metrics: [
           { label: 'Status', value: project.status, trend: 'stable' },
-          { label: 'Budget', value: `£${project.budget.total}${project.budget.unit}`, trend: 'stable' },
+          { label: 'Budget', value: `$${project.budget.total}${project.budget.unit}`, trend: 'stable' },
           { label: 'ROI', value: project.expectedROI, trend: 'up' },
           { label: 'Timeline', value: `${project.timeline.elapsed}/${project.timeline.total} months`, trend: 'stable' }
         ],
@@ -1257,8 +1257,8 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
       entityType: 'contingency',
       entityId: id,
       metrics: [
-        { label: 'Budget Reserve', value: '£1.2M', trend: 'stable' },
-        { label: 'Used', value: '£0.4M', trend: 'up' },
+        { label: 'Budget Reserve', value: '$1.2M', trend: 'stable' },
+        { label: 'Used', value: '$0.4M', trend: 'up' },
         { label: 'Schedule Buffer', value: '3 weeks', trend: 'stable' },
         { label: 'Buffer Used', value: '1 week', trend: 'up' }
       ],
@@ -1288,8 +1288,8 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
       entityType: 'risk-transfer',
       entityId: id,
       metrics: [
-        { label: 'Coverage', value: '£5M', trend: 'stable' },
-        { label: 'Premium', value: '£120K/yr', trend: 'down' },
+        { label: 'Coverage', value: '$5M', trend: 'stable' },
+        { label: 'Premium', value: '$120K/yr', trend: 'down' },
         { label: 'Vendors', value: '4', trend: 'stable' }
       ],
       aiInsight: 'FinOps Agent: Risk transfer coverage adequate for identified risk exposure.',
@@ -1364,8 +1364,8 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
       entityType: 'benefit',
       entityId: id,
       metrics: [
-        { label: 'Realized', value: '£2.1M', trend: 'up' },
-        { label: 'Target', value: '£3.5M', trend: 'stable' },
+        { label: 'Realized', value: '$2.1M', trend: 'up' },
+        { label: 'Target', value: '$3.5M', trend: 'stable' },
         { label: 'Progress', value: '60%', trend: 'up' }
       ],
       aiInsight: 'VRO Agent: Benefit realization on track with 60% target achieved.',
@@ -1456,7 +1456,7 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
       metrics: [
         { label: 'Affected Projects', value: '4', trend: 'stable' },
         { label: 'Schedule Impact', value: '+5 days', trend: 'stable' },
-        { label: 'Cost Impact', value: '£120K', trend: 'stable' }
+        { label: 'Cost Impact', value: '$120K', trend: 'stable' }
       ],
       aiInsight: 'PMO Agent: Impact analysis shows 4 downstream projects affected with manageable risk.',
       agentSource: 'tmo'
@@ -1544,9 +1544,9 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
       entityType: 'benefits',
       entityId: id,
       metrics: [
-        { label: 'Total Benefits', value: '£5.8M', trend: 'stable' },
-        { label: 'Realized', value: '£4.2M', trend: 'up' },
-        { label: 'At Risk', value: '£0.8M', trend: 'down' }
+        { label: 'Total Benefits', value: '$5.8M', trend: 'stable' },
+        { label: 'Realized', value: '$4.2M', trend: 'up' },
+        { label: 'At Risk', value: '$0.8M', trend: 'down' }
       ],
       aiInsight: 'VRO Agent: 72% of benefits realized with clear tracking for remaining value.',
       agentSource: 'integrated-management'

@@ -108,7 +108,7 @@ const FINANCIAL_SCENARIOS: ScenarioTemplate[] = [
     domain: 'financial',
     severity: 'critical',
     titleTemplate: 'Funding Request Needed',
-    descriptionTemplate: '{project} requires additional £{amount}M to complete Phase 2',
+    descriptionTemplate: '{project} requires additional ${amount}M to complete Phase 2',
     agentId: 'finops',
     actionTemplate: 'Funding request drafted',
     impactTemplate: 'Business case updated, sponsor briefing scheduled'

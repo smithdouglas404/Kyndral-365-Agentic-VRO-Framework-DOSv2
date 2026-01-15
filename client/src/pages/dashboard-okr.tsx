@@ -69,7 +69,7 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
                 <span>{objective.owner}</span>
                 <span className="flex items-center gap-1 text-green-600">
                   <DollarSign className="h-3 w-3" />
-                  £{objective.totalValueImpact.costSavings + objective.totalValueImpact.revenueImpact}M value
+                  ${objective.totalValueImpact.costSavings + objective.totalValueImpact.revenueImpact}M value
                 </span>
               </div>
             </div>
@@ -105,14 +105,14 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
                   <DollarSign className="h-5 w-5 text-green-500" />
                   <div>
                     <p className="text-xs text-gray-500">Cost Savings</p>
-                    <p className="font-bold text-green-600">£{objective.totalValueImpact.costSavings}M</p>
+                    <p className="font-bold text-green-600">${objective.totalValueImpact.costSavings}M</p>
                   </div>
                 </div>
                 <div className="bg-white p-3 rounded-lg border flex items-center gap-3">
                   <TrendingUp className="h-5 w-5 text-blue-500" />
                   <div>
                     <p className="text-xs text-gray-500">Revenue Impact</p>
-                    <p className="font-bold text-blue-600">£{objective.totalValueImpact.revenueImpact}M</p>
+                    <p className="font-bold text-blue-600">${objective.totalValueImpact.revenueImpact}M</p>
                   </div>
                 </div>
               </div>
@@ -297,7 +297,7 @@ export default function OKRDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Total Value</p>
-                    <p className="text-2xl font-bold text-green-600">£{liveData.metrics.totalValue || totalValue}M</p>
+                    <p className="text-2xl font-bold text-green-600">${liveData.metrics.totalValue || totalValue}M</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-green-200" />
                 </div>

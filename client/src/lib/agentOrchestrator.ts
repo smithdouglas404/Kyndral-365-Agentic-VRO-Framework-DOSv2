@@ -488,14 +488,14 @@ const AGENT_INTERVENTION_SCENARIOS: NewIntervention[] = [
     projectName: 'Digital Transformation Office',
     confidence: 88,
     suggestedAction: 'Extend milestone deadline by 1 sprint. Assign dedicated resources to unmet criteria.',
-    impact: 'Proceeding without resolution introduces £1.2M technical debt.',
+    impact: 'Proceeding without resolution introduces $1.2M technical debt.',
     agentSource: 'TMO Agent'
   },
   {
     type: 'budget',
     severity: 'medium',
     title: 'FinOps Cost Optimization Opportunity',
-    description: 'Cloud infrastructure costs 18% above benchmark. Identified £340K annual savings potential.',
+    description: 'Cloud infrastructure costs 18% above benchmark. Identified $340K annual savings potential.',
     projectId: 'proj-cloud-optimization',
     projectName: 'Infrastructure Cost Management',
     confidence: 84,

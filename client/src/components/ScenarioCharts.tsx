@@ -79,7 +79,7 @@ export function ScenarioCycleTimeChart({ scenario, stage, refreshKey }: Scenario
         </div>
         <CardDescription className="flex items-center gap-2">
           Projected days from intake to approval
-          <SourceBadge source="L&G Annual Report 2024, Strategic Objectives" />
+          <SourceBadge source="NextEra Energy Annual Report 2024, Strategic Objectives" />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -161,7 +161,7 @@ export function ScenarioBenefitsChart({ scenario, stage, refreshKey }: ScenarioC
         </div>
         <CardDescription className="flex items-center gap-2">
           Forecasted vs. realized value (%)
-          <SourceBadge source="L&G Annual Report 2024, p.52" />
+          <SourceBadge source="NextEra Energy Annual Report 2024, p.52" />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -217,7 +217,7 @@ export function ScenarioRiskChart({ scenario, stage, refreshKey }: ScenarioChart
         </div>
         <CardDescription className="flex items-center gap-2">
           Portfolio risk distribution
-          <SourceBadge source="L&G Annual Report 2024, Risk Section p.78" />
+          <SourceBadge source="NextEra Energy Annual Report 2024, Risk Section p.78" />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -284,7 +284,7 @@ export function ScenarioEfficiencyChart({ scenario, stage, refreshKey }: Scenari
         </div>
         <CardDescription className="flex items-center gap-2">
           Manual vs. automated processing
-          <SourceBadge source="L&G Annual Report 2024, p.23" />
+          <SourceBadge source="NextEra Energy Annual Report 2024, p.23" />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -338,7 +338,7 @@ export function ScenarioGovernanceChart({ scenario, stage, refreshKey }: Scenari
         </div>
         <CardDescription className="flex items-center gap-2">
           Compliance across control gates
-          <SourceBadge source="L&G Annual Report 2024, Governance Section" />
+          <SourceBadge source="NextEra Energy Annual Report 2024, Governance Section" />
         </CardDescription>
       </CardHeader>
       <CardContent>

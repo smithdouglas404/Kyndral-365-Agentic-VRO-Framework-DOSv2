@@ -170,7 +170,7 @@ function MetricCard({
 
 function DivisionalProfitChart() {
   const data = divisionalProfitData.map(d => ({
-    name: d.division.replace("Institutional Retirement", "Inst. Retirement").replace("Corporate Investments", "Corp. Inv."),
+    name: d.division.replace("Florida Power & Light", "Inst. Retirement").replace("Corporate & Other", "Corp. Inv."),
     "2023": d.profit2023,
     "2024": d.profit2024,
     change: d.change
@@ -185,7 +185,7 @@ function DivisionalProfitChart() {
               <BarChart3 size={18} className="text-[#0072CE]" />
               Operating Profit by Division
             </CardTitle>
-            <CardDescription>2023 vs 2024 comparison (£m)</CardDescription>
+            <CardDescription>2023 vs 2024 comparison ($m)</CardDescription>
           </div>
           <Badge className="bg-green-100 text-green-700">+6% Core Growth</Badge>
         </div>
@@ -196,9 +196,9 @@ function DivisionalProfitChart() {
             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `£${v}m`} />
+              <YAxis tickFormatter={(v) => `$${v}m`} />
               <RechartsTooltip 
-                formatter={(value: number) => [`£${value}m`, '']}
+                formatter={(value: number) => [`$${value}m`, '']}
                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb' }}
               />
               <Legend />
@@ -238,9 +238,9 @@ function AUMBreakdownChart() {
               <PieChartIcon size={18} className="text-[#00A651]" />
               Assets Under Management
             </CardTitle>
-            <CardDescription>Key AUM segments (£bn)</CardDescription>
+            <CardDescription>Key AUM segments ($bn)</CardDescription>
           </div>
-          <Badge variant="outline" className="text-xs">£1.1tn Total (vs £1.2tn 2023)</Badge>
+          <Badge variant="outline" className="text-xs">$1.1tn Total (vs $1.2tn 2023)</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -261,7 +261,7 @@ function AUMBreakdownChart() {
                 ))}
               </Pie>
               <RechartsTooltip 
-                formatter={(value: number) => [`£${value}bn`, '']}
+                formatter={(value: number) => [`$${value}bn`, '']}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -296,7 +296,7 @@ function GlobalPRTChart() {
           <Globe size={18} className="text-[#0072CE]" />
           Global PRT Written 2024
         </CardTitle>
-        <CardDescription>£{globalPRTData.totalGlobal2024}bn total across regions</CardDescription>
+        <CardDescription>${globalPRTData.totalGlobal2024}bn total across regions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -304,7 +304,7 @@ function GlobalPRTChart() {
             <div key={i}>
               <div className="flex justify-between text-sm mb-1">
                 <span>{d.region}</span>
-                <span className="font-medium">£{d.value}bn</span>
+                <span className="font-medium">${d.value}bn</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 
@@ -399,7 +399,7 @@ function ClimateMetricsCard() {
             <p className="text-[10px] text-muted-foreground">Target: 1.5°C Paris</p>
           </div>
           <div className="p-3 bg-purple-50 rounded-lg text-center">
-            <span className="text-xl font-bold text-purple-700">£{climateMetrics.transitionFinance.current}bn</span>
+            <span className="text-xl font-bold text-purple-700">${climateMetrics.transitionFinance.current}bn</span>
             <p className="text-xs text-purple-600">Transition Finance</p>
           </div>
           <div className="p-3 bg-amber-50 rounded-lg text-center">
@@ -431,21 +431,21 @@ function ShareholderReturnsCard() {
       </CardHeader>
       <CardContent>
         <div className="text-center mb-4">
-          <span className="text-3xl font-bold text-[#0072CE]">£{(shareholderReturns.totalReturnTarget2024_27 / 1000).toFixed(0)}bn+</span>
+          <span className="text-3xl font-bold text-[#0072CE]">${(shareholderReturns.totalReturnTarget2024_27 / 1000).toFixed(0)}bn+</span>
           <p className="text-sm text-muted-foreground">Total Return Target (40% of market cap)</p>
         </div>
         <div className="space-y-2">
           <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
             <span className="text-sm">2024 Buyback (Completed)</span>
-            <Badge variant="secondary">£{shareholderReturns.buyback2024Completed}m</Badge>
+            <Badge variant="secondary">${shareholderReturns.buyback2024Completed}m</Badge>
           </div>
           <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
             <span className="text-sm">New Buyback (Announced)</span>
-            <Badge className="bg-[#0072CE]">£{shareholderReturns.buybackAnnounced}m</Badge>
+            <Badge className="bg-[#0072CE]">${shareholderReturns.buybackAnnounced}m</Badge>
           </div>
           <div className="flex justify-between items-center p-2 bg-green-50 rounded">
             <span className="text-sm">Post-US Sale Buyback</span>
-            <Badge className="bg-[#00A651]">£{(shareholderReturns.additionalBuybackPostUSSale / 1000).toFixed(0)}bn</Badge>
+            <Badge className="bg-[#00A651]">${(shareholderReturns.additionalBuybackPostUSSale / 1000).toFixed(0)}bn</Badge>
           </div>
         </div>
         <div className="mt-3 text-center text-xs text-muted-foreground">
@@ -502,7 +502,7 @@ export function BusinessPerformanceSection({ mode = "VRO" }: { mode?: DataMode }
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard 
           title="Core Operating Profit" 
-          value={`£${mode === "VRO" ? coreOperatingProfit.value2024 : Math.round(coreOperatingProfit.value2024 * pmoMultiplier)}`}
+          value={`$${mode === "VRO" ? coreOperatingProfit.value2024 : Math.round(coreOperatingProfit.value2024 * pmoMultiplier)}`}
           change={mode === "VRO" ? coreOperatingProfit.change : Math.round(coreOperatingProfit.change * pmoMultiplier)}
           unit="m"
           icon={TrendingUp}

@@ -268,7 +268,7 @@ export function ChallengeCard({ challenge, index, onDrillDown }: ChallengeCardPr
 
                   <div className="pt-4 border-t flex items-center gap-2 text-xs text-muted-foreground">
                     <Info size={12} />
-                    Data sourced from L&G Annual Report 2024
+                    Data sourced from NextEra Energy Annual Report 2024
                   </div>
                 </div>
               </ScrollArea>

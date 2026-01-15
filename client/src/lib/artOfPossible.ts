@@ -101,7 +101,7 @@ export const transformationPhases: TransformationPhase[] = [
     screens: [
       { id: "1-1", title: "Opportunity Radar", type: "dashboard", content: "Live feed of AI-detected opportunities with confidence scores", aiAction: "3 new PRT opportunities detected in FTSE 350" },
       { id: "1-2", title: "Market Signal", type: "alert", content: "Phoenix Group pension scheme showing stress signals", persona: personas[0], aiAction: "CEO briefed on acquisition target" },
-      { id: "1-3", title: "Portfolio Scan", type: "insight", content: "AI analysis of £1.1tn AUM for optimization opportunities" },
+      { id: "1-3", title: "Portfolio Scan", type: "insight", content: "AI analysis of $1.1tn AUM for optimization opportunities" },
     ],
   },
   {
@@ -183,7 +183,7 @@ export const transformationPhases: TransformationPhase[] = [
       ],
     },
     screens: [
-      { id: "3-1", title: "Case Generator", type: "form", content: "AI-generated business case for PRT acceleration", aiAction: "Projected £45m value creation over 3 years" },
+      { id: "3-1", title: "Case Generator", type: "form", content: "AI-generated business case for PRT acceleration", aiAction: "Projected $45m value creation over 3 years" },
       { id: "3-2", title: "Risk Matrix", type: "dashboard", content: "Automated risk scoring with mitigation recommendations", persona: personas[2] },
       { id: "3-3", title: "Scenario Compare", type: "insight", content: "50 Monte Carlo simulations completed" },
     ],

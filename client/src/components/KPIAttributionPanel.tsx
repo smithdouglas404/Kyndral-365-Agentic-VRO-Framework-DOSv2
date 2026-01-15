@@ -43,7 +43,7 @@ const CORE_KPIS: KPI[] = [
     baseline: 820,
     target: 950,
     current: 892,
-    unit: '£m',
+    unit: '$m',
     trend: 'up',
     status: 'on-track',
     attribution: [
@@ -137,20 +137,20 @@ const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
   {
     initiative: 'Claims',
     kpiImpact: [
-      { kpi: 'Operating Profit', contribution: '+£23m', confidence: 85 },
+      { kpi: 'Operating Profit', contribution: '+$23m', confidence: 85 },
       { kpi: 'Customer NPS', contribution: '+4 pts', confidence: 75 },
       { kpi: 'Claims Processing Time', contribution: '-4.5 days', confidence: 90 }
     ],
-    totalValue: '£47m',
+    totalValue: '$47m',
     evidenceStrength: 'strong'
   },
   {
     initiative: 'Cost Efficiency Programme',
     kpiImpact: [
-      { kpi: 'Operating Profit', contribution: '+£33m', confidence: 92 },
+      { kpi: 'Operating Profit', contribution: '+$33m', confidence: 92 },
       { kpi: 'Cost-to-Income Ratio', contribution: '-3.4%', confidence: 95 }
     ],
-    totalValue: '£33m',
+    totalValue: '$33m',
     evidenceStrength: 'strong'
   },
   {
@@ -159,7 +159,7 @@ const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
       { kpi: 'Customer NPS', contribution: '+5 pts', confidence: 88 },
       { kpi: 'Digital Adoption Rate', contribution: '+9%', confidence: 92 }
     ],
-    totalValue: '£18m',
+    totalValue: '$18m',
     evidenceStrength: 'moderate'
   }
 ];

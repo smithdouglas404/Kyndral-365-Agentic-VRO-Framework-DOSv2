@@ -73,7 +73,7 @@ const initialInterventions: RiskIntervention[] = [
     projectName: 'Climate Transition Analytics',
     confidence: 94,
     suggestedAction: 'Escalate to RTE and implement interim mock API for parallel development',
-    impact: '£1.2M schedule cost if unresolved',
+    impact: '$1.2M schedule cost if unresolved',
     timestamp: new Date(),
     status: 'pending',
     agentSource: 'Planning Agent'
@@ -83,12 +83,12 @@ const initialInterventions: RiskIntervention[] = [
     type: 'budget',
     severity: 'high',
     title: 'Budget Overrun Trajectory',
-    description: 'Current burn rate projects £850K overrun by PI 25.1. Primary driver: unplanned infrastructure costs.',
+    description: 'Current burn rate projects $850K overrun by PI 25.1. Primary driver: unplanned infrastructure costs.',
     projectId: 'pmo-grp-001',
     projectName: 'Enterprise Data Platform',
     confidence: 87,
-    suggestedAction: 'Defer AI/ML Infrastructure feature to Phase 2, release £400K contingency',
-    impact: 'Saves £1.1M, maintains core deliverables',
+    suggestedAction: 'Defer AI/ML Infrastructure feature to Phase 2, release $400K contingency',
+    impact: 'Saves $1.1M, maintains core deliverables',
     timestamp: new Date(),
     status: 'pending',
     agentSource: 'FinOps Agent'
@@ -141,11 +141,11 @@ const initialInterventions: RiskIntervention[] = [
 ];
 
 const agentDiscussion: AgentMessage[] = [
-  { id: 'msg-1', agent: 'FinOps Agent', agentColor: 'bg-green-500', message: "I've analyzed the Enterprise Data Foundation budget trajectory. Current burn rate suggests £850K overrun by PI 25.1.", type: 'analysis' },
+  { id: 'msg-1', agent: 'FinOps Agent', agentColor: 'bg-green-500', message: "I've analyzed the Enterprise Data Foundation budget trajectory. Current burn rate suggests $850K overrun by PI 25.1.", type: 'analysis' },
   { id: 'msg-2', agent: 'Planning Agent', agentColor: 'bg-blue-500', message: "Looking at the feature backlog, AI/ML Infrastructure could be deferred to Phase 2 without impacting dependent projects. This would reduce scope by ~25%.", type: 'recommendation' },
   { id: 'msg-3', agent: 'TMO Agent', agentColor: 'bg-teal-500', message: "Change impact assessment: Deferring AI/ML affects 8 stakeholders. I can prepare communications if we proceed.", type: 'analysis' },
   { id: 'msg-4', agent: 'Governance Agent', agentColor: 'bg-purple-500', message: "Scope reduction requires steering committee approval. I can fast-track through CAB with proper documentation.", type: 'question' },
-  { id: 'msg-5', agent: 'FinOps Agent', agentColor: 'bg-green-500', message: "Deferral saves £1.1M. Combined with £400K contingency release, we're back within budget tolerance.", type: 'analysis' },
+  { id: 'msg-5', agent: 'FinOps Agent', agentColor: 'bg-green-500', message: "Deferral saves $1.1M. Combined with $400K contingency release, we're back within budget tolerance.", type: 'analysis' },
   { id: 'msg-6', agent: 'OKR Agent', agentColor: 'bg-orange-500', message: "This aligns with Q4 objective 'Optimize Portfolio Delivery'. Key result KR2.3 would improve from 65% to 78% achievement.", type: 'agreement' },
   { id: 'msg-7', agent: 'Planning Agent', agentColor: 'bg-blue-500', message: "Consensus reached. Proposed: 1) Defer AI/ML to Phase 2, 2) Release contingency, 3) Fast-track CAB. Ready for human approval.", type: 'action' }
 ];

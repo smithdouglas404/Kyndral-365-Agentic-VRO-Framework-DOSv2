@@ -33,20 +33,20 @@ const vroRecommendations: Recommendation[] = [
     id: '1',
     title: 'AI-Driven Cost Optimization',
     confidence: 92,
-    description: 'VRO predictive analytics identified £8.2M savings through intelligent resource reallocation. Proactive intervention recommended within 2 weeks.',
+    description: 'VRO predictive analytics identified $8.2M savings through intelligent resource reallocation. Proactive intervention recommended within 2 weeks.',
     actionLabel: 'Deploy AI Model',
     type: 'savings',
-    impact: '£8.2M savings',
+    impact: '$8.2M savings',
     actionType: 'accelerate'
   },
   {
     id: '2',
     title: 'PRT Volume Acceleration',
     confidence: 94,
-    description: 'VRO market sensing detects favorable conditions. Automated workflow can accelerate PRT processing by 40%, targeting £12bn volume.',
+    description: 'VRO market sensing detects favorable conditions. Automated workflow can accelerate PRT processing by 40%, targeting $12bn volume.',
     actionLabel: 'Activate Automation',
     type: 'opportunity',
-    impact: '+£2.8bn potential',
+    impact: '+$2.8bn potential',
     actionType: 'accelerate'
   },
   {
@@ -56,7 +56,7 @@ const vroRecommendations: Recommendation[] = [
     description: 'VRO early warning system flagged 3 emerging risks before impact. AI-recommended interventions have 89% success rate.',
     actionLabel: 'Review AI Actions',
     type: 'risk',
-    impact: 'Prevented £3.1M loss',
+    impact: 'Prevented $3.1M loss',
     actionType: 'mitigate'
   },
   {
@@ -76,20 +76,20 @@ const pmoRecommendations: Recommendation[] = [
     id: '1',
     title: 'Digital Platform Cost Overrun',
     confidence: 68,
-    description: 'Technology modernization costs running 18% above baseline at £52.4M. Manual review required to identify root causes.',
+    description: 'Technology modernization costs running 18% above baseline at $52.4M. Manual review required to identify root causes.',
     actionLabel: 'Schedule Review',
     type: 'risk',
-    impact: '£9.4M at risk',
+    impact: '$9.4M at risk',
     actionType: 'escalate'
   },
   {
     id: '2',
     title: 'PRT Volume Tracking',
     confidence: 72,
-    description: 'Current PRT volume at £7.1bn, below £10bn target. Traditional forecasting shows gap widening without intervention.',
+    description: 'Current PRT volume at $7.1bn, below $10bn target. Traditional forecasting shows gap widening without intervention.',
     actionLabel: 'View Forecast',
     type: 'risk',
-    impact: '£2.9bn gap',
+    impact: '$2.9bn gap',
     actionType: 'investigate'
   },
   {
@@ -99,7 +99,7 @@ const pmoRecommendations: Recommendation[] = [
     description: 'Manual analysis suggests potential savings in Retail operations. Detailed study required - estimated 6-8 weeks.',
     actionLabel: 'Request Study',
     type: 'savings',
-    impact: '£28M potential',
+    impact: '$28M potential',
     actionType: 'investigate'
   },
   {
@@ -122,7 +122,7 @@ const tmoRecommendations: Recommendation[] = [
     description: 'Inventory Optimization workstream is at risk due to dependency on ERP Upgrade Phase 2 which is currently blocked.',
     actionLabel: 'View Impact',
     type: 'risk',
-    impact: '£2.3M at risk',
+    impact: '$2.3M at risk',
     actionType: 'mitigate'
   },
   {
@@ -155,17 +155,17 @@ const finopsRecommendations: Recommendation[] = [
     description: 'AWS spending increased 42% this month. 23 unused EC2 instances detected across 3 environments.',
     actionLabel: 'Optimize Now',
     type: 'savings',
-    impact: '£45K/month savings',
+    impact: '$45K/month savings',
     actionType: 'accelerate'
   },
   {
     id: '2',
     title: 'Reserved Instance Opportunity',
     confidence: 91,
-    description: 'Converting 15 on-demand instances to reserved could save £180K annually.',
+    description: 'Converting 15 on-demand instances to reserved could save $180K annually.',
     actionLabel: 'Calculate Savings',
     type: 'savings',
-    impact: '£180K annual',
+    impact: '$180K annual',
     actionType: 'investigate'
   },
   {
@@ -175,7 +175,7 @@ const finopsRecommendations: Recommendation[] = [
     description: 'Infrastructure budget 15% under-utilized while Application Development is at 120%.',
     actionLabel: 'Rebalance',
     type: 'opportunity',
-    impact: 'Optimize £2.1M',
+    impact: 'Optimize $2.1M',
     actionType: 'accelerate'
   }
 ];
@@ -231,7 +231,7 @@ const okrRecommendations: Recommendation[] = [
     description: 'Revenue growth KR on track to exceed target by 8% if current momentum continues.',
     actionLabel: 'Set Stretch',
     type: 'opportunity',
-    impact: '+£6M potential',
+    impact: '+$6M potential',
     actionType: 'accelerate'
   },
   {

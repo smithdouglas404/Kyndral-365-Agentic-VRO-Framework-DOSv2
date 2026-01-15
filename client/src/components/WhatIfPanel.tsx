@@ -152,8 +152,8 @@ export function WhatIfPanel({ yamlCode, policyName }: WhatIfPanelProps) {
     if (wouldHaveBeenEligible > 1000) complianceNotes.push(`Large customer expansion (${wouldHaveBeenEligible.toLocaleString()}) requires capacity review.`);
     
     const revenueImpact = eligibilityChange > 0 
-      ? `+£${Math.round(eligibilityChange * 125000).toLocaleString()} annual premium`
-      : `${eligibilityChange < 0 ? '-' : ''}£${Math.abs(Math.round(eligibilityChange * 125000)).toLocaleString()} annual premium`;
+      ? `+$${Math.round(eligibilityChange * 125000).toLocaleString()} annual premium`
+      : `${eligibilityChange < 0 ? '-' : ''}$${Math.abs(Math.round(eligibilityChange * 125000)).toLocaleString()} annual premium`;
 
     return { 
       eligibilityChange, 
@@ -164,7 +164,7 @@ export function WhatIfPanel({ yamlCode, policyName }: WhatIfPanelProps) {
       historicalImpact: {
         wouldHaveBeenEligible,
         additionalClaims,
-        claimsValue: `£${claimsValue.toLocaleString()}`
+        claimsValue: `$${claimsValue.toLocaleString()}`
       }
     };
   }, [maxAge, minAge, survivalDays, terminalMonths, includeTerminalIllness, originalValues]);
@@ -462,8 +462,8 @@ export function WhatIfPanel({ yamlCode, policyName }: WhatIfPanelProps) {
               <CardContent className="space-y-4">
                 <HistoricalStat label="Claims Submitted" value={HISTORICAL_DATA.claimsSubmitted} color="blue" />
                 <HistoricalStat label="Claims Paid" value={HISTORICAL_DATA.claimsPaid} color="green" />
-                <HistoricalStat label="Average Claim Value" value={`£${HISTORICAL_DATA.averageClaimValue.toLocaleString()}`} color="purple" isText />
-                <HistoricalStat label="Total Paid Out" value={`£${(HISTORICAL_DATA.claimsPaid * HISTORICAL_DATA.averageClaimValue).toLocaleString()}`} color="green" isText />
+                <HistoricalStat label="Average Claim Value" value={`$${HISTORICAL_DATA.averageClaimValue.toLocaleString()}`} color="purple" isText />
+                <HistoricalStat label="Total Paid Out" value={`$${(HISTORICAL_DATA.claimsPaid * HISTORICAL_DATA.averageClaimValue).toLocaleString()}`} color="green" isText />
               </CardContent>
             </Card>
 

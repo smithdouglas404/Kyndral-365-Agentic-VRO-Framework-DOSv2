@@ -28,7 +28,7 @@ export interface EnrichedProject {
   // Rich descriptive fields
   description: string;
   expectedROI: string;
-  roiValue: number; // Numeric value in £m for calculations
+  roiValue: number; // Numeric value in $m for calculations
   priority: ProjectPriority;
   aiRecommendation: string;
   
@@ -572,12 +572,12 @@ export const enrichedProjects: EnrichedProject[] = [
 
 // Map old L&G business units to new NextEra segments
 export const buMapping: Record<string, string> = {
-  'Institutional Retirement': 'Florida Power & Light',
-  'Asset Management': 'NextEra Energy Resources',
-  'Retail': 'Florida Power & Light',
-  'Corporate Investments': 'Corporate & Other',
-  'Risk & Compliance': 'Corporate & Other',
-  'Group Functions': 'Corporate & Other',
+  'Florida Power & Light': 'Florida Power & Light',
+  'NextEra Energy Resources': 'NextEra Energy Resources',
+  'Florida Power & Light': 'Florida Power & Light',
+  'Corporate & Other': 'Corporate & Other',
+  'Corporate & Other': 'Corporate & Other',
+  'Corporate & Other': 'Corporate & Other',
   'Florida Power & Light': 'Florida Power & Light',
   'NextEra Energy Resources': 'NextEra Energy Resources',
   'Corporate & Other': 'Corporate & Other'

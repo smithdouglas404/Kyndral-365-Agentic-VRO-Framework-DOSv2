@@ -252,7 +252,7 @@ export function PMOProjectWorkspace({ project, onClose }: PMOProjectWorkspacePro
           </div>
           <div className="bg-white/10 rounded-lg p-3">
             <div className="flex items-center gap-2 text-white/70 text-xs mb-1">
-              £ Budget
+              $ Budget
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold">{project.budget.spent}</span>

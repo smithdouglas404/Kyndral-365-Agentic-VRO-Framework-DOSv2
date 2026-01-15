@@ -230,7 +230,7 @@ export function ExecutiveCommandCenter() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           <ProbabilityRibbon 
             label="Value Realization" 
-            value="£847M" 
+            value="$847M" 
             confidence={92} 
             trend="up" 
           />

@@ -37,14 +37,14 @@ const BUSINESS_CASES: BusinessCase[] = [
     bu: 'Insurance',
     status: 'review',
     score: 78,
-    investment: '£4.2m',
+    investment: '$4.2m',
     expectedRoi: '245%',
     paybackPeriod: '18 months',
     riskLevel: 'medium',
     aiRecommendations: [
       { type: 'improvement', text: 'Strengthen benefits quantification with customer NPS correlation data', impact: '+12% approval likelihood' },
-      { type: 'risk', text: 'Legacy system integration costs may be underestimated by 15-20%', impact: 'Budget risk £630k' },
-      { type: 'opportunity', text: 'Cross-sell opportunity in Retail identified - add to benefits case', impact: '+£1.8m NPV' }
+      { type: 'risk', text: 'Legacy system integration costs may be underestimated by 15-20%', impact: 'Budget risk $630k' },
+      { type: 'opportunity', text: 'Cross-sell opportunity in Retail identified - add to benefits case', impact: '+$1.8m NPV' }
     ],
     governanceStage: 'Investment Committee',
     nextMilestone: 'Stage Gate 2 Review - Jan 15'
@@ -55,12 +55,12 @@ const BUSINESS_CASES: BusinessCase[] = [
     bu: 'Workplace',
     status: 'approved',
     score: 92,
-    investment: '£8.7m',
+    investment: '$8.7m',
     expectedRoi: '312%',
     paybackPeriod: '24 months',
     riskLevel: 'low',
     aiRecommendations: [
-      { type: 'opportunity', text: 'Accelerate Phase 2 to capture early market advantage', impact: '+£2.1m revenue' },
+      { type: 'opportunity', text: 'Accelerate Phase 2 to capture early market advantage', impact: '+$2.1m revenue' },
       { type: 'improvement', text: 'Add sustainability metrics to align with ESG reporting requirements', impact: 'Regulatory compliance' }
     ],
     governanceStage: 'Execution',
@@ -69,17 +69,17 @@ const BUSINESS_CASES: BusinessCase[] = [
   {
     id: 'bc-003',
     name: 'Customer',
-    bu: 'Group Functions',
+    bu: 'Corporate & Other',
     status: 'draft',
     score: 65,
-    investment: '£12.5m',
+    investment: '$12.5m',
     expectedRoi: '189%',
     paybackPeriod: '36 months',
     riskLevel: 'high',
     aiRecommendations: [
       { type: 'risk', text: 'Data governance approvals not yet secured - critical path risk', impact: '3-month delay risk' },
       { type: 'improvement', text: 'Phased rollout recommended to reduce execution risk', impact: '-25% risk exposure' },
-      { type: 'improvement', text: 'Include quick wins from Retail data consolidation', impact: '+£800k Year 1' },
+      { type: 'improvement', text: 'Include quick wins from Retail data consolidation', impact: '+$800k Year 1' },
       { type: 'risk', text: 'Resource dependency on external vendor capacity', impact: 'Delivery risk' }
     ],
     governanceStage: 'Business Case Development',
@@ -91,12 +91,12 @@ const BUSINESS_CASES: BusinessCase[] = [
     bu: 'Insurance',
     status: 'review',
     score: 84,
-    investment: '£3.1m',
+    investment: '$3.1m',
     expectedRoi: '278%',
     paybackPeriod: '14 months',
     riskLevel: 'medium',
     aiRecommendations: [
-      { type: 'opportunity', text: 'Expand scope to include motor insurance for 40% additional benefit', impact: '+£1.2m NPV' },
+      { type: 'opportunity', text: 'Expand scope to include motor insurance for 40% additional benefit', impact: '+$1.2m NPV' },
       { type: 'improvement', text: 'Add model explainability requirements for FCA compliance', impact: 'Regulatory alignment' }
     ],
     governanceStage: 'Technical Review Board',

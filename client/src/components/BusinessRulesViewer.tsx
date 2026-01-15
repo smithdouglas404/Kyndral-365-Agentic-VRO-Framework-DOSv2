@@ -474,7 +474,7 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
                 icon={<Shield className="text-[#005EB8]" />}
                 features={[
                   "Covers you from application for up to 90 days",
-                  "Up to £300,000 payout",
+                  "Up to $300,000 payout",
                   "Applies if death is from accident during this period"
                 ]}
               />
@@ -484,7 +484,7 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
                 icon={<Home className="text-[#00843D]" />}
                 features={[
                   "Covers gap between exchange and completion",
-                  "Up to £300,000 or mortgage amount",
+                  "Up to $300,000 or mortgage amount",
                   "Must be under 55 years old"
                 ]}
               />
@@ -494,7 +494,7 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
                 icon={<Baby className="text-purple-600" />}
                 features={[
                   "Covers children aged 30 days to 18 (21 if in education)",
-                  "50% of cover up to £25,000 per child",
+                  "50% of cover up to $25,000 per child",
                   "Maximum 2 claims then cover ends"
                 ]}
               />
@@ -503,7 +503,7 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
                 cost="Included with CI cover"
                 icon={<Stethoscope className="text-amber-600" />}
                 features={[
-                  "£5,000 payout",
+                  "$5,000 payout",
                   "If in hospital 28+ consecutive days after accident",
                   "One claim per person"
                 ]}
@@ -519,10 +519,10 @@ export function BusinessRulesViewer({ yamlCode, policyName }: BusinessRulesViewe
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ChildBenefit title="Child Accident Hospitalisation" amount="£5,000" description="28 consecutive days in hospital" />
-                  <ChildBenefit title="Child Funeral Benefit" amount="£4,000" description="Contribution towards funeral" />
-                  <ChildBenefit title="Childcare Benefit" amount="£1,000" description="For under 5s with registered childminder" />
-                  <ChildBenefit title="Family Accommodation" amount="£100/night (max £1,000)" description="3 months after CI diagnosis" />
+                  <ChildBenefit title="Child Accident Hospitalisation" amount="$5,000" description="28 consecutive days in hospital" />
+                  <ChildBenefit title="Child Funeral Benefit" amount="$4,000" description="Contribution towards funeral" />
+                  <ChildBenefit title="Childcare Benefit" amount="$1,000" description="For under 5s with registered childminder" />
+                  <ChildBenefit title="Family Accommodation" amount="$100/night (max $1,000)" description="3 months after CI diagnosis" />
                 </div>
               </CardContent>
             </Card>

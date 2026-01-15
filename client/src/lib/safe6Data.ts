@@ -101,7 +101,7 @@ export const valueStreams: ValueStream[] = [
   },
   {
     id: 'vs-risk-compliance',
-    name: 'Risk & Compliance',
+    name: 'Corporate & Other',
     description: 'Enterprise risk management, regulatory reporting, and compliance monitoring',
     type: 'operational',
     owner: 'James Mitchell',
@@ -139,7 +139,7 @@ export const portfolioOKRs: PortfolioOKR[] = [
     keyResults: [
       { id: 'kr-ops-1', description: 'Automate 70% of manual back-office processes', targetValue: 70, currentValue: 48, unit: '%', confidence: 60, status: 'at-risk' },
       { id: 'kr-ops-2', description: 'Reduce FTE requirements by 15% through automation', targetValue: 15, currentValue: 8, unit: '%', confidence: 55, status: 'at-risk' },
-      { id: 'kr-ops-3', description: 'Achieve £5M annual cost savings', targetValue: 5000000, currentValue: 2800000, unit: '£', confidence: 65, status: 'at-risk' }
+      { id: 'kr-ops-3', description: 'Achieve $5M annual cost savings', targetValue: 5000000, currentValue: 2800000, unit: '$', confidence: 65, status: 'at-risk' }
     ],
     linkedEpics: ['epic-bulk-automation', 'epic-reporting-automation'],
     linkedKPIs: ['kpi-ret-processing-time']
@@ -189,7 +189,7 @@ export const portfolioKPIs: PortfolioKPI[] = [
     targetValue: 1500000000000,
     currentValue: 1350000000000,
     previousValue: 1280000000000,
-    unit: '£',
+    unit: '$',
     trend: 'up',
     frequency: 'daily',
     linkedValueStreams: ['vs-investment-management'],
@@ -203,9 +203,9 @@ export const portfolioEpics: PortfolioEpic[] = [
   {
     id: 'epic-prt-platform',
     name: 'PRT Platform Modernization',
-    description: 'Complete modernization of the Pension Risk Transfer platform to support £10bn+ annual volume',
+    description: 'Complete modernization of the Pension Risk Transfer platform to support $10bn+ annual volume',
     epicHypothesis: 'By modernizing the PRT platform with API-first architecture and real-time pricing, we will reduce quote turnaround from 5 days to 4 hours and improve win rate by 15%',
-    businessOutcome: 'Increase annual PRT volume by £2B and improve profit margins by 3%',
+    businessOutcome: 'Increase annual PRT volume by $2B and improve profit margins by 3%',
     leadingIndicators: ['Quote turnaround time', 'Win rate percentage', 'Customer satisfaction score'],
     mvp: 'Basic pricing API with single-life calculations and manual workflow integration',
     status: 'implementing',
@@ -227,7 +227,7 @@ export const portfolioEpics: PortfolioEpic[] = [
     name: 'Next-Gen Trading Platform',
     description: 'New multi-asset trading platform with real-time risk analytics and automated execution',
     epicHypothesis: 'A modern trading platform will reduce trading costs by 20% and enable new asset class expansion',
-    businessOutcome: 'Reduce annual trading costs by £15M and enable £5B new AUM in alternatives',
+    businessOutcome: 'Reduce annual trading costs by $15M and enable $5B new AUM in alternatives',
     leadingIndicators: ['Trade execution time', 'Trading cost per transaction', 'System uptime'],
     mvp: 'Core equities trading with basic risk monitoring',
     status: 'implementing',
@@ -249,7 +249,7 @@ export const portfolioEpics: PortfolioEpic[] = [
     name: 'Enterprise Data Foundation',
     description: 'Unified data platform providing single source of truth for all enterprise data',
     epicHypothesis: 'A unified data foundation will enable real-time analytics and reduce data reconciliation effort by 80%',
-    businessOutcome: 'Enable data-driven decision making and reduce data management costs by £3M annually',
+    businessOutcome: 'Enable data-driven decision making and reduce data management costs by $3M annually',
     leadingIndicators: ['Data quality score', 'Query response time', 'Data source coverage'],
     mvp: 'Core data lake with customer and transaction data domains',
     status: 'implementing',
@@ -952,13 +952,13 @@ export const financialSnapshots: FinancialSnapshot[] = [
     projectedROI: 45000000,
     roiConfidence: 78,
     paybackMonths: 18,
-    currency: '£'
+    currency: '$'
   },
   {
     id: 'fin-portfolio-jan',
     entityType: 'portfolio',
     entityId: 'portfolio-lg',
-    entityName: 'L&G Enterprise Portfolio',
+    entityName: 'NextEra Energy Enterprise Portfolio',
     snapshotDate: '2025-01-31',
     period: 'monthly',
     totalBudget: 95000000,
@@ -982,7 +982,7 @@ export const financialSnapshots: FinancialSnapshot[] = [
     projectedROI: 250000000,
     roiConfidence: 72,
     paybackMonths: 24,
-    currency: '£'
+    currency: '$'
   }
 ];
 
@@ -1003,7 +1003,7 @@ export const riskRegister: RiskRegisterEntry[] = [
     status: 'mitigating',
     owner: 'James Chen',
     mitigationPlan: 'Build temporary data bridge from legacy CRM system for member data',
-    contingencyPlan: 'Proceed with manual data preparation process at £50K additional cost',
+    contingencyPlan: 'Proceed with manual data preparation process at $50K additional cost',
     triggerConditions: ['Data Lake misses Feb 28 milestone', 'API latency exceeds 500ms'],
     financialExposure: 2500000,
     scheduleExposureDays: 45,

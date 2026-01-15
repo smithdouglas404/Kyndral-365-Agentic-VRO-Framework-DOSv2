@@ -28,19 +28,19 @@ const legacySlugs: Record<string, string> = {
 
 // BU name mapping for filtering enriched projects (covers all division IDs)
 const buNameMapping: Record<string, string[]> = {
-  'institutional-retirement': ['Institutional Retirement'],
-  'asset-management': ['Asset Management'],
-  'retail': ['Retail'],
-  'corporate-investments': ['Corporate Investments'],
-  'corporate': ['Corporate Investments'],
-  'capital': ['Corporate Investments'],
-  'insurance': ['Risk & Compliance'],
-  'fintech': ['Group Functions'],
-  'risk-center': ['Risk & Compliance'],
-  'climate': ['Group Functions', 'Corporate Investments'],
-  'group-functions': ['Group Functions'],
-  'technology': ['Group Functions'],
-  'default': ['Institutional Retirement', 'Asset Management', 'Retail', 'Corporate Investments', 'Risk & Compliance', 'Group Functions']
+  'institutional-retirement': ['Florida Power & Light'],
+  'asset-management': ['NextEra Energy Resources'],
+  'retail': ['Florida Power & Light'],
+  'corporate-investments': ['Corporate & Other'],
+  'corporate': ['Corporate & Other'],
+  'capital': ['Corporate & Other'],
+  'insurance': ['Corporate & Other'],
+  'fintech': ['Corporate & Other'],
+  'risk-center': ['Corporate & Other'],
+  'climate': ['Corporate & Other', 'Corporate & Other'],
+  'group-functions': ['Corporate & Other'],
+  'technology': ['Corporate & Other'],
+  'default': ['Florida Power & Light', 'NextEra Energy Resources', 'Florida Power & Light', 'Corporate & Other', 'Corporate & Other', 'Corporate & Other']
 };
 
 // Division ID to Portfolio ID mapping for VRO/PMO metrics
@@ -167,7 +167,7 @@ export default function DivisionPage() {
             <div className="text-right">
               <p className="text-sm text-gray-500">Operating Profit 2024</p>
               <p className="text-3xl font-bold" style={{ color: division.color }} data-testid="text-profit">
-                £{division.profit2024}m
+                ${division.profit2024}m
               </p>
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function DivisionPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip formatter={(value) => [`£${value}m`, "Profit"]} />
+                      <Tooltip formatter={(value) => [`$${value}m`, "Profit"]} />
                       <Line type="monotone" dataKey="profit" stroke={division.color} strokeWidth={3} dot={{ fill: division.color, strokeWidth: 2, r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -251,7 +251,7 @@ export default function DivisionPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Realized</span>
-                          <span className="text-xl font-bold text-teal-700">£{portfolioData.valueRealized}m</span>
+                          <span className="text-xl font-bold text-teal-700">${portfolioData.valueRealized}m</span>
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Programs</span>
@@ -700,7 +700,7 @@ export default function DivisionPage() {
                 <div className="text-sm text-red-600">Critical</div>
               </Card>
               <Card className="p-4 bg-blue-50 border-blue-200">
-                <div className="text-2xl font-bold text-blue-700">£{divisionProjects.reduce((sum, p) => sum + p.roiValue, 0)}m</div>
+                <div className="text-2xl font-bold text-blue-700">${divisionProjects.reduce((sum, p) => sum + p.roiValue, 0)}m</div>
                 <div className="text-sm text-blue-600">Total Expected ROI</div>
               </Card>
             </div>

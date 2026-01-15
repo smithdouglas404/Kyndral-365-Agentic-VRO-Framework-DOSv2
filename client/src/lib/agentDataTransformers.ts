@@ -64,7 +64,7 @@ export function getCostCategoriesFromDivisions(mode: DataMode): TransformedCostC
       division: div.ceo,
       savings,
       aiInsight: mode === 'VRO' 
-        ? `AI analysis of ${kpiCount} KPIs identified £${savings}M optimization across ${projectCount} projects`
+        ? `AI analysis of ${kpiCount} KPIs identified $${savings}M optimization across ${projectCount} projects`
         : `Manual review of ${kpiCount} KPIs pending. ${projectCount} projects require assessment.`
     };
   });
@@ -89,7 +89,7 @@ export function getSavingsOpportunitiesFromProjects(mode: DataMode): Transformed
   );
   
   return allProjects.slice(0, 6).map((project, i) => {
-    const roiMatch = project.expectedROI.match(/£?(\d+(?:\.\d+)?)/);
+    const roiMatch = project.expectedROI.match(/$?(\d+(?:\.\d+)?)/);
     const baseRoi = roiMatch ? parseFloat(roiMatch[1]) : 5 + i * 2;
     
     const baseConfidence = 50 + (project.status === 'completed' ? 40 : project.status === 'in-progress' ? 20 : 0);
@@ -514,7 +514,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
   ];
   
   return allProjects.map((project, i) => {
-    const roiMatch = project.expectedROI.match(/£?(\d+(?:\.\d+)?)/);
+    const roiMatch = project.expectedROI.match(/$?(\d+(?:\.\d+)?)/);
     const roiValue = roiMatch ? parseFloat(roiMatch[1]) : 25;
     
     const baseProgress = project.status === 'completed' ? 100 : project.status === 'in-progress' ? 50 : 10;
@@ -550,7 +550,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
           name: kr.result,
           contribution: mode === 'VRO' ? 20 + j * 10 + k * 5 : 5 + j * 2 + k
         })),
-        valueImpact: mode === 'VRO' ? `+£${Math.round(roiValue * 0.3)}M value` : 'TBD'
+        valueImpact: mode === 'VRO' ? `+$${Math.round(roiValue * 0.3)}M value` : 'TBD'
       })),
       collaboratingAgents: mode === 'VRO' 
         ? agents.slice(0, 3 + (i % 3)).map((a, j) => ({

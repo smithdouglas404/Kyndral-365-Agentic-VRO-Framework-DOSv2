@@ -74,7 +74,7 @@ const stageLabels: Record<string, string> = {
 };
 
 function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
-  // Handle both £m and £M units (case-insensitive) - convert millions to actual value
+  // Handle both $m and $M units (case-insensitive) - convert millions to actual value
   const isMillions = enriched.budget.unit.toLowerCase().includes('m');
   const budgetAmount = enriched.budget.total * (isMillions ? 1000000 : 1);
   // For backlog projects with no spend, use 0 but keep total budget from business case
@@ -194,23 +194,23 @@ function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
     'portfolio-review': 'reviewing'
   };
 
-  const buMap: Record<string, 'Institutional Retirement' | 'Asset Management' | 'Retail' | 'Corporate Investments' | 'Risk & Compliance' | 'Group Functions'> = {
-    'Institutional Retirement': 'Institutional Retirement',
-    'Asset Management': 'Asset Management',
-    'Retail': 'Retail',
-    'Corporate Investments': 'Corporate Investments',
-    'Risk & Compliance': 'Risk & Compliance',
-    'Group Functions': 'Group Functions',
-    'Group HR': 'Group Functions',
-    'Group Finance': 'Group Functions',
-    'Group Technology': 'Group Functions',
-    'Group Legal': 'Group Functions'
+  const buMap: Record<string, 'Florida Power & Light' | 'NextEra Energy Resources' | 'Florida Power & Light' | 'Corporate & Other' | 'Corporate & Other' | 'Corporate & Other'> = {
+    'Florida Power & Light': 'Florida Power & Light',
+    'NextEra Energy Resources': 'NextEra Energy Resources',
+    'Florida Power & Light': 'Florida Power & Light',
+    'Corporate & Other': 'Corporate & Other',
+    'Corporate & Other': 'Corporate & Other',
+    'Corporate & Other': 'Corporate & Other',
+    'Group HR': 'Corporate & Other',
+    'Group Finance': 'Corporate & Other',
+    'Group Technology': 'Corporate & Other',
+    'Corporate & Other': 'Corporate & Other'
   };
 
   return {
     id: enriched.id,
     name: enriched.name,
-    bu: buMap[enriched.bu] || 'Group Functions',
+    bu: buMap[enriched.bu] || 'Corporate & Other',
     artName: `${enriched.bu} ART`,
     description: enriched.description,
     status: enriched.status,
@@ -229,7 +229,7 @@ function convertEnrichedToSAFe(enriched: EnrichedProject): SAFeProject {
       budget: budgetAmount,
       spent: spentAmount,
       forecast: budgetAmount * 1.1,
-      currency: '£',
+      currency: '$',
       laborCost: spentAmount * 0.7,
       vendorCost: spentAmount * 0.2,
       infrastructureCost: spentAmount * 0.1,
@@ -447,7 +447,7 @@ export default function ProjectDetailPage() {
             <div className="text-right">
               <p className="text-sm text-gray-500">PI {project.currentPI} of {project.totalPIs}</p>
               <p className="text-2xl font-bold text-purple-600">
-                £{(project.financials.roi.projected / 1000000).toFixed(1)}M ROI
+                ${(project.financials.roi.projected / 1000000).toFixed(1)}M ROI
               </p>
             </div>
             <Button 
@@ -513,7 +513,7 @@ export default function ProjectDetailPage() {
                 </div>
                 <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
-              <p className="text-2xl font-bold">£{(project.financials.budget / 1000000).toFixed(1)}M</p>
+              <p className="text-2xl font-bold">${(project.financials.budget / 1000000).toFixed(1)}M</p>
               <Progress value={budgetUtilization} className="h-2 mt-2" />
               <p className="text-xs text-gray-500 mt-1">{budgetUtilization}% utilized</p>
             </CardContent>
@@ -983,7 +983,7 @@ export default function ProjectDetailPage() {
                               <span className="text-xs">{resource.allocation}%</span>
                             </div>
                           </td>
-                          <td className="p-3 text-right">£{resource.costRate}</td>
+                          <td className="p-3 text-right">${resource.costRate}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1103,7 +1103,7 @@ export default function ProjectDetailPage() {
                             <div className="mt-2 flex items-center gap-2">
                               <DollarSign className="h-4 w-4 text-red-600" />
                               <span className="text-sm font-medium text-red-700">
-                                £{(dep.financialImpact / 1000000).toFixed(1)}M financial impact
+                                ${(dep.financialImpact / 1000000).toFixed(1)}M financial impact
                               </span>
                             </div>
                           )}
@@ -1128,17 +1128,17 @@ export default function ProjectDetailPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span>Total Budget</span>
-                    <span className="font-bold text-lg">£{(project.financials.budget / 1000000).toFixed(2)}M</span>
+                    <span className="font-bold text-lg">${(project.financials.budget / 1000000).toFixed(2)}M</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                     <span>Spent to Date</span>
-                    <span className="font-bold text-blue-700">£{(project.financials.spent / 1000000).toFixed(2)}M</span>
+                    <span className="font-bold text-blue-700">${(project.financials.spent / 1000000).toFixed(2)}M</span>
                   </div>
                   <div className={`flex justify-between items-center p-3 rounded-lg ${forecastVariance > 0 ? 'bg-red-50' : 'bg-green-50'}`}>
                     <span>Forecast at Completion</span>
                     <div className="text-right">
                       <span className={`font-bold ${forecastVariance > 0 ? 'text-red-700' : 'text-green-700'}`}>
-                        £{(project.financials.forecast / 1000000).toFixed(2)}M
+                        ${(project.financials.forecast / 1000000).toFixed(2)}M
                       </span>
                       <p className="text-xs text-gray-500">
                         {forecastVariance > 0 ? '+' : ''}{forecastVariance}% variance
@@ -1149,19 +1149,19 @@ export default function ProjectDetailPage() {
                   <div className="pt-4 border-t space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Labor Cost</span>
-                      <span>£{(project.financials.laborCost / 1000000).toFixed(2)}M</span>
+                      <span>${(project.financials.laborCost / 1000000).toFixed(2)}M</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Vendor Cost</span>
-                      <span>£{(project.financials.vendorCost / 1000000).toFixed(2)}M</span>
+                      <span>${(project.financials.vendorCost / 1000000).toFixed(2)}M</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Infrastructure</span>
-                      <span>£{(project.financials.infrastructureCost / 1000000).toFixed(2)}M</span>
+                      <span>${(project.financials.infrastructureCost / 1000000).toFixed(2)}M</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Contingency</span>
-                      <span>£{(project.financials.contingency / 1000000).toFixed(2)}M</span>
+                      <span>${(project.financials.contingency / 1000000).toFixed(2)}M</span>
                     </div>
                   </div>
                 </CardContent>
@@ -1178,7 +1178,7 @@ export default function ProjectDetailPage() {
                   <div className="p-4 bg-purple-50 rounded-lg text-center">
                     <p className="text-sm text-gray-600">Projected ROI</p>
                     <p className="text-3xl font-bold text-purple-700">
-                      £{(project.financials.roi.projected / 1000000).toFixed(1)}M
+                      ${(project.financials.roi.projected / 1000000).toFixed(1)}M
                     </p>
                   </div>
                   

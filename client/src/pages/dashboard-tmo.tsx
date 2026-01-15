@@ -156,11 +156,11 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500 mb-1">Cost Savings</p>
-                  <p className="text-lg font-bold text-green-600">£{initiative.valueImpact.costSavings}M</p>
+                  <p className="text-lg font-bold text-green-600">${initiative.valueImpact.costSavings}M</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500 mb-1">Revenue Impact</p>
-                  <p className="text-lg font-bold text-blue-600">£{initiative.valueImpact.revenueImpact}M</p>
+                  <p className="text-lg font-bold text-blue-600">${initiative.valueImpact.revenueImpact}M</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500 mb-1">Efficiency Gain</p>
