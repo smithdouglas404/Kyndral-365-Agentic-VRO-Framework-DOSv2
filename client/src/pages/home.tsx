@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@assets/generated_images/florida_clean_energy_landscape.png";
+import nexteraLogo from "@assets/nextera_logo.png";
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -10,16 +11,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* Navigation */}
-      <header className="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-white/20">
-        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="text-2xl font-bold text-[#0072CE] tracking-tight">
-            NextEra Energy
-          </div>
+      <header className="absolute top-0 left-0 w-full z-50">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <img src={nexteraLogo} alt="NextEra Energy" className="h-12" />
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <div 
@@ -30,7 +29,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/20" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center pt-20">
+        <div className="relative z-10 container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center pt-16">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
