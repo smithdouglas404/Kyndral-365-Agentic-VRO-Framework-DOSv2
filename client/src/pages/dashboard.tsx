@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode, Zap } from "lucide-react";
+import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as LinkIcon, FileText, ArrowRight, RefreshCw, Play, Pause, Download, TrendingDown, Brain, BarChart3, Building2, AlertCircle, Briefcase, AlertOctagon, PieChart, FileCode, Zap, Settings, Network, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
 import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
@@ -384,6 +385,36 @@ function NavBar() {
             Command Center
           </Link>
           <Link href="/ingestion" className="text-sm font-medium text-[#0072CE]" data-testid="link-ingestion">Project Ingestion</Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="text-sm font-medium text-[#0072CE] flex items-center gap-1 hover:opacity-80" data-testid="button-admin-menu">
+                <Settings className="h-4 w-4" />
+                Admin
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="flex items-center gap-2 cursor-pointer" data-testid="link-settings">
+                  <Settings className="h-4 w-4" />
+                  Dashboard Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/mcp-config" className="flex items-center gap-2 cursor-pointer" data-testid="link-mcp-config">
+                  <Network className="h-4 w-4" />
+                  MCP Configuration
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/ingestion" className="flex items-center gap-2 cursor-pointer" data-testid="link-data-ingestion">
+                  <FileCode className="h-4 w-4" />
+                  Data Ingestion
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
       </div>
       <div className="flex items-center gap-4">
