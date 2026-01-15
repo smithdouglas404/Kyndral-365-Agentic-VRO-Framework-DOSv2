@@ -1546,6 +1546,66 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   // SAFe ONTOLOGY API ENDPOINTS
   // ============================================================================
 
+  // Strategic Themes
+  app.get("/api/safe/strategic-themes", async (req, res) => {
+    try {
+      const { portfolioId } = req.query;
+      const themes = await storage.getStrategicThemes(portfolioId as string | undefined);
+      res.json({ strategicThemes: themes });
+    } catch (error: any) {
+      console.error("Get strategic themes error:", error);
+      res.status(500).json({ error: "Failed to get strategic themes" });
+    }
+  });
+
+  app.post("/api/safe/strategic-themes", async (req, res) => {
+    try {
+      const { insertStrategicThemeSchema } = await import("@shared/schema");
+      const validated = insertStrategicThemeSchema.parse(req.body);
+      const theme = await storage.createStrategicTheme(validated);
+      res.json({ success: true, strategicTheme: theme });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation error", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create strategic theme" });
+    }
+  });
+
+  app.post("/api/safe/seed-themes", async (_req, res) => {
+    try {
+      const existingThemes = await storage.getStrategicThemes();
+      if (existingThemes.length > 0) {
+        return res.json({ message: "Strategic themes already seeded", count: existingThemes.length });
+      }
+      
+      const portfolios = await storage.getPortfolios();
+      const primaryPortfolio = portfolios.find(p => p.id === 'portfolio-nee-001') || portfolios[0];
+      
+      if (!primaryPortfolio) {
+        return res.status(400).json({ error: "No portfolios found. Seed portfolios first." });
+      }
+      
+      const themesToSeed = [
+        { id: 'theme-clean-energy', portfolioId: primaryPortfolio.id, name: 'Clean Energy Transition', description: 'Accelerate transition to zero-carbon energy generation and storage across all business units', timeHorizon: '10-year', budgetAllocation: '45', status: 'active' },
+        { id: 'theme-grid-modernization', portfolioId: primaryPortfolio.id, name: 'Grid Modernization', description: 'Deploy smart grid infrastructure and advanced distribution management for reliability and resilience', timeHorizon: '5-year', budgetAllocation: '25', status: 'active' },
+        { id: 'theme-customer-innovation', portfolioId: primaryPortfolio.id, name: 'Customer Innovation', description: 'Deliver innovative products and digital experiences that exceed customer expectations', timeHorizon: '3-year', budgetAllocation: '15', status: 'active' },
+        { id: 'theme-operational-excellence', portfolioId: primaryPortfolio.id, name: 'Operational Excellence', description: 'Drive efficiency, safety, and cost optimization across all operations', timeHorizon: '3-year', budgetAllocation: '15', status: 'active' }
+      ];
+      
+      const created = [];
+      for (const theme of themesToSeed) {
+        const t = await storage.createStrategicTheme(theme);
+        created.push(t);
+      }
+      
+      res.json({ success: true, message: 'Strategic themes seeded', themes: created, linkedPortfolio: primaryPortfolio.id });
+    } catch (error: any) {
+      console.error("Seed strategic themes error:", error);
+      res.status(500).json({ error: "Failed to seed strategic themes" });
+    }
+  });
+
   // Portfolios
   app.get("/api/safe/portfolios", async (_req, res) => {
     try {
@@ -1961,6 +2021,128 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     } catch (error: any) {
       console.error("Get SAFe summary error:", error);
       res.status(500).json({ error: "Failed to get SAFe summary" });
+    }
+  });
+
+  // Seed SAFe Hierarchy Data - NextEra Energy specific
+  app.post("/api/safe/seed", async (_req, res) => {
+    try {
+      // Check if already seeded
+      const existingPortfolios = await storage.getPortfolios();
+      if (existingPortfolios.length > 0) {
+        return res.json({ message: "SAFe data already seeded", portfolios: existingPortfolios.length });
+      }
+
+      // Define theme IDs for portfolio reference
+      const themeIds = ['theme-clean-energy', 'theme-grid-modernization', 'theme-customer-innovation', 'theme-operational-excellence'];
+
+      // Portfolio - NextEra Energy Enterprise Portfolio (create first for FK linkage)
+      const portfolio = await storage.createPortfolio({
+        name: 'NextEra Energy Enterprise Portfolio',
+        description: 'Enterprise transformation portfolio managing all strategic initiatives across FPL, NEER, and Corporate',
+        vision: 'To be the world leader in clean energy, delivering affordable, reliable, and sustainable power to our customers while maximizing shareholder value',
+        strategicThemes: JSON.stringify(themeIds),
+        owner: 'John Ketchum - Chairman & CEO',
+        status: 'active',
+        budgetAllocation: '8500',
+        budgetUnit: '$M',
+        fiscalYear: '2025'
+      });
+
+      // Strategic Themes - now linked to portfolio
+      const themesData = [
+        { id: 'theme-clean-energy', portfolioId: portfolio.id, name: 'Clean Energy Transition', description: 'Accelerate transition to zero-carbon energy generation and storage across all business units', timeHorizon: '10-year', budgetAllocation: '45', status: 'active' },
+        { id: 'theme-grid-modernization', portfolioId: portfolio.id, name: 'Grid Modernization', description: 'Deploy smart grid infrastructure and advanced distribution management for reliability and resilience', timeHorizon: '5-year', budgetAllocation: '25', status: 'active' },
+        { id: 'theme-customer-innovation', portfolioId: portfolio.id, name: 'Customer Innovation', description: 'Deliver innovative products and digital experiences that exceed customer expectations', timeHorizon: '3-year', budgetAllocation: '15', status: 'active' },
+        { id: 'theme-operational-excellence', portfolioId: portfolio.id, name: 'Operational Excellence', description: 'Drive efficiency, safety, and cost optimization across all operations', timeHorizon: '3-year', budgetAllocation: '15', status: 'active' }
+      ];
+
+      for (const theme of themesData) {
+        await storage.createStrategicTheme(theme);
+      }
+
+      // Value Streams
+      const valueStreamsData = [
+        { portfolioId: portfolio.id, name: 'FPL Customer Operations', description: 'End-to-end customer service delivery from metering to billing and support', type: 'operational', owner: 'Eric Silagy', status: 'active', leadTime: '2.5', throughput: '125' },
+        { portfolioId: portfolio.id, name: 'Clean Energy Development', description: 'Solar, wind, and battery storage project development pipeline', type: 'development', owner: 'Rebecca Kujawa', status: 'active', leadTime: '365', throughput: '45' },
+        { portfolioId: portfolio.id, name: 'Grid Infrastructure', description: 'Transmission and distribution network modernization and maintenance', type: 'operational', owner: 'Mark Hickson', status: 'active', leadTime: '30', throughput: '85' },
+        { portfolioId: portfolio.id, name: 'Digital & Technology', description: 'Enterprise technology platforms, data analytics, and digital customer experience', type: 'development', owner: 'Charles Farrar', status: 'active', leadTime: '14', throughput: '210' }
+      ];
+
+      const createdValueStreams: any[] = [];
+      for (const vs of valueStreamsData) {
+        const created = await storage.createValueStream(vs);
+        createdValueStreams.push(created);
+      }
+
+      // ARTs (Agile Release Trains)
+      const artsData = [
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[0].id, name: 'Customer Experience ART', description: 'Delivering exceptional customer digital experiences and self-service capabilities', releaseTrainEngineer: 'Maria Santos', productManager: 'David Chen', systemArchitect: 'Alex Rivera', status: 'active', piCadence: '10 weeks', teamCount: '6', velocity: '450', predictability: '82' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[1].id, name: 'Renewable Development ART', description: 'Enabling rapid clean energy project origination and execution', releaseTrainEngineer: 'James Wilson', productManager: 'Sarah Kim', systemArchitect: 'Michael Brown', status: 'active', piCadence: '12 weeks', teamCount: '5', velocity: '380', predictability: '78' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[2].id, name: 'Smart Grid ART', description: 'Modernizing grid infrastructure with advanced monitoring and automation', releaseTrainEngineer: 'Lisa Anderson', productManager: 'Tom Harris', systemArchitect: 'Jennifer Lee', status: 'active', piCadence: '10 weeks', teamCount: '7', velocity: '520', predictability: '85' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[3].id, name: 'Enterprise Platforms ART', description: 'Building shared technology platforms and data capabilities', releaseTrainEngineer: 'Robert Chen', productManager: 'Amanda Foster', systemArchitect: 'David Wilson', status: 'active', piCadence: '10 weeks', teamCount: '8', velocity: '580', predictability: '80' }
+      ];
+
+      const createdArts: any[] = [];
+      for (const art of artsData) {
+        const created = await storage.createArt(art);
+        createdArts.push(created);
+      }
+
+      // Teams
+      const teamsData = [
+        { artId: createdArts[0].id, name: 'Mobile App Team', description: 'Customer mobile application development', type: 'feature', scrumMaster: 'Emily Davis', productOwner: 'Mark Thompson', techLead: 'Chris Johnson', memberCount: '8', capacity: '64', velocity: '58', status: 'active' },
+        { artId: createdArts[0].id, name: 'Billing Integration Team', description: 'Billing system modernization and integration', type: 'feature', scrumMaster: 'Rachel Green', productOwner: 'Steve Martinez', techLead: 'Karen White', memberCount: '7', capacity: '56', velocity: '52', status: 'active' },
+        { artId: createdArts[1].id, name: 'Project Analytics Team', description: 'Development project performance analytics', type: 'feature', scrumMaster: 'Paul Adams', productOwner: 'Nicole Brown', techLead: 'Kevin Lee', memberCount: '6', capacity: '48', velocity: '44', status: 'active' },
+        { artId: createdArts[2].id, name: 'SCADA Modernization Team', description: 'Grid control systems modernization', type: 'platform', scrumMaster: 'Diana Ross', productOwner: 'Frank Miller', techLead: 'George Chen', memberCount: '9', capacity: '72', velocity: '68', status: 'active' },
+        { artId: createdArts[3].id, name: 'Data Platform Team', description: 'Enterprise data lake and analytics platform', type: 'platform', scrumMaster: 'Michelle Thompson', productOwner: 'Jason Park', techLead: 'Andrea Lopez', memberCount: '8', capacity: '64', velocity: '60', status: 'active' },
+        { artId: createdArts[3].id, name: 'API Gateway Team', description: 'Enterprise API management and integration', type: 'platform', scrumMaster: 'Brian Evans', productOwner: 'Sophia Martin', techLead: 'Tyler Green', memberCount: '6', capacity: '48', velocity: '45', status: 'active' }
+      ];
+
+      for (const team of teamsData) {
+        await storage.createTeam(team);
+      }
+
+      // Program Increments
+      const pisData = [
+        { artId: createdArts[0].id, name: 'PI 2025.1 - Customer Experience', description: 'Focus on mobile app modernization and self-service expansion', piNumber: '2025.1', startDate: new Date('2025-01-06'), endDate: new Date('2025-03-14'), status: 'executing', objectives: JSON.stringify(['Launch mobile app 3.0', 'Reduce call center volume 15%']), committedPoints: '450', deliveredPoints: '385', predictability: '85' },
+        { artId: createdArts[1].id, name: 'PI 2025.1 - Renewable Development', description: 'Streamline project origination pipeline', piNumber: '2025.1', startDate: new Date('2025-01-06'), endDate: new Date('2025-03-21'), status: 'executing', objectives: JSON.stringify(['Deploy project analytics dashboard', 'Integrate permitting workflow']), committedPoints: '380', deliveredPoints: '312', predictability: '82' },
+        { artId: createdArts[2].id, name: 'PI 2025.1 - Smart Grid', description: 'Advanced distribution management rollout', piNumber: '2025.1', startDate: new Date('2025-01-06'), endDate: new Date('2025-03-14'), status: 'executing', objectives: JSON.stringify(['Complete ADMS Phase 2', 'Deploy 500K smart meters']), committedPoints: '520', deliveredPoints: '468', predictability: '90' },
+        { artId: createdArts[3].id, name: 'PI 2025.1 - Enterprise Platforms', description: 'Data platform foundation and API modernization', piNumber: '2025.1', startDate: new Date('2025-01-06'), endDate: new Date('2025-03-14'), status: 'executing', objectives: JSON.stringify(['Launch enterprise data catalog', 'API gateway v2 release']), committedPoints: '580', deliveredPoints: '493', predictability: '85' }
+      ];
+
+      for (const pi of pisData) {
+        await storage.createProgramIncrement(pi);
+      }
+
+      // Epics
+      const epicsData = [
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[0].id, name: 'Mobile App 3.0 Platform', description: 'Complete redesign of customer mobile application with enhanced self-service', type: 'business', status: 'implementing', owner: 'Maria Santos', hypothesis: 'Redesigning mobile app will increase digital adoption by 25% and reduce call center volume', expectedOutcome: 'Increase digital transactions to 75% of all customer interactions', estimatedCost: '4500000', estimatedBenefit: '12000000', wsjfScore: '28' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[1].id, name: 'Solar Project Automation', description: 'Automate solar project development lifecycle from site selection to commissioning', type: 'business', status: 'implementing', owner: 'James Wilson', hypothesis: 'Automating project development will reduce time-to-COD by 20%', expectedOutcome: 'Reduce average project timeline from 18 to 14 months', estimatedCost: '8000000', estimatedBenefit: '25000000', wsjfScore: '32' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[2].id, name: 'Advanced Distribution Management', description: 'Deploy ADMS across FPL service territory for enhanced grid reliability', type: 'enabler', status: 'implementing', owner: 'Lisa Anderson', hypothesis: 'ADMS will reduce outage duration by 30% through automated fault detection', expectedOutcome: 'Achieve industry-leading SAIDI and SAIFI metrics', estimatedCost: '15000000', estimatedBenefit: '35000000', wsjfScore: '35' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[3].id, name: 'Enterprise Data Lake', description: 'Build unified data platform for analytics and AI/ML initiatives', type: 'enabler', status: 'implementing', owner: 'Robert Chen', hypothesis: 'Unified data platform will enable advanced analytics and reduce data reconciliation by 80%', expectedOutcome: 'Single source of truth for all enterprise data', estimatedCost: '12000000', estimatedBenefit: '28000000', wsjfScore: '30' }
+      ];
+
+      for (const epic of epicsData) {
+        await storage.createEpic(epic);
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'SAFe hierarchy seeded successfully',
+        data: {
+          strategicThemes: themesData.length,
+          portfolios: 1,
+          valueStreams: createdValueStreams.length,
+          arts: createdArts.length,
+          teams: teamsData.length,
+          programIncrements: pisData.length,
+          epics: epicsData.length
+        }
+      });
+    } catch (error: any) {
+      console.error("Seed SAFe error:", error);
+      res.status(500).json({ error: "Failed to seed SAFe hierarchy", details: error.message });
     }
   });
 

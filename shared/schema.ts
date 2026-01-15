@@ -793,6 +793,28 @@ export type Kpi = typeof kpis.$inferSelect;
 // Portfolio → Value Stream → ART → Team → PI → Epic → Capability → Feature → Story → Task
 // ============================================================================
 
+// Strategic Themes - High-level business objectives that guide portfolio investment
+export const strategicThemes = pgTable("strategic_themes", {
+  id: varchar("id").primaryKey(),
+  portfolioId: varchar("portfolio_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  timeHorizon: text("time_horizon").default("3-year"), // 1-year, 3-year, 5-year
+  budgetAllocation: text("budget_allocation"), // % of portfolio budget
+  status: text("status").default("active"), // active, retired, planned
+  linkedOkrIds: text("linked_okr_ids"), // JSON array of OKR ids
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertStrategicThemeSchema = createInsertSchema(strategicThemes).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertStrategicTheme = z.infer<typeof insertStrategicThemeSchema>;
+export type StrategicTheme = typeof strategicThemes.$inferSelect;
+
 // Portfolios - Top level of SAFe hierarchy
 export const portfolios = pgTable("portfolios", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

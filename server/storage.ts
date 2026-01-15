@@ -33,6 +33,7 @@ import {
   type Epic, type InsertEpic,
   type Capability, type InsertCapability,
   type Sprint, type InsertSprint,
+  type StrategicTheme, type InsertStrategicTheme,
   type SourceSystem, type InsertSourceSystem,
   type McpAdapter, type InsertMcpAdapter,
   type FieldMapping, type InsertFieldMapping,
@@ -50,7 +51,7 @@ import {
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
   okrs, keyResults, kpis,
-  portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints,
+  portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints, strategicThemes,
   sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings,
   divisions, divisionKpis, divisionOkrs, divisionRisks,
   companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks
@@ -158,6 +159,9 @@ export interface IStorage {
   } | undefined>;
   
   // SAFe Ontology Methods
+  getStrategicThemes(portfolioId?: string): Promise<StrategicTheme[]>;
+  createStrategicTheme(theme: InsertStrategicTheme): Promise<StrategicTheme>;
+  backfillStrategicThemesPortfolioId(): Promise<number>;
   getPortfolios(): Promise<Portfolio[]>;
   getPortfolio(id: string): Promise<Portfolio | undefined>;
   createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
@@ -1316,6 +1320,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   // SAFe Ontology Methods
+  async getStrategicThemes(portfolioId?: string): Promise<StrategicTheme[]> {
+    if (portfolioId) {
+      return await db.select().from(strategicThemes).where(eq(strategicThemes.portfolioId, portfolioId));
+    }
+    return await db.select().from(strategicThemes);
+  }
+
+  async createStrategicTheme(theme: InsertStrategicTheme): Promise<StrategicTheme> {
+    const result = await db.insert(strategicThemes).values(theme).returning();
+    return result[0];
+  }
+
+  async backfillStrategicThemesPortfolioId(): Promise<number> {
+    const allThemes = await this.getStrategicThemes();
+    const orphanThemes = allThemes.filter(t => !t.portfolioId);
+    if (orphanThemes.length === 0) return 0;
+    
+    const allPortfolios = await this.getPortfolios();
+    const primaryPortfolio = allPortfolios.find(p => p.id === 'portfolio-nee-001') || allPortfolios[0];
+    if (!primaryPortfolio) return 0;
+    
+    for (const theme of orphanThemes) {
+      await db.update(strategicThemes).set({ portfolioId: primaryPortfolio.id }).where(eq(strategicThemes.id, theme.id));
+    }
+    return orphanThemes.length;
+  }
+
   async getPortfolios(): Promise<Portfolio[]> {
     return await db.select().from(portfolios);
   }

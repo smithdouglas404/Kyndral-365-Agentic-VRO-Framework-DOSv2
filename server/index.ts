@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { startAgentSimulation } from "./agentSimulation";
+import { storage } from "./storage";
 
 const app = express();
 const httpServer = createServer(app);
@@ -62,6 +63,16 @@ app.use((req, res, next) => {
 
 (async () => {
   await registerRoutes(httpServer, app);
+
+  // Backfill orphan strategic themes with portfolio linkage
+  try {
+    const backfillCount = await storage.backfillStrategicThemesPortfolioId();
+    if (backfillCount > 0) {
+      log(`Backfilled ${backfillCount} strategic themes with portfolio linkage`);
+    }
+  } catch (e: any) {
+    log(`Strategic themes backfill skipped: ${e.message}`);
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
