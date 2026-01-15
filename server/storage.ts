@@ -13,9 +13,17 @@ import {
   type DiscussionMessage, type InsertDiscussionMessage,
   type ProjectMetric, type InsertProjectMetric,
   type AgentActivityLog, type InsertAgentActivityLog,
+  type Feature, type InsertFeature,
+  type Story, type InsertStory,
+  type Task, type InsertTask,
+  type Resource, type InsertResource,
+  type Milestone, type InsertMilestone,
+  type Dependency, type InsertDependency,
+  type ProjectFinancials, type InsertProjectFinancials,
+  type Risk, type InsertRisk,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
-  projectMetrics, agentActivityLog
+  projectMetrics, agentActivityLog, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -74,6 +82,36 @@ export interface IStorage {
   
   seedDemoInterventions(): Promise<void>;
   clearInterventions(): Promise<void>;
+  
+  getFeatures(projectId: string): Promise<Feature[]>;
+  createFeature(feature: InsertFeature): Promise<Feature>;
+  getStories(featureId: string): Promise<Story[]>;
+  getStoriesByProject(projectId: string): Promise<Story[]>;
+  createStory(story: InsertStory): Promise<Story>;
+  getTasks(storyId: string): Promise<Task[]>;
+  getTasksByProject(projectId: string): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  getResources(projectId: string): Promise<Resource[]>;
+  createResource(resource: InsertResource): Promise<Resource>;
+  getMilestones(projectId: string): Promise<Milestone[]>;
+  createMilestone(milestone: InsertMilestone): Promise<Milestone>;
+  getDependencies(projectId: string): Promise<Dependency[]>;
+  createDependency(dependency: InsertDependency): Promise<Dependency>;
+  getProjectFinancials(projectId: string): Promise<ProjectFinancials | undefined>;
+  upsertProjectFinancials(financials: InsertProjectFinancials): Promise<ProjectFinancials>;
+  getRisks(projectId: string): Promise<Risk[]>;
+  createRisk(risk: InsertRisk): Promise<Risk>;
+  getFullProject(projectId: string): Promise<{
+    project: Project;
+    features: Feature[];
+    stories: Story[];
+    tasks: Task[];
+    resources: Resource[];
+    milestones: Milestone[];
+    dependencies: Dependency[];
+    financials: ProjectFinancials | undefined;
+    risks: Risk[];
+  } | undefined>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -759,6 +797,130 @@ export class DatabaseStorage implements IStorage {
     for (const activity of demoActivities) {
       await db.insert(agentActivityLog).values(activity);
     }
+  }
+
+  async getFeatures(projectId: string): Promise<Feature[]> {
+    return await db.select().from(features).where(eq(features.projectId, projectId));
+  }
+
+  async createFeature(feature: InsertFeature): Promise<Feature> {
+    const result = await db.insert(features).values(feature).returning();
+    return result[0];
+  }
+
+  async getStories(featureId: string): Promise<Story[]> {
+    return await db.select().from(stories).where(eq(stories.featureId, featureId));
+  }
+
+  async getStoriesByProject(projectId: string): Promise<Story[]> {
+    return await db.select().from(stories).where(eq(stories.projectId, projectId));
+  }
+
+  async createStory(story: InsertStory): Promise<Story> {
+    const result = await db.insert(stories).values(story).returning();
+    return result[0];
+  }
+
+  async getTasks(storyId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.storyId, storyId));
+  }
+
+  async getTasksByProject(projectId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.projectId, projectId));
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const result = await db.insert(tasks).values(task).returning();
+    return result[0];
+  }
+
+  async getResources(projectId: string): Promise<Resource[]> {
+    return await db.select().from(resources).where(eq(resources.projectId, projectId));
+  }
+
+  async createResource(resource: InsertResource): Promise<Resource> {
+    const result = await db.insert(resources).values(resource).returning();
+    return result[0];
+  }
+
+  async getMilestones(projectId: string): Promise<Milestone[]> {
+    return await db.select().from(milestones).where(eq(milestones.projectId, projectId));
+  }
+
+  async createMilestone(milestone: InsertMilestone): Promise<Milestone> {
+    const result = await db.insert(milestones).values(milestone).returning();
+    return result[0];
+  }
+
+  async getDependencies(projectId: string): Promise<Dependency[]> {
+    return await db.select().from(dependencies).where(eq(dependencies.projectId, projectId));
+  }
+
+  async createDependency(dependency: InsertDependency): Promise<Dependency> {
+    const result = await db.insert(dependencies).values(dependency).returning();
+    return result[0];
+  }
+
+  async getProjectFinancials(projectId: string): Promise<ProjectFinancials | undefined> {
+    const result = await db.select().from(projectFinancials).where(eq(projectFinancials.projectId, projectId)).limit(1);
+    return result[0];
+  }
+
+  async upsertProjectFinancials(fin: InsertProjectFinancials): Promise<ProjectFinancials> {
+    const existing = await this.getProjectFinancials(fin.projectId);
+    if (existing) {
+      const result = await db.update(projectFinancials).set(fin).where(eq(projectFinancials.projectId, fin.projectId)).returning();
+      return result[0];
+    }
+    const result = await db.insert(projectFinancials).values(fin).returning();
+    return result[0];
+  }
+
+  async getRisks(projectId: string): Promise<Risk[]> {
+    return await db.select().from(risks).where(eq(risks.projectId, projectId));
+  }
+
+  async createRisk(risk: InsertRisk): Promise<Risk> {
+    const result = await db.insert(risks).values(risk).returning();
+    return result[0];
+  }
+
+  async getFullProject(projectId: string): Promise<{
+    project: Project;
+    features: Feature[];
+    stories: Story[];
+    tasks: Task[];
+    resources: Resource[];
+    milestones: Milestone[];
+    dependencies: Dependency[];
+    financials: ProjectFinancials | undefined;
+    risks: Risk[];
+  } | undefined> {
+    const project = await this.getProject(projectId);
+    if (!project) return undefined;
+
+    const [projectFeatures, projectStories, projectTasks, projectResources, projectMilestones, projectDependencies, projectFinancialsData, projectRisks] = await Promise.all([
+      this.getFeatures(projectId),
+      this.getStoriesByProject(projectId),
+      this.getTasksByProject(projectId),
+      this.getResources(projectId),
+      this.getMilestones(projectId),
+      this.getDependencies(projectId),
+      this.getProjectFinancials(projectId),
+      this.getRisks(projectId)
+    ]);
+
+    return {
+      project,
+      features: projectFeatures,
+      stories: projectStories,
+      tasks: projectTasks,
+      resources: projectResources,
+      milestones: projectMilestones,
+      dependencies: projectDependencies,
+      financials: projectFinancialsData,
+      risks: projectRisks
+    };
   }
 }
 

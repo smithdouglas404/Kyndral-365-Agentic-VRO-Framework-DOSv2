@@ -567,20 +567,161 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         return res.status(400).json({ error: "Project name and business unit are required" });
       }
       
-      // Create project in database
+      // Create project with full SAFe data
       const project = await storage.createProject({
+        id: projectData.id,
         name: projectData.name,
         description: projectData.description || `${projectData.name} - SAFe 6.0 Managed Project`,
         businessUnitId: projectData.bu,
         status: projectData.status || 'planning',
-        startDate: projectData.startDate ? new Date(projectData.startDate) : null,
-        endDate: projectData.endDate ? new Date(projectData.endDate) : null
+        startDate: projectData.timeline?.startDate ? new Date(projectData.timeline.startDate) : null,
+        endDate: projectData.timeline?.endDate ? new Date(projectData.timeline.endDate) : null,
+        priority: projectData.priority,
+        expectedRoi: projectData.expectedROI,
+        roiValue: projectData.roiValue?.toString(),
+        artName: projectData.artName,
+        portfolioTheme: projectData.portfolioTheme,
+        safeStage: projectData.safeStage || 'funnel',
+        currentPi: projectData.safe?.currentPI,
+        totalPis: projectData.safe?.totalPIs?.toString(),
+        velocity: projectData.safe?.velocity?.toString(),
+        predictability: projectData.safe?.predictability?.toString(),
+        flowEfficiency: projectData.safe?.flowEfficiency?.toString(),
+        epicId: projectData.safe?.epicId,
+        epicName: projectData.safe?.epicName,
+        epicProgress: projectData.safe?.epicProgress?.toString(),
+        budgetSpent: projectData.budget?.spent?.toString(),
+        budgetTotal: projectData.budget?.total?.toString(),
+        budgetUnit: projectData.budget?.unit || '$m'
       });
+
+      // Store features, stories, tasks
+      if (projectData.features && Array.isArray(projectData.features)) {
+        for (const feat of projectData.features) {
+          const feature = await storage.createFeature({
+            id: feat.id,
+            projectId: project.id,
+            name: feat.name,
+            description: feat.description,
+            status: feat.status,
+            storyPoints: feat.storyPoints?.toString(),
+            completedPoints: feat.completedPoints?.toString(),
+            priority: feat.priority,
+            targetPi: feat.targetPi?.toString(),
+            acceptanceCriteria: JSON.stringify(feat.acceptanceCriteria || []),
+            wsjfScore: feat.wsjf?.score?.toString()
+          });
+
+          if (feat.stories && Array.isArray(feat.stories)) {
+            for (const st of feat.stories) {
+              const story = await storage.createStory({
+                id: st.id,
+                featureId: feature.id,
+                projectId: project.id,
+                name: st.name,
+                description: st.description,
+                status: st.status,
+                storyPoints: st.storyPoints?.toString(),
+                acceptanceCriteria: JSON.stringify(st.acceptanceCriteria || [])
+              });
+
+              if (st.tasks && Array.isArray(st.tasks)) {
+                for (const task of st.tasks) {
+                  await storage.createTask({
+                    id: task.id,
+                    storyId: story.id,
+                    featureId: feature.id,
+                    projectId: project.id,
+                    name: task.name,
+                    status: task.status,
+                    effortHours: task.effortHours?.toString(),
+                    assignee: task.assignee,
+                    skills: JSON.stringify(task.skills || [])
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Store resources
+      if (projectData.resources && Array.isArray(projectData.resources)) {
+        for (const res of projectData.resources) {
+          await storage.createResource({
+            id: res.id,
+            projectId: project.id,
+            name: res.name,
+            role: res.role,
+            allocation: res.allocation?.toString(),
+            team: res.team,
+            skills: JSON.stringify(res.skills || []),
+            costRate: res.costRate?.toString()
+          });
+        }
+      }
+
+      // Store milestones
+      if (projectData.milestones && Array.isArray(projectData.milestones)) {
+        for (const ms of projectData.milestones) {
+          await storage.createMilestone({
+            id: ms.id,
+            projectId: project.id,
+            name: ms.name,
+            targetDate: ms.date ? new Date(ms.date) : null,
+            status: ms.status,
+            deliverables: JSON.stringify(ms.deliverables || [])
+          });
+        }
+      }
+
+      // Store dependencies
+      if (projectData.dependencies && Array.isArray(projectData.dependencies)) {
+        for (const dep of projectData.dependencies) {
+          await storage.createDependency({
+            id: dep.id,
+            projectId: project.id,
+            name: dep.name,
+            dependencyType: dep.type,
+            status: dep.status,
+            description: dep.description
+          });
+        }
+      }
+
+      // Store risks
+      if (projectData.risks && Array.isArray(projectData.risks)) {
+        for (const risk of projectData.risks) {
+          await storage.createRisk({
+            id: risk.id,
+            projectId: project.id,
+            name: risk.name,
+            probability: risk.probability,
+            impact: risk.impact,
+            status: risk.status,
+            mitigation: risk.mitigation,
+            owner: risk.owner
+          });
+        }
+      }
+
+      // Store financials
+      if (projectData.financials) {
+        await storage.upsertProjectFinancials({
+          projectId: project.id,
+          capitalex: projectData.financials.capitalex?.toString(),
+          opex: projectData.financials.opex?.toString(),
+          contingency: projectData.financials.contingency?.toString(),
+          npv: projectData.financials.npv?.toString(),
+          irr: projectData.financials.irr?.toString(),
+          paybackMonths: projectData.financials.paybackMonths?.toString()
+        });
+      }
 
       res.json({ 
         success: true, 
         projectId: project.id,
-        message: `Project "${projectData.name}" created successfully`,
+        message: `Project "${projectData.name}" ingested with full SAFe hierarchy`,
         agentActions: [
           { agent: 'TMO Agent', action: 'Team notification sent', status: 'completed' },
           { agent: 'Planning Agent', action: 'Kickoff meeting scheduled', status: 'completed' },
@@ -593,6 +734,106 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     } catch (error: any) {
       console.error("Project ingest error:", error);
       res.status(500).json({ error: "Failed to ingest project" });
+    }
+  });
+
+  // Full project with SAFe hierarchy
+  app.get("/api/projects/:id/full", async (req, res) => {
+    try {
+      const fullProject = await storage.getFullProject(req.params.id);
+      if (!fullProject) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+      res.json(fullProject);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch full project" });
+    }
+  });
+
+  // Features endpoints
+  app.get("/api/projects/:id/features", async (req, res) => {
+    try {
+      const projectFeatures = await storage.getFeatures(req.params.id);
+      res.json(projectFeatures);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch features" });
+    }
+  });
+
+  // Stories endpoints
+  app.get("/api/projects/:id/stories", async (req, res) => {
+    try {
+      const projectStories = await storage.getStoriesByProject(req.params.id);
+      res.json(projectStories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stories" });
+    }
+  });
+
+  // Tasks endpoints
+  app.get("/api/projects/:id/tasks", async (req, res) => {
+    try {
+      const projectTasks = await storage.getTasksByProject(req.params.id);
+      res.json(projectTasks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+  });
+
+  // Resources endpoints
+  app.get("/api/projects/:id/resources", async (req, res) => {
+    try {
+      const projectResources = await storage.getResources(req.params.id);
+      res.json(projectResources);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch resources" });
+    }
+  });
+
+  // Milestones endpoints
+  app.get("/api/projects/:id/milestones", async (req, res) => {
+    try {
+      const projectMilestones = await storage.getMilestones(req.params.id);
+      res.json(projectMilestones);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch milestones" });
+    }
+  });
+
+  // Risks endpoints
+  app.get("/api/projects/:id/risks", async (req, res) => {
+    try {
+      const projectRisks = await storage.getRisks(req.params.id);
+      res.json(projectRisks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch risks" });
+    }
+  });
+
+  // All projects with counts (enriched list)
+  app.get("/api/projects/enriched", async (req, res) => {
+    try {
+      const allProjects = await storage.getProjects();
+      const enrichedList = await Promise.all(allProjects.map(async (p) => {
+        const [feats, strs, tsks, ress, deps] = await Promise.all([
+          storage.getFeatures(p.id),
+          storage.getStoriesByProject(p.id),
+          storage.getTasksByProject(p.id),
+          storage.getResources(p.id),
+          storage.getDependencies(p.id)
+        ]);
+        return {
+          ...p,
+          featureCount: feats.length,
+          storyCount: strs.length,
+          taskCount: tsks.length,
+          resourceCount: ress.length,
+          dependencyCount: deps.length
+        };
+      }));
+      res.json(enrichedList);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch enriched projects" });
     }
   });
 

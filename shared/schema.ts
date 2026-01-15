@@ -61,6 +61,23 @@ export const projects = pgTable("projects", {
   businessUnitId: varchar("business_unit_id"),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
+  priority: text("priority").default("medium"),
+  expectedRoi: text("expected_roi"),
+  roiValue: text("roi_value"),
+  artName: text("art_name"),
+  portfolioTheme: text("portfolio_theme"),
+  safeStage: text("safe_stage").default("funnel"),
+  currentPi: text("current_pi"),
+  totalPis: text("total_pis"),
+  velocity: text("velocity"),
+  predictability: text("predictability"),
+  flowEfficiency: text("flow_efficiency"),
+  epicId: text("epic_id"),
+  epicName: text("epic_name"),
+  epicProgress: text("epic_progress"),
+  budgetSpent: text("budget_spent"),
+  budgetTotal: text("budget_total"),
+  budgetUnit: text("budget_unit").default("$m"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -71,6 +88,173 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+
+export const features = pgTable("features", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").default("backlog"),
+  storyPoints: text("story_points"),
+  completedPoints: text("completed_points"),
+  priority: text("priority").default("medium"),
+  targetPi: text("target_pi"),
+  acceptanceCriteria: text("acceptance_criteria"),
+  wsjfScore: text("wsjf_score"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFeatureSchema = createInsertSchema(features).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertFeature = z.infer<typeof insertFeatureSchema>;
+export type Feature = typeof features.$inferSelect;
+
+export const stories = pgTable("stories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  featureId: varchar("feature_id").notNull(),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").default("backlog"),
+  storyPoints: text("story_points"),
+  sprint: text("sprint"),
+  assignedTeam: text("assigned_team"),
+  acceptanceCriteria: text("acceptance_criteria"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertStorySchema = createInsertSchema(stories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertStory = z.infer<typeof insertStorySchema>;
+export type Story = typeof stories.$inferSelect;
+
+export const tasks = pgTable("tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull(),
+  featureId: varchar("feature_id").notNull(),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").default("todo"),
+  effortHours: text("effort_hours"),
+  assignee: text("assignee"),
+  skills: text("skills"),
+  priority: text("priority").default("medium"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type Task = typeof tasks.$inferSelect;
+
+export const resources = pgTable("resources", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  allocation: text("allocation"),
+  team: text("team"),
+  skills: text("skills"),
+  costRate: text("cost_rate"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertResourceSchema = createInsertSchema(resources).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertResource = z.infer<typeof insertResourceSchema>;
+export type Resource = typeof resources.$inferSelect;
+
+export const milestones = pgTable("milestones", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  targetDate: timestamp("target_date"),
+  status: text("status").default("pending"),
+  deliverables: text("deliverables"),
+  piNumber: text("pi_number"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMilestoneSchema = createInsertSchema(milestones).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertMilestone = z.infer<typeof insertMilestoneSchema>;
+export type Milestone = typeof milestones.$inferSelect;
+
+export const dependencies = pgTable("dependencies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  dependencyType: text("dependency_type").default("related"),
+  status: text("status").default("green"),
+  description: text("description"),
+  targetProjectId: varchar("target_project_id"),
+  impactIfDelayed: text("impact_if_delayed"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDependencySchema = createInsertSchema(dependencies).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDependency = z.infer<typeof insertDependencySchema>;
+export type Dependency = typeof dependencies.$inferSelect;
+
+export const projectFinancials = pgTable("project_financials", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().unique(),
+  capitalex: text("capitalex"),
+  opex: text("opex"),
+  contingency: text("contingency"),
+  npv: text("npv"),
+  irr: text("irr"),
+  paybackMonths: text("payback_months"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertProjectFinancialsSchema = createInsertSchema(projectFinancials).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProjectFinancials = z.infer<typeof insertProjectFinancialsSchema>;
+export type ProjectFinancials = typeof projectFinancials.$inferSelect;
+
+export const risks = pgTable("risks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  probability: text("probability").default("medium"),
+  impact: text("impact").default("medium"),
+  status: text("status").default("open"),
+  mitigation: text("mitigation"),
+  owner: text("owner"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertRiskSchema = createInsertSchema(risks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRisk = z.infer<typeof insertRiskSchema>;
+export type Risk = typeof risks.$inferSelect;
 
 export const policyBusinessUnitLinks = pgTable("policy_business_unit_links", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
