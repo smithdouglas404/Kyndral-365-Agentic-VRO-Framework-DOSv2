@@ -31,7 +31,7 @@ export default function Home() {
           >
             {/* Logo */}
             <div className="mb-2">
-              <img src={nexteraLogo} alt="NextEra Energy" className="h-14 bg-white/90 rounded px-2 py-1" />
+              <img src={nexteraLogo} alt="NextEra Energy" className="h-12" />
             </div>
             
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
