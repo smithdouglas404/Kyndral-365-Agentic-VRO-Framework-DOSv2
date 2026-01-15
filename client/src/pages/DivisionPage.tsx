@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { divisions, aiAlerts, industryBenchmarks } from "@/lib/lgData";
+import { formatMoney } from "@/lib/formatters";
 import { getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
 import { useEnrichedProjects } from "@/hooks/useProjects";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
@@ -133,13 +134,6 @@ export default function DivisionPage() {
     "Target": typeof kpi.target2025 === "number" ? kpi.target2025 : 0
   }));
 
-  const formatMoney = (valueInMillions: number): string => {
-    if (valueInMillions >= 1000) {
-      return `$${(valueInMillions / 1000).toFixed(1)}B`;
-    }
-    return `$${valueInMillions}m`;
-  };
-
   const profitTrend = [
     { year: "2023", profit: division.profit2023 },
     { year: "2024", profit: division.profit2024 },
@@ -239,7 +233,7 @@ export default function DivisionPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip formatter={(value) => [`$${value}m`, "Profit"]} />
+                      <Tooltip formatter={(value) => [formatMoney(value as number), "Profit"]} />
                       <Line type="monotone" dataKey="profit" stroke={division.color} strokeWidth={3} dot={{ fill: division.color, strokeWidth: 2, r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -261,7 +255,7 @@ export default function DivisionPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Realized</span>
-                          <span className="text-xl font-bold text-teal-700">${portfolioData.valueRealized}m</span>
+                          <span className="text-xl font-bold text-teal-700">{formatMoney(portfolioData.valueRealized)}</span>
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Programs</span>
@@ -710,7 +704,7 @@ export default function DivisionPage() {
                 <div className="text-sm text-red-600">Critical</div>
               </Card>
               <Card className="p-4 bg-blue-50 border-blue-200">
-                <div className="text-2xl font-bold text-blue-700">${divisionProjects.reduce((sum, p) => sum + p.roiValue, 0)}m</div>
+                <div className="text-2xl font-bold text-blue-700">{formatMoney(divisionProjects.reduce((sum, p) => sum + p.roiValue, 0))}</div>
                 <div className="text-sm text-blue-600">Total Expected ROI</div>
               </Card>
             </div>

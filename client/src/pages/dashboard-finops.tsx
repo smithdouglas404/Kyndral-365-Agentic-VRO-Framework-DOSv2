@@ -16,6 +16,7 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { divisions } from '@/lib/lgData';
+import { formatMoney } from '@/lib/formatters';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
@@ -401,7 +402,7 @@ export default function FinOpsDashboard() {
                       style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
                     >
                       <p className="text-sm font-medium text-gray-500">{division.name}</p>
-                      <p className="text-2xl font-bold" style={{ color: division.color }}>${division.profit2024}M</p>
+                      <p className="text-2xl font-bold" style={{ color: division.color }}>{formatMoney(division.profit2024)}</p>
                       <div className="flex items-center gap-1 mt-1">
                         {division.changePercent >= 0 ? (
                           <ArrowUpRight className="h-4 w-4 text-green-500" />

@@ -27,6 +27,7 @@ import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { divisions, lgCompanyOverview, aiAlerts } from "@/lib/lgData";
+import { formatMoney } from "@/lib/formatters";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
@@ -562,7 +563,7 @@ function DashboardContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
-                      <p className="text-lg font-bold" style={{ color: division.color }}>${division.profit2024}m</p>
+                      <p className="text-lg font-bold" style={{ color: division.color }}>{formatMoney(division.profit2024)}</p>
                       <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
                         {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
                       </Badge>
