@@ -38,12 +38,17 @@ import {
   type FieldMapping, type InsertFieldMapping,
   type IngestionJob, type InsertIngestionJob,
   type McpToolMapping, type InsertMcpToolMapping,
+  type Division, type InsertDivision,
+  type DivisionKpi, type InsertDivisionKpi,
+  type DivisionOkr, type InsertDivisionOkr,
+  type DivisionRisk, type InsertDivisionRisk,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
   okrs, keyResults, kpis,
   portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints,
-  sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings
+  sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings,
+  divisions, divisionKpis, divisionOkrs, divisionRisks
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -186,6 +191,24 @@ export interface IStorage {
     valueStreams: (ValueStream & { arts: (Art & { teams: Team[]; programIncrements: ProgramIncrement[] })[] })[];
     epics: Epic[];
   } | undefined>;
+  
+  // Division Methods (NextEra Business Segments)
+  getDivisions(): Promise<Division[]>;
+  getDivision(id: string): Promise<Division | undefined>;
+  createDivision(division: InsertDivision): Promise<Division>;
+  getDivisionKpis(divisionId: string): Promise<DivisionKpi[]>;
+  createDivisionKpi(kpi: InsertDivisionKpi): Promise<DivisionKpi>;
+  getDivisionOkrs(divisionId: string): Promise<DivisionOkr[]>;
+  createDivisionOkr(okr: InsertDivisionOkr): Promise<DivisionOkr>;
+  getDivisionRisks(divisionId: string): Promise<DivisionRisk[]>;
+  createDivisionRisk(risk: InsertDivisionRisk): Promise<DivisionRisk>;
+  getFullDivision(divisionId: string): Promise<{
+    division: Division;
+    kpis: DivisionKpi[];
+    okrs: DivisionOkr[];
+    risks: DivisionRisk[];
+  } | undefined>;
+  seedDivisions(): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -1487,10 +1510,184 @@ export class DatabaseStorage implements IStorage {
       epics: portfolioEpics
     };
   }
+
+  // Division Methods
+  async getDivisions(): Promise<Division[]> {
+    return await db.select().from(divisions);
+  }
+
+  async getDivision(id: string): Promise<Division | undefined> {
+    const result = await db.select().from(divisions).where(eq(divisions.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createDivision(division: InsertDivision): Promise<Division> {
+    const result = await db.insert(divisions).values(division).returning();
+    return result[0];
+  }
+
+  async getDivisionKpis(divisionId: string): Promise<DivisionKpi[]> {
+    return await db.select().from(divisionKpis).where(eq(divisionKpis.divisionId, divisionId));
+  }
+
+  async createDivisionKpi(kpi: InsertDivisionKpi): Promise<DivisionKpi> {
+    const result = await db.insert(divisionKpis).values(kpi).returning();
+    return result[0];
+  }
+
+  async getDivisionOkrs(divisionId: string): Promise<DivisionOkr[]> {
+    return await db.select().from(divisionOkrs).where(eq(divisionOkrs.divisionId, divisionId));
+  }
+
+  async createDivisionOkr(okr: InsertDivisionOkr): Promise<DivisionOkr> {
+    const result = await db.insert(divisionOkrs).values(okr).returning();
+    return result[0];
+  }
+
+  async getDivisionRisks(divisionId: string): Promise<DivisionRisk[]> {
+    return await db.select().from(divisionRisks).where(eq(divisionRisks.divisionId, divisionId));
+  }
+
+  async createDivisionRisk(risk: InsertDivisionRisk): Promise<DivisionRisk> {
+    const result = await db.insert(divisionRisks).values(risk).returning();
+    return result[0];
+  }
+
+  async getFullDivision(divisionId: string): Promise<{
+    division: Division;
+    kpis: DivisionKpi[];
+    okrs: DivisionOkr[];
+    risks: DivisionRisk[];
+  } | undefined> {
+    const division = await this.getDivision(divisionId);
+    if (!division) return undefined;
+    
+    const [kpis, okrs, risks] = await Promise.all([
+      this.getDivisionKpis(divisionId),
+      this.getDivisionOkrs(divisionId),
+      this.getDivisionRisks(divisionId)
+    ]);
+    
+    return { division, kpis, okrs, risks };
+  }
+
+  async seedDivisions(): Promise<void> {
+    const existing = await db.select().from(divisions).limit(1);
+    if (existing.length > 0) return;
+
+    const divisionData: InsertDivision[] = [
+      {
+        id: "florida-power-light",
+        name: "Florida Power & Light",
+        ceo: "Armando Pimentel",
+        profit2023: 4850,
+        profit2024: 5200,
+        changePercent: 7,
+        description: "Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
+        color: "#0072CE"
+      },
+      {
+        id: "nextera-energy-resources",
+        name: "NextEra Energy Resources",
+        ceo: "Rebecca Kujawa",
+        profit2023: 2100,
+        profit2024: 2350,
+        changePercent: 12,
+        description: "World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
+        color: "#00A651"
+      },
+      {
+        id: "corporate-other",
+        name: "Corporate & Other",
+        ceo: "John Ketchum",
+        profit2023: 450,
+        profit2024: 480,
+        changePercent: 7,
+        description: "Corporate functions including finance, legal, IT, human resources, and other shared services supporting NextEra Energy operations.",
+        color: "#8B5CF6"
+      }
+    ];
+
+    for (const div of divisionData) {
+      await db.insert(divisions).values(div);
+    }
+
+    // Seed KPIs for FPL
+    const fplKpis: InsertDivisionKpi[] = [
+      { divisionId: "florida-power-light", name: "Operating Revenue", value2023: "17200", value2024: "18500", target2025: "19500", unit: "$m", trend: "up", status: "on-track" },
+      { divisionId: "florida-power-light", name: "Net Generating Capacity", value2023: "33500", value2024: "35052", target2025: "37000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "florida-power-light", name: "Customer Accounts", value2023: "5.7", value2024: "5.9", target2025: "6.1", unit: "m", trend: "up", status: "on-track" },
+      { divisionId: "florida-power-light", name: "System Reliability", value2023: "99.96", value2024: "99.98", target2025: "99.99", unit: "%", trend: "up", status: "on-track" }
+    ];
+
+    for (const kpi of fplKpis) {
+      await db.insert(divisionKpis).values(kpi);
+    }
+
+    // Seed KPIs for NEER
+    const neerKpis: InsertDivisionKpi[] = [
+      { divisionId: "nextera-energy-resources", name: "Operating Revenue", value2023: "6200", value2024: "6800", target2025: "7500", unit: "$m", trend: "up", status: "on-track" },
+      { divisionId: "nextera-energy-resources", name: "Wind Capacity", value2023: "21000", value2024: "22500", target2025: "25000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "nextera-energy-resources", name: "Solar Capacity", value2023: "5800", value2024: "7200", target2025: "9000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "nextera-energy-resources", name: "Battery Storage", value2023: "2800", value2024: "3700", target2025: "5000", unit: "MW", trend: "up", status: "on-track" }
+    ];
+
+    for (const kpi of neerKpis) {
+      await db.insert(divisionKpis).values(kpi);
+    }
+
+    // Seed OKRs
+    const divOkrs: InsertDivisionOkr[] = [
+      { 
+        divisionId: "florida-power-light", 
+        objective: "Accelerate grid modernization through automation",
+        keyResults: JSON.stringify([
+          { result: "Reduce outage duration", progress: 18, target: 5, unit: "minutes" },
+          { result: "Increase smart meter coverage", progress: 92, target: 100, unit: "%" },
+          { result: "Automate grid switching", progress: 75, target: 95, unit: "%" }
+        ]),
+        owner: "Armando Pimentel",
+        dueDate: "Q4 2025"
+      },
+      { 
+        divisionId: "nextera-energy-resources", 
+        objective: "Expand renewable energy generation capacity",
+        keyResults: JSON.stringify([
+          { result: "Add new wind capacity", progress: 1500, target: 3000, unit: "MW" },
+          { result: "Deploy solar installations", progress: 1200, target: 2000, unit: "MW" },
+          { result: "Secure long-term contracts", progress: 4, target: 8, unit: "GW" }
+        ]),
+        owner: "Rebecca Kujawa",
+        dueDate: "2026"
+      }
+    ];
+
+    for (const okr of divOkrs) {
+      await db.insert(divisionOkrs).values(okr);
+    }
+
+    // Seed Risks
+    const divRisks: InsertDivisionRisk[] = [
+      { divisionId: "florida-power-light", type: "Hurricane", level: "high", description: "Florida exposure to severe weather events", mitigation: "Grid hardening and storm preparation protocols" },
+      { divisionId: "florida-power-light", type: "Regulatory", level: "medium", description: "Rate case outcomes and regulatory changes", mitigation: "Proactive regulatory engagement" },
+      { divisionId: "nextera-energy-resources", type: "Supply Chain", level: "medium", description: "Solar panel and battery component availability", mitigation: "Diversified supplier relationships" },
+      { divisionId: "nextera-energy-resources", type: "Policy", level: "medium", description: "Changes to renewable energy incentives", mitigation: "Geographic and technology diversification" }
+    ];
+
+    for (const risk of divRisks) {
+      await db.insert(divisionRisks).values(risk);
+    }
+
+    console.log("[Seed] Seeded 3 divisions with KPIs, OKRs, and risks");
+  }
 }
 
 export const storage = new DatabaseStorage();
 
 storage.seedDemoData().catch(err => {
   console.error("Failed to seed demo data:", err);
+});
+
+storage.seedDivisions().catch(err => {
+  console.error("Failed to seed divisions:", err);
 });

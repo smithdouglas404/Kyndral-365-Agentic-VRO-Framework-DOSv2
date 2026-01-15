@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -53,19 +53,110 @@ export const insertBusinessUnitSchema = createInsertSchema(businessUnits).omit({
 export type InsertBusinessUnit = z.infer<typeof insertBusinessUnitSchema>;
 export type BusinessUnit = typeof businessUnits.$inferSelect;
 
+// ============================================================================
+// DIVISIONS - NextEra Energy Business Segments (from official filings)
+// ============================================================================
+
+export const divisions = pgTable("divisions", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  ceo: text("ceo"),
+  profit2023: integer("profit_2023"), // in millions
+  profit2024: integer("profit_2024"), // in millions
+  changePercent: real("change_percent"),
+  description: text("description"),
+  color: text("color"), // Brand color hex
+  portfolioId: varchar("portfolio_id"), // Link to SAFe portfolio
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDivisionSchema = createInsertSchema(divisions).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDivision = z.infer<typeof insertDivisionSchema>;
+export type Division = typeof divisions.$inferSelect;
+
+// Division KPIs - Key Performance Indicators by division
+export const divisionKpis = pgTable("division_kpis", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  divisionId: varchar("division_id").notNull().references(() => divisions.id),
+  name: text("name").notNull(),
+  value2023: text("value_2023"),
+  value2024: text("value_2024"),
+  target2025: text("target_2025"),
+  unit: text("unit"),
+  trend: text("trend").default("stable"), // up, down, stable
+  status: text("status").default("on-track"), // on-track, at-risk, off-track
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDivisionKpiSchema = createInsertSchema(divisionKpis).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDivisionKpi = z.infer<typeof insertDivisionKpiSchema>;
+export type DivisionKpi = typeof divisionKpis.$inferSelect;
+
+// Division OKRs - Objectives & Key Results by division
+export const divisionOkrs = pgTable("division_okrs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  divisionId: varchar("division_id").notNull().references(() => divisions.id),
+  objective: text("objective").notNull(),
+  keyResults: text("key_results"), // JSON array of key results
+  owner: text("owner"),
+  dueDate: text("due_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDivisionOkrSchema = createInsertSchema(divisionOkrs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDivisionOkr = z.infer<typeof insertDivisionOkrSchema>;
+export type DivisionOkr = typeof divisionOkrs.$inferSelect;
+
+// Division Risks - Risk registry by division
+export const divisionRisks = pgTable("division_risks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  divisionId: varchar("division_id").notNull().references(() => divisions.id),
+  type: text("type").notNull(),
+  level: text("level").default("medium"), // low, medium, high
+  description: text("description"),
+  mitigation: text("mitigation"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDivisionRiskSchema = createInsertSchema(divisionRisks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDivisionRisk = z.infer<typeof insertDivisionRiskSchema>;
+export type DivisionRisk = typeof divisionRisks.$inferSelect;
+
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   description: text("description"),
   status: text("status").default("active"),
   businessUnitId: varchar("business_unit_id"),
+  divisionId: varchar("division_id"), // FK to divisions (added for SAFe hierarchy)
+  portfolioId: varchar("portfolio_id"), // FK to portfolios (added for SAFe hierarchy)
+  valueStreamId: varchar("value_stream_id"), // FK to value_streams (added for SAFe hierarchy)
+  artId: varchar("art_id"), // FK to arts (added for SAFe hierarchy)
+  teamId: varchar("team_id"), // FK to teams (added for SAFe hierarchy)
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   priority: text("priority").default("medium"),
   expectedRoi: text("expected_roi"),
   roiValue: text("roi_value"),
-  artName: text("art_name"),
-  portfolioTheme: text("portfolio_theme"),
+  artName: text("art_name"), // Keep for backward compatibility
+  portfolioTheme: text("portfolio_theme"), // Keep for backward compatibility
   safeStage: text("safe_stage").default("funnel"),
   currentPi: text("current_pi"),
   totalPis: text("total_pis"),

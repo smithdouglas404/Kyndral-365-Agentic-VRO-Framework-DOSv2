@@ -1964,5 +1964,75 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // DIVISIONS API - NextEra Business Segments (DB-backed)
+  // ============================================================================
+  
+  app.get("/api/divisions", async (_req, res) => {
+    try {
+      const allDivisions = await storage.getDivisions();
+      res.json(allDivisions);
+    } catch (error: any) {
+      console.error("Get divisions error:", error);
+      res.status(500).json({ error: "Failed to get divisions" });
+    }
+  });
+
+  app.get("/api/divisions/:id", async (req, res) => {
+    try {
+      const division = await storage.getDivision(req.params.id);
+      if (!division) {
+        return res.status(404).json({ error: "Division not found" });
+      }
+      res.json(division);
+    } catch (error: any) {
+      console.error("Get division error:", error);
+      res.status(500).json({ error: "Failed to get division" });
+    }
+  });
+
+  app.get("/api/divisions/:id/full", async (req, res) => {
+    try {
+      const fullDivision = await storage.getFullDivision(req.params.id);
+      if (!fullDivision) {
+        return res.status(404).json({ error: "Division not found" });
+      }
+      res.json(fullDivision);
+    } catch (error: any) {
+      console.error("Get full division error:", error);
+      res.status(500).json({ error: "Failed to get full division" });
+    }
+  });
+
+  app.get("/api/divisions/:id/kpis", async (req, res) => {
+    try {
+      const kpis = await storage.getDivisionKpis(req.params.id);
+      res.json(kpis);
+    } catch (error: any) {
+      console.error("Get division KPIs error:", error);
+      res.status(500).json({ error: "Failed to get division KPIs" });
+    }
+  });
+
+  app.get("/api/divisions/:id/okrs", async (req, res) => {
+    try {
+      const okrs = await storage.getDivisionOkrs(req.params.id);
+      res.json(okrs);
+    } catch (error: any) {
+      console.error("Get division OKRs error:", error);
+      res.status(500).json({ error: "Failed to get division OKRs" });
+    }
+  });
+
+  app.get("/api/divisions/:id/risks", async (req, res) => {
+    try {
+      const risks = await storage.getDivisionRisks(req.params.id);
+      res.json(risks);
+    } catch (error: any) {
+      console.error("Get division risks error:", error);
+      res.status(500).json({ error: "Failed to get division risks" });
+    }
+  });
+
   return httpServer;
 }
