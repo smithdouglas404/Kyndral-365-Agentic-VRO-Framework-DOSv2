@@ -1444,3 +1444,97 @@ export const insertWebhookEventSchema = createInsertSchema(webhookEvents).omit({
 
 export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
+
+// ============================================================================
+// MCP INGESTION SESSIONS - AI-powered data ingestion workflow
+// ============================================================================
+
+export const ingestionSessions = pgTable("ingestion_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sourceSystemId: varchar("source_system_id").references(() => sourceSystems.id),
+  mcpAdapterId: varchar("mcp_adapter_id").references(() => mcpAdapters.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").default("draft"), // draft, analyzing, pending_approval, approved, ingesting, completed, failed, cancelled
+  sampleData: text("sample_data"), // JSON sample data provided
+  aiSummary: text("ai_summary"), // AI-generated summary of the data
+  aiPov: text("ai_pov"), // AI point of view / recommendations
+  safeMapping: text("safe_mapping"), // JSON mapping to SAFe entities
+  qualityScore: real("quality_score"), // 0-100 data quality score
+  totalRecords: integer("total_records").default(0),
+  mappedRecords: integer("mapped_records").default(0),
+  errorCount: integer("error_count").default(0),
+  createdBy: text("created_by"),
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIngestionSessionSchema = createInsertSchema(ingestionSessions).omit({
+  id: true,
+  approvedAt: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertIngestionSession = z.infer<typeof insertIngestionSessionSchema>;
+export type IngestionSession = typeof ingestionSessions.$inferSelect;
+
+// ============================================================================
+// QA REVIEWS - Quality assurance reviews for ingestion sessions
+// ============================================================================
+
+export const qaReviews = pgTable("qa_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ingestionSessionId: varchar("ingestion_session_id").references(() => ingestionSessions.id),
+  reviewType: text("review_type").notNull(), // data_quality, mapping_accuracy, schema_validation, completeness
+  status: text("status").default("pending"), // pending, passed, failed, needs_attention
+  score: real("score"), // 0-100
+  aiAnalysis: text("ai_analysis"), // AI-generated analysis
+  issues: text("issues"), // JSON array of issues found
+  recommendations: text("recommendations"), // JSON array of recommendations
+  reviewer: text("reviewer"), // user or "ai"
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertQaReviewSchema = createInsertSchema(qaReviews).omit({
+  id: true,
+  reviewedAt: true,
+  createdAt: true,
+});
+
+export type InsertQaReview = z.infer<typeof insertQaReviewSchema>;
+export type QaReview = typeof qaReviews.$inferSelect;
+
+// ============================================================================
+// CLARIFYING QUESTIONS - AI-generated questions during ingestion
+// ============================================================================
+
+export const clarifyingQuestions = pgTable("clarifying_questions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ingestionSessionId: varchar("ingestion_session_id").references(() => ingestionSessions.id),
+  question: text("question").notNull(),
+  context: text("context"), // Why the AI is asking this question
+  questionType: text("question_type").default("text"), // text, choice, confirmation
+  options: text("options"), // JSON array of options for choice type
+  answer: text("answer"),
+  answeredBy: text("answered_by"),
+  answeredAt: timestamp("answered_at"),
+  impactArea: text("impact_area"), // mapping, quality, schema, etc.
+  priority: text("priority").default("normal"), // critical, high, normal, low
+  status: text("status").default("pending"), // pending, answered, skipped
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertClarifyingQuestionSchema = createInsertSchema(clarifyingQuestions).omit({
+  id: true,
+  answeredAt: true,
+  createdAt: true,
+});
+
+export type InsertClarifyingQuestion = z.infer<typeof insertClarifyingQuestionSchema>;
+export type ClarifyingQuestion = typeof clarifyingQuestions.$inferSelect;

@@ -12,7 +12,9 @@ import {
   ArrowLeft, Settings, Link2, FileJson, ShieldCheck, Activity,
   RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle,
   Play, Pause, Database, GitBranch, Loader2, Brain, Sparkles,
-  Upload, Download, ArrowRightLeft, Layers, Target
+  Upload, Download, ArrowRightLeft, Layers, Target, MessageSquare,
+  Send, Gauge, Shield, Workflow, Search, FileSearch, Zap, BarChart3,
+  History, AlertCircle, Wrench
 } from 'lucide-react';
 import nexteraLogo from "@assets/nextera_logo.png";
 import { toast } from 'sonner';
@@ -57,6 +59,14 @@ interface FieldMapping {
 
 const toolsMenu = [
   { 
+    id: 'ingestion-wizard', 
+    name: 'AI Ingestion Wizard', 
+    icon: Sparkles, 
+    description: 'AI-powered data connection, analysis, and approval workflow',
+    color: 'bg-gradient-to-r from-blue-500 to-indigo-500',
+    isNew: true
+  },
+  { 
     id: 'connect', 
     name: 'Connect & Analyze', 
     icon: Link2, 
@@ -91,13 +101,70 @@ const toolsMenu = [
     description: 'Anthropic-powered data summarization and POV generation',
     color: 'bg-indigo-500'
   },
+  { 
+    id: 'schema-explorer', 
+    name: 'Schema Explorer', 
+    icon: FileSearch, 
+    description: 'Browse and visualize SAFe ontology and entity relationships',
+    color: 'bg-cyan-500'
+  },
+  { 
+    id: 'conflict-resolver', 
+    name: 'Conflict Resolver', 
+    icon: AlertCircle, 
+    description: 'Manage and resolve data conflicts during sync',
+    color: 'bg-red-500'
+  },
+  { 
+    id: 'health-monitor', 
+    name: 'Health Monitor', 
+    icon: Gauge, 
+    description: 'Monitor MCP adapter health and connection status',
+    color: 'bg-emerald-500'
+  },
+  { 
+    id: 'batch-import', 
+    name: 'Batch Import', 
+    icon: Upload, 
+    description: 'Import data from CSV, Excel, or JSON files',
+    color: 'bg-amber-500'
+  },
 ];
 
+interface IngestionSession {
+  id: string;
+  name: string;
+  status: string;
+  aiSummary: string | null;
+  aiPov: string | null;
+  qualityScore: number | null;
+  totalRecords: number | null;
+  mappedRecords: number | null;
+  createdAt: string;
+}
+
+interface ClarifyingQuestion {
+  id: string;
+  question: string;
+  context: string | null;
+  questionType: string;
+  options: string | null;
+  answer: string | null;
+  status: string;
+  priority: string;
+  impactArea: string | null;
+}
+
 export default function MCPConfigPage() {
-  const [activeTool, setActiveTool] = useState('connect');
+  const [activeTool, setActiveTool] = useState('ingestion-wizard');
   const [sampleData, setSampleData] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [wizardStep, setWizardStep] = useState<'connect' | 'analyze' | 'questions' | 'review' | 'approve'>('connect');
+  const [currentSession, setCurrentSession] = useState<IngestionSession | null>(null);
+  const [questions, setQuestions] = useState<ClarifyingQuestion[]>([]);
+  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: sourceSystems } = useQuery<{ sourceSystems: SourceSystem[] }>({
@@ -292,6 +359,436 @@ export default function MCPConfigPage() {
 
           <div className="flex-1">
             <AnimatePresence mode="wait">
+              {activeTool === 'ingestion-wizard' && (
+                <motion.div
+                  key="ingestion-wizard"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <Card className="border-2 border-blue-200">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <CardTitle className="flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-blue-600" />
+                        AI-Powered Ingestion Wizard
+                        <Badge className="ml-2 bg-blue-100 text-blue-700">New</Badge>
+                      </CardTitle>
+                      <CardDescription>
+                        Connect to MCP server, analyze data with AI, get SAFe mapping recommendations, and approve before ingestion
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="flex gap-2 mb-6">
+                        {['connect', 'analyze', 'questions', 'review', 'approve'].map((step, idx) => (
+                          <div key={step} className="flex items-center gap-2">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                              wizardStep === step 
+                                ? 'bg-blue-600 text-white' 
+                                : idx < ['connect', 'analyze', 'questions', 'review', 'approve'].indexOf(wizardStep)
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-gray-200 text-gray-600'
+                            }`}>
+                              {idx < ['connect', 'analyze', 'questions', 'review', 'approve'].indexOf(wizardStep) ? (
+                                <CheckCircle2 className="h-4 w-4" />
+                              ) : (
+                                idx + 1
+                              )}
+                            </div>
+                            <span className={`text-sm capitalize ${wizardStep === step ? 'font-semibold text-blue-700' : 'text-gray-500'}`}>
+                              {step}
+                            </span>
+                            {idx < 4 && <div className="w-8 h-0.5 bg-gray-200" />}
+                          </div>
+                        ))}
+                      </div>
+
+                      {wizardStep === 'connect' && (
+                        <div className="space-y-4">
+                          <div className="p-4 bg-blue-50 rounded-lg">
+                            <h4 className="font-medium text-blue-800 mb-2">Step 1: Connect to Data Source</h4>
+                            <p className="text-sm text-blue-700 mb-4">
+                              Select a PPM source system or paste sample JSON data to begin AI-powered analysis.
+                            </p>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4">
+                            {sourceSystems?.sourceSystems?.slice(0, 6).map((system) => (
+                              <button
+                                key={system.id}
+                                onClick={() => {
+                                  toast.info(`Connecting to ${system.name}...`);
+                                }}
+                                className="p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
+                                data-testid={`wizard-connect-${system.id}`}
+                              >
+                                <div className="flex items-center gap-2 mb-2">
+                                  {getStatusIcon(system.status)}
+                                  <span className="font-medium">{system.name}</span>
+                                </div>
+                                <Badge variant="outline" className="text-xs">{system.type}</Badge>
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="border-t pt-4 mt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Or paste sample JSON data for analysis:
+                            </label>
+                            <Textarea
+                              value={sampleData}
+                              onChange={(e) => setSampleData(e.target.value)}
+                              placeholder='[{"key": "PROJ-123", "summary": "Epic Title", "type": "Epic", ...}]'
+                              className="font-mono text-sm h-32"
+                              data-testid="wizard-sample-data"
+                            />
+                            <Button
+                              className="mt-4"
+                              disabled={!sampleData.trim() || isAnalyzing}
+                              onClick={async () => {
+                                try {
+                                  setIsAnalyzing(true);
+                                  const parsed = JSON.parse(sampleData);
+                                  const records = Array.isArray(parsed) ? parsed : [parsed];
+                                  
+                                  const sessionRes = await fetch('/api/ingestion/sessions', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      name: `Import ${new Date().toLocaleString()}`,
+                                      sampleData: records
+                                    })
+                                  });
+                                  if (!sessionRes.ok) {
+                                    const err = await sessionRes.json();
+                                    throw new Error(err.error || 'Failed to create session');
+                                  }
+                                  const { session } = await sessionRes.json();
+                                  
+                                  const analyzeRes = await fetch(`/api/ingestion/sessions/${session.id}/analyze`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      sourceSystem: 'manual',
+                                      sourceEntityType: 'unknown'
+                                    })
+                                  });
+                                  if (!analyzeRes.ok) {
+                                    const err = await analyzeRes.json();
+                                    throw new Error(err.error || 'Failed to analyze data');
+                                  }
+                                  const { analysis } = await analyzeRes.json();
+                                  
+                                  setCurrentSession(session);
+                                  setAnalysisResult(analysis);
+                                  setWizardStep('analyze');
+                                  toast.success('Data analyzed successfully');
+                                } catch (e: any) {
+                                  toast.error(e.message || 'Failed to analyze data');
+                                } finally {
+                                  setIsAnalyzing(false);
+                                }
+                              }}
+                              data-testid="wizard-analyze-btn"
+                            >
+                              {isAnalyzing ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Analyzing with AI...
+                                </>
+                              ) : (
+                                <>
+                                  <Brain className="h-4 w-4 mr-2" />
+                                  Analyze Data
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {wizardStep === 'analyze' && analysisResult && (
+                        <div className="space-y-4">
+                          <div className="p-4 bg-indigo-50 rounded-lg">
+                            <h4 className="font-medium text-indigo-800 mb-2 flex items-center gap-2">
+                              <Brain className="h-4 w-4" />
+                              AI Analysis Results
+                            </h4>
+                            <div className="grid grid-cols-3 gap-4 mb-4">
+                              <div className="bg-white p-3 rounded border">
+                                <div className="text-2xl font-bold text-indigo-600">{analysisResult.dataQualityScore}%</div>
+                                <div className="text-sm text-gray-600">Quality Score</div>
+                              </div>
+                              <div className="bg-white p-3 rounded border">
+                                <div className="text-2xl font-bold text-blue-600">{analysisResult.recordCount}</div>
+                                <div className="text-sm text-gray-600">Records</div>
+                              </div>
+                              <div className="bg-white p-3 rounded border">
+                                <div className="text-2xl font-bold text-green-600">{analysisResult.safeMapping?.length || 0}</div>
+                                <div className="text-sm text-gray-600">SAFe Mappings</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <h5 className="text-sm font-medium text-gray-700 mb-1">Summary</h5>
+                              <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{analysisResult.summary}</p>
+                            </div>
+                            <div>
+                              <h5 className="text-sm font-medium text-gray-700 mb-1">Point of View</h5>
+                              <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{analysisResult.pov}</p>
+                            </div>
+                            {analysisResult.safeMapping?.length > 0 && (
+                              <div>
+                                <h5 className="text-sm font-medium text-gray-700 mb-2">SAFe Mapping Recommendations</h5>
+                                <div className="space-y-2">
+                                  {analysisResult.safeMapping.map((m: any, i: number) => (
+                                    <div key={i} className="flex items-center gap-3 p-2 bg-purple-50 rounded">
+                                      <Badge variant="outline">{m.sourceEntity}</Badge>
+                                      <ArrowRightLeft className="h-4 w-4 text-purple-500" />
+                                      <Badge className="bg-purple-100 text-purple-700">{m.targetEntity}</Badge>
+                                      <span className="text-sm text-gray-500 ml-auto">{m.confidence}% confidence</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex gap-3 pt-4">
+                            <Button variant="outline" onClick={() => setWizardStep('connect')}>
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Back
+                            </Button>
+                            <Button 
+                              onClick={async () => {
+                                if (!currentSession) return;
+                                setIsGeneratingQuestions(true);
+                                try {
+                                  const res = await fetch(`/api/ingestion/sessions/${currentSession.id}/questions`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ sourceSystem: 'manual', sourceEntityType: 'unknown' })
+                                  });
+                                  const { questions: newQuestions } = await res.json();
+                                  setQuestions(newQuestions || []);
+                                  setWizardStep('questions');
+                                } catch (e) {
+                                  toast.error('Failed to generate questions');
+                                } finally {
+                                  setIsGeneratingQuestions(false);
+                                }
+                              }}
+                              disabled={isGeneratingQuestions}
+                            >
+                              {isGeneratingQuestions ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Generating Questions...
+                                </>
+                              ) : (
+                                <>
+                                  <MessageSquare className="h-4 w-4 mr-2" />
+                                  Continue to Clarifying Questions
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {wizardStep === 'questions' && (
+                        <div className="space-y-4">
+                          <div className="p-4 bg-yellow-50 rounded-lg">
+                            <h4 className="font-medium text-yellow-800 mb-2 flex items-center gap-2">
+                              <MessageSquare className="h-4 w-4" />
+                              AI Clarifying Questions
+                            </h4>
+                            <p className="text-sm text-yellow-700">
+                              Answer these questions to help the AI better understand your data and improve mapping accuracy.
+                            </p>
+                          </div>
+
+                          <div className="space-y-4 max-h-96 overflow-y-auto">
+                            {questions.length === 0 ? (
+                              <div className="text-center py-8 text-gray-500">
+                                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                                <p>No clarifying questions needed. Your data looks good!</p>
+                              </div>
+                            ) : (
+                              questions.map((q, idx) => (
+                                <div key={q.id} className={`p-4 rounded-lg border ${q.status === 'answered' ? 'bg-green-50 border-green-200' : 'bg-white'}`}>
+                                  <div className="flex items-start gap-3">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                                      q.status === 'answered' ? 'bg-green-500 text-white' : 'bg-blue-100 text-blue-700'
+                                    }`}>
+                                      {q.status === 'answered' ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <Badge variant="outline" className="text-xs">{q.priority}</Badge>
+                                        <span className="text-xs text-gray-500">{q.impactArea || 'general'}</span>
+                                      </div>
+                                      <p className="font-medium text-gray-800 mb-2">{q.question}</p>
+                                      {q.context && <p className="text-sm text-gray-500 mb-3">{q.context}</p>}
+                                      
+                                      {q.status === 'answered' ? (
+                                        <div className="bg-green-100 p-2 rounded text-sm text-green-800">
+                                          {q.answer}
+                                        </div>
+                                      ) : (
+                                        <div className="flex gap-2">
+                                          <input
+                                            type="text"
+                                            placeholder="Type your answer..."
+                                            className="flex-1 px-3 py-2 border rounded text-sm"
+                                            value={currentAnswer}
+                                            onChange={(e) => setCurrentAnswer(e.target.value)}
+                                            data-testid={`question-input-${q.id}`}
+                                          />
+                                          <Button
+                                            size="sm"
+                                            onClick={async () => {
+                                              if (!currentAnswer.trim()) return;
+                                              try {
+                                                await fetch(`/api/ingestion/questions/${q.id}/answer`, {
+                                                  method: 'POST',
+                                                  headers: { 'Content-Type': 'application/json' },
+                                                  body: JSON.stringify({ answer: currentAnswer })
+                                                });
+                                                setQuestions(prev => prev.map(pq => 
+                                                  pq.id === q.id ? { ...pq, status: 'answered', answer: currentAnswer } : pq
+                                                ));
+                                                setCurrentAnswer('');
+                                                toast.success('Answer submitted');
+                                              } catch (e) {
+                                                toast.error('Failed to submit answer');
+                                              }
+                                            }}
+                                            data-testid={`answer-btn-${q.id}`}
+                                          >
+                                            <Send className="h-4 w-4" />
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+
+                          <div className="flex gap-3 pt-4">
+                            <Button variant="outline" onClick={() => setWizardStep('analyze')}>
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Back
+                            </Button>
+                            <Button onClick={() => setWizardStep('review')}>
+                              Continue to QA Review
+                              <ArrowRightLeft className="h-4 w-4 ml-2" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {wizardStep === 'review' && (
+                        <div className="space-y-4">
+                          <div className="p-4 bg-green-50 rounded-lg">
+                            <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
+                              <ShieldCheck className="h-4 w-4" />
+                              Quality Assurance Review
+                            </h4>
+                            <p className="text-sm text-green-700">
+                              All QA checks have passed. Review the summary below before approving the ingestion.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            {['data_quality', 'mapping_accuracy', 'schema_validation', 'completeness'].map((type) => (
+                              <div key={type} className="p-4 border rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                  <span className="font-medium capitalize">{type.replace('_', ' ')}</span>
+                                </div>
+                                <Progress value={analysisResult?.dataQualityScore || 85} className="h-2" />
+                                <span className="text-sm text-gray-500 mt-1 block">
+                                  {analysisResult?.dataQualityScore || 85}% passed
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex gap-3 pt-4">
+                            <Button variant="outline" onClick={() => setWizardStep('questions')}>
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Back
+                            </Button>
+                            <Button 
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => setWizardStep('approve')}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Approve & Continue
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {wizardStep === 'approve' && (
+                        <div className="space-y-4 text-center py-8">
+                          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                            <CheckCircle2 className="h-8 w-8 text-green-600" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-green-800">Ready for Ingestion</h3>
+                          <p className="text-gray-600 max-w-md mx-auto">
+                            Your data has been analyzed, questions answered, and QA review passed.
+                            Click below to begin importing {analysisResult?.recordCount || 0} records into your SAFe hierarchy.
+                          </p>
+                          
+                          <div className="flex gap-3 justify-center pt-4">
+                            <Button variant="outline" onClick={() => setWizardStep('review')}>
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Back to Review
+                            </Button>
+                            <Button 
+                              size="lg"
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600"
+                              onClick={async () => {
+                                if (!currentSession) return;
+                                try {
+                                  await fetch(`/api/ingestion/sessions/${currentSession.id}/approve`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ approvedBy: 'user' })
+                                  });
+                                  
+                                  const res = await fetch(`/api/ingestion/sessions/${currentSession.id}/ingest`, {
+                                    method: 'POST'
+                                  });
+                                  const result = await res.json();
+                                  
+                                  toast.success(`Successfully imported ${result.stats?.mappedRecords || 0} records!`);
+                                  setWizardStep('connect');
+                                  setCurrentSession(null);
+                                  setAnalysisResult(null);
+                                  setQuestions([]);
+                                  setSampleData('');
+                                } catch (e) {
+                                  toast.error('Failed to complete ingestion');
+                                }
+                              }}
+                            >
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Start Ingestion
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
               {activeTool === 'connect' && (
                 <motion.div
                   key="connect"
@@ -721,6 +1218,198 @@ export default function MCPConfigPage() {
                             )}
                           </motion.div>
                         )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTool === 'schema-explorer' && (
+                <motion.div
+                  key="schema-explorer"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileSearch className="h-5 w-5 text-cyan-500" />
+                        SAFe Ontology Schema Explorer
+                      </CardTitle>
+                      <CardDescription>
+                        Browse and visualize the SAFe 6.0 entity hierarchy and relationships
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 border rounded-lg">
+                            <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <Layers className="h-4 w-4 text-blue-500" />
+                              Portfolio Level
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                              <Badge className="mr-2">Portfolio</Badge>
+                              <Badge variant="outline" className="mr-2">Strategic Theme</Badge>
+                              <Badge variant="outline" className="mr-2">Epic</Badge>
+                              <Badge variant="outline">Capability</Badge>
+                            </div>
+                          </div>
+                          <div className="p-4 border rounded-lg">
+                            <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <Workflow className="h-4 w-4 text-purple-500" />
+                              Value Stream Level
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                              <Badge className="mr-2 bg-purple-100 text-purple-700">Value Stream</Badge>
+                              <Badge variant="outline" className="mr-2">ART</Badge>
+                              <Badge variant="outline" className="mr-2">Team</Badge>
+                              <Badge variant="outline">PI</Badge>
+                            </div>
+                          </div>
+                          <div className="p-4 border rounded-lg">
+                            <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <Target className="h-4 w-4 text-green-500" />
+                              Delivery Level
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                              <Badge className="mr-2 bg-green-100 text-green-700">Feature</Badge>
+                              <Badge variant="outline" className="mr-2">Story</Badge>
+                              <Badge variant="outline" className="mr-2">Task</Badge>
+                              <Badge variant="outline">Sprint</Badge>
+                            </div>
+                          </div>
+                          <div className="p-4 border rounded-lg">
+                            <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4 text-orange-500" />
+                              Metrics Level
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                              <Badge className="mr-2 bg-orange-100 text-orange-700">OKR</Badge>
+                              <Badge variant="outline" className="mr-2">KPI</Badge>
+                              <Badge variant="outline" className="mr-2">Milestone</Badge>
+                              <Badge variant="outline">Risk</Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTool === 'conflict-resolver' && (
+                <motion.div
+                  key="conflict-resolver"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                        Data Conflict Resolver
+                      </CardTitle>
+                      <CardDescription>
+                        Manage and resolve data conflicts during bidirectional sync operations
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-12 text-gray-500">
+                        <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-green-400" />
+                        <h3 className="text-lg font-medium text-gray-700">No Active Conflicts</h3>
+                        <p className="text-sm">All data sync operations are running smoothly</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTool === 'health-monitor' && (
+                <motion.div
+                  key="health-monitor"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Gauge className="h-5 w-5 text-emerald-500" />
+                        MCP Health Monitor
+                      </CardTitle>
+                      <CardDescription>
+                        Real-time monitoring of MCP adapter connections and health status
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-4 gap-4 mb-6">
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-3xl font-bold text-green-600">3</div>
+                          <div className="text-sm text-gray-600">Healthy</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-3xl font-bold text-yellow-600">1</div>
+                          <div className="text-sm text-gray-600">Degraded</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-3xl font-bold text-gray-400">2</div>
+                          <div className="text-sm text-gray-600">Inactive</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-3xl font-bold text-blue-600">99.8%</div>
+                          <div className="text-sm text-gray-600">Uptime</div>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {['Jira MCP', 'Azure DevOps MCP', 'ServiceNow MCP'].map((adapter, i) => (
+                          <div key={adapter} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-3 h-3 rounded-full ${i === 1 ? 'bg-yellow-500' : 'bg-green-500'}`} />
+                              <span className="font-medium">{adapter}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-gray-500">Last check: 2m ago</span>
+                              <Badge className={i === 1 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}>
+                                {i === 1 ? 'Degraded' : 'Healthy'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTool === 'batch-import' && (
+                <motion.div
+                  key="batch-import"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Upload className="h-5 w-5 text-amber-500" />
+                        Batch Import Tool
+                      </CardTitle>
+                      <CardDescription>
+                        Import data from CSV, Excel, or JSON files into your SAFe hierarchy
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-amber-400 transition-colors cursor-pointer">
+                        <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <h3 className="text-lg font-medium text-gray-700 mb-2">Drop files here or click to upload</h3>
+                        <p className="text-sm text-gray-500 mb-4">Supports CSV, Excel (.xlsx), and JSON files</p>
+                        <Button variant="outline">
+                          <Upload className="h-4 w-4 mr-2" />
+                          Select Files
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

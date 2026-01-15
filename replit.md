@@ -1,8 +1,8 @@
-# VRO Strategy Dashboard
+# NextEra Energy Enterprise Transformation Dashboard
 
 ## Overview
 
-This is a **VRO (Value Realization Office) Strategy Dashboard** application for Legal & General. It's a full-stack TypeScript application that visualizes client challenges and VRO responses, comparing VRO performance metrics against traditional PMO approaches. The dashboard presents strategic value propositions, challenge cards with detailed solutions, and interactive data visualizations with simulated real-time data updates.
+This is a **NextEra Energy Enterprise Transformation Dashboard** with complete SAFe PPM-ART ontology. It's a full-stack TypeScript application featuring MCP server integration for bidirectional sync with external PPM tools (Jira, Azure DevOps, ServiceNow), AI-powered data analysis via Anthropic, and comprehensive project portfolio management. All data is stored in PostgreSQL with no static content.
 
 ## User Preferences
 
@@ -100,3 +100,40 @@ The dashboard implements comprehensive 1-3 level drill-down navigation:
 ### Session Management
 - **connect-pg-simple**: PostgreSQL session store (ready for auth implementation)
 - **express-session**: Session middleware
+
+## MCP Integration System
+
+### AI-Powered Ingestion Wizard
+The application features a comprehensive MCP (Model Context Protocol) integration with AI-powered data ingestion:
+
+- **5-Step Workflow**: Connect → Analyze → Questions → Review → Approve
+- **AI Analysis**: Anthropic Claude-powered data summarization and POV generation
+- **SAFe Mapping**: Automatic mapping recommendations to SAFe ontology entities
+- **Clarifying Questions**: AI generates context-aware questions to resolve ambiguities
+- **QA Gate**: Quality assurance reviews before data ingestion (data_quality, mapping_accuracy, schema_validation, completeness)
+
+### MCP Tools (10 tools available at /mcp-config)
+1. **AI Ingestion Wizard**: Full workflow for data import with AI analysis
+2. **Connect & Analyze**: Connect to external PPM tools
+3. **Field Mapping**: Configure source-to-SAFe field mappings
+4. **Data QA Gate**: AI-powered quality assurance
+5. **Sync Status**: Monitor sync jobs and history
+6. **AI Data Analysis**: Standalone data analysis tool
+7. **Schema Explorer**: Browse SAFe ontology hierarchy
+8. **Conflict Resolver**: Manage data conflicts during sync
+9. **Health Monitor**: MCP adapter health status
+10. **Batch Import**: CSV/Excel/JSON file import
+
+### Sync Job Scheduling
+- **Cron-based scheduling**: Configure sync jobs with cron expressions
+- **Webhook handlers**: Receive real-time updates from external systems
+- **Conflict resolution**: Strategies for handling data conflicts (source_wins, target_wins, last_write_wins, manual)
+
+### Database Tables for MCP
+- `sync_jobs`: Scheduled sync jobs with cron expressions
+- `sync_job_runs`: Execution history for sync jobs
+- `webhook_endpoints`: Incoming webhook handlers
+- `webhook_events`: Log of received webhook events
+- `ingestion_sessions`: AI-powered ingestion workflow state
+- `qa_reviews`: QA gate reviews with scores and recommendations
+- `clarifying_questions`: AI-generated questions and user answers

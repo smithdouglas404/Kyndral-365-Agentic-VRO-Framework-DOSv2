@@ -51,6 +51,9 @@ import {
   type SyncJobRun, type InsertSyncJobRun,
   type WebhookEndpoint, type InsertWebhookEndpoint,
   type WebhookEvent, type InsertWebhookEvent,
+  type IngestionSession, type InsertIngestionSession,
+  type QaReview, type InsertQaReview,
+  type ClarifyingQuestion, type InsertClarifyingQuestion,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -59,7 +62,8 @@ import {
   sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings,
   divisions, divisionKpis, divisionOkrs, divisionRisks,
   companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks,
-  syncJobs, syncJobRuns, webhookEndpoints, webhookEvents
+  syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
+  ingestionSessions, qaReviews, clarifyingQuestions
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -272,6 +276,25 @@ export interface IStorage {
   getWebhookEvents(webhookEndpointId?: string, limit?: number): Promise<WebhookEvent[]>;
   createWebhookEvent(event: InsertWebhookEvent): Promise<WebhookEvent>;
   updateWebhookEventStatus(id: string, status: string, error?: string, syncJobRunId?: string): Promise<void>;
+  
+  // Ingestion Session Methods (AI-powered ingestion workflow)
+  getIngestionSessions(status?: string): Promise<IngestionSession[]>;
+  getIngestionSession(id: string): Promise<IngestionSession | undefined>;
+  createIngestionSession(session: InsertIngestionSession): Promise<IngestionSession>;
+  updateIngestionSession(id: string, updates: Partial<IngestionSession>): Promise<IngestionSession | undefined>;
+  deleteIngestionSession(id: string): Promise<void>;
+  
+  // QA Review Methods
+  getQaReviews(ingestionSessionId?: string): Promise<QaReview[]>;
+  getQaReview(id: string): Promise<QaReview | undefined>;
+  createQaReview(review: InsertQaReview): Promise<QaReview>;
+  updateQaReview(id: string, updates: Partial<QaReview>): Promise<QaReview | undefined>;
+  
+  // Clarifying Question Methods
+  getClarifyingQuestions(ingestionSessionId?: string, status?: string): Promise<ClarifyingQuestion[]>;
+  getClarifyingQuestion(id: string): Promise<ClarifyingQuestion | undefined>;
+  createClarifyingQuestion(question: InsertClarifyingQuestion): Promise<ClarifyingQuestion>;
+  answerClarifyingQuestion(id: string, answer: string, answeredBy: string): Promise<ClarifyingQuestion | undefined>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -2082,6 +2105,98 @@ export class DatabaseStorage implements IStorage {
       syncJobRunId: syncJobRunId || null,
       processedAt: status === 'processed' || status === 'failed' ? new Date() : null
     }).where(eq(webhookEvents.id, id));
+  }
+
+  // Ingestion Session Methods
+  async getIngestionSessions(status?: string): Promise<IngestionSession[]> {
+    if (status) {
+      return await db.select().from(ingestionSessions).where(eq(ingestionSessions.status, status)).orderBy(desc(ingestionSessions.createdAt));
+    }
+    return await db.select().from(ingestionSessions).orderBy(desc(ingestionSessions.createdAt));
+  }
+
+  async getIngestionSession(id: string): Promise<IngestionSession | undefined> {
+    const result = await db.select().from(ingestionSessions).where(eq(ingestionSessions.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createIngestionSession(session: InsertIngestionSession): Promise<IngestionSession> {
+    const result = await db.insert(ingestionSessions).values(session).returning();
+    return result[0];
+  }
+
+  async updateIngestionSession(id: string, updates: Partial<IngestionSession>): Promise<IngestionSession | undefined> {
+    const result = await db.update(ingestionSessions).set({ ...updates, updatedAt: new Date() }).where(eq(ingestionSessions.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteIngestionSession(id: string): Promise<void> {
+    await db.delete(clarifyingQuestions).where(eq(clarifyingQuestions.ingestionSessionId, id));
+    await db.delete(qaReviews).where(eq(qaReviews.ingestionSessionId, id));
+    await db.delete(ingestionSessions).where(eq(ingestionSessions.id, id));
+  }
+
+  // QA Review Methods
+  async getQaReviews(ingestionSessionId?: string): Promise<QaReview[]> {
+    if (ingestionSessionId) {
+      return await db.select().from(qaReviews).where(eq(qaReviews.ingestionSessionId, ingestionSessionId)).orderBy(desc(qaReviews.createdAt));
+    }
+    return await db.select().from(qaReviews).orderBy(desc(qaReviews.createdAt));
+  }
+
+  async getQaReview(id: string): Promise<QaReview | undefined> {
+    const result = await db.select().from(qaReviews).where(eq(qaReviews.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createQaReview(review: InsertQaReview): Promise<QaReview> {
+    const result = await db.insert(qaReviews).values(review).returning();
+    return result[0];
+  }
+
+  async updateQaReview(id: string, updates: Partial<QaReview>): Promise<QaReview | undefined> {
+    const result = await db.update(qaReviews).set({ ...updates, reviewedAt: new Date() }).where(eq(qaReviews.id, id)).returning();
+    return result[0];
+  }
+
+  // Clarifying Question Methods
+  async getClarifyingQuestions(ingestionSessionId?: string, status?: string): Promise<ClarifyingQuestion[]> {
+    if (ingestionSessionId && status) {
+      return await db.select().from(clarifyingQuestions)
+        .where(and(eq(clarifyingQuestions.ingestionSessionId, ingestionSessionId), eq(clarifyingQuestions.status, status)))
+        .orderBy(desc(clarifyingQuestions.createdAt));
+    }
+    if (ingestionSessionId) {
+      return await db.select().from(clarifyingQuestions)
+        .where(eq(clarifyingQuestions.ingestionSessionId, ingestionSessionId))
+        .orderBy(desc(clarifyingQuestions.createdAt));
+    }
+    if (status) {
+      return await db.select().from(clarifyingQuestions)
+        .where(eq(clarifyingQuestions.status, status))
+        .orderBy(desc(clarifyingQuestions.createdAt));
+    }
+    return await db.select().from(clarifyingQuestions).orderBy(desc(clarifyingQuestions.createdAt));
+  }
+
+  async getClarifyingQuestion(id: string): Promise<ClarifyingQuestion | undefined> {
+    const result = await db.select().from(clarifyingQuestions).where(eq(clarifyingQuestions.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createClarifyingQuestion(question: InsertClarifyingQuestion): Promise<ClarifyingQuestion> {
+    const result = await db.insert(clarifyingQuestions).values(question).returning();
+    return result[0];
+  }
+
+  async answerClarifyingQuestion(id: string, answer: string, answeredBy: string): Promise<ClarifyingQuestion | undefined> {
+    const result = await db.update(clarifyingQuestions).set({
+      answer,
+      answeredBy,
+      answeredAt: new Date(),
+      status: 'answered'
+    }).where(eq(clarifyingQuestions.id, id)).returning();
+    return result[0];
   }
 }
 

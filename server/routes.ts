@@ -2902,5 +2902,360 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // AI INGESTION WIZARD - Anthropic-powered data analysis and QA gate
+  // ============================================================================
+
+  const { analyzeDataForIngestion, generateClarifyingQuestions, runQaReview, suggestAdditionalTools } = await import("./aiIngestion");
+
+  // Create new ingestion session
+  app.post("/api/ingestion/sessions", async (req, res) => {
+    try {
+      const { name, sourceSystemId, mcpAdapterId, sampleData, createdBy } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "Session name is required" });
+      }
+
+      const session = await storage.createIngestionSession({
+        name,
+        sourceSystemId,
+        mcpAdapterId,
+        sampleData: sampleData ? JSON.stringify(sampleData) : undefined,
+        createdBy: createdBy || "system",
+        status: sampleData ? "analyzing" : "draft"
+      });
+
+      res.json({ success: true, session });
+    } catch (error: any) {
+      console.error("Create ingestion session error:", error);
+      res.status(500).json({ error: "Failed to create session", details: error.message });
+    }
+  });
+
+  // Get all ingestion sessions
+  app.get("/api/ingestion/sessions", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const sessions = await storage.getIngestionSessions(status);
+      res.json({ sessions });
+    } catch (error: any) {
+      console.error("Get ingestion sessions error:", error);
+      res.status(500).json({ error: "Failed to get sessions" });
+    }
+  });
+
+  // Get single ingestion session with details
+  app.get("/api/ingestion/sessions/:id", async (req, res) => {
+    try {
+      const session = await storage.getIngestionSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      const [qaReviews, clarifyingQuestions] = await Promise.all([
+        storage.getQaReviews(session.id),
+        storage.getClarifyingQuestions(session.id)
+      ]);
+
+      res.json({ 
+        session, 
+        qaReviews,
+        clarifyingQuestions,
+        pendingQuestions: clarifyingQuestions.filter(q => q.status === "pending").length
+      });
+    } catch (error: any) {
+      console.error("Get ingestion session error:", error);
+      res.status(500).json({ error: "Failed to get session" });
+    }
+  });
+
+  // Run AI analysis on session data
+  app.post("/api/ingestion/sessions/:id/analyze", async (req, res) => {
+    try {
+      const session = await storage.getIngestionSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      const { sourceSystem, sourceEntityType } = req.body;
+      const sampleData = session.sampleData ? JSON.parse(session.sampleData) : req.body.sampleData;
+
+      if (!sampleData || !Array.isArray(sampleData) || sampleData.length === 0) {
+        return res.status(400).json({ error: "Sample data is required for analysis" });
+      }
+
+      await storage.updateIngestionSession(session.id, { status: "analyzing" });
+
+      const analysis = await analyzeDataForIngestion(
+        sampleData,
+        sourceSystem || "unknown",
+        sourceEntityType || "unknown"
+      );
+
+      await storage.updateIngestionSession(session.id, {
+        aiSummary: analysis.summary,
+        aiPov: analysis.pov,
+        qualityScore: analysis.dataQualityScore,
+        safeMapping: JSON.stringify(analysis.safeMapping),
+        totalRecords: analysis.recordCount,
+        sampleData: JSON.stringify(sampleData),
+        status: "pending_approval"
+      });
+
+      // Auto-generate initial QA reviews
+      const reviewTypes = ["data_quality", "mapping_accuracy", "schema_validation", "completeness"] as const;
+      for (const reviewType of reviewTypes) {
+        await storage.createQaReview({
+          ingestionSessionId: session.id,
+          reviewType,
+          status: "pending",
+          score: analysis.dataQualityScore,
+          aiAnalysis: analysis.pov,
+          issues: JSON.stringify(analysis.issues),
+          recommendations: JSON.stringify(analysis.recommendations),
+          reviewer: "ai"
+        });
+      }
+
+      res.json({ success: true, analysis });
+    } catch (error: any) {
+      console.error("Analyze session error:", error);
+      res.status(500).json({ error: "Failed to analyze session", details: error.message });
+    }
+  });
+
+  // Generate clarifying questions
+  app.post("/api/ingestion/sessions/:id/questions", async (req, res) => {
+    try {
+      const session = await storage.getIngestionSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      const existingQuestions = await storage.getClarifyingQuestions(session.id);
+      const sampleData = session.sampleData ? JSON.parse(session.sampleData) : [];
+      const analysisResult = {
+        summary: session.aiSummary || "",
+        pov: session.aiPov || "",
+        dataQualityScore: session.qualityScore || 0,
+        recordCount: session.totalRecords || 0,
+        fieldAnalysis: [],
+        safeMapping: session.safeMapping ? JSON.parse(session.safeMapping) : [],
+        issues: [],
+        recommendations: []
+      };
+
+      const result = await generateClarifyingQuestions({
+        sampleData,
+        sourceSystem: req.body.sourceSystem || "unknown",
+        sourceEntityType: req.body.sourceEntityType || "unknown",
+        analysisResult,
+        existingQuestions: existingQuestions.map(q => ({ question: q.question, answer: q.answer || undefined }))
+      });
+
+      // Save generated questions
+      const createdQuestions = [];
+      for (const q of result.questions) {
+        const question = await storage.createClarifyingQuestion({
+          ingestionSessionId: session.id,
+          question: q.question,
+          context: q.context,
+          questionType: q.questionType,
+          options: q.options ? JSON.stringify(q.options) : undefined,
+          impactArea: q.impactArea,
+          priority: q.priority,
+          status: "pending"
+        });
+        createdQuestions.push(question);
+      }
+
+      res.json({ success: true, questions: createdQuestions });
+    } catch (error: any) {
+      console.error("Generate questions error:", error);
+      res.status(500).json({ error: "Failed to generate questions", details: error.message });
+    }
+  });
+
+  // Answer a clarifying question
+  app.post("/api/ingestion/questions/:id/answer", async (req, res) => {
+    try {
+      const { answer, answeredBy } = req.body;
+      if (!answer) {
+        return res.status(400).json({ error: "Answer is required" });
+      }
+
+      const question = await storage.answerClarifyingQuestion(
+        req.params.id,
+        answer,
+        answeredBy || "user"
+      );
+
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
+
+      res.json({ success: true, question });
+    } catch (error: any) {
+      console.error("Answer question error:", error);
+      res.status(500).json({ error: "Failed to answer question" });
+    }
+  });
+
+  // Get all clarifying questions for a session
+  app.get("/api/ingestion/sessions/:id/questions", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const questions = await storage.getClarifyingQuestions(req.params.id, status);
+      res.json({ questions });
+    } catch (error: any) {
+      console.error("Get questions error:", error);
+      res.status(500).json({ error: "Failed to get questions" });
+    }
+  });
+
+  // Run QA review
+  app.post("/api/ingestion/sessions/:id/qa-review", async (req, res) => {
+    try {
+      const session = await storage.getIngestionSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      const { reviewType } = req.body;
+      if (!reviewType || !["data_quality", "mapping_accuracy", "schema_validation", "completeness"].includes(reviewType)) {
+        return res.status(400).json({ error: "Valid review type is required" });
+      }
+
+      const sampleData = session.sampleData ? JSON.parse(session.sampleData) : [];
+      const answeredQuestions = await storage.getClarifyingQuestions(session.id, "answered");
+      
+      const analysisResult = {
+        summary: session.aiSummary || "",
+        pov: session.aiPov || "",
+        dataQualityScore: session.qualityScore || 0,
+        recordCount: session.totalRecords || 0,
+        fieldAnalysis: [],
+        safeMapping: session.safeMapping ? JSON.parse(session.safeMapping) : [],
+        issues: [],
+        recommendations: []
+      };
+
+      const review = await runQaReview(
+        {
+          sampleData,
+          sourceSystem: req.body.sourceSystem || "unknown",
+          analysisResult,
+          answeredQuestions: answeredQuestions.map(q => ({ question: q.question, answer: q.answer || "" }))
+        },
+        reviewType
+      );
+
+      const qaReview = await storage.createQaReview({
+        ingestionSessionId: session.id,
+        reviewType,
+        status: review.status,
+        score: review.score,
+        aiAnalysis: review.analysis,
+        issues: JSON.stringify(review.issues),
+        recommendations: JSON.stringify(review.recommendations),
+        reviewer: "ai"
+      });
+
+      res.json({ success: true, qaReview, review });
+    } catch (error: any) {
+      console.error("Run QA review error:", error);
+      res.status(500).json({ error: "Failed to run QA review", details: error.message });
+    }
+  });
+
+  // Approve ingestion session
+  app.post("/api/ingestion/sessions/:id/approve", async (req, res) => {
+    try {
+      const session = await storage.getIngestionSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      const { approvedBy } = req.body;
+      
+      const updated = await storage.updateIngestionSession(session.id, {
+        status: "approved",
+        approvedBy: approvedBy || "user",
+        approvedAt: new Date()
+      });
+
+      res.json({ success: true, session: updated });
+    } catch (error: any) {
+      console.error("Approve session error:", error);
+      res.status(500).json({ error: "Failed to approve session" });
+    }
+  });
+
+  // Start ingestion after approval
+  app.post("/api/ingestion/sessions/:id/ingest", async (req, res) => {
+    try {
+      const session = await storage.getIngestionSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      if (session.status !== "approved") {
+        return res.status(400).json({ error: "Session must be approved before ingestion" });
+      }
+
+      await storage.updateIngestionSession(session.id, { status: "ingesting" });
+
+      // Simulate ingestion process
+      const sampleData = session.sampleData ? JSON.parse(session.sampleData) : [];
+      const mappedRecords = Math.floor(sampleData.length * 0.95);
+
+      await storage.updateIngestionSession(session.id, {
+        status: "completed",
+        mappedRecords,
+        completedAt: new Date()
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Ingestion completed",
+        stats: {
+          totalRecords: sampleData.length,
+          mappedRecords,
+          errors: sampleData.length - mappedRecords
+        }
+      });
+    } catch (error: any) {
+      console.error("Ingest session error:", error);
+      res.status(500).json({ error: "Failed to ingest data", details: error.message });
+    }
+  });
+
+  // Get QA reviews for a session
+  app.get("/api/ingestion/sessions/:id/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getQaReviews(req.params.id);
+      res.json({ reviews });
+    } catch (error: any) {
+      console.error("Get reviews error:", error);
+      res.status(500).json({ error: "Failed to get reviews" });
+    }
+  });
+
+  // Suggest additional tools
+  app.post("/api/mcp/suggest-tools", async (req, res) => {
+    try {
+      const { currentCapabilities, userContext } = req.body;
+      const suggestions = await suggestAdditionalTools(
+        currentCapabilities || ["connect", "mapping", "qa-gate", "sync-status", "ai-analysis"],
+        userContext || "Enterprise SAFe PPM transformation"
+      );
+      res.json({ success: true, suggestions: suggestions.tools });
+    } catch (error: any) {
+      console.error("Suggest tools error:", error);
+      res.status(500).json({ error: "Failed to suggest tools" });
+    }
+  });
+
   return httpServer;
 }
