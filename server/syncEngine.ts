@@ -232,12 +232,11 @@ export class SyncEngine {
     direction: SyncDirection = 'inbound'
   ): Promise<IngestionJob> {
     const job = await storage.createIngestionJob({
-      id: `job-${Date.now()}`,
       sourceSystemId,
       jobType: direction === 'inbound' ? 'full_import' : direction === 'outbound' ? 'full_export' : 'full_sync',
       status: 'pending',
-      triggeredBy: 'system',
-      entityTypes: JSON.stringify(entityTypes),
+      triggerType: 'manual',
+      sourceData: JSON.stringify({ entityTypes }),
     });
 
     await this.logActivity('sync_started', `Starting ${direction} sync for ${entityTypes.join(', ')}`, sourceSystemId);
@@ -358,7 +357,7 @@ export class SyncEngine {
     let bestMatch: EntityMapping | null = null;
     let bestMatchScore = 0;
 
-    for (const [, mapping] of this.entityMappings) {
+    for (const mapping of Array.from(this.entityMappings.values())) {
       let matchScore = 0;
       for (const rule of mapping.fieldRules) {
         if (fieldList.includes(rule.sourceField)) {
