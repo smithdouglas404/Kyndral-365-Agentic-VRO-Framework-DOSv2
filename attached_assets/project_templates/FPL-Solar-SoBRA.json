@@ -1,0 +1,87 @@
+{
+  "id": "nee-fpl-003",
+  "name": "FPL Solar Base Rate Adjustment (SoBRA) Expansion",
+  "bu": "Florida Power & Light",
+  "division": "Generation",
+  "description": "Expansion of FPL's solar generation capacity under the SoBRA mechanism approved by Florida PSC. Adding 1.8 GW of solar capacity across Florida with battery storage co-location.",
+  "expectedROI": "$340M net fuel savings over 30 years",
+  "roiValue": 340,
+  "priority": "critical",
+  "status": "green",
+  "budget": { "spent": 890, "total": 1800, "unit": "$m", "contingency": 180 },
+  "timeline": { "elapsed": 14, "total": 30, "unit": "months", "startDate": "2024-01-01", "endDate": "2026-07-01" },
+  "artName": "Renewable Generation ART",
+  "portfolioTheme": "Clean Energy Transition",
+  "strategicObjectives": ["Add 1.8 GW solar capacity", "Reduce fuel costs by $11M annually per 100 MW", "Achieve 40% renewable mix by 2030"],
+  "safe": {
+    "velocity": 55,
+    "predictability": 85,
+    "flowEfficiency": 75,
+    "currentPI": "PI 24.3",
+    "totalPIs": 8,
+    "piCadence": "12 weeks",
+    "epicId": "EPIC-FPL-103",
+    "epicName": "SoBRA Generation Program",
+    "epicProgress": 49,
+    "epicWsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 7, "jobSize": 10, "score": 25 },
+    "solutionTrain": "Generation Solutions",
+    "valueStream": "Power Generation"
+  },
+  "features": [
+    {
+      "id": "feat-solar-001",
+      "name": "Site Acquisition & Permitting",
+      "description": "Land acquisition and regulatory permitting for 12 new solar facilities",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 110,
+      "priority": "critical",
+      "wsjf": { "businessValue": 10, "timeCriticality": 10, "riskReduction": 6, "jobSize": 8, "score": 27 },
+      "acceptanceCriteria": ["Secure 4,000 acres", "Environmental permits approved", "Interconnection agreements signed"],
+      "stories": [
+        {
+          "id": "story-solar-001",
+          "name": "Manatee County 200 MW Site",
+          "description": "Complete land acquisition and permitting for Manatee solar facility",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": ["Land purchased", "County permits approved", "Wildlife study complete"],
+          "tasks": [
+            { "id": "task-solar-001", "name": "Land survey and due diligence", "status": "done", "effortHours": 120, "assignee": "Land Team", "skills": ["Real Estate", "Environmental"] },
+            { "id": "task-solar-002", "name": "Environmental impact assessment", "status": "done", "effortHours": 200, "assignee": "Environmental Team", "skills": ["Environmental Science"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-solar-002",
+      "name": "Battery Storage Co-location",
+      "description": "400 MWh battery storage deployment across solar facilities for grid stabilization",
+      "status": "analyzing",
+      "storyPoints": 89,
+      "completedPoints": 13,
+      "priority": "high",
+      "wsjf": { "businessValue": 8, "timeCriticality": 6, "riskReduction": 8, "jobSize": 7, "score": 22 },
+      "acceptanceCriteria": ["4-hour storage duration", "95% round-trip efficiency", "10-year warranty"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-solar-001", "name": "Robert Kim", "role": "RTE", "allocation": 100, "team": "Renewable Generation ART", "skills": ["SAFe", "Solar Development"], "costRate": 1300 },
+    { "id": "res-solar-002", "name": "Amanda Foster", "role": "PM", "allocation": 100, "team": "Project Delivery", "skills": ["Construction Management", "Utility-Scale Solar"], "costRate": 1200 }
+  ],
+  "milestones": [
+    { "id": "ms-solar-001", "name": "500 MW Online", "date": "2024-12-31", "status": "on-track", "deliverables": ["4 facilities operational", "PSC filing complete"] },
+    { "id": "ms-solar-002", "name": "1.2 GW Online", "date": "2025-09-30", "status": "pending", "deliverables": ["8 facilities operational", "Battery storage phase 1"] },
+    { "id": "ms-solar-003", "name": "Full 1.8 GW Capacity", "date": "2026-07-01", "status": "pending", "deliverables": ["All 12 facilities operational", "Full battery deployment"] }
+  ],
+  "risks": [
+    { "id": "risk-solar-001", "name": "Panel Supply Chain", "probability": "medium", "impact": "high", "status": "mitigating", "mitigation": "Contracts with 3 tier-1 suppliers; 12-month forward purchases", "owner": "Procurement" },
+    { "id": "risk-solar-002", "name": "Interconnection Delays", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Early engagement with transmission planning", "owner": "Grid Engineering" }
+  ],
+  "dependencies": [
+    { "id": "dep-solar-001", "name": "Transmission Upgrades", "type": "blocked-by", "status": "green", "description": "Requires substation upgrades for interconnection" }
+  ],
+  "financials": { "capitalex": 1620, "opex": 180, "contingency": 180, "npv": 890, "irr": 12, "paybackMonths": 96 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 95, "technicalDebtDays": 5, "codeReviewCoverage": 100, "documentationScore": 95 }
+}

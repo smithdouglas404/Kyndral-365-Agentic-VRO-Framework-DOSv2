@@ -1,0 +1,89 @@
+{
+  "id": "nee-corp-004",
+  "name": "NEET Transmission Expansion Program",
+  "bu": "Corporate & Other",
+  "division": "NextEra Energy Transmission",
+  "description": "Strategic transmission development through NEET to enable renewable integration and improve grid reliability. Focus on competitive transmission projects in MISO, SPP, and PJM.",
+  "expectedROI": "$580M projected rate base growth",
+  "roiValue": 580,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 180, "total": 450, "unit": "$m", "contingency": 45 },
+  "timeline": { "elapsed": 12, "total": 48, "unit": "months", "startDate": "2024-01-01", "endDate": "2028-01-01" },
+  "artName": "Transmission Development ART",
+  "portfolioTheme": "Infrastructure Growth",
+  "strategicObjectives": ["Win 3+ competitive transmission projects", "Add $2B rate base by 2028", "Enable 5 GW renewable interconnection"],
+  "safe": {
+    "velocity": 32,
+    "predictability": 82,
+    "flowEfficiency": 68,
+    "currentPI": "PI 24.4",
+    "totalPIs": 16,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-CORP-104",
+    "epicName": "Transmission Growth Initiative",
+    "epicProgress": 28,
+    "epicWsjf": { "businessValue": 10, "timeCriticality": 6, "riskReduction": 7, "jobSize": 10, "score": 23 },
+    "solutionTrain": "Infrastructure Solutions",
+    "valueStream": "Transmission Development"
+  },
+  "features": [
+    {
+      "id": "feat-tx-001",
+      "name": "MISO Long-Range Transmission Plan Projects",
+      "description": "Pursue MISO LRTP Tranche 1 competitive projects totaling $1.2B",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 6, "jobSize": 9, "score": 25 },
+      "acceptanceCriteria": ["2+ projects selected", "RTO approval", "Construction contracts awarded"],
+      "stories": [
+        {
+          "id": "story-tx-001",
+          "name": "MISO Tranche 1 competitive bid",
+          "description": "Prepare and submit competitive proposals for MISO LRTP projects",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": ["Proposal submitted", "Cost competitive", "Technical approach approved"],
+          "tasks": [
+            { "id": "task-tx-001", "name": "Route analysis and siting", "status": "done", "effortHours": 120, "assignee": "Transmission Planning", "skills": ["Transmission Engineering"] },
+            { "id": "task-tx-002", "name": "Cost estimation", "status": "done", "effortHours": 80, "assignee": "Estimating Team", "skills": ["Cost Engineering"] },
+            { "id": "task-tx-003", "name": "Proposal development", "status": "in-progress", "effortHours": 160, "assignee": "Business Development", "skills": ["Transmission Business"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-tx-002",
+      "name": "SPP Priority Projects",
+      "description": "Develop SPP designated priority transmission projects",
+      "status": "analyzing",
+      "storyPoints": 89,
+      "completedPoints": 13,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 6, "riskReduction": 6, "jobSize": 8, "score": 22 },
+      "acceptanceCriteria": ["SPP approval", "Landowner agreements", "Construction timeline established"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-tx-001", "name": "Michael Stevens", "role": "RTE", "allocation": 100, "team": "Transmission Development ART", "skills": ["SAFe", "Transmission Development"], "costRate": 1400 },
+    { "id": "res-tx-002", "name": "Patricia Johnson", "role": "PM", "allocation": 100, "team": "Major Projects", "skills": ["Transmission Construction", "EPC"], "costRate": 1350 }
+  ],
+  "milestones": [
+    { "id": "ms-tx-001", "name": "MISO Tranche 1 Selection", "date": "2025-06-30", "status": "on-track", "deliverables": ["Project selection announcement", "Development rights secured"] },
+    { "id": "ms-tx-002", "name": "SPP Project Approval", "date": "2025-12-31", "status": "pending", "deliverables": ["SPP board approval", "Construction schedule"] },
+    { "id": "ms-tx-003", "name": "First Project COD", "date": "2027-12-31", "status": "pending", "deliverables": ["First major project operational", "Rate base in service"] }
+  ],
+  "risks": [
+    { "id": "risk-tx-001", "name": "Competitive Selection Risk", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Strong proposals; strategic partnerships", "owner": "Business Development" },
+    { "id": "risk-tx-002", "name": "Permitting Delays", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Early stakeholder engagement; route alternatives", "owner": "Siting Team" }
+  ],
+  "dependencies": [
+    { "id": "dep-tx-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Enables renewable delivery" },
+    { "id": "dep-tx-002", "name": "Solar Development", "type": "related", "status": "green", "description": "Transmission for solar interconnection" }
+  ],
+  "financials": { "capitalex": 405, "opex": 45, "contingency": 45, "npv": 1250, "irr": 11, "paybackMonths": 120 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 92, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 90 }
+}

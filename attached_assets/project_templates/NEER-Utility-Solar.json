@@ -1,0 +1,74 @@
+{
+  "id": "nee-neer-002",
+  "name": "NEER Utility-Scale Solar Development",
+  "bu": "NextEra Energy Resources",
+  "division": "Solar Development",
+  "description": "Development of utility-scale solar projects across ERCOT, CAISO, and PJM markets. Part of NEER's industry-leading renewable development pipeline with 2.5 GW annual deployment target.",
+  "expectedROI": "$650M projected EBITDA contribution",
+  "roiValue": 650,
+  "priority": "critical",
+  "status": "green",
+  "budget": { "spent": 210, "total": 420, "unit": "$m", "contingency": 42 },
+  "timeline": { "elapsed": 10, "total": 30, "unit": "months", "startDate": "2024-02-01", "endDate": "2026-08-01" },
+  "artName": "Solar Development ART",
+  "portfolioTheme": "Renewable Growth",
+  "strategicObjectives": ["Deploy 2.5 GW solar annually", "Achieve 99% availability", "Secure investment-grade PPAs"],
+  "safe": {
+    "velocity": 58,
+    "predictability": 86,
+    "flowEfficiency": 74,
+    "currentPI": "PI 24.4",
+    "totalPIs": 10,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-NEER-102",
+    "epicName": "Solar Growth Program",
+    "epicProgress": 38,
+    "epicWsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 6, "jobSize": 9, "score": 26 },
+    "solutionTrain": "Renewable Development",
+    "valueStream": "Clean Energy Development"
+  },
+  "features": [
+    {
+      "id": "feat-solar-neer-001",
+      "name": "California Desert Solar Complex",
+      "description": "500 MW solar development in Riverside County with battery storage",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 89,
+      "priority": "critical",
+      "wsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 6, "jobSize": 7, "score": 26 },
+      "acceptanceCriteria": ["500 MW online by Q2 2025", "200 MWh storage co-located", "CAISO interconnection", "PPA with major IOU"],
+      "stories": [
+        {
+          "id": "story-solar-neer-001",
+          "name": "Panel procurement and installation",
+          "description": "Procure and install 1.2M bifacial panels",
+          "storyPoints": 34,
+          "status": "in-progress",
+          "acceptanceCriteria": ["All panels delivered", "Installation 60% complete", "Quality inspection passed"],
+          "tasks": [
+            { "id": "task-solar-neer-001", "name": "Panel supply agreement execution", "status": "done", "effortHours": 80, "assignee": "Procurement", "skills": ["Solar Procurement"] },
+            { "id": "task-solar-neer-002", "name": "Tracker system installation", "status": "in-progress", "effortHours": 600, "assignee": "Installation Crew", "skills": ["Solar Installation"] }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "res-solar-neer-001", "name": "Michael Rodriguez", "role": "RTE", "allocation": 100, "team": "Solar Development ART", "skills": ["SAFe", "Solar Development"], "costRate": 1350 },
+    { "id": "res-solar-neer-002", "name": "Emily Watson", "role": "PM", "allocation": 100, "team": "Project Delivery", "skills": ["Utility-Scale Solar", "EPC"], "costRate": 1250 }
+  ],
+  "milestones": [
+    { "id": "ms-solar-neer-001", "name": "California 250 MW Phase 1", "date": "2025-03-31", "status": "on-track", "deliverables": ["First 250 MW operational", "Battery storage online"] },
+    { "id": "ms-solar-neer-002", "name": "California 500 MW Complete", "date": "2025-06-30", "status": "pending", "deliverables": ["Full complex operational"] },
+    { "id": "ms-solar-neer-003", "name": "Texas Portfolio 1 GW", "date": "2026-03-31", "status": "pending", "deliverables": ["Texas projects complete"] }
+  ],
+  "risks": [
+    { "id": "risk-solar-neer-001", "name": "Panel Tariff Uncertainty", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Diversified supply chain; domestic content sourcing", "owner": "Supply Chain" }
+  ],
+  "dependencies": [
+    { "id": "dep-solar-neer-001", "name": "Battery Storage Program", "type": "related", "status": "green", "description": "Co-located storage deployment" }
+  ],
+  "financials": { "capitalex": 378, "opex": 42, "contingency": 42, "npv": 980, "irr": 13, "paybackMonths": 90 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 94, "technicalDebtDays": 6, "codeReviewCoverage": 100, "documentationScore": 92 }
+}

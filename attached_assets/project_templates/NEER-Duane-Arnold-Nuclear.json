@@ -1,0 +1,85 @@
+{
+  "id": "nee-neer-005",
+  "name": "Duane Arnold Nuclear Restart Assessment",
+  "bu": "NextEra Energy Resources",
+  "division": "Nuclear Development",
+  "description": "Feasibility study and preliminary engineering for potential restart of Duane Arnold Energy Center in Iowa. Exploring commercial arrangements and regulatory pathway.",
+  "expectedROI": "$15M study investment; $2B+ potential asset value",
+  "roiValue": 15,
+  "priority": "medium",
+  "status": "green",
+  "budget": { "spent": 8, "total": 25, "unit": "$m", "contingency": 5 },
+  "timeline": { "elapsed": 4, "total": 18, "unit": "months", "startDate": "2024-06-01", "endDate": "2025-12-01" },
+  "artName": "Nuclear Development ART",
+  "portfolioTheme": "Zero-Carbon Baseload",
+  "strategicObjectives": ["Complete technical feasibility", "Identify commercial pathway", "Engage NRC on restart process"],
+  "safe": {
+    "velocity": 24,
+    "predictability": 85,
+    "flowEfficiency": 70,
+    "currentPI": "PI 24.4",
+    "totalPIs": 6,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-NEER-105",
+    "epicName": "Nuclear Restart Initiative",
+    "epicProgress": 25,
+    "epicWsjf": { "businessValue": 8, "timeCriticality": 5, "riskReduction": 7, "jobSize": 6, "score": 22 },
+    "solutionTrain": "Generation Solutions",
+    "valueStream": "Zero-Carbon Power"
+  },
+  "features": [
+    {
+      "id": "feat-nuc-001",
+      "name": "Technical Feasibility Assessment",
+      "description": "Comprehensive assessment of plant condition and restart requirements",
+      "status": "implementing",
+      "storyPoints": 55,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 6, "riskReduction": 8, "jobSize": 5, "score": 26 },
+      "acceptanceCriteria": ["Equipment condition assessment", "Restart cost estimate ±20%", "Schedule estimate", "Risk assessment complete"],
+      "stories": [
+        {
+          "id": "story-nuc-001",
+          "name": "Plant walkdown and inspection",
+          "description": "Physical inspection of key plant systems and equipment",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["All major systems inspected", "Condition reports complete", "Photo documentation"],
+          "tasks": [
+            { "id": "task-nuc-001", "name": "Reactor systems inspection", "status": "done", "effortHours": 80, "assignee": "Nuclear Engineering", "skills": ["BWR Systems", "Nuclear Engineering"] },
+            { "id": "task-nuc-002", "name": "Balance of plant inspection", "status": "done", "effortHours": 120, "assignee": "Plant Engineering", "skills": ["Mechanical Engineering"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-nuc-002",
+      "name": "Commercial Pathway Analysis",
+      "description": "Evaluate PPA opportunities, data center demand, and market positioning",
+      "status": "analyzing",
+      "storyPoints": 34,
+      "completedPoints": 8,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 7, "riskReduction": 5, "jobSize": 4, "score": 28 },
+      "acceptanceCriteria": ["Customer interest validated", "Pricing model developed", "Go/no-go recommendation"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-nuc-001", "name": "Dr. Robert Stevens", "role": "Architect", "allocation": 100, "team": "Nuclear Engineering", "skills": ["Nuclear Engineering", "BWR Technology"], "costRate": 1800 },
+    { "id": "res-nuc-002", "name": "Jennifer Walsh", "role": "PM", "allocation": 80, "team": "Nuclear Development", "skills": ["Nuclear Projects", "NRC Regulatory"], "costRate": 1400 }
+  ],
+  "milestones": [
+    { "id": "ms-nuc-001", "name": "Technical Feasibility Complete", "date": "2025-03-31", "status": "on-track", "deliverables": ["Feasibility report", "Cost estimate", "Risk assessment"] },
+    { "id": "ms-nuc-002", "name": "Commercial Agreement LOI", "date": "2025-06-30", "status": "pending", "deliverables": ["Customer LOI signed", "Preliminary economics"] },
+    { "id": "ms-nuc-003", "name": "Go/No-Go Decision", "date": "2025-12-01", "status": "pending", "deliverables": ["Board decision", "NRC engagement plan"] }
+  ],
+  "risks": [
+    { "id": "risk-nuc-001", "name": "NRC Restart Regulatory Process", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Early NRC engagement; experienced regulatory team", "owner": "Regulatory Affairs" },
+    { "id": "risk-nuc-002", "name": "Cost Escalation", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Contingency allowance; detailed engineering before commitment", "owner": "Project Controls" }
+  ],
+  "dependencies": [],
+  "financials": { "capitalex": 20, "opex": 5, "contingency": 5, "npv": 45, "irr": 25, "paybackMonths": 24 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 95, "technicalDebtDays": 5, "codeReviewCoverage": 100, "documentationScore": 95 }
+}

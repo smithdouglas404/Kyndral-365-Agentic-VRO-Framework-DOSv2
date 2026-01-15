@@ -1,0 +1,76 @@
+{
+  "id": "nee-neer-004",
+  "name": "NEER Green Hydrogen Pilot Program",
+  "bu": "NextEra Energy Resources",
+  "division": "New Technology",
+  "description": "Pilot-scale green hydrogen production using dedicated renewable energy. Targeting industrial customers and exploring hydrogen hub opportunities under DOE programs.",
+  "expectedROI": "$35M strategic value (pilot phase)",
+  "roiValue": 35,
+  "priority": "medium",
+  "status": "green",
+  "budget": { "spent": 45, "total": 120, "unit": "$m", "contingency": 18 },
+  "timeline": { "elapsed": 6, "total": 24, "unit": "months", "startDate": "2024-04-01", "endDate": "2026-04-01" },
+  "artName": "New Technology ART",
+  "portfolioTheme": "Technology Innovation",
+  "strategicObjectives": ["Demonstrate commercial viability", "Secure hydrogen hub funding", "Establish industrial customer relationships"],
+  "safe": {
+    "velocity": 28,
+    "predictability": 72,
+    "flowEfficiency": 60,
+    "currentPI": "PI 24.4",
+    "totalPIs": 8,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-NEER-104",
+    "epicName": "Green Hydrogen Initiative",
+    "epicProgress": 28,
+    "epicWsjf": { "businessValue": 7, "timeCriticality": 5, "riskReduction": 8, "jobSize": 7, "score": 20 },
+    "solutionTrain": "Innovation Solutions",
+    "valueStream": "Emerging Technology"
+  },
+  "features": [
+    {
+      "id": "feat-h2-001",
+      "name": "Texas Electrolyzer Facility",
+      "description": "50 MW PEM electrolyzer facility co-located with wind generation",
+      "status": "implementing",
+      "storyPoints": 89,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": { "businessValue": 8, "timeCriticality": 6, "riskReduction": 7, "jobSize": 8, "score": 21 },
+      "acceptanceCriteria": ["50 MW electrolyzer operational", "10 tons/day H2 production", "99% renewable powered", "Cost below $4/kg H2"],
+      "stories": [
+        {
+          "id": "story-h2-001",
+          "name": "Electrolyzer procurement and installation",
+          "description": "Procure and install 50 MW PEM electrolyzer system",
+          "storyPoints": 34,
+          "status": "in-progress",
+          "acceptanceCriteria": ["Equipment delivered", "Installation complete", "Commissioning started"],
+          "tasks": [
+            { "id": "task-h2-001", "name": "Electrolyzer vendor selection", "status": "done", "effortHours": 80, "assignee": "Engineering", "skills": ["Hydrogen Technology"] },
+            { "id": "task-h2-002", "name": "Site preparation", "status": "done", "effortHours": 120, "assignee": "Construction", "skills": ["Industrial Construction"] },
+            { "id": "task-h2-003", "name": "Equipment installation", "status": "in-progress", "effortHours": 200, "assignee": "Installation Team", "skills": ["Process Engineering"] }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "res-h2-001", "name": "Dr. James Park", "role": "Architect", "allocation": 100, "team": "Hydrogen Technology", "skills": ["Chemical Engineering", "Hydrogen Systems"], "costRate": 1600 },
+    { "id": "res-h2-002", "name": "Lisa Chen", "role": "PM", "allocation": 80, "team": "New Technology", "skills": ["R&D Management", "Energy Technology"], "costRate": 1200 }
+  ],
+  "milestones": [
+    { "id": "ms-h2-001", "name": "Electrolyzer Installation Complete", "date": "2025-03-31", "status": "on-track", "deliverables": ["50 MW system installed", "Grid connection complete"] },
+    { "id": "ms-h2-002", "name": "First Hydrogen Production", "date": "2025-06-30", "status": "pending", "deliverables": ["Commercial production started", "First customer delivery"] },
+    { "id": "ms-h2-003", "name": "Full Commercial Operation", "date": "2026-01-31", "status": "pending", "deliverables": ["Full capacity production", "Customer contracts activated"] }
+  ],
+  "risks": [
+    { "id": "risk-h2-001", "name": "Hydrogen Market Development", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Early customer engagement; flexible off-take agreements", "owner": "Business Development" },
+    { "id": "risk-h2-002", "name": "Technology Performance", "probability": "low", "impact": "medium", "status": "monitoring", "mitigation": "Vendor performance guarantees; extended warranty", "owner": "Engineering" }
+  ],
+  "dependencies": [
+    { "id": "dep-h2-001", "name": "Wind Expansion", "type": "blocked-by", "status": "green", "description": "Requires dedicated renewable generation" }
+  ],
+  "financials": { "capitalex": 102, "opex": 18, "contingency": 12, "npv": 85, "irr": 8, "paybackMonths": 120 },
+  "qualityMetrics": { "defectDensity": 0.5, "testCoverage": 85, "technicalDebtDays": 15, "codeReviewCoverage": 100, "documentationScore": 82 }
+}

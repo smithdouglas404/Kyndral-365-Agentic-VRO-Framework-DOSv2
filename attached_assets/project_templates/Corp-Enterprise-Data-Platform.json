@@ -1,0 +1,97 @@
+{
+  "id": "nee-corp-001",
+  "name": "NextEra Enterprise Data Platform",
+  "bu": "Corporate & Other",
+  "division": "Information Technology",
+  "description": "Unified enterprise data platform consolidating data from FPL, NEER, and corporate systems. Enables AI/ML capabilities, advanced analytics, and regulatory reporting across NextEra.",
+  "expectedROI": "$75M annual value from analytics enablement",
+  "roiValue": 75,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 38, "total": 65, "unit": "$m", "contingency": 8 },
+  "timeline": { "elapsed": 10, "total": 20, "unit": "months", "startDate": "2024-02-01", "endDate": "2025-10-01" },
+  "artName": "Enterprise Technology ART",
+  "portfolioTheme": "Digital Foundation",
+  "strategicObjectives": ["Unified data architecture", "Enable AI/ML at scale", "Reduce data silos by 80%"],
+  "safe": {
+    "velocity": 42,
+    "predictability": 78,
+    "flowEfficiency": 65,
+    "currentPI": "PI 24.4",
+    "totalPIs": 7,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-CORP-101",
+    "epicName": "Data Foundation Initiative",
+    "epicProgress": 52,
+    "epicWsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 8, "jobSize": 9, "score": 26 },
+    "solutionTrain": "Enterprise Solutions",
+    "valueStream": "Corporate Technology"
+  },
+  "features": [
+    {
+      "id": "feat-data-001",
+      "name": "Enterprise Data Lake on AWS",
+      "description": "Centralized data lake ingesting data from 200+ source systems",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 89,
+      "priority": "critical",
+      "wsjf": { "businessValue": 10, "timeCriticality": 9, "riskReduction": 7, "jobSize": 8, "score": 27 },
+      "acceptanceCriteria": ["200+ sources integrated", "Real-time ingestion", "Data catalog complete", "Role-based access"],
+      "stories": [
+        {
+          "id": "story-data-001",
+          "name": "FPL operational data ingestion",
+          "description": "Ingest SCADA, AMI, and customer data from FPL systems",
+          "storyPoints": 21,
+          "status": "done",
+          "acceptanceCriteria": ["Real-time SCADA data", "15-minute AMI intervals", "Customer data daily sync"],
+          "tasks": [
+            { "id": "task-data-001", "name": "SCADA streaming pipeline", "status": "done", "effortHours": 60, "assignee": "Data Engineering", "skills": ["Kafka", "AWS"] },
+            { "id": "task-data-002", "name": "AMI batch ingestion", "status": "done", "effortHours": 40, "assignee": "Data Engineering", "skills": ["Spark", "S3"] }
+          ]
+        },
+        {
+          "id": "story-data-002",
+          "name": "NEER asset data integration",
+          "description": "Integrate wind, solar, and storage asset performance data",
+          "storyPoints": 13,
+          "status": "in-progress",
+          "acceptanceCriteria": ["All renewable assets tracked", "5-minute data granularity", "Performance dashboards"],
+          "tasks": [
+            { "id": "task-data-003", "name": "Wind SCADA integration", "status": "done", "effortHours": 40, "assignee": "Data Team", "skills": ["Wind Systems", "Data Engineering"] },
+            { "id": "task-data-004", "name": "Solar monitoring integration", "status": "in-progress", "effortHours": 32, "assignee": "Data Team", "skills": ["Solar Systems"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-data-002",
+      "name": "ML/AI Platform Layer",
+      "description": "Managed ML platform for model development and deployment",
+      "status": "analyzing",
+      "storyPoints": 89,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 7, "riskReduction": 7, "jobSize": 7, "score": 24 },
+      "acceptanceCriteria": ["SageMaker deployment", "Model registry", "MLOps automation"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-data-001", "name": "Dr. Jennifer Lee", "role": "Architect", "allocation": 100, "team": "Data Architecture", "skills": ["Data Architecture", "AWS", "ML"], "costRate": 1600 },
+    { "id": "res-data-002", "name": "Robert Chen", "role": "RTE", "allocation": 100, "team": "Enterprise Technology ART", "skills": ["SAFe", "Enterprise Data"], "costRate": 1300 }
+  ],
+  "milestones": [
+    { "id": "ms-data-001", "name": "Core Data Lake Live", "date": "2024-09-30", "status": "completed", "deliverables": ["AWS infrastructure", "Core ingestion pipelines"] },
+    { "id": "ms-data-002", "name": "Full Source Integration", "date": "2025-03-31", "status": "on-track", "deliverables": ["200+ sources", "Data catalog"] },
+    { "id": "ms-data-003", "name": "ML Platform Launch", "date": "2025-10-01", "status": "pending", "deliverables": ["ML platform live", "First models deployed"] }
+  ],
+  "risks": [
+    { "id": "risk-data-001", "name": "Data Quality Issues", "probability": "high", "impact": "medium", "status": "mitigating", "mitigation": "Data governance program; source system remediation", "owner": "Data Quality Team" },
+    { "id": "risk-data-002", "name": "Integration Complexity", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Phased rollout; dedicated integration team", "owner": "Integration Lead" }
+  ],
+  "dependencies": [],
+  "financials": { "capitalex": 52, "opex": 13, "contingency": 6.5, "npv": 195, "irr": 32, "paybackMonths": 18 },
+  "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 88, "technicalDebtDays": 12, "codeReviewCoverage": 100, "documentationScore": 85 }
+}

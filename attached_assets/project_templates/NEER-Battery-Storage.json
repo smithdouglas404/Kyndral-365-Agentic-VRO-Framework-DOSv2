@@ -1,0 +1,88 @@
+{
+  "id": "nee-neer-003",
+  "name": "NEER Battery Energy Storage Systems",
+  "bu": "NextEra Energy Resources",
+  "division": "Energy Storage",
+  "description": "Large-scale battery storage deployment for grid services, renewable firming, and energy arbitrage. Target 3 GWh deployment by 2026 across key markets.",
+  "expectedROI": "$245M projected EBITDA contribution",
+  "roiValue": 245,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 180, "total": 380, "unit": "$m", "contingency": 38 },
+  "timeline": { "elapsed": 8, "total": 28, "unit": "months", "startDate": "2024-03-01", "endDate": "2026-07-01" },
+  "artName": "Storage Development ART",
+  "portfolioTheme": "Grid Flexibility",
+  "strategicObjectives": ["Deploy 3 GWh storage", "Achieve 95% availability", "Generate $80/kWh/year revenue"],
+  "safe": {
+    "velocity": 44,
+    "predictability": 78,
+    "flowEfficiency": 65,
+    "currentPI": "PI 24.4",
+    "totalPIs": 9,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-NEER-103",
+    "epicName": "Energy Storage Initiative",
+    "epicProgress": 32,
+    "epicWsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 8, "jobSize": 8, "score": 27 },
+    "solutionTrain": "Renewable Development",
+    "valueStream": "Grid Services"
+  },
+  "features": [
+    {
+      "id": "feat-bess-001",
+      "name": "Texas ERCOT Battery Portfolio",
+      "description": "1.5 GWh battery deployment across ERCOT for ancillary services and energy arbitrage",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": { "businessValue": 9, "timeCriticality": 9, "riskReduction": 7, "jobSize": 7, "score": 28 },
+      "acceptanceCriteria": ["1.5 GWh online by Q4 2025", "ERCOT ancillary services certified", "4-hour duration", "95% round-trip efficiency"],
+      "stories": [
+        {
+          "id": "story-bess-001",
+          "name": "Battery cell procurement",
+          "description": "Procure LFP battery cells from tier-1 manufacturers",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": ["Supply agreement signed", "Delivery schedule confirmed", "10-year warranty"],
+          "tasks": [
+            { "id": "task-bess-001", "name": "Negotiate supply contracts", "status": "done", "effortHours": 160, "assignee": "Procurement", "skills": ["Battery Procurement"] },
+            { "id": "task-bess-002", "name": "Quality inspection protocol", "status": "in-progress", "effortHours": 40, "assignee": "Engineering", "skills": ["Battery Systems"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-bess-002",
+      "name": "California Resource Adequacy Storage",
+      "description": "800 MWh storage for CAISO resource adequacy and capacity market",
+      "status": "analyzing",
+      "storyPoints": 89,
+      "completedPoints": 13,
+      "priority": "high",
+      "wsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 6, "jobSize": 6, "score": 24 },
+      "acceptanceCriteria": ["RA contract secured", "CAISO interconnection", "4-hour duration"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-bess-001", "name": "David Lee", "role": "RTE", "allocation": 100, "team": "Storage Development ART", "skills": ["SAFe", "Energy Storage"], "costRate": 1400 },
+    { "id": "res-bess-002", "name": "Rachel Kim", "role": "Architect", "allocation": 80, "team": "Storage Engineering", "skills": ["Battery Systems", "Power Electronics"], "costRate": 1500 }
+  ],
+  "milestones": [
+    { "id": "ms-bess-001", "name": "Texas Phase 1 - 500 MWh", "date": "2025-03-31", "status": "on-track", "deliverables": ["First 500 MWh operational", "ERCOT certified"] },
+    { "id": "ms-bess-002", "name": "Texas Full 1.5 GWh", "date": "2025-12-31", "status": "pending", "deliverables": ["Full Texas portfolio operational"] },
+    { "id": "ms-bess-003", "name": "California 800 MWh", "date": "2026-06-30", "status": "pending", "deliverables": ["California portfolio operational"] }
+  ],
+  "risks": [
+    { "id": "risk-bess-001", "name": "Battery Cell Supply Constraints", "probability": "high", "impact": "high", "status": "mitigating", "mitigation": "Multi-supplier strategy; 18-month forward orders", "owner": "Supply Chain" },
+    { "id": "risk-bess-002", "name": "Fire Safety Regulations", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Exceed NFPA standards; LFP chemistry selection", "owner": "Safety" }
+  ],
+  "dependencies": [
+    { "id": "dep-bess-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Co-location with wind projects" },
+    { "id": "dep-bess-002", "name": "Solar Development", "type": "related", "status": "green", "description": "Hybrid solar+storage projects" }
+  ],
+  "financials": { "capitalex": 342, "opex": 38, "contingency": 38, "npv": 580, "irr": 15, "paybackMonths": 72 },
+  "qualityMetrics": { "defectDensity": 0.3, "testCoverage": 90, "technicalDebtDays": 10, "codeReviewCoverage": 100, "documentationScore": 88 }
+}

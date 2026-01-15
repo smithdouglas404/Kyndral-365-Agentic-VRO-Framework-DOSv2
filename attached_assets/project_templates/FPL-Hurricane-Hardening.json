@@ -1,0 +1,88 @@
+{
+  "id": "nee-fpl-004",
+  "name": "FPL Storm Protection Plan - Hurricane Hardening",
+  "bu": "Florida Power & Light",
+  "division": "Transmission & Distribution",
+  "description": "10-year storm protection plan accelerating undergrounding of distribution lines, hardening poles, and installing smart switches. Response to Hurricane Milton and Helene impacts in 2024.",
+  "expectedROI": "$180M avoided outage costs annually",
+  "roiValue": 180,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 145, "total": 250, "unit": "$m", "contingency": 25 },
+  "timeline": { "elapsed": 6, "total": 24, "unit": "months", "startDate": "2024-06-01", "endDate": "2026-06-01" },
+  "artName": "Grid Resilience ART",
+  "portfolioTheme": "Infrastructure Resilience",
+  "strategicObjectives": ["Underground 15% of coastal feeders", "Reduce storm restoration time by 50%", "Achieve 99.5% reliability during cat 1-2 storms"],
+  "safe": {
+    "velocity": 38,
+    "predictability": 75,
+    "flowEfficiency": 62,
+    "currentPI": "PI 24.4",
+    "totalPIs": 8,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-FPL-104",
+    "epicName": "Storm Protection Initiative",
+    "epicProgress": 28,
+    "epicWsjf": { "businessValue": 10, "timeCriticality": 9, "riskReduction": 10, "jobSize": 9, "score": 29 },
+    "solutionTrain": "Energy Delivery Solutions",
+    "valueStream": "Grid Operations"
+  },
+  "features": [
+    {
+      "id": "feat-storm-001",
+      "name": "Coastal Undergrounding Phase 1",
+      "description": "Convert 500 miles of overhead distribution to underground in coastal high-risk zones",
+      "status": "implementing",
+      "storyPoints": 233,
+      "completedPoints": 89,
+      "priority": "critical",
+      "wsjf": { "businessValue": 10, "timeCriticality": 9, "riskReduction": 10, "jobSize": 10, "score": 28 },
+      "acceptanceCriteria": ["Complete 500 miles undergrounding", "Zero safety incidents", "All permits secured", "Customer coordination complete"],
+      "stories": [
+        {
+          "id": "story-storm-001",
+          "name": "Miami Beach corridor conversion",
+          "description": "Underground conversion of 45 miles in Miami Beach high-rise corridor",
+          "storyPoints": 34,
+          "status": "in-progress",
+          "acceptanceCriteria": ["45 miles completed", "Traffic management plan executed", "All customers restored within 24 hours of work"],
+          "tasks": [
+            { "id": "task-storm-001", "name": "Utility coordination and permits", "status": "done", "effortHours": 80, "assignee": "Permitting Team", "skills": ["Permitting", "Municipal Relations"] },
+            { "id": "task-storm-002", "name": "Conduit installation", "status": "in-progress", "effortHours": 400, "assignee": "Construction Crew A", "skills": ["Underground Construction"] },
+            { "id": "task-storm-003", "name": "Cable pulling and termination", "status": "todo", "effortHours": 200, "assignee": "Cable Team", "skills": ["Cable Installation"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-storm-002",
+      "name": "Pole Hardening Program",
+      "description": "Replace 50,000 wooden poles with concrete or steel poles in hurricane zones",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 55,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 9, "jobSize": 8, "score": 26 },
+      "acceptanceCriteria": ["50,000 poles replaced", "Category 4 wind rating", "15-year warranty"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-storm-001", "name": "David Martinez", "role": "RTE", "allocation": 100, "team": "Storm Protection Program", "skills": ["SAFe", "T&D Construction"], "costRate": 1250 },
+    { "id": "res-storm-002", "name": "Patricia Garcia", "role": "PM", "allocation": 100, "team": "Construction Management", "skills": ["Construction", "Utility Operations"], "costRate": 1150 }
+  ],
+  "milestones": [
+    { "id": "ms-storm-001", "name": "2024 Hurricane Season Prep Complete", "date": "2024-05-31", "status": "completed", "deliverables": ["Critical infrastructure hardened", "Emergency response updated"] },
+    { "id": "ms-storm-002", "name": "Phase 1 - 200 Miles Underground", "date": "2025-05-31", "status": "on-track", "deliverables": ["Coastal zones 1-3 complete", "20,000 poles replaced"] },
+    { "id": "ms-storm-003", "name": "Phase 2 - Full 500 Miles", "date": "2026-06-01", "status": "pending", "deliverables": ["All coastal zones complete", "50,000 poles replaced"] }
+  ],
+  "risks": [
+    { "id": "risk-storm-001", "name": "Hurricane Season Disruption", "probability": "high", "impact": "high", "status": "active", "mitigation": "Accelerate pre-season work; maintain restoration resources separate from construction", "owner": "Operations" },
+    { "id": "risk-storm-002", "name": "Contractor Availability", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Multi-year contracts with 3 major contractors", "owner": "Procurement" }
+  ],
+  "dependencies": [
+    { "id": "dep-storm-001", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Smart switch installation coordinated with undergrounding" }
+  ],
+  "financials": { "capitalex": 225, "opex": 25, "contingency": 25, "npv": 520, "irr": 18, "paybackMonths": 36 },
+  "qualityMetrics": { "defectDensity": 0.1, "testCoverage": 98, "technicalDebtDays": 3, "codeReviewCoverage": 100, "documentationScore": 92 }
+}

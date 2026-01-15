@@ -1,0 +1,86 @@
+{
+  "id": "nee-corp-003",
+  "name": "NextEra Cybersecurity & NERC CIP Compliance",
+  "bu": "Corporate & Other",
+  "division": "Information Security",
+  "description": "Enterprise cybersecurity program ensuring NERC CIP compliance for critical infrastructure, implementing zero-trust architecture, and protecting against evolving threats.",
+  "expectedROI": "$45M risk mitigation value",
+  "roiValue": 45,
+  "priority": "critical",
+  "status": "green",
+  "budget": { "spent": 15, "total": 28, "unit": "$m", "contingency": 4 },
+  "timeline": { "elapsed": 8, "total": 18, "unit": "months", "startDate": "2024-03-01", "endDate": "2025-09-01" },
+  "artName": "Enterprise Technology ART",
+  "portfolioTheme": "Security & Resilience",
+  "strategicObjectives": ["100% NERC CIP compliance", "Zero-trust architecture", "Reduce security incidents by 50%"],
+  "safe": {
+    "velocity": 35,
+    "predictability": 88,
+    "flowEfficiency": 72,
+    "currentPI": "PI 24.4",
+    "totalPIs": 6,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-CORP-103",
+    "epicName": "Cybersecurity Excellence Program",
+    "epicProgress": 48,
+    "epicWsjf": { "businessValue": 10, "timeCriticality": 9, "riskReduction": 10, "jobSize": 7, "score": 31 },
+    "solutionTrain": "Enterprise Solutions",
+    "valueStream": "Security Operations"
+  },
+  "features": [
+    {
+      "id": "feat-sec-001",
+      "name": "NERC CIP Compliance Automation",
+      "description": "Automated compliance monitoring and evidence collection for NERC CIP standards",
+      "status": "implementing",
+      "storyPoints": 89,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": { "businessValue": 10, "timeCriticality": 10, "riskReduction": 10, "jobSize": 6, "score": 35 },
+      "acceptanceCriteria": ["CIP-002 through CIP-014 coverage", "Automated evidence collection", "Audit-ready reports"],
+      "stories": [
+        {
+          "id": "story-sec-001",
+          "name": "Asset inventory automation",
+          "description": "Continuous discovery and classification of BES Cyber Assets",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["All cyber assets inventoried", "Classification updated daily", "Change detection alerts"],
+          "tasks": [
+            { "id": "task-sec-001", "name": "Deploy discovery tools", "status": "done", "effortHours": 40, "assignee": "Security Team", "skills": ["Security Tools", "OT Security"] },
+            { "id": "task-sec-002", "name": "Build classification engine", "status": "done", "effortHours": 60, "assignee": "Security Engineering", "skills": ["Python", "NERC CIP"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-sec-002",
+      "name": "Zero-Trust Network Architecture",
+      "description": "Implement zero-trust security model across IT and OT environments",
+      "status": "analyzing",
+      "storyPoints": 144,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 7, "riskReduction": 10, "jobSize": 9, "score": 26 },
+      "acceptanceCriteria": ["Micro-segmentation", "Identity-based access", "Continuous verification"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-sec-001", "name": "David Chen", "role": "Architect", "allocation": 100, "team": "Security Architecture", "skills": ["Cybersecurity", "NERC CIP", "Zero Trust"], "costRate": 1700 },
+    { "id": "res-sec-002", "name": "Jennifer Walsh", "role": "PM", "allocation": 80, "team": "Security Programs", "skills": ["Security Management", "Compliance"], "costRate": 1300 }
+  ],
+  "milestones": [
+    { "id": "ms-sec-001", "name": "CIP Automation Phase 1", "date": "2024-12-31", "status": "on-track", "deliverables": ["Asset inventory", "Access management"] },
+    { "id": "ms-sec-002", "name": "Zero-Trust Pilot", "date": "2025-04-30", "status": "pending", "deliverables": ["Pilot environment", "Policy framework"] },
+    { "id": "ms-sec-003", "name": "Full Deployment", "date": "2025-09-01", "status": "pending", "deliverables": ["Enterprise rollout", "24/7 SOC integration"] }
+  ],
+  "risks": [
+    { "id": "risk-sec-001", "name": "OT Security Complexity", "probability": "medium", "impact": "high", "status": "mitigating", "mitigation": "Specialized OT security team; vendor partnerships", "owner": "OT Security Lead" }
+  ],
+  "dependencies": [
+    { "id": "dep-sec-001", "name": "Enterprise Data Platform", "type": "related", "status": "green", "description": "Security data integration" }
+  ],
+  "financials": { "capitalex": 22, "opex": 6, "contingency": 2.8, "npv": 120, "irr": 38, "paybackMonths": 16 },
+  "qualityMetrics": { "defectDensity": 0.1, "testCoverage": 98, "technicalDebtDays": 3, "codeReviewCoverage": 100, "documentationScore": 98 }
+}

@@ -1,0 +1,74 @@
+{
+  "id": "nee-neer-006",
+  "name": "NEER Wind Fleet Repowering Program",
+  "bu": "NextEra Energy Resources",
+  "division": "Asset Management",
+  "description": "Systematic repowering of aging wind assets with modern turbines to extend asset life, increase capacity, and qualify for new tax credits. Targeting 2+ GW of repowered capacity by 2027.",
+  "expectedROI": "$320M incremental EBITDA",
+  "roiValue": 320,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 85, "total": 280, "unit": "$m", "contingency": 28 },
+  "timeline": { "elapsed": 8, "total": 30, "unit": "months", "startDate": "2024-03-01", "endDate": "2026-09-01" },
+  "artName": "Wind Development ART",
+  "portfolioTheme": "Asset Optimization",
+  "strategicObjectives": ["Repower 2 GW existing capacity", "Increase capacity factor by 40%", "Extend asset life 20 years"],
+  "safe": {
+    "velocity": 42,
+    "predictability": 88,
+    "flowEfficiency": 72,
+    "currentPI": "PI 24.4",
+    "totalPIs": 10,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-NEER-106",
+    "epicName": "Fleet Optimization Program",
+    "epicProgress": 30,
+    "epicWsjf": { "businessValue": 9, "timeCriticality": 7, "riskReduction": 6, "jobSize": 7, "score": 25 },
+    "solutionTrain": "Renewable Development",
+    "valueStream": "Asset Management"
+  },
+  "features": [
+    {
+      "id": "feat-rep-001",
+      "name": "Oklahoma Repowering Phase 1",
+      "description": "Repower 800 MW across 3 wind farms in Oklahoma",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 55,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 6, "jobSize": 7, "score": 26 },
+      "acceptanceCriteria": ["800 MW repowered", "45% capacity factor achieved", "New 20-year PPA secured"],
+      "stories": [
+        {
+          "id": "story-rep-001",
+          "name": "Turbine decommissioning",
+          "description": "Safe removal of existing 1.5 MW turbines",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": ["All turbines removed safely", "Components recycled/disposed", "Site cleared for new turbines"],
+          "tasks": [
+            { "id": "task-rep-001", "name": "Blade removal and disposal", "status": "done", "effortHours": 200, "assignee": "Decommissioning Crew", "skills": ["Wind Decommissioning"] },
+            { "id": "task-rep-002", "name": "Tower section removal", "status": "in-progress", "effortHours": 300, "assignee": "Crane Team", "skills": ["Heavy Lift Operations"] }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "res-rep-001", "name": "Mark Johnson", "role": "PM", "allocation": 100, "team": "Repowering Program", "skills": ["Wind Projects", "Asset Management"], "costRate": 1250 },
+    { "id": "res-rep-002", "name": "Tom Williams", "role": "PO", "allocation": 80, "team": "Asset Optimization", "skills": ["Wind Operations", "Product Management"], "costRate": 1100 }
+  ],
+  "milestones": [
+    { "id": "ms-rep-001", "name": "Oklahoma Phase 1 - 400 MW", "date": "2025-06-30", "status": "on-track", "deliverables": ["First 400 MW repowered", "New PPA activated"] },
+    { "id": "ms-rep-002", "name": "Oklahoma Phase 1 Complete - 800 MW", "date": "2025-12-31", "status": "pending", "deliverables": ["Full 800 MW operational"] },
+    { "id": "ms-rep-003", "name": "Texas Repowering Start", "date": "2026-03-31", "status": "pending", "deliverables": ["Texas projects initiated"] }
+  ],
+  "risks": [
+    { "id": "risk-rep-001", "name": "PTC Qualification Timeline", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Accelerate safe harbor activities", "owner": "Tax Team" }
+  ],
+  "dependencies": [
+    { "id": "dep-rep-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Shared turbine procurement" }
+  ],
+  "financials": { "capitalex": 252, "opex": 28, "contingency": 28, "npv": 680, "irr": 18, "paybackMonths": 60 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 92, "technicalDebtDays": 7, "codeReviewCoverage": 100, "documentationScore": 90 }
+}

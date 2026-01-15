@@ -1,0 +1,86 @@
+{
+  "id": "nee-fpl-005",
+  "name": "FPL Customer Digital Experience Platform",
+  "bu": "Florida Power & Light",
+  "division": "Customer Operations",
+  "description": "Next-generation customer portal and mobile app with AI-powered support, real-time outage tracking, and self-service capabilities. Target: 90% digital adoption and 50% reduction in call center volume.",
+  "expectedROI": "$45M annual savings in customer operations",
+  "roiValue": 45,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 12, "total": 28, "unit": "$m", "contingency": 4 },
+  "timeline": { "elapsed": 8, "total": 16, "unit": "months", "startDate": "2024-04-01", "endDate": "2025-08-01" },
+  "artName": "Customer Technology ART",
+  "portfolioTheme": "Customer Experience",
+  "strategicObjectives": ["Achieve 90% digital adoption", "Reduce call center volume by 50%", "Achieve JD Power top quartile ranking"],
+  "safe": {
+    "velocity": 45,
+    "predictability": 90,
+    "flowEfficiency": 78,
+    "currentPI": "PI 24.4",
+    "totalPIs": 5,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-FPL-105",
+    "epicName": "Digital Customer Platform",
+    "epicProgress": 52,
+    "epicWsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 5, "jobSize": 5, "score": 24 },
+    "solutionTrain": "Customer Solutions",
+    "valueStream": "Customer Experience"
+  },
+  "features": [
+    {
+      "id": "feat-cust-001",
+      "name": "AI-Powered Virtual Assistant",
+      "description": "Conversational AI for customer inquiries, bill questions, and service requests",
+      "status": "implementing",
+      "storyPoints": 89,
+      "completedPoints": 55,
+      "priority": "high",
+      "wsjf": { "businessValue": 9, "timeCriticality": 7, "riskReduction": 5, "jobSize": 5, "score": 25 },
+      "acceptanceCriteria": ["Handle 80% of inquiries without human", "95% customer satisfaction", "24/7 availability", "Spanish language support"],
+      "stories": [
+        {
+          "id": "story-cust-001",
+          "name": "Billing inquiry handling",
+          "description": "AI assistant to explain bills, payment options, and usage patterns",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["Answer billing questions", "Process payments", "Set up payment plans"],
+          "tasks": [
+            { "id": "task-cust-001", "name": "Train LLM on billing FAQs", "status": "done", "effortHours": 40, "assignee": "AI Team", "skills": ["NLP", "LLM Fine-tuning"] },
+            { "id": "task-cust-002", "name": "Integrate with billing system", "status": "done", "effortHours": 24, "assignee": "Integration Team", "skills": ["API Development", "SAP"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-cust-002",
+      "name": "Real-Time Outage Tracker",
+      "description": "Interactive map showing outages, crew locations, and estimated restoration times",
+      "status": "done",
+      "storyPoints": 55,
+      "completedPoints": 55,
+      "priority": "critical",
+      "wsjf": { "businessValue": 9, "timeCriticality": 9, "riskReduction": 7, "jobSize": 4, "score": 30 },
+      "acceptanceCriteria": ["Real-time updates every 2 minutes", "Crew location tracking", "Push notifications", "Accuracy within 15 minutes of actual restoration"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-cust-001", "name": "Michelle Thompson", "role": "RTE", "allocation": 100, "team": "Customer Technology ART", "skills": ["SAFe", "Digital Products"], "costRate": 1200 },
+    { "id": "res-cust-002", "name": "Alex Chen", "role": "PO", "allocation": 100, "team": "Digital Experience", "skills": ["Product Management", "UX"], "costRate": 1100 }
+  ],
+  "milestones": [
+    { "id": "ms-cust-001", "name": "Beta Launch", "date": "2024-10-01", "status": "completed", "deliverables": ["New portal live for 10% of customers", "Mobile app beta"] },
+    { "id": "ms-cust-002", "name": "Full Launch", "date": "2025-02-01", "status": "on-track", "deliverables": ["100% customer migration", "AI assistant live"] },
+    { "id": "ms-cust-003", "name": "Phase 2 Features", "date": "2025-08-01", "status": "pending", "deliverables": ["Advanced analytics", "Smart home integration"] }
+  ],
+  "risks": [
+    { "id": "risk-cust-001", "name": "Customer Adoption", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Targeted marketing campaign; incentives for digital enrollment", "owner": "Marketing" }
+  ],
+  "dependencies": [
+    { "id": "dep-cust-001", "name": "AMI 2.0", "type": "related", "status": "green", "description": "Real-time usage data from smart meters" }
+  ],
+  "financials": { "capitalex": 22, "opex": 6, "contingency": 2.8, "npv": 125, "irr": 35, "paybackMonths": 15 },
+  "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 94, "technicalDebtDays": 6, "codeReviewCoverage": 100, "documentationScore": 88 }
+}

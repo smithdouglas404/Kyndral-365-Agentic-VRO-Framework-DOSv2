@@ -1,0 +1,74 @@
+{
+  "id": "nee-neer-008",
+  "name": "NEER Development Pipeline Management System",
+  "bu": "NextEra Energy Resources",
+  "division": "Development",
+  "description": "Digital platform for managing NEER's 300+ GW renewable development pipeline from origination through construction. Integrates land, permitting, interconnection, and offtake tracking.",
+  "expectedROI": "$28M development efficiency gains",
+  "roiValue": 28,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 8, "total": 22, "unit": "$m", "contingency": 3 },
+  "timeline": { "elapsed": 5, "total": 12, "unit": "months", "startDate": "2024-06-01", "endDate": "2025-06-01" },
+  "artName": "Development Systems ART",
+  "portfolioTheme": "Development Excellence",
+  "strategicObjectives": ["Reduce development cycle time by 20%", "Improve pipeline visibility", "Automate stage-gate processes"],
+  "safe": {
+    "velocity": 35,
+    "predictability": 88,
+    "flowEfficiency": 72,
+    "currentPI": "PI 24.4",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-NEER-108",
+    "epicName": "Development Excellence Program",
+    "epicProgress": 42,
+    "epicWsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 6, "jobSize": 4, "score": 27 },
+    "solutionTrain": "Corporate Solutions",
+    "valueStream": "Development Operations"
+  },
+  "features": [
+    {
+      "id": "feat-dev-001",
+      "name": "Pipeline Dashboard & Analytics",
+      "description": "Real-time visibility into development pipeline with stage-gate tracking",
+      "status": "implementing",
+      "storyPoints": 55,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 6, "jobSize": 4, "score": 27 },
+      "acceptanceCriteria": ["300+ project visibility", "Stage-gate automation", "Executive dashboard", "Mobile access"],
+      "stories": [
+        {
+          "id": "story-dev-001",
+          "name": "Project tracking dashboard",
+          "description": "Interactive dashboard showing all projects by stage and region",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["Filter by region/stage/technology", "Drill-down to project details", "Export capabilities"],
+          "tasks": [
+            { "id": "task-dev-001", "name": "Design dashboard UI", "status": "done", "effortHours": 24, "assignee": "UX Team", "skills": ["UX Design"] },
+            { "id": "task-dev-002", "name": "Build React components", "status": "done", "effortHours": 40, "assignee": "Frontend Team", "skills": ["React", "D3.js"] }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "res-dev-001", "name": "Sarah Martinez", "role": "PO", "allocation": 100, "team": "Development Systems", "skills": ["Product Management", "Renewable Development"], "costRate": 1200 },
+    { "id": "res-dev-002", "name": "Kevin Thompson", "role": "RTE", "allocation": 80, "team": "Development Systems ART", "skills": ["SAFe", "Business Systems"], "costRate": 1150 }
+  ],
+  "milestones": [
+    { "id": "ms-dev-001", "name": "Core Platform Launch", "date": "2024-12-31", "status": "on-track", "deliverables": ["Pipeline dashboard", "Basic tracking"] },
+    { "id": "ms-dev-002", "name": "Stage-Gate Automation", "date": "2025-03-31", "status": "pending", "deliverables": ["Workflow automation", "Approval routing"] },
+    { "id": "ms-dev-003", "name": "Full Rollout", "date": "2025-06-01", "status": "pending", "deliverables": ["All regions live", "Mobile app"] }
+  ],
+  "risks": [
+    { "id": "risk-dev-001", "name": "User Adoption", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Change management program; executive sponsorship", "owner": "Change Management" }
+  ],
+  "dependencies": [
+    { "id": "dep-dev-001", "name": "Enterprise Data Platform", "type": "related", "status": "green", "description": "Data integration" }
+  ],
+  "financials": { "capitalex": 18, "opex": 4, "contingency": 2.2, "npv": 75, "irr": 38, "paybackMonths": 14 },
+  "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 90, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 88 }
+}

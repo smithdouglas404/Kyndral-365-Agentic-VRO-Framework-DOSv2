@@ -1,0 +1,74 @@
+{
+  "id": "nee-fpl-006",
+  "name": "FPL 2025 Rate Case Support System",
+  "bu": "Florida Power & Light",
+  "division": "Regulatory Affairs",
+  "description": "Comprehensive analytics and documentation platform supporting FPL's rate case filing with Florida PSC. Automates cost-of-service studies, rate design modeling, and regulatory reporting.",
+  "expectedROI": "$15M regulatory efficiency savings",
+  "roiValue": 15,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 5, "total": 12, "unit": "$m", "contingency": 1.5 },
+  "timeline": { "elapsed": 6, "total": 12, "unit": "months", "startDate": "2024-07-01", "endDate": "2025-07-01" },
+  "artName": "Corporate Systems ART",
+  "portfolioTheme": "Regulatory Excellence",
+  "strategicObjectives": ["Reduce rate case preparation time by 40%", "Improve cost allocation accuracy", "Support real-time scenario modeling"],
+  "safe": {
+    "velocity": 32,
+    "predictability": 92,
+    "flowEfficiency": 80,
+    "currentPI": "PI 24.4",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-FPL-106",
+    "epicName": "Regulatory Analytics Platform",
+    "epicProgress": 48,
+    "epicWsjf": { "businessValue": 7, "timeCriticality": 8, "riskReduction": 6, "jobSize": 4, "score": 26 },
+    "solutionTrain": "Corporate Solutions",
+    "valueStream": "Regulatory Operations"
+  },
+  "features": [
+    {
+      "id": "feat-rate-001",
+      "name": "Cost-of-Service Automation",
+      "description": "Automated calculation of embedded cost studies and class cost allocation",
+      "status": "implementing",
+      "storyPoints": 55,
+      "completedPoints": 34,
+      "priority": "high",
+      "wsjf": { "businessValue": 8, "timeCriticality": 8, "riskReduction": 6, "jobSize": 5, "score": 26 },
+      "acceptanceCriteria": ["Match manual calculations within 0.1%", "Support 12 rate classes", "Audit trail for all calculations"],
+      "stories": [
+        {
+          "id": "story-rate-001",
+          "name": "Demand allocation engine",
+          "description": "Calculate demand-related costs by customer class using coincident peak methodology",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["12-CP methodology", "NCP calculations", "Validation against Excel model"],
+          "tasks": [
+            { "id": "task-rate-001", "name": "Implement allocation algorithms", "status": "done", "effortHours": 40, "assignee": "Rate Team", "skills": ["Cost Accounting", "Python"] },
+            { "id": "task-rate-002", "name": "Build validation framework", "status": "done", "effortHours": 24, "assignee": "QA Team", "skills": ["Testing", "Regulatory"] }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "res-rate-001", "name": "Jennifer Adams", "role": "PO", "allocation": 80, "team": "Regulatory Systems", "skills": ["Regulatory Affairs", "Rate Design"], "costRate": 1300 },
+    { "id": "res-rate-002", "name": "Mark Thompson", "role": "Architect", "allocation": 60, "team": "Analytics Platform", "skills": ["Data Architecture", "Financial Systems"], "costRate": 1400 }
+  ],
+  "milestones": [
+    { "id": "ms-rate-001", "name": "Cost Study Module Complete", "date": "2024-12-15", "status": "on-track", "deliverables": ["Automated cost allocation", "Class revenue requirements"] },
+    { "id": "ms-rate-002", "name": "Rate Design Module", "date": "2025-03-01", "status": "pending", "deliverables": ["Rate structure modeling", "Bill impact calculator"] },
+    { "id": "ms-rate-003", "name": "Filing Support", "date": "2025-07-01", "status": "pending", "deliverables": ["Full rate case package", "Testimony support"] }
+  ],
+  "risks": [
+    { "id": "risk-rate-001", "name": "PSC Methodology Changes", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Flexible architecture to accommodate rule changes", "owner": "Regulatory Affairs" }
+  ],
+  "dependencies": [
+    { "id": "dep-rate-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Requires integrated financial data from all systems" }
+  ],
+  "financials": { "capitalex": 10, "opex": 2, "contingency": 1.2, "npv": 45, "irr": 42, "paybackMonths": 10 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 96, "technicalDebtDays": 4, "codeReviewCoverage": 100, "documentationScore": 95 }
+}

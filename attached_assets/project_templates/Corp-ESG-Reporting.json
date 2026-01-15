@@ -1,0 +1,86 @@
+{
+  "id": "nee-corp-002",
+  "name": "NextEra ESG & Sustainability Reporting Platform",
+  "bu": "Corporate & Other",
+  "division": "Sustainability",
+  "description": "Integrated ESG reporting platform for SEC climate disclosures, sustainability reporting, and stakeholder communications. Supports NextEra's leadership in clean energy transition.",
+  "expectedROI": "$12M regulatory compliance value",
+  "roiValue": 12,
+  "priority": "high",
+  "status": "green",
+  "budget": { "spent": 4, "total": 8, "unit": "$m", "contingency": 1 },
+  "timeline": { "elapsed": 5, "total": 10, "unit": "months", "startDate": "2024-06-01", "endDate": "2025-04-01" },
+  "artName": "Corporate Systems ART",
+  "portfolioTheme": "Regulatory Excellence",
+  "strategicObjectives": ["SEC climate disclosure compliance", "Automated sustainability reporting", "ESG rating improvement"],
+  "safe": {
+    "velocity": 28,
+    "predictability": 92,
+    "flowEfficiency": 78,
+    "currentPI": "PI 24.4",
+    "totalPIs": 4,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-CORP-102",
+    "epicName": "ESG Excellence Program",
+    "epicProgress": 52,
+    "epicWsjf": { "businessValue": 8, "timeCriticality": 9, "riskReduction": 8, "jobSize": 4, "score": 31 },
+    "solutionTrain": "Corporate Solutions",
+    "valueStream": "Corporate Governance"
+  },
+  "features": [
+    {
+      "id": "feat-esg-001",
+      "name": "Carbon Emissions Tracking",
+      "description": "Automated Scope 1, 2, 3 emissions calculation and reporting",
+      "status": "implementing",
+      "storyPoints": 55,
+      "completedPoints": 42,
+      "priority": "critical",
+      "wsjf": { "businessValue": 9, "timeCriticality": 10, "riskReduction": 8, "jobSize": 4, "score": 33 },
+      "acceptanceCriteria": ["All emission sources tracked", "GHG Protocol compliant", "Third-party verification ready"],
+      "stories": [
+        {
+          "id": "story-esg-001",
+          "name": "Scope 1 emissions automation",
+          "description": "Automate direct emissions from generation assets",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["All gas plants integrated", "Real-time emissions calculation", "EPA reporting format"],
+          "tasks": [
+            { "id": "task-esg-001", "name": "Integrate CEMS data", "status": "done", "effortHours": 40, "assignee": "Environmental Team", "skills": ["Environmental Systems"] },
+            { "id": "task-esg-002", "name": "Build calculation engine", "status": "done", "effortHours": 32, "assignee": "Development Team", "skills": ["Python", "Environmental"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-esg-002",
+      "name": "SEC Climate Disclosure Module",
+      "description": "Generate SEC-compliant climate risk disclosures",
+      "status": "implementing",
+      "storyPoints": 34,
+      "completedPoints": 21,
+      "priority": "critical",
+      "wsjf": { "businessValue": 9, "timeCriticality": 10, "riskReduction": 9, "jobSize": 3, "score": 36 },
+      "acceptanceCriteria": ["SEC format compliance", "Risk scenario modeling", "Audit trail"],
+      "stories": []
+    }
+  ],
+  "resources": [
+    { "id": "res-esg-001", "name": "Dr. Maria Santos", "role": "PO", "allocation": 80, "team": "Sustainability", "skills": ["ESG", "Environmental Reporting"], "costRate": 1400 },
+    { "id": "res-esg-002", "name": "Tom Williams", "role": "PM", "allocation": 60, "team": "Corporate Systems", "skills": ["Project Management", "Compliance"], "costRate": 1100 }
+  ],
+  "milestones": [
+    { "id": "ms-esg-001", "name": "Emissions Tracking Live", "date": "2024-12-31", "status": "on-track", "deliverables": ["Scope 1-2 tracking", "Dashboard live"] },
+    { "id": "ms-esg-002", "name": "SEC Module Complete", "date": "2025-02-28", "status": "pending", "deliverables": ["Climate disclosure ready", "Risk scenarios"] },
+    { "id": "ms-esg-003", "name": "Full Platform Launch", "date": "2025-04-01", "status": "pending", "deliverables": ["Sustainability report automation", "Stakeholder portal"] }
+  ],
+  "risks": [
+    { "id": "risk-esg-001", "name": "Regulatory Timeline Changes", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Flexible architecture; early SEC engagement", "owner": "Legal" }
+  ],
+  "dependencies": [
+    { "id": "dep-esg-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Emissions data from data lake" }
+  ],
+  "financials": { "capitalex": 6.5, "opex": 1.5, "contingency": 0.8, "npv": 35, "irr": 45, "paybackMonths": 10 },
+  "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 95, "technicalDebtDays": 4, "codeReviewCoverage": 100, "documentationScore": 95 }
+}

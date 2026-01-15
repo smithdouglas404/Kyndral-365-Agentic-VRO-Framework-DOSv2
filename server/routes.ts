@@ -513,8 +513,8 @@ ${projectData ? `
 Status: ${projectData.status}
 Priority: ${projectData.priority}
 Business Unit: ${projectData.bu}
-Budget: £${projectData.budget}M (${projectData.budgetUtilization}% utilized)
-ROI: £${projectData.roi}M projected
+Budget: $${projectData.budget}M (${projectData.budgetUtilization}% utilized)
+ROI: $${projectData.roi}M projected
 Timeline: PI ${projectData.currentPI} of ${projectData.totalPIs}
 Key Risks: ${projectData.risks || 'None identified'}
 Dependencies: ${projectData.dependencies || 'None'}

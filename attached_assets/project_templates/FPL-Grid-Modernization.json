@@ -1,0 +1,120 @@
+{
+  "id": "nee-fpl-001",
+  "name": "FPL Grid Modernization & Automation",
+  "bu": "Florida Power & Light",
+  "division": "Distribution Operations",
+  "description": "AI-powered grid management system with automated switching, real-time load balancing, and predictive outage prevention. Part of FPL's $8.2B capital investment program targeting 99.98% reliability.",
+  "expectedROI": "$120M annual efficiency gains",
+  "roiValue": 120,
+  "priority": "critical",
+  "status": "amber",
+  "budget": { "spent": 45, "total": 68, "unit": "$m", "contingency": 10 },
+  "timeline": { "elapsed": 8, "total": 14, "unit": "months", "startDate": "2024-03-01", "endDate": "2025-05-01" },
+  "artName": "Grid Resilience ART",
+  "portfolioTheme": "Infrastructure Modernization",
+  "strategicObjectives": ["Reduce outage duration by 80%", "Achieve 5-minute average restoration", "Improve customer reliability index"],
+  "safe": {
+    "velocity": 48,
+    "predictability": 82,
+    "flowEfficiency": 68,
+    "currentPI": "PI 24.4",
+    "totalPIs": 6,
+    "piCadence": "10 weeks",
+    "epicId": "EPIC-FPL-101",
+    "epicName": "Grid Resilience Initiative",
+    "epicProgress": 55,
+    "epicWsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 9, "jobSize": 8, "score": 28 },
+    "solutionTrain": "Energy Delivery Solutions",
+    "valueStream": "Grid Operations"
+  },
+  "features": [
+    {
+      "id": "feat-grid-001",
+      "name": "Automated Fault Detection & Isolation",
+      "description": "AI-powered system to detect grid faults within milliseconds and automatically isolate affected sections",
+      "status": "implementing",
+      "storyPoints": 144,
+      "completedPoints": 89,
+      "priority": "critical",
+      "wsjf": { "businessValue": 9, "timeCriticality": 9, "riskReduction": 8, "jobSize": 5, "score": 32 },
+      "acceptanceCriteria": ["Detect faults in <100ms", "Auto-isolate in <500ms", "Notify dispatch center", "Log all events for NERC compliance"],
+      "stories": [
+        {
+          "id": "story-grid-001",
+          "name": "Fault signature pattern recognition",
+          "description": "ML model to identify fault types from voltage/current waveforms",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["95% accuracy on test dataset", "Support 8 fault types", "Real-time inference <50ms"],
+          "tasks": [
+            { "id": "task-001", "name": "Collect training data from SCADA historians", "status": "done", "effortHours": 24, "assignee": "Carlos Martinez", "skills": ["Data Engineering", "SCADA"] },
+            { "id": "task-002", "name": "Train CNN model on fault signatures", "status": "done", "effortHours": 40, "assignee": "Dr. Sarah Chen", "skills": ["ML Engineering", "Python"] },
+            { "id": "task-003", "name": "Deploy model to edge devices", "status": "done", "effortHours": 16, "assignee": "Mike Johnson", "skills": ["Edge Computing", "IoT"] }
+          ]
+        },
+        {
+          "id": "story-grid-002",
+          "name": "Automated switching sequence execution",
+          "description": "Execute pre-defined switching sequences to isolate faults and restore healthy sections",
+          "storyPoints": 21,
+          "status": "in-progress",
+          "acceptanceCriteria": ["Support 50+ switching sequences", "Validate safety interlocks", "Human override capability"],
+          "tasks": [
+            { "id": "task-004", "name": "Map switching sequences from operations manual", "status": "done", "effortHours": 32, "assignee": "Tom Williams", "skills": ["Power Systems", "Operations"] },
+            { "id": "task-005", "name": "Implement sequence validator", "status": "in-progress", "effortHours": 24, "assignee": "Lisa Park", "skills": ["Java", "Control Systems"] },
+            { "id": "task-006", "name": "Integration with ADMS platform", "status": "todo", "effortHours": 40, "assignee": "James Rodriguez", "skills": ["ADMS", "Integration"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feat-grid-002",
+      "name": "Predictive Maintenance Analytics",
+      "description": "ML-based prediction of equipment failures before they occur",
+      "status": "analyzing",
+      "storyPoints": 89,
+      "completedPoints": 21,
+      "priority": "high",
+      "wsjf": { "businessValue": 8, "timeCriticality": 6, "riskReduction": 9, "jobSize": 6, "score": 24 },
+      "acceptanceCriteria": ["Predict failures 30 days in advance", "80% prediction accuracy", "Integrate with work management system"],
+      "stories": [
+        {
+          "id": "story-grid-003",
+          "name": "Transformer health monitoring",
+          "description": "Continuous monitoring of transformer oil temperature, dissolved gas analysis",
+          "storyPoints": 13,
+          "status": "done",
+          "acceptanceCriteria": ["Monitor 500+ transformers", "Alert on anomalies", "Dashboard visualization"],
+          "tasks": [
+            { "id": "task-007", "name": "Deploy IoT sensors on critical transformers", "status": "done", "effortHours": 80, "assignee": "Field Team Alpha", "skills": ["Field Operations", "IoT"] },
+            { "id": "task-008", "name": "Build data pipeline to analytics platform", "status": "done", "effortHours": 24, "assignee": "Data Team", "skills": ["Kafka", "AWS"] }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    { "id": "res-001", "name": "Maria Santos", "role": "RTE", "allocation": 100, "team": "Grid Resilience ART", "skills": ["SAFe", "Power Systems", "Agile"], "costRate": 1200 },
+    { "id": "res-002", "name": "Dr. Sarah Chen", "role": "Architect", "allocation": 80, "team": "ML Engineering", "skills": ["Machine Learning", "Python", "TensorFlow"], "costRate": 1500 },
+    { "id": "res-003", "name": "Carlos Martinez", "role": "PO", "allocation": 100, "team": "Grid Operations", "skills": ["Product Management", "SCADA", "Utilities"], "costRate": 1100 }
+  ],
+  "milestones": [
+    { "id": "ms-001", "name": "Phase 1 - Coastal Zone Deployment", "date": "2024-09-30", "status": "completed", "deliverables": ["Miami-Dade automation", "Broward County automation", "SCADA integration"] },
+    { "id": "ms-002", "name": "Phase 2 - Central Florida Expansion", "date": "2025-01-15", "status": "on-track", "deliverables": ["Orlando metro", "Tampa Bay area", "Predictive maintenance pilot"] },
+    { "id": "ms-003", "name": "Phase 3 - Statewide Rollout", "date": "2025-05-01", "status": "pending", "deliverables": ["Full state coverage", "AI optimization", "Performance validation"] }
+  ],
+  "risks": [
+    { "id": "risk-001", "name": "Hurricane Season Impact", "probability": "high", "impact": "high", "status": "monitoring", "mitigation": "Accelerate coastal deployments before June; maintain emergency rollback procedures", "owner": "Maria Santos" },
+    { "id": "risk-002", "name": "Legacy SCADA Integration Delays", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Dedicated integration team; vendor support escalation path", "owner": "James Rodriguez" }
+  ],
+  "dependencies": [
+    { "id": "dep-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "yellow", "description": "Requires unified data lake for ML training data" },
+    { "id": "dep-002", "name": "AMI Infrastructure", "type": "related", "status": "green", "description": "Shares communication backbone for grid sensors" }
+  ],
+  "stakeholders": [
+    { "id": "sh-001", "name": "Eric Silagy", "role": "Executive Sponsor", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" }
+  ],
+  "financials": { "capitalex": 58, "opex": 10, "contingency": 6.8, "npv": 245, "irr": 28, "paybackMonths": 24 },
+  "qualityMetrics": { "defectDensity": 0.8, "testCoverage": 87, "technicalDebtDays": 12, "codeReviewCoverage": 100, "documentationScore": 85 }
+}
