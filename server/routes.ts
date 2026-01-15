@@ -1136,6 +1136,28 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Seed agent discussions and task queue
+  app.post("/api/demo/seed-agent-data", async (_req, res) => {
+    try {
+      // @ts-ignore - using internal seed methods
+      if (typeof storage.seedAgentDiscussions === 'function') {
+        await storage.seedAgentDiscussions();
+      }
+      // @ts-ignore
+      if (typeof storage.seedAgentTaskQueue === 'function') {
+        await storage.seedAgentTaskQueue();
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'Agent discussions and task queue seeded successfully.',
+      });
+    } catch (error: any) {
+      console.error("Seed agent data error:", error);
+      res.status(500).json({ error: "Failed to seed agent data" });
+    }
+  });
+
   // Get agent activity log
   app.get("/api/agent-activity", async (req, res) => {
     try {

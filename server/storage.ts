@@ -866,6 +866,185 @@ export class DatabaseStorage implements IStorage {
     for (const activity of demoActivities) {
       await db.insert(agentActivityLog).values(activity);
     }
+    
+    // Seed agent discussions and messages
+    await this.seedAgentDiscussions();
+    await this.seedAgentTaskQueue();
+  }
+
+  async seedAgentDiscussions(): Promise<void> {
+    // Check if discussions already exist
+    const existing = await db.select().from(agentDiscussions).limit(1);
+    if (existing.length > 0) return;
+
+    const demoDiscussions = [
+      {
+        id: 'disc-001',
+        topic: 'Q1 Budget Reallocation for Data Center Initiative',
+        projectId: 'nee-google-001',
+        projectName: 'Google Cloud Data Center Partnership',
+        priority: 'critical',
+        status: 'active',
+        consensusReached: 'false'
+      },
+      {
+        id: 'disc-002',
+        topic: 'Cross-ART Dependency Resolution - API Platform Blocking Teams',
+        projectId: 'nee-grid-mod',
+        projectName: 'Grid Modernization Program',
+        priority: 'high',
+        status: 'active',
+        consensusReached: 'false'
+      },
+      {
+        id: 'disc-003',
+        topic: 'Hurricane Season Preparedness - Resource Allocation',
+        projectId: 'nee-storm-001',
+        projectName: 'FPL Storm Hardening Phase III',
+        priority: 'high',
+        status: 'resolved',
+        consensusReached: 'true',
+        resolution: 'Approved 15% contingency increase with phased resource deployment'
+      },
+      {
+        id: 'disc-004',
+        topic: 'AI/ML Model Governance for Grid Analytics',
+        projectId: 'nee-ai-grid',
+        projectName: 'AI-Powered Grid Analytics',
+        priority: 'medium',
+        status: 'active',
+        consensusReached: 'false'
+      },
+      {
+        id: 'disc-005',
+        topic: 'Sprint Velocity Decline - Change Fatigue Assessment',
+        projectId: 'nee-digital-001',
+        projectName: 'Digital Transformation Program',
+        priority: 'medium',
+        status: 'resolved',
+        consensusReached: 'true',
+        resolution: 'Implemented team wellness check and reduced meeting load by 30%'
+      }
+    ];
+
+    for (const disc of demoDiscussions) {
+      await db.insert(agentDiscussions).values(disc);
+    }
+
+    const demoMessages = [
+      // Discussion 1: Budget reallocation
+      { discussionId: 'disc-001', agentId: 'finops', agentName: 'FinOps Agent', messageType: 'analysis', content: 'Current spend rate on Google Data Center Partnership is 18% above forecast. Q1 burn rate at $127M vs $107M planned. Recommend immediate cost review.' },
+      { discussionId: 'disc-001', agentId: 'planning', agentName: 'Planning Agent', messageType: 'analysis', content: 'Accelerated timeline is driving the overspend. We pulled forward 3 workstreams to meet Google milestone dates. This was approved in December steering committee.' },
+      { discussionId: 'disc-001', agentId: 'tmo', agentName: 'TMO Agent', messageType: 'recommendation', content: 'Based on velocity data, we can absorb 60% of the overspend through efficiency gains in PI-4. Remaining 40% needs budget reallocation from contingency.' },
+      { discussionId: 'disc-001', agentId: 'governance', agentName: 'Governance Agent', messageType: 'question', content: 'What is the risk to other portfolio projects if we reallocate contingency? Need approval threshold analysis.' },
+      { discussionId: 'disc-001', agentId: 'finops', agentName: 'FinOps Agent', messageType: 'analysis', content: 'Reallocation from contingency would reduce portfolio buffer from 15% to 11%. Still within policy guidelines but at lower comfort level.' },
+      
+      // Discussion 2: Cross-ART dependency
+      { discussionId: 'disc-002', agentId: 'planning', agentName: 'Planning Agent', messageType: 'analysis', content: 'API Platform team blocking 3 downstream teams: Solar Analytics, Battery Management, and Customer Portal. Total of 34 story points blocked.' },
+      { discussionId: 'disc-002', agentId: 'tmo', agentName: 'TMO Agent', messageType: 'analysis', content: 'API team is at 110% capacity utilization. Cannot absorb additional work without impacting their own commitments.' },
+      { discussionId: 'disc-002', agentId: 'ocm', agentName: 'OCM Agent', messageType: 'recommendation', content: 'Recommend temporary resource augmentation. Have identified 2 contractors with relevant API experience available within 2 weeks.' },
+      { discussionId: 'disc-002', agentId: 'finops', agentName: 'FinOps Agent', messageType: 'analysis', content: 'Contractor augmentation would cost $85K for 8-week engagement. Cost of delay to downstream teams is estimated at $240K in opportunity cost.' },
+      { discussionId: 'disc-002', agentId: 'governance', agentName: 'Governance Agent', messageType: 'action', content: 'Escalating to Portfolio Steering Committee for emergency resource approval. ROI clearly supports intervention.' },
+      
+      // Discussion 3: Hurricane preparedness (resolved)
+      { discussionId: 'disc-003', agentId: 'planning', agentName: 'Planning Agent', messageType: 'analysis', content: 'Hurricane season starts June 1. Current storm hardening progress at 67%. Need to accelerate critical path activities.' },
+      { discussionId: 'disc-003', agentId: 'finops', agentName: 'FinOps Agent', messageType: 'analysis', content: 'Acceleration requires $12M additional investment. Propose 15% contingency increase funded from FY25 CapEx reserve.' },
+      { discussionId: 'disc-003', agentId: 'ocm', agentName: 'OCM Agent', messageType: 'recommendation', content: 'Phased resource deployment recommended: Critical circuits first (May), secondary circuits (July), tertiary (September).' },
+      { discussionId: 'disc-003', agentId: 'governance', agentName: 'Governance Agent', messageType: 'agreement', content: 'Approved phased approach with 15% contingency. Aligns with FPSC regulatory requirements for storm resilience.' },
+      
+      // Discussion 4: AI/ML Governance
+      { discussionId: 'disc-004', agentId: 'governance', agentName: 'Governance Agent', messageType: 'analysis', content: 'AI models for grid load prediction need governance framework. Current models operating without formal model risk management.' },
+      { discussionId: 'disc-004', agentId: 'tmo', agentName: 'TMO Agent', messageType: 'question', content: 'What validation requirements are needed before production deployment? NERC CIP compliance implications?' },
+      { discussionId: 'disc-004', agentId: 'planning', agentName: 'Planning Agent', messageType: 'recommendation', content: 'Propose adding Model Validation Sprint before each major release. 2-week cycle with defined acceptance criteria.' },
+      
+      // Discussion 5: Change fatigue (resolved)
+      { discussionId: 'disc-005', agentId: 'ocm', agentName: 'OCM Agent', messageType: 'analysis', content: 'Team velocity declined 15% over last 3 sprints. Survey data indicates meeting overload and unclear priorities.' },
+      { discussionId: 'disc-005', agentId: 'tmo', agentName: 'TMO Agent', messageType: 'analysis', content: 'Teams have 8.5 hours of recurring meetings per week on average. Industry benchmark is 5-6 hours.' },
+      { discussionId: 'disc-005', agentId: 'planning', agentName: 'Planning Agent', messageType: 'recommendation', content: 'Consolidate 3 daily standups into 1 cross-team sync. Cancel duplicate status meetings.' },
+      { discussionId: 'disc-005', agentId: 'ocm', agentName: 'OCM Agent', messageType: 'action', content: 'Implementing wellness checks and reducing meeting load by 30%. Will monitor velocity recovery over next 2 sprints.' }
+    ];
+
+    for (const msg of demoMessages) {
+      await db.insert(discussionMessages).values(msg);
+    }
+  }
+
+  async seedAgentTaskQueue(): Promise<void> {
+    const existing = await db.select().from(agentTaskQueue).limit(1);
+    if (existing.length > 0) return;
+
+    const demoTasks = [
+      {
+        id: 'task-001',
+        assignedAgent: 'finops',
+        taskType: 'investigate',
+        priority: 'high',
+        status: 'in_progress',
+        targetType: 'project',
+        targetId: 'nee-google-001',
+        targetName: 'Google Cloud Data Center Partnership',
+        description: 'Investigate Q1 budget variance and provide cost optimization recommendations',
+        reasoning: 'CPI dropped below 0.90 threshold, triggering automatic investigation',
+        delegatedBy: 'VRO Orchestrator'
+      },
+      {
+        id: 'task-002',
+        assignedAgent: 'tmo',
+        taskType: 'mitigate',
+        priority: 'critical',
+        status: 'pending',
+        targetType: 'project',
+        targetId: 'nee-grid-mod',
+        targetName: 'Grid Modernization Program',
+        description: 'Develop schedule recovery plan for API platform delay impact',
+        reasoning: 'SPI at 0.78, critical dependencies at risk',
+        delegatedBy: 'Planning Agent',
+        conflictsWith: '["task-003"]'
+      },
+      {
+        id: 'task-003',
+        assignedAgent: 'ocm',
+        taskType: 'notify',
+        priority: 'medium',
+        status: 'pending',
+        targetType: 'team',
+        targetId: 'team-api-platform',
+        targetName: 'API Platform Team',
+        description: 'Communicate capacity constraints and available support options to team leads',
+        reasoning: 'Team at 110% utilization, change fatigue signals detected',
+        delegatedBy: 'TMO Agent'
+      },
+      {
+        id: 'task-004',
+        assignedAgent: 'governance',
+        taskType: 'escalate',
+        priority: 'high',
+        status: 'completed',
+        targetType: 'portfolio',
+        targetId: 'portfolio-nee-001',
+        targetName: 'NextEra Energy Enterprise Transformation',
+        description: 'Escalate contractor augmentation request to Portfolio Steering Committee',
+        reasoning: 'Emergency resource need with clear ROI justification',
+        delegatedBy: 'FinOps Agent'
+      },
+      {
+        id: 'task-005',
+        assignedAgent: 'planning',
+        taskType: 'investigate',
+        priority: 'medium',
+        status: 'in_progress',
+        targetType: 'epic',
+        targetId: 'epic-nee-001',
+        targetName: 'Data Center Infrastructure Development',
+        description: 'Analyze feature completion trends and update PI forecast',
+        reasoning: 'Quarterly planning cycle requires updated projections',
+        delegatedBy: 'VRO Orchestrator'
+      }
+    ];
+
+    for (const task of demoTasks) {
+      await db.insert(agentTaskQueue).values(task);
+    }
   }
 
   async getFeatures(projectId: string): Promise<Feature[]> {
