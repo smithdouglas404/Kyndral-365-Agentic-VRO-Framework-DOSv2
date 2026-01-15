@@ -483,3 +483,84 @@ export const insertAgentActivityLogSchema = createInsertSchema(agentActivityLog)
 
 export type InsertAgentActivityLog = z.infer<typeof insertAgentActivityLogSchema>;
 export type AgentActivityLog = typeof agentActivityLog.$inferSelect;
+
+// OKRs - Objectives and Key Results with source attribution
+export const okrs = pgTable("okrs", {
+  id: varchar("id").primaryKey(),
+  objective: text("objective").notNull(),
+  businessUnitId: text("business_unit_id"),
+  strategicPriority: text("strategic_priority").default("high"), // critical, high, medium
+  owner: text("owner"),
+  overallProgress: text("overall_progress").default("0"),
+  status: text("status").default("active"), // active, completed, at-risk
+  dataSource: text("data_source"), // e.g., "NextEra 2025 Investor Presentation"
+  dataSourceUrl: text("data_source_url"), // URL to source document
+  dataSourceDate: text("data_source_date"), // Date of source data
+  fiscalYear: text("fiscal_year"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOkrSchema = createInsertSchema(okrs).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertOkr = z.infer<typeof insertOkrSchema>;
+export type Okr = typeof okrs.$inferSelect;
+
+// Key Results - Individual measurable results for OKRs
+export const keyResults = pgTable("key_results", {
+  id: varchar("id").primaryKey(),
+  okrId: varchar("okr_id").notNull().references(() => okrs.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  metricName: text("metric_name"),
+  currentValue: text("current_value"),
+  targetValue: text("target_value"),
+  baselineValue: text("baseline_value"),
+  unit: text("unit").default("%"),
+  progress: text("progress").default("0"),
+  trend: text("trend").default("stable"), // up, down, stable
+  dataSource: text("data_source"),
+  dataSourceUrl: text("data_source_url"),
+  lastMeasuredDate: text("last_measured_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertKeyResultSchema = createInsertSchema(keyResults).omit({
+  createdAt: true,
+});
+
+export type InsertKeyResult = z.infer<typeof insertKeyResultSchema>;
+export type KeyResult = typeof keyResults.$inferSelect;
+
+// KPIs - Key Performance Indicators with source attribution
+export const kpis = pgTable("kpis", {
+  id: varchar("id").primaryKey(),
+  projectId: text("project_id"),
+  businessUnitId: text("business_unit_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category"), // financial, operational, strategic, customer
+  currentValue: text("current_value"),
+  targetValue: text("target_value"),
+  baselineValue: text("baseline_value"),
+  unit: text("unit").default("%"),
+  trend: text("trend").default("stable"), // up, down, stable
+  weight: text("weight").default("1"),
+  dataSource: text("data_source"), // e.g., "FPL 2024 10-K Filing"
+  dataSourceUrl: text("data_source_url"),
+  dataSourceDate: text("data_source_date"),
+  measurementFrequency: text("measurement_frequency").default("quarterly"),
+  lastMeasuredDate: text("last_measured_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertKpiSchema = createInsertSchema(kpis).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertKpi = z.infer<typeof insertKpiSchema>;
+export type Kpi = typeof kpis.$inferSelect;

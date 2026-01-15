@@ -1242,5 +1242,126 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // OKR endpoints
+  app.get("/api/okrs", async (req, res) => {
+    try {
+      const { businessUnitId } = req.query;
+      const allOkrs = await storage.getOkrsWithKeyResults();
+      if (businessUnitId) {
+        const filtered = allOkrs.filter(o => o.businessUnitId === businessUnitId);
+        return res.json({ okrs: filtered });
+      }
+      res.json({ okrs: allOkrs });
+    } catch (error: any) {
+      console.error("Get OKRs error:", error);
+      res.status(500).json({ error: "Failed to get OKRs" });
+    }
+  });
+
+  app.get("/api/okrs/:id", async (req, res) => {
+    try {
+      const okr = await storage.getOkr(req.params.id);
+      if (!okr) {
+        return res.status(404).json({ error: "OKR not found" });
+      }
+      const keyResultsList = await storage.getKeyResults(req.params.id);
+      res.json({ okr: { ...okr, keyResults: keyResultsList } });
+    } catch (error: any) {
+      console.error("Get OKR error:", error);
+      res.status(500).json({ error: "Failed to get OKR" });
+    }
+  });
+
+  app.post("/api/okrs", async (req, res) => {
+    try {
+      const { okr, keyResults: krs } = req.body;
+      if (!okr || !okr.id || !okr.objective) {
+        return res.status(400).json({ error: "OKR id and objective are required" });
+      }
+      const createdOkr = await storage.createOkr(okr);
+      const createdKrs = [];
+      if (krs && Array.isArray(krs)) {
+        for (const kr of krs) {
+          const created = await storage.createKeyResult({ ...kr, okrId: createdOkr.id });
+          createdKrs.push(created);
+        }
+      }
+      res.json({ success: true, okr: { ...createdOkr, keyResults: createdKrs } });
+    } catch (error: any) {
+      console.error("Create OKR error:", error);
+      res.status(500).json({ error: "Failed to create OKR" });
+    }
+  });
+
+  // KPI endpoints
+  app.get("/api/kpis", async (req, res) => {
+    try {
+      const { projectId, businessUnitId } = req.query;
+      const allKpis = await storage.getKpis(
+        projectId as string | undefined, 
+        businessUnitId as string | undefined
+      );
+      res.json({ kpis: allKpis });
+    } catch (error: any) {
+      console.error("Get KPIs error:", error);
+      res.status(500).json({ error: "Failed to get KPIs" });
+    }
+  });
+
+  app.post("/api/kpis", async (req, res) => {
+    try {
+      const kpi = req.body;
+      if (!kpi || !kpi.id || !kpi.name) {
+        return res.status(400).json({ error: "KPI id and name are required" });
+      }
+      const created = await storage.createKpi(kpi);
+      res.json({ success: true, kpi: created });
+    } catch (error: any) {
+      console.error("Create KPI error:", error);
+      res.status(500).json({ error: "Failed to create KPI" });
+    }
+  });
+
+  // Seed OKRs and KPIs endpoint
+  app.post("/api/okrs-kpis/seed", async (req, res) => {
+    try {
+      const { okrs: okrData, kpis: kpiData } = req.body;
+      const createdOkrs = [];
+      const createdKpis = [];
+      
+      if (okrData && Array.isArray(okrData)) {
+        for (const item of okrData) {
+          const { keyResults: krs, ...okr } = item;
+          const createdOkr = await storage.createOkr(okr);
+          const createdKrs = [];
+          if (krs && Array.isArray(krs)) {
+            for (const kr of krs) {
+              const created = await storage.createKeyResult({ ...kr, okrId: createdOkr.id });
+              createdKrs.push(created);
+            }
+          }
+          createdOkrs.push({ ...createdOkr, keyResults: createdKrs });
+        }
+      }
+      
+      if (kpiData && Array.isArray(kpiData)) {
+        for (const kpi of kpiData) {
+          const created = await storage.createKpi(kpi);
+          createdKpis.push(created);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Seeded ${createdOkrs.length} OKRs and ${createdKpis.length} KPIs`,
+        okrs: createdOkrs,
+        kpis: createdKpis
+      });
+    } catch (error: any) {
+      console.error("Seed OKRs/KPIs error:", error);
+      res.status(500).json({ error: "Failed to seed OKRs/KPIs" });
+    }
+  });
+
   return httpServer;
 }

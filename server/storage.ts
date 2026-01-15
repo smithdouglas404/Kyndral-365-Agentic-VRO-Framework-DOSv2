@@ -21,9 +21,13 @@ import {
   type Dependency, type InsertDependency,
   type ProjectFinancials, type InsertProjectFinancials,
   type Risk, type InsertRisk,
+  type Okr, type InsertOkr,
+  type KeyResult, type InsertKeyResult,
+  type Kpi, type InsertKpi,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
-  projectMetrics, agentActivityLog, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks
+  projectMetrics, agentActivityLog, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
+  okrs, keyResults, kpis
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -75,6 +79,16 @@ export interface IStorage {
   getProjectMetrics(projectId: string): Promise<ProjectMetric[]>;
   getAllProjectMetrics(): Promise<ProjectMetric[]>;
   upsertProjectMetric(metric: InsertProjectMetric): Promise<ProjectMetric>;
+  
+  getOkrs(businessUnitId?: string): Promise<Okr[]>;
+  getOkr(id: string): Promise<Okr | undefined>;
+  createOkr(okr: InsertOkr): Promise<Okr>;
+  getKeyResults(okrId: string): Promise<KeyResult[]>;
+  createKeyResult(kr: InsertKeyResult): Promise<KeyResult>;
+  getOkrsWithKeyResults(): Promise<(Okr & { keyResults: KeyResult[] })[]>;
+  
+  getKpis(projectId?: string, businessUnitId?: string): Promise<Kpi[]>;
+  createKpi(kpi: InsertKpi): Promise<Kpi>;
   
   getAgentActivityLog(limit?: number): Promise<AgentActivityLog[]>;
   createAgentActivityLog(activity: InsertAgentActivityLog): Promise<AgentActivityLog>;
@@ -921,6 +935,58 @@ export class DatabaseStorage implements IStorage {
       financials: projectFinancialsData,
       risks: projectRisks
     };
+  }
+
+  async getOkrs(businessUnitId?: string): Promise<Okr[]> {
+    if (businessUnitId) {
+      return await db.select().from(okrs).where(eq(okrs.businessUnitId, businessUnitId));
+    }
+    return await db.select().from(okrs);
+  }
+
+  async getOkr(id: string): Promise<Okr | undefined> {
+    const result = await db.select().from(okrs).where(eq(okrs.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createOkr(okr: InsertOkr): Promise<Okr> {
+    const result = await db.insert(okrs).values(okr).returning();
+    return result[0];
+  }
+
+  async getKeyResults(okrId: string): Promise<KeyResult[]> {
+    return await db.select().from(keyResults).where(eq(keyResults.okrId, okrId));
+  }
+
+  async createKeyResult(kr: InsertKeyResult): Promise<KeyResult> {
+    const result = await db.insert(keyResults).values(kr).returning();
+    return result[0];
+  }
+
+  async getOkrsWithKeyResults(): Promise<(Okr & { keyResults: KeyResult[] })[]> {
+    const allOkrs = await this.getOkrs();
+    const result = await Promise.all(
+      allOkrs.map(async (okr) => ({
+        ...okr,
+        keyResults: await this.getKeyResults(okr.id)
+      }))
+    );
+    return result;
+  }
+
+  async getKpis(projectId?: string, businessUnitId?: string): Promise<Kpi[]> {
+    if (projectId) {
+      return await db.select().from(kpis).where(eq(kpis.projectId, projectId));
+    }
+    if (businessUnitId) {
+      return await db.select().from(kpis).where(eq(kpis.businessUnitId, businessUnitId));
+    }
+    return await db.select().from(kpis);
+  }
+
+  async createKpi(kpi: InsertKpi): Promise<Kpi> {
+    const result = await db.insert(kpis).values(kpi).returning();
+    return result[0];
   }
 }
 
