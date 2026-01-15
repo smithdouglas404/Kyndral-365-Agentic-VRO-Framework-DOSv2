@@ -452,18 +452,18 @@ export class DatabaseStorage implements IStorage {
     if (existingBUs.length > 0) return;
 
     await db.insert(businessUnits).values([
-      { id: 'bu-retail', name: 'Retail Insurance', description: 'Consumer-facing life insurance and protection products', department: 'Retail Division', owner: 'Sarah Johnson' },
-      { id: 'bu-pensions', name: 'Workplace Pensions', description: 'Employer pension schemes and retirement solutions', department: 'Institutional Division', owner: 'Mark Williams' },
-      { id: 'bu-wealth', name: 'Wealth Management', description: 'Investment and wealth advisory services', department: 'Wealth Division', owner: 'Emma Thompson' },
+      { id: 'bu-renewables', name: 'NextEra Energy Resources', description: 'Clean energy generation and battery storage', department: 'Renewables Division', owner: 'Rebecca Kujawa' },
+      { id: 'bu-fpl', name: 'Florida Power & Light', description: 'Electric utility serving Florida customers', department: 'Utility Division', owner: 'Armando Pimentel' },
+      { id: 'bu-transmission', name: 'NextEra Energy Transmission', description: 'Grid modernization and transmission assets', department: 'Infrastructure Division', owner: 'John Ketchum' },
     ]);
 
     await db.insert(projects).values([
-      { id: 'proj-1', name: 'Digital Underwriting Platform', description: 'Automating underwriting decisions', status: 'active', businessUnitId: 'bu-retail' },
-      { id: 'proj-2', name: 'Customer Portal Refresh', description: 'New self-service portal for policyholders', status: 'active', businessUnitId: 'bu-retail' },
-      { id: 'proj-3', name: 'Claims Processing Automation', description: 'Streamlining claims handling with AI', status: 'active', businessUnitId: 'bu-retail' },
-      { id: 'proj-4', name: 'Pension Auto-Enrolment Update', description: 'Compliance with new regulations', status: 'active', businessUnitId: 'bu-pensions' },
-      { id: 'proj-5', name: 'Retirement Calculator', description: 'New online retirement planning tool', status: 'active', businessUnitId: 'bu-pensions' },
-      { id: 'proj-6', name: 'Investment Risk Dashboard', description: 'Real-time portfolio risk monitoring', status: 'active', businessUnitId: 'bu-wealth' },
+      { id: 'proj-1', name: 'Solar Array Expansion Phase 4', description: 'Adding 500MW of solar capacity', status: 'active', businessUnitId: 'bu-renewables' },
+      { id: 'proj-2', name: 'Smart Grid Modernization', description: 'Next-gen smart meter and grid automation', status: 'active', businessUnitId: 'bu-fpl' },
+      { id: 'proj-3', name: 'Green Hydrogen Pilot', description: 'Testing industrial hydrogen production', status: 'active', businessUnitId: 'bu-renewables' },
+      { id: 'proj-4', name: 'Substation Digitization', description: 'IoT sensor deployment in Florida grid', status: 'active', businessUnitId: 'bu-fpl' },
+      { id: 'proj-5', name: 'Wind Asset Optimization', description: 'AI-driven turbine performance tuning', status: 'active', businessUnitId: 'bu-renewables' },
+      { id: 'proj-6', name: 'Battery Storage Utility Scale', description: 'Large scale BESS deployment', status: 'active', businessUnitId: 'bu-transmission' },
     ]);
     
     await this.seedPortfolioMetrics();
@@ -474,9 +474,10 @@ export class DatabaseStorage implements IStorage {
     if (existingMetrics.length > 0) return;
     
     const portfolioMetrics = [
-      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.96', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },
-      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'cpi', metricName: 'Cost Performance Index', currentValue: '0.93', threshold: '0.92', criticalThreshold: '0.80', direction: 'higher_is_better', agentOwner: 'finops' },
-      { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'okr_progress', metricName: 'OKR Progress', currentValue: '0.72', threshold: '0.70', criticalThreshold: '0.50', direction: 'higher_is_better', agentOwner: 'okr' },
+      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'renewable_gw', metricName: 'Renewable Capacity (GW)', currentValue: '45.2', threshold: '40.0', criticalThreshold: '35.0', direction: 'higher_is_better', agentOwner: 'planning' },
+      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'grid_uptime', metricName: 'Grid Reliability Index', currentValue: '99.98', threshold: '99.95', criticalThreshold: '99.90', direction: 'higher_is_better', agentOwner: 'finops' },
+      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'decarbonization', metricName: 'Carbon Intensity Reduction', currentValue: '12.5', threshold: '10.0', criticalThreshold: '5.0', direction: 'higher_is_better', agentOwner: 'okr' },
+    ];
       { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'change_adoption', metricName: 'Change Adoption Rate', currentValue: '0.78', threshold: '0.75', criticalThreshold: '0.60', direction: 'higher_is_better', agentOwner: 'ocm' },
       { projectId: 'portfolio-lgim', projectName: 'LGIM Portfolio', metricKey: 'sprint_velocity', metricName: 'Sprint Velocity Variance', currentValue: '0.08', threshold: '0.15', criticalThreshold: '0.25', direction: 'lower_is_better', agentOwner: 'planning' },
       { projectId: 'proj-cloud-migration', projectName: 'Cloud Infrastructure Migration', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.94', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },

@@ -32,7 +32,30 @@ const getMonths = (count: number) => {
   return months;
 };
 
-// ============ VRO DATA (Better Performance - Success Story) ============
+// ============ NEXTERA ENERGY DATA (Renewables & Grid Transformation) ============
+
+export const generateRenewableGrowthData = () => {
+  const months = getMonths(12);
+  const rawData = generateTrend(45, 78, 12, 5); // Growing towards 78GW target
+  
+  return months.map((month, i) => ({
+    month,
+    capacity: rawData[i],
+    target: 78
+  }));
+};
+
+export const generateGridModernizationData = () => {
+  const quarters = ["Q1", "Q2", "Q3", "Q4"];
+  const deployment = generateTrend(30, 85, 4, 2);
+  const target = [40, 60, 80, 100];
+
+  return quarters.map((q, i) => ({
+    quarter: q,
+    deployment: deployment[i],
+    target: target[i]
+  }));
+};
 
 export const generateVROCycleTimeData = () => {
   const months = getMonths(12);
