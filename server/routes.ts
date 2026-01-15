@@ -2906,7 +2906,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   // AI INGESTION WIZARD - Anthropic-powered data analysis and QA gate
   // ============================================================================
 
-  const { analyzeDataForIngestion, generateClarifyingQuestions, runQaReview, suggestAdditionalTools } = await import("./aiIngestion");
+  const { analyzeDataForIngestion, generateClarifyingQuestions, runQaReview, suggestAdditionalTools, detectSourceOntology } = await import("./aiIngestion");
 
   // Create new ingestion session
   app.post("/api/ingestion/sessions", async (req, res) => {
@@ -3022,6 +3022,23 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     } catch (error: any) {
       console.error("Analyze session error:", error);
       res.status(500).json({ error: "Failed to analyze session", details: error.message });
+    }
+  });
+
+  // Detect source ontology (for non-SAFe data)
+  app.post("/api/ingestion/detect-ontology", async (req, res) => {
+    try {
+      const { sampleData, sourceSystem } = req.body;
+      
+      if (!sampleData || !Array.isArray(sampleData) || sampleData.length === 0) {
+        return res.status(400).json({ error: "Sample data is required" });
+      }
+
+      const result = await detectSourceOntology(sampleData, sourceSystem || "unknown");
+      res.json({ success: true, ontology: result });
+    } catch (error: any) {
+      console.error("Ontology detection error:", error);
+      res.status(500).json({ error: "Failed to detect ontology", details: error.message });
     }
   });
 

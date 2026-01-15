@@ -64,6 +64,109 @@ Portfolio → Epics → Capabilities → Features → Stories → Tasks
 ART → Program Increments → Sprints
 `;
 
+const CUSTOM_ONTOLOGY_MAPPING = `
+If source data does NOT use SAFe terminology, map using these equivalencies:
+
+Traditional PMO → SAFe:
+- Program/Initiative → Portfolio or Epic
+- Project → Feature or Capability
+- Workstream → Value Stream
+- Department/Division → ART or Team
+- Phase/Gate → Program Increment or Sprint
+- Deliverable → Story or Feature
+- Action Item/Task → Task
+- Risk/Issue → Risk
+- Objective/Goal → Strategic Theme or OKR
+- Metric/Measure → KPI
+
+PRINCE2 → SAFe:
+- Programme → Portfolio
+- Project → Epic or Feature
+- Stage → Program Increment
+- Work Package → Story
+- Product → Capability
+
+Waterfall → SAFe:
+- Phase → Program Increment
+- Milestone → Milestone
+- Task → Task
+- Requirement → Story
+- Module/Component → Feature
+
+Kanban/Generic → SAFe:
+- Board → Team
+- Column/Status → Sprint Status
+- Card/Item → Story or Task
+- Epic/Initiative → Epic
+- Theme → Strategic Theme
+
+Custom/Unknown:
+- If terminology is unfamiliar, analyze the data structure and semantics
+- Map based on hierarchy level (top=Portfolio, bottom=Task)
+- Map based on scope (large=Epic, small=Story)
+- Ask clarifying questions when mapping confidence is below 70%
+`;
+
+export type OntologyType = 'safe' | 'pmo' | 'prince2' | 'waterfall' | 'kanban' | 'custom';
+
+export interface OntologyDetectionResult {
+  detectedOntology: OntologyType;
+  confidence: number;
+  indicators: string[];
+  suggestedMappingStrategy: string;
+}
+
+export async function detectSourceOntology(
+  sampleData: any[],
+  sourceSystem: string
+): Promise<OntologyDetectionResult> {
+  const prompt = `Analyze this sample data and detect the project management methodology/ontology being used.
+
+Source System: ${sourceSystem}
+Sample Data: ${JSON.stringify(sampleData.slice(0, 5), null, 2)}
+
+Detect if the data uses:
+- "safe": SAFe terminology (Epic, Feature, Story, ART, PI, Value Stream)
+- "pmo": Traditional PMO (Program, Project, Workstream, Phase, Deliverable)
+- "prince2": PRINCE2 (Programme, Stage, Work Package, Product)
+- "waterfall": Waterfall (Phase, Milestone, Requirement, Module)
+- "kanban": Kanban/Agile generic (Board, Card, Sprint, Backlog)
+- "custom": Unknown/Custom terminology
+
+Respond in JSON:
+{
+  "detectedOntology": "safe|pmo|prince2|waterfall|kanban|custom",
+  "confidence": 0-100,
+  "indicators": ["list of field names or values that indicate this ontology"],
+  "suggestedMappingStrategy": "description of how to map this data to SAFe"
+}`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: DEFAULT_MODEL,
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const content = response.content[0];
+    if (content.type === "text") {
+      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+    }
+    throw new Error("Failed to parse AI response");
+  } catch (error: any) {
+    console.error("Ontology detection error:", error);
+    return {
+      detectedOntology: 'custom',
+      confidence: 0,
+      indicators: [],
+      suggestedMappingStrategy: 'Manual mapping required'
+    };
+  }
+}
+
 export async function analyzeDataForIngestion(
   sampleData: any[],
   sourceSystem: string,
@@ -77,7 +180,10 @@ Analyze this sample data from ${sourceSystem} (entity type: ${sourceEntityType})
 2. **POV (Point of View)**: Your professional assessment of the data quality, completeness, and readiness for import
 3. **Data Quality Score**: 0-100 score based on completeness, consistency, and accuracy
 4. **Field Analysis**: For each field, identify type, coverage %, and any issues
-5. **SAFe Mapping**: How each source entity/field maps to our SAFe ontology:
+5. **SAFe Mapping**: How each source entity/field maps to our SAFe ontology. IMPORTANT: If the source data does NOT use SAFe terminology, use these mapping equivalencies to translate:
+${CUSTOM_ONTOLOGY_MAPPING}
+
+Target SAFe Ontology:
 ${SAFE_ONTOLOGY}
 
 6. **Issues**: Any data quality issues, missing required fields, inconsistencies
