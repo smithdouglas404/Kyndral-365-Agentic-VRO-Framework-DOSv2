@@ -1,0 +1,178 @@
+{
+  "project": {
+    "id": "nee-meta-001",
+    "name": "Meta Clean Energy Partnership",
+    "description": "Strategic clean energy partnership with Meta for approximately 2.5 GW of capacity via 11 power purchase agreements and 2 energy storage agreements. Projects span ERCOT, SPP, MISO, and New Mexico markets, coming online 2026-2028.",
+    "status": "green",
+    "businessUnitId": "NextEra Energy Resources",
+    "startDate": "2025-12-08",
+    "endDate": "2028-12-31",
+    "priority": "critical",
+    "expectedRoi": "$890M projected EBITDA from Meta PPAs",
+    "roiValue": "890",
+    "artName": "Commercial Renewables ART",
+    "portfolioTheme": "Hyperscaler Partnerships",
+    "safeStage": "implementing",
+    "currentPi": "PI 25.1",
+    "totalPis": "12",
+    "velocity": "55",
+    "predictability": "90",
+    "flowEfficiency": "78",
+    "epicId": "EPIC-META-001",
+    "epicName": "Meta Data Center Clean Energy Program",
+    "epicProgress": "22",
+    "budgetSpent": "180",
+    "budgetTotal": "680",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-meta-001",
+      "name": "New Mexico Solar + Storage Portfolio",
+      "description": "Four integrated solar and battery storage projects in New Mexico serving Meta data centers",
+      "status": "implementing",
+      "storyPoints": "144",
+      "completedPoints": "42",
+      "priority": "critical",
+      "acceptanceCriteria": ["PPAs executed", "Interconnection secured", "Construction permits obtained", "COD achieved 2026-2027"],
+      "wsjfScore": "38"
+    },
+    {
+      "id": "feat-meta-002",
+      "name": "Multi-Region Renewable Portfolio Expansion",
+      "description": "Development of renewable projects across ERCOT, SPP, and MISO to serve Meta's 100% renewable commitment",
+      "status": "analyzing",
+      "storyPoints": "89",
+      "completedPoints": "15",
+      "priority": "high",
+      "acceptanceCriteria": ["Site acquisition complete", "PPA terms finalized", "Grid studies approved", "EPC contracts awarded"],
+      "wsjfScore": "32"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-meta-001",
+      "featureId": "feat-meta-001",
+      "name": "Roswell Solar + Storage Project",
+      "description": "400 MW solar with 200 MWh battery storage in Roswell, New Mexico",
+      "status": "in-progress",
+      "storyPoints": "34",
+      "acceptanceCriteria": ["Construction 50% complete", "Battery procurement finalized", "Grid interconnection tests passed"]
+    },
+    {
+      "id": "story-meta-002",
+      "featureId": "feat-meta-001",
+      "name": "Clovis Solar + Storage Project",
+      "description": "350 MW solar with 175 MWh battery storage in Clovis, New Mexico",
+      "status": "in-progress",
+      "storyPoints": "34",
+      "acceptanceCriteria": ["Permits obtained", "EPC contractor mobilized", "On schedule for 2027 COD"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-meta-001",
+      "storyId": "story-meta-001",
+      "featureId": "feat-meta-001",
+      "name": "Complete solar panel installation Phase 1",
+      "status": "done",
+      "effortHours": "480",
+      "assignee": "Construction Team Alpha",
+      "skills": ["Solar Installation", "EPC Management"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-meta-002",
+      "storyId": "story-meta-001",
+      "featureId": "feat-meta-001",
+      "name": "Commission battery energy storage system",
+      "status": "in-progress",
+      "effortHours": "240",
+      "assignee": "Storage Engineering",
+      "skills": ["BESS", "Commissioning", "Grid Integration"],
+      "priority": "high"
+    },
+    {
+      "id": "task-meta-003",
+      "storyId": "story-meta-002",
+      "featureId": "feat-meta-001",
+      "name": "Execute interconnection agreement with PNM",
+      "status": "done",
+      "effortHours": "80",
+      "assignee": "Grid Development",
+      "skills": ["Interconnection", "Utility Relations"],
+      "priority": "high"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-meta-001",
+      "name": "Marcus Williams",
+      "role": "Project Director",
+      "allocation": "100",
+      "team": "NEER Development",
+      "skills": ["Project Management", "Solar Development", "Commercial Operations"],
+      "costRate": "1400"
+    },
+    {
+      "id": "res-meta-002",
+      "name": "Jennifer Park",
+      "role": "Commercial Manager",
+      "allocation": "80",
+      "team": "Origination",
+      "skills": ["PPA Structuring", "Hyperscaler Relations", "Risk Management"],
+      "costRate": "1200"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-meta-001",
+      "name": "Meta Partnership Announced",
+      "targetDate": "2025-12-08",
+      "status": "completed",
+      "deliverables": ["11 PPAs signed", "2 ESAs signed", "2.5 GW total capacity committed"]
+    },
+    {
+      "id": "ms-meta-002",
+      "name": "First Projects COD",
+      "targetDate": "2026-12-31",
+      "status": "on-track",
+      "deliverables": ["800 MW solar operational", "400 MWh storage commissioned", "Meta receiving clean energy"]
+    },
+    {
+      "id": "ms-meta-003",
+      "name": "Full Portfolio Operational",
+      "targetDate": "2028-12-31",
+      "status": "pending",
+      "deliverables": ["2.5 GW fully operational", "All PPAs in commercial service"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-meta-001",
+      "name": "New Mexico Transmission Upgrades",
+      "dependencyType": "blocked-by",
+      "status": "green",
+      "description": "PNM transmission upgrades required for full capacity interconnection"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-meta-001",
+      "name": "Solar Panel Tariff Impact",
+      "probability": "low",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Secured domestic supply chain; tariff cost pass-through provisions in PPAs",
+      "owner": "Jennifer Park"
+    }
+  ],
+  "financials": {
+    "capitalex": "580",
+    "opex": "65",
+    "contingency": "35",
+    "npv": "520",
+    "irr": "22",
+    "paybackMonths": "60"
+  }
+}

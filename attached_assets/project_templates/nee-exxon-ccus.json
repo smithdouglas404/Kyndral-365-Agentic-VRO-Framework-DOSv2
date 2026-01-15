@@ -1,0 +1,174 @@
+{
+  "project": {
+    "id": "nee-ccus-001",
+    "name": "ExxonMobil Natural Gas + CCUS Partnership",
+    "description": "Partnership with ExxonMobil to develop 1.2 GW natural gas plant with integrated carbon capture, utilization and storage (CCUS). Addresses data center 24/7 firm power requirements while maintaining decarbonization commitments.",
+    "status": "green",
+    "businessUnitId": "NextEra Energy Resources",
+    "startDate": "2025-06-01",
+    "endDate": "2029-12-31",
+    "priority": "high",
+    "expectedRoi": "$380M projected EBITDA over asset life",
+    "roiValue": "380",
+    "artName": "Low-Carbon Generation ART",
+    "portfolioTheme": "Technology Innovation",
+    "safeStage": "analyzing",
+    "currentPi": "PI 25.1",
+    "totalPis": "16",
+    "velocity": "32",
+    "predictability": "75",
+    "flowEfficiency": "65",
+    "epicId": "EPIC-CCUS-001",
+    "epicName": "Carbon Capture Generation Initiative",
+    "epicProgress": "12",
+    "budgetSpent": "28",
+    "budgetTotal": "890",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-ccus-001",
+      "name": "Combined Cycle Gas Plant Development",
+      "description": "Design and construction of 1.2 GW combined-cycle natural gas generation facility with carbon capture ready design",
+      "status": "analyzing",
+      "storyPoints": "233",
+      "completedPoints": "32",
+      "priority": "critical",
+      "acceptanceCriteria": ["Site selected", "GE Vernova equipment ordered", "Air permits obtained", "EPC contract awarded"],
+      "wsjfScore": "38"
+    },
+    {
+      "id": "feat-ccus-002",
+      "name": "Carbon Capture System Integration",
+      "description": "Integration of ExxonMobil CCUS technology capturing 90%+ of CO2 emissions for permanent sequestration",
+      "status": "backlog",
+      "storyPoints": "144",
+      "completedPoints": "0",
+      "priority": "high",
+      "acceptanceCriteria": ["CCUS technology selected", "CO2 pipeline route identified", "Sequestration site secured", "45Q tax credit qualification confirmed"],
+      "wsjfScore": "35"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-ccus-001",
+      "featureId": "feat-ccus-001",
+      "name": "Texas Site Development",
+      "description": "Develop greenfield site in ERCOT for combined-cycle plant with grid interconnection",
+      "status": "in-progress",
+      "storyPoints": "55",
+      "acceptanceCriteria": ["Land secured", "Environmental studies complete", "ERCOT interconnection study initiated"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-ccus-001",
+      "storyId": "story-ccus-001",
+      "featureId": "feat-ccus-001",
+      "name": "Complete environmental baseline studies",
+      "status": "in-progress",
+      "effortHours": "240",
+      "assignee": "Environmental Team",
+      "skills": ["Environmental Assessment", "NEPA", "Air Quality"],
+      "priority": "high"
+    },
+    {
+      "id": "task-ccus-002",
+      "storyId": "story-ccus-001",
+      "featureId": "feat-ccus-001",
+      "name": "Submit ERCOT interconnection application",
+      "status": "done",
+      "effortHours": "80",
+      "assignee": "Grid Development",
+      "skills": ["ERCOT", "Interconnection", "Power Systems"],
+      "priority": "critical"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-ccus-001",
+      "name": "Dr. James Foster",
+      "role": "Project Director",
+      "allocation": "100",
+      "team": "Gas Generation",
+      "skills": ["Power Plant Development", "CCUS Technology", "Project Management"],
+      "costRate": "1600"
+    },
+    {
+      "id": "res-ccus-002",
+      "name": "Angela Martinez",
+      "role": "Commercial Lead",
+      "allocation": "60",
+      "team": "Origination",
+      "skills": ["PPA Structuring", "Data Center Sales", "Carbon Markets"],
+      "costRate": "1300"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-ccus-001",
+      "name": "Partnership Agreement",
+      "targetDate": "2025-06-01",
+      "status": "completed",
+      "deliverables": ["ExxonMobil CCUS partnership executed", "Technology licensing agreed", "Joint development terms finalized"]
+    },
+    {
+      "id": "ms-ccus-002",
+      "name": "Final Investment Decision",
+      "targetDate": "2026-06-30",
+      "status": "on-track",
+      "deliverables": ["EPC contract awarded", "Financing secured", "Board approval obtained"]
+    },
+    {
+      "id": "ms-ccus-003",
+      "name": "Commercial Operation",
+      "targetDate": "2029-12-31",
+      "status": "pending",
+      "deliverables": ["1.2 GW online", "CCUS operational", "45Q credits flowing"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-ccus-001",
+      "name": "45Q Tax Credit Availability",
+      "dependencyType": "blocked-by",
+      "status": "green",
+      "description": "Project economics depend on 45Q carbon capture tax credits - bipartisan support expected to continue"
+    },
+    {
+      "id": "dep-ccus-002",
+      "name": "CO2 Pipeline & Sequestration",
+      "dependencyType": "related",
+      "status": "yellow",
+      "description": "Requires ExxonMobil CO2 pipeline access and sequestration capacity"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-ccus-001",
+      "name": "CCUS Technology Performance",
+      "probability": "low",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "Using proven ExxonMobil technology with commercial track record",
+      "owner": "Dr. James Foster"
+    },
+    {
+      "id": "risk-ccus-002",
+      "name": "Natural Gas Price Volatility",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Toll-based contract structure with pass-through fuel costs; long-term gas supply hedges",
+      "owner": "Angela Martinez"
+    }
+  ],
+  "financials": {
+    "capitalex": "780",
+    "opex": "85",
+    "contingency": "25",
+    "npv": "285",
+    "irr": "14",
+    "paybackMonths": "108"
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "project": {
+    "id": "nee-crisis-001",
+    "name": "2024 Hurricane Season Recovery & Resilience",
+    "description": "Comprehensive recovery program following four major hurricanes in 2024 that caused over 3 million customer outages. Includes $1.2B cost recovery filing, storm reserve replenishment, and accelerated infrastructure hardening.",
+    "status": "red",
+    "businessUnitId": "Florida Power & Light",
+    "startDate": "2024-09-01",
+    "endDate": "2025-12-31",
+    "priority": "critical",
+    "expectedRoi": "$180M avoided outage costs from accelerated hardening",
+    "roiValue": "180",
+    "artName": "Emergency Response ART",
+    "portfolioTheme": "Infrastructure Resilience",
+    "safeStage": "implementing",
+    "currentPi": "PI 25.1",
+    "totalPis": "5",
+    "velocity": "65",
+    "predictability": "72",
+    "flowEfficiency": "58",
+    "epicId": "EPIC-CRISIS-001",
+    "epicName": "Hurricane Season Response 2024",
+    "epicProgress": "62",
+    "budgetSpent": "890",
+    "budgetTotal": "1350",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-crisis-001",
+      "name": "Storm Cost Recovery Filing",
+      "description": "Florida PSC filing for $1.2B cost recovery from 2024 hurricane response including temporary rate adjustments",
+      "status": "implementing",
+      "storyPoints": "89",
+      "completedPoints": "65",
+      "priority": "critical",
+      "acceptanceCriteria": ["Cost recovery filing submitted", "PSC hearings completed", "Temporary rates approved", "Customer communication executed"],
+      "wsjfScore": "48"
+    },
+    {
+      "id": "feat-crisis-002",
+      "name": "Storm Reserve Replenishment",
+      "description": "Replenish completely depleted storm reserve fund with $150M allocation requested from Florida PSC",
+      "status": "reviewing",
+      "storyPoints": "55",
+      "completedPoints": "22",
+      "priority": "high",
+      "acceptanceCriteria": ["Reserve analysis complete", "PSC filing submitted", "Funding mechanism approved", "Reserve account funded"],
+      "wsjfScore": "42"
+    },
+    {
+      "id": "feat-crisis-003",
+      "name": "Accelerated Infrastructure Hardening",
+      "description": "Fast-track pole hardening, undergrounding, and smart switch installation in hurricane-impacted areas",
+      "status": "implementing",
+      "storyPoints": "144",
+      "completedPoints": "48",
+      "priority": "critical",
+      "acceptanceCriteria": ["Priority areas identified", "Hardening plans approved", "Construction 50% complete", "Smart switches installed"],
+      "wsjfScore": "45"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-crisis-001",
+      "featureId": "feat-crisis-001",
+      "name": "Complete PSC Cost Recovery Filing",
+      "description": "Prepare and submit detailed cost recovery filing to Florida Public Service Commission",
+      "status": "done",
+      "storyPoints": "21",
+      "acceptanceCriteria": ["Cost documentation complete", "Filing submitted", "Intervenor discovery responded"]
+    },
+    {
+      "id": "story-crisis-002",
+      "featureId": "feat-crisis-003",
+      "name": "Miami-Dade Coastal Hardening Phase 1",
+      "description": "Accelerated pole replacement and undergrounding in highest-risk coastal Miami-Dade areas",
+      "status": "in-progress",
+      "storyPoints": "34",
+      "acceptanceCriteria": ["500 poles replaced", "25 miles undergrounded", "100 smart switches installed"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-crisis-001",
+      "storyId": "story-crisis-001",
+      "featureId": "feat-crisis-001",
+      "name": "Document storm restoration costs by category",
+      "status": "done",
+      "effortHours": "240",
+      "assignee": "Regulatory Accounting",
+      "skills": ["Regulatory Accounting", "Storm Cost Recovery", "PSC Filing"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-crisis-002",
+      "storyId": "story-crisis-001",
+      "featureId": "feat-crisis-001",
+      "name": "Prepare customer impact testimony",
+      "status": "done",
+      "effortHours": "80",
+      "assignee": "Regulatory Affairs",
+      "skills": ["Regulatory Testimony", "Customer Relations"],
+      "priority": "high"
+    },
+    {
+      "id": "task-crisis-003",
+      "storyId": "story-crisis-002",
+      "featureId": "feat-crisis-003",
+      "name": "Complete pole replacement in Brickell corridor",
+      "status": "in-progress",
+      "effortHours": "480",
+      "assignee": "Field Operations East",
+      "skills": ["Line Construction", "Pole Installation", "Heavy Equipment"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-crisis-004",
+      "storyId": "story-crisis-002",
+      "featureId": "feat-crisis-003",
+      "name": "Install automated switching on coastal feeders",
+      "status": "in-progress",
+      "effortHours": "320",
+      "assignee": "Smart Grid Team",
+      "skills": ["Distribution Automation", "SCADA", "Smart Switches"],
+      "priority": "high"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-crisis-001",
+      "name": "Manuel Rodriguez",
+      "role": "Storm Recovery Director",
+      "allocation": "100",
+      "team": "Emergency Operations",
+      "skills": ["Emergency Management", "Restoration Operations", "Utility Operations"],
+      "costRate": "1400"
+    },
+    {
+      "id": "res-crisis-002",
+      "name": "Sandra Mitchell",
+      "role": "Regulatory Director",
+      "allocation": "100",
+      "team": "Regulatory Affairs",
+      "skills": ["PSC Relations", "Rate Cases", "Cost Recovery"],
+      "costRate": "1300"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-crisis-001",
+      "name": "Hurricane Season 2024 Response Complete",
+      "targetDate": "2024-11-30",
+      "status": "completed",
+      "deliverables": ["All customers restored", "Damage assessment complete", "Mutual aid crews released"]
+    },
+    {
+      "id": "ms-crisis-002",
+      "name": "PSC Cost Recovery Approved",
+      "targetDate": "2025-03-31",
+      "status": "on-track",
+      "deliverables": ["Temporary rate increase approved (~$12/month)", "$1.2B recovery authorized"]
+    },
+    {
+      "id": "ms-crisis-003",
+      "name": "Accelerated Hardening Complete",
+      "targetDate": "2025-12-31",
+      "status": "at-risk",
+      "deliverables": ["Priority corridors hardened", "Storm reserve replenished", "Lessons learned documented"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-crisis-001",
+      "name": "Florida PSC Approval",
+      "dependencyType": "blocked-by",
+      "status": "yellow",
+      "description": "Cost recovery and storm reserve replenishment require PSC regulatory approval"
+    },
+    {
+      "id": "dep-crisis-002",
+      "name": "Supply Chain - Utility Poles",
+      "dependencyType": "related",
+      "status": "yellow",
+      "description": "National pole supply constraints affecting delivery timelines"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-crisis-001",
+      "name": "PSC Cost Recovery Reduction",
+      "probability": "medium",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "Detailed cost documentation; proactive intervenor engagement; precedent from prior storms",
+      "owner": "Sandra Mitchell"
+    },
+    {
+      "id": "risk-crisis-002",
+      "name": "2025 Hurricane Season Overlap",
+      "probability": "high",
+      "impact": "high",
+      "status": "mitigating",
+      "mitigation": "Accelerate critical hardening before June 1; maintain enhanced storm reserves of materials and crews",
+      "owner": "Manuel Rodriguez"
+    }
+  ],
+  "financials": {
+    "capitalex": "450",
+    "opex": "750",
+    "contingency": "150",
+    "npv": "-850",
+    "irr": "-5",
+    "paybackMonths": "0"
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "project": {
+    "id": "nee-nuclear-001",
+    "name": "Duane Arnold Nuclear Restart",
+    "description": "Feasibility and restart of the 615 MW Duane Arnold Energy Center in Iowa. 25-year power purchase agreement with Google to provide zero-carbon baseload power for AI data centers. Expected return to service by 2029.",
+    "status": "amber",
+    "businessUnitId": "NextEra Energy Resources",
+    "startDate": "2024-06-01",
+    "endDate": "2029-12-31",
+    "priority": "critical",
+    "expectedRoi": "$1.8B projected value over 25-year PPA",
+    "roiValue": "1800",
+    "artName": "Nuclear Development ART",
+    "portfolioTheme": "Zero-Carbon Baseload",
+    "safeStage": "analyzing",
+    "currentPi": "PI 25.1",
+    "totalPis": "16",
+    "velocity": "28",
+    "predictability": "72",
+    "flowEfficiency": "62",
+    "epicId": "EPIC-NUCLEAR-002",
+    "epicName": "Nuclear Asset Restart Initiative",
+    "epicProgress": "18",
+    "budgetSpent": "35",
+    "budgetTotal": "450",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-nuclear-001",
+      "name": "Reactor Systems Refurbishment",
+      "description": "Complete refurbishment of reactor vessel, steam generators, and primary coolant systems for safe restart",
+      "status": "analyzing",
+      "storyPoints": "377",
+      "completedPoints": "45",
+      "priority": "critical",
+      "acceptanceCriteria": ["Engineering assessment complete", "NRC restart application submitted", "Major component inspections passed", "Restart license approved"],
+      "wsjfScore": "48"
+    },
+    {
+      "id": "feat-nuclear-002",
+      "name": "NRC Regulatory Pathway",
+      "description": "Develop and execute regulatory pathway for nuclear plant restart including updated safety analysis and licensing",
+      "status": "implementing",
+      "storyPoints": "144",
+      "completedPoints": "38",
+      "priority": "critical",
+      "acceptanceCriteria": ["Pre-application meetings complete", "Safety analysis updated", "Emergency preparedness plan approved", "Operating license renewed"],
+      "wsjfScore": "45"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-nuclear-001",
+      "featureId": "feat-nuclear-001",
+      "name": "Reactor Vessel Integrity Assessment",
+      "description": "Comprehensive inspection and assessment of reactor vessel integrity after shutdown period",
+      "status": "in-progress",
+      "storyPoints": "55",
+      "acceptanceCriteria": ["Non-destructive testing complete", "Vessel integrity report issued", "NRC review submitted"]
+    },
+    {
+      "id": "story-nuclear-002",
+      "featureId": "feat-nuclear-002",
+      "name": "Updated Final Safety Analysis Report",
+      "description": "Update FSAR documentation for restart licensing application",
+      "status": "in-progress",
+      "storyPoints": "34",
+      "acceptanceCriteria": ["Chapter updates complete", "Internal review passed", "NRC submittal ready"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-nuclear-001",
+      "storyId": "story-nuclear-001",
+      "featureId": "feat-nuclear-001",
+      "name": "Perform ultrasonic testing on reactor vessel welds",
+      "status": "done",
+      "effortHours": "320",
+      "assignee": "NDT Inspection Team",
+      "skills": ["Nuclear Inspection", "UT Testing", "ASME Code"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-nuclear-002",
+      "storyId": "story-nuclear-001",
+      "featureId": "feat-nuclear-001",
+      "name": "Complete steam generator tube inspection",
+      "status": "in-progress",
+      "effortHours": "480",
+      "assignee": "Steam Generator Team",
+      "skills": ["Eddy Current Testing", "Nuclear Systems"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-nuclear-003",
+      "storyId": "story-nuclear-002",
+      "featureId": "feat-nuclear-002",
+      "name": "Update emergency operating procedures",
+      "status": "in-progress",
+      "effortHours": "160",
+      "assignee": "Nuclear Licensing",
+      "skills": ["Nuclear Licensing", "Emergency Procedures", "NRC Regulations"],
+      "priority": "high"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-nuclear-001",
+      "name": "Dr. Robert Anderson",
+      "role": "Nuclear Project Director",
+      "allocation": "100",
+      "team": "Nuclear Development",
+      "skills": ["Nuclear Engineering", "Reactor Operations", "NRC Licensing"],
+      "costRate": "2200"
+    },
+    {
+      "id": "res-nuclear-002",
+      "name": "Patricia Walsh",
+      "role": "Licensing Manager",
+      "allocation": "100",
+      "team": "Nuclear Licensing",
+      "skills": ["NRC Relations", "FSAR Development", "Regulatory Compliance"],
+      "costRate": "1600"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-nuclear-001",
+      "name": "Google PPA Executed",
+      "targetDate": "2025-12-08",
+      "status": "completed",
+      "deliverables": ["25-year PPA signed", "Commercial terms finalized", "Restart commitment secured"]
+    },
+    {
+      "id": "ms-nuclear-002",
+      "name": "NRC Restart Application Submitted",
+      "targetDate": "2026-06-30",
+      "status": "on-track",
+      "deliverables": ["Complete restart application", "Updated FSAR", "Emergency preparedness plan"]
+    },
+    {
+      "id": "ms-nuclear-003",
+      "name": "NRC Restart License Approved",
+      "targetDate": "2028-06-30",
+      "status": "pending",
+      "deliverables": ["Operating license renewed", "Technical specifications approved", "Startup testing authorized"]
+    },
+    {
+      "id": "ms-nuclear-004",
+      "name": "Commercial Operation Achieved",
+      "targetDate": "2029-12-31",
+      "status": "pending",
+      "deliverables": ["615 MW at full power", "Google receiving clean baseload power", "25-year commercial operation begins"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-nuclear-001",
+      "name": "NRC Regulatory Approval",
+      "dependencyType": "blocked-by",
+      "status": "yellow",
+      "description": "Restart requires NRC license renewal and safety review - estimated 24-month process"
+    },
+    {
+      "id": "dep-nuclear-002",
+      "name": "Workforce Recruitment",
+      "dependencyType": "related",
+      "status": "yellow",
+      "description": "Need to recruit and train 500+ nuclear-qualified operators and technicians"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-nuclear-001",
+      "name": "NRC Review Delays",
+      "probability": "medium",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "Pre-application engagement; experienced licensing team; benchmark with Palisades restart",
+      "owner": "Patricia Walsh"
+    },
+    {
+      "id": "risk-nuclear-002",
+      "name": "Component Obsolescence",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "mitigating",
+      "mitigation": "Early equipment assessment; supplier qualification for replacement parts",
+      "owner": "Dr. Robert Anderson"
+    }
+  ],
+  "financials": {
+    "capitalex": "380",
+    "opex": "45",
+    "contingency": "25",
+    "npv": "850",
+    "irr": "15",
+    "paybackMonths": "96"
+  }
+}

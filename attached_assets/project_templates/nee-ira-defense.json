@@ -1,0 +1,207 @@
+{
+  "project": {
+    "id": "nee-policy-001",
+    "name": "IRA Tax Credit Defense & Policy Strategy",
+    "description": "Strategic initiative to defend Inflation Reduction Act clean energy tax credits against potential repeal or rollback under new administration. IRA credits projected to be worth $1.16 trillion (2025-2034) across the industry.",
+    "status": "amber",
+    "businessUnitId": "Corporate & Other",
+    "startDate": "2025-01-20",
+    "endDate": "2026-12-31",
+    "priority": "critical",
+    "expectedRoi": "$2.4B value preservation if IRA credits maintained",
+    "roiValue": "2400",
+    "artName": "Government Affairs ART",
+    "portfolioTheme": "Policy & Regulatory",
+    "safeStage": "implementing",
+    "currentPi": "PI 25.1",
+    "totalPis": "8",
+    "velocity": "35",
+    "predictability": "55",
+    "flowEfficiency": "48",
+    "epicId": "EPIC-POLICY-001",
+    "epicName": "Energy Policy Defense Initiative",
+    "epicProgress": "25",
+    "budgetSpent": "8",
+    "budgetTotal": "45",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-policy-001",
+      "name": "Congressional Advocacy Campaign",
+      "description": "Coordinated advocacy with Republican lawmakers in districts benefiting from NextEra renewable investments and manufacturing jobs",
+      "status": "implementing",
+      "storyPoints": "89",
+      "completedPoints": "28",
+      "priority": "critical",
+      "acceptanceCriteria": ["Key lawmaker meetings completed", "Economic impact studies published", "Coalition partners engaged", "Testimony prepared"],
+      "wsjfScore": "48"
+    },
+    {
+      "id": "feat-policy-002",
+      "name": "Business Competitiveness Without Subsidies Analysis",
+      "description": "Demonstrate that renewables remain competitive in most regions even without IRA credits to reduce policy dependency",
+      "status": "analyzing",
+      "storyPoints": "55",
+      "completedPoints": "18",
+      "priority": "high",
+      "acceptanceCriteria": ["Regional cost analysis complete", "Investor messaging developed", "Media strategy executed", "Analyst briefings delivered"],
+      "wsjfScore": "38"
+    },
+    {
+      "id": "feat-policy-003",
+      "name": "Portfolio Hedging Strategy",
+      "description": "Develop alternative technology strategies (gas + nuclear) to hedge against potential IRA credit rollback",
+      "status": "implementing",
+      "storyPoints": "89",
+      "completedPoints": "32",
+      "priority": "high",
+      "acceptanceCriteria": ["GE Vernova gas turbine agreement executed", "Nuclear restart pathway established", "CCUS partnerships developed", "Technology-neutral messaging deployed"],
+      "wsjfScore": "42"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-policy-001",
+      "featureId": "feat-policy-001",
+      "name": "Red State Economic Impact Campaign",
+      "description": "Document and communicate clean energy jobs and investment in Republican-represented districts",
+      "status": "in-progress",
+      "storyPoints": "21",
+      "acceptanceCriteria": ["Economic impact data compiled", "District-level fact sheets created", "Local media engagement executed"]
+    },
+    {
+      "id": "story-policy-002",
+      "featureId": "feat-policy-003",
+      "name": "Natural Gas Partnership Expansion",
+      "description": "Accelerate gas generation development as hedge against renewable policy uncertainty",
+      "status": "in-progress",
+      "storyPoints": "34",
+      "acceptanceCriteria": ["4 GW gas turbine slots secured", "Site development initiated", "Data center customer interest confirmed"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-policy-001",
+      "storyId": "story-policy-001",
+      "featureId": "feat-policy-001",
+      "name": "Complete Texas economic impact analysis",
+      "status": "done",
+      "effortHours": "80",
+      "assignee": "Government Affairs",
+      "skills": ["Economic Analysis", "Policy Research", "Stakeholder Relations"],
+      "priority": "high"
+    },
+    {
+      "id": "task-policy-002",
+      "storyId": "story-policy-001",
+      "featureId": "feat-policy-001",
+      "name": "Brief key House Energy & Commerce Committee members",
+      "status": "in-progress",
+      "effortHours": "40",
+      "assignee": "Federal Affairs Team",
+      "skills": ["Congressional Relations", "Policy Advocacy"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-policy-003",
+      "storyId": "story-policy-002",
+      "featureId": "feat-policy-003",
+      "name": "Finalize GE Vernova turbine slot agreements",
+      "status": "done",
+      "effortHours": "120",
+      "assignee": "Commercial Development",
+      "skills": ["Equipment Procurement", "Contract Negotiation"],
+      "priority": "high"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-policy-001",
+      "name": "Katherine Reynolds",
+      "role": "VP Government Affairs",
+      "allocation": "100",
+      "team": "Government Affairs",
+      "skills": ["Congressional Relations", "Energy Policy", "Stakeholder Management"],
+      "costRate": "2000"
+    },
+    {
+      "id": "res-policy-002",
+      "name": "Michael Thompson",
+      "role": "Policy Director",
+      "allocation": "100",
+      "team": "Regulatory Strategy",
+      "skills": ["Tax Policy", "Regulatory Analysis", "Strategic Communications"],
+      "costRate": "1500"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-policy-001",
+      "name": "Initial Advocacy Campaign Launched",
+      "targetDate": "2025-02-28",
+      "status": "completed",
+      "deliverables": ["Coalition formed", "Economic impact data published", "Key lawmaker outreach initiated"]
+    },
+    {
+      "id": "ms-policy-002",
+      "name": "Budget Reconciliation Process",
+      "targetDate": "2025-06-30",
+      "status": "on-track",
+      "deliverables": ["Impact of any proposed changes assessed", "Alternative strategies ready", "Investor communication prepared"]
+    },
+    {
+      "id": "ms-policy-003",
+      "name": "Policy Clarity Achieved",
+      "targetDate": "2026-12-31",
+      "status": "pending",
+      "deliverables": ["Final IRA status determined", "Portfolio strategy adjusted", "Long-term planning updated"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-policy-001",
+      "name": "Congressional Budget Process",
+      "dependencyType": "blocked-by",
+      "status": "red",
+      "description": "IRA repeal would require budget reconciliation process - timing and scope uncertain"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-policy-001",
+      "name": "Full IRA Repeal",
+      "probability": "low",
+      "impact": "critical",
+      "status": "monitoring",
+      "mitigation": "Full repeal unlikely given bipartisan support for some credits; portfolio diversification underway",
+      "owner": "Katherine Reynolds"
+    },
+    {
+      "id": "risk-policy-002",
+      "name": "Partial Credit Rollback",
+      "probability": "medium",
+      "impact": "high",
+      "status": "mitigating",
+      "mitigation": "Advocating for grandfathering of existing projects; accelerating safe harbor activities",
+      "owner": "Michael Thompson"
+    },
+    {
+      "id": "risk-policy-003",
+      "name": "Wind Permit Freeze Extended",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Focus on projects with existing permits; shift resources to solar and storage",
+      "owner": "Development Team"
+    }
+  ],
+  "financials": {
+    "capitalex": "5",
+    "opex": "38",
+    "contingency": "2",
+    "npv": "2400",
+    "irr": "0",
+    "paybackMonths": "0"
+  }
+}

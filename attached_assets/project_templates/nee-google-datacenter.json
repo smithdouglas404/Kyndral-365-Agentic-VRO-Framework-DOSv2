@@ -1,0 +1,203 @@
+{
+  "project": {
+    "id": "nee-google-001",
+    "name": "Google Cloud Data Center Partnership",
+    "description": "Landmark strategic partnership with Google Cloud to develop 15 GW of new power generation capacity by 2035 for gigawatt-scale data center campuses. First three campuses currently in development with integrated renewable, storage, and gas generation.",
+    "status": "green",
+    "businessUnitId": "Corporate & Other",
+    "startDate": "2025-12-08",
+    "endDate": "2035-12-31",
+    "priority": "critical",
+    "expectedRoi": "$2.8B projected revenue from data center power sales",
+    "roiValue": "2800",
+    "artName": "Data Center Solutions ART",
+    "portfolioTheme": "AI Infrastructure Growth",
+    "safeStage": "implementing",
+    "currentPi": "PI 25.1",
+    "totalPis": "40",
+    "velocity": "62",
+    "predictability": "88",
+    "flowEfficiency": "75",
+    "epicId": "EPIC-GOOGLE-001",
+    "epicName": "Hyperscaler Data Center Program",
+    "epicProgress": "15",
+    "budgetSpent": "450",
+    "budgetTotal": "8500",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-google-001",
+      "name": "GW-Scale Data Center Campus Development",
+      "description": "Design and construction of three gigawatt-scale data center campuses with dedicated power generation, transmission interconnection, and energy storage",
+      "status": "implementing",
+      "storyPoints": "233",
+      "completedPoints": "45",
+      "priority": "critical",
+      "acceptanceCriteria": ["Site selection and land acquisition complete", "Generation interconnection agreements signed", "Construction permits obtained", "Power purchase agreements executed"],
+      "wsjfScore": "42"
+    },
+    {
+      "id": "feat-google-002",
+      "name": "Bring-Your-Own-Generation (BYOG) Model Implementation",
+      "description": "Collaborative development framework for land, load interconnection, and supporting generation resources with Google",
+      "status": "analyzing",
+      "storyPoints": "144",
+      "completedPoints": "28",
+      "priority": "high",
+      "acceptanceCriteria": ["BYOG framework documented", "Resource allocation model finalized", "Joint planning process established", "Cost sharing agreements executed"],
+      "wsjfScore": "35"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-google-001",
+      "featureId": "feat-google-001",
+      "name": "Campus 1 Site Development - Texas",
+      "description": "First GW-scale campus development in ERCOT region with integrated solar, storage, and gas generation",
+      "status": "in-progress",
+      "storyPoints": "55",
+      "acceptanceCriteria": ["Land secured", "Environmental permits obtained", "Grid interconnection approved", "Construction timeline finalized"]
+    },
+    {
+      "id": "story-google-002",
+      "featureId": "feat-google-001",
+      "name": "Campus 2 Site Development - Oklahoma",
+      "description": "Second GW-scale campus leveraging 600 MW of new capacity via two long-term PPAs",
+      "status": "backlog",
+      "storyPoints": "55",
+      "acceptanceCriteria": ["Site feasibility complete", "PPA terms negotiated", "Regulatory approvals obtained"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-google-001",
+      "storyId": "story-google-001",
+      "featureId": "feat-google-001",
+      "name": "Complete ERCOT interconnection study",
+      "status": "done",
+      "effortHours": "240",
+      "assignee": "Grid Integration Team",
+      "skills": ["ERCOT", "Power Systems", "Interconnection"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-google-002",
+      "storyId": "story-google-001",
+      "featureId": "feat-google-001",
+      "name": "Negotiate land acquisition agreements",
+      "status": "in-progress",
+      "effortHours": "160",
+      "assignee": "Real Estate Development",
+      "skills": ["Land Acquisition", "Legal", "Negotiation"],
+      "priority": "high"
+    },
+    {
+      "id": "task-google-003",
+      "storyId": "story-google-001",
+      "featureId": "feat-google-001",
+      "name": "Design hybrid generation portfolio (solar + gas + storage)",
+      "status": "in-progress",
+      "effortHours": "320",
+      "assignee": "Generation Engineering",
+      "skills": ["Power Engineering", "Renewable Design", "Storage"],
+      "priority": "critical"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-google-001",
+      "name": "Rebecca Johnson",
+      "role": "Program Director",
+      "allocation": "100",
+      "team": "Strategic Partnerships",
+      "skills": ["Program Management", "Hyperscaler Relations", "Energy Development"],
+      "costRate": "1800"
+    },
+    {
+      "id": "res-google-002",
+      "name": "David Chen",
+      "role": "Technical Lead",
+      "allocation": "100",
+      "team": "Data Center Solutions",
+      "skills": ["Power Systems", "Data Center Design", "Grid Integration"],
+      "costRate": "1500"
+    },
+    {
+      "id": "res-google-003",
+      "name": "Amanda Torres",
+      "role": "Commercial Lead",
+      "allocation": "80",
+      "team": "Business Development",
+      "skills": ["PPA Negotiation", "Commercial Structuring", "Risk Management"],
+      "costRate": "1400"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-google-001",
+      "name": "Partnership Agreement Signed",
+      "targetDate": "2025-12-08",
+      "status": "completed",
+      "deliverables": ["Strategic partnership agreement", "Initial 3.5 GW commitment confirmed", "Joint development framework"]
+    },
+    {
+      "id": "ms-google-002",
+      "name": "Campus 1 Construction Start",
+      "targetDate": "2026-06-01",
+      "status": "on-track",
+      "deliverables": ["Final permits obtained", "EPC contracts executed", "Ground breaking ceremony"]
+    },
+    {
+      "id": "ms-google-003",
+      "name": "First Campus Operational",
+      "targetDate": "2028-12-31",
+      "status": "pending",
+      "deliverables": ["1 GW generation capacity online", "Data center interconnection complete", "Commercial operations achieved"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-google-001",
+      "name": "ERCOT Transmission Capacity",
+      "dependencyType": "blocked-by",
+      "status": "yellow",
+      "description": "Requires ERCOT transmission upgrades for GW-scale interconnection"
+    },
+    {
+      "id": "dep-google-002",
+      "name": "GE Vernova Turbine Delivery",
+      "dependencyType": "blocked-by",
+      "status": "green",
+      "description": "Secured 4 GW of combined-cycle gas turbine slots from GE Vernova"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-google-001",
+      "name": "Transmission Interconnection Delays",
+      "probability": "medium",
+      "impact": "high",
+      "status": "monitoring",
+      "mitigation": "Early engagement with ERCOT; parallel path for behind-the-meter generation",
+      "owner": "David Chen"
+    },
+    {
+      "id": "risk-google-002",
+      "name": "Equipment Supply Chain Constraints",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "mitigating",
+      "mitigation": "Pre-secured turbine slots; diversified supplier base",
+      "owner": "Procurement Team"
+    }
+  ],
+  "financials": {
+    "capitalex": "7200",
+    "opex": "850",
+    "contingency": "450",
+    "npv": "4200",
+    "irr": "18",
+    "paybackMonths": "84"
+  }
+}

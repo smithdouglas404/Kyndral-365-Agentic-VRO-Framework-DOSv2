@@ -1,0 +1,214 @@
+{
+  "project": {
+    "id": "nee-ai-001",
+    "name": "AI Grid Management Platform",
+    "description": "Joint development with Google Cloud of AI-powered grid management platform using TimesFM 2.5 and WeatherNext 2 models. First commercial product launching via Google Cloud Marketplace mid-2026 for predictive maintenance, supply chain optimization, and weather response.",
+    "status": "green",
+    "businessUnitId": "Corporate & Other",
+    "startDate": "2025-12-08",
+    "endDate": "2027-06-30",
+    "priority": "high",
+    "expectedRoi": "$125M annual operational savings + licensing revenue",
+    "roiValue": "125",
+    "artName": "Digital Innovation ART",
+    "portfolioTheme": "Digital Transformation",
+    "safeStage": "implementing",
+    "currentPi": "PI 25.1",
+    "totalPis": "6",
+    "velocity": "48",
+    "predictability": "82",
+    "flowEfficiency": "72",
+    "epicId": "EPIC-AI-001",
+    "epicName": "AI-Powered Operations Initiative",
+    "epicProgress": "18",
+    "budgetSpent": "12",
+    "budgetTotal": "85",
+    "budgetUnit": "$m"
+  },
+  "features": [
+    {
+      "id": "feat-ai-001",
+      "name": "Predictive Maintenance AI Module",
+      "description": "ML-powered prediction of equipment failures 30+ days in advance using sensor data and Google's TimesFM models",
+      "status": "implementing",
+      "storyPoints": "144",
+      "completedPoints": "35",
+      "priority": "critical",
+      "acceptanceCriteria": ["Model training on NextEra data complete", "80% prediction accuracy achieved", "Integration with work management system", "Field pilot successful"],
+      "wsjfScore": "42"
+    },
+    {
+      "id": "feat-ai-002",
+      "name": "Weather Response Optimization",
+      "description": "Integration with Google's WeatherNext 2 for storm preparation, resource positioning, and restoration optimization",
+      "status": "analyzing",
+      "storyPoints": "89",
+      "completedPoints": "15",
+      "priority": "high",
+      "acceptanceCriteria": ["WeatherNext integration complete", "72-hour prediction accuracy >90%", "Automated crew positioning triggered", "Storm response time reduced 25%"],
+      "wsjfScore": "38"
+    },
+    {
+      "id": "feat-ai-003",
+      "name": "Google Cloud Marketplace Product",
+      "description": "Commercialize AI grid management platform for sale to other utilities via Google Cloud Marketplace by mid-2026",
+      "status": "backlog",
+      "storyPoints": "89",
+      "completedPoints": "0",
+      "priority": "medium",
+      "acceptanceCriteria": ["Product packaging complete", "Marketplace listing approved", "Pricing model established", "First utility customer acquired"],
+      "wsjfScore": "32"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-ai-001",
+      "featureId": "feat-ai-001",
+      "name": "Transformer Failure Prediction Model",
+      "description": "Train and deploy ML model to predict transformer failures using dissolved gas analysis and temperature data",
+      "status": "in-progress",
+      "storyPoints": "34",
+      "acceptanceCriteria": ["Model trained on 5 years historical data", "Validated on test transformers", "Deployed to production"]
+    },
+    {
+      "id": "story-ai-002",
+      "featureId": "feat-ai-002",
+      "name": "Hurricane Path Impact Prediction",
+      "description": "Integrate WeatherNext hurricane forecasts with FPL infrastructure data to predict outage impacts",
+      "status": "in-progress",
+      "storyPoints": "21",
+      "acceptanceCriteria": ["Weather data pipeline established", "Infrastructure impact model trained", "Real-time predictions operational"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-ai-001",
+      "storyId": "story-ai-001",
+      "featureId": "feat-ai-001",
+      "name": "Prepare training dataset from SCADA historians",
+      "status": "done",
+      "effortHours": "160",
+      "assignee": "Data Engineering",
+      "skills": ["Data Engineering", "SCADA", "ML Pipelines"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-ai-002",
+      "storyId": "story-ai-001",
+      "featureId": "feat-ai-001",
+      "name": "Fine-tune TimesFM model on transformer data",
+      "status": "in-progress",
+      "effortHours": "240",
+      "assignee": "ML Engineering",
+      "skills": ["Machine Learning", "TensorFlow", "Time Series"],
+      "priority": "critical"
+    },
+    {
+      "id": "task-ai-003",
+      "storyId": "story-ai-002",
+      "featureId": "feat-ai-002",
+      "name": "Build WeatherNext API integration",
+      "status": "in-progress",
+      "effortHours": "120",
+      "assignee": "Platform Engineering",
+      "skills": ["API Integration", "GCP", "Weather Data"],
+      "priority": "high"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-ai-001",
+      "name": "Dr. Lisa Wang",
+      "role": "AI Program Director",
+      "allocation": "100",
+      "team": "Digital Innovation",
+      "skills": ["Machine Learning", "Product Management", "Utility Operations"],
+      "costRate": "1800"
+    },
+    {
+      "id": "res-ai-002",
+      "name": "Kevin O'Brien",
+      "role": "ML Engineering Lead",
+      "allocation": "100",
+      "team": "Data Science",
+      "skills": ["TensorFlow", "GCP Vertex AI", "Time Series ML"],
+      "costRate": "1500"
+    },
+    {
+      "id": "res-ai-003",
+      "name": "Google Cloud Partner Lead",
+      "role": "Partner Integration",
+      "allocation": "50",
+      "team": "Google Cloud",
+      "skills": ["GCP", "AI/ML", "Partner Management"],
+      "costRate": "0"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ms-ai-001",
+      "name": "Google Partnership Announced",
+      "targetDate": "2025-12-08",
+      "status": "completed",
+      "deliverables": ["Technology partnership signed", "AI model access granted", "Joint development roadmap agreed"]
+    },
+    {
+      "id": "ms-ai-002",
+      "name": "Internal AI Platform MVP",
+      "targetDate": "2026-03-31",
+      "status": "on-track",
+      "deliverables": ["Predictive maintenance live at FPL", "Weather optimization pilot complete", "ROI metrics validated"]
+    },
+    {
+      "id": "ms-ai-003",
+      "name": "Marketplace Product Launch",
+      "targetDate": "2026-06-30",
+      "status": "pending",
+      "deliverables": ["Commercial product on Google Cloud Marketplace", "First external utility customer", "Revenue recognition begins"]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dep-ai-001",
+      "name": "Google Cloud AI Models",
+      "dependencyType": "blocked-by",
+      "status": "green",
+      "description": "Access to TimesFM 2.5 and WeatherNext 2 models granted under partnership"
+    },
+    {
+      "id": "dep-ai-002",
+      "name": "Internal Data Platform",
+      "dependencyType": "related",
+      "status": "green",
+      "description": "Requires NextEra Enterprise Data Platform for ML training data access"
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk-ai-001",
+      "name": "AI Model Accuracy",
+      "probability": "low",
+      "impact": "medium",
+      "status": "monitoring",
+      "mitigation": "Extensive validation on historical data; phased rollout with human oversight",
+      "owner": "Dr. Lisa Wang"
+    },
+    {
+      "id": "risk-ai-002",
+      "name": "Marketplace Adoption",
+      "probability": "medium",
+      "impact": "low",
+      "status": "monitoring",
+      "mitigation": "Primary value is internal operational savings; commercial product is upside",
+      "owner": "Commercial Team"
+    }
+  ],
+  "financials": {
+    "capitalex": "65",
+    "opex": "18",
+    "contingency": "2",
+    "npv": "420",
+    "irr": "85",
+    "paybackMonths": "18"
+  }
+}
