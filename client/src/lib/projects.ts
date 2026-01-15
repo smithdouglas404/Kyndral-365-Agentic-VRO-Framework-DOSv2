@@ -631,12 +631,9 @@ export function getProjectDependents(projectId: string): EnrichedProject[] {
     p.dependencies.some(d => d.projectId === projectId)
   );
 }
-  {
-    id: "pmo-rt-002",
-    name: "AI Chatbot Implementation",
 
 // ============================================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS (CONTINUED)
 // ============================================================================
 
 // Get all unique business units
@@ -662,32 +659,15 @@ export const getStageLabel = (stage: SAFePortfolioStage): string => {
   return labels[stage];
 };
 
-// Filter projects by business unit
-export const getProjectsByBU = (bu: string): EnrichedProject[] => {
-  return enrichedProjects.filter(p => p.bu === bu);
-};
-
 // Filter projects by stage
 export const getProjectsByStage = (stage: SAFePortfolioStage): EnrichedProject[] => {
   return enrichedProjects.filter(p => p.safeStage === stage);
-};
-
-// Get project by ID
-export const getProjectById = (id: string): EnrichedProject | undefined => {
-  return enrichedProjects.find(p => p.id === id);
 };
 
 // Get all dependencies for a project
 export const getProjectDependencies = (projectId: string): ProjectDependency[] => {
   const project = getProjectById(projectId);
   return project?.dependencies || [];
-};
-
-// Get projects that depend on this project
-export const getDependentProjects = (projectId: string): EnrichedProject[] => {
-  return enrichedProjects.filter(p => 
-    p.dependencies.some(d => d.projectId === projectId)
-  );
 };
 
 // Get cross-project dependency health summary

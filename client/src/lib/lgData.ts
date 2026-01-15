@@ -371,186 +371,162 @@ export const riskData = {
     }
   ],
   
-  // Risk Categories with full descriptions
+  // Risk Categories with full descriptions - Based on NextEra Energy 10-K 2024 Risk Factors
   categories: [
     {
-      id: "insurance",
-      name: "Insurance Risk",
-      subtitle: "The products we write",
+      id: "operational",
+      name: "Operational Risk",
+      subtitle: "Infrastructure and execution",
       icon: "Shield",
       color: "#C50B30",
       subRisks: [
         {
-          name: "Longevity, mortality and morbidity",
-          description: "Pricing of long-term life insurance requires assumptions for future trends in life expectancy and general health. Risk that actual experience may diverge from assumptions, requiring reserve increases.",
+          name: "Hurricane and severe weather exposure",
+          description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event. 2024 storms Milton and Helene required significant recovery efforts.",
+          severity: "high",
+          trend: "worsening"
+        },
+        {
+          name: "Project execution and development",
+          description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
           severity: "high",
           trend: "stable"
         },
         {
-          name: "Life catastrophe",
-          description: "Assumptions about catastrophic events causing widespread loss of life or disability. Risk that future events could be more extreme than assessed.",
-          severity: "medium",
-          trend: "stable"
-        },
-        {
-          name: "Persistency (lapse)",
-          description: "Risk that product acquisition and set-up costs may not be recovered if policies lapse earlier than anticipated in pricing assumptions.",
-          severity: "medium",
+          name: "Equipment and infrastructure reliability",
+          description: "Critical dependence on generation, transmission, and distribution infrastructure. Equipment failures, unplanned outages, or extended maintenance periods impact reliability and costs.",
+          severity: "high",
           trend: "improving"
         },
         {
-          name: "Product expenses",
-          description: "Future costs of product servicing. Deviations in actual costs present risk of reduced product profitability.",
-          severity: "low",
+          name: "Nuclear operations",
+          description: "Point Beach and other nuclear facilities require NRC compliance, safe operations, and extended license renewals. Duane Arnold restart project adds execution complexity.",
+          severity: "medium",
           trend: "stable"
+        }
+      ]
+    },
+    {
+      id: "regulatory",
+      name: "Regulatory Risk",
+      subtitle: "Policy and compliance",
+      icon: "TrendingUp",
+      color: "#007FAA",
+      subRisks: [
+        {
+          name: "Rate case outcomes",
+          description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE and capital recovery. Current ROE range 10.15-11.15%.",
+          severity: "high",
+          trend: "stable"
+        },
+        {
+          name: "Federal energy policy changes",
+          description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact NEER economics. Policy changes or repeal could affect project returns.",
+          severity: "high",
+          trend: "volatile"
+        },
+        {
+          name: "Environmental regulations",
+          description: "EPA air quality standards, water discharge permits, waste disposal requirements, and endangered species compliance affect operations and capital requirements.",
+          severity: "medium",
+          trend: "stable"
+        },
+        {
+          name: "NERC/FERC compliance",
+          description: "Critical infrastructure protection (CIP) standards, reliability standards, and market manipulation rules require ongoing compliance investment.",
+          severity: "medium",
+          trend: "improving"
         }
       ]
     },
     {
       id: "market",
       name: "Market Risk",
-      subtitle: "The investments we hold",
-      icon: "TrendingUp",
-      color: "#007FAA",
-      subRisks: [
-        {
-          name: "Investment performance",
-          description: "Invest in equities, bonds, and property to meet obligations and deliver returns. Risk that income and value may underperform relative to required targets.",
-          severity: "high",
-          trend: "volatile"
-        },
-        {
-          name: "Interest rates and inflation",
-          description: "Can affect value of investment assets held to meet obligations, as well as the value of obligations themselves. Impact on profitability.",
-          severity: "high",
-          trend: "volatile"
-        },
-        {
-          name: "Currency",
-          description: "Fluctuations in exchange rates can vary both value and income from foreign currency denominated assets and overseas businesses.",
-          severity: "medium",
-          trend: "stable"
-        },
-        {
-          name: "Property",
-          description: "Exposure to property price fluctuations through investments in residential and commercial property. Lifetime mortgages include no-negative equity guarantee.",
-          severity: "medium",
-          trend: "improving"
-        }
-      ]
-    },
-    {
-      id: "credit",
-      name: "Credit Risk",
-      subtitle: "Counterparty exposures",
+      subtitle: "Financial and commodity exposure",
       icon: "CreditCard",
       color: "#f59e0b",
       subRisks: [
         {
-          name: "Bond default",
-          description: "Significant corporate bond portfolio backing PRT and annuities. Diversified across sectors and geographies but carries inherent default risk.",
-          severity: "high",
-          trend: "stable"
-        },
-        {
-          name: "Property direct lending",
-          description: "Property lending and sale-leaseback investments exposed to borrower/tenant default. Protected by security over underlying property.",
-          severity: "medium",
-          trend: "stable"
-        },
-        {
-          name: "Banks and financial instruments",
-          description: "Banking/money market counterparties, issuers of financial instruments, and settlement/custody providers may default.",
-          severity: "medium",
-          trend: "stable"
-        },
-        {
-          name: "Reinsurance counterparties",
-          description: "Reinsurer may default, impacting claims payments and requiring alternative arrangements on less advantageous terms.",
-          severity: "medium",
-          trend: "stable"
-        }
-      ]
-    },
-    {
-      id: "liquidity",
-      name: "Liquidity Risk",
-      subtitle: "Funding and cash flow",
-      icon: "Droplets",
-      color: "#10b981",
-      subRisks: [
-        {
-          name: "Contingent events",
-          description: "Low probability, extreme events that may result in unanticipated liquidity requirements if not adequately planned for.",
-          severity: "high",
-          trend: "stable"
-        },
-        {
-          name: "Collateral",
-          description: "Failure to hold sufficient cash or liquid assets for collateral requirements may result in unplanned asset disposals at excessive cost.",
-          severity: "medium",
-          trend: "stable"
-        },
-        {
-          name: "Investment liquidity",
-          description: "Asset profile must align with policy maturity profile and account for policyholder rights to exercise options or guarantees.",
-          severity: "medium",
-          trend: "stable"
-        }
-      ]
-    },
-    {
-      id: "non-financial",
-      name: "Non-Financial Risk",
-      subtitle: "Operational and strategic",
-      icon: "AlertTriangle",
-      color: "#6366f1",
-      subRisks: [
-        {
-          name: "Technology",
-          description: "Significant reliance on IT systems and manual processes. Vulnerabilities, breakdowns, or loss of key personnel could lead to financial loss or customer impact.",
-          severity: "high",
-          trend: "improving"
-        },
-        {
-          name: "Information security and cyber threats",
-          description: "Complex and dynamic landscape with emerging and evolving risks. Managed by continuous monitoring and robust security measures.",
+          name: "Interest rate exposure",
+          description: "Significant capital investment program ($8.2B annual at FPL) requires debt financing. Rising rates increase borrowing costs and reduce project economics.",
           severity: "high",
           trend: "volatile"
         },
         {
-          name: "Data governance",
-          description: "Critical as organisations depend on intangible assets. Poor data decisions, losses, reputational damage, or regulatory sanctions from data issues.",
+          name: "Natural gas price volatility",
+          description: "FPL generating fleet includes significant natural gas capacity. Fuel cost pass-through mechanism provides some protection but timing differences create exposure.",
           severity: "medium",
           trend: "improving"
         },
         {
-          name: "Third parties",
-          description: "Collaboration with outsource providers. Service provider failure due to poor performance or financial issues could result in loss or reputational harm.",
+          name: "Power market prices",
+          description: "NEER merchant exposure in deregulated markets. Wholesale power prices affect contracted renewables economics and battery storage dispatch value.",
           severity: "medium",
           trend: "stable"
         },
         {
-          name: "Climate and nature",
-          description: "Deterioration of ecosystems is the biggest challenge of our generation. Physical, transition, and corporate climate risks.",
+          name: "Supply chain cost inflation",
+          description: "Solar panels, wind turbines, battery storage systems, transformers, and specialized equipment face cost increases and extended lead times.",
+          severity: "high",
+          trend: "improving"
+        }
+      ]
+    },
+    {
+      id: "climate",
+      name: "Climate & Environmental Risk",
+      subtitle: "Physical and transition exposure",
+      icon: "Droplets",
+      color: "#10b981",
+      subRisks: [
+        {
+          name: "Physical climate impacts",
+          description: "Increasing hurricane intensity, sea level rise affecting coastal infrastructure, extreme heat affecting grid demand and equipment performance.",
           severity: "high",
           trend: "worsening"
         },
         {
-          name: "People",
-          description: "Dependence on knowledge and expert judgement. Failure to recruit, retain, and manage workforce with right skills and culture.",
+          name: "Transition risk",
+          description: "Accelerated clean energy transition creates opportunities but also risks from changing technology costs, customer preferences, and competitive dynamics.",
           severity: "medium",
           trend: "stable"
         },
         {
-          name: "Compliance and conduct",
-          description: "Highly regulated markets. Regulatory breaches may result in poor customer outcomes, penalties, remediation costs, and reputational damage.",
+          name: "Water availability",
+          description: "Thermal generation requires cooling water access. Drought conditions and water rights restrictions could impact plant operations.",
+          severity: "medium",
+          trend: "worsening"
+        }
+      ]
+    },
+    {
+      id: "technology-cyber",
+      name: "Technology & Cyber Risk",
+      subtitle: "Digital and security threats",
+      icon: "AlertTriangle",
+      color: "#6366f1",
+      subRisks: [
+        {
+          name: "Cybersecurity threats",
+          description: "Critical infrastructure target for nation-state actors and cybercriminals. NERC CIP compliance required. SCADA/OT systems require specialized protection.",
+          severity: "high",
+          trend: "worsening"
+        },
+        {
+          name: "IT system reliability",
+          description: "Enterprise systems including billing, customer service, and workforce management. System failures impact customer service and regulatory compliance.",
+          severity: "medium",
+          trend: "improving"
+        },
+        {
+          name: "Technology obsolescence",
+          description: "Rapid evolution of renewable energy, battery storage, and grid technologies. Risk of stranded assets or suboptimal technology deployment.",
           severity: "medium",
           trend: "stable"
         },
         {
-          name: "Financial crime",
-          description: "Exposure to money laundering, fraud, sanctions, bribery, corruption, and tax evasion. Dynamic landscape managed through robust control frameworks.",
+          name: "Data privacy and protection",
+          description: "Customer data, employee information, and proprietary business data require protection. State privacy laws and NERC CIP data requirements.",
           severity: "medium",
           trend: "stable"
         }
@@ -624,93 +600,93 @@ export const aiAlerts: AIAlert[] = [
     id: "alert-1",
     type: "prediction",
     severity: "warning",
-    title: "Longevity Assumption Drift Detected",
-    description: "AI models predict 2.3% deviation from longevity assumptions over next 12 months based on latest mortality data patterns",
-    metric: "Longevity Reserve Adequacy",
-    value: "97.7%",
-    recommendation: "Initiate reserve review with actuarial team. Consider increasing prudent margins by 15bps.",
-    targetPersona: "CRO - Chris Knight",
-    division: "Institutional Retirement",
+    title: "Hurricane Season Capacity Planning Alert",
+    description: "AI models predict 15% higher restoration workforce requirements for 2025 hurricane season based on NOAA forecast data and historical storm patterns",
+    metric: "Storm Response Readiness",
+    value: "85%",
+    recommendation: "Pre-position additional contractor crews and mobile substations in South Florida. Consider expanding mutual aid agreements.",
+    targetPersona: "COO - Eric Silagy",
+    division: "Florida Power & Light",
     timestamp: new Date(),
-    confidence: 87,
-    source: "AI Longevity Model + ONS Mortality Data",
-    actions: [{ label: "Schedule Review", type: "primary" }, { label: "View Analysis", type: "secondary" }]
+    confidence: 82,
+    source: "AI Weather Model + NOAA Hurricane Outlook 2025",
+    actions: [{ label: "Review Plan", type: "primary" }, { label: "View Forecast", type: "secondary" }]
   },
   {
     id: "alert-2",
     type: "threshold",
     severity: "critical",
-    title: "Credit Concentration Threshold Breach",
-    description: "Infrastructure sector exposure has reached 18.4% of credit portfolio, exceeding 18% limit",
-    metric: "Sector Concentration",
-    value: "18.4%",
-    recommendation: "Reduce infrastructure allocation by $420m or seek Board approval for temporary limit extension.",
-    targetPersona: "CIO",
-    division: "Asset Management",
+    title: "Interconnection Queue Delay Risk",
+    description: "Texas wind project interconnection timeline extended by 8 months, impacting 520 MW online target date",
+    metric: "Project Execution",
+    value: "520 MW at risk",
+    recommendation: "Escalate with ERCOT, consider alternative interconnection points, or adjust 2025 capacity guidance.",
+    targetPersona: "NEER President",
+    division: "NextEra Energy Resources",
     timestamp: new Date(Date.now() - 3600000),
     confidence: 99,
-    source: "Real-time Portfolio Monitoring",
-    actions: [{ label: "Rebalance Portfolio", type: "primary" }, { label: "Request Limit Extension", type: "secondary" }]
+    source: "ERCOT Interconnection Queue Monitoring",
+    actions: [{ label: "Escalate to ERCOT", type: "primary" }, { label: "Review Alternatives", type: "secondary" }]
   },
   {
     id: "alert-3",
     type: "anomaly",
     severity: "warning",
-    title: "Climate Transition Risk Escalation",
-    description: "Portfolio temperature alignment worsening - 3 high-carbon holdings showing delayed transition plans",
-    metric: "Portfolio Temperature",
-    value: "2.4°C → 2.6°C",
-    recommendation: "Escalate engagement with Shell, BP, and Rio Tinto. Consider divestment timeline if no progress by Q2.",
-    targetPersona: "Climate Director - Carl Moxley",
-    division: "Asset Management",
+    title: "Battery Storage Dispatch Optimization Alert",
+    description: "CAISO market signals show 18% higher arbitrage opportunity for battery storage assets than current dispatch strategy captures",
+    metric: "Revenue Optimization",
+    value: "$4.2M/month potential",
+    recommendation: "Review battery dispatch algorithms. Consider implementing real-time pricing optimization across 3,379 MW storage fleet.",
+    targetPersona: "VP Trading Operations",
+    division: "NextEra Energy Resources",
     timestamp: new Date(Date.now() - 7200000),
-    confidence: 82,
-    source: "AI Climate Scenario Analysis",
-    actions: [{ label: "Initiate Engagement", type: "primary" }, { label: "View Holdings", type: "secondary" }]
+    confidence: 78,
+    source: "AI Market Price Analysis + CAISO Data",
+    actions: [{ label: "Optimize Dispatch", type: "primary" }, { label: "View Analysis", type: "secondary" }]
   },
   {
     id: "alert-4",
     type: "recommendation",
     severity: "success",
-    title: "Clean Energy Project Acceleration Opportunity",
-    description: "AI identifies 4 solar projects in advanced permitting positions matching NextEra risk appetite",
+    title: "Solar SoBRA Filing Opportunity",
+    description: "AI identifies favorable conditions for accelerated solar capacity addition under SoBRA mechanism - 2,500 MW potential for 2025-2026",
     metric: "Pipeline Value",
-    value: "$2.8bn potential",
-    recommendation: "Prioritize outreach to identified projects. Estimated 68% completion probability with proactive engagement.",
-    targetPersona: "CEO NEER - Rebecca Kujawa",
-    division: "NextEra Energy Resources",
+    value: "$1.8B potential",
+    recommendation: "Prioritize SoBRA filing preparation. Strong rate base growth and customer demand metrics support expedited approval.",
+    targetPersona: "FPL President - Eric Silagy",
+    division: "Florida Power & Light",
     timestamp: new Date(Date.now() - 1800000),
-    confidence: 74,
-    source: "AI Market Intelligence + Scheme Data",
-    actions: [{ label: "View Opportunities", type: "primary" }, { label: "Assign Team", type: "secondary" }]
+    confidence: 86,
+    source: "AI Regulatory Analysis + Florida PSC Filings",
+    actions: [{ label: "Prepare Filing", type: "primary" }, { label: "Review Economics", type: "secondary" }]
   },
   {
     id: "alert-5",
     type: "prediction",
     severity: "info",
-    title: "Customer Sentiment Shift - Retail",
-    description: "NLP analysis of customer feedback shows 12% improvement in digital experience sentiment vs Q3",
-    metric: "Sentiment Score",
-    value: "+12%",
-    recommendation: "Continue digital transformation momentum. Consider expanding AI chatbot to protection products.",
-    targetPersona: "CEO Retail - Paula Llewellyn",
-    division: "Retail",
+    title: "Customer Reliability Satisfaction Trending Up",
+    description: "NLP analysis of customer feedback shows 8% improvement in reliability perception following grid hardening investments",
+    metric: "Satisfaction Score",
+    value: "+8% YoY",
+    recommendation: "Continue grid modernization communications. Proactive outage notification reducing complaint volume.",
+    targetPersona: "VP Customer Experience",
+    division: "Florida Power & Light",
     timestamp: new Date(Date.now() - 5400000),
     confidence: 91,
-    source: "Voice of Customer NLP Analysis",
+    source: "Voice of Customer NLP Analysis + JD Power Survey",
     actions: [{ label: "View Insights", type: "primary" }, { label: "Share Report", type: "secondary" }]
   },
   {
     id: "alert-6",
     type: "collaboration",
     severity: "warning",
-    title: "Cross-Division Coordination Required",
-    description: "Housing development delays impacting Retail mortgage pipeline and Asset Management investment schedule",
+    title: "Cross-Segment Coordination Required",
+    description: "NEET transmission projects dependent on FPL substation upgrades showing schedule misalignment",
     metric: "Project Alignment",
     value: "3 projects affected",
-    recommendation: "Schedule cross-divisional sync between Corporate, Retail, and Asset Management leadership.",
-    targetPersona: "CEO - António Simões",
-    division: "Corporate",
+    recommendation: "Schedule cross-segment sync between FPL, NEET, and NEER engineering leadership.",
+    targetPersona: "CEO - John Ketchum",
+    division: "Corporate & Other",
     timestamp: new Date(Date.now() - 10800000),
     confidence: 85,
     source: "AI Project Dependency Analysis",
