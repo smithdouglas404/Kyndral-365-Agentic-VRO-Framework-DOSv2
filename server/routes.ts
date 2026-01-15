@@ -645,6 +645,40 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         }
       }
 
+      // Handle top-level stories array (linked via featureId)
+      if (projectData.stories && Array.isArray(projectData.stories)) {
+        for (const st of projectData.stories) {
+          await storage.createStory({
+            id: st.id,
+            featureId: st.featureId,
+            projectId: project.id,
+            name: st.name,
+            description: st.description,
+            status: st.status,
+            storyPoints: st.storyPoints?.toString(),
+            acceptanceCriteria: JSON.stringify(st.acceptanceCriteria || [])
+          });
+        }
+      }
+
+      // Handle top-level tasks array (linked via storyId and featureId)
+      if (projectData.tasks && Array.isArray(projectData.tasks)) {
+        for (const task of projectData.tasks) {
+          await storage.createTask({
+            id: task.id,
+            storyId: task.storyId,
+            featureId: task.featureId,
+            projectId: project.id,
+            name: task.name,
+            status: task.status,
+            effortHours: task.effortHours?.toString(),
+            assignee: task.assignee,
+            skills: JSON.stringify(task.skills || []),
+            priority: task.priority
+          });
+        }
+      }
+
       // Store resources
       if (projectData.resources && Array.isArray(projectData.resources)) {
         for (const res of projectData.resources) {
