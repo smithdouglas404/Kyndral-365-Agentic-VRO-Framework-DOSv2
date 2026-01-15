@@ -57,6 +57,7 @@ import {
   type VroMetric, type InsertVroMetric,
   type Benchmark, type InsertBenchmark,
   type AppConfig, type InsertAppConfig,
+  type DashboardWidget, type InsertDashboardWidget,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -67,7 +68,7 @@ import {
   companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks,
   syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
   ingestionSessions, qaReviews, clarifyingQuestions,
-  vroMetrics, benchmarks, appConfig
+  vroMetrics, benchmarks, appConfig, dashboardWidgets
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -314,6 +315,14 @@ export interface IStorage {
   getAppConfig(key: string): Promise<AppConfig | undefined>;
   getAllAppConfig(category?: string): Promise<AppConfig[]>;
   setAppConfig(key: string, value: string, description?: string, category?: string): Promise<AppConfig>;
+  
+  // Dashboard Widget Methods
+  getDashboardWidgets(category?: string, visibleOnly?: boolean): Promise<DashboardWidget[]>;
+  getDashboardWidget(id: string): Promise<DashboardWidget | undefined>;
+  createDashboardWidget(widget: InsertDashboardWidget): Promise<DashboardWidget>;
+  updateDashboardWidget(id: string, updates: Partial<DashboardWidget>): Promise<DashboardWidget | undefined>;
+  deleteDashboardWidget(id: string): Promise<void>;
+  reorderDashboardWidgets(widgetOrders: { id: string; sortOrder: number }[]): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -2324,6 +2333,74 @@ export class DatabaseStorage implements IStorage {
       console.log("[Seed] App config seeded with demo_mode=true");
     }
   }
+
+  // Dashboard Widget Methods
+  async getDashboardWidgets(category?: string, visibleOnly: boolean = true): Promise<DashboardWidget[]> {
+    if (category && visibleOnly) {
+      return await db.select().from(dashboardWidgets)
+        .where(and(eq(dashboardWidgets.category, category), eq(dashboardWidgets.isVisible, true)))
+        .orderBy(dashboardWidgets.sortOrder);
+    }
+    if (category) {
+      return await db.select().from(dashboardWidgets)
+        .where(eq(dashboardWidgets.category, category))
+        .orderBy(dashboardWidgets.sortOrder);
+    }
+    if (visibleOnly) {
+      return await db.select().from(dashboardWidgets)
+        .where(eq(dashboardWidgets.isVisible, true))
+        .orderBy(dashboardWidgets.sortOrder);
+    }
+    return await db.select().from(dashboardWidgets).orderBy(dashboardWidgets.sortOrder);
+  }
+
+  async getDashboardWidget(id: string): Promise<DashboardWidget | undefined> {
+    const result = await db.select().from(dashboardWidgets).where(eq(dashboardWidgets.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createDashboardWidget(widget: InsertDashboardWidget): Promise<DashboardWidget> {
+    const result = await db.insert(dashboardWidgets).values(widget).returning();
+    return result[0];
+  }
+
+  async updateDashboardWidget(id: string, updates: Partial<DashboardWidget>): Promise<DashboardWidget | undefined> {
+    const result = await db.update(dashboardWidgets).set({ ...updates, updatedAt: new Date() }).where(eq(dashboardWidgets.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteDashboardWidget(id: string): Promise<void> {
+    await db.delete(dashboardWidgets).where(eq(dashboardWidgets.id, id));
+  }
+
+  async reorderDashboardWidgets(widgetOrders: { id: string; sortOrder: number }[]): Promise<void> {
+    for (const { id, sortOrder } of widgetOrders) {
+      await db.update(dashboardWidgets).set({ sortOrder, updatedAt: new Date() }).where(eq(dashboardWidgets.id, id));
+    }
+  }
+
+  // Seed Dashboard Widgets
+  async seedDashboardWidgets(): Promise<void> {
+    const existingWidgets = await db.select().from(dashboardWidgets).limit(1);
+    if (existingWidgets.length > 0) {
+      console.log("[Seed] Dashboard widgets already exist, skipping...");
+      return;
+    }
+
+    const defaultWidgets: InsertDashboardWidget[] = [
+      { widgetKey: 'portfolio-health', widgetType: 'metric', title: 'Portfolio Health', description: 'Overall portfolio health score', dataSource: '/api/portfolio/metrics', category: 'vro', size: 'medium', sortOrder: 1 },
+      { widgetKey: 'budget-utilization', widgetType: 'metric', title: 'Budget Utilization', description: 'Budget spent vs allocated', dataSource: '/api/portfolio/metrics', category: 'financial', size: 'medium', sortOrder: 2 },
+      { widgetKey: 'project-status', widgetType: 'chart', title: 'Project Status', description: 'Projects by status breakdown', dataSource: '/api/portfolio/metrics', category: 'pmo', size: 'large', sortOrder: 3 },
+      { widgetKey: 'total-roi', widgetType: 'metric', title: 'Total ROI Value', description: 'Combined ROI across all projects', dataSource: '/api/portfolio/metrics', category: 'financial', size: 'medium', sortOrder: 4 },
+      { widgetKey: 'active-alerts', widgetType: 'list', title: 'Active Alerts', description: 'Current active system alerts', dataSource: '/api/alerts/active', category: 'general', size: 'large', sortOrder: 5 },
+      { widgetKey: 'avg-predictability', widgetType: 'metric', title: 'Avg Predictability', description: 'Average SAFe predictability score', dataSource: '/api/portfolio/metrics', category: 'performance', size: 'small', sortOrder: 6 },
+    ];
+
+    for (const widget of defaultWidgets) {
+      await this.createDashboardWidget(widget);
+    }
+    console.log("[Seed] Dashboard widgets seeded successfully");
+  }
 }
 
 export const storage = new DatabaseStorage();
@@ -2346,4 +2423,8 @@ storage.seedVroMetrics().catch(err => {
 
 storage.seedAppConfig().catch(err => {
   console.error("Failed to seed app config:", err);
+});
+
+storage.seedDashboardWidgets().catch(err => {
+  console.error("Failed to seed dashboard widgets:", err);
 });

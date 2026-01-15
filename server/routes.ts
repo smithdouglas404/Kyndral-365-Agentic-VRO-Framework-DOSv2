@@ -3399,5 +3399,237 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // PORTFOLIO METRICS API - Calculated aggregates from project data
+  // ============================================================================
+
+  app.get("/api/portfolio/metrics", async (_req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      
+      const totalProjects = projects.length;
+      const projectsByStatus = {
+        green: projects.filter(p => p.status === 'green').length,
+        amber: projects.filter(p => p.status === 'amber').length,
+        red: projects.filter(p => p.status === 'red').length,
+      };
+      
+      const totalBudget = projects.reduce((sum, p) => {
+        const budget = parseFloat(p.budgetTotal || '0');
+        return sum + (isNaN(budget) ? 0 : budget);
+      }, 0);
+      
+      const totalSpent = projects.reduce((sum, p) => {
+        const spent = parseFloat(p.budgetSpent || '0');
+        return sum + (isNaN(spent) ? 0 : spent);
+      }, 0);
+      
+      const totalRoiValue = projects.reduce((sum, p) => {
+        const roi = parseFloat(p.roiValue || '0');
+        return sum + (isNaN(roi) ? 0 : roi);
+      }, 0);
+      
+      const projectsWithPredictability = projects.filter(p => p.predictability);
+      const avgPredictability = projectsWithPredictability.length > 0
+        ? projectsWithPredictability.reduce((sum, p) => sum + parseFloat(p.predictability || '0'), 0) / projectsWithPredictability.length
+        : 0;
+      
+      const projectsWithVelocity = projects.filter(p => p.velocity);
+      const avgVelocity = projectsWithVelocity.length > 0
+        ? projectsWithVelocity.reduce((sum, p) => sum + parseFloat(p.velocity || '0'), 0) / projectsWithVelocity.length
+        : 0;
+      
+      const budgetUtilization = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+      
+      const criticalProjects = projects.filter(p => p.priority === 'critical').length;
+      const highProjects = projects.filter(p => p.priority === 'high').length;
+      
+      res.json({
+        summary: {
+          totalProjects,
+          projectsByStatus,
+          criticalProjects,
+          highProjects,
+        },
+        financial: {
+          totalBudget,
+          totalSpent,
+          budgetUtilization: Math.round(budgetUtilization),
+          totalRoiValue,
+          budgetUnit: projects[0]?.budgetUnit || '$m',
+        },
+        performance: {
+          avgPredictability: Math.round(avgPredictability),
+          avgVelocity: Math.round(avgVelocity),
+          healthScore: Math.round(
+            (projectsByStatus.green / Math.max(totalProjects, 1)) * 100
+          ),
+        },
+        lastCalculated: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      console.error("Get portfolio metrics error:", error);
+      res.status(500).json({ error: "Failed to calculate portfolio metrics" });
+    }
+  });
+
+  // ============================================================================
+  // DASHBOARD WIDGETS API - Configurable dashboard layout
+  // ============================================================================
+
+  app.get("/api/dashboard/widgets", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const visibleOnly = req.query.all !== 'true';
+      const widgets = await storage.getDashboardWidgets(category, visibleOnly);
+      res.json(widgets);
+    } catch (error: any) {
+      console.error("Get dashboard widgets error:", error);
+      res.status(500).json({ error: "Failed to get dashboard widgets" });
+    }
+  });
+
+  const createWidgetSchema = z.object({
+    widgetKey: z.string().min(1),
+    widgetType: z.enum(['metric', 'chart', 'list', 'kpi', 'okr', 'alert']),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    dataSource: z.string().optional(),
+    category: z.string().optional(),
+    size: z.enum(['small', 'medium', 'large', 'full']).optional(),
+    sortOrder: z.number().optional(),
+    isVisible: z.boolean().optional(),
+    config: z.string().optional(),
+  });
+
+  app.post("/api/dashboard/widgets", async (req, res) => {
+    try {
+      const parseResult = createWidgetSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const widget = await storage.createDashboardWidget(parseResult.data);
+      res.status(201).json(widget);
+    } catch (error: any) {
+      console.error("Create widget error:", error);
+      res.status(500).json({ error: "Failed to create widget" });
+    }
+  });
+
+  app.get("/api/dashboard/widgets/:id", async (req, res) => {
+    try {
+      const widget = await storage.getDashboardWidget(req.params.id);
+      if (!widget) {
+        return res.status(404).json({ error: "Widget not found" });
+      }
+      res.json(widget);
+    } catch (error: any) {
+      console.error("Get widget error:", error);
+      res.status(500).json({ error: "Failed to get widget" });
+    }
+  });
+
+  const updateWidgetSchema = z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    dataSource: z.string().optional(),
+    category: z.string().optional(),
+    size: z.enum(['small', 'medium', 'large', 'full']).optional(),
+    sortOrder: z.number().optional(),
+    isVisible: z.boolean().optional(),
+    config: z.string().optional(),
+  });
+
+  app.put("/api/dashboard/widgets/:id", async (req, res) => {
+    try {
+      const parseResult = updateWidgetSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const widget = await storage.updateDashboardWidget(req.params.id, parseResult.data);
+      if (!widget) {
+        return res.status(404).json({ error: "Widget not found" });
+      }
+      res.json(widget);
+    } catch (error: any) {
+      console.error("Update widget error:", error);
+      res.status(500).json({ error: "Failed to update widget" });
+    }
+  });
+
+  app.delete("/api/dashboard/widgets/:id", async (req, res) => {
+    try {
+      await storage.deleteDashboardWidget(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Delete widget error:", error);
+      res.status(500).json({ error: "Failed to delete widget" });
+    }
+  });
+
+  const reorderWidgetsSchema = z.object({
+    widgets: z.array(z.object({
+      id: z.string(),
+      sortOrder: z.number(),
+    })),
+  });
+
+  app.post("/api/dashboard/widgets/reorder", async (req, res) => {
+    try {
+      const parseResult = reorderWidgetsSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      await storage.reorderDashboardWidgets(parseResult.data.widgets);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Reorder widgets error:", error);
+      res.status(500).json({ error: "Failed to reorder widgets" });
+    }
+  });
+
+  // Get metrics by business unit
+  app.get("/api/portfolio/metrics/:businessUnitId", async (req, res) => {
+    try {
+      const projects = await storage.getProjectsByBusinessUnit(req.params.businessUnitId);
+      
+      const totalProjects = projects.length;
+      const totalBudget = projects.reduce((sum, p) => {
+        const budget = parseFloat(p.budgetTotal || '0');
+        return sum + (isNaN(budget) ? 0 : budget);
+      }, 0);
+      
+      const totalSpent = projects.reduce((sum, p) => {
+        const spent = parseFloat(p.budgetSpent || '0');
+        return sum + (isNaN(spent) ? 0 : spent);
+      }, 0);
+      
+      const totalRoiValue = projects.reduce((sum, p) => {
+        const roi = parseFloat(p.roiValue || '0');
+        return sum + (isNaN(roi) ? 0 : roi);
+      }, 0);
+      
+      res.json({
+        businessUnitId: req.params.businessUnitId,
+        totalProjects,
+        projectsByStatus: {
+          green: projects.filter(p => p.status === 'green').length,
+          amber: projects.filter(p => p.status === 'amber').length,
+          red: projects.filter(p => p.status === 'red').length,
+        },
+        financial: {
+          totalBudget,
+          totalSpent,
+          budgetUtilization: totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0,
+          totalRoiValue,
+        },
+        lastCalculated: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      console.error("Get business unit metrics error:", error);
+      res.status(500).json({ error: "Failed to calculate business unit metrics" });
+    }
+  });
+
   return httpServer;
 }

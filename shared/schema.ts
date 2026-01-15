@@ -1603,3 +1603,32 @@ export const insertAppConfigSchema = createInsertSchema(appConfig).omit({
 
 export type InsertAppConfig = z.infer<typeof insertAppConfigSchema>;
 export type AppConfig = typeof appConfig.$inferSelect;
+
+// ============================================================================
+// DASHBOARD WIDGETS - Configurable dashboard layout and widgets
+// ============================================================================
+
+export const dashboardWidgets = pgTable("dashboard_widgets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  widgetKey: text("widget_key").notNull().unique(),
+  widgetType: text("widget_type").notNull(), // metric, chart, list, kpi, okr, alert
+  title: text("title").notNull(),
+  description: text("description"),
+  dataSource: text("data_source"), // api endpoint or data key
+  category: text("category").default("general"), // vro, pmo, financial, performance
+  size: text("size").default("medium"), // small, medium, large, full
+  sortOrder: integer("sort_order").default(0),
+  isVisible: boolean("is_visible").default(true),
+  config: text("config"), // JSON configuration for the widget
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDashboardWidgetSchema = createInsertSchema(dashboardWidgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDashboardWidget = z.infer<typeof insertDashboardWidgetSchema>;
+export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
