@@ -1660,6 +1660,62 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // SYNC ENGINE API ENDPOINTS
+  // ============================================================================
+  
+  const { syncEngine } = await import("./syncEngine");
+
+  app.post("/api/sync/start", async (req, res) => {
+    try {
+      const { sourceSystemId, entityTypes, direction } = req.body;
+      if (!sourceSystemId || !entityTypes) {
+        return res.status(400).json({ error: "sourceSystemId and entityTypes are required" });
+      }
+      const job = await syncEngine.startIngestionJob(sourceSystemId, entityTypes, direction || 'inbound');
+      res.json({ success: true, job });
+    } catch (error: any) {
+      console.error("Start sync error:", error);
+      res.status(500).json({ error: "Failed to start sync job" });
+    }
+  });
+
+  app.post("/api/sync/analyze", async (req, res) => {
+    try {
+      const { sourceSystemId, sampleRecords, sourceEntityType } = req.body;
+      if (!sourceSystemId || !sampleRecords || !sourceEntityType) {
+        return res.status(400).json({ error: "sourceSystemId, sampleRecords, and sourceEntityType are required" });
+      }
+      const analysis = await syncEngine.analyzeDataForMapping(sourceSystemId, sampleRecords, sourceEntityType);
+      res.json({ success: true, analysis });
+    } catch (error: any) {
+      console.error("Analyze data error:", error);
+      res.status(500).json({ error: "Failed to analyze data" });
+    }
+  });
+
+  app.get("/api/sync/mappings", async (_req, res) => {
+    try {
+      const mappings = syncEngine.getAvailableMappings();
+      res.json({ mappings });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get mappings" });
+    }
+  });
+
+  app.get("/api/sync/history", async (req, res) => {
+    try {
+      const { sourceSystemId, limit } = req.query;
+      const history = await syncEngine.getSyncHistory(
+        sourceSystemId as string | undefined, 
+        limit ? parseInt(limit as string) : 20
+      );
+      res.json({ history });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get sync history" });
+    }
+  });
+
   // SAFe Ontology Summary - Full hierarchy for dashboard
   app.get("/api/safe/summary", async (_req, res) => {
     try {
