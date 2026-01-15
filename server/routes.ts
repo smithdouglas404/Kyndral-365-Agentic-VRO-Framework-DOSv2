@@ -3279,5 +3279,125 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // VRO METRICS API - Database-driven VRO performance metrics
+  // ============================================================================
+
+  app.get("/api/vro-metrics", async (_req, res) => {
+    try {
+      const metrics = await storage.getVroMetrics();
+      res.json(metrics);
+    } catch (error: any) {
+      console.error("Get VRO metrics error:", error);
+      res.status(500).json({ error: "Failed to get VRO metrics" });
+    }
+  });
+
+  const updateVroMetricSchema = z.object({
+    label: z.string().optional(),
+    value: z.string().optional(),
+    unit: z.string().optional(),
+    color: z.string().optional(),
+    source: z.string().optional(),
+    category: z.string().optional(),
+    sortOrder: z.number().optional(),
+    isActive: z.boolean().optional(),
+  });
+
+  app.put("/api/vro-metrics/:id", async (req, res) => {
+    try {
+      const parseResult = updateVroMetricSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const metric = await storage.updateVroMetric(req.params.id, parseResult.data);
+      if (!metric) {
+        return res.status(404).json({ error: "Metric not found" });
+      }
+      res.json(metric);
+    } catch (error: any) {
+      console.error("Update VRO metric error:", error);
+      res.status(500).json({ error: "Failed to update metric" });
+    }
+  });
+
+  // ============================================================================
+  // BENCHMARKS API - Industry benchmarks for comparison
+  // ============================================================================
+
+  app.get("/api/benchmarks", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const benchmarksList = await storage.getBenchmarks(category);
+      res.json(benchmarksList);
+    } catch (error: any) {
+      console.error("Get benchmarks error:", error);
+      res.status(500).json({ error: "Failed to get benchmarks" });
+    }
+  });
+
+  // ============================================================================
+  // APP CONFIG API - Application settings including demo mode
+  // ============================================================================
+
+  app.get("/api/config/:key", async (req, res) => {
+    try {
+      const config = await storage.getAppConfig(req.params.key);
+      if (!config) {
+        return res.status(404).json({ error: "Config not found" });
+      }
+      res.json(config);
+    } catch (error: any) {
+      console.error("Get config error:", error);
+      res.status(500).json({ error: "Failed to get config" });
+    }
+  });
+
+  app.get("/api/config", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const configs = await storage.getAllAppConfig(category);
+      res.json(configs);
+    } catch (error: any) {
+      console.error("Get all config error:", error);
+      res.status(500).json({ error: "Failed to get configs" });
+    }
+  });
+
+  const setAppConfigSchema = z.object({
+    value: z.string().min(1, "Value is required"),
+    description: z.string().optional(),
+    category: z.string().optional(),
+  });
+
+  app.put("/api/config/:key", async (req, res) => {
+    try {
+      const parseResult = setAppConfigSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+      const { value, description, category } = parseResult.data;
+      const config = await storage.setAppConfig(req.params.key, value, description, category);
+      res.json(config);
+    } catch (error: any) {
+      console.error("Set config error:", error);
+      res.status(500).json({ error: "Failed to set config" });
+    }
+  });
+
+  // ============================================================================
+  // ALERTS API - Active alerts from database
+  // ============================================================================
+
+  app.get("/api/alerts/active", async (_req, res) => {
+    try {
+      const activeAlerts = await storage.getAlerts("active");
+      res.json(activeAlerts);
+    } catch (error: any) {
+      console.error("Get active alerts error:", error);
+      res.status(500).json({ error: "Failed to get active alerts" });
+    }
+  });
+
   return httpServer;
 }

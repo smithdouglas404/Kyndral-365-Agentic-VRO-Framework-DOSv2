@@ -1526,3 +1526,80 @@ export const insertClarifyingQuestionSchema = createInsertSchema(clarifyingQuest
 
 export type InsertClarifyingQuestion = z.infer<typeof insertClarifyingQuestionSchema>;
 export type ClarifyingQuestion = typeof clarifyingQuestions.$inferSelect;
+
+// ============================================================================
+// VRO METRICS - Value Realization Office performance metrics
+// ============================================================================
+
+export const vroMetrics = pgTable("vro_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  metricKey: text("metric_key").notNull().unique(), // current-roi, net-present-value, etc.
+  label: text("label").notNull(),
+  value: text("value").notNull(),
+  unit: text("unit"), // %, M, etc.
+  color: text("color"), // Tailwind color class
+  source: text("source"), // Where this metric comes from
+  category: text("category").default("vro"), // vro, pmo, financial
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertVroMetricSchema = createInsertSchema(vroMetrics).omit({
+  id: true,
+  updatedAt: true,
+  createdAt: true,
+});
+
+export type InsertVroMetric = z.infer<typeof insertVroMetricSchema>;
+export type VroMetric = typeof vroMetrics.$inferSelect;
+
+// ============================================================================
+// BENCHMARKS - Industry benchmarks for comparison
+// ============================================================================
+
+export const benchmarks = pgTable("benchmarks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  benchmarkKey: text("benchmark_key").notNull().unique(),
+  name: text("name").notNull(),
+  value: real("value").notNull(),
+  unit: text("unit"),
+  category: text("category"), // financial, operational, project
+  industry: text("industry").default("energy"),
+  source: text("source"),
+  year: integer("year"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertBenchmarkSchema = createInsertSchema(benchmarks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertBenchmark = z.infer<typeof insertBenchmarkSchema>;
+export type Benchmark = typeof benchmarks.$inferSelect;
+
+// ============================================================================
+// APP CONFIG - Application configuration and settings
+// ============================================================================
+
+export const appConfig = pgTable("app_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  configKey: text("config_key").notNull().unique(),
+  configValue: text("config_value").notNull(),
+  description: text("description"),
+  category: text("category").default("general"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAppConfigSchema = createInsertSchema(appConfig).omit({
+  id: true,
+  updatedAt: true,
+  createdAt: true,
+});
+
+export type InsertAppConfig = z.infer<typeof insertAppConfigSchema>;
+export type AppConfig = typeof appConfig.$inferSelect;

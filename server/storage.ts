@@ -54,6 +54,9 @@ import {
   type IngestionSession, type InsertIngestionSession,
   type QaReview, type InsertQaReview,
   type ClarifyingQuestion, type InsertClarifyingQuestion,
+  type VroMetric, type InsertVroMetric,
+  type Benchmark, type InsertBenchmark,
+  type AppConfig, type InsertAppConfig,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -63,7 +66,8 @@ import {
   divisions, divisionKpis, divisionOkrs, divisionRisks,
   companyOverview, climateMetrics, enterpriseRiskCategories, enterpriseRisks,
   syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
-  ingestionSessions, qaReviews, clarifyingQuestions
+  ingestionSessions, qaReviews, clarifyingQuestions,
+  vroMetrics, benchmarks, appConfig
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -294,6 +298,22 @@ export interface IStorage {
   getClarifyingQuestion(id: string): Promise<ClarifyingQuestion | undefined>;
   createClarifyingQuestion(question: InsertClarifyingQuestion): Promise<ClarifyingQuestion>;
   answerClarifyingQuestion(id: string, answer: string, answeredBy: string): Promise<ClarifyingQuestion | undefined>;
+  
+  // VRO Metrics Methods
+  getVroMetrics(category?: string): Promise<VroMetric[]>;
+  getVroMetric(id: string): Promise<VroMetric | undefined>;
+  createVroMetric(metric: InsertVroMetric): Promise<VroMetric>;
+  updateVroMetric(id: string, updates: Partial<VroMetric>): Promise<VroMetric | undefined>;
+  
+  // Benchmarks Methods
+  getBenchmarks(category?: string): Promise<Benchmark[]>;
+  getBenchmark(id: string): Promise<Benchmark | undefined>;
+  createBenchmark(benchmark: InsertBenchmark): Promise<Benchmark>;
+  
+  // App Config Methods
+  getAppConfig(key: string): Promise<AppConfig | undefined>;
+  getAllAppConfig(category?: string): Promise<AppConfig[]>;
+  setAppConfig(key: string, value: string, description?: string, category?: string): Promise<AppConfig>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -2202,6 +2222,108 @@ export class DatabaseStorage implements IStorage {
     }).where(eq(clarifyingQuestions.id, id)).returning();
     return result[0];
   }
+
+  // VRO Metrics Methods
+  async getVroMetrics(category?: string): Promise<VroMetric[]> {
+    if (category) {
+      return await db.select().from(vroMetrics)
+        .where(and(eq(vroMetrics.category, category), eq(vroMetrics.isActive, true)))
+        .orderBy(vroMetrics.sortOrder);
+    }
+    return await db.select().from(vroMetrics)
+      .where(eq(vroMetrics.isActive, true))
+      .orderBy(vroMetrics.sortOrder);
+  }
+
+  async getVroMetric(id: string): Promise<VroMetric | undefined> {
+    const result = await db.select().from(vroMetrics).where(eq(vroMetrics.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createVroMetric(metric: InsertVroMetric): Promise<VroMetric> {
+    const result = await db.insert(vroMetrics).values(metric).returning();
+    return result[0];
+  }
+
+  async updateVroMetric(id: string, updates: Partial<VroMetric>): Promise<VroMetric | undefined> {
+    const result = await db.update(vroMetrics).set({ ...updates, updatedAt: new Date() }).where(eq(vroMetrics.id, id)).returning();
+    return result[0];
+  }
+
+  // Benchmarks Methods
+  async getBenchmarks(category?: string): Promise<Benchmark[]> {
+    if (category) {
+      return await db.select().from(benchmarks)
+        .where(and(eq(benchmarks.category, category), eq(benchmarks.isActive, true)));
+    }
+    return await db.select().from(benchmarks).where(eq(benchmarks.isActive, true));
+  }
+
+  async getBenchmark(id: string): Promise<Benchmark | undefined> {
+    const result = await db.select().from(benchmarks).where(eq(benchmarks.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createBenchmark(benchmark: InsertBenchmark): Promise<Benchmark> {
+    const result = await db.insert(benchmarks).values(benchmark).returning();
+    return result[0];
+  }
+
+  // App Config Methods
+  async getAppConfig(key: string): Promise<AppConfig | undefined> {
+    const result = await db.select().from(appConfig).where(eq(appConfig.configKey, key)).limit(1);
+    return result[0];
+  }
+
+  async getAllAppConfig(category?: string): Promise<AppConfig[]> {
+    if (category) {
+      return await db.select().from(appConfig).where(eq(appConfig.category, category));
+    }
+    return await db.select().from(appConfig);
+  }
+
+  async setAppConfig(key: string, value: string, description?: string, category?: string): Promise<AppConfig> {
+    const result = await db.insert(appConfig).values({
+      configKey: key,
+      configValue: value,
+      description,
+      category: category || 'general'
+    }).onConflictDoUpdate({
+      target: appConfig.configKey,
+      set: { configValue: value, updatedAt: new Date() }
+    }).returning();
+    return result[0];
+  }
+
+  // Seed VRO Metrics
+  async seedVroMetrics(): Promise<void> {
+    const existingMetrics = await db.select().from(vroMetrics).limit(1);
+    if (existingMetrics.length > 0) {
+      console.log("[Seed] VRO metrics already exist, skipping...");
+      return;
+    }
+
+    const defaultMetrics: InsertVroMetric[] = [
+      { metricKey: 'current-roi', label: 'Current ROI', value: '64', unit: '%', color: 'text-[#D50032]', source: 'VRO Financial Analysis', category: 'vro', sortOrder: 1 },
+      { metricKey: 'net-present-value', label: 'Net Present Value', value: '$36.25', unit: 'M', color: 'text-[#0072CE]', source: '5-year projection', category: 'vro', sortOrder: 2 },
+      { metricKey: 'timeline-progress', label: 'Timeline Progress', value: '69', unit: '%', color: 'text-[#00A651]', source: 'Value Stream Mapping', category: 'vro', sortOrder: 3 },
+      { metricKey: 'budget-utilization', label: 'Budget Utilization', value: '94', unit: '%', color: 'text-[#FFD700]', source: 'FinOps Tracking', category: 'vro', sortOrder: 4 },
+    ];
+
+    for (const metric of defaultMetrics) {
+      await this.createVroMetric(metric);
+    }
+    console.log("[Seed] VRO metrics seeded successfully");
+  }
+
+  // Seed Demo Mode Config
+  async seedAppConfig(): Promise<void> {
+    const existingConfig = await this.getAppConfig('demo_mode');
+    if (!existingConfig) {
+      await this.setAppConfig('demo_mode', 'true', 'Enable demo simulation mode', 'system');
+      console.log("[Seed] App config seeded with demo_mode=true");
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
@@ -2216,4 +2338,12 @@ storage.seedDivisions().catch(err => {
 
 storage.seedCompanyData().catch(err => {
   console.error("Failed to seed company data:", err);
+});
+
+storage.seedVroMetrics().catch(err => {
+  console.error("Failed to seed VRO metrics:", err);
+});
+
+storage.seedAppConfig().catch(err => {
+  console.error("Failed to seed app config:", err);
 });

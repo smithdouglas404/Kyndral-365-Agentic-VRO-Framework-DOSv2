@@ -26,8 +26,9 @@ import { AgentCommandCenter } from "@/components/AgentCommandCenter";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
-import { aiAlerts } from "@/lib/lgData";
 import { useDivisions } from "@/hooks/useNexteraData";
+import { useVroMetrics } from "@/hooks/useVroMetrics";
+import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
 import { formatMoney } from "@/lib/formatters";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
@@ -54,41 +55,7 @@ const NEE = {
 };
 
 
-// Shared VRO metrics data - Used by both VRO and PMO views (PMO rolls up to VRO)
-const VRO_METRICS_DATA = [
-  { 
-    id: "current-roi",
-    label: "Current ROI", 
-    value: "64",
-    unit: "%",
-    color: "text-[#D50032]",
-    source: "VRO Financial Analysis"
-  },
-  { 
-    id: "net-present-value",
-    label: "Net Present Value", 
-    value: "$36.25",
-    unit: "M",
-    color: "text-[#0072CE]",
-    source: "5-year projection"
-  },
-  { 
-    id: "timeline-progress",
-    label: "Timeline Progress", 
-    value: "69",
-    unit: "%",
-    color: "text-[#00A651]",
-    source: "Value Stream Mapping"
-  },
-  { 
-    id: "budget-utilization",
-    label: "Budget Utilization", 
-    value: "94",
-    unit: "%",
-    color: "text-[#FFD700]",
-    source: "FinOps Tracking"
-  },
-];
+// VRO_METRICS_DATA is now loaded from database via useVroMetrics hook
 
 // VRO Metrics Summary - Shown in PMO view to show PMO rolls up to VRO (Uses live simulation data)
 function VROMetricsSummaryLive() {
@@ -155,8 +122,28 @@ function VROMetricsSummaryLive() {
   );
 }
 
-// Original static VRO Metrics Summary (fallback)
+// Database-driven VRO Metrics Summary (fallback for static mode)
 function VROMetricsSummary() {
+  const { data: vroMetrics, isLoading } = useVroMetrics();
+  
+  if (isLoading) {
+    return (
+      <div className="mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <TrendingUp className="h-4 w-4 text-[#0072CE]" />
+          <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="bg-blue-50 border border-blue-200 rounded-[4px] p-4 animate-pulse h-24" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  const metricsToDisplay = vroMetrics || [];
+  
   return (
     <div className="mt-4">
       <div className="flex items-center gap-2 mb-3">
@@ -164,15 +151,15 @@ function VROMetricsSummary() {
         <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {VRO_METRICS_DATA.map((kpi, i) => (
+        {metricsToDisplay.map((kpi) => (
           <div
             key={kpi.id}
             className="bg-blue-50 border border-blue-200 rounded-[4px] p-4 flex flex-col"
-            data-testid={`vro-stat-${kpi.id}`}
+            data-testid={`vro-stat-${kpi.metricKey}`}
           >
             <span className="text-xs font-medium text-gray-500 mb-1">{kpi.label}</span>
             <div className="flex items-baseline gap-1">
-              <span className={cn("text-2xl font-bold", kpi.color)}>{kpi.value}</span>
+              <span className={cn("text-2xl font-bold", kpi.color || "text-[#0072CE]")}>{kpi.value}</span>
               <span className="text-sm text-gray-500">{kpi.unit}</span>
             </div>
             <div className="mt-2 pt-2 border-t border-blue-200">
