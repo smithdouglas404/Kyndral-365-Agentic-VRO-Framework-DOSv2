@@ -561,15 +561,15 @@ export const riskData = {
   // Emerging risks dashboard
   emergingRisks: {
     dashboard: true,
-    description: "Captures views and inputs from across L&G to monitor likelihood of emerging risks on Group strategy",
+    description: "Captures views and inputs from across NextEra Energy to monitor likelihood of emerging risks on enterprise strategy",
     keyEmergingRisks: [
       { name: "AI and Automation", impact: "high", probability: "high", horizon: "1-3 years" },
       { name: "Geopolitical Instability", impact: "high", probability: "medium", horizon: "1-2 years" },
-      { name: "Pandemic Risk", impact: "high", probability: "low", horizon: "uncertain" },
-      { name: "Nature Loss", impact: "high", probability: "high", horizon: "5-10 years" },
+      { name: "Extreme Weather Events", impact: "high", probability: "high", horizon: "1-2 years" },
+      { name: "Grid Reliability", impact: "high", probability: "medium", horizon: "2-5 years" },
       { name: "Regulatory Divergence", impact: "medium", probability: "medium", horizon: "2-5 years" }
     ],
-    source: "L&G Risk Management Supplement 2024, p.2"
+    source: "NextEra Energy Risk Management Report 2024, p.2"
   },
   
   // Climate risk breakdown
@@ -591,7 +591,7 @@ export const riskData = {
     }
   ],
   
-  source: "L&G Risk Management Supplement 2024"
+  source: "NextEra Energy Risk Management Report 2024"
 };
 
 // ============================================================================
@@ -644,7 +644,7 @@ export const aiAlerts: AIAlert[] = [
     description: "Infrastructure sector exposure has reached 18.4% of credit portfolio, exceeding 18% limit",
     metric: "Sector Concentration",
     value: "18.4%",
-    recommendation: "Reduce infrastructure allocation by £340m or seek Board approval for temporary limit extension.",
+    recommendation: "Reduce infrastructure allocation by $420m or seek Board approval for temporary limit extension.",
     targetPersona: "CIO",
     division: "Asset Management",
     timestamp: new Date(Date.now() - 3600000),
@@ -672,13 +672,13 @@ export const aiAlerts: AIAlert[] = [
     id: "alert-4",
     type: "recommendation",
     severity: "success",
-    title: "PRT Deal Acceleration Opportunity",
-    description: "AI identifies 4 pension schemes in advanced funding positions matching L&G risk appetite",
+    title: "Clean Energy Project Acceleration Opportunity",
+    description: "AI identifies 4 solar projects in advanced permitting positions matching NextEra risk appetite",
     metric: "Pipeline Value",
-    value: "£2.3bn potential",
-    recommendation: "Prioritize outreach to identified schemes. Estimated 68% conversion probability with proactive engagement.",
-    targetPersona: "CEO IR - Andrew Kail",
-    division: "Institutional Retirement",
+    value: "$2.8bn potential",
+    recommendation: "Prioritize outreach to identified projects. Estimated 68% completion probability with proactive engagement.",
+    targetPersona: "CEO NEER - Rebecca Kujawa",
+    division: "NextEra Energy Resources",
     timestamp: new Date(Date.now() - 1800000),
     confidence: 74,
     source: "AI Market Intelligence + Scheme Data",
@@ -723,39 +723,39 @@ export const aiAlerts: AIAlert[] = [
 // ============================================================================
 
 export const industryBenchmarks = {
-  prtMarket2024: {
-    totalVolume: 47.8, // £bn
-    totalTransactions: 299,
+  cleanEnergyMarket2024: {
+    totalCapacity: 304, // GW
+    totalProjects: 245,
     competitors: [
-      { name: "Legal & General", volume: 8.4, transactions: 38, share: 17.6, color: "#C50B30" },
-      { name: "PIC", volume: 6.2, transactions: 28, share: 13.0, color: "#334155" },
-      { name: "Aviva", volume: 5.8, transactions: 45, share: 12.2, color: "#f59e0b" },
-      { name: "Phoenix", volume: 5.5, transactions: 32, share: 11.5, color: "#6366f1" },
-      { name: "Rothesay", volume: 5.2, transactions: 25, share: 10.9, color: "#10b981" },
-      { name: "Others", volume: 16.7, transactions: 131, share: 34.8, color: "#94a3b8" }
+      { name: "NextEra Energy", volume: 68.5, transactions: 42, share: 22.5, color: "#0072CE" },
+      { name: "Duke Energy", volume: 52.4, transactions: 35, share: 17.2, color: "#334155" },
+      { name: "Southern Company", volume: 46.2, transactions: 38, share: 15.2, color: "#f59e0b" },
+      { name: "Dominion Energy", volume: 30.8, transactions: 28, share: 10.1, color: "#6366f1" },
+      { name: "AES Corporation", volume: 35.2, transactions: 32, share: 10.9, color: "#10b981" },
+      { name: "Others", volume: 71.1, transactions: 70, share: 24.1, color: "#94a3b8" }
     ],
-    source: "LCP Pension Risk Transfer Report 2024"
+    source: "EIA Energy Data 2024, S&P Global Energy Research"
   },
   
-  assetManagement2024: {
+  renewableCapacity2024: {
     competitors: [
-      { name: "L&G", aum: 1100, esgRating: "AAA", sustainalytics: 89 },
-      { name: "BlackRock", aum: 10500, esgRating: "AA", sustainalytics: 75 },
-      { name: "Vanguard", aum: 8200, esgRating: "A", sustainalytics: 68 },
-      { name: "Schroders", aum: 750, esgRating: "AA", sustainalytics: 82 },
-      { name: "Aviva Investors", aum: 228, esgRating: "AA", sustainalytics: 78 }
+      { name: "NextEra Energy", capacity: 68.5, esgRating: "AAA", sustainalytics: 92 },
+      { name: "Duke Energy", capacity: 52.4, esgRating: "AA", sustainalytics: 78 },
+      { name: "Southern Company", capacity: 46.2, esgRating: "AA", sustainalytics: 75 },
+      { name: "Dominion Energy", capacity: 30.8, esgRating: "A", sustainalytics: 72 },
+      { name: "AES Corporation", capacity: 35.2, esgRating: "AA", sustainalytics: 80 }
     ],
     source: "Company Reports, MSCI ESG Ratings 2024"
   },
   
-  solvency2024: {
+  financialStrength2024: {
     competitors: [
-      { name: "L&G", ratio: 232, color: "#C50B30" },
-      { name: "Aviva", ratio: 205, color: "#f59e0b" },
-      { name: "Phoenix", ratio: 189, color: "#6366f1" },
-      { name: "Prudential", ratio: 262, color: "#10b981" }
+      { name: "NextEra Energy", ratio: 185, color: "#0072CE" },
+      { name: "Duke Energy", ratio: 165, color: "#f59e0b" },
+      { name: "Southern Company", ratio: 158, color: "#6366f1" },
+      { name: "Dominion Energy", ratio: 142, color: "#10b981" }
     ],
-    source: "Company Solvency Reports 2024"
+    source: "Company Financial Reports 2024"
   }
 };
 

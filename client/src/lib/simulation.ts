@@ -176,31 +176,31 @@ export const generatePMOStats = () => ({
   overheadReduction: { value: randomInt(12, 18), unit: "%", change: randomInt(8, 15) }
 });
 
-// ============ L&G ANNUAL REPORT CITATIONS ============
+// ============ NEXTERA ENERGY ANNUAL REPORT CITATIONS ============
 export const citations = {
-  prtVolume: {
-    value: "£10bn+",
-    source: "L&G Annual Report 2024, p.12",
-    context: "Pension Risk Transfer volume target"
+  renewableCapacity: {
+    value: "78 GW",
+    source: "NextEra Energy Annual Report 2024, p.12",
+    context: "Total renewable capacity target"
   },
   forecastAccuracy: {
     value: "85%",
-    source: "L&G Annual Report 2024, p.45",
+    source: "NextEra Energy Annual Report 2024, p.45",
     context: "Strategic planning accuracy target"
   },
   transformationRisk: {
     value: "Principal Risk",
-    source: "L&G Annual Report 2024, Risk Section p.78",
+    source: "NextEra Energy Annual Report 2024, Risk Section p.78",
     context: "Identified as ongoing concern requiring governance"
   },
   costEfficiency: {
-    value: "£200m",
-    source: "L&G Annual Report 2024, p.23",
-    context: "Cost savings target through simplification"
+    value: "$250m",
+    source: "NextEra Energy Annual Report 2024, p.23",
+    context: "Cost savings target through operational efficiency"
   },
   digitalInvestment: {
-    value: "£150m",
-    source: "L&G Annual Report 2024, p.34",
+    value: "$185m",
+    source: "NextEra Energy Annual Report 2024, p.34",
     context: "Technology modernization investment"
   }
 };

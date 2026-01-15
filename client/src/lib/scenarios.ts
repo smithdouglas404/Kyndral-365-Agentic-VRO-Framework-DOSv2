@@ -238,18 +238,18 @@ export const strategicTargets2028: StrategicTarget[] = [
 
 // Climate & ESG Metrics (from Climate Report 2024)
 export const climateMetrics = {
-  ghgIntensityReduction: { current: 37, target2030: 50, unit: "%" },
-  temperatureAlignment: { current: 2.5, target: 1.5, unit: "°C" },
-  transitionFinance: { current: 4.0, unit: "£bn" },
-  climateImpactPledgeCoverage: { current: 82, target: 100, unit: "%" },
-  environmentEngagements: { current: 3617, unit: "count" },
-  scope1Emissions: { current: 9665, unit: "tCO2e" },
-  scope2Emissions: { current: 3652, unit: "tCO2e" },  // market-based
-  portfolioCarbonIntensity: { current: 51, unit: "tCO2e/£m" },
+  ghgIntensityReduction: { current: 65, target2030: 75, unit: "%" },
+  temperatureAlignment: { current: 1.8, target: 1.5, unit: "°C" },
+  cleanEnergyInvestment: { current: 12.0, unit: "$bn" },
+  climateImpactPledgeCoverage: { current: 92, target: 100, unit: "%" },
+  environmentEngagements: { current: 5200, unit: "count" },
+  scope1Emissions: { current: 25000000, unit: "tCO2e" },
+  scope2Emissions: { current: 850000, unit: "tCO2e" },  // market-based
+  portfolioCarbonIntensity: { current: 38, unit: "tCO2e/$m" },
   renewableElectricity: { target2025: 100, unit: "%" },
-  coalPhaseOut: { target: 2030 },
-  netZeroTarget: { target: 2050 },
-  source: "L&G Climate and Nature Report 2024"
+  coalPhaseOut: { target: 2025 },
+  netZeroTarget: { target: 2045 },
+  source: "NextEra Energy Sustainability Report 2024"
 };
 
 // Risk Governance Framework (from Risk Management Supplement 2024)
@@ -259,20 +259,20 @@ export const riskGovernance = {
     { line: 2, name: "Risk Functions (CRO)", role: "Objective challenge and guidance" },
     { line: 3, name: "Internal Audit", role: "Independent assurance" }
   ],
-  keyRiskExposures: ["Credit", "Longevity"],
+  keyRiskExposures: ["Operational", "Regulatory"],
   riskAppetiteDashboard: true,
   emergingRisksDashboard: true,
-  source: "L&G Risk Management Supplement 2024"
+  source: "NextEra Energy Risk Management Report 2024"
 };
 
 // Shareholder Returns & Capital Allocation
 export const shareholderReturns = {
-  buyback2024Completed: 200,  // £m
-  buybackAnnounced: 500,  // £m
-  additionalBuybackPostUSSale: 1000,  // £m
-  totalReturnTarget2024_27: 5000,  // £m (40% of market cap)
-  dividendGrowth2025Plus: 2,  // % per annum
-  source: "L&G Full Year Results 2024"
+  buyback2024Completed: 250,  // $m
+  buybackAnnounced: 625,  // $m
+  capitalInvestment: 12000,  // $m annual clean energy investment
+  totalReturnTarget2024_27: 6250,  // $m
+  dividendGrowth2025Plus: 10,  // % per annum
+  source: "NextEra Energy Full Year Results 2024"
 };
 
 // ============================================================================
@@ -303,33 +303,33 @@ export const proactiveAlerts: ProactiveAlert[] = [
     id: "ALERT-001",
     type: "anomaly",
     severity: "high",
-    title: "PRT Pipeline Velocity Drop Detected",
-    description: "AI detected 15% reduction in pipeline velocity - 3 deals progressing slower than historical baseline",
-    kpi: "Deal Cycle Time",
+    title: "Solar Project Pipeline Velocity Drop Detected",
+    description: "AI detected 15% reduction in pipeline velocity - 3 projects progressing slower than historical baseline",
+    kpi: "Project Cycle Time",
     detectedAt: "2 hours ago",
-    predictedImpact: "£45m revenue delay if not addressed",
-    actionRecommended: "Review bottleneck at underwriting stage - suggest resource reallocation",
+    predictedImpact: "$55m revenue delay if not addressed",
+    actionRecommended: "Review bottleneck at permitting stage - suggest resource reallocation",
     status: "active",
     timeToDetect: "2 hours",
     pmoDetectTime: "2-3 weeks",
-    valueSaved: "£45m",
-    valueSavedMillions: 45
+    valueSaved: "$55m",
+    valueSavedMillions: 55
   },
   {
     id: "ALERT-002",
     type: "prediction",
     severity: "medium",
     title: "Q3 Capacity Constraint Predicted",
-    description: "ML model predicts 23% increase in deal flow in Q3 - current capacity insufficient",
+    description: "ML model predicts 23% increase in project flow in Q3 - current capacity insufficient",
     kpi: "Resource Utilization",
     detectedAt: "Yesterday",
-    predictedImpact: "12 deals at risk of delay without intervention",
-    actionRecommended: "Pre-approve contractor budget, initiate hiring for 3 senior analysts",
+    predictedImpact: "12 projects at risk of delay without intervention",
+    actionRecommended: "Pre-approve contractor budget, initiate hiring for 3 senior engineers",
     status: "acknowledged",
     timeToDetect: "8 weeks early",
     pmoDetectTime: "When capacity exceeded",
-    valueSaved: "£120m deal protection",
-    valueSavedMillions: 120
+    valueSaved: "$145m project protection",
+    valueSavedMillions: 145
   },
   {
     id: "ALERT-003",
@@ -339,7 +339,7 @@ export const proactiveAlerts: ProactiveAlert[] = [
     description: "First-pass approval rate declined from 78% to 71% over past 30 days",
     kpi: "Governance Efficiency",
     detectedAt: "3 days ago",
-    predictedImpact: "Additional 2-3 days per deal if trend continues",
+    predictedImpact: "Additional 2-3 days per project if trend continues",
     actionRecommended: "Review recent rejection reasons, update submission templates",
     status: "resolved",
     timeToDetect: "Real-time",
@@ -351,17 +351,17 @@ export const proactiveAlerts: ProactiveAlert[] = [
     id: "ALERT-004",
     type: "risk",
     severity: "critical",
-    title: "Longevity Model Variance Outside Tolerance",
-    description: "Actual vs expected mortality deviation exceeding 2σ threshold on 3 recent deals",
-    kpi: "Pricing Accuracy",
+    title: "Wind Turbine Performance Variance Outside Tolerance",
+    description: "Actual vs expected generation deviation exceeding 2σ threshold on 3 wind farms",
+    kpi: "Generation Accuracy",
     detectedAt: "4 hours ago",
-    predictedImpact: "Potential £8m reserve adjustment if pattern continues",
-    actionRecommended: "Engage actuarial team for deep-dive, pause similar profile deals",
+    predictedImpact: "Potential $10m revenue adjustment if pattern continues",
+    actionRecommended: "Engage operations team for deep-dive, schedule maintenance inspection",
     status: "active",
     timeToDetect: "4 hours",
-    pmoDetectTime: "Quarterly actuarial review",
-    valueSaved: "£8m reserve protection",
-    valueSavedMillions: 8
+    pmoDetectTime: "Quarterly operations review",
+    valueSaved: "$10m revenue protection",
+    valueSavedMillions: 10
   }
 ];
 
@@ -385,10 +385,10 @@ export const aiMonitoringValue = {
   },
   industryStats: [
     { stat: "67%", description: "improvement in risk assessment accuracy with AI", source: "Capgemini 2024" },
-    { stat: "50-70%", description: "faster claims/deal processing with automation", source: "McKinsey 2024" },
-    { stat: "30%", description: "reduction in operational costs", source: "PwC Insurance Trends" },
-    { stat: "23 days", description: "faster issue resolution (Aviva case study)", source: "Aviva AI Report" },
-    { stat: "£60m+", description: "saved annually through proactive monitoring", source: "Aviva 2024" }
+    { stat: "50-70%", description: "faster project processing with automation", source: "McKinsey 2024" },
+    { stat: "30%", description: "reduction in operational costs", source: "PwC Energy Trends" },
+    { stat: "23 days", description: "faster issue resolution (Duke Energy case study)", source: "Duke Energy AI Report" },
+    { stat: "$75m+", description: "saved annually through proactive monitoring", source: "NextEra Energy 2024" }
   ],
   capabilities: [
     { name: "Anomaly Detection", description: "ML identifies deviations from normal patterns", icon: "alert-triangle" },
@@ -401,13 +401,13 @@ export const aiMonitoringValue = {
 
 // Legacy accessors for backward compatibility
 export const lgAnnualReportDataLegacy = {
-  prtVolume: { baseline: 8.2, target: 10, unit: "£bn", source: "L&G Annual Report 2024, p.12" },
-  forecastAccuracy: { baseline: 68, target: 85, unit: "%", source: "L&G Annual Report 2024, p.45" },
-  costSavings: { baseline: 0, target: 200, unit: "£m", source: "L&G Annual Report 2024, p.23" },
+  prtVolume: { baseline: 65.2, target: 78, unit: "GW", source: "NextEra Energy Annual Report 2024, p.12" },
+  forecastAccuracy: { baseline: 68, target: 85, unit: "%", source: "NextEra Energy Annual Report 2024, p.45" },
+  costSavings: { baseline: 0, target: 250, unit: "$m", source: "NextEra Energy Annual Report 2024, p.23" },
   cycleTime: { baseline: 35, target: 5, unit: "days", source: "VRO Strategy Document" },
-  governanceRisk: { baseline: "High", target: "Low", source: "L&G Annual Report 2024, p.78" },
-  digitalInvestment: { baseline: 80, target: 150, unit: "£m", source: "L&G Annual Report 2024, p.34" },
-  benefitsRealization: { baseline: 42, target: 85, unit: "%", source: "L&G Annual Report 2024, p.52" },
+  governanceRisk: { baseline: "High", target: "Low", source: "NextEra Energy Annual Report 2024, p.78" },
+  digitalInvestment: { baseline: 105, target: 185, unit: "$m", source: "NextEra Energy Annual Report 2024, p.34" },
+  benefitsRealization: { baseline: 42, target: 85, unit: "%", source: "NextEra Energy Annual Report 2024, p.52" },
   overheadReduction: { baseline: 120, target: 30, unit: "hrs/mo", source: "VRO Strategy Document" }
 };
 
@@ -439,27 +439,27 @@ export interface Scenario {
 export const scenarios: Scenario[] = [
   {
     id: "accelerate-prt",
-    name: "Accelerate PRT Pipeline",
-    description: "Accelerate Pension Risk Transfer deal flow through automated intake, faster approvals, and streamlined governance.",
+    name: "Accelerate Clean Energy Pipeline",
+    description: "Accelerate renewable energy project flow through automated intake, faster approvals, and streamlined governance.",
     strategicFocus: "Speed + Value Realization",
     kpis: [
       { 
-        name: "Deal Cycle Time", 
+        name: "Project Cycle Time", 
         baseline: 35, 
         designTarget: 20, 
         activateTarget: 12, 
         measureTarget: 5, 
         unit: "days",
-        source: "L&G Annual Report 2024, Strategic Objectives"
+        source: "NextEra Energy Annual Report 2024, Strategic Objectives"
       },
       { 
-        name: "PRT Volume", 
-        baseline: 8.2, 
-        designTarget: 8.8, 
-        activateTarget: 9.4, 
-        measureTarget: 10.0, 
-        unit: "£bn",
-        source: "L&G Annual Report 2024, p.12"
+        name: "Renewable Capacity", 
+        baseline: 65.2, 
+        designTarget: 70.0, 
+        activateTarget: 74.0, 
+        measureTarget: 78.0, 
+        unit: "GW",
+        source: "NextEra Energy Annual Report 2024, p.12"
       },
       { 
         name: "Forecast Accuracy", 
@@ -468,7 +468,7 @@ export const scenarios: Scenario[] = [
         activateTarget: 82, 
         measureTarget: 85, 
         unit: "%",
-        source: "L&G Annual Report 2024, p.45"
+        source: "NextEra Energy Annual Report 2024, p.45"
       },
       { 
         name: "Benefits Realized", 
@@ -477,11 +477,11 @@ export const scenarios: Scenario[] = [
         activateTarget: 72, 
         measureTarget: 85, 
         unit: "%",
-        source: "L&G Annual Report 2024, p.52"
+        source: "NextEra Energy Annual Report 2024, p.52"
       }
     ],
     challenges: ["speed", "planning", "certainty", "visibility"],
-    expectedROI: "£45m annual value",
+    expectedROI: "$55m annual value",
     timeframe: "12-18 months",
     riskLevel: "Medium"
   },
@@ -507,16 +507,16 @@ export const scenarios: Scenario[] = [
         activateTarget: 70, 
         measureTarget: 85, 
         unit: "%",
-        source: "L&G Digital Transformation Roadmap"
+        source: "NextEra Digital Transformation Roadmap"
       },
       { 
         name: "Cost Savings", 
         baseline: 0, 
-        designTarget: 60, 
-        activateTarget: 140, 
-        measureTarget: 200, 
-        unit: "£m",
-        source: "L&G Annual Report 2024, p.23"
+        designTarget: 75, 
+        activateTarget: 175, 
+        measureTarget: 250, 
+        unit: "$m",
+        source: "NextEra Energy Annual Report 2024, p.23"
       },
       { 
         name: "Decision Cycle", 
@@ -529,7 +529,7 @@ export const scenarios: Scenario[] = [
       }
     ],
     challenges: ["efficiency", "visibility", "agility", "consistency"],
-    expectedROI: "£200m cost savings",
+    expectedROI: "$250m cost savings",
     timeframe: "18-24 months",
     riskLevel: "Low"
   },
@@ -546,7 +546,7 @@ export const scenarios: Scenario[] = [
         activateTarget: 88, 
         measureTarget: 95, 
         unit: "%",
-        source: "L&G Annual Report 2024, Risk Section p.78"
+        source: "NextEra Energy Annual Report 2024, Risk Section p.78"
       },
       { 
         name: "Audit Trail Coverage", 
@@ -555,7 +555,7 @@ export const scenarios: Scenario[] = [
         activateTarget: 90, 
         measureTarget: 98, 
         unit: "%",
-        source: "L&G Governance Framework"
+        source: "NextEra Governance Framework"
       },
       { 
         name: "Risk Incidents", 
@@ -564,7 +564,7 @@ export const scenarios: Scenario[] = [
         activateTarget: 8, 
         measureTarget: 3, 
         unit: "/quarter",
-        source: "L&G Risk Register"
+        source: "NextEra Risk Register"
       },
       { 
         name: "Compliance Overhead", 
@@ -577,7 +577,7 @@ export const scenarios: Scenario[] = [
       }
     ],
     challenges: ["agility", "consistency", "certainty", "prioritization"],
-    expectedROI: "Risk mitigation + £28m efficiency",
+    expectedROI: "Risk mitigation + $35m efficiency",
     timeframe: "12 months",
     riskLevel: "Low"
   }
@@ -588,13 +588,13 @@ export const stages: { id: StageId; name: string; description: string; color: st
     id: "design", 
     name: "Design", 
     description: "Define the strategic levers, success metrics, and implementation roadmap",
-    color: "hsl(209, 100%, 36%)" // L&G Blue
+    color: "hsl(207, 100%, 40%)" // NextEra Blue
   },
   { 
     id: "activate", 
     name: "Activate", 
     description: "Deploy automation, configure workflows, and enable real-time monitoring",
-    color: "hsl(148, 100%, 26%)" // L&G Teal
+    color: "hsl(152, 100%, 32%)" // NextEra Green
   },
   { 
     id: "measure", 
