@@ -76,896 +76,564 @@ export interface EnrichedProject {
 
 export const enrichedProjects: EnrichedProject[] = [
   // ============================================================================
-  // INSTITUTIONAL RETIREMENT (2 Projects)
+  // FLORIDA POWER & LIGHT (FPL) - 4 Projects
+  // Source: NextEra Energy Annual Report 2024, 10-K Filing
   // ============================================================================
   {
-    id: "pmo-ir-001",
-    name: "PRT Intake System Upgrade",
-    bu: "Institutional Retirement",
-    description: "Modernizing the Pension Risk Transfer intake system to automate initial deal assessment, reduce manual processing, and accelerate deal cycle times. Integrating AI-powered document processing with actuarial workflows.",
-    expectedROI: "£85m annual efficiency",
-    roiValue: 85,
+    id: "pmo-fpl-001",
+    name: "Grid Modernization & Automation",
+    bu: "Florida Power & Light",
+    description: "Deploying AI-powered grid management system with automated switching, real-time load balancing, and predictive outage prevention. Target: reduce outage duration from 30 to 5 minutes. Part of $8.2bn FPL capital investment program.",
+    expectedROI: "$120m annual efficiency",
+    roiValue: 120,
     priority: "critical",
-    aiRecommendation: "High priority - legacy API degradation detected. Recommend cloud migration to reduce integration complexity by 40%. Schedule API performance review immediately.",
+    aiRecommendation: "High priority - hurricane season preparedness critical. AI models show 40% reduction in restoration times with full automation. Recommend accelerating deployment in coastal zones.",
     status: "amber",
-    budget: { spent: 2.4, total: 3.5, unit: "£m" },
-    timeline: { elapsed: 8, total: 12, unit: "months" },
+    budget: { spent: 45, total: 68, unit: "$m" },
+    timeline: { elapsed: 8, total: 14, unit: "months" },
     deliverables: { completed: 6, total: 14 },
-    risks: ["Integration delays with legacy systems", "Resource constraints in Q3"],
-    nextMilestone: "UAT Phase 2 - Week 34",
+    risks: ["Hurricane season timing", "Vendor equipment delays", "Integration with legacy SCADA systems"],
+    nextMilestone: "Coastal Zone Phase 2 - Week 34",
     safe: {
       velocity: 48,
       predictability: 82,
       flowEfficiency: 68,
       currentPI: "PI 24.4",
-      epicId: "EPIC-IR-101",
-      epicName: "PRT Digital Transformation",
+      epicId: "EPIC-FPL-101",
+      epicName: "Grid Resilience Initiative",
       epicProgress: 55,
-      okr: { objective: "Reduce PRT processing time by 40%", keyResult: "Achieve 3-day turnaround", progress: 45 },
+      okr: { objective: "Reduce outage duration by 80%", keyResult: "Achieve 5-minute average restoration", progress: 45 },
       piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 75 }, { pi: "PI 24.2", velocity: 45, predictability: 78 }, { pi: "PI 24.3", velocity: 46, predictability: 80 }, { pi: "PI 24.4", velocity: 48, predictability: 82 }]
     },
     safeStage: "implementing",
     aiSignals: [
-      { type: "warning", message: "Legacy API response times degrading 23% - integration risk increasing", confidence: 87, dataSource: "System monitoring" },
+      { type: "warning", message: "Legacy SCADA integration delays - 23% behind schedule on Miami-Dade zone", confidence: 87, dataSource: "System monitoring" },
       { type: "opportunity", message: "Cloud migration could reduce integration complexity by 40%", confidence: 72, dataSource: "Architecture review" }
     ],
     proactiveActions: [
-      { id: "pa-001", action: "Schedule API performance review with legacy team", impact: "Prevent 2-week delay", urgency: "immediate", type: "mitigate" },
+      { id: "pa-001", action: "Schedule SCADA integration review with legacy team", impact: "Prevent 2-week delay", urgency: "immediate", type: "mitigate" },
       { id: "pa-002", action: "Request additional contractor resources for Q3", impact: "Maintain delivery pace", urgency: "this-week", type: "escalate" }
     ],
     trendData: [{ week: "W28", value: 42 }, { week: "W29", value: 45 }, { week: "W30", value: 43 }, { week: "W31", value: 48 }, { week: "W32", value: 52 }],
     dependencies: [
-      { projectId: "pmo-ir-002", projectName: "Longevity Model Enhancement", type: "related", health: "green", description: "Shares actuarial data pipeline", impactIfDelayed: "Minimal - separate workstreams" },
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "blocked-by", health: "yellow", description: "Requires ESG data feeds for sustainable PRT deals", impactIfDelayed: "2-week delay on ESG module" },
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "related", health: "yellow", description: "Risk metrics integration", impactIfDelayed: "Manual risk data entry required" }
+      { projectId: "pmo-fpl-002", projectName: "Advanced Metering Infrastructure", type: "related", health: "green", description: "Shares data pipeline for grid analytics", impactIfDelayed: "Minimal - separate workstreams" },
+      { projectId: "pmo-corp-001", projectName: "Enterprise Data Platform", type: "blocked-by", health: "yellow", description: "Requires unified data infrastructure", impactIfDelayed: "2-week delay on analytics module" }
     ],
-    linkedVROProgramId: "vro-ir-001"
+    linkedVROProgramId: "vro-fpl-001"
   },
   {
-    id: "pmo-ir-002",
-    name: "Longevity Model Enhancement",
-    bu: "Institutional Retirement",
-    description: "Upgrading actuarial mortality and longevity models with latest population data, improved ML prediction capabilities, and real-time cohort monitoring. Critical for accurate reserve calculations.",
-    expectedROI: "£42m risk mitigation",
-    roiValue: 42,
+    id: "pmo-fpl-002",
+    name: "Advanced Metering Infrastructure Expansion",
+    bu: "Florida Power & Light",
+    description: "Deploying next-generation smart meters with real-time analytics across 6M+ customer accounts. Enables demand response, outage detection, and energy efficiency programs. Supports FPL's 99.98% reliability target.",
+    expectedROI: "$85m operational savings",
+    roiValue: 85,
     priority: "high",
-    aiRecommendation: "Model accuracy improved 12% with new mortality tables. Fast-track actuarial review to accelerate go-live by 1 week. Strong candidate for early completion bonus.",
+    aiRecommendation: "Deployment showing 15% faster outage detection in pilot areas. Recommend expansion to remaining 1.2M accounts. Strong correlation with customer satisfaction improvements.",
     status: "green",
-    budget: { spent: 0.8, total: 1.2, unit: "£m" },
-    timeline: { elapsed: 5, total: 6, unit: "months" },
+    budget: { spent: 28, total: 35, unit: "$m" },
+    timeline: { elapsed: 10, total: 12, unit: "months" },
     deliverables: { completed: 8, total: 10 },
-    risks: ["Actuarial sign-off pending"],
-    nextMilestone: "Go-live - Week 28",
+    risks: ["Cybersecurity compliance requirements", "Meter supply chain constraints"],
+    nextMilestone: "Full deployment - Week 28",
     safe: {
       velocity: 52,
       predictability: 91,
       flowEfficiency: 78,
       currentPI: "PI 25.1",
-      epicId: "EPIC-IR-102",
-      epicName: "Actuarial Model Modernization",
+      epicId: "EPIC-FPL-102",
+      epicName: "Customer Experience Modernization",
       epicProgress: 85,
-      okr: { objective: "Improve mortality prediction accuracy", keyResult: "Achieve 95% model accuracy", progress: 82 },
+      okr: { objective: "Achieve 100% smart meter coverage", keyResult: "Deploy to remaining 1.2M accounts", progress: 82 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 82 }, { pi: "PI 24.2", velocity: 48, predictability: 85 }, { pi: "PI 24.3", velocity: 50, predictability: 88 }, { pi: "PI 25.1", velocity: 52, predictability: 91 }]
     },
     safeStage: "implementing",
     aiSignals: [
-      { type: "insight", message: "Model accuracy improved 12% with new mortality tables", confidence: 94, dataSource: "Actuarial analytics" }
+      { type: "insight", message: "Pilot areas showing 15% faster outage detection - exceeding targets", confidence: 94, dataSource: "Operations analytics" }
     ],
     proactiveActions: [
-      { id: "pa-003", action: "Fast-track actuarial review to accelerate go-live", impact: "Save 1 week", urgency: "this-week", type: "accelerate" }
+      { id: "pa-003", action: "Accelerate remaining account deployments", impact: "Complete 2 weeks early", urgency: "this-week", type: "accelerate" }
     ],
     trendData: [{ week: "W28", value: 78 }, { week: "W29", value: 82 }, { week: "W30", value: 85 }, { week: "W31", value: 88 }, { week: "W32", value: 92 }],
     dependencies: [
-      { projectId: "pmo-ir-001", projectName: "PRT Intake System Upgrade", type: "related", health: "green", description: "Feeds pricing models for intake", impactIfDelayed: "PRT pricing less accurate" },
-      { projectId: "pmo-rc-002", projectName: "Three Lines of Defence Automation", type: "blocks", health: "green", description: "Model outputs feed risk controls", impactIfDelayed: "Risk controls use legacy data" }
+      { projectId: "pmo-fpl-001", projectName: "Grid Modernization & Automation", type: "related", health: "green", description: "Feeds real-time data to grid automation", impactIfDelayed: "Grid automation less effective" }
     ],
-    linkedVROProgramId: "vro-ir-002"
+    linkedVROProgramId: "vro-fpl-002"
   },
-
-  // ============================================================================
-  // ASSET MANAGEMENT (2 Projects)
-  // ============================================================================
   {
-    id: "pmo-am-001",
-    name: "Private Markets Platform Build",
-    bu: "Asset Management",
-    description: "Building enterprise platform for private markets investments including infrastructure, real estate, and clean energy. Critical enabler for £2.5bn AUM growth target. Integrating deal pipeline, valuation, and investor reporting.",
-    expectedROI: "£2.5bn new AUM capacity",
-    roiValue: 125, // 5% fee on new AUM
+    id: "pmo-fpl-003",
+    name: "Solar Expansion Program - SoBRA",
+    bu: "Florida Power & Light",
+    description: "Adding 4,800 MW of new solar capacity through the Solar Base Rate Adjustment mechanism. Largest utility-operated solar program in the U.S. Includes 894 MW approved for January 2025 deployment.",
+    expectedROI: "$340m annual revenue",
+    roiValue: 340,
     priority: "critical",
-    aiRecommendation: "URGENT: Budget overrun 5% with vendor financial stress signals detected. Recommend immediate steering committee escalation. Freeze non-essential scope changes and identify backup vendor.",
-    status: "red",
-    budget: { spent: 4.2, total: 4.0, unit: "£m" },
-    timeline: { elapsed: 14, total: 18, unit: "months" },
-    deliverables: { completed: 12, total: 22 },
-    risks: ["Budget overrun by 5%", "Key vendor dependency", "Scope creep from stakeholders"],
-    nextMilestone: "Executive Steering - Week 32",
-    safe: {
-      velocity: 38,
-      predictability: 65,
-      flowEfficiency: 52,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-AM-201",
-      epicName: "Private Markets Capability Build",
-      epicProgress: 45,
-      okr: { objective: "Grow private markets AUM by 20%", keyResult: "Platform operational for £5bn transactions", progress: 35 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 42, predictability: 72 }, { pi: "PI 24.3", velocity: 40, predictability: 68 }, { pi: "PI 24.4", velocity: 38, predictability: 65 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "warning", message: "Vendor showing financial stress signals - backup plan needed", confidence: 78, dataSource: "Vendor risk monitoring" },
-      { type: "warning", message: "Scope creep adding £800k unless controlled now", confidence: 91, dataSource: "Change request analysis" },
-      { type: "prediction", message: "Timeline likely to slip 6 weeks without intervention", confidence: 85, dataSource: "Delivery analytics" }
-    ],
-    proactiveActions: [
-      { id: "pa-004", action: "Escalate to Eric Adler - executive decision required", impact: "Unblock critical path", urgency: "immediate", type: "escalate" },
-      { id: "pa-005", action: "Freeze non-essential scope changes", impact: "Contain budget overrun", urgency: "immediate", type: "mitigate" },
-      { id: "pa-006", action: "Identify alternative vendor for backup", impact: "Reduce single-vendor risk", urgency: "this-week", type: "investigate" }
-    ],
-    trendData: [{ week: "W28", value: 52 }, { week: "W29", value: 50 }, { week: "W30", value: 48 }, { week: "W31", value: 45 }, { week: "W32", value: 42 }],
-    dependencies: [
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "blocks", health: "red", description: "Platform provides data for ESG analytics", impactIfDelayed: "ESG analytics delayed 6 weeks" },
-      { projectId: "pmo-ci-001", projectName: "Net Zero Housing Tracker", type: "related", health: "yellow", description: "Shared infrastructure investment data", impactIfDelayed: "Manual data reconciliation" },
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "blocked-by", health: "yellow", description: "Risk limits required before launch", impactIfDelayed: "Cannot process large deals" }
-    ],
-    linkedVROProgramId: "vro-am-001"
-  },
-  {
-    id: "pmo-am-002",
-    name: "ESG Analytics Dashboard",
-    bu: "Asset Management",
-    description: "Comprehensive ESG analytics platform providing portfolio-level sustainability metrics, climate risk analysis, and TCFD/TNFD reporting. Covers 100% of portfolio holdings with third-party data integration.",
-    expectedROI: "£15m in ESG mandate wins",
-    roiValue: 15,
-    priority: "high",
-    aiRecommendation: "Opportunity to add TNFD nature-risk metrics ahead of competitors. First-mover advantage in biodiversity analytics could attract £800m additional ESG mandates.",
+    aiRecommendation: "Land acquisition 92% complete. Recommend accelerating permitting for sites 12-15 to capture ITC benefits before phase-out. Weather data favorable for Q2 construction start.",
     status: "green",
-    budget: { spent: 0.6, total: 0.9, unit: "£m" },
-    timeline: { elapsed: 4, total: 8, unit: "months" },
-    deliverables: { completed: 5, total: 11 },
-    risks: ["Data quality from third parties"],
-    nextMilestone: "Beta release - Week 26",
+    budget: { spent: 1200, total: 1800, unit: "$m" },
+    timeline: { elapsed: 18, total: 24, unit: "months" },
+    deliverables: { completed: 12, total: 18 },
+    risks: ["Supply chain for solar panels", "Permitting delays", "Interest rate impact on financing"],
+    nextMilestone: "Phase 3 construction start - Week 36",
     safe: {
       velocity: 55,
       predictability: 88,
       flowEfficiency: 75,
-      currentPI: "PI 24.3",
-      epicId: "EPIC-AM-202",
-      epicName: "ESG Data & Reporting",
-      epicProgress: 62,
-      okr: { objective: "Achieve industry-leading ESG analytics", keyResult: "Cover 100% of portfolio holdings", progress: 58 },
-      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 80 }, { pi: "PI 24.2", velocity: 50, predictability: 82 }, { pi: "PI 24.3", velocity: 52, predictability: 85 }, { pi: "PI 24.3", velocity: 55, predictability: 88 }]
+      currentPI: "PI 25.1",
+      epicId: "EPIC-FPL-103",
+      epicName: "Clean Energy Transition",
+      epicProgress: 67,
+      okr: { objective: "Add 4,800 MW solar capacity", keyResult: "Complete 18 solar facilities", progress: 67 },
+      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 80 }, { pi: "PI 24.2", velocity: 50, predictability: 82 }, { pi: "PI 24.3", velocity: 53, predictability: 85 }, { pi: "PI 25.1", velocity: 55, predictability: 88 }]
     },
-    safeStage: "portfolio-backlog",
+    safeStage: "implementing",
     aiSignals: [
-      { type: "opportunity", message: "Add TNFD metrics to gain first-mover advantage", confidence: 82, dataSource: "Regulatory scanner" }
+      { type: "insight", message: "Land acquisition 92% complete - ahead of schedule", confidence: 95, dataSource: "Real estate analytics" },
+      { type: "opportunity", message: "Accelerate permitting for ITC benefit capture", confidence: 78, dataSource: "Tax analysis" }
     ],
     proactiveActions: [
-      { id: "pa-007", action: "Expand scope to include nature-risk metrics", impact: "Industry leadership", urgency: "this-month", type: "accelerate" }
+      { id: "pa-004", action: "Expedite permitting for remaining sites", impact: "$45m tax benefit capture", urgency: "this-week", type: "accelerate" }
     ],
-    trendData: [{ week: "W28", value: 45 }, { week: "W29", value: 52 }, { week: "W30", value: 58 }, { week: "W31", value: 62 }, { week: "W32", value: 68 }],
+    trendData: [{ week: "W28", value: 62 }, { week: "W29", value: 64 }, { week: "W30", value: 65 }, { week: "W31", value: 67 }, { week: "W32", value: 69 }],
     dependencies: [
-      { projectId: "pmo-am-001", projectName: "Private Markets Platform Build", type: "blocked-by", health: "red", description: "Requires private markets data feed", impactIfDelayed: "Limited to public markets only" },
-      { projectId: "pmo-ir-001", projectName: "PRT Intake System Upgrade", type: "blocks", health: "green", description: "Provides ESG scores for PRT deals", impactIfDelayed: "PRT lacks ESG module" },
-      { projectId: "pmo-ci-001", projectName: "Net Zero Housing Tracker", type: "related", health: "green", description: "Shared carbon metrics", impactIfDelayed: "Duplicate carbon calculations" }
+      { projectId: "pmo-neer-002", projectName: "Battery Storage Network", type: "related", health: "green", description: "Shared battery technology platform", impactIfDelayed: "Solar intermittency management delayed" }
     ],
-    linkedVROProgramId: "vro-am-002"
+    linkedVROProgramId: "vro-fpl-003"
   },
-
-  // ============================================================================
-  // RETAIL (2 Projects)
-  // ============================================================================
   {
-    id: "pmo-rt-001",
-    name: "Digital Onboarding Redesign",
-    bu: "Retail",
-    description: "Complete redesign of customer onboarding journey for insurance and savings products. Mobile-first approach with 10-minute completion target, integrated identity verification, and accessibility compliance.",
-    expectedROI: "£28m efficiency + 15% conversion lift",
-    roiValue: 28,
+    id: "pmo-fpl-004",
+    name: "Hurricane Hardening Phase 4",
+    bu: "Florida Power & Light",
+    description: "Continuation of storm hardening program to strengthen transmission and distribution infrastructure. Undergrounding critical feeders, upgrading poles, and installing breakaway components in high-risk areas.",
+    expectedROI: "$95m avoided storm restoration costs",
+    roiValue: 95,
     priority: "high",
-    aiRecommendation: "WCAG 2.1 compliance at 78% - needs 95% for launch. Engage accessibility specialist immediately. Step 3 redesign could increase conversion by 15%.",
+    aiRecommendation: "Phase 3 reduced restoration times by 45% in hardened areas during 2024 storm season. Prioritize remaining coastal zones before June hurricane season.",
     status: "amber",
-    budget: { spent: 1.8, total: 2.5, unit: "£m" },
-    timeline: { elapsed: 6, total: 10, unit: "months" },
-    deliverables: { completed: 7, total: 16 },
-    risks: ["Mobile app testing delays", "Accessibility compliance gaps"],
-    nextMilestone: "Customer pilot - Week 30",
+    budget: { spent: 180, total: 250, unit: "$m" },
+    timeline: { elapsed: 14, total: 18, unit: "months" },
+    deliverables: { completed: 10, total: 15 },
+    risks: ["Hurricane season window", "Labor availability", "Material costs"],
+    nextMilestone: "Coastal zone completion - Week 24",
     safe: {
       velocity: 45,
       predictability: 78,
       flowEfficiency: 65,
       currentPI: "PI 24.4",
-      epicId: "EPIC-RT-301",
-      epicName: "Customer Digital Experience",
-      epicProgress: 48,
-      okr: { objective: "Achieve 50% digital policy adoption", keyResult: "Reduce onboarding time to under 10 minutes", progress: 52 },
-      piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 72 }, { pi: "PI 24.2", velocity: 42, predictability: 74 }, { pi: "PI 24.3", velocity: 44, predictability: 76 }, { pi: "PI 24.4", velocity: 45, predictability: 78 }]
+      epicId: "EPIC-FPL-104",
+      epicName: "Infrastructure Resilience",
+      epicProgress: 72,
+      okr: { objective: "Harden 1,500 miles of critical infrastructure", keyResult: "Complete before 2025 hurricane season", progress: 72 },
+      piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 70 }, { pi: "PI 24.2", velocity: 42, predictability: 72 }, { pi: "PI 24.3", velocity: 44, predictability: 75 }, { pi: "PI 24.4", velocity: 45, predictability: 78 }]
     },
     safeStage: "implementing",
     aiSignals: [
-      { type: "warning", message: "WCAG 2.1 compliance at 78% - needs 95% for launch", confidence: 96, dataSource: "Accessibility scanner" },
-      { type: "insight", message: "Drop-off rate highest at step 3 - simplification would increase conversion 15%", confidence: 88, dataSource: "User analytics" }
+      { type: "warning", message: "June hurricane season deadline at risk - 28% work remaining", confidence: 82, dataSource: "Project tracking" }
     ],
     proactiveActions: [
-      { id: "pa-008", action: "Engage accessibility specialist contractor", impact: "Close compliance gap", urgency: "this-week", type: "mitigate" },
-      { id: "pa-009", action: "Redesign step 3 to reduce friction", impact: "+15% conversion", urgency: "this-month", type: "accelerate" }
+      { id: "pa-005", action: "Add second shift for coastal zone work", impact: "Complete 3 weeks earlier", urgency: "immediate", type: "mitigate" }
     ],
-    trendData: [{ week: "W28", value: 38 }, { week: "W29", value: 42 }, { week: "W30", value: 44 }, { week: "W31", value: 48 }, { week: "W32", value: 52 }],
+    trendData: [{ week: "W28", value: 68 }, { week: "W29", value: 70 }, { week: "W30", value: 71 }, { week: "W31", value: 72 }, { week: "W32", value: 74 }],
     dependencies: [
-      { projectId: "pmo-rt-002", projectName: "AI Chatbot Implementation", type: "blocks", health: "green", description: "Onboarding feeds chatbot training data", impactIfDelayed: "Chatbot lacks onboarding support" },
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "related", health: "yellow", description: "Risk scoring for new customers", impactIfDelayed: "Manual risk assessment required" }
+      { projectId: "pmo-fpl-001", projectName: "Grid Modernization & Automation", type: "related", health: "green", description: "Hardened infrastructure supports automated switching", impactIfDelayed: "Automation benefits delayed" }
     ],
-    linkedVROProgramId: "vro-rt-001"
-  },
-  {
-    id: "pmo-rt-002",
-    name: "AI Chatbot Implementation",
-    bu: "Retail",
-    description: "Deploying AI-powered customer service chatbot to handle 50% of queries, reduce call center volume by 30%, and improve response times. Integrated with knowledge base and escalation workflows.",
-    expectedROI: "£8m annual call center savings",
-    roiValue: 8,
-    priority: "medium",
-    aiRecommendation: "Current accuracy 89% exceeds 85% target. Plan Phase 2 with voice capability to handle 30% more queries. Strong success story for board presentation.",
-    status: "green",
-    budget: { spent: 0.4, total: 0.7, unit: "£m" },
-    timeline: { elapsed: 3, total: 5, unit: "months" },
-    deliverables: { completed: 4, total: 7 },
-    risks: ["Training data quality"],
-    nextMilestone: "Soft launch - Week 24",
-    safe: {
-      velocity: 62,
-      predictability: 92,
-      flowEfficiency: 82,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-RT-302",
-      epicName: "AI Customer Service",
-      epicProgress: 72,
-      okr: { objective: "Reduce customer service calls by 30%", keyResult: "Handle 50% of queries via AI", progress: 65 },
-      piTrend: [{ pi: "PI 24.1", velocity: 52, predictability: 85 }, { pi: "PI 24.2", velocity: 55, predictability: 87 }, { pi: "PI 24.3", velocity: 58, predictability: 90 }, { pi: "PI 24.4", velocity: 62, predictability: 92 }]
-    },
-    safeStage: "done",
-    aiSignals: [
-      { type: "insight", message: "Current accuracy 89% - exceeds 85% target", confidence: 95, dataSource: "ML model metrics" },
-      { type: "opportunity", message: "Voice capability could handle 30% more queries", confidence: 76, dataSource: "Customer research" }
-    ],
-    proactiveActions: [
-      { id: "pa-010", action: "Plan Phase 2 with voice capability", impact: "30% more automation", urgency: "this-month", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 55 }, { week: "W29", value: 62 }, { week: "W30", value: 70 }, { week: "W31", value: 78 }, { week: "W32", value: 85 }],
-    dependencies: [
-      { projectId: "pmo-rt-001", projectName: "Digital Onboarding Redesign", type: "blocked-by", health: "yellow", description: "Needs onboarding data for training", impactIfDelayed: "Limited onboarding support" }
-    ],
-    linkedVROProgramId: "vro-rt-001"
+    linkedVROProgramId: "vro-fpl-004"
   },
 
   // ============================================================================
-  // CORPORATE INVESTMENTS (1 Project)
+  // NEXTERA ENERGY RESOURCES (NEER) - 4 Projects
+  // Source: NextEra Energy Annual Report 2024, 10-K Filing
   // ============================================================================
   {
-    id: "pmo-ci-001",
-    name: "Net Zero Housing Tracker",
-    bu: "Corporate Investments",
-    description: "IoT-enabled carbon tracking platform for L&G Affordable Homes portfolio. Real-time energy monitoring, heat pump integration, and carbon reduction verification. Expanding from Millfield Green pilot to 1000 properties.",
-    expectedROI: "£180m development value unlocked",
+    id: "pmo-neer-001",
+    name: "Wind Portfolio Expansion - Texas",
+    bu: "NextEra Energy Resources",
+    description: "Developing 2,500 MW of new wind capacity across 5 Texas sites. Part of NEER's record 12+ GW origination year. Long-term PPAs secured with Fortune 500 customers including Microsoft and Amazon.",
+    expectedROI: "$180m annual revenue",
     roiValue: 180,
-    priority: "high",
-    aiRecommendation: "Energy savings 42% better than projected at pilot sites. Q4 rollout to 500 properties feasible ahead of schedule. Recommend acceleration to capture sustainability premium.",
-    status: "green",
-    budget: { spent: 0.5, total: 0.8, unit: "£m" },
-    timeline: { elapsed: 4, total: 6, unit: "months" },
-    deliverables: { completed: 6, total: 9 },
-    risks: ["Sensor integration with older properties"],
-    nextMilestone: "Phase 2 rollout - Week 27",
-    safe: {
-      velocity: 48,
-      predictability: 88,
-      flowEfficiency: 75,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-CI-401",
-      epicName: "Carbon Neutral Portfolio",
-      epicProgress: 68,
-      okr: { objective: "Achieve carbon neutral portfolio by 2030", keyResult: "Deploy to 1000 properties", progress: 45 },
-      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 82 }, { pi: "PI 24.2", velocity: 44, predictability: 84 }, { pi: "PI 24.3", velocity: 46, predictability: 86 }, { pi: "PI 24.4", velocity: 48, predictability: 88 }]
-    },
-    safeStage: "analyzing",
-    aiSignals: [
-      { type: "insight", message: "Energy savings 42% better than projected in pilot sites", confidence: 92, dataSource: "IoT telemetry" },
-      { type: "prediction", message: "Q4 rollout to 500 properties feasible ahead of schedule", confidence: 81, dataSource: "Capacity model" }
-    ],
-    proactiveActions: [
-      { id: "pa-011", action: "Accelerate rollout to 500 properties by Q4", impact: "Earlier carbon savings", urgency: "this-month", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 62 }, { week: "W29", value: 68 }, { week: "W30", value: 72 }, { week: "W31", value: 78 }, { week: "W32", value: 82 }],
-    dependencies: [
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "related", health: "green", description: "Carbon data feeds ESG reporting", impactIfDelayed: "Manual carbon reporting" },
-      { projectId: "pmo-am-001", projectName: "Private Markets Platform Build", type: "related", health: "red", description: "Asset valuation integration", impactIfDelayed: "Separate valuation workflows" }
-    ],
-    linkedVROProgramId: "vro-ci-001"
-  },
-
-  // ============================================================================
-  // RISK & COMPLIANCE (2 Projects)
-  // ============================================================================
-  {
-    id: "pmo-rc-001",
-    name: "Risk Appetite Dashboard Upgrade",
-    bu: "Risk & Compliance",
-    description: "Enterprise risk dashboard providing real-time risk appetite monitoring across all business units. Integration with CRO reporting, regulatory stress testing, and early warning indicators. Critical for PRA compliance.",
-    expectedROI: "£60m risk savings + regulatory compliance",
-    roiValue: 60,
     priority: "critical",
-    aiRecommendation: "PRA consultation may require 3 additional metrics. Engage with regulator to clarify requirements and avoid rework. Focus data lineage sprint on 2 priority legacy systems to close 80% of gaps.",
+    aiRecommendation: "Supply chain constraints detected for turbine components. Recommend alternative vendor qualification and buffer stock strategy. PPA pricing favorable - accelerate origination.",
     status: "amber",
-    budget: { spent: 1.1, total: 1.5, unit: "£m" },
-    timeline: { elapsed: 7, total: 9, unit: "months" },
-    deliverables: { completed: 9, total: 15 },
-    risks: ["Data lineage documentation incomplete", "Regulatory changes pending"],
-    nextMilestone: "CRO sign-off - Week 29",
+    budget: { spent: 420, total: 520, unit: "$m" },
+    timeline: { elapsed: 14, total: 20, unit: "months" },
+    deliverables: { completed: 12, total: 22 },
+    risks: ["Turbine supply chain delays", "Interconnection queue timing", "Interest rate impact on financing"],
+    nextMilestone: "Site 3 COD - Week 32",
     safe: {
       velocity: 42,
-      predictability: 75,
-      flowEfficiency: 62,
-      currentPI: "PI 24.3",
-      epicId: "EPIC-RC-501",
-      epicName: "Enterprise Risk Framework",
-      epicProgress: 58,
-      okr: { objective: "Zero regulatory breaches", keyResult: "100% risk appetite coverage", progress: 72 },
-      piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.3", velocity: 42, predictability: 75 }]
+      predictability: 72,
+      flowEfficiency: 65,
+      currentPI: "PI 24.4",
+      epicId: "EPIC-NEER-101",
+      epicName: "Wind Expansion 2024-2027",
+      epicProgress: 55,
+      okr: { objective: "Add 2,500 MW wind capacity", keyResult: "Complete 5 Texas wind farms", progress: 55 },
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 44, predictability: 75 }, { pi: "PI 24.3", velocity: 43, predictability: 73 }, { pi: "PI 24.4", velocity: 42, predictability: 72 }]
     },
-    safeStage: "reviewing",
+    safeStage: "implementing",
     aiSignals: [
-      { type: "warning", message: "PRA consultation may require 3 additional metrics", confidence: 74, dataSource: "Regulatory intelligence" },
-      { type: "insight", message: "Data lineage gaps concentrated in 2 legacy systems", confidence: 88, dataSource: "Data quality scan" }
+      { type: "warning", message: "Turbine delivery delays - 3-week slip on Site 4", confidence: 85, dataSource: "Supply chain monitoring" },
+      { type: "opportunity", message: "PPA pricing 8% above plan - accelerate origination", confidence: 82, dataSource: "Market analytics" }
     ],
     proactiveActions: [
-      { id: "pa-012", action: "Engage with PRA to clarify requirements", impact: "Avoid rework", urgency: "this-week", type: "investigate" },
-      { id: "pa-013", action: "Focus data lineage sprint on 2 priority systems", impact: "Close 80% of gaps", urgency: "immediate", type: "mitigate" }
+      { id: "pa-006", action: "Qualify alternative turbine supplier", impact: "Reduce supply risk", urgency: "this-week", type: "mitigate" },
+      { id: "pa-007", action: "Accelerate Site 5 origination", impact: "$15m additional margin", urgency: "this-month", type: "accelerate" }
     ],
-    trendData: [{ week: "W28", value: 58 }, { week: "W29", value: 60 }, { week: "W30", value: 62 }, { week: "W31", value: 64 }, { week: "W32", value: 66 }],
+    trendData: [{ week: "W28", value: 52 }, { week: "W29", value: 53 }, { week: "W30", value: 54 }, { week: "W31", value: 55 }, { week: "W32", value: 56 }],
     dependencies: [
-      { projectId: "pmo-am-001", projectName: "Private Markets Platform Build", type: "blocks", health: "red", description: "Risk limits for private markets deals", impactIfDelayed: "Private markets cannot launch" },
-      { projectId: "pmo-ir-001", projectName: "PRT Intake System Upgrade", type: "related", health: "yellow", description: "PRT risk scoring integration", impactIfDelayed: "Manual risk assessment for PRT" },
-      { projectId: "pmo-rt-001", projectName: "Digital Onboarding Redesign", type: "related", health: "yellow", description: "Customer risk profiling", impactIfDelayed: "Basic risk scoring only" }
+      { projectId: "pmo-neer-002", projectName: "Battery Storage Network", type: "related", health: "green", description: "Shared battery integration for wind variability", impactIfDelayed: "Curtailment risk increases" },
+      { projectId: "pmo-corp-001", projectName: "Enterprise Data Platform", type: "blocked-by", health: "yellow", description: "Requires data infrastructure for optimization", impactIfDelayed: "Manual performance tracking" }
     ],
-    linkedVROProgramId: "vro-rc-001"
+    linkedVROProgramId: "vro-neer-001"
   },
   {
-    id: "pmo-rc-002",
-    name: "Three Lines of Defence Automation",
-    bu: "Risk & Compliance",
-    description: "Automating the Three Lines of Defence model with integrated GRC platform. Control testing automation, audit trail generation, and real-time compliance monitoring. Targeting 80% control automation.",
-    expectedROI: "£12m compliance efficiency",
-    roiValue: 12,
-    priority: "medium",
-    aiRecommendation: "Retail division showing 92% adoption in pilot - highest across BUs. Create success playbook to accelerate rollout to other business units.",
+    id: "pmo-neer-002",
+    name: "Battery Storage Network",
+    bu: "NextEra Energy Resources",
+    description: "Deploying 3,500 MW of grid-scale battery storage across NEER portfolio. World-leading battery storage capacity supporting renewable intermittency management and grid services revenue.",
+    expectedROI: "$145m annual grid services revenue",
+    roiValue: 145,
+    priority: "critical",
+    aiRecommendation: "Battery costs down 12% - recommend accelerating procurement. Grid services pricing favorable in ERCOT and CAISO markets. Strong ROI trajectory.",
     status: "green",
-    budget: { spent: 0.7, total: 1.0, unit: "£m" },
-    timeline: { elapsed: 5, total: 8, unit: "months" },
-    deliverables: { completed: 6, total: 10 },
-    risks: ["User adoption in Business Lines"],
-    nextMilestone: "Pilot in Retail - Week 26",
+    budget: { spent: 280, total: 380, unit: "$m" },
+    timeline: { elapsed: 12, total: 18, unit: "months" },
+    deliverables: { completed: 14, total: 20 },
+    risks: ["Battery supply chain", "Interconnection timing", "Grid services market volatility"],
+    nextMilestone: "Phase 2 COD - Week 28",
     safe: {
-      velocity: 52,
-      predictability: 85,
-      flowEfficiency: 72,
+      velocity: 55,
+      predictability: 88,
+      flowEfficiency: 78,
       currentPI: "PI 25.1",
-      epicId: "EPIC-RC-502",
-      epicName: "GRC Automation Platform",
-      epicProgress: 65,
-      okr: { objective: "Complete operational resilience framework", keyResult: "Automate 80% of controls", progress: 58 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 82 }, { pi: "PI 25.1", velocity: 52, predictability: 85 }]
+      epicId: "EPIC-NEER-102",
+      epicName: "Battery Storage Leadership",
+      epicProgress: 70,
+      okr: { objective: "Deploy 3,500 MW battery storage", keyResult: "Achieve world-leading storage capacity", progress: 70 },
+      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 80 }, { pi: "PI 24.2", velocity: 50, predictability: 82 }, { pi: "PI 24.3", velocity: 52, predictability: 85 }, { pi: "PI 25.1", velocity: 55, predictability: 88 }]
+    },
+    safeStage: "implementing",
+    aiSignals: [
+      { type: "opportunity", message: "Battery costs down 12% - accelerate procurement", confidence: 90, dataSource: "Market analytics" },
+      { type: "insight", message: "Grid services pricing favorable in target markets", confidence: 85, dataSource: "Market intelligence" }
+    ],
+    proactiveActions: [
+      { id: "pa-008", action: "Lock in battery pricing for Phase 3", impact: "$28m cost savings", urgency: "this-week", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 65 }, { week: "W29", value: 67 }, { week: "W30", value: 69 }, { week: "W31", value: 70 }, { week: "W32", value: 72 }],
+    dependencies: [
+      { projectId: "pmo-fpl-003", projectName: "Solar Expansion Program", type: "related", health: "green", description: "Shared technology platform", impactIfDelayed: "Independent deployment" }
+    ],
+    linkedVROProgramId: "vro-neer-002"
+  },
+  {
+    id: "pmo-neer-003",
+    name: "Green Hydrogen Hub Development",
+    bu: "NextEra Energy Resources",
+    description: "Developing large-scale green hydrogen production facility powered by dedicated renewable energy. Targeting 200 tons/day production capacity. Strategic investment in emerging clean fuel market.",
+    expectedROI: "$2.5bn revenue opportunity",
+    roiValue: 250,
+    priority: "high",
+    aiRecommendation: "DOE hydrogen hub funding opportunity identified. Submit application to accelerate timeline and reduce capital requirements. Strong alignment with IRA incentives.",
+    status: "green",
+    budget: { spent: 45, total: 120, unit: "$m" },
+    timeline: { elapsed: 8, total: 24, unit: "months" },
+    deliverables: { completed: 6, total: 18 },
+    risks: ["Technology maturity", "Offtake agreements", "Regulatory framework"],
+    nextMilestone: "DOE Application - Week 30",
+    safe: {
+      velocity: 48,
+      predictability: 75,
+      flowEfficiency: 68,
+      currentPI: "PI 24.3",
+      epicId: "EPIC-NEER-103",
+      epicName: "Clean Hydrogen Initiative",
+      epicProgress: 33,
+      okr: { objective: "Establish green hydrogen production", keyResult: "Achieve 200 tons/day capacity", progress: 33 },
+      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 70 }, { pi: "PI 24.2", velocity: 45, predictability: 72 }, { pi: "PI 24.3", velocity: 48, predictability: 75 }]
     },
     safeStage: "funnel",
     aiSignals: [
-      { type: "insight", message: "Retail division showing 92% adoption in pilot - highest across BUs", confidence: 94, dataSource: "Usage analytics" },
-      { type: "opportunity", message: "Success playbook from Retail can accelerate other BU rollouts", confidence: 86, dataSource: "Change management" }
+      { type: "opportunity", message: "DOE hydrogen hub funding - $500m potential", confidence: 75, dataSource: "Policy scanner" }
     ],
     proactiveActions: [
-      { id: "pa-014", action: "Create Retail playbook for other BU adoption", impact: "Faster enterprise rollout", urgency: "this-month", type: "accelerate" }
+      { id: "pa-009", action: "Submit DOE hydrogen hub application", impact: "Accelerate by 18 months", urgency: "this-month", type: "accelerate" }
     ],
-    trendData: [{ week: "W28", value: 58 }, { week: "W29", value: 65 }, { week: "W30", value: 72 }, { week: "W31", value: 78 }, { week: "W32", value: 85 }],
+    trendData: [{ week: "W28", value: 28 }, { week: "W29", value: 30 }, { week: "W30", value: 32 }, { week: "W31", value: 33 }, { week: "W32", value: 35 }],
     dependencies: [
-      { projectId: "pmo-ir-002", projectName: "Longevity Model Enhancement", type: "blocked-by", health: "green", description: "Model outputs for control testing", impactIfDelayed: "Limited actuarial controls" },
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "related", health: "yellow", description: "Shared risk data layer", impactIfDelayed: "Duplicate data infrastructure" }
+      { projectId: "pmo-neer-001", projectName: "Wind Portfolio Expansion", type: "blocked-by", health: "amber", description: "Requires dedicated renewable supply", impactIfDelayed: "Hydrogen production delayed" }
     ],
-    linkedVROProgramId: "vro-rc-002"
+    linkedVROProgramId: "vro-neer-003"
+  },
+  {
+    id: "pmo-neer-004",
+    name: "Duane Arnold Nuclear Restart",
+    bu: "NextEra Energy Resources",
+    description: "Evaluating recommissioning of Duane Arnold Energy Center in Iowa. Potential restart by end of 2028 pending NRC approvals. 600 MW carbon-free baseload generation.",
+    expectedROI: "$85m annual revenue",
+    roiValue: 85,
+    priority: "medium",
+    aiRecommendation: "NRC early engagement favorable. Data center demand in Midwest creating strong offtake opportunity. Recommend advancing feasibility study.",
+    status: "green",
+    budget: { spent: 8, total: 25, unit: "$m" },
+    timeline: { elapsed: 6, total: 36, unit: "months" },
+    deliverables: { completed: 3, total: 12 },
+    risks: ["NRC licensing", "Capital requirements", "Offtake uncertainty"],
+    nextMilestone: "NRC Pre-Application - Week 40",
+    safe: {
+      velocity: 35,
+      predictability: 80,
+      flowEfficiency: 70,
+      currentPI: "PI 24.2",
+      epicId: "EPIC-NEER-104",
+      epicName: "Nuclear Revival Program",
+      epicProgress: 25,
+      okr: { objective: "Restart Duane Arnold by 2028", keyResult: "Obtain NRC approval for recommissioning", progress: 25 },
+      piTrend: [{ pi: "PI 24.1", velocity: 32, predictability: 75 }, { pi: "PI 24.2", velocity: 35, predictability: 80 }]
+    },
+    safeStage: "funnel",
+    aiSignals: [
+      { type: "insight", message: "Data center demand creating strong offtake opportunity", confidence: 78, dataSource: "Market intelligence" }
+    ],
+    proactiveActions: [
+      { id: "pa-010", action: "Advance NRC pre-application meetings", impact: "Reduce regulatory risk", urgency: "this-month", type: "investigate" }
+    ],
+    trendData: [{ week: "W28", value: 22 }, { week: "W29", value: 23 }, { week: "W30", value: 24 }, { week: "W31", value: 25 }, { week: "W32", value: 26 }],
+    dependencies: [],
+    linkedVROProgramId: "vro-neer-004"
   },
 
   // ============================================================================
-  // ADDITIONAL PROJECTS TO REACH 24 (Strategic Growth Initiatives)
+  // CORPORATE & OTHER - 4 Projects
+  // Source: NextEra Energy Annual Report 2024, 10-K Filing
   // ============================================================================
-  
-  // Additional Institutional Retirement Projects
   {
-    id: "pmo-ir-003",
-    name: "Bulk Annuity Pricing Engine",
-    bu: "Institutional Retirement",
-    description: "Next-generation pricing engine with ML-driven mortality assumptions, real-time market data integration, and automated quote generation. Targeting 50% reduction in pricing turnaround time.",
-    expectedROI: "£35m additional deal capacity",
-    roiValue: 35,
-    priority: "high",
-    aiRecommendation: "ML model showing 8% improvement in pricing accuracy. Integrate with PRT intake system for seamless workflow.",
+    id: "pmo-corp-001",
+    name: "Enterprise Data Platform",
+    bu: "Corporate & Other",
+    description: "Unified data platform for renewable asset optimization, predictive maintenance, and enterprise analytics. Foundation for AI-driven operations across FPL and NEER.",
+    expectedROI: "$180m efficiency gains",
+    roiValue: 180,
+    priority: "critical",
+    aiRecommendation: "Platform showing 25% efficiency improvement in pilot areas. Accelerate enterprise rollout. Strong synergies with grid automation and asset optimization initiatives.",
     status: "green",
-    budget: { spent: 1.2, total: 1.8, unit: "£m" },
-    timeline: { elapsed: 4, total: 9, unit: "months" },
-    deliverables: { completed: 5, total: 12 },
-    risks: ["ML model validation with actuaries", "Market data vendor dependency"],
-    nextMilestone: "UAT completion - Week 30",
+    budget: { spent: 42, total: 65, unit: "$m" },
+    timeline: { elapsed: 10, total: 14, unit: "months" },
+    deliverables: { completed: 12, total: 16 },
+    risks: ["Enterprise adoption", "Legacy system integration", "Data quality"],
+    nextMilestone: "Enterprise rollout - Week 32",
+    safe: {
+      velocity: 52,
+      predictability: 85,
+      flowEfficiency: 75,
+      currentPI: "PI 24.4",
+      epicId: "EPIC-CORP-101",
+      epicName: "Digital Transformation",
+      epicProgress: 75,
+      okr: { objective: "Deploy unified data platform", keyResult: "Achieve 100% business unit adoption", progress: 75 },
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 82 }, { pi: "PI 24.4", velocity: 52, predictability: 85 }]
+    },
+    safeStage: "implementing",
+    aiSignals: [
+      { type: "insight", message: "Pilot areas showing 25% efficiency improvement", confidence: 92, dataSource: "Operations analytics" }
+    ],
+    proactiveActions: [
+      { id: "pa-011", action: "Accelerate enterprise rollout", impact: "Capture $45m savings earlier", urgency: "this-week", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 70 }, { week: "W29", value: 72 }, { week: "W30", value: 73 }, { week: "W31", value: 75 }, { week: "W32", value: 77 }],
+    dependencies: [
+      { projectId: "pmo-fpl-001", projectName: "Grid Modernization & Automation", type: "blocks", health: "green", description: "Provides data infrastructure", impactIfDelayed: "Grid analytics delayed" }
+    ],
+    linkedVROProgramId: "vro-corp-001"
+  },
+  {
+    id: "pmo-corp-002",
+    name: "NEET Transmission Expansion",
+    bu: "Corporate & Other",
+    description: "Expanding rate-regulated transmission infrastructure through NextEra Energy Transmission (NEET). Adding 800 miles of new transmission lines to support renewable integration.",
+    expectedROI: "$95m annual revenue",
+    roiValue: 95,
+    priority: "high",
+    aiRecommendation: "FERC approval timeline favorable. Recommend advancing permitting for priority corridors. Strong alignment with renewable expansion strategy.",
+    status: "green",
+    budget: { spent: 320, total: 450, unit: "$m" },
+    timeline: { elapsed: 16, total: 24, unit: "months" },
+    deliverables: { completed: 10, total: 15 },
+    risks: ["FERC regulatory approvals", "Right-of-way acquisition", "Material costs"],
+    nextMilestone: "Phase 2 FERC filing - Week 34",
+    safe: {
+      velocity: 48,
+      predictability: 82,
+      flowEfficiency: 72,
+      currentPI: "PI 24.4",
+      epicId: "EPIC-CORP-102",
+      epicName: "Transmission Growth Initiative",
+      epicProgress: 67,
+      okr: { objective: "Expand transmission by 800 miles", keyResult: "Achieve $3.2bn rate base", progress: 67 },
+      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 75 }, { pi: "PI 24.2", velocity: 44, predictability: 77 }, { pi: "PI 24.3", velocity: 46, predictability: 80 }, { pi: "PI 24.4", velocity: 48, predictability: 82 }]
+    },
+    safeStage: "implementing",
+    aiSignals: [
+      { type: "insight", message: "FERC approval timeline favorable - 6 months ahead", confidence: 80, dataSource: "Regulatory scanner" }
+    ],
+    proactiveActions: [
+      { id: "pa-012", action: "Advance permitting for priority corridors", impact: "Accelerate by 3 months", urgency: "this-month", type: "accelerate" }
+    ],
+    trendData: [{ week: "W28", value: 62 }, { week: "W29", value: 64 }, { week: "W30", value: 65 }, { week: "W31", value: 67 }, { week: "W32", value: 68 }],
+    dependencies: [
+      { projectId: "pmo-neer-001", projectName: "Wind Portfolio Expansion", type: "related", health: "green", description: "Supports wind interconnection", impactIfDelayed: "Wind curtailment increases" }
+    ],
+    linkedVROProgramId: "vro-corp-002"
+  },
+  {
+    id: "pmo-corp-003",
+    name: "ESG Reporting Automation",
+    bu: "Corporate & Other",
+    description: "Automating sustainability reporting for TCFD, TNFD, and CDP disclosures. Centralizing ESG data collection across FPL and NEER for AAA sustainability ratings.",
+    expectedROI: "$15m efficiency + rating improvement",
+    roiValue: 15,
+    priority: "medium",
+    aiRecommendation: "TNFD framework finalizing - recommend early adoption for competitive advantage. ESG investor demand strong. Rating agencies monitoring closely.",
+    status: "green",
+    budget: { spent: 4.5, total: 8, unit: "$m" },
+    timeline: { elapsed: 6, total: 10, unit: "months" },
+    deliverables: { completed: 7, total: 12 },
+    risks: ["Evolving regulatory requirements", "Data quality", "Third-party data integration"],
+    nextMilestone: "TNFD module launch - Week 30",
     safe: {
       velocity: 50,
       predictability: 85,
-      flowEfficiency: 70,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-IR-103",
-      epicName: "Pricing Automation",
-      epicProgress: 45,
-      okr: { objective: "Reduce pricing turnaround by 50%", keyResult: "Same-day quote capability", progress: 40 },
-      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 78 }, { pi: "PI 24.2", velocity: 45, predictability: 80 }, { pi: "PI 24.3", velocity: 48, predictability: 83 }, { pi: "PI 24.4", velocity: 50, predictability: 85 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "insight", message: "ML model showing 8% improvement in pricing accuracy", confidence: 88, dataSource: "Model validation" },
-      { type: "opportunity", message: "Same-day quotes could increase deal win rate by 12%", confidence: 75, dataSource: "Sales analytics" }
-    ],
-    proactiveActions: [
-      { id: "pa-015", action: "Accelerate actuarial validation for ML model", impact: "Earlier go-live", urgency: "this-week", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 35 }, { week: "W29", value: 40 }, { week: "W30", value: 45 }, { week: "W31", value: 52 }, { week: "W32", value: 58 }],
-    dependencies: [
-      { projectId: "pmo-ir-001", projectName: "PRT Intake System Upgrade", type: "blocked-by", health: "yellow", description: "Integration point for quotes", impactIfDelayed: "Manual quote transfer" },
-      { projectId: "pmo-ir-002", projectName: "Longevity Model Enhancement", type: "blocked-by", health: "green", description: "Mortality assumptions source", impactIfDelayed: "Legacy assumptions used" }
-    ]
-  },
-  {
-    id: "pmo-ir-004",
-    name: "Pension Scheme Data Hub",
-    bu: "Institutional Retirement",
-    description: "Centralized data platform for pension scheme information, member records, and benefit calculations. Enabling self-service for scheme administrators and automated member communications.",
-    expectedROI: "£18m operational savings",
-    roiValue: 18,
-    priority: "medium",
-    aiRecommendation: "Data quality improvements showing 15% reduction in member queries. Scale to all administered schemes.",
-    status: "amber",
-    budget: { spent: 0.9, total: 1.4, unit: "£m" },
-    timeline: { elapsed: 6, total: 10, unit: "months" },
-    deliverables: { completed: 6, total: 13 },
-    risks: ["Legacy data migration complexity", "GDPR compliance requirements"],
-    nextMilestone: "Data migration phase 2 - Week 32",
-    safe: {
-      velocity: 42,
-      predictability: 75,
-      flowEfficiency: 62,
+      flowEfficiency: 75,
       currentPI: "PI 24.3",
-      epicId: "EPIC-IR-104",
-      epicName: "Pension Administration Platform",
-      epicProgress: 50,
-      okr: { objective: "Improve scheme administration efficiency", keyResult: "90% self-service adoption", progress: 35 },
-      piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.3", velocity: 42, predictability: 75 }]
+      epicId: "EPIC-CORP-103",
+      epicName: "Sustainability Excellence",
+      epicProgress: 58,
+      okr: { objective: "Achieve automated ESG reporting", keyResult: "Maintain AAA sustainability rating", progress: 58 },
+      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 47, predictability: 82 }, { pi: "PI 24.3", velocity: 50, predictability: 85 }]
     },
     safeStage: "implementing",
     aiSignals: [
-      { type: "warning", message: "Legacy data migration at 65% - quality issues in source systems", confidence: 82, dataSource: "Data profiling" },
-      { type: "insight", message: "Self-service reducing member queries by 15%", confidence: 90, dataSource: "Support analytics" }
+      { type: "opportunity", message: "Early TNFD adoption for competitive advantage", confidence: 78, dataSource: "Regulatory scanner" }
     ],
     proactiveActions: [
-      { id: "pa-016", action: "Allocate data cleansing resources for legacy migration", impact: "Improve data quality", urgency: "immediate", type: "mitigate" }
+      { id: "pa-013", action: "Accelerate TNFD module development", impact: "First-mover advantage", urgency: "this-month", type: "accelerate" }
     ],
-    trendData: [{ week: "W28", value: 45 }, { week: "W29", value: 48 }, { week: "W30", value: 50 }, { week: "W31", value: 52 }, { week: "W32", value: 55 }],
+    trendData: [{ week: "W28", value: 52 }, { week: "W29", value: 54 }, { week: "W30", value: 56 }, { week: "W31", value: 58 }, { week: "W32", value: 60 }],
     dependencies: [
-      { projectId: "pmo-ir-001", projectName: "PRT Intake System Upgrade", type: "related", health: "green", description: "Member data for PRT deals", impactIfDelayed: "Manual member data handling" }
-    ]
+      { projectId: "pmo-corp-001", projectName: "Enterprise Data Platform", type: "blocked-by", health: "green", description: "Requires unified data feeds", impactIfDelayed: "Manual data collection" }
+    ],
+    linkedVROProgramId: "vro-corp-003"
   },
-
-  // Additional Asset Management Projects
   {
-    id: "pmo-am-003",
-    name: "Client Portal Modernization",
-    bu: "Asset Management",
-    description: "Redesigning LGIM client portal with enhanced reporting, real-time portfolio views, and self-service capabilities. Mobile-responsive design with API integration for institutional clients.",
-    expectedROI: "£22m client retention value",
-    roiValue: 22,
+    id: "pmo-corp-004",
+    name: "Cybersecurity Enhancement Program",
+    bu: "Corporate & Other",
+    description: "Strengthening cybersecurity posture across critical infrastructure. Implementing NERC CIP compliance, OT security, and AI-driven threat detection for grid operations.",
+    expectedROI: "$45m risk mitigation",
+    roiValue: 45,
     priority: "high",
-    aiRecommendation: "Client satisfaction scores improved 18% in beta testing. Prioritize institutional client features to reduce churn risk.",
-    status: "green",
-    budget: { spent: 1.0, total: 1.6, unit: "£m" },
-    timeline: { elapsed: 5, total: 10, unit: "months" },
-    deliverables: { completed: 6, total: 14 },
-    risks: ["API backward compatibility", "Client migration coordination"],
-    nextMilestone: "Institutional client pilot - Week 28",
-    safe: {
-      velocity: 52,
-      predictability: 86,
-      flowEfficiency: 72,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-AM-203",
-      epicName: "Client Experience Platform",
-      epicProgress: 55,
-      okr: { objective: "Improve client satisfaction to 85%", keyResult: "Launch new portal with 100% feature parity", progress: 50 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 82 }, { pi: "PI 24.3", velocity: 50, predictability: 84 }, { pi: "PI 24.4", velocity: 52, predictability: 86 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "insight", message: "Client satisfaction improved 18% in beta testing", confidence: 91, dataSource: "NPS surveys" },
-      { type: "opportunity", message: "Self-service could reduce client service costs by £3m", confidence: 78, dataSource: "Cost analysis" }
-    ],
-    proactiveActions: [
-      { id: "pa-017", action: "Prioritize top 10 institutional clients for pilot", impact: "Protect £2bn AUM at risk", urgency: "this-week", type: "mitigate" }
-    ],
-    trendData: [{ week: "W28", value: 42 }, { week: "W29", value: 48 }, { week: "W30", value: 52 }, { week: "W31", value: 58 }, { week: "W32", value: 62 }],
-    dependencies: [
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "blocked-by", health: "green", description: "ESG reporting integration", impactIfDelayed: "No ESG data in portal" },
-      { projectId: "pmo-am-001", projectName: "Private Markets Platform Build", type: "blocked-by", health: "red", description: "Private markets data feeds", impactIfDelayed: "Limited to public markets" }
-    ]
-  },
-  {
-    id: "pmo-am-004",
-    name: "Investment Research AI",
-    bu: "Asset Management",
-    description: "AI-powered research platform providing automated analysis of earnings calls, regulatory filings, and market sentiment. Augmenting analyst capabilities with natural language processing.",
-    expectedROI: "£8m analyst productivity gains",
-    roiValue: 8,
-    priority: "medium",
-    aiRecommendation: "Pilot showing 25% reduction in research time. Expand to cover all FTSE 350 companies.",
-    status: "green",
-    budget: { spent: 0.5, total: 0.9, unit: "£m" },
-    timeline: { elapsed: 3, total: 7, unit: "months" },
-    deliverables: { completed: 4, total: 9 },
-    risks: ["Model accuracy for niche sectors", "Data licensing costs"],
-    nextMilestone: "Full FTSE coverage - Week 26",
-    safe: {
-      velocity: 58,
-      predictability: 88,
-      flowEfficiency: 78,
-      currentPI: "PI 24.3",
-      epicId: "EPIC-AM-204",
-      epicName: "AI-Augmented Research",
-      epicProgress: 50,
-      okr: { objective: "Enhance research productivity by 30%", keyResult: "Cover 100% of investable universe", progress: 45 },
-      piTrend: [{ pi: "PI 24.1", velocity: 50, predictability: 82 }, { pi: "PI 24.2", velocity: 52, predictability: 84 }, { pi: "PI 24.3", velocity: 55, predictability: 86 }, { pi: "PI 24.3", velocity: 58, predictability: 88 }]
-    },
-    safeStage: "analyzing",
-    aiSignals: [
-      { type: "insight", message: "Pilot showing 25% reduction in research time", confidence: 89, dataSource: "Productivity metrics" },
-      { type: "opportunity", message: "Extend to earnings call analysis for real-time insights", confidence: 82, dataSource: "Feature requests" }
-    ],
-    proactiveActions: [
-      { id: "pa-018", action: "Expand to FTSE 350 coverage by end of quarter", impact: "Full analyst adoption", urgency: "this-month", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 35 }, { week: "W29", value: 42 }, { week: "W30", value: 48 }, { week: "W31", value: 55 }, { week: "W32", value: 62 }],
-    dependencies: [
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "related", health: "green", description: "ESG data for research context", impactIfDelayed: "Limited ESG research" }
-    ]
-  },
-
-  // Additional Retail Projects
-  {
-    id: "pmo-rt-003",
-    name: "Protection Product Digitization",
-    bu: "Retail",
-    description: "Full digitization of protection product journey including life insurance, critical illness, and income protection. Automated underwriting with instant decisions for standard cases.",
-    expectedROI: "£15m new business growth",
-    roiValue: 15,
-    priority: "high",
-    aiRecommendation: "Automated underwriting approving 72% of cases instantly. Target 85% automation rate with enhanced medical data integration.",
+    aiRecommendation: "OT security gaps identified in legacy SCADA systems. Prioritize remediation before NERC audit. AI threat detection showing 35% improvement in detection times.",
     status: "amber",
-    budget: { spent: 1.4, total: 2.0, unit: "£m" },
-    timeline: { elapsed: 7, total: 11, unit: "months" },
-    deliverables: { completed: 8, total: 15 },
-    risks: ["Medical underwriting accuracy", "Regulatory approval for automated decisions"],
-    nextMilestone: "Critical illness module launch - Week 31",
+    budget: { spent: 18, total: 28, unit: "$m" },
+    timeline: { elapsed: 8, total: 12, unit: "months" },
+    deliverables: { completed: 8, total: 14 },
+    risks: ["Legacy system vulnerabilities", "NERC compliance deadlines", "Skilled resource availability"],
+    nextMilestone: "NERC CIP audit - Week 36",
     safe: {
       velocity: 45,
       predictability: 78,
-      flowEfficiency: 65,
+      flowEfficiency: 68,
       currentPI: "PI 24.4",
-      epicId: "EPIC-RT-303",
-      epicName: "Protection Digital Transformation",
-      epicProgress: 55,
-      okr: { objective: "Grow protection APE by 15%", keyResult: "85% automated underwriting", progress: 60 },
+      epicId: "EPIC-CORP-104",
+      epicName: "Critical Infrastructure Protection",
+      epicProgress: 57,
+      okr: { objective: "Achieve NERC CIP compliance", keyResult: "Zero critical findings in audit", progress: 57 },
       piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 72 }, { pi: "PI 24.2", velocity: 42, predictability: 74 }, { pi: "PI 24.3", velocity: 44, predictability: 76 }, { pi: "PI 24.4", velocity: 45, predictability: 78 }]
     },
     safeStage: "implementing",
     aiSignals: [
-      { type: "insight", message: "Automated underwriting at 72% instant approval rate", confidence: 92, dataSource: "Underwriting metrics" },
-      { type: "warning", message: "Critical illness module behind schedule - medical integration delayed", confidence: 85, dataSource: "Project tracking" }
+      { type: "warning", message: "OT security gaps in legacy SCADA - prioritize remediation", confidence: 88, dataSource: "Security audit" },
+      { type: "insight", message: "AI threat detection showing 35% improvement", confidence: 85, dataSource: "Security operations" }
     ],
     proactiveActions: [
-      { id: "pa-019", action: "Expedite medical data integration partner contract", impact: "Unblock CI module", urgency: "immediate", type: "mitigate" }
+      { id: "pa-014", action: "Accelerate SCADA security remediation", impact: "NERC compliance", urgency: "immediate", type: "mitigate" }
     ],
-    trendData: [{ week: "W28", value: 50 }, { week: "W29", value: 52 }, { week: "W30", value: 55 }, { week: "W31", value: 58 }, { week: "W32", value: 60 }],
+    trendData: [{ week: "W28", value: 52 }, { week: "W29", value: 54 }, { week: "W30", value: 55 }, { week: "W31", value: 57 }, { week: "W32", value: 58 }],
     dependencies: [
-      { projectId: "pmo-rt-001", projectName: "Digital Onboarding Redesign", type: "related", health: "yellow", description: "Shared customer journey", impactIfDelayed: "Inconsistent experience" },
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "blocked-by", health: "yellow", description: "Risk scoring for underwriting", impactIfDelayed: "Conservative risk limits" }
-    ]
-  },
-  {
-    id: "pmo-rt-004",
-    name: "Savings & Investments Platform",
-    bu: "Retail",
-    description: "New retail investment platform for ISAs, investment bonds, and retirement products. Goal-based planning tools with AI-driven recommendations and portfolio modeling.",
-    expectedROI: "£45m new inflows",
-    roiValue: 45,
-    priority: "high",
-    aiRecommendation: "Market analysis shows 340% increase in goal-based planning demand. Prioritize retirement planning features for baby boomer segment.",
-    status: "green",
-    budget: { spent: 1.1, total: 2.2, unit: "£m" },
-    timeline: { elapsed: 4, total: 12, unit: "months" },
-    deliverables: { completed: 5, total: 18 },
-    risks: ["Regulatory approval for robo-advice", "Platform scalability"],
-    nextMilestone: "ISA module MVP - Week 26",
-    safe: {
-      velocity: 55,
-      predictability: 85,
-      flowEfficiency: 72,
-      currentPI: "PI 24.3",
-      epicId: "EPIC-RT-304",
-      epicName: "Retail Investment Platform",
-      epicProgress: 35,
-      okr: { objective: "Launch market-leading investment platform", keyResult: "Achieve £500m inflows in year 1", progress: 28 },
-      piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 78 }, { pi: "PI 24.2", velocity: 50, predictability: 80 }, { pi: "PI 24.3", velocity: 52, predictability: 82 }, { pi: "PI 24.3", velocity: 55, predictability: 85 }]
-    },
-    safeStage: "analyzing",
-    aiSignals: [
-      { type: "opportunity", message: "Goal-based planning demand up 340% - first-mover advantage", confidence: 87, dataSource: "Market research" },
-      { type: "insight", message: "Baby boomer segment showing highest engagement in beta", confidence: 83, dataSource: "User analytics" }
+      { projectId: "pmo-fpl-001", projectName: "Grid Modernization & Automation", type: "related", health: "green", description: "Security requirements for new systems", impactIfDelayed: "Security gaps in new infrastructure" }
     ],
-    proactiveActions: [
-      { id: "pa-020", action: "Prioritize retirement planning features for launch", impact: "Capture boomer segment", urgency: "this-week", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 25 }, { week: "W29", value: 28 }, { week: "W30", value: 32 }, { week: "W31", value: 35 }, { week: "W32", value: 40 }],
-    dependencies: [
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "blocked-by", health: "green", description: "ESG data for fund selection", impactIfDelayed: "Limited ESG fund options" },
-      { projectId: "pmo-rt-001", projectName: "Digital Onboarding Redesign", type: "related", health: "yellow", description: "Customer onboarding flow", impactIfDelayed: "Separate onboarding" }
-    ]
-  },
-
-  // Additional Corporate Investments Projects
-  {
-    id: "pmo-ci-002",
-    name: "Infrastructure Asset Management System",
-    bu: "Corporate Investments",
-    description: "Digital platform for managing £5bn infrastructure investment portfolio including wind farms, solar parks, and transport assets. Real-time performance monitoring and predictive maintenance.",
-    expectedROI: "£25m asset optimization",
-    roiValue: 25,
-    priority: "high",
-    aiRecommendation: "Predictive maintenance reducing downtime by 18% in pilot assets. Scale to full infrastructure portfolio.",
-    status: "green",
-    budget: { spent: 0.8, total: 1.3, unit: "£m" },
-    timeline: { elapsed: 5, total: 9, unit: "months" },
-    deliverables: { completed: 6, total: 11 },
-    risks: ["IoT sensor reliability", "Asset data standardization"],
-    nextMilestone: "Wind farm integration - Week 28",
-    safe: {
-      velocity: 50,
-      predictability: 86,
-      flowEfficiency: 74,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-CI-402",
-      epicName: "Infrastructure Intelligence",
-      epicProgress: 58,
-      okr: { objective: "Optimize infrastructure returns", keyResult: "95% asset visibility", progress: 55 },
-      piTrend: [{ pi: "PI 24.1", velocity: 44, predictability: 80 }, { pi: "PI 24.2", velocity: 46, predictability: 82 }, { pi: "PI 24.3", velocity: 48, predictability: 84 }, { pi: "PI 24.4", velocity: 50, predictability: 86 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "insight", message: "Predictive maintenance reducing downtime by 18%", confidence: 90, dataSource: "Asset telemetry" },
-      { type: "opportunity", message: "Extend to solar portfolio for additional £5m savings", confidence: 78, dataSource: "Asset analysis" }
-    ],
-    proactiveActions: [
-      { id: "pa-021", action: "Scale predictive maintenance to all wind assets", impact: "£8m additional savings", urgency: "this-month", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 48 }, { week: "W29", value: 52 }, { week: "W30", value: 55 }, { week: "W31", value: 58 }, { week: "W32", value: 62 }],
-    dependencies: [
-      { projectId: "pmo-ci-001", projectName: "Net Zero Housing Tracker", type: "related", health: "green", description: "Shared IoT platform", impactIfDelayed: "Separate IoT stacks" },
-      { projectId: "pmo-am-001", projectName: "Private Markets Platform Build", type: "blocked-by", health: "red", description: "Asset valuation data", impactIfDelayed: "Manual valuations" }
-    ]
-  },
-  {
-    id: "pmo-ci-003",
-    name: "Build to Rent Operating Platform",
-    bu: "Corporate Investments",
-    description: "End-to-end platform for L&G's Build to Rent portfolio including tenant management, maintenance scheduling, and rent optimization. Covering 3,000+ residential units.",
-    expectedROI: "£12m operational efficiency",
-    roiValue: 12,
-    priority: "medium",
-    aiRecommendation: "Tenant satisfaction improved 22% with new digital services. Expand to all BTR sites.",
-    status: "green",
-    budget: { spent: 0.6, total: 1.0, unit: "£m" },
-    timeline: { elapsed: 4, total: 8, unit: "months" },
-    deliverables: { completed: 5, total: 10 },
-    risks: ["Tenant adoption of digital channels", "Integration with property managers"],
-    nextMilestone: "National rollout - Week 29",
-    safe: {
-      velocity: 52,
-      predictability: 88,
-      flowEfficiency: 76,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-CI-403",
-      epicName: "BTR Digital Experience",
-      epicProgress: 55,
-      okr: { objective: "Lead BTR sector in tenant experience", keyResult: "Achieve 90% tenant satisfaction", progress: 60 },
-      piTrend: [{ pi: "PI 24.1", velocity: 46, predictability: 82 }, { pi: "PI 24.2", velocity: 48, predictability: 84 }, { pi: "PI 24.3", velocity: 50, predictability: 86 }, { pi: "PI 24.4", velocity: 52, predictability: 88 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "insight", message: "Tenant satisfaction improved 22% with digital services", confidence: 91, dataSource: "Tenant surveys" },
-      { type: "opportunity", message: "Predictive maintenance could reduce repair costs by 15%", confidence: 75, dataSource: "Maintenance analytics" }
-    ],
-    proactiveActions: [
-      { id: "pa-022", action: "Fast-track national rollout to all BTR sites", impact: "Capture market leadership", urgency: "this-week", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 45 }, { week: "W29", value: 50 }, { week: "W30", value: 54 }, { week: "W31", value: 58 }, { week: "W32", value: 62 }],
-    dependencies: [
-      { projectId: "pmo-ci-001", projectName: "Net Zero Housing Tracker", type: "related", health: "green", description: "Carbon tracking for BTR", impactIfDelayed: "No sustainability metrics" }
-    ]
-  },
-
-  // Additional Risk & Compliance Projects
-  {
-    id: "pmo-rc-003",
-    name: "Regulatory Change Management",
-    bu: "Risk & Compliance",
-    description: "AI-powered platform for tracking, assessing, and implementing regulatory changes across all business units. Automated impact analysis with integrated workflow for compliance responses.",
-    expectedROI: "£8m compliance efficiency",
-    roiValue: 8,
-    priority: "high",
-    aiRecommendation: "25 regulatory changes in pipeline for 2025. Prioritize CSRD and PS1/SS3 climate disclosure requirements.",
-    status: "amber",
-    budget: { spent: 0.7, total: 1.1, unit: "£m" },
-    timeline: { elapsed: 5, total: 9, unit: "months" },
-    deliverables: { completed: 5, total: 11 },
-    risks: ["Regulatory uncertainty", "Cross-BU coordination"],
-    nextMilestone: "CSRD module live - Week 30",
-    safe: {
-      velocity: 44,
-      predictability: 78,
-      flowEfficiency: 65,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-RC-503",
-      epicName: "RegTech Platform",
-      epicProgress: 50,
-      okr: { objective: "Zero compliance surprises", keyResult: "Track 100% of applicable regulations", progress: 72 },
-      piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 72 }, { pi: "PI 24.2", velocity: 41, predictability: 74 }, { pi: "PI 24.3", velocity: 43, predictability: 76 }, { pi: "PI 24.4", velocity: 44, predictability: 78 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "warning", message: "CSRD implementation timeline compressed - accelerate preparations", confidence: 88, dataSource: "Regulatory intelligence" },
-      { type: "insight", message: "25 significant regulatory changes tracked for 2025", confidence: 95, dataSource: "Regulatory scanner" }
-    ],
-    proactiveActions: [
-      { id: "pa-023", action: "Prioritize CSRD and climate disclosure modules", impact: "Meet regulatory deadlines", urgency: "immediate", type: "mitigate" }
-    ],
-    trendData: [{ week: "W28", value: 42 }, { week: "W29", value: 45 }, { week: "W30", value: 48 }, { week: "W31", value: 52 }, { week: "W32", value: 55 }],
-    dependencies: [
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "related", health: "yellow", description: "Risk impact integration", impactIfDelayed: "Manual risk assessment" },
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "blocked-by", health: "green", description: "Climate disclosure data", impactIfDelayed: "Limited climate reporting" }
-    ]
-  },
-  {
-    id: "pmo-rc-004",
-    name: "Operational Resilience Framework",
-    bu: "Risk & Compliance",
-    description: "Building comprehensive operational resilience capability including impact tolerances, scenario testing, and recovery planning. Meeting PRA/FCA operational resilience requirements.",
-    expectedROI: "Regulatory compliance + £5m avoided fines",
-    roiValue: 5,
-    priority: "critical",
-    aiRecommendation: "March 2025 deadline approaching. 3 important business services still need impact tolerance mapping.",
-    status: "amber",
-    budget: { spent: 0.9, total: 1.2, unit: "£m" },
-    timeline: { elapsed: 8, total: 10, unit: "months" },
-    deliverables: { completed: 9, total: 12 },
-    risks: ["Regulatory deadline pressure", "Third-party dependencies"],
-    nextMilestone: "Board attestation - Week 32",
-    safe: {
-      velocity: 48,
-      predictability: 82,
-      flowEfficiency: 68,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-RC-504",
-      epicName: "Operational Resilience",
-      epicProgress: 78,
-      okr: { objective: "Full regulatory compliance by March 2025", keyResult: "100% IBS mapping complete", progress: 82 },
-      piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 75 }, { pi: "PI 24.2", velocity: 44, predictability: 78 }, { pi: "PI 24.3", velocity: 46, predictability: 80 }, { pi: "PI 24.4", velocity: 48, predictability: 82 }]
-    },
-    safeStage: "reviewing",
-    aiSignals: [
-      { type: "warning", message: "3 important business services need impact tolerance mapping", confidence: 95, dataSource: "Compliance tracking" },
-      { type: "insight", message: "82% of IBS mapping complete - on track for deadline", confidence: 90, dataSource: "Project tracking" }
-    ],
-    proactiveActions: [
-      { id: "pa-024", action: "Sprint on remaining 3 IBS impact tolerances", impact: "Meet regulatory deadline", urgency: "immediate", type: "mitigate" }
-    ],
-    trendData: [{ week: "W28", value: 72 }, { week: "W29", value: 75 }, { week: "W30", value: 78 }, { week: "W31", value: 80 }, { week: "W32", value: 82 }],
-    dependencies: [
-      { projectId: "pmo-rc-002", projectName: "Three Lines of Defence Automation", type: "related", health: "green", description: "Control framework integration", impactIfDelayed: "Manual control testing" },
-      { projectId: "pmo-rc-001", projectName: "Risk Appetite Dashboard Upgrade", type: "related", health: "yellow", description: "Risk tolerance alignment", impactIfDelayed: "Inconsistent tolerances" }
-    ]
-  },
-
-  // Group-wide Strategic Projects
-  {
-    id: "pmo-grp-001",
-    name: "Enterprise Data Platform",
-    bu: "Group Functions",
-    description: "Central data platform enabling cross-BU analytics, AI/ML capabilities, and regulatory reporting. Building single source of truth for customer, product, and financial data.",
-    expectedROI: "£50m data-driven decision value",
-    roiValue: 50,
-    priority: "critical",
-    aiRecommendation: "Data quality scores improved 35% in pilot domains. Accelerate rollout to support AI initiatives across all BUs.",
-    status: "amber",
-    budget: { spent: 3.2, total: 4.5, unit: "£m" },
-    timeline: { elapsed: 10, total: 18, unit: "months" },
-    deliverables: { completed: 12, total: 24 },
-    risks: ["Data governance complexity", "Legacy system integration", "Resource constraints"],
-    nextMilestone: "Customer 360 domain live - Week 30",
-    safe: {
-      velocity: 45,
-      predictability: 75,
-      flowEfficiency: 60,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-GRP-001",
-      epicName: "Enterprise Data Foundation",
-      epicProgress: 52,
-      okr: { objective: "Enable data-driven enterprise", keyResult: "100% priority domains migrated", progress: 48 },
-      piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 68 }, { pi: "PI 24.2", velocity: 42, predictability: 70 }, { pi: "PI 24.3", velocity: 44, predictability: 73 }, { pi: "PI 24.4", velocity: 45, predictability: 75 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "insight", message: "Data quality improved 35% in pilot domains", confidence: 88, dataSource: "Data quality metrics" },
-      { type: "warning", message: "Customer domain integration behind schedule", confidence: 82, dataSource: "Project tracking" }
-    ],
-    proactiveActions: [
-      { id: "pa-025", action: "Add resources to customer domain integration", impact: "Unblock AI initiatives", urgency: "immediate", type: "mitigate" }
-    ],
-    trendData: [{ week: "W28", value: 45 }, { week: "W29", value: 48 }, { week: "W30", value: 50 }, { week: "W31", value: 52 }, { week: "W32", value: 55 }],
-    dependencies: [
-      { projectId: "pmo-ir-001", projectName: "PRT Intake System Upgrade", type: "blocks", health: "yellow", description: "PRT data integration", impactIfDelayed: "Limited PRT analytics" },
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "blocks", health: "green", description: "ESG data foundation", impactIfDelayed: "ESG analytics delayed" },
-      { projectId: "pmo-rt-002", projectName: "AI Chatbot Implementation", type: "blocks", health: "green", description: "Customer data for AI training", impactIfDelayed: "Limited chatbot knowledge" }
-    ]
-  },
-  {
-    id: "pmo-grp-002",
-    name: "Climate Transition Analytics",
-    bu: "Group Functions",
-    description: "Platform for tracking L&G's net zero transition across all portfolios. Portfolio temperature scoring, transition pathway modeling, and TCFD/TNFD disclosure automation.",
-    expectedROI: "Regulatory compliance + £100m green bond capacity",
-    roiValue: 100,
-    priority: "high",
-    aiRecommendation: "Portfolio temperature at 2.4°C - transition pathway modeling shows 1.5°C achievable with £2.1bn reallocation. Position for green bond issuance.",
-    status: "green",
-    budget: { spent: 0.8, total: 1.4, unit: "£m" },
-    timeline: { elapsed: 5, total: 10, unit: "months" },
-    deliverables: { completed: 6, total: 13 },
-    risks: ["Data availability for scope 3", "Methodology evolution"],
-    nextMilestone: "TCFD automation live - Week 28",
-    safe: {
-      velocity: 52,
-      predictability: 85,
-      flowEfficiency: 72,
-      currentPI: "PI 24.4",
-      epicId: "EPIC-GRP-002",
-      epicName: "Net Zero Acceleration",
-      epicProgress: 55,
-      okr: { objective: "Achieve 1.5°C portfolio alignment by 2030", keyResult: "100% portfolio coverage", progress: 62 },
-      piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 83 }, { pi: "PI 24.4", velocity: 52, predictability: 85 }]
-    },
-    safeStage: "implementing",
-    aiSignals: [
-      { type: "insight", message: "1.5°C pathway achievable with £2.1bn reallocation", confidence: 87, dataSource: "Climate model" },
-      { type: "opportunity", message: "Green bond issuance enabled by credible pathway", confidence: 80, dataSource: "Treasury analysis" }
-    ],
-    proactiveActions: [
-      { id: "pa-026", action: "Commission transition pathway analysis", impact: "Enable green financing", urgency: "this-month", type: "accelerate" }
-    ],
-    trendData: [{ week: "W28", value: 48 }, { week: "W29", value: 52 }, { week: "W30", value: 55 }, { week: "W31", value: 58 }, { week: "W32", value: 62 }],
-    dependencies: [
-      { projectId: "pmo-am-002", projectName: "ESG Analytics Dashboard", type: "related", health: "green", description: "Shared ESG data infrastructure", impactIfDelayed: "Duplicate data work" },
-      { projectId: "pmo-ci-001", projectName: "Net Zero Housing Tracker", type: "related", health: "green", description: "Property carbon data", impactIfDelayed: "Missing real estate emissions" },
-      { projectId: "pmo-rc-003", projectName: "Regulatory Change Management", type: "related", health: "yellow", description: "CSRD/TCFD requirements", impactIfDelayed: "Manual compliance tracking" }
-    ]
+    linkedVROProgramId: "vro-corp-004"
   }
 ];
+
+// ============================================================================
+// LEGACY PROJECT MAPPINGS - For backward compatibility
+// ============================================================================
+
+// Map old L&G business units to new NextEra segments
+export const buMapping: Record<string, string> = {
+  'Institutional Retirement': 'Florida Power & Light',
+  'Asset Management': 'NextEra Energy Resources',
+  'Retail': 'Florida Power & Light',
+  'Corporate Investments': 'Corporate & Other',
+  'Risk & Compliance': 'Corporate & Other',
+  'Group Functions': 'Corporate & Other',
+  'Florida Power & Light': 'Florida Power & Light',
+  'NextEra Energy Resources': 'NextEra Energy Resources',
+  'Corporate & Other': 'Corporate & Other'
+};
+
+// Get projects by NextEra business unit
+export function getProjectsByBU(bu: string): EnrichedProject[] {
+  const mappedBU = buMapping[bu] || bu;
+  return enrichedProjects.filter(p => p.bu === mappedBU);
+}
+
+// ============================================================================
+// OLD L&G PROJECTS REMOVED - Above projects replace all previous L&G projects
+// The following section provides compatibility layer for any legacy code
+// ============================================================================
+
+// Legacy project type alias for backward compatibility
+export type {
+  EnrichedProject as Project,
+  ProjectDependency,
+  ProjectPriority
+};
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+// Get all projects
+export function getAllProjects(): EnrichedProject[] {
+  return enrichedProjects;
+}
+
+// Get project by ID
+export function getProjectById(id: string): EnrichedProject | undefined {
+  return enrichedProjects.find(p => p.id === id);
+}
+
+// Get projects by status
+export function getProjectsByStatus(status: "green" | "amber" | "red"): EnrichedProject[] {
+  return enrichedProjects.filter(p => p.status === status);
+}
+
+// Get critical projects
+export function getCriticalProjects(): EnrichedProject[] {
+  return enrichedProjects.filter(p => p.priority === "critical");
+}
+
+// Get projects with dependencies on a specific project
+export function getProjectDependents(projectId: string): EnrichedProject[] {
+  return enrichedProjects.filter(p => 
+    p.dependencies.some(d => d.projectId === projectId)
+  );
+}
+  {
+    id: "pmo-rt-002",
+    name: "AI Chatbot Implementation",
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -1059,33 +727,21 @@ export const projectSummary = {
 
 // Mapping from enrichedProject IDs to safeProject IDs (matching safeProjectData.ts exactly)
 const projectLinkMapping: Record<string, string> = {
-  // Institutional Retirement → Maps to IR-tagged projects in safeProjectData
-  "pmo-ir-001": "proj-prt-platform",           // PRT Platform Modernization
-  "pmo-ir-002": "proj-member-portal",          // Member Self-Service Portal
-  "pmo-ir-003": "proj-bulk-annuity-automation", // Bulk Annuity Automation
-  "pmo-ir-004": "proj-member-portal",           // Reuse for coverage
-  // Asset Management → Maps to AM-tagged projects
-  "pmo-am-001": "proj-trading-platform",       // Trading Platform Upgrade
-  "pmo-am-002": "proj-client-reporting",       // Client Reporting Automation
-  "pmo-am-003": "proj-risk-engine",            // Risk Analytics Engine
-  "pmo-am-004": "proj-alt-investments",        // Alternative Investments Portal
-  // Retail → Maps to Retail-tagged projects
-  "pmo-rt-001": "proj-digital-onboarding",     // Digital Onboarding Journey
-  "pmo-rt-002": "proj-mobile-app-refresh",     // Mobile App Refresh
-  "pmo-rt-003": "proj-advisor-portal",         // Advisor Portal 2.0
-  "pmo-rt-004": "proj-mobile-app-refresh",     // Reuse for coverage
-  // Corporate Investments → Maps to CI-tagged projects
-  "pmo-ci-001": "proj-data-foundation",        // Data Foundation Platform
-  "pmo-ci-002": "proj-api-gateway",            // Enterprise API Gateway
-  "pmo-ci-003": "proj-cloud-migration",        // Cloud Migration Program
-  // Risk & Compliance → Maps to RC-tagged projects  
-  "pmo-rc-001": "proj-regulatory-reporting",   // Regulatory Reporting Automation
-  "pmo-rc-002": "proj-fraud-detection",        // Fraud Detection AI
-  "pmo-rc-003": "proj-grc-platform",           // GRC Platform Consolidation
-  "pmo-rc-004": "proj-fraud-detection",        // Reuse for coverage
-  // Group Functions → Maps to Group-tagged projects
-  "pmo-grp-001": "proj-esg-reporting",         // ESG Reporting Dashboard
-  "pmo-grp-002": "proj-cloud-migration"        // Reuse for coverage
+  // Florida Power & Light → Maps to grid/utility-tagged projects
+  "pmo-fpl-001": "proj-data-foundation",       // Grid Modernization
+  "pmo-fpl-002": "proj-digital-onboarding",    // Advanced Metering Infrastructure  
+  "pmo-fpl-003": "proj-cloud-migration",       // Solar Expansion Program
+  "pmo-fpl-004": "proj-prt-platform",          // Hurricane Hardening
+  // NextEra Energy Resources → Maps to renewable-tagged projects
+  "pmo-neer-001": "proj-trading-platform",     // Wind Portfolio Expansion
+  "pmo-neer-002": "proj-risk-engine",          // Battery Storage Network
+  "pmo-neer-003": "proj-alt-investments",      // Green Hydrogen Hub
+  "pmo-neer-004": "proj-member-portal",        // Duane Arnold Nuclear Restart
+  // Corporate & Other → Maps to corporate-tagged projects
+  "pmo-corp-001": "proj-data-foundation",      // Enterprise Data Platform
+  "pmo-corp-002": "proj-api-gateway",          // NEET Transmission Expansion
+  "pmo-corp-003": "proj-esg-reporting",        // ESG Reporting Automation
+  "pmo-corp-004": "proj-regulatory-reporting"  // Cybersecurity Enhancement
 };
 
 // Get SAFe hierarchy for an enriched project
