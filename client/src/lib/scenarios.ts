@@ -255,7 +255,7 @@ export const climateMetrics = {
 // Risk Governance Framework (from Risk Management Supplement 2024)
 export const riskGovernance = {
   threeLines: [
-    { line: 1, name: "Operating Segments", role: "Risk taking within appetite parameters" },
+    { line: 1, name: "Reportable Segments", role: "Risk taking within appetite parameters" },
     { line: 2, name: "Risk Functions (CRO)", role: "Objective challenge and guidance" },
     { line: 3, name: "Internal Audit", role: "Independent assurance" }
   ],

@@ -353,7 +353,7 @@ export const riskData = {
   threeLines: [
     { 
       line: 1, 
-      name: "Operating Segments", 
+      name: "Reportable Segments", 
       role: "Risk taking within appetite parameters",
       accountable: "Managing risks in line with risk policies"
     },
@@ -365,7 +365,7 @@ export const riskData = {
     },
     { 
       line: 3, 
-      name: "Group Internal Audit", 
+      name: "Internal Audit", 
       role: "Independent assurance",
       accountable: "Effectiveness of business risk management and overall risk framework"
     }

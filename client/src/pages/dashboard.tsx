@@ -539,15 +539,15 @@ function DashboardContent() {
             {/* AI Executive Intelligence - Portfolio-level insights */}
             <AIExecutiveInsights />
 
-            {/* Operating Segments & Group Function Overview */}
+            {/* Reportable Segments & Corporate Functions Overview */}
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-purple-600" />
-                  Operating Segments & Group Function Overview
+                  Reportable Segments & Corporate Functions
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Click any Operating Segment to view detailed projects and metrics
+                  Click any segment to view detailed projects and metrics
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -562,7 +562,7 @@ function DashboardContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
-                      <p className="text-lg font-bold" style={{ color: division.color }}>£{division.profit2024}m</p>
+                      <p className="text-lg font-bold" style={{ color: division.color }}>${division.profit2024}m</p>
                       <Badge variant={division.changePercent >= 0 ? "default" : "destructive"} className="text-xs mt-1">
                         {division.changePercent >= 0 ? "+" : ""}{division.changePercent}%
                       </Badge>
