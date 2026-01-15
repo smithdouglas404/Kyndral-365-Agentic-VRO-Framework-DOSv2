@@ -10,13 +10,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* Navigation */}
-      <header className="absolute top-0 left-0 w-full z-50">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          <img src={nexteraLogo} alt="NextEra Energy" className="h-12" />
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background Image with Overlay */}
@@ -29,13 +22,18 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/20" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center pt-16">
+        <div className="relative z-10 container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-white space-y-8"
+            className="text-white space-y-6"
           >
+            {/* Logo */}
+            <div className="mb-2">
+              <img src={nexteraLogo} alt="NextEra Energy" className="h-14 bg-white/90 rounded px-2 py-1" />
+            </div>
+            
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[hsl(148,100%,50%)] animate-pulse" />
               <span className="text-sm font-medium tracking-wide">Enterprise Transformation Co-Pilot</span>

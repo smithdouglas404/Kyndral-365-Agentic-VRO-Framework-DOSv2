@@ -379,12 +379,14 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
   );
 }
 
+import nexteraLogo from "@assets/nextera_logo.png";
+
 function NavBar() {
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[#0072CE] tracking-tight cursor-pointer whitespace-nowrap" data-testid="link-home">NextEra Energy</div>
+          <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" data-testid="link-home" />
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#0072CE]" data-testid="link-dashboard">Dashboard</Link>
