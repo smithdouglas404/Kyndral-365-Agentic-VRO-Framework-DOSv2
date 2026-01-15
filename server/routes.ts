@@ -1363,5 +1363,314 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // SAFe ONTOLOGY API ENDPOINTS
+  // ============================================================================
+
+  // Portfolios
+  app.get("/api/safe/portfolios", async (_req, res) => {
+    try {
+      const allPortfolios = await storage.getPortfolios();
+      res.json({ portfolios: allPortfolios });
+    } catch (error: any) {
+      console.error("Get portfolios error:", error);
+      res.status(500).json({ error: "Failed to get portfolios" });
+    }
+  });
+
+  app.get("/api/safe/portfolios/:id", async (req, res) => {
+    try {
+      const portfolio = await storage.getPortfolio(req.params.id);
+      if (!portfolio) {
+        return res.status(404).json({ error: "Portfolio not found" });
+      }
+      res.json(portfolio);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get portfolio" });
+    }
+  });
+
+  app.get("/api/safe/portfolios/:id/hierarchy", async (req, res) => {
+    try {
+      const hierarchy = await storage.getSafeHierarchy(req.params.id);
+      if (!hierarchy) {
+        return res.status(404).json({ error: "Portfolio not found" });
+      }
+      res.json(hierarchy);
+    } catch (error: any) {
+      console.error("Get SAFe hierarchy error:", error);
+      res.status(500).json({ error: "Failed to get SAFe hierarchy" });
+    }
+  });
+
+  app.post("/api/safe/portfolios", async (req, res) => {
+    try {
+      const portfolio = await storage.createPortfolio(req.body);
+      res.json({ success: true, portfolio });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create portfolio" });
+    }
+  });
+
+  // Value Streams
+  app.get("/api/safe/value-streams", async (req, res) => {
+    try {
+      const { portfolioId } = req.query;
+      const valueStreamsList = await storage.getValueStreams(portfolioId as string | undefined);
+      res.json({ valueStreams: valueStreamsList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get value streams" });
+    }
+  });
+
+  app.post("/api/safe/value-streams", async (req, res) => {
+    try {
+      const vs = await storage.createValueStream(req.body);
+      res.json({ success: true, valueStream: vs });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create value stream" });
+    }
+  });
+
+  // ARTs
+  app.get("/api/safe/arts", async (req, res) => {
+    try {
+      const { valueStreamId } = req.query;
+      const artsList = await storage.getArts(valueStreamId as string | undefined);
+      res.json({ arts: artsList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get ARTs" });
+    }
+  });
+
+  app.post("/api/safe/arts", async (req, res) => {
+    try {
+      const art = await storage.createArt(req.body);
+      res.json({ success: true, art });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create ART" });
+    }
+  });
+
+  // Teams
+  app.get("/api/safe/teams", async (req, res) => {
+    try {
+      const { artId } = req.query;
+      const teamsList = await storage.getTeams(artId as string | undefined);
+      res.json({ teams: teamsList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get teams" });
+    }
+  });
+
+  app.post("/api/safe/teams", async (req, res) => {
+    try {
+      const team = await storage.createTeam(req.body);
+      res.json({ success: true, team });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create team" });
+    }
+  });
+
+  // Program Increments
+  app.get("/api/safe/program-increments", async (req, res) => {
+    try {
+      const { artId } = req.query;
+      const piList = await storage.getProgramIncrements(artId as string | undefined);
+      res.json({ programIncrements: piList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get program increments" });
+    }
+  });
+
+  app.post("/api/safe/program-increments", async (req, res) => {
+    try {
+      const pi = await storage.createProgramIncrement(req.body);
+      res.json({ success: true, programIncrement: pi });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create program increment" });
+    }
+  });
+
+  // Epics
+  app.get("/api/safe/epics", async (req, res) => {
+    try {
+      const { portfolioId, valueStreamId } = req.query;
+      const epicsList = await storage.getEpics(portfolioId as string | undefined, valueStreamId as string | undefined);
+      res.json({ epics: epicsList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get epics" });
+    }
+  });
+
+  app.post("/api/safe/epics", async (req, res) => {
+    try {
+      const epic = await storage.createEpic(req.body);
+      res.json({ success: true, epic });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create epic" });
+    }
+  });
+
+  // Capabilities
+  app.get("/api/safe/capabilities", async (req, res) => {
+    try {
+      const { epicId } = req.query;
+      const capsList = await storage.getCapabilities(epicId as string | undefined);
+      res.json({ capabilities: capsList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get capabilities" });
+    }
+  });
+
+  // Sprints
+  app.get("/api/safe/sprints", async (req, res) => {
+    try {
+      const { piId, teamId } = req.query;
+      const sprintsList = await storage.getSprints(piId as string | undefined, teamId as string | undefined);
+      res.json({ sprints: sprintsList });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get sprints" });
+    }
+  });
+
+  // ============================================================================
+  // MCP & INTEGRATION API ENDPOINTS
+  // ============================================================================
+
+  // Source Systems
+  app.get("/api/integrations/source-systems", async (_req, res) => {
+    try {
+      const systems = await storage.getSourceSystems();
+      res.json({ sourceSystems: systems });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get source systems" });
+    }
+  });
+
+  app.post("/api/integrations/source-systems", async (req, res) => {
+    try {
+      const system = await storage.createSourceSystem(req.body);
+      res.json({ success: true, sourceSystem: system });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create source system" });
+    }
+  });
+
+  app.patch("/api/integrations/source-systems/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      await storage.updateSourceSystemStatus(req.params.id, status);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to update source system status" });
+    }
+  });
+
+  // MCP Adapters
+  app.get("/api/integrations/mcp-adapters", async (req, res) => {
+    try {
+      const { sourceSystemId } = req.query;
+      const adapters = await storage.getMcpAdapters(sourceSystemId as string | undefined);
+      res.json({ mcpAdapters: adapters });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get MCP adapters" });
+    }
+  });
+
+  app.post("/api/integrations/mcp-adapters", async (req, res) => {
+    try {
+      const adapter = await storage.createMcpAdapter(req.body);
+      res.json({ success: true, mcpAdapter: adapter });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create MCP adapter" });
+    }
+  });
+
+  // Field Mappings
+  app.get("/api/integrations/field-mappings", async (req, res) => {
+    try {
+      const { sourceSystemId } = req.query;
+      const mappings = await storage.getFieldMappings(sourceSystemId as string | undefined);
+      res.json({ fieldMappings: mappings });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get field mappings" });
+    }
+  });
+
+  app.post("/api/integrations/field-mappings", async (req, res) => {
+    try {
+      const mapping = await storage.createFieldMapping(req.body);
+      res.json({ success: true, fieldMapping: mapping });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create field mapping" });
+    }
+  });
+
+  // MCP Tool Mappings
+  app.get("/api/integrations/mcp-tool-mappings", async (req, res) => {
+    try {
+      const { adapterId } = req.query;
+      const mappings = await storage.getMcpToolMappings(adapterId as string | undefined);
+      res.json({ mcpToolMappings: mappings });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get MCP tool mappings" });
+    }
+  });
+
+  // Ingestion Jobs
+  app.get("/api/integrations/ingestion-jobs", async (req, res) => {
+    try {
+      const { sourceSystemId } = req.query;
+      const jobs = await storage.getIngestionJobs(sourceSystemId as string | undefined);
+      res.json({ ingestionJobs: jobs });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get ingestion jobs" });
+    }
+  });
+
+  app.post("/api/integrations/ingestion-jobs", async (req, res) => {
+    try {
+      const job = await storage.createIngestionJob(req.body);
+      res.json({ success: true, ingestionJob: job });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create ingestion job" });
+    }
+  });
+
+  // SAFe Ontology Summary - Full hierarchy for dashboard
+  app.get("/api/safe/summary", async (_req, res) => {
+    try {
+      const [allPortfolios, allValueStreams, allArts, allTeams, allPIs, allEpics] = await Promise.all([
+        storage.getPortfolios(),
+        storage.getValueStreams(),
+        storage.getArts(),
+        storage.getTeams(),
+        storage.getProgramIncrements(),
+        storage.getEpics()
+      ]);
+      
+      res.json({
+        summary: {
+          portfolioCount: allPortfolios.length,
+          valueStreamCount: allValueStreams.length,
+          artCount: allArts.length,
+          teamCount: allTeams.length,
+          piCount: allPIs.length,
+          epicCount: allEpics.length
+        },
+        portfolios: allPortfolios,
+        valueStreams: allValueStreams,
+        arts: allArts,
+        teams: allTeams,
+        programIncrements: allPIs,
+        epics: allEpics
+      });
+    } catch (error: any) {
+      console.error("Get SAFe summary error:", error);
+      res.status(500).json({ error: "Failed to get SAFe summary" });
+    }
+  });
+
   return httpServer;
 }

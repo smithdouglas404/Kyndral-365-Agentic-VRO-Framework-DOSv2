@@ -24,10 +24,25 @@ import {
   type Okr, type InsertOkr,
   type KeyResult, type InsertKeyResult,
   type Kpi, type InsertKpi,
+  type Portfolio, type InsertPortfolio,
+  type ValueStream, type InsertValueStream,
+  type Art, type InsertArt,
+  type Team, type InsertTeam,
+  type ProgramIncrement, type InsertProgramIncrement,
+  type Epic, type InsertEpic,
+  type Capability, type InsertCapability,
+  type Sprint, type InsertSprint,
+  type SourceSystem, type InsertSourceSystem,
+  type McpAdapter, type InsertMcpAdapter,
+  type FieldMapping, type InsertFieldMapping,
+  type IngestionJob, type InsertIngestionJob,
+  type McpToolMapping, type InsertMcpToolMapping,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
-  okrs, keyResults, kpis
+  okrs, keyResults, kpis,
+  portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints,
+  sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -125,6 +140,46 @@ export interface IStorage {
     dependencies: Dependency[];
     financials: ProjectFinancials | undefined;
     risks: Risk[];
+  } | undefined>;
+  
+  // SAFe Ontology Methods
+  getPortfolios(): Promise<Portfolio[]>;
+  getPortfolio(id: string): Promise<Portfolio | undefined>;
+  createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
+  getValueStreams(portfolioId?: string): Promise<ValueStream[]>;
+  createValueStream(vs: InsertValueStream): Promise<ValueStream>;
+  getArts(valueStreamId?: string): Promise<Art[]>;
+  createArt(art: InsertArt): Promise<Art>;
+  getTeams(artId?: string): Promise<Team[]>;
+  createTeam(team: InsertTeam): Promise<Team>;
+  getProgramIncrements(artId?: string): Promise<ProgramIncrement[]>;
+  createProgramIncrement(pi: InsertProgramIncrement): Promise<ProgramIncrement>;
+  getEpics(portfolioId?: string, valueStreamId?: string): Promise<Epic[]>;
+  createEpic(epic: InsertEpic): Promise<Epic>;
+  getCapabilities(epicId?: string): Promise<Capability[]>;
+  createCapability(cap: InsertCapability): Promise<Capability>;
+  getSprints(piId?: string, teamId?: string): Promise<Sprint[]>;
+  createSprint(sprint: InsertSprint): Promise<Sprint>;
+  
+  // MCP & Integration Methods
+  getSourceSystems(): Promise<SourceSystem[]>;
+  createSourceSystem(ss: InsertSourceSystem): Promise<SourceSystem>;
+  updateSourceSystemStatus(id: string, status: string): Promise<void>;
+  getMcpAdapters(sourceSystemId?: string): Promise<McpAdapter[]>;
+  createMcpAdapter(adapter: InsertMcpAdapter): Promise<McpAdapter>;
+  getFieldMappings(sourceSystemId?: string): Promise<FieldMapping[]>;
+  createFieldMapping(mapping: InsertFieldMapping): Promise<FieldMapping>;
+  getIngestionJobs(sourceSystemId?: string): Promise<IngestionJob[]>;
+  createIngestionJob(job: InsertIngestionJob): Promise<IngestionJob>;
+  updateIngestionJobStatus(id: string, status: string, stats?: { processed?: number; created?: number; updated?: number; failed?: number }): Promise<void>;
+  getMcpToolMappings(adapterId?: string): Promise<McpToolMapping[]>;
+  createMcpToolMapping(mapping: InsertMcpToolMapping): Promise<McpToolMapping>;
+  
+  // Full SAFe Hierarchy Query
+  getSafeHierarchy(portfolioId: string): Promise<{
+    portfolio: Portfolio;
+    valueStreams: (ValueStream & { arts: (Art & { teams: Team[]; programIncrements: ProgramIncrement[] })[] })[];
+    epics: Epic[];
   } | undefined>;
 }
 
@@ -987,6 +1042,227 @@ export class DatabaseStorage implements IStorage {
   async createKpi(kpi: InsertKpi): Promise<Kpi> {
     const result = await db.insert(kpis).values(kpi).returning();
     return result[0];
+  }
+
+  // SAFe Ontology Methods
+  async getPortfolios(): Promise<Portfolio[]> {
+    return await db.select().from(portfolios);
+  }
+
+  async getPortfolio(id: string): Promise<Portfolio | undefined> {
+    const result = await db.select().from(portfolios).where(eq(portfolios.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio> {
+    const result = await db.insert(portfolios).values(portfolio).returning();
+    return result[0];
+  }
+
+  async getValueStreams(portfolioId?: string): Promise<ValueStream[]> {
+    if (portfolioId) {
+      return await db.select().from(valueStreams).where(eq(valueStreams.portfolioId, portfolioId));
+    }
+    return await db.select().from(valueStreams);
+  }
+
+  async createValueStream(vs: InsertValueStream): Promise<ValueStream> {
+    const result = await db.insert(valueStreams).values(vs).returning();
+    return result[0];
+  }
+
+  async getArts(valueStreamId?: string): Promise<Art[]> {
+    if (valueStreamId) {
+      return await db.select().from(arts).where(eq(arts.valueStreamId, valueStreamId));
+    }
+    return await db.select().from(arts);
+  }
+
+  async createArt(art: InsertArt): Promise<Art> {
+    const result = await db.insert(arts).values(art).returning();
+    return result[0];
+  }
+
+  async getTeams(artId?: string): Promise<Team[]> {
+    if (artId) {
+      return await db.select().from(teams).where(eq(teams.artId, artId));
+    }
+    return await db.select().from(teams);
+  }
+
+  async createTeam(team: InsertTeam): Promise<Team> {
+    const result = await db.insert(teams).values(team).returning();
+    return result[0];
+  }
+
+  async getProgramIncrements(artId?: string): Promise<ProgramIncrement[]> {
+    if (artId) {
+      return await db.select().from(programIncrements).where(eq(programIncrements.artId, artId));
+    }
+    return await db.select().from(programIncrements);
+  }
+
+  async createProgramIncrement(pi: InsertProgramIncrement): Promise<ProgramIncrement> {
+    const result = await db.insert(programIncrements).values(pi).returning();
+    return result[0];
+  }
+
+  async getEpics(portfolioId?: string, valueStreamId?: string): Promise<Epic[]> {
+    if (portfolioId && valueStreamId) {
+      return await db.select().from(epics).where(and(eq(epics.portfolioId, portfolioId), eq(epics.valueStreamId, valueStreamId)));
+    }
+    if (portfolioId) {
+      return await db.select().from(epics).where(eq(epics.portfolioId, portfolioId));
+    }
+    if (valueStreamId) {
+      return await db.select().from(epics).where(eq(epics.valueStreamId, valueStreamId));
+    }
+    return await db.select().from(epics);
+  }
+
+  async createEpic(epic: InsertEpic): Promise<Epic> {
+    const result = await db.insert(epics).values(epic).returning();
+    return result[0];
+  }
+
+  async getCapabilities(epicId?: string): Promise<Capability[]> {
+    if (epicId) {
+      return await db.select().from(capabilities).where(eq(capabilities.epicId, epicId));
+    }
+    return await db.select().from(capabilities);
+  }
+
+  async createCapability(cap: InsertCapability): Promise<Capability> {
+    const result = await db.insert(capabilities).values(cap).returning();
+    return result[0];
+  }
+
+  async getSprints(piId?: string, teamId?: string): Promise<Sprint[]> {
+    if (piId && teamId) {
+      return await db.select().from(sprints).where(and(eq(sprints.programIncrementId, piId), eq(sprints.teamId, teamId)));
+    }
+    if (piId) {
+      return await db.select().from(sprints).where(eq(sprints.programIncrementId, piId));
+    }
+    if (teamId) {
+      return await db.select().from(sprints).where(eq(sprints.teamId, teamId));
+    }
+    return await db.select().from(sprints);
+  }
+
+  async createSprint(sprint: InsertSprint): Promise<Sprint> {
+    const result = await db.insert(sprints).values(sprint).returning();
+    return result[0];
+  }
+
+  // MCP & Integration Methods
+  async getSourceSystems(): Promise<SourceSystem[]> {
+    return await db.select().from(sourceSystems);
+  }
+
+  async createSourceSystem(ss: InsertSourceSystem): Promise<SourceSystem> {
+    const result = await db.insert(sourceSystems).values(ss).returning();
+    return result[0];
+  }
+
+  async updateSourceSystemStatus(id: string, status: string): Promise<void> {
+    await db.update(sourceSystems).set({ status, lastConnectedAt: new Date() }).where(eq(sourceSystems.id, id));
+  }
+
+  async getMcpAdapters(sourceSystemId?: string): Promise<McpAdapter[]> {
+    if (sourceSystemId) {
+      return await db.select().from(mcpAdapters).where(eq(mcpAdapters.sourceSystemId, sourceSystemId));
+    }
+    return await db.select().from(mcpAdapters);
+  }
+
+  async createMcpAdapter(adapter: InsertMcpAdapter): Promise<McpAdapter> {
+    const result = await db.insert(mcpAdapters).values(adapter).returning();
+    return result[0];
+  }
+
+  async getFieldMappings(sourceSystemId?: string): Promise<FieldMapping[]> {
+    if (sourceSystemId) {
+      return await db.select().from(fieldMappings).where(eq(fieldMappings.sourceSystemId, sourceSystemId));
+    }
+    return await db.select().from(fieldMappings);
+  }
+
+  async createFieldMapping(mapping: InsertFieldMapping): Promise<FieldMapping> {
+    const result = await db.insert(fieldMappings).values(mapping).returning();
+    return result[0];
+  }
+
+  async getIngestionJobs(sourceSystemId?: string): Promise<IngestionJob[]> {
+    if (sourceSystemId) {
+      return await db.select().from(ingestionJobs).where(eq(ingestionJobs.sourceSystemId, sourceSystemId)).orderBy(desc(ingestionJobs.createdAt));
+    }
+    return await db.select().from(ingestionJobs).orderBy(desc(ingestionJobs.createdAt));
+  }
+
+  async createIngestionJob(job: InsertIngestionJob): Promise<IngestionJob> {
+    const result = await db.insert(ingestionJobs).values(job).returning();
+    return result[0];
+  }
+
+  async updateIngestionJobStatus(id: string, status: string, stats?: { processed?: number; created?: number; updated?: number; failed?: number }): Promise<void> {
+    const updates: any = { status };
+    if (status === 'running') updates.startedAt = new Date();
+    if (status === 'completed' || status === 'failed') updates.completedAt = new Date();
+    if (stats) {
+      if (stats.processed !== undefined) updates.itemsProcessed = String(stats.processed);
+      if (stats.created !== undefined) updates.itemsCreated = String(stats.created);
+      if (stats.updated !== undefined) updates.itemsUpdated = String(stats.updated);
+      if (stats.failed !== undefined) updates.itemsFailed = String(stats.failed);
+    }
+    await db.update(ingestionJobs).set(updates).where(eq(ingestionJobs.id, id));
+  }
+
+  async getMcpToolMappings(adapterId?: string): Promise<McpToolMapping[]> {
+    if (adapterId) {
+      return await db.select().from(mcpToolMappings).where(eq(mcpToolMappings.mcpAdapterId, adapterId));
+    }
+    return await db.select().from(mcpToolMappings);
+  }
+
+  async createMcpToolMapping(mapping: InsertMcpToolMapping): Promise<McpToolMapping> {
+    const result = await db.insert(mcpToolMappings).values(mapping).returning();
+    return result[0];
+  }
+
+  async getSafeHierarchy(portfolioId: string): Promise<{
+    portfolio: Portfolio;
+    valueStreams: (ValueStream & { arts: (Art & { teams: Team[]; programIncrements: ProgramIncrement[] })[] })[];
+    epics: Epic[];
+  } | undefined> {
+    const portfolio = await this.getPortfolio(portfolioId);
+    if (!portfolio) return undefined;
+
+    const portfolioValueStreams = await this.getValueStreams(portfolioId);
+    const portfolioEpics = await this.getEpics(portfolioId);
+
+    const valueStreamsWithArts = await Promise.all(
+      portfolioValueStreams.map(async (vs) => {
+        const vsArts = await this.getArts(vs.id);
+        const artsWithTeamsAndPIs = await Promise.all(
+          vsArts.map(async (art) => ({
+            ...art,
+            teams: await this.getTeams(art.id),
+            programIncrements: await this.getProgramIncrements(art.id)
+          }))
+        );
+        return {
+          ...vs,
+          arts: artsWithTeamsAndPIs
+        };
+      })
+    );
+
+    return {
+      portfolio,
+      valueStreams: valueStreamsWithArts,
+      epics: portfolioEpics
+    };
   }
 }
 
