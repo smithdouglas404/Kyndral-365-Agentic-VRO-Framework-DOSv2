@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { safeProjects } from "@/lib/safeProjectData";
+import { useEnrichedProjects } from "@/hooks/useProjects";
 import { useLocation } from "wouter";
 import { usePageContext, getSuggestedQuestions } from "@/contexts/PageContext";
 import { parseActionIntent, buildScenario, dispatchAgentCascade, type ActionScenario } from "@/lib/agentCascade";
@@ -147,6 +147,7 @@ function MarkdownRenderer({ content, onNavigate }: { content: string; onNavigate
 export function AskPMChat() {
   const [, setLocation] = useLocation();
   const { context } = usePageContext();
+  const { data: projects = [] } = useEnrichedProjects();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -395,7 +396,7 @@ export function AskPMChat() {
                   <Sparkles className="h-12 w-12 text-purple-400 mx-auto mb-3" />
                   <h3 className="font-semibold text-gray-800 mb-2">Welcome to Ask the PM</h3>
                   <p className="text-sm text-gray-600">
-                    I have access to all {safeProjects.length} projects in your portfolio. 
+                    I have access to all {projects.length} projects in your portfolio. 
                     Ask me about dependencies, status, risks, or anything else!
                   </p>
                 </div>
