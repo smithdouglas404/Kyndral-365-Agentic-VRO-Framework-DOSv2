@@ -1,4 +1,5 @@
 import { storage } from "./storage";
+import { createJiraClientFromAdapter } from "./jiraClient";
 
 interface ScheduledJob {
   jobId: string;
@@ -83,32 +84,63 @@ async function executeSyncJob(jobId: string): Promise<void> {
     });
 
     try {
-      const recordsProcessed = Math.floor(Math.random() * 200) + 20;
-      const recordsCreated = Math.floor(recordsProcessed * 0.15);
-      const recordsUpdated = Math.floor(recordsProcessed * 0.65);
-      const recordsFailed = Math.floor(recordsProcessed * 0.02);
+      let recordsProcessed = 0;
+      let recordsCreated = 0;
+      let recordsFailed = 0;
+      const errors: string[] = [];
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (job.syncType === 'jira' && job.mcpAdapterId) {
+        const client = await createJiraClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Jira client - check adapter configuration");
+        }
+        
+        let config: { projectKey?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const projectKey = config.projectKey;
+        if (!projectKey) {
+          throw new Error("Missing projectKey in sync job filterCriteria - set filterCriteria to {\"projectKey\":\"YOUR_PROJECT\"}");
+        }
+        
+        const result = await client.syncProject(projectKey, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType !== 'jira') {
+        recordsProcessed = Math.floor(Math.random() * 200) + 20;
+        recordsCreated = Math.floor(recordsProcessed * 0.15);
+        recordsFailed = Math.floor(recordsProcessed * 0.02);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
 
       await storage.updateSyncJobRun(run.id, {
-        status: "success",
+        status: recordsFailed > 0 ? "completed_with_errors" : "success",
         completedAt: new Date(),
         recordsProcessed,
         recordsCreated,
-        recordsUpdated,
+        recordsUpdated: 0,
         recordsDeleted: 0,
         recordsFailed,
-        conflictsDetected: Math.floor(Math.random() * 5),
-        conflictsResolved: Math.floor(Math.random() * 3),
+        conflictsDetected: 0,
+        conflictsResolved: 0,
         summary: JSON.stringify({
-          duration: `${(Math.random() * 5 + 1).toFixed(1)}s`,
           entityTypes: JSON.parse(job.entityTypes || "[]"),
-          syncDirection: job.syncDirection
+          syncDirection: job.syncDirection,
+          errors: errors.slice(0, 5)
         })
       });
 
-      await storage.updateSyncJobLastRun(job.id, "success");
-      console.log(`[SyncScheduler] Job ${job.name} completed successfully: ${recordsProcessed} records processed`);
+      await storage.updateSyncJobLastRun(job.id, recordsFailed > 0 ? "warning" : "success");
+      console.log(`[SyncScheduler] Job ${job.name} completed: ${recordsProcessed} records processed, ${recordsFailed} errors`);
 
     } catch (execError: any) {
       await storage.updateSyncJobRun(run.id, {

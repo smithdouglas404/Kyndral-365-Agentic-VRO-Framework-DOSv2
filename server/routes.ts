@@ -6,6 +6,8 @@ import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
 import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
+import { registerWebhookRoutes } from "./webhookHandler";
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
@@ -3980,6 +3982,114 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     } catch (error: any) {
       console.error("Download export error:", error);
       res.status(500).json({ error: "Failed to download export" });
+    }
+  });
+
+  // Register webhook routes
+  registerWebhookRoutes(app);
+
+  // ============================================================================
+  // JIRA INTEGRATION API
+  // ============================================================================
+
+  const jiraConfigSchema = z.object({
+    domain: z.string().min(1),
+    email: z.string().email(),
+    apiToken: z.string().min(1),
+    projectKey: z.string().optional(),
+  });
+
+  app.post("/api/jira/test-connection", async (req, res) => {
+    try {
+      const parseResult = jiraConfigSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+
+      const client = new JiraClient(parseResult.data);
+      const result = await client.testConnection();
+      res.json(result);
+    } catch (error: any) {
+      console.error("Jira test connection error:", error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/jira/projects", async (req, res) => {
+    try {
+      const parseResult = jiraConfigSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+
+      const client = new JiraClient(parseResult.data);
+      const projects = await client.getProjects();
+      res.json(projects);
+    } catch (error: any) {
+      console.error("Jira get projects error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/jira/issues", async (req, res) => {
+    try {
+      const schema = jiraConfigSchema.extend({
+        projectKey: z.string().min(1),
+      });
+      const parseResult = schema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+
+      const client = new JiraClient(parseResult.data);
+      const issues = await client.getAllIssues(parseResult.data.projectKey);
+      res.json(issues);
+    } catch (error: any) {
+      console.error("Jira get issues error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/jira/sync", async (req, res) => {
+    try {
+      const schema = jiraConfigSchema.extend({
+        projectKey: z.string().min(1),
+        sourceSystemId: z.string().optional(),
+      });
+      const parseResult = schema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
+      }
+
+      const client = new JiraClient(parseResult.data);
+      const result = await client.syncProject(
+        parseResult.data.projectKey,
+        parseResult.data.sourceSystemId || 'manual'
+      );
+      res.json(result);
+    } catch (error: any) {
+      console.error("Jira sync error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/jira/sync-from-adapter/:adapterId", async (req, res) => {
+    try {
+      const client = await createJiraClientFromAdapter(req.params.adapterId);
+      if (!client) {
+        return res.status(404).json({ error: "Jira adapter not found or invalid configuration" });
+      }
+
+      const projectKey = req.body.projectKey;
+      if (!projectKey) {
+        return res.status(400).json({ error: "projectKey is required" });
+      }
+
+      const result = await client.syncProject(projectKey, req.params.adapterId);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Jira sync from adapter error:", error);
+      res.status(500).json({ error: error.message });
     }
   });
 
