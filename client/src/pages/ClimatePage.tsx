@@ -481,7 +481,7 @@ export default function ClimatePage() {
                 </div>
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('lg-response', 'response-001'); }} data-testid="metric-lg-response">
-                  <h4 className="font-semibold mb-2">L&G Response</h4>
+                  <h4 className="font-semibold mb-2">NextEra Response</h4>
                   <p className="text-sm text-gray-700">
                     "Climate risk is increasingly financially material to understanding a company's future success and must be an integral part of our investment analysis. While we continue to do what is within our control to decarbonise our business, as a financial organisation the success of our transition is dependent on the companies we invest in delivering on their decarbonisation targets."
                   </p>

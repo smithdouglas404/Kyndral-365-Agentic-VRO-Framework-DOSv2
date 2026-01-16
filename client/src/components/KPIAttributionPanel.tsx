@@ -168,7 +168,7 @@ const AI_SUGGESTED_KPIS = [
   { name: 'First Contact Resolution Rate', rationale: 'Strong correlation with NPS improvements in similar transformations', confidence: 87 },
   { name: 'Automation Coverage %', rationale: 'Leading indicator for operational efficiency gains', confidence: 82 },
   { name: 'Time to Value (New Features)', rationale: 'Measures speed of capability delivery to customers', confidence: 79 },
-  { name: 'Carbon Footprint Reduction', rationale: 'Aligns with L&G ESG commitments and Climate Report targets', confidence: 91 }
+  { name: 'Carbon Footprint Reduction', rationale: 'Aligns with NextEra ESG commitments and Climate Report targets', confidence: 91 }
 ];
 
 export function KPIAttributionPanel() {
@@ -383,7 +383,7 @@ export function KPIAttributionPanel() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Based on L&G's strategic objectives and industry benchmarks, consider adding these KPIs:
+                Based on NextEra's strategic objectives and industry benchmarks, consider adding these KPIs:
               </p>
               <div className="space-y-3">
                 {AI_SUGGESTED_KPIS.map((suggestion, idx) => (

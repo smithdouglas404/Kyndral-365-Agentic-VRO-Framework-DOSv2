@@ -71,7 +71,7 @@ const simulatedDiscussion: AgentMessage[] = [
     id: 'msg-3',
     agent: 'TMO Agent',
     agentColor: 'bg-teal-500',
-    message: "Change impact assessment: Deferring MDM Phase 2 affects 12 stakeholders in Asset Management. I can prepare a communication plan if we proceed.",
+    message: "Change impact assessment: Deferring MDM Phase 2 affects 12 stakeholders in NextEra Energy Resources. I can prepare a communication plan if we proceed.",
     timestamp: new Date(),
     type: 'analysis'
   },

@@ -146,7 +146,7 @@ const playbooks: Playbook[] = [
     lastUpdated: '1 week ago',
     uses: 28,
     rating: 4.5,
-    description: 'Common patterns and anti-patterns when integrating with L&G legacy systems. Includes API strategies and testing approaches.'
+    description: 'Common patterns and anti-patterns when integrating with NextEra legacy systems. Includes API strategies and testing approaches.'
   },
   {
     id: 'pb-005',

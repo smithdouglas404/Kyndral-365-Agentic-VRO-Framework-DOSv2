@@ -97,7 +97,7 @@ export const executivePersonas: Persona[] = [
   },
 ];
 
-// Real-time AI Alerts based on L&G data
+// Real-time AI Alerts based on NextEra data
 export const liveAIAlerts: AIAlert[] = [
   {
     id: "alert-001",

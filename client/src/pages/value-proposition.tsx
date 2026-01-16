@@ -57,7 +57,7 @@ export default function ValueProposition() {
         >
           <div className="mb-12 text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-[hsl(209,100%,36%)] mb-6">
-              Delivering Value for Legal & General
+              Delivering Value for NextEra Energy
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               How the Value Realization Office (VRO) addresses critical challenges to drive speed, certainty, and efficiency across the enterprise.
@@ -75,7 +75,7 @@ export default function ValueProposition() {
                   <h2 className="text-2xl font-bold mb-3">Accelerating Delivery & Speed</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     By implementing agentic automation and smart classification, we remove the manual bottlenecks that historically slowed down decision-making. 
-                    This creates a paradigm shift from a 30-day cycle to a 5-day cycle, ensuring L&G can respond to market demands with agility without sacrificing governance.
+                    This creates a paradigm shift from a 30-day cycle to a 5-day cycle, ensuring NextEra can respond to market demands with agility without sacrificing governance.
                   </p>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {["83% Reduction in Cycle Time", "Automated Intake & Approvals", "30 Days → 5 Days Speed", "Governance Quality Maintained"].map((item, i) => (
@@ -158,7 +158,7 @@ export default function ValueProposition() {
       </main>
 
       <footer className="py-8 border-t border-border bg-white text-center text-sm text-muted-foreground mt-12">
-        <p>© 2026 Legal & General. Strategic Transformation Office.</p>
+        <p>© 2026 NextEra Energy. Strategic Transformation Office.</p>
       </footer>
     </div>
   );

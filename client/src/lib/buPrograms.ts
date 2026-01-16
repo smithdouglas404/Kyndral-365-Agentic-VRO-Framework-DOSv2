@@ -1,5 +1,5 @@
 // ============================================================================
-// L&G BUSINESS UNIT PROGRAMS - PMO vs VRO DIFFERENTIATION
+// NEXTERA ENERGY BUSINESS UNIT PROGRAMS - PMO vs VRO DIFFERENTIATION
 // Source: NextEra Energy Annual Report 2024, Risk Management Supplement, Climate Report
 // ============================================================================
 
@@ -957,7 +957,7 @@ export const buPortfolios: BUPortfolio[] = [
   {
     id: "portfolio-am",
     name: "NextEra Energy Resources",
-    description: "LGIM investment strategies, ESG integration, and private markets expansion - $1.1tn AUM",
+    description: "Clean energy generation, renewable power solutions, and grid modernization - $68B in assets",
     projectCount: getBUProjects("NextEra Energy Resources").length,
     programCount: getBUPrograms("NextEra Energy Resources").length,
     totalBudget: getBUProjects("NextEra Energy Resources").reduce((s, p) => s + p.budget.total, 0),

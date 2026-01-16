@@ -858,10 +858,10 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Sprint Commitment': '96%'
       },
       projectBreakdown: [
-        { name: 'Group Technology', value: '62 pts', budget: 'High' },
-        { name: 'LGRI', value: '51 pts', budget: 'Medium' },
-        { name: 'LGC', value: '48 pts', budget: 'Medium' },
-        { name: 'LGIM', value: '45 pts', budget: 'Medium' }
+        { name: 'Enterprise Technology', value: '62 pts', budget: 'High' },
+        { name: 'FPL', value: '51 pts', budget: 'Medium' },
+        { name: 'Corporate', value: '48 pts', budget: 'Medium' },
+        { name: 'NEER', value: '45 pts', budget: 'Medium' }
       ],
       insight: 'Portfolio velocity at 53 points is near target. Group Technology leads with highest velocity. Planning agent recommends cross-team knowledge sharing to improve velocity across business units.',
       summary: 'Velocity trending positive with 26% improvement from baseline. Sprint commitment at 96% indicates healthy capacity planning.'

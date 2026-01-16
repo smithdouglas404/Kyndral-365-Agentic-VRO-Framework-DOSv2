@@ -33,7 +33,7 @@ function NavBar() {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">Legal & General</div>
+          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">NextEra Energy</div>
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]">Dashboard</Link>
@@ -425,7 +425,7 @@ export default function TMODashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">L&G Employees</p>
+                    <p className="text-xs text-gray-500">NextEra Employees</p>
                     <p className="text-2xl font-bold text-green-600">{companyMetrics.totalEmployees.toLocaleString()}</p>
                   </div>
                   <CheckCircle2 className="h-8 w-8 text-green-200" />
@@ -444,7 +444,7 @@ export default function TMODashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Group Function Adoption Rates</span>
-                  <Badge variant="outline" className="text-xs">From L&G Group Functions</Badge>
+                  <Badge variant="outline" className="text-xs">From NextEra Business Units</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

@@ -65,7 +65,7 @@ export function ScenarioWorkflow({ onScenarioChange, initialScenario, initialSta
               <p className="font-semibold mb-2">Value Realization Loop</p>
               <p className="text-sm text-muted-foreground">
                 This workflow mirrors the VRO methodology: Design strategic interventions, 
-                Activate through automation, and Measure realized value against L&G targets.
+                Activate through automation, and Measure realized value against NextEra targets.
               </p>
               <p className="text-xs text-[hsl(209,100%,36%)] mt-2">Source: VRO Strategy Document</p>
             </TooltipContent>

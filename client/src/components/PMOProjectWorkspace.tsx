@@ -53,9 +53,9 @@ const STAGE_GUIDANCE: Record<SAFePortfolioStage, {
       'Prepare for deeper analysis or rejection'
     ],
     aiRecommendations: [
-      'This aligns strongly with L&G\'s Digital First strategy',
+      'This aligns strongly with NextEra\'s Clean Energy Transition strategy',
       'Similar scope projects averaged 8-month delivery',
-      '2 potential synergies identified with Asset Management initiatives'
+      '2 potential synergies identified with NEER initiatives'
     ],
     templates: ['Strategic Alignment Scorecard', 'Dependency Matrix', 'Go/No-Go Checklist']
   },
