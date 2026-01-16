@@ -380,44 +380,6 @@ function NavBar() {
         <Link href="/">
           <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" data-testid="link-home" />
         </Link>
-        <nav className="hidden md:flex gap-6">
-          <Link href="/dashboard" className="text-sm font-medium text-[#0072CE]" data-testid="link-dashboard">Dashboard</Link>
-          <Link href="/command-center" className="text-sm font-medium text-[#0072CE] flex items-center gap-1" data-testid="link-command-center">
-            <Brain className="h-4 w-4" />
-            Command Center
-          </Link>
-          <Link href="/ingestion" className="text-sm font-medium text-[#0072CE]" data-testid="link-ingestion">Project Ingestion</Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="text-sm font-medium text-[#0072CE] flex items-center gap-1 hover:opacity-80" data-testid="button-admin-menu">
-                <Settings className="h-4 w-4" />
-                Admin
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center gap-2 cursor-pointer" data-testid="link-settings">
-                  <Settings className="h-4 w-4" />
-                  Dashboard Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/mcp-config" className="flex items-center gap-2 cursor-pointer" data-testid="link-mcp-config">
-                  <Network className="h-4 w-4" />
-                  MCP Configuration
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/ingestion" className="flex items-center gap-2 cursor-pointer" data-testid="link-data-ingestion">
-                  <FileCode className="h-4 w-4" />
-                  Data Ingestion
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </nav>
       </div>
       <div className="flex items-center gap-2">
         <div className="relative w-64 hidden md:block">
