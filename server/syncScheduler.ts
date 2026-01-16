@@ -1,5 +1,7 @@
 import { storage } from "./storage";
 import { createJiraClientFromAdapter } from "./jiraClient";
+import { createServiceNowClientFromAdapter } from "./serviceNowClient";
+import { createAzureDevOpsClientFromAdapter } from "./azureDevOpsClient";
 
 interface ScheduledJob {
   jobId: string;
@@ -115,11 +117,48 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType !== 'jira') {
-        recordsProcessed = Math.floor(Math.random() * 200) + 20;
-        recordsCreated = Math.floor(recordsProcessed * 0.15);
-        recordsFailed = Math.floor(recordsProcessed * 0.02);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      } else if (job.syncType === 'servicenow' && job.mcpAdapterId) {
+        const client = await createServiceNowClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create ServiceNow client - check adapter configuration");
+        }
+        
+        let config: { projectId?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const projectId = config.projectId;
+        if (!projectId) {
+          throw new Error("Missing projectId in sync job filterCriteria - set filterCriteria to {\"projectId\":\"YOUR_PROJECT_SYS_ID\"}");
+        }
+        
+        const result = await client.syncProject(projectId, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType === 'azure_devops' && job.mcpAdapterId) {
+        const client = await createAzureDevOpsClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Azure DevOps client - check adapter configuration");
+        }
+        
+        const result = await client.syncProject();
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else {
+        throw new Error(`Unsupported sync type: ${job.syncType} - configure mcpAdapterId with proper adapter type`);
       }
 
       await storage.updateSyncJobRun(run.id, {

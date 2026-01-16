@@ -124,10 +124,29 @@ The application features a comprehensive MCP (Model Context Protocol) integratio
 9. **Health Monitor**: MCP adapter health status
 10. **Batch Import**: CSV/Excel/JSON file import
 
+### External PPM Tool API Clients
+The application includes production-ready API clients for three major PPM tools:
+
+**Jira** (`server/jiraClient.ts`)
+- Authentication: Basic Auth with API Token
+- Required config: `domain`, `email`, `apiToken`, `projectKey`
+- Syncs: Projects, Epics → Features, Stories, Tasks/Sub-tasks
+
+**ServiceNow** (`server/serviceNowClient.ts`)
+- Authentication: Basic Auth (username/password)
+- Required config: `instanceUrl`, `username`, `password`
+- Syncs: Projects, Demands/Epics → Features, Stories, Tasks
+
+**Azure DevOps** (`server/azureDevOpsClient.ts`)
+- Authentication: Personal Access Token (PAT)
+- Required config: `organization`, `project`, `personalAccessToken`
+- Syncs: Projects, Epics/Features, User Stories/PBIs, Tasks
+
 ### Sync Job Scheduling
 - **Cron-based scheduling**: Configure sync jobs with cron expressions
 - **Webhook handlers**: Receive real-time updates from external systems
 - **Conflict resolution**: Strategies for handling data conflicts (source_wins, target_wins, last_write_wins, manual)
+- **Background sync**: 60-second interval checks for due sync jobs
 
 ### Database Tables for MCP
 - `sync_jobs`: Scheduled sync jobs with cron expressions
