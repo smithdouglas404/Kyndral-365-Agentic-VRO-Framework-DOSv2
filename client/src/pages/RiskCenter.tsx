@@ -92,9 +92,9 @@ export default function RiskCenter() {
 
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          <Card className="lg:col-span-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('governance', 'three-lines-defence')} data-testid="card-three-lines-defence">
+          <Card className="lg:col-span-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('governance', 'risk-governance-framework')} data-testid="card-risk-governance-framework">
             <CardHeader>
-              <CardTitle>Three Lines of Defence</CardTitle>
+              <CardTitle>Enterprise Risk Governance Framework</CardTitle>
               <CardDescription>Risk governance model</CardDescription>
             </CardHeader>
             <CardContent>

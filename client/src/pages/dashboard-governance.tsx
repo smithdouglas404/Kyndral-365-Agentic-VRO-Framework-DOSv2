@@ -378,7 +378,7 @@ export default function GovernanceDashboard() {
 
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-lg">Three Lines of Defence</CardTitle>
+              <CardTitle className="text-lg">Enterprise Risk Governance Framework</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

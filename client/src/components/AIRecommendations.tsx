@@ -41,9 +41,9 @@ const vroRecommendations: Recommendation[] = [
   },
   {
     id: '2',
-    title: 'PRT Volume Acceleration',
+    title: 'Renewable Project Acceleration',
     confidence: 94,
-    description: 'VRO market sensing detects favorable conditions. Automated workflow can accelerate PRT processing by 40%, targeting $12bn volume.',
+    description: 'VRO market sensing detects favorable ITC/PTC conditions. Automated workflow can accelerate project approvals by 40%, targeting 8 GW additions.',
     actionLabel: 'Activate Automation',
     type: 'opportunity',
     impact: '+$2.8bn potential',
@@ -84,12 +84,12 @@ const pmoRecommendations: Recommendation[] = [
   },
   {
     id: '2',
-    title: 'PRT Volume Tracking',
+    title: 'Renewable Capacity Tracking',
     confidence: 72,
-    description: 'Current PRT volume at $7.1bn, below $10bn target. Traditional forecasting shows gap widening without intervention.',
+    description: 'Current project pipeline at 32 GW, below 46.5 GW target. Traditional forecasting shows gap widening without intervention.',
     actionLabel: 'View Forecast',
     type: 'risk',
-    impact: '$2.9bn gap',
+    impact: '14.5 GW gap',
     actionType: 'investigate'
   },
   {

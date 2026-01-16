@@ -378,25 +378,25 @@ export const riskData = {
     source: "NextEra Energy 10-K 2024, Risk Factors"
   },
   
-  // Three Lines of Defence
+  // Enterprise Risk Governance Framework
   threeLines: [
     { 
       line: 1, 
       name: "Reportable Segments", 
-      role: "Risk taking within appetite parameters",
-      accountable: "Managing risks in line with risk policies"
+      role: "Operational risk ownership within business units",
+      accountable: "Managing day-to-day risks per enterprise risk policies (FPL, NEER, Corporate)"
     },
     { 
       line: 2, 
-      name: "Risk Functions (CRO)", 
-      role: "Objective challenge and guidance on risk matters",
-      accountable: "Independent oversight and challenge"
+      name: "Risk Management & Compliance", 
+      role: "Independent oversight of enterprise risks",
+      accountable: "Regulatory compliance, NERC CIP, environmental and safety oversight"
     },
     { 
       line: 3, 
       name: "Internal Audit", 
-      role: "Independent assurance",
-      accountable: "Effectiveness of business risk management and overall risk framework"
+      role: "Independent assurance and validation",
+      accountable: "Effectiveness of risk management framework and regulatory compliance"
     }
   ],
   

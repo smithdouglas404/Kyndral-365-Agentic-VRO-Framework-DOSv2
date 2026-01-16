@@ -553,15 +553,15 @@ export const PROJECT_KPIS: Record<string, ProjectKPI[]> = {
 export const OKRS: OKR[] = [
   {
     id: "okr-001",
-    objective: "Accelerate PRT Deal Processing",
+    objective: "Accelerate Grid Modernization",
     keyResults: [
-      { id: "kr-001-1", description: "Reduce deal cycle time from 18 days to 5 days", progress: 68, target: 100, unit: "%", contributingKPIs: ["kpi-ir-001-1", "kpi-ir-001-2"], calculationMethod: "Weighted average of processing time and error rate improvements" },
-      { id: "kr-001-2", description: "Increase throughput to 200 deals/month", progress: 72, target: 100, unit: "%", contributingKPIs: ["kpi-ir-001-3"], calculationMethod: "Current throughput / target throughput * 100" },
+      { id: "kr-001-1", description: "Reduce outage response time from 18 minutes to 5 minutes", progress: 68, target: 100, unit: "%", contributingKPIs: ["kpi-ir-001-1", "kpi-ir-001-2"], calculationMethod: "Weighted average of response time and error rate improvements" },
+      { id: "kr-001-2", description: "Increase smart meter coverage to 100%", progress: 72, target: 100, unit: "%", contributingKPIs: ["kpi-ir-001-3"], calculationMethod: "Current coverage / target coverage * 100" },
       { id: "kr-001-3", description: "Achieve 4.5/5 customer satisfaction", progress: 93, target: 100, unit: "%", contributingKPIs: ["kpi-ir-001-4"], calculationMethod: "Current score / target score * 100" }
     ],
     overallProgress: 78,
     strategicPriority: "critical",
-    owner: "Andrew Kail",
+    owner: "Armando Pimentel",
     buAlignment: ["Florida Power & Light"]
   },
   {

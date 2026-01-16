@@ -134,13 +134,13 @@ export function getGovernanceItemsFromRiskData(mode: DataMode): TransformedGover
   
   const uniqueItemData = [
     {
-      title: 'Insurance Risk Review',
+      title: 'Grid Reliability Assessment',
       type: 'review' as const,
       owner: lgCompanyOverview.ceo,
       priority: 'medium' as const,
       daysOffset: mode === 'VRO' ? -5 : 10,
-      aiStatusVRO: 'ML model analyzed 2,847 claims patterns, identified 12 emerging risk trends. Solvency II compliance verified automatically with 99.2% accuracy.',
-      aiStatusPMO: 'Manual review of 156 claims files required. Spreadsheet-based tracking with quarterly reporting cycle.',
+      aiStatusVRO: 'ML model analyzed 35,052 MW generation assets, identified 12 potential equipment failure patterns. NERC compliance verified automatically with 99.2% accuracy.',
+      aiStatusPMO: 'Manual review of 156 substation reports required. Spreadsheet-based tracking with quarterly reporting cycle.',
       completionVRO: '2 days ahead of schedule',
       completionPMO: 'On schedule',
       statusVRO: 'complete' as const,
@@ -148,13 +148,13 @@ export function getGovernanceItemsFromRiskData(mode: DataMode): TransformedGover
       relatedRisks: 3
     },
     {
-      title: 'Market Risk Review',
+      title: 'Energy Market Risk Review',
       type: 'approval' as const,
       owner: lgCompanyOverview.cfo,
       priority: 'high' as const,
       daysOffset: mode === 'VRO' ? -2 : 15,
-      aiStatusVRO: 'Real-time VaR monitoring active. AI detected 3 positions exceeding risk thresholds, auto-escalated to Jeff Davies for immediate review.',
-      aiStatusPMO: 'Monthly VaR report pending manual compilation. Interest rate sensitivity analysis scheduled for next committee meeting.',
+      aiStatusVRO: 'Real-time power price monitoring active. AI detected 3 hedging positions exceeding risk thresholds, auto-escalated to Kirk Crews for immediate review.',
+      aiStatusPMO: 'Monthly market exposure report pending manual compilation. Commodity price sensitivity analysis scheduled for next committee meeting.',
       completionVRO: '1 day ahead of schedule',
       completionPMO: 'Delayed 6 days',
       statusVRO: 'complete' as const,
@@ -162,13 +162,13 @@ export function getGovernanceItemsFromRiskData(mode: DataMode): TransformedGover
       relatedRisks: 5
     },
     {
-      title: 'Credit Risk Review',
+      title: 'Regulatory Compliance Review',
       type: 'compliance' as const,
       owner: lgCompanyOverview.cro,
       priority: 'low' as const,
       daysOffset: mode === 'VRO' ? 1 : 20,
-      aiStatusVRO: 'Counterparty exposure dashboard updated hourly. AI scoring model rates 94% of counterparties as investment grade. 2 watchlist items flagged.',
-      aiStatusPMO: 'Quarterly counterparty review in progress. Credit rating updates awaiting manual verification from rating agencies.',
+      aiStatusVRO: 'FERC and Florida PSC compliance dashboard updated hourly. AI scoring model shows 94% regulatory readiness. 2 rate case items flagged for attention.',
+      aiStatusPMO: 'Quarterly regulatory filing review in progress. Rate case updates awaiting manual verification from legal team.',
       completionVRO: 'On schedule',
       completionPMO: 'Delayed 9 days',
       statusVRO: 'complete' as const,
@@ -176,13 +176,13 @@ export function getGovernanceItemsFromRiskData(mode: DataMode): TransformedGover
       relatedRisks: 2
     },
     {
-      title: 'Liquidity Risk Review',
+      title: 'Environmental Compliance Audit',
       type: 'decision' as const,
       owner: 'Compliance',
       priority: 'low' as const,
       daysOffset: mode === 'VRO' ? 4 : 25,
-      aiStatusVRO: 'Cash flow forecasting model predicting 98% accuracy over 90-day horizon. LCR at 142%, well above regulatory minimum. No stress test breaches detected.',
-      aiStatusPMO: 'Manual cash flow projections being consolidated from 4 business units. LCR calculation pending treasury reconciliation.',
+      aiStatusVRO: 'Environmental monitoring systems achieving 98% accuracy. CO2 emissions tracking on target for Real Zero goals. No EPA compliance breaches detected.',
+      aiStatusPMO: 'Manual environmental reports being consolidated from 4 business units. EPA filing data pending environmental team reconciliation.',
       completionVRO: 'On schedule',
       completionPMO: 'Delayed 12 days',
       statusVRO: 'in-review' as const,

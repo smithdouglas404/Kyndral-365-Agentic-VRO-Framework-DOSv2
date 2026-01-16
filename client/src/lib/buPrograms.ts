@@ -142,7 +142,7 @@ export const pmoProjects: PMOProject[] = [
   // Institutional Retirement
   {
     id: "pmo-ir-001",
-    name: "PRT Intake System Upgrade",
+    name: "Grid Modernization System Upgrade",
     bu: "Florida Power & Light",
     status: "amber",
     budget: { spent: 2.4, total: 3.5, unit: "$m" },
@@ -156,9 +156,9 @@ export const pmoProjects: PMOProject[] = [
       flowEfficiency: 68,
       currentPI: "PI 24.4",
       epicId: "EPIC-IR-101",
-      epicName: "PRT Digital Transformation",
+      epicName: "Grid Operations Digital Transformation",
       epicProgress: 55,
-      okr: { objective: "Reduce PRT processing time by 40%", keyResult: "Achieve 3-day turnaround", progress: 45 },
+      okr: { objective: "Reduce outage response time by 40%", keyResult: "Achieve 3-minute average restoration", progress: 45 },
       piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 75 }, { pi: "PI 24.2", velocity: 45, predictability: 78 }, { pi: "PI 24.3", velocity: 46, predictability: 80 }, { pi: "PI 24.4", velocity: 48, predictability: 82 }]
     },
     safeStage: "implementing",
@@ -174,13 +174,13 @@ export const pmoProjects: PMOProject[] = [
   },
   {
     id: "pmo-ir-002",
-    name: "Longevity Model Enhancement",
+    name: "Demand Forecasting Enhancement",
     bu: "Florida Power & Light",
     status: "green",
     budget: { spent: 0.8, total: 1.2, unit: "$m" },
     timeline: { elapsed: 5, total: 6, unit: "months" },
     deliverables: { completed: 8, total: 10 },
-    risks: ["Actuarial sign-off pending"],
+    risks: ["Engineering sign-off pending"],
     nextMilestone: "Go-live - Week 28",
     safe: {
       velocity: 52,
@@ -188,17 +188,17 @@ export const pmoProjects: PMOProject[] = [
       flowEfficiency: 78,
       currentPI: "PI 25.1",
       epicId: "EPIC-IR-102",
-      epicName: "Actuarial Model Modernization",
+      epicName: "Load Forecasting Modernization",
       epicProgress: 85,
-      okr: { objective: "Improve mortality prediction accuracy", keyResult: "Achieve 95% model accuracy", progress: 82 },
+      okr: { objective: "Improve demand prediction accuracy", keyResult: "Achieve 95% model accuracy", progress: 82 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 82 }, { pi: "PI 24.2", velocity: 48, predictability: 85 }, { pi: "PI 24.3", velocity: 50, predictability: 88 }, { pi: "PI 25.1", velocity: 52, predictability: 91 }]
     },
     safeStage: "implementing",
     aiSignals: [
-      { type: "insight", message: "Model accuracy improved 12% with new mortality tables", confidence: 94, dataSource: "Actuarial analytics" }
+      { type: "insight", message: "Model accuracy improved 12% with updated weather patterns", confidence: 94, dataSource: "Load analytics" }
     ],
     proactiveActions: [
-      { id: "pa-003", action: "Fast-track actuarial review to accelerate go-live", impact: "Save 1 week", urgency: "this-week", type: "accelerate" }
+      { id: "pa-003", action: "Fast-track engineering review to accelerate go-live", impact: "Save 1 week", urgency: "this-week", type: "accelerate" }
     ],
     trendData: [{ week: "W28", value: 78 }, { week: "W29", value: 82 }, { week: "W30", value: 85 }, { week: "W31", value: 88 }, { week: "W32", value: 92 }]
   },
@@ -402,7 +402,7 @@ export const pmoProjects: PMOProject[] = [
   },
   {
     id: "pmo-rc-002",
-    name: "Three Lines of Defence Automation",
+    name: "Enterprise Risk Governance Automation",
     bu: "Corporate & Other",
     status: "green",
     budget: { spent: 0.7, total: 1.0, unit: "$m" },
@@ -465,7 +465,7 @@ export const vroPrograms: VROProgram[] = [
       epicId: "EPIC-VRO-IR-01",
       epicName: "AI Deal Intelligence",
       epicProgress: 72,
-      okr: { objective: "Reduce PRT deal cycle by 40%", keyResult: "18-day to 5-day reduction", progress: 68 },
+      okr: { objective: "Reduce project approval cycle by 40%", keyResult: "18-day to 5-day reduction", progress: 68 },
       piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 85 }, { pi: "PI 24.2", velocity: 52, predictability: 88 }, { pi: "PI 24.3", velocity: 55, predictability: 90 }, { pi: "PI 25.2", velocity: 58, predictability: 92 }]
     },
     aiSignals: [
@@ -487,33 +487,33 @@ export const vroPrograms: VROProgram[] = [
     roiValue: 42,
     valueRealized: 15,
     strategicAlignment: 88,
-    aiInsight: "Mortality experience trending 1.2% favorable vs assumptions - recommend reserve release review",
-    prediction: "Demographic shift in North-West cohort may impact 2026 renewals - proactive reinsurance recommended",
+    aiInsight: "Generation performance trending 1.2% favorable vs projections - recommend capacity expansion review",
+    prediction: "Demand pattern shift in Southeast region may impact 2026 capacity - proactive grid expansion recommended",
     keyOutcomes: [
-      { outcome: "Reserve accuracy", progress: 96, target: 99, unit: "%" },
+      { outcome: "Forecast accuracy", progress: 96, target: 99, unit: "%" },
       { outcome: "Early warning detections", progress: 8, target: 12, unit: "/quarter" },
-      { outcome: "Reinsurance optimization", progress: 4.2, target: 6, unit: "$m savings" }
+      { outcome: "Grid efficiency gains", progress: 4.2, target: 6, unit: "$m savings" }
     ],
-    collaborators: ["Chris Knight (CRO)", "Actuarial", "Finance"],
-    riskMitigation: "AI monitoring 847 longevity cohorts in real-time",
+    collaborators: ["Rebecca Kujawa (CRO)", "Grid Operations", "Finance"],
+    riskMitigation: "AI monitoring 847 grid segments in real-time",
     safe: {
       velocity: 52,
       predictability: 88,
       flowEfficiency: 72,
       currentPI: "PI 24.3",
       epicId: "EPIC-VRO-IR-02",
-      epicName: "Longevity AI Platform",
+      epicName: "Grid Intelligence Platform",
       epicProgress: 65,
-      okr: { objective: "Achieve 99% reserve accuracy", keyResult: "Track 847 cohorts in real-time", progress: 75 },
+      okr: { objective: "Achieve 99% forecast accuracy", keyResult: "Track 847 grid segments in real-time", progress: 75 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 83 }, { pi: "PI 24.3", velocity: 50, predictability: 85 }, { pi: "PI 24.3", velocity: 52, predictability: 88 }]
     },
     aiSignals: [
-      { type: "insight", message: "Mortality 1.2% favorable - potential reserve release", confidence: 89, dataSource: "Actuarial AI" },
-      { type: "warning", message: "North-West cohort demographic shift detected", confidence: 76, dataSource: "Population analytics" }
+      { type: "insight", message: "Performance 1.2% favorable - potential capacity optimization", confidence: 89, dataSource: "Grid AI" },
+      { type: "warning", message: "Southeast demand pattern shift detected", confidence: 76, dataSource: "Load analytics" }
     ],
     proactiveActions: [
-      { id: "vpa-003", action: "Commission reserve release review with actuaries", impact: "Unlock $8m capital", urgency: "this-week", type: "accelerate" },
-      { id: "vpa-004", action: "Engage reinsurance broker for 2026 renewals", impact: "Hedge demographic risk", urgency: "this-month", type: "mitigate" }
+      { id: "vpa-003", action: "Commission capacity optimization review with engineering", impact: "Unlock $8m efficiency", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-004", action: "Engage construction teams for 2026 grid expansion", impact: "Meet demand growth", urgency: "this-month", type: "mitigate" }
     ],
     trendData: [{ week: "W28", value: 15 }, { week: "W29", value: 18 }, { week: "W30", value: 22 }, { week: "W31", value: 28 }, { week: "W32", value: 35 }]
   },
@@ -806,7 +806,7 @@ export const vroPrograms: VROProgram[] = [
 
 export interface RiskIssue {
   id: string;
-  category: "insurance" | "market" | "credit" | "liquidity" | "non-financial";
+  category: "operational" | "market" | "regulatory" | "environmental" | "non-financial";
   name: string;
   severity: "critical" | "high" | "medium" | "low";
   trend: "improving" | "stable" | "worsening";
@@ -820,122 +820,122 @@ export interface RiskIssue {
 }
 
 export const riskIssues: RiskIssue[] = [
-  // Credit Risk - Largest exposure
+  // Operational Risk - Hurricane Exposure
   {
     id: "risk-001",
-    category: "credit",
-    name: "Corporate Bond Default Risk",
+    category: "operational",
+    name: "Hurricane & Severe Weather Exposure",
     severity: "high",
     trend: "stable",
-    description: "Significant corporate bond portfolio backing PRT and annuities. Diversified across sectors and geographies but carries inherent default risk.",
-    exposure: "$42bn portfolio",
-    mitigation: "Diversification limits, credit rating floors, sector concentration caps",
-    owner: "Chris Knight",
-    aiAlert: "BBB cohort showing 0.3% deterioration - 12 issuers on watchlist",
+    description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event.",
+    exposure: "35,052 MW generation capacity",
+    mitigation: "Storm hardening, vegetation management, restoration crews, mutual aid agreements",
+    owner: "Armando Pimentel",
+    aiAlert: "2024 storm season: Milton and Helene required $1.2B restoration - within reserves",
     lastReview: "2024-12-15",
-    source: "Risk Management Supplement 2024, p.8"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
-  // Longevity Risk - Second largest
+  // Project Execution Risk
   {
     id: "risk-002",
-    category: "insurance",
-    name: "Longevity Assumption Drift",
+    category: "operational",
+    name: "Renewable Project Execution Risk",
     severity: "high",
     trend: "stable",
-    description: "Pricing of long-term life insurance requires assumptions for future trends in life expectancy. Risk that actual experience may diverge from assumptions.",
-    exposure: "$97.6bn proprietary assets",
-    mitigation: "Regular reserve reviews, reinsurance partnerships, dynamic hedging",
-    owner: "Andrew Kail",
-    aiAlert: "Mortality variance at 2.3% - within tolerance but trending upward",
+    description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
+    exposure: "68 GW development pipeline",
+    mitigation: "Diversified project portfolio, early procurement, multiple vendor relationships",
+    owner: "Rebecca Kujawa",
+    aiAlert: "3 projects experiencing interconnection delays - replanning in progress",
     lastReview: "2024-12-10",
-    source: "Risk Management Supplement 2024, p.5"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
-  // Cyber Risk
+  // Cyber Risk - Critical Infrastructure
   {
     id: "risk-003",
     category: "non-financial",
-    name: "Information Security & Cyber Threats",
+    name: "NERC CIP & Cyber Security",
     severity: "critical",
     trend: "worsening",
-    description: "Complex and dynamic threat landscape with emerging and evolving risks. Insurance sector increasingly targeted.",
-    exposure: "Operational + reputational",
-    mitigation: "Continuous monitoring, SOC 24/7, regular penetration testing, staff training",
-    owner: "Chris Knight",
-    aiAlert: "23% increase in insurance-sector attacks detected - enhanced monitoring activated",
+    description: "Critical infrastructure protection requirements and evolving cyber threats targeting energy sector. NERC CIP compliance essential for grid operations.",
+    exposure: "Grid operations + customer data",
+    mitigation: "NERC CIP compliance program, SOC 24/7, regular penetration testing, OT/IT segmentation",
+    owner: "Kirk Crews",
+    aiAlert: "42% increase in energy-sector attacks detected - enhanced monitoring activated",
     lastReview: "2024-12-18",
-    source: "Risk Management Supplement 2024, p.12"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
-  // Climate Risk
+  // Environmental & Climate Risk
   {
     id: "risk-004",
-    category: "non-financial",
-    name: "Climate and Nature Related Risk",
+    category: "environmental",
+    name: "Climate & Environmental Compliance",
     severity: "high",
     trend: "worsening",
-    description: "Described as 'the biggest challenge our generation faces'. Physical and transition risks across investment portfolio and operations.",
-    exposure: "$1.1tn AUM",
-    mitigation: "Net zero roadmap, TCFD disclosure, portfolio decarbonization, transition finance",
-    owner: "Carl Moxley",
-    aiAlert: "2024 warmest year on record - physical risk models updated",
+    description: "Climate transition risks, EPA regulations, and Real Zero 2045 commitments require ongoing capital investment and operational changes.",
+    exposure: "180 GW renewable portfolio",
+    mitigation: "Real Zero roadmap, TCFD disclosure, renewable buildout acceleration, carbon reduction",
+    owner: "Eric Silagy",
+    aiAlert: "2024 warmest year on record - storm frequency models updated",
     lastReview: "2024-12-12",
-    source: "Climate and Nature Report 2024, p.22"
+    source: "NextEra Energy Sustainability Report 2024"
   },
-  // Market Risk - Interest rates
+  // Market Risk - Commodity Prices
   {
     id: "risk-005",
     category: "market",
-    name: "Interest Rate & Inflation Volatility",
+    name: "Energy Commodity & PPA Pricing",
     severity: "medium",
     trend: "improving",
-    description: "Can affect value of investment assets held to meet obligations, as well as the value of obligations themselves.",
-    exposure: "Balance sheet sensitivity",
-    mitigation: "Duration matching, inflation hedging, stress testing",
-    owner: "Jeff Davies (CFO)",
+    description: "Exposure to natural gas, power prices, and long-term PPA pricing dynamics affecting NEER merchant and contracted revenues.",
+    exposure: "$18.5B operating revenue",
+    mitigation: "Hedging programs, PPA diversification, fuel cost recovery clauses",
+    owner: "Kirk Crews (CFO)",
     lastReview: "2024-12-08",
-    source: "Risk Management Supplement 2024, p.6"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
-  // Technology Risk
+  // Technology Risk - Grid Systems
   {
     id: "risk-006",
-    category: "non-financial",
-    name: "Technology System Dependencies",
+    category: "operational",
+    name: "Grid Technology & SCADA Systems",
     severity: "medium",
     trend: "improving",
-    description: "Significant reliance on IT systems and manual processes. Vulnerabilities, breakdowns, or loss of key personnel could lead to financial loss.",
-    exposure: "Operational continuity",
-    mitigation: "System modernization, redundancy, DR/BCP testing, key-man succession",
+    description: "Critical dependence on SCADA, EMS, and smart grid technology for operations. System failures could impact reliability and customer service.",
+    exposure: "91,000 circuit miles",
+    mitigation: "System redundancy, grid modernization, AMI deployment, DR/BCP testing",
     owner: "CIO",
     lastReview: "2024-12-05",
-    source: "Risk Management Supplement 2024, p.11"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
-  // Third Party Risk
+  // Supply Chain Risk
   {
     id: "risk-007",
-    category: "non-financial",
-    name: "Third Party & Outsource Providers",
+    category: "operational",
+    name: "Supply Chain & Equipment Vendors",
     severity: "medium",
     trend: "stable",
-    description: "Reliance on external providers for critical services. Provider failure could impact operations and customer service.",
-    exposure: "42 critical vendors",
-    mitigation: "Vendor due diligence, SLA monitoring, exit planning, concentration limits",
+    description: "Reliance on solar panel, battery, and wind turbine suppliers. Supply disruptions could delay renewable project timelines.",
+    exposure: "68 GW development pipeline",
+    mitigation: "Vendor diversification, inventory buffers, multi-year procurement contracts",
     owner: "Procurement",
-    aiAlert: "2 vendors showing financial stress indicators - contingency planning initiated",
+    aiAlert: "2 solar panel suppliers showing delivery delays - contingency sourcing activated",
     lastReview: "2024-12-14",
-    source: "Risk Management Supplement 2024, p.11"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   },
-  // Liquidity Risk
+  // Regulatory Risk
   {
     id: "risk-008",
-    category: "liquidity",
-    name: "Contingent Liquidity Events",
+    category: "regulatory",
+    name: "Rate Case & FERC Regulatory Outcomes",
     severity: "medium",
     trend: "stable",
-    description: "Low probability, extreme events that may result in unanticipated liquidity requirements if not adequately planned for.",
-    exposure: "Collateral requirements",
-    mitigation: "Liquidity buffer, contingent funding lines, asset-liability matching",
-    owner: "Treasury",
+    description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings and FERC transmission tariffs affect revenue recovery.",
+    exposure: "Current ROE 10.15-11.15%",
+    mitigation: "Regulatory engagement, rate case preparation, prudent capital deployment",
+    owner: "Regulatory Affairs",
     lastReview: "2024-12-11",
-    source: "Risk Management Supplement 2024, p.9"
+    source: "NextEra Energy 10-K 2024, Risk Factors"
   }
 ];
 
@@ -982,7 +982,7 @@ export const buPortfolios: BUPortfolio[] = [
   {
     id: "portfolio-ir",
     name: "Florida Power & Light",
-    description: "PRT deals, longevity risk management, and pension scheme solutions - $335bn AUM",
+    description: "Rate-regulated electric utility serving 5.9M customer accounts in Florida - 35,052 MW capacity",
     projectCount: getBUProjects("Florida Power & Light").length,
     programCount: getBUPrograms("Florida Power & Light").length,
     totalBudget: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.total, 0),
@@ -997,10 +997,10 @@ export const buPortfolios: BUPortfolio[] = [
     velocity: 52,
     predictability: 87,
     flowEfficiency: 72,
-    topAISignal: { type: "opportunity", message: "PRT pipeline expansion could accelerate value realization by 35%", confidence: 88, dataSource: "Market analysis" },
-    topAction: { id: "port-ir-001", action: "Fast-track PRT digital intake to capture Q1 pipeline", impact: "+$2.5m value", urgency: "immediate", type: "accelerate" },
+    topAISignal: { type: "opportunity", message: "Grid modernization could accelerate value realization by 35%", confidence: 88, dataSource: "System analysis" },
+    topAction: { id: "port-ir-001", action: "Fast-track AMI deployment to improve reliability", impact: "+$2.5m value", urgency: "immediate", type: "accelerate" },
     okrs: [
-      { objective: "Expand PRT market share to 25%", progress: 72, status: "on-track" },
+      { objective: "Achieve 99.99% system reliability", progress: 72, status: "on-track" },
       { objective: "Reduce processing time by 40%", progress: 55, status: "at-risk" }
     ]
   },
@@ -1032,7 +1032,7 @@ export const buPortfolios: BUPortfolio[] = [
   {
     id: "portfolio-retail",
     name: "Florida Power & Light",
-    description: "Consumer protection, insurance products, and direct-to-customer digital services",
+    description: "Customer operations, digital services, and direct-to-customer energy solutions",
     projectCount: getBUProjects("Florida Power & Light").length,
     programCount: getBUPrograms("Florida Power & Light").length,
     totalBudget: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.total, 0),

@@ -26,7 +26,7 @@ const guidanceItems: GuidanceItem[] = [
     type: 'best-practice',
     title: 'Early Stakeholder Alignment',
     description: 'Projects with steering committee alignment in Sprint 0 show 40% faster time-to-value. Consider scheduling alignment sessions before deep implementation.',
-    source: 'PRT Intake System lessons',
+    source: 'Grid Modernization lessons',
     relevance: 'high',
     actionable: true
   },
@@ -44,7 +44,7 @@ const guidanceItems: GuidanceItem[] = [
     type: 'collaboration',
     title: 'Cross-Group Knowledge Share',
     description: 'Retail team achieved 92% adoption with a structured playbook. This approach is recommended for other Group rollouts.',
-    source: 'Three Lines of Defence project',
+    source: 'Enterprise Risk Governance project',
     relevance: 'medium',
     actionable: true
   },
@@ -67,7 +67,7 @@ const learningResources = [
 ];
 
 const collaborators = [
-  { id: 'collab-ak', name: 'Andrew Kail', initials: 'AK', color: 'blue', activity: 'Shared PRT automation insights', isNew: true },
+  { id: 'collab-ak', name: 'Armando Pimentel', initials: 'AP', color: 'blue', activity: 'Shared grid automation insights', isNew: true },
   { id: 'collab-pl', name: 'Paula Llewellyn', initials: 'PL', color: 'purple', activity: 'Posted accessibility checklist', isNew: false }
 ];
 
