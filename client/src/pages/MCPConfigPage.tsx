@@ -220,6 +220,16 @@ function SchemaExplorerContent() {
       fields: ['name', 'strategicTheme', 'lpmCadence', 'budgetTotal', 'budgetAllocated'],
       relationships: ['Contains Value Streams', 'Has Strategic Themes', 'Owns Epics']
     },
+    'strategic-theme': { 
+      description: 'Business objective that connects portfolio vision to solutions',
+      fields: ['name', 'description', 'timeHorizon', 'budgetAllocation', 'status'],
+      relationships: ['Belongs to Portfolio', 'Guides Epics', 'Drives OKRs']
+    },
+    'capability': { 
+      description: 'Higher-level solution behavior that spans multiple features',
+      fields: ['name', 'description', 'status', 'enablers', 'targetPI'],
+      relationships: ['Belongs to Epic', 'Contains Features', 'Has Enablers']
+    },
     'value-stream': { 
       description: 'Sequence of steps delivering value to customers',
       fields: ['name', 'type', 'owner', 'flowEfficiency', 'leadTime'],
@@ -229,6 +239,16 @@ function SchemaExplorerContent() {
       description: 'Agile Release Train - cross-functional team of teams',
       fields: ['name', 'releaseTrainEngineer', 'productManager', 'piCadence', 'teamCount', 'velocity'],
       relationships: ['Part of Value Stream', 'Contains Teams', 'Delivers PIs']
+    },
+    'team': { 
+      description: 'Cross-functional group delivering stories each sprint',
+      fields: ['name', 'type', 'velocity', 'sprintCadence', 'scrumMaster', 'productOwner'],
+      relationships: ['Belongs to ART', 'Delivers Stories', 'Participates in Sprints']
+    },
+    'pi': { 
+      description: 'Program Increment - 8-12 week planning and delivery cycle',
+      fields: ['name', 'startDate', 'endDate', 'objectives', 'status', 'predictability'],
+      relationships: ['Belongs to ART', 'Contains Sprints', 'Delivers Features']
     },
     'feature': { 
       description: 'Customer-facing functionality delivered in a single PI',
@@ -240,10 +260,30 @@ function SchemaExplorerContent() {
       fields: ['name', 'status', 'storyPoints', 'sprint', 'assignedTeam', 'acceptanceCriteria'],
       relationships: ['Belongs to Feature', 'Contains Tasks', 'Assigned to Team']
     },
+    'task': { 
+      description: 'Unit of work needed to complete a story',
+      fields: ['name', 'status', 'estimatedHours', 'actualHours', 'assignee', 'type'],
+      relationships: ['Belongs to Story', 'Assigned to Team Member', 'Tracked in Sprint']
+    },
+    'sprint': { 
+      description: 'Time-boxed iteration (typically 2 weeks) for delivering stories',
+      fields: ['name', 'startDate', 'endDate', 'goal', 'velocity', 'status'],
+      relationships: ['Belongs to PI', 'Contains Stories', 'Executed by Team']
+    },
     'epic': { 
       description: 'Large initiative spanning multiple PIs',
       fields: ['name', 'status', 'leanBusinessCase', 'mvp', 'outcomes', 'budgetRange'],
       relationships: ['Part of Portfolio', 'Contains Features', 'Has Capabilities']
+    },
+    'okr': { 
+      description: 'Objective and Key Results - measurable goals',
+      fields: ['objective', 'keyResults', 'owner', 'progress', 'targetDate', 'status'],
+      relationships: ['Aligned to Theme', 'Measured by KPIs', 'Drives Projects']
+    },
+    'kpi': { 
+      description: 'Key Performance Indicator - quantitative success metric',
+      fields: ['name', 'currentValue', 'targetValue', 'unit', 'trend', 'frequency'],
+      relationships: ['Measures OKR', 'Tracked by Dashboard', 'Alerts on Threshold']
     },
     'milestone': { 
       description: 'Significant checkpoint or deliverable date',
