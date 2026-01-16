@@ -1194,15 +1194,10 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
             </div>
 
             <div className="p-4">
-              <AICoPilot 
-                drilldown={displayData} 
-                agentId={displayData.relatedAgents[0] || 'integrated-management'}
-                dataMode={dataMode}
-              />
-              
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="w-full mb-4">
                   <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+                  <TabsTrigger value="ai-analysis" className="flex-1">AI Analysis</TabsTrigger>
                   <TabsTrigger value="traceability" className="flex-1">Traceability</TabsTrigger>
                   <TabsTrigger value="agents" className="flex-1">Agents</TabsTrigger>
                   <TabsTrigger value="history" className="flex-1">History</TabsTrigger>
@@ -1751,6 +1746,14 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                     )}
                   </div>
                   )}
+                </TabsContent>
+
+                <TabsContent value="ai-analysis">
+                  <AICoPilot 
+                    drilldown={displayData} 
+                    agentId={displayData.relatedAgents[0] || 'integrated-management'}
+                    dataMode={dataMode}
+                  />
                 </TabsContent>
 
                 <TabsContent value="traceability">
