@@ -1,4 +1,5 @@
 import { persistIntervention, persistDiscussion, addDiscussionMessage } from './agentPersistence';
+import { interventionEvents } from './interventionEvents';
 
 export interface AgentAction {
   actionType: 'approve' | 'dismiss' | 'escalate' | 'acknowledge';
@@ -84,6 +85,13 @@ export async function routeToCommandCenter(action: AgentAction): Promise<{ succe
           });
         }
 
+        interventionEvents.emitApproved(intervention.id, {
+          title: interventionData.title,
+          status: 'approved',
+          agentSource: interventionData.agentSource,
+          projectName: interventionData.projectName
+        });
+        
         return { success: true, interventionId: intervention.id, discussionId: discussion?.id };
       }
     } else if (actionType === 'dismiss') {
@@ -101,6 +109,15 @@ export async function routeToCommandCenter(action: AgentAction): Promise<{ succe
         agentSource: interventionData.agentSource
       });
 
+      if (intervention) {
+        interventionEvents.emitDismissed(intervention.id, {
+          title: interventionData.title,
+          status: 'dismissed',
+          agentSource: interventionData.agentSource,
+          projectName: interventionData.projectName
+        });
+      }
+      
       return { success: !!intervention, interventionId: intervention?.id };
     } else if (actionType === 'escalate') {
       const intervention = await persistIntervention({
@@ -215,6 +232,14 @@ export async function emitAgentIntervention(intervention: NewIntervention): Prom
 
     if (result) {
       console.log(`[Command Center] New intervention from ${intervention.agentSource}: ${intervention.title}`);
+      
+      interventionEvents.emitCreated(result.id, {
+        title: intervention.title,
+        status: 'pending',
+        agentSource: intervention.agentSource,
+        projectName: intervention.projectName
+      });
+      
       return { success: true, interventionId: result.id };
     }
     

@@ -30,6 +30,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
+import { interventionEvents } from '@/lib/interventionEvents';
 
 interface RiskIntervention {
   id: string;
@@ -179,54 +180,65 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch interventions from database
-  useEffect(() => {
-    const fetchInterventions = async () => {
-      try {
-        const response = await fetch('/api/interventions');
-        if (response.ok) {
-          const data = await response.json();
-          const dbInterventions = data.interventions || [];
-          
-          // Map database interventions to component format
-          const mappedInterventions: RiskIntervention[] = dbInterventions.map((i: any) => ({
-            id: i.id,
-            type: i.type as 'dependency' | 'budget' | 'timeline' | 'resource' | 'quality',
-            severity: i.severity as 'critical' | 'high' | 'medium',
-            title: i.title,
-            description: i.description,
-            projectId: i.projectId || '',
-            projectName: i.projectName || 'Unknown Project',
-            confidence: parseFloat(i.confidence) * 100 || 85,
-            suggestedAction: i.suggestedAction,
-            impact: i.impact || 'Impact assessment pending',
-            timestamp: new Date(i.createdAt),
-            status: i.status as 'pending' | 'approved' | 'dismissed' | 'executing',
-            agentSource: i.agentSource
-          }));
-          
-          // Combine with initial demo data for richer display if DB is sparse
-          if (mappedInterventions.length < 3) {
-            setInterventions([...mappedInterventions, ...initialInterventions.slice(0, 3 - mappedInterventions.length)]);
-          } else {
-            setInterventions(mappedInterventions);
-          }
+  const fetchInterventions = useCallback(async () => {
+    try {
+      const response = await fetch('/api/interventions');
+      if (response.ok) {
+        const data = await response.json();
+        const dbInterventions = data.interventions || [];
+        
+        // Map database interventions to component format
+        const mappedInterventions: RiskIntervention[] = dbInterventions.map((i: any) => ({
+          id: i.id,
+          type: i.type as 'dependency' | 'budget' | 'timeline' | 'resource' | 'quality',
+          severity: i.severity as 'critical' | 'high' | 'medium',
+          title: i.title,
+          description: i.description,
+          projectId: i.projectId || '',
+          projectName: i.projectName || 'Unknown Project',
+          confidence: parseFloat(i.confidence) * 100 || 85,
+          suggestedAction: i.suggestedAction,
+          impact: i.impact || 'Impact assessment pending',
+          timestamp: new Date(i.createdAt),
+          status: i.status as 'pending' | 'approved' | 'dismissed' | 'executing',
+          agentSource: i.agentSource
+        }));
+        
+        // Combine with initial demo data for richer display if DB is sparse
+        if (mappedInterventions.length < 3) {
+          setInterventions([...mappedInterventions, ...initialInterventions.slice(0, 3 - mappedInterventions.length)]);
         } else {
-          // Fallback to demo data
-          setInterventions(initialInterventions);
+          setInterventions(mappedInterventions);
         }
-      } catch (error) {
-        console.error('Failed to fetch interventions:', error);
+      } else {
+        // Fallback to demo data
         setInterventions(initialInterventions);
-      } finally {
-        setIsLoading(false);
       }
-    };
-    
+    } catch (error) {
+      console.error('Failed to fetch interventions:', error);
+      setInterventions(initialInterventions);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchInterventions();
     // Poll for updates every 15 seconds
     const interval = setInterval(fetchInterventions, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchInterventions]);
+
+  // Listen for intervention events from other components
+  useEffect(() => {
+    const unsubscribe = interventionEvents.subscribe((event) => {
+      console.log('[Command Center] Received intervention event:', event.type);
+      // Immediately refetch interventions when any event occurs
+      fetchInterventions();
+    });
+    
+    return unsubscribe;
+  }, [fetchInterventions]);
 
   useEffect(() => {
     if (!isDiscussionPlaying || discussionIndex >= agentDiscussion.length) return;
