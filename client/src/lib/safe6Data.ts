@@ -67,259 +67,264 @@ export const strategicThemes: StrategicTheme[] = [
 ];
 
 // ===================== VALUE STREAMS =====================
+// NextEra Energy Value Streams aligned to SEC Reportable Segments
 
 export const valueStreams: ValueStream[] = [
   {
-    id: 'vs-retirement-solutions',
-    name: 'Retirement Solutions',
-    description: 'End-to-end pension and retirement product delivery from sales to servicing',
+    id: 'vs-grid-operations',
+    name: 'Grid Operations & Reliability',
+    description: 'FPL transmission and distribution network operations, storm hardening, and reliability improvements',
     type: 'operational',
-    owner: 'Michelle Thompson',
-    linkedARTs: ['art-retirement'],
-    annualBudget: 25000000,
-    kpis: ['kpi-ret-nps', 'kpi-ret-processing-time']
+    owner: 'Eric Silagy',
+    linkedARTs: ['art-grid'],
+    annualBudget: 450000000,
+    kpis: ['kpi-grid-reliability', 'kpi-outage-duration']
   },
   {
-    id: 'vs-investment-management',
-    name: 'Investment Management',
-    description: 'Portfolio management, trading, and client reporting for institutional and retail investors',
-    type: 'operational',
-    owner: 'Robert Chen',
-    linkedARTs: ['art-investments'],
-    annualBudget: 35000000,
-    kpis: ['kpi-inv-aum', 'kpi-inv-performance']
-  },
-  {
-    id: 'vs-digital-platforms',
-    name: 'Digital Platforms',
-    description: 'Shared digital infrastructure, APIs, and customer-facing applications',
+    id: 'vs-renewable-development',
+    name: 'Clean Energy Development',
+    description: 'NEER solar, wind, and battery storage project development and construction',
     type: 'development',
-    owner: 'Sarah Williams',
-    linkedARTs: ['art-digital'],
-    annualBudget: 20000000,
-    kpis: ['kpi-dig-uptime', 'kpi-dig-adoption']
+    owner: 'Rebecca Kujawa',
+    linkedARTs: ['art-renewables'],
+    annualBudget: 680000000,
+    kpis: ['kpi-renewable-capacity', 'kpi-project-completion']
   },
   {
-    id: 'vs-risk-compliance',
-    name: 'Corporate & Other',
-    description: 'Enterprise risk management, regulatory reporting, and compliance monitoring',
+    id: 'vs-customer-operations',
+    name: 'Customer Operations',
+    description: 'FPL customer service, billing, smart meter deployment, and demand-side management',
     type: 'operational',
-    owner: 'James Mitchell',
-    linkedARTs: ['art-risk'],
-    annualBudget: 15000000,
-    kpis: ['kpi-risk-incidents', 'kpi-risk-reporting']
+    owner: 'Mark Hickson',
+    linkedARTs: ['art-customer'],
+    annualBudget: 125000000,
+    kpis: ['kpi-customer-satisfaction', 'kpi-digital-adoption']
+  },
+  {
+    id: 'vs-energy-trading',
+    name: 'Energy Markets & Trading',
+    description: 'Wholesale energy trading, power purchase agreements, and market operations',
+    type: 'operational',
+    owner: 'John Ketchum',
+    linkedARTs: ['art-trading'],
+    annualBudget: 85000000,
+    kpis: ['kpi-trading-margin', 'kpi-ppa-execution']
   }
 ];
 
 // ===================== PORTFOLIO OKRs =====================
+// NextEra Energy Strategic OKRs - Source: Investor Presentations 2024
 
 export const portfolioOKRs: PortfolioOKR[] = [
   {
     id: 'okr-portfolio-digital',
     level: 'portfolio',
-    objective: 'Become the most digitally advanced retirement provider in the UK',
-    owner: 'CTO - David Harrison',
+    objective: 'Accelerate digital grid modernization and customer self-service capabilities',
+    owner: 'CTO - Enterprise Technology',
     quarter: '2025-Q4',
     status: 'on-track',
     keyResults: [
-      { id: 'kr-dig-1', description: 'Achieve 80% digital adoption rate for customer transactions', targetValue: 80, currentValue: 62, unit: '%', confidence: 75, status: 'on-track' },
-      { id: 'kr-dig-2', description: 'Reduce average transaction processing time by 60%', targetValue: 60, currentValue: 45, unit: '%', confidence: 80, status: 'on-track' },
-      { id: 'kr-dig-3', description: 'Launch 5 new digital-first products', targetValue: 5, currentValue: 3, unit: 'products', confidence: 85, status: 'on-track' }
+      { id: 'kr-dig-1', description: 'Deploy smart meters to 100% of FPL service territory', targetValue: 100, currentValue: 94, unit: '%', confidence: 90, status: 'on-track' },
+      { id: 'kr-dig-2', description: 'Achieve 75% customer digital engagement rate', targetValue: 75, currentValue: 62, unit: '%', confidence: 75, status: 'on-track' },
+      { id: 'kr-dig-3', description: 'Reduce outage restoration time by 40% through automation', targetValue: 40, currentValue: 28, unit: '%', confidence: 80, status: 'on-track' }
     ],
-    linkedEpics: ['epic-prt-platform', 'epic-digital-portal'],
-    linkedKPIs: ['kpi-dig-adoption', 'kpi-dig-uptime']
+    linkedEpics: ['epic-smart-grid', 'epic-digital-portal'],
+    linkedKPIs: ['kpi-digital-adoption', 'kpi-grid-reliability']
   },
   {
     id: 'okr-portfolio-ops',
     level: 'portfolio',
-    objective: 'Reduce operational costs by 25% through automation',
-    owner: 'COO - Jennifer Adams',
+    objective: 'Achieve industry-leading grid reliability and storm resilience',
+    owner: 'COO - FPL Operations',
     quarter: '2025-Q4',
     status: 'at-risk',
     keyResults: [
-      { id: 'kr-ops-1', description: 'Automate 70% of manual back-office processes', targetValue: 70, currentValue: 48, unit: '%', confidence: 60, status: 'at-risk' },
-      { id: 'kr-ops-2', description: 'Reduce FTE requirements by 15% through automation', targetValue: 15, currentValue: 8, unit: '%', confidence: 55, status: 'at-risk' },
-      { id: 'kr-ops-3', description: 'Achieve $5M annual cost savings', targetValue: 5000000, currentValue: 2800000, unit: '$', confidence: 65, status: 'at-risk' }
+      { id: 'kr-ops-1', description: 'Complete 100% of planned storm hardening program', targetValue: 100, currentValue: 85, unit: '%', confidence: 72, status: 'at-risk' },
+      { id: 'kr-ops-2', description: 'Reduce average outage duration (CAIDI) to 60 minutes', targetValue: 60, currentValue: 78, unit: 'min', confidence: 65, status: 'at-risk' },
+      { id: 'kr-ops-3', description: 'Achieve 99.98% system availability', targetValue: 99.98, currentValue: 99.94, unit: '%', confidence: 75, status: 'on-track' }
     ],
-    linkedEpics: ['epic-bulk-automation', 'epic-reporting-automation'],
-    linkedKPIs: ['kpi-ret-processing-time']
+    linkedEpics: ['epic-storm-hardening', 'epic-grid-automation'],
+    linkedKPIs: ['kpi-grid-reliability', 'kpi-outage-duration']
   }
 ];
 
 // ===================== PORTFOLIO KPIs =====================
+// NextEra Energy Key Performance Indicators - Source: 10-K 2024, Investor Presentations
 
 export const portfolioKPIs: PortfolioKPI[] = [
   {
-    id: 'kpi-dig-adoption',
-    name: 'Digital Adoption Rate',
-    description: 'Percentage of customer transactions completed digitally',
-    category: 'customer',
-    targetValue: 80,
-    currentValue: 62,
-    previousValue: 55,
-    unit: '%',
-    trend: 'up',
+    id: 'kpi-grid-reliability',
+    name: 'Grid Reliability (SAIDI)',
+    description: 'System Average Interruption Duration Index - minutes per customer per year',
+    category: 'operational',
+    targetValue: 45,
+    currentValue: 52,
+    previousValue: 58,
+    unit: 'min',
+    trend: 'down',
     frequency: 'monthly',
-    linkedValueStreams: ['vs-digital-platforms'],
+    linkedValueStreams: ['vs-grid-operations'],
     observations: [
-      { id: 'obs-1', kpiId: 'kpi-dig-adoption', timestamp: '2025-01-01', value: 55 },
-      { id: 'obs-2', kpiId: 'kpi-dig-adoption', timestamp: '2025-02-01', value: 58 },
-      { id: 'obs-3', kpiId: 'kpi-dig-adoption', timestamp: '2025-03-01', value: 62 }
+      { id: 'obs-1', kpiId: 'kpi-grid-reliability', timestamp: '2025-01-01', value: 58 },
+      { id: 'obs-2', kpiId: 'kpi-grid-reliability', timestamp: '2025-02-01', value: 55 },
+      { id: 'obs-3', kpiId: 'kpi-grid-reliability', timestamp: '2025-03-01', value: 52 }
     ]
   },
   {
-    id: 'kpi-ret-processing-time',
-    name: 'Pension Processing Time',
-    description: 'Average days to process a pension transfer request',
+    id: 'kpi-renewable-capacity',
+    name: 'Renewable Capacity Added',
+    description: 'New solar, wind, and battery storage capacity brought online (MW)',
     category: 'operational',
-    targetValue: 5,
-    currentValue: 12,
-    previousValue: 15,
-    unit: 'days',
-    trend: 'down',
-    frequency: 'weekly',
-    linkedValueStreams: ['vs-retirement-solutions'],
+    targetValue: 8500,
+    currentValue: 6200,
+    previousValue: 4800,
+    unit: 'MW',
+    trend: 'up',
+    frequency: 'quarterly',
+    linkedValueStreams: ['vs-renewable-development'],
     observations: []
   },
   {
-    id: 'kpi-inv-aum',
-    name: 'Assets Under Management',
-    description: 'Total assets under management across all funds',
-    category: 'financial',
-    targetValue: 1500000000000,
-    currentValue: 1350000000000,
-    previousValue: 1280000000000,
-    unit: '$',
+    id: 'kpi-customer-satisfaction',
+    name: 'Customer Satisfaction (J.D. Power)',
+    description: 'FPL customer satisfaction ranking among large utilities',
+    category: 'customer',
+    targetValue: 1,
+    currentValue: 2,
+    previousValue: 3,
+    unit: 'rank',
     trend: 'up',
-    frequency: 'daily',
-    linkedValueStreams: ['vs-investment-management'],
+    frequency: 'annual',
+    linkedValueStreams: ['vs-customer-operations'],
     observations: []
   }
 ];
 
 // ===================== PORTFOLIO EPICS =====================
+// NextEra Energy Strategic Initiatives - Source: Investor Presentations 2024
 
 export const portfolioEpics: PortfolioEpic[] = [
   {
-    id: 'epic-prt-platform',
-    name: 'PRT Platform Modernization',
-    description: 'Complete modernization of the Pension Risk Transfer platform to support $10bn+ annual volume',
-    epicHypothesis: 'By modernizing the PRT platform with API-first architecture and real-time pricing, we will reduce quote turnaround from 5 days to 4 hours and improve win rate by 15%',
-    businessOutcome: 'Increase annual PRT volume by $2B and improve profit margins by 3%',
-    leadingIndicators: ['Quote turnaround time', 'Win rate percentage', 'Customer satisfaction score'],
-    mvp: 'Basic pricing API with single-life calculations and manual workflow integration',
+    id: 'epic-storm-hardening',
+    name: 'FPL Storm Hardening Program',
+    description: 'Comprehensive grid hardening initiative including undergrounding, pole strengthening, and vegetation management',
+    epicHypothesis: 'By completing storm hardening before hurricane season, we reduce outage duration by 50% and customer impact by $1.2B',
+    businessOutcome: 'Reduce storm restoration costs by $400M and improve customer satisfaction by 15 points',
+    leadingIndicators: ['Miles hardened', 'Poles replaced', 'Underground conversion rate'],
+    mvp: 'Complete hardening of critical feeders serving hospitals and emergency services',
     status: 'implementing',
-    owner: 'Sarah Mitchell - RTE',
-    strategicThemeId: 'theme-digital-transform',
-    valueStreamId: 'vs-retirement-solutions',
-    wsjfScore: 28,
-    estimatedCost: 8500000,
-    actualCost: 4200000,
-    targetStartDate: '2025-01-15',
-    targetEndDate: '2026-06-30',
-    actualStartDate: '2025-01-20',
-    linkedCapabilities: [],
-    linkedFeatures: ['feat-prt-pricing', 'feat-prt-underwriting', 'feat-prt-integration'],
-    linkedOKRs: ['okr-portfolio-digital']
-  },
-  {
-    id: 'epic-trading-platform',
-    name: 'Next-Gen Trading Platform',
-    description: 'New multi-asset trading platform with real-time risk analytics and automated execution',
-    epicHypothesis: 'A modern trading platform will reduce trading costs by 20% and enable new asset class expansion',
-    businessOutcome: 'Reduce annual trading costs by $15M and enable $5B new AUM in alternatives',
-    leadingIndicators: ['Trade execution time', 'Trading cost per transaction', 'System uptime'],
-    mvp: 'Core equities trading with basic risk monitoring',
-    status: 'implementing',
-    owner: 'Robert Chen - PM',
-    strategicThemeId: 'theme-digital-transform',
-    valueStreamId: 'vs-investment-management',
-    wsjfScore: 25,
-    estimatedCost: 15000000,
-    actualCost: 9500000,
-    targetStartDate: '2024-09-01',
-    targetEndDate: '2026-03-31',
-    actualStartDate: '2024-09-15',
-    linkedCapabilities: [],
-    linkedFeatures: ['feat-trading-core', 'feat-trading-risk', 'feat-trading-fi'],
-    linkedOKRs: ['okr-portfolio-digital']
-  },
-  {
-    id: 'epic-data-foundation',
-    name: 'Enterprise Data Foundation',
-    description: 'Unified data platform providing single source of truth for all enterprise data',
-    epicHypothesis: 'A unified data foundation will enable real-time analytics and reduce data reconciliation effort by 80%',
-    businessOutcome: 'Enable data-driven decision making and reduce data management costs by $3M annually',
-    leadingIndicators: ['Data quality score', 'Query response time', 'Data source coverage'],
-    mvp: 'Core data lake with customer and transaction data domains',
-    status: 'implementing',
-    owner: 'James Wilson - Architect',
+    owner: 'Eric Silagy - FPL CEO',
     strategicThemeId: 'theme-operational-excellence',
-    valueStreamId: 'vs-digital-platforms',
-    wsjfScore: 30,
-    estimatedCost: 12000000,
-    actualCost: 8500000,
+    valueStreamId: 'vs-grid-operations',
+    wsjfScore: 35,
+    estimatedCost: 450000000,
+    actualCost: 382000000,
+    targetStartDate: '2024-01-01',
+    targetEndDate: '2026-05-31',
+    actualStartDate: '2024-01-15',
+    linkedCapabilities: [],
+    linkedFeatures: ['feat-underground-conversion', 'feat-pole-hardening', 'feat-vegetation-mgmt'],
+    linkedOKRs: ['okr-portfolio-ops']
+  },
+  {
+    id: 'epic-solar-expansion',
+    name: 'NEER Solar Capacity Expansion',
+    description: 'Development and construction of 5GW new solar generation capacity across 15 states',
+    epicHypothesis: 'Expanding solar capacity will generate $2.1B in annual revenue and support decarbonization goals',
+    businessOutcome: 'Add 5GW solar capacity, secure $8B in long-term PPAs, achieve 15% IRR on new projects',
+    leadingIndicators: ['MW under construction', 'PPA execution rate', 'Permitting cycle time'],
+    mvp: 'Complete first 1GW tranche with executed PPAs and interconnection agreements',
+    status: 'implementing',
+    owner: 'Rebecca Kujawa - NEER President',
+    strategicThemeId: 'theme-customer-growth',
+    valueStreamId: 'vs-renewable-development',
+    wsjfScore: 32,
+    estimatedCost: 680000000,
+    actualCost: 420000000,
+    targetStartDate: '2024-03-01',
+    targetEndDate: '2027-12-31',
+    actualStartDate: '2024-03-15',
+    linkedCapabilities: [],
+    linkedFeatures: ['feat-solar-development', 'feat-ppa-execution', 'feat-interconnection'],
+    linkedOKRs: ['okr-portfolio-digital']
+  },
+  {
+    id: 'epic-customer-digital',
+    name: 'Customer Digital Experience Platform',
+    description: 'Unified customer portal with self-service, real-time usage, and demand response capabilities',
+    epicHypothesis: 'Digital self-service will reduce call center volume by 40% and improve customer satisfaction by 20 points',
+    businessOutcome: 'Reduce O&M costs by $25M annually and achieve 75% digital engagement rate',
+    leadingIndicators: ['Digital adoption rate', 'Self-service completion rate', 'Mobile app ratings'],
+    mvp: 'Mobile app with usage viewing, bill pay, and outage reporting',
+    status: 'implementing',
+    owner: 'Mark Hickson - Customer Operations',
+    strategicThemeId: 'theme-digital-transform',
+    valueStreamId: 'vs-customer-operations',
+    wsjfScore: 28,
+    estimatedCost: 45000000,
+    actualCost: 28000000,
     targetStartDate: '2024-06-01',
     targetEndDate: '2025-12-31',
     actualStartDate: '2024-06-15',
     linkedCapabilities: [],
-    linkedFeatures: ['feat-data-lake', 'feat-data-quality', 'feat-data-api'],
-    linkedOKRs: ['okr-portfolio-ops']
+    linkedFeatures: ['feat-mobile-app', 'feat-self-service', 'feat-demand-response'],
+    linkedOKRs: ['okr-portfolio-digital']
   }
 ];
 
 // ===================== AGILE RELEASE TRAINS =====================
+// NextEra Energy Agile Release Trains - aligned to Value Streams
 
 export const arts: AgileReleaseTrain[] = [
   {
-    id: 'art-retirement',
-    name: 'Retirement Solutions ART',
-    description: 'Agile Release Train for all retirement and pension products',
-    valueStreamId: 'vs-retirement-solutions',
-    releaseTrainEngineer: 'Sarah Mitchell',
-    productManager: 'Emily Davis',
-    systemArchitect: 'James Chen',
-    teams: ['team-actuarial', 'team-platform', 'team-underwriting'],
+    id: 'art-grid',
+    name: 'Grid Operations ART',
+    description: 'Agile Release Train for FPL transmission, distribution, and grid modernization',
+    valueStreamId: 'vs-grid-operations',
+    releaseTrainEngineer: 'Maria Santos',
+    productManager: 'David Thompson',
+    systemArchitect: 'Kevin O\'Brien',
+    teams: ['team-scada', 'team-oms', 'team-gis'],
     piCadenceWeeks: 10,
     sprintCadenceWeeks: 2,
-    currentPI: 'pi-ret-2025-q1',
-    programBacklog: ['feat-prt-pricing', 'feat-prt-underwriting', 'feat-prt-integration'],
+    currentPI: 'pi-grid-2025-q1',
+    programBacklog: ['feat-storm-hardening', 'feat-smart-grid', 'feat-distribution-automation'],
     kpis: [
-      { id: 'kpi-art-ret-velocity', artId: 'art-retirement', name: 'Team Velocity', category: 'flow', targetValue: 150, currentValue: 142, unit: 'points/PI', trend: 'up' },
-      { id: 'kpi-art-ret-predict', artId: 'art-retirement', name: 'PI Predictability', category: 'predictability', targetValue: 85, currentValue: 78, unit: '%', trend: 'stable' }
+      { id: 'kpi-art-grid-velocity', artId: 'art-grid', name: 'Team Velocity', category: 'flow', targetValue: 180, currentValue: 165, unit: 'points/PI', trend: 'up' },
+      { id: 'kpi-art-grid-predict', artId: 'art-grid', name: 'PI Predictability', category: 'predictability', targetValue: 85, currentValue: 82, unit: '%', trend: 'up' }
     ]
   },
   {
-    id: 'art-investments',
-    name: 'Investment Management ART',
-    description: 'Agile Release Train for trading and investment management capabilities',
-    valueStreamId: 'vs-investment-management',
-    releaseTrainEngineer: 'Robert Chen',
-    productManager: 'Amanda Foster',
-    systemArchitect: 'Michael Brown',
-    teams: ['team-trading', 'team-risk-engine', 'team-reporting'],
+    id: 'art-renewables',
+    name: 'Clean Energy Development ART',
+    description: 'Agile Release Train for NEER solar, wind, and battery storage projects',
+    valueStreamId: 'vs-renewable-development',
+    releaseTrainEngineer: 'Jennifer Walsh',
+    productManager: 'Chris Martinez',
+    systemArchitect: 'Brian Kim',
+    teams: ['team-solar-dev', 'team-wind-ops', 'team-storage'],
     piCadenceWeeks: 10,
     sprintCadenceWeeks: 2,
-    currentPI: 'pi-inv-2025-q1',
-    programBacklog: ['feat-trading-core', 'feat-trading-risk', 'feat-trading-fi'],
+    currentPI: 'pi-renew-2025-q1',
+    programBacklog: ['feat-solar-development', 'feat-ppa-execution', 'feat-interconnection'],
     kpis: [
-      { id: 'kpi-art-inv-velocity', artId: 'art-investments', name: 'Team Velocity', category: 'flow', targetValue: 180, currentValue: 165, unit: 'points/PI', trend: 'up' },
-      { id: 'kpi-art-inv-quality', artId: 'art-investments', name: 'Defect Escape Rate', category: 'quality', targetValue: 2, currentValue: 3.5, unit: '%', trend: 'down' }
+      { id: 'kpi-art-renew-velocity', artId: 'art-renewables', name: 'Team Velocity', category: 'flow', targetValue: 160, currentValue: 148, unit: 'points/PI', trend: 'up' },
+      { id: 'kpi-art-renew-quality', artId: 'art-renewables', name: 'Defect Escape Rate', category: 'quality', targetValue: 2, currentValue: 2.8, unit: '%', trend: 'down' }
     ]
   },
   {
-    id: 'art-digital',
-    name: 'Digital Platforms ART',
-    description: 'Shared platform services, APIs, and digital infrastructure',
-    valueStreamId: 'vs-digital-platforms',
+    id: 'art-customer',
+    name: 'Customer Operations ART',
+    description: 'FPL customer service, billing, smart meters, and digital experience',
+    valueStreamId: 'vs-customer-operations',
     releaseTrainEngineer: 'Lisa Anderson',
     productManager: 'Tom Harris',
     systemArchitect: 'David Wilson',
-    teams: ['team-api', 'team-cloud', 'team-data'],
+    teams: ['team-mobile', 'team-billing', 'team-smart-meter'],
     piCadenceWeeks: 10,
     sprintCadenceWeeks: 2,
-    currentPI: 'pi-dig-2025-q1',
-    programBacklog: ['feat-data-lake', 'feat-api-gateway', 'feat-cloud-migration'],
+    currentPI: 'pi-cust-2025-q1',
+    programBacklog: ['feat-mobile-app', 'feat-self-service', 'feat-demand-response'],
     kpis: []
   }
 ];

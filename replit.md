@@ -59,8 +59,15 @@ The storage layer uses an interface pattern (`IStorage`) allowing easy swapping 
 1. **Monorepo Structure**: Client, server, and shared code in one repository with path aliases (`@/`, `@shared/`)
 2. **Storage Interface Pattern**: Abstract storage operations behind an interface for flexibility
 3. **Component Composition**: shadcn/ui components using Radix primitives with Tailwind styling
-4. **Simulated Data**: Dashboard uses generated/simulated data in `client/src/lib/simulation.ts` for demonstration purposes
+4. **Database-First AI Insights**: All AI-powered analysis (executiveInsights, askPM, impactAnalysis) reads from PostgreSQL database via storage interface - NO static file imports
 5. **Registry-Based Drill-Down Navigation**: All clickable entities resolve through `drilldownRegistry.ts` for consistent content
+
+### AI Insights Architecture (Updated Jan 2026)
+AI-powered features now read exclusively from the database:
+- **server/executiveInsights.ts**: Fetches strategicThemes, valueStreams, epics, arts, divisions, projects from DB and sends to Claude for executive-level analysis
+- **server/askPM.ts**: Builds SAFe context from DB for the AI PM assistant chatbot
+- **server/impactAnalysis.ts**: Performs what-if analysis using project/epic/feature data from DB
+- **IMPORTANT**: Do NOT import from client/src/lib/safe6Data.ts or lgData.ts in server files - these are legacy static files
 
 ### Drill-Down Navigation System
 The dashboard implements comprehensive 1-3 level drill-down navigation:
