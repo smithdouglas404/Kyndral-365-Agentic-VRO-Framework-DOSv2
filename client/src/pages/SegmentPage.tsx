@@ -68,7 +68,7 @@ function parseKeyResults(keyResults: string | null): ParsedKeyResult[] {
   }
 }
 
-export default function DivisionPage() {
+export default function SegmentPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { setPageContext } = usePageContext();
@@ -97,7 +97,7 @@ export default function DivisionPage() {
   useEffect(() => {
     if (division) {
       setPageContext({
-        pageType: 'division',
+        pageType: 'segment',
         entityId: division.id,
         entityName: division.name,
         breadcrumb: ['Dashboard', division.name]
@@ -215,7 +215,7 @@ export default function DivisionPage() {
           <TabsList className="bg-white shadow-sm">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="outcomes" data-testid="tab-outcomes">Outcomes & Alignment</TabsTrigger>
-            <TabsTrigger value="projects" data-testid="tab-projects">Projects ({divisionProjects.length})</TabsTrigger>
+            <TabsTrigger value="projects" data-testid="tab-projects">Projects ({segmentProjects.length})</TabsTrigger>
             <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
             <TabsTrigger value="alerts" data-testid="tab-alerts">AI Alerts ({divisionAlerts.length})</TabsTrigger>
           </TabsList>
@@ -291,7 +291,7 @@ export default function DivisionPage() {
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Programs</span>
-                          <span className="text-xl font-bold text-teal-700">{divisionProjects.length}</span>
+                          <span className="text-xl font-bold text-teal-700">{segmentProjects.length}</span>
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-teal-600">Value Score</span>
@@ -311,7 +311,7 @@ export default function DivisionPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">Projects</span>
-                          <span className="text-xl font-bold text-blue-700">{divisionProjects.length}</span>
+                          <span className="text-xl font-bold text-blue-700">{segmentProjects.length}</span>
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">On-Time</span>
@@ -319,7 +319,7 @@ export default function DivisionPage() {
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">Features</span>
-                          <span className="text-xl font-bold text-blue-700">{divisionProjects.reduce((sum, p) => sum + (p.features?.length || 0), 0)}</span>
+                          <span className="text-xl font-bold text-blue-700">{segmentProjects.reduce((sum, p) => sum + (p.features?.length || 0), 0)}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -703,10 +703,10 @@ export default function DivisionPage() {
                     onClick={() => setStageFilter("all")}
                     data-testid="filter-all-stages"
                   >
-                    All Stages ({divisionProjects.length})
+                    All Stages ({segmentProjects.length})
                   </Button>
                   {getSafeStages().map(stage => {
-                    const count = divisionProjects.filter(p => p.safeStage === stage).length;
+                    const count = segmentProjects.filter(p => p.safeStage === stage).length;
                     return (
                       <Button
                         key={stage}
@@ -727,19 +727,19 @@ export default function DivisionPage() {
             {/* Projects Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="p-4 bg-green-50 border-green-200">
-                <div className="text-2xl font-bold text-green-700">{divisionProjects.filter(p => p.status === 'green').length}</div>
+                <div className="text-2xl font-bold text-green-700">{segmentProjects.filter(p => p.status === 'green').length}</div>
                 <div className="text-sm text-green-600">On Track</div>
               </Card>
               <Card className="p-4 bg-amber-50 border-amber-200">
-                <div className="text-2xl font-bold text-amber-700">{divisionProjects.filter(p => p.status === 'amber').length}</div>
+                <div className="text-2xl font-bold text-amber-700">{segmentProjects.filter(p => p.status === 'amber').length}</div>
                 <div className="text-sm text-amber-600">At Risk</div>
               </Card>
               <Card className="p-4 bg-red-50 border-red-200">
-                <div className="text-2xl font-bold text-red-700">{divisionProjects.filter(p => p.status === 'red').length}</div>
+                <div className="text-2xl font-bold text-red-700">{segmentProjects.filter(p => p.status === 'red').length}</div>
                 <div className="text-sm text-red-600">Critical</div>
               </Card>
               <Card className="p-4 bg-blue-50 border-blue-200">
-                <div className="text-2xl font-bold text-blue-700">{formatMoney(divisionProjects.reduce((sum, p) => sum + p.roiValue, 0))}</div>
+                <div className="text-2xl font-bold text-blue-700">{formatMoney(segmentProjects.reduce((sum, p) => sum + p.roiValue, 0))}</div>
                 <div className="text-sm text-blue-600">Total Expected ROI</div>
               </Card>
             </div>

@@ -131,14 +131,15 @@ export function getSuggestedQuestions(context: PageContextData): string[] {
         "List projects that need immediate attention"
       ];
     
+    case 'segment':
     case 'division':
-      const divName = entityName || businessUnit || 'this division';
+      const segmentName = entityName || businessUnit || 'this segment';
       return [
-        `What projects in ${divName} are at risk?`,
-        `Show me the dependencies for ${divName} projects`,
-        `What's the total budget and ROI for ${divName}?`,
-        `Which ${divName} projects need attention?`,
-        "How do these projects relate to other divisions?"
+        `What projects in ${segmentName} are at risk?`,
+        `Show me the dependencies for ${segmentName} projects`,
+        `What's the total budget and ROI for ${segmentName}?`,
+        `Which ${segmentName} projects need attention?`,
+        "How do these projects relate to other segments?"
       ];
     
     case 'project':
