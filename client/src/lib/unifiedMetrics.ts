@@ -44,16 +44,9 @@ export interface VROAggregatedMetric {
 }
 
 export const GROUP_FUNCTIONS = [
-  'Florida Power & Light',
-  'NextEra Energy Resources',
-  'Florida Power & Light',
-  'Corporate & Other',
-  'Corporate & Other',
-  'Group Technology',
-  'Group HR',
-  'Corporate & Other',
-  'Group Finance',
-  'Group Investments'
+  'FPL',
+  'NEER',
+  'Corporate & Other'
 ] as const;
 
 export type GroupFunction = typeof GROUP_FUNCTIONS[number];
@@ -199,71 +192,71 @@ export const EXPANDED_PMO_PROJECTS = [
     trendData: [{ week: "W28", value: 42 }, { week: "W29", value: 48 }, { week: "W30", value: 52 }, { week: "W31", value: 55 }, { week: "W32", value: 58 }]
   },
   {
-    id: "pmo-gl-001",
-    name: "Contract Lifecycle Management",
-    bu: "Corporate & Other",
+    id: "nee-fpl-003",
+    name: "FPL Storm Protection Plan",
+    bu: "FPL",
     status: "green" as const,
-    budget: { spent: 1.5, total: 2.0, unit: "$m" },
+    budget: { spent: 150, total: 200, unit: "$M" },
     timeline: { elapsed: 8, total: 10, unit: "months" },
     deliverables: { completed: 12, total: 15 },
-    risks: ["Integration with existing document management"],
+    risks: ["Weather delays during installation"],
     nextMilestone: "Go-live - Week 28",
     safe: {
       velocity: 55,
       predictability: 88,
       flowEfficiency: 75,
       currentPI: "PI 24.3",
-      epicId: "EPIC-GL-001",
-      epicName: "Regulatory Operations Automation",
+      epicId: "EPIC-FPL-003",
+      epicName: "Storm Resilience Infrastructure",
       epicProgress: 82,
-      okr: { objective: "Automate 70% of contract workflows", keyResult: "Reduce cycle time by 50%", progress: 78 },
+      okr: { objective: "Harden 70% of coastal substations", keyResult: "Reduce hurricane restoration time by 50%", progress: 78 },
       piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 82 }, { pi: "PI 24.2", velocity: 50, predictability: 84 }, { pi: "PI 24.3", velocity: 52, predictability: 86 }, { pi: "PI 24.4", velocity: 55, predictability: 88 }]
     },
     safeStage: "done" as const,
     aiSignals: [
-      { type: "insight" as const, message: "AI clause extraction achieving 94% accuracy", confidence: 95, dataSource: "NLP model" }
+      { type: "insight" as const, message: "AI storm prediction achieving 94% accuracy", confidence: 95, dataSource: "Weather analytics" }
     ],
     proactiveActions: [
-      { id: "pa-gl-001", action: "Document success patterns for Phase 2", impact: "Enable faster rollout", urgency: "this-month" as const, type: "accelerate" as const }
+      { id: "pa-fpl-003", action: "Document success patterns for Phase 2", impact: "Enable faster rollout", urgency: "this-month" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W28", value: 78 }, { week: "W29", value: 82 }, { week: "W30", value: 85 }, { week: "W31", value: 88 }, { week: "W32", value: 92 }]
   },
   {
-    id: "pmo-gl-002",
-    name: "Regulatory Change Tracker",
+    id: "nee-corp-001",
+    name: "NextEra NERC CIP Compliance",
     bu: "Corporate & Other",
     status: "amber" as const,
-    budget: { spent: 0.6, total: 0.9, unit: "$m" },
+    budget: { spent: 60, total: 90, unit: "$M" },
     timeline: { elapsed: 4, total: 7, unit: "months" },
     deliverables: { completed: 5, total: 10 },
-    risks: ["Regulatory data feed reliability"],
+    risks: ["Regulatory audit timeline"],
     nextMilestone: "UAT - Week 30",
     safe: {
       velocity: 42,
       predictability: 75,
       flowEfficiency: 62,
       currentPI: "PI 25.1",
-      epicId: "EPIC-GL-002",
-      epicName: "Regulatory Intelligence",
+      epicId: "EPIC-CORP-001",
+      epicName: "Cybersecurity Compliance",
       epicProgress: 55,
-      okr: { objective: "Proactive regulatory compliance", keyResult: "Zero missed regulatory changes", progress: 52 },
+      okr: { objective: "100% NERC CIP compliance", keyResult: "Zero audit findings", progress: 52 },
       piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.4", velocity: 42, predictability: 75 }]
     },
     safeStage: "reviewing" as const,
     aiSignals: [
-      { type: "warning" as const, message: "2 regulatory feeds showing latency issues", confidence: 78, dataSource: "Feed monitoring" }
+      { type: "warning" as const, message: "2 control gaps showing latency issues", confidence: 78, dataSource: "Compliance monitoring" }
     ],
     proactiveActions: [
-      { id: "pa-gl-002", action: "Escalate feed issues to vendor", impact: "Ensure data reliability", urgency: "immediate" as const, type: "mitigate" as const }
+      { id: "pa-corp-001", action: "Escalate gaps to CISO", impact: "Ensure audit readiness", urgency: "immediate" as const, type: "mitigate" as const }
     ],
     trendData: [{ week: "W28", value: 48 }, { week: "W29", value: 52 }, { week: "W30", value: 55 }, { week: "W31", value: 58 }, { week: "W32", value: 62 }]
   },
   {
-    id: "pmo-gf-001",
-    name: "Finance Automation Suite",
-    bu: "Group Finance",
+    id: "nee-corp-002",
+    name: "NextEra Enterprise Finance Platform",
+    bu: "Corporate & Other",
     status: "green" as const,
-    budget: { spent: 2.2, total: 3.0, unit: "$m" },
+    budget: { spent: 22, total: 30, unit: "$M" },
     timeline: { elapsed: 9, total: 12, unit: "months" },
     deliverables: { completed: 15, total: 20 },
     risks: ["Audit trail requirements"],
@@ -273,7 +266,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 85,
       flowEfficiency: 75,
       currentPI: "PI 25.2",
-      epicId: "EPIC-GF-001",
+      epicId: "EPIC-CORP-002",
       epicName: "Finance Transformation",
       epicProgress: 75,
       okr: { objective: "Automate 80% of finance processes", keyResult: "5-day close cycle", progress: 72 },
@@ -284,97 +277,97 @@ export const EXPANDED_PMO_PROJECTS = [
       { type: "insight" as const, message: "Close cycle reduced from 12 to 7 days", confidence: 94, dataSource: "Process metrics" }
     ],
     proactiveActions: [
-      { id: "pa-gf-001", action: "Capture efficiency gains for business case", impact: "Support Phase 3 funding", urgency: "this-week" as const, type: "accelerate" as const }
+      { id: "pa-corp-002", action: "Capture efficiency gains for business case", impact: "Support Phase 3 funding", urgency: "this-week" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W28", value: 68 }, { week: "W29", value: 72 }, { week: "W30", value: 75 }, { week: "W31", value: 78 }, { week: "W32", value: 82 }]
   },
   {
-    id: "pmo-gf-002",
-    name: "Treasury Management Upgrade",
-    bu: "Group Finance",
+    id: "nee-neer-003",
+    name: "NEER Offshore Wind Development",
+    bu: "NEER",
     status: "amber" as const,
-    budget: { spent: 0.9, total: 1.4, unit: "$m" },
+    budget: { spent: 900, total: 1400, unit: "$M" },
     timeline: { elapsed: 5, total: 8, unit: "months" },
     deliverables: { completed: 6, total: 12 },
-    risks: ["Bank connectivity testing"],
-    nextMilestone: "Integration testing - Week 29",
+    risks: ["Offshore permitting delays"],
+    nextMilestone: "Environmental review - Week 29",
     safe: {
       velocity: 45,
       predictability: 78,
       flowEfficiency: 68,
       currentPI: "PI 24.3",
-      epicId: "EPIC-GF-002",
-      epicName: "Treasury Modernization",
+      epicId: "EPIC-NEER-003",
+      epicName: "Atlantic Offshore Wind",
       epicProgress: 52,
-      okr: { objective: "Real-time cash visibility", keyResult: "Same-day reporting", progress: 48 },
+      okr: { objective: "Develop 1,200 MW offshore capacity", keyResult: "Federal permits secured", progress: 48 },
       piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 72 }, { pi: "PI 24.2", velocity: 42, predictability: 74 }, { pi: "PI 24.3", velocity: 44, predictability: 76 }, { pi: "PI 24.4", velocity: 45, predictability: 78 }]
     },
     safeStage: "analyzing" as const,
     aiSignals: [
-      { type: "warning" as const, message: "2 bank APIs require additional security testing", confidence: 82, dataSource: "Security scan" }
+      { type: "warning" as const, message: "2 environmental studies require additional review", confidence: 82, dataSource: "Regulatory tracker" }
     ],
     proactiveActions: [
-      { id: "pa-gf-002", action: "Schedule dedicated security testing window", impact: "Unblock integration", urgency: "this-week" as const, type: "mitigate" as const }
+      { id: "pa-neer-003", action: "Schedule dedicated permitting review", impact: "Unblock construction", urgency: "this-week" as const, type: "mitigate" as const }
     ],
     trendData: [{ week: "W28", value: 45 }, { week: "W29", value: 48 }, { week: "W30", value: 52 }, { week: "W31", value: 55 }, { week: "W32", value: 58 }]
   },
   {
-    id: "pmo-gi-001",
-    name: "Investment Analytics Platform",
-    bu: "Group Investments",
+    id: "nee-neer-004",
+    name: "NEER Hydrogen Production Pilot",
+    bu: "NEER",
     status: "green" as const,
-    budget: { spent: 1.8, total: 2.5, unit: "$m" },
+    budget: { spent: 180, total: 250, unit: "$M" },
     timeline: { elapsed: 7, total: 10, unit: "months" },
     deliverables: { completed: 11, total: 16 },
-    risks: ["Real-time data feed latency"],
+    risks: ["Electrolyzer delivery timeline"],
     nextMilestone: "Beta launch - Week 28",
     safe: {
       velocity: 55,
       predictability: 88,
       flowEfficiency: 78,
       currentPI: "PI 25.1",
-      epicId: "EPIC-GI-001",
-      epicName: "Investment Intelligence",
+      epicId: "EPIC-NEER-004",
+      epicName: "Green Hydrogen Initiative",
       epicProgress: 70,
-      okr: { objective: "Data-driven investment decisions", keyResult: "15bps alpha improvement", progress: 68 },
+      okr: { objective: "Produce 10,000 kg/day green hydrogen", keyResult: "Industrial customer contracts", progress: 68 },
       piTrend: [{ pi: "PI 24.1", velocity: 48, predictability: 82 }, { pi: "PI 24.2", velocity: 50, predictability: 84 }, { pi: "PI 24.3", velocity: 52, predictability: 86 }, { pi: "PI 24.4", velocity: 55, predictability: 88 }]
     },
     safeStage: "implementing" as const,
     aiSignals: [
-      { type: "opportunity" as const, message: "ML model identifying 12bps additional alpha opportunity", confidence: 85, dataSource: "Quant analytics" }
+      { type: "opportunity" as const, message: "Industrial demand 25% higher than projected", confidence: 85, dataSource: "Market analytics" }
     ],
     proactiveActions: [
-      { id: "pa-gi-001", action: "Prioritize ML model enhancement", impact: "Capture additional alpha", urgency: "this-month" as const, type: "accelerate" as const }
+      { id: "pa-neer-004", action: "Accelerate electrolyzer capacity expansion", impact: "Capture demand", urgency: "this-month" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W28", value: 62 }, { week: "W29", value: 68 }, { week: "W30", value: 72 }, { week: "W31", value: 76 }, { week: "W32", value: 80 }]
   },
   {
-    id: "pmo-gi-002",
-    name: "ESG Scoring Integration",
-    bu: "Group Investments",
+    id: "nee-neer-005",
+    name: "NEER Real Zero Carbon Credits",
+    bu: "NEER",
     status: "green" as const,
-    budget: { spent: 0.5, total: 0.8, unit: "$m" },
+    budget: { spent: 50, total: 80, unit: "$M" },
     timeline: { elapsed: 4, total: 6, unit: "months" },
     deliverables: { completed: 7, total: 10 },
-    risks: ["Third-party ESG data quality"],
+    risks: ["Carbon credit verification standards"],
     nextMilestone: "Production release - Week 26",
     safe: {
       velocity: 58,
       predictability: 90,
       flowEfficiency: 82,
       currentPI: "PI 25.2",
-      epicId: "EPIC-GI-002",
-      epicName: "Sustainable Investment Framework",
+      epicId: "EPIC-NEER-005",
+      epicName: "Carbon Credit Platform",
       epicProgress: 72,
-      okr: { objective: "Integrate ESG into all investment decisions", keyResult: "100% portfolio coverage", progress: 78 },
+      okr: { objective: "Launch Real Zero carbon credit marketplace", keyResult: "10 corporate customers enrolled", progress: 78 },
       piTrend: [{ pi: "PI 24.1", velocity: 50, predictability: 84 }, { pi: "PI 24.2", velocity: 53, predictability: 86 }, { pi: "PI 24.3", velocity: 55, predictability: 88 }, { pi: "PI 24.4", velocity: 58, predictability: 90 }]
     },
     safeStage: "done" as const,
     aiSignals: [
-      { type: "insight" as const, message: "ESG integration showing positive correlation with returns", confidence: 88, dataSource: "Portfolio analytics" }
+      { type: "insight" as const, message: "Corporate demand exceeding projections by 40%", confidence: 88, dataSource: "Sales analytics" }
     ],
     proactiveActions: [
-      { id: "pa-gi-002", action: "Document ESG-return correlation for investor comms", impact: "Strengthen ESG narrative", urgency: "this-month" as const, type: "accelerate" as const }
+      { id: "pa-neer-005", action: "Expand sales team capacity", impact: "Capture revenue opportunity", urgency: "this-month" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W28", value: 72 }, { week: "W29", value: 78 }, { week: "W30", value: 82 }, { week: "W31", value: 86 }, { week: "W32", value: 90 }]
   },
@@ -499,32 +492,32 @@ export const EXPANDED_PMO_PROJECTS = [
     trendData: [{ week: "W32", value: 28 }]
   },
   {
-    id: "pmo-rc-backlog-001",
-    name: "Operational Resilience Framework",
+    id: "nee-corp-003",
+    name: "NextEra Operational Resilience Framework",
     bu: "Corporate & Other",
     status: "green" as const,
-    budget: { spent: 0.5, total: 1.8, unit: "$m" },
+    budget: { spent: 50, total: 180, unit: "$M" },
     timeline: { elapsed: 4, total: 12, unit: "months" },
     deliverables: { completed: 5, total: 16 },
-    risks: ["Cross-Group coordination"],
+    risks: ["Cross-segment coordination"],
     nextMilestone: "Sprint 1 start - Week 26",
     safe: {
       velocity: 42,
       predictability: 78,
       flowEfficiency: 65,
       currentPI: "PI 25.1",
-      epicId: "EPIC-RC-BACKLOG",
+      epicId: "EPIC-CORP-003",
       epicName: "Enterprise Resilience",
       epicProgress: 32,
-      okr: { objective: "Meet operational resilience requirements", keyResult: "100% IBS mapping", progress: 28 },
+      okr: { objective: "Meet operational resilience requirements", keyResult: "100% critical asset mapping", progress: 28 },
       piTrend: [{ pi: "PI 24.4", velocity: 42, predictability: 78 }]
     },
     safeStage: "portfolio-backlog" as const,
     aiSignals: [
-      { type: "insight" as const, message: "Early mapping shows 85% IBS coverage already", confidence: 85, dataSource: "Resilience assessment" }
+      { type: "insight" as const, message: "Early mapping shows 85% critical asset coverage", confidence: 85, dataSource: "Resilience assessment" }
     ],
     proactiveActions: [
-      { id: "pa-rc-b-001", action: "Prioritize gap analysis for remaining 15%", impact: "Focus remediation efforts", urgency: "this-week" as const, type: "accelerate" as const }
+      { id: "pa-corp-003", action: "Prioritize gap analysis for remaining 15%", impact: "Focus remediation efforts", urgency: "this-week" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W32", value: 32 }]
   }
@@ -599,16 +592,16 @@ export const OKRS: OKR[] = [
   },
   {
     id: "okr-004",
-    objective: "Enterprise Cloud Transformation",
+    objective: "Enterprise Grid Transformation",
     keyResults: [
-      { id: "kr-004-1", description: "Migrate 80% workloads to cloud", progress: 65, target: 100, unit: "%", contributingKPIs: ["kpi-gt-001-1"], calculationMethod: "Workloads migrated / target * 100" },
-      { id: "kr-004-2", description: "Reduce infrastructure costs 40%", progress: 70, target: 100, unit: "%", contributingKPIs: ["kpi-gt-001-2"], calculationMethod: "Cost reduction / target * 100" },
-      { id: "kr-004-3", description: "Increase deployment frequency to 20/week", progress: 60, target: 100, unit: "%", contributingKPIs: ["kpi-gt-001-3"], calculationMethod: "Current frequency / target * 100" }
+      { id: "kr-004-1", description: "Modernize 80% of grid infrastructure", progress: 65, target: 100, unit: "%", contributingKPIs: ["kpi-gt-001-1"], calculationMethod: "Infrastructure modernized / target * 100" },
+      { id: "kr-004-2", description: "Reduce outage duration 40%", progress: 70, target: 100, unit: "%", contributingKPIs: ["kpi-gt-001-2"], calculationMethod: "Outage reduction / target * 100" },
+      { id: "kr-004-3", description: "Increase grid automation to 90%", progress: 60, target: 100, unit: "%", contributingKPIs: ["kpi-gt-001-3"], calculationMethod: "Current automation / target * 100" }
     ],
     overallProgress: 65,
     strategicPriority: "critical",
-    owner: "Group CTO",
-    buAlignment: ["Group Technology"]
+    owner: "NextEra CTO",
+    buAlignment: ["FPL"]
   }
 ];
 
