@@ -26,9 +26,10 @@ export const lgCompanyOverview = {
 // BUSINESS DIVISIONS - Each with KPIs, OKRs, and Projects
 // ============================================================================
 
-export interface DivisionData {
+export interface SegmentData {
   id: string;
   name: string;
+  abbreviation: string;
   ceo: string;
   profit2023: number;
   profit2024: number;
@@ -37,9 +38,12 @@ export interface DivisionData {
   kpis: KPI[];
   okrs: OKR[];
   potentialProjects: Project[];
-  risks: DivisionRisk[];
+  risks: SegmentRisk[];
   color: string;
 }
+
+// Legacy alias for backward compatibility
+export type DivisionData = SegmentData;
 
 export interface KPI {
   name: string;
@@ -77,22 +81,27 @@ export interface Project {
   dependencies?: ProjectDependency[];
 }
 
-export interface DivisionRisk {
+export interface SegmentRisk {
   type: string;
   level: "low" | "medium" | "high";
   description: string;
   mitigation: string;
 }
 
-export const divisions: DivisionData[] = [
+// Legacy alias for backward compatibility
+export type DivisionRisk = SegmentRisk;
+
+// NextEra Energy Reportable Segments (per SEC 10-K filings)
+export const segments: SegmentData[] = [
   {
-    id: "florida-power-light",
-    name: "Florida Power & Light",
+    id: "fpl",
+    name: "FPL",
+    abbreviation: "FPL",
     ceo: "Armando Pimentel",
     profit2023: 4850,
     profit2024: 5200,
     changePercent: 7,
-    description: "Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
+    description: "Florida Power & Light Company - Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
     color: "#0072CE", // NextEra Blue
     kpis: [
       { name: "Operating Revenue", value2023: 17200, value2024: 18500, target2025: 19500, unit: "$m", trend: "up", status: "on-track" },
@@ -156,13 +165,14 @@ export const divisions: DivisionData[] = [
     ]
   },
   {
-    id: "nextera-energy-resources",
-    name: "NextEra Energy Resources",
+    id: "neer",
+    name: "NEER",
+    abbreviation: "NEER",
     ceo: "Rebecca Kujawa",
     profit2023: 2100,
     profit2024: 2350,
     changePercent: 12,
-    description: "World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
+    description: "NextEra Energy Resources, LLC - World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
     color: "#00A651", // NextEra Green
     kpis: [
       { name: "Operating Revenue", value2023: 6200, value2024: 6800, target2025: 7500, unit: "$m", trend: "up", status: "on-track" },
@@ -226,12 +236,13 @@ export const divisions: DivisionData[] = [
   },
   {
     id: "corporate-other",
-    name: "Corporate & Other",
+    name: "Corporate and Other",
+    abbreviation: "Corp",
     ceo: "John Ketchum",
     profit2023: 450,
     profit2024: 520,
     changePercent: 16,
-    description: "Corporate functions, NEET transmission business, and strategic investments supporting NextEra's growth.",
+    description: "Corporate functions, NextEra Energy Transmission (NEET), and strategic investments supporting NextEra's growth.",
     color: "#424242", // Grey-700
     kpis: [
       { name: "NEET Rate Base", value2023: 2.4, value2024: 2.7, target2025: 3.2, unit: "$bn", trend: "up", status: "on-track" },
@@ -272,6 +283,9 @@ export const divisions: DivisionData[] = [
     ]
   }
 ];
+
+// Legacy export for backward compatibility
+export const divisions = segments;
 
 // ============================================================================
 // CLIMATE & SUSTAINABILITY DATA - From NextEra Energy Reports 2024
