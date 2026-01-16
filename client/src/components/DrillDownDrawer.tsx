@@ -882,6 +882,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Regulatory Compliance Review', value: 'Complete', budget: 'On schedule' },
         { name: 'Environmental Compliance Audit', value: 'In Review', budget: 'Due in 4 days' }
       ],
+      pendingAlerts: [
+        { id: 'gov-alert-1', title: 'Environmental Compliance Audit', severity: 'warning', description: 'Awaiting final review from Legal team', dueDate: '4 days', actionLabel: 'Complete Review' }
+      ],
       insight: '3 of 4 governance decisions completed this cycle. Environmental Compliance Audit is currently in review and expected to complete within SLA.',
       summary: 'Governance queue performing well with 87% on-time completion rate. One decision pending final review.'
     },
@@ -900,6 +903,12 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Q1 Rate Case Filing Review', value: 'Medium', budget: 'Due: 8 days' },
         { name: 'NERC CIP Attestation', value: 'Medium', budget: 'Due: 12 days' },
         { name: 'Board ESG Report Approval', value: 'Low', budget: 'Due: 20 days' }
+      ],
+      pendingAlerts: [
+        { id: 'pending-1', title: 'Environmental Compliance Audit', severity: 'critical', description: 'EPA submission deadline approaching', dueDate: '4 days', actionLabel: 'Start Audit' },
+        { id: 'pending-2', title: 'Q1 Rate Case Filing Review', severity: 'warning', description: 'Florida PSC rate case documentation', dueDate: '8 days', actionLabel: 'Begin Review' },
+        { id: 'pending-3', title: 'NERC CIP Attestation', severity: 'warning', description: 'Annual cybersecurity compliance attestation', dueDate: '12 days', actionLabel: 'Schedule' },
+        { id: 'pending-4', title: 'Board ESG Report Approval', severity: 'info', description: 'Q4 sustainability metrics for board', dueDate: '20 days', actionLabel: 'Prepare Report' }
       ],
       insight: 'Environmental Compliance Audit requires immediate attention - currently 1 day from due date. NERC CIP Attestation on track but needs scheduling.',
       summary: '4 governance actions pending. Governance Agent recommends prioritizing Environmental Compliance Audit to maintain SLA compliance.'
@@ -921,6 +930,10 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'EPA Environmental', value: '91%', budget: 'Needs Attention' },
         { name: 'Florida PSC Rate Case', value: '89%', budget: 'Under Review' }
       ],
+      pendingAlerts: [
+        { id: 'comp-1', title: 'EPA Environmental Gap', severity: 'warning', description: 'Emissions reporting 4% below target', dueDate: 'Ongoing', actionLabel: 'View Gap Analysis' },
+        { id: 'comp-2', title: 'Florida PSC Rate Case', severity: 'info', description: 'Rate case filing under regulatory review', dueDate: 'Q2 2026', actionLabel: 'Track Status' }
+      ],
       insight: 'Overall compliance at 93% with FERC leading at 98%. EPA and Florida PSC areas need focus to reach 95% target.',
       summary: 'Strong regulatory compliance posture. Governance Agent monitoring 4 active regulatory areas with automated tracking.'
     },
@@ -939,6 +952,12 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Renewable Project Delays', value: 'Severe', budget: '3 projects affected' },
         { name: 'NERC CIP Audit Finding', value: 'Severe', budget: 'Remediation in progress' },
         { name: 'Supply Chain Constraints', value: 'Severe', budget: 'Solar panel delays' }
+      ],
+      pendingAlerts: [
+        { id: 'risk-1', title: 'Hurricane Season Exposure', severity: 'critical', description: 'Storm hardening 85% complete - accelerate remaining 15%', dueDate: 'June 1', actionLabel: 'View Mitigation Plan' },
+        { id: 'risk-2', title: 'Renewable Project Delays', severity: 'warning', description: '3 solar projects delayed due to permitting', dueDate: 'Ongoing', actionLabel: 'Review Timeline' },
+        { id: 'risk-3', title: 'NERC CIP Audit Finding', severity: 'warning', description: 'Substation access control remediation needed', dueDate: '30 days', actionLabel: 'Assign Resources' },
+        { id: 'risk-4', title: 'Supply Chain Constraints', severity: 'warning', description: 'Solar panel delivery delays from suppliers', dueDate: 'Q2 2026', actionLabel: 'Contact Vendors' }
       ],
       insight: 'Hurricane Season Exposure is the highest risk with potential $1.2B impact. Storm hardening program 85% complete. 3 risks have active mitigation plans.',
       summary: '4 high-severity risks actively monitored. Risk Agent recommends accelerating storm hardening completion before peak season.'
@@ -959,9 +978,22 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Market Risk', value: '4 sub-risks', budget: 'Monitored' },
         { name: 'Climate & Environmental', value: '3 sub-risks', budget: 'High priority' }
       ],
+      pendingAlerts: [
+        { id: 'cro-1', title: 'Executive Escalation: Grid Reliability', severity: 'critical', description: 'Requires CRO decision by end of week', dueDate: '3 days', actionLabel: 'Review & Decide' },
+        { id: 'cro-2', title: 'Executive Escalation: Vendor Contract', severity: 'warning', description: 'Solar panel supplier renegotiation pending', dueDate: '7 days', actionLabel: 'Schedule Meeting' }
+      ],
       insight: 'Rebecca Kujawa oversees 6 risk categories with 12 open items. 2 items escalated to executive committee this week.',
       summary: 'Enterprise risk governance under CRO oversight. Next quarterly risk review scheduled for Feb 2026.'
     }
+  };
+  
+  type GovernanceAlert = {
+    id: string;
+    title: string;
+    severity: 'critical' | 'warning' | 'info';
+    description: string;
+    dueDate: string;
+    actionLabel: string;
   };
 
   const metricConfig = entityType === 'metric' ? metricConfigs[entityId] : null;
@@ -977,12 +1009,13 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     events: [],
     metrics: metricConfig.metrics,
     projectBreakdown: metricConfig.projectBreakdown,
-    actions: [
+    actions: entityId.startsWith('governance-') ? [] : [
       { id: 'analyze', label: 'Deep Dive Analysis', type: 'investigate' },
       { id: 'forecast', label: 'Run Forecast Scenario', type: 'accelerate' },
       { id: 'alert', label: 'Set Alert Threshold', type: 'mitigate' },
       { id: 'report', label: 'Generate Report', type: 'escalate' }
     ],
+    pendingAlerts: (metricConfig as any).pendingAlerts || [],
     history: [
       { timestamp: new Date(Date.now() - 300000), action: 'Metric data refreshed from source systems', agent: 'integrated-management' as AgentType },
       { timestamp: new Date(Date.now() - 180000), action: 'Cross-validated with historical trends', agent: 'finops' as AgentType },
@@ -1409,8 +1442,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                     </Card>
                     )}
 
-                    {/* Project Breakdown for Metric entities */}
-                    {entityType === 'metric' && metricDrilldown?.projectBreakdown && (
+                    {/* Project Breakdown for non-governance Metric entities */}
+                    {entityType === 'metric' && metricDrilldown?.projectBreakdown && !entityId.startsWith('governance-') && (
                       <Card className="border-gray-200">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2 uppercase tracking-wide text-gray-600">
@@ -1432,6 +1465,65 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                                   <p className="font-bold text-sm">{project.value}</p>
                                   <p className="text-xs text-gray-500">{project.budget}</p>
                                 </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Pending Alerts for Governance Metrics - actionable items */}
+                    {entityType === 'metric' && entityId.startsWith('governance-') && metricDrilldown?.pendingAlerts && metricDrilldown.pendingAlerts.length > 0 && (
+                      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2 text-amber-800">
+                            <AlertTriangle size={16} className="text-amber-600" />
+                            Pending Actions ({metricDrilldown.pendingAlerts.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {metricDrilldown.pendingAlerts.map((alert: GovernanceAlert) => (
+                              <div 
+                                key={alert.id} 
+                                className={`p-3 rounded-lg border ${
+                                  alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
+                                  alert.severity === 'warning' ? 'bg-amber-50 border-amber-200' :
+                                  'bg-blue-50 border-blue-200'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${
+                                      alert.severity === 'critical' ? 'bg-red-500' :
+                                      alert.severity === 'warning' ? 'bg-amber-500' :
+                                      'bg-blue-500'
+                                    }`} />
+                                    <span className="font-medium text-sm">{alert.title}</span>
+                                  </div>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`text-xs ${
+                                      alert.severity === 'critical' ? 'bg-red-100 text-red-700 border-red-300' :
+                                      alert.severity === 'warning' ? 'bg-amber-100 text-amber-700 border-amber-300' :
+                                      'bg-blue-100 text-blue-700 border-blue-300'
+                                    }`}
+                                  >
+                                    Due: {alert.dueDate}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-gray-600 mb-3">{alert.description}</p>
+                                <Button 
+                                  size="sm" 
+                                  className={`w-full ${
+                                    alert.severity === 'critical' ? 'bg-red-600 hover:bg-red-700' :
+                                    alert.severity === 'warning' ? 'bg-amber-600 hover:bg-amber-700' :
+                                    'bg-blue-600 hover:bg-blue-700'
+                                  } text-white`}
+                                  data-testid={`complete-${alert.id}`}
+                                >
+                                  {alert.actionLabel}
+                                </Button>
                               </div>
                             ))}
                           </div>
