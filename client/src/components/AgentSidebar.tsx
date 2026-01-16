@@ -2,7 +2,8 @@ import { Link, useLocation } from 'wouter';
 import { 
   Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight,
-  BarChart3, Building2, Briefcase, PieChart, Upload, Bot
+  BarChart3, Building2, Briefcase, PieChart, Upload, Bot,
+  Settings, Network, Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -239,6 +240,29 @@ export function AgentSidebar({ activeTab = "overview", onTabChange = () => {}, c
           );
         })}
       </nav>
+
+      {/* Admin Section */}
+      <div className="border-t border-gray-200 py-2">
+        {!collapsed && (
+          <div className="px-3 mb-1">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Admin</span>
+          </div>
+        )}
+        <div className="px-2 space-y-1">
+          <Link href="/settings">
+            <div className="w-full px-3 py-2 rounded-lg cursor-pointer transition-all text-left flex items-center gap-3 hover:bg-gray-100 text-gray-700" data-testid="nav-settings">
+              <Settings className="h-4 w-4 text-gray-500" />
+              {!collapsed && <span className="text-sm font-medium">Settings</span>}
+            </div>
+          </Link>
+          <Link href="/mcp-config">
+            <div className="w-full px-3 py-2 rounded-lg cursor-pointer transition-all text-left flex items-center gap-3 hover:bg-gray-100 text-gray-700" data-testid="nav-mcp-config">
+              <Network className="h-4 w-4 text-gray-500" />
+              {!collapsed && <span className="text-sm font-medium">MCP Config</span>}
+            </div>
+          </Link>
+        </div>
+      </div>
 
       <div className="p-3 border-t border-gray-100">
         <Link href="/vro-framework">
