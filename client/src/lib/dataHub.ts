@@ -6,7 +6,7 @@
 import { pmoProjects, vroPrograms, riskIssues, buPortfolios, PMOProject, VROProgram, RiskIssue, BUPortfolio } from './buPrograms';
 import { SimulationEvent } from './liveSimulation';
 import { getProjectsByMetricId, EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
-import { formatValueInMillions } from './formatters';
+import { formatValueInMillions, formatValueWithUnit } from './formatters';
 
 export type AgentType = 'integrated-management' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
 
@@ -974,8 +974,8 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
         const proj = entity as PMOProject;
         relatedAgents = ['integrated-management', 'governance', 'ocm'];
         metrics = {
-          'Budget Spent': `${proj.budget.spent}${proj.budget.unit}`,
-          'Budget Total': `${proj.budget.total}${proj.budget.unit}`,
+          'Budget Spent': formatValueWithUnit(proj.budget.spent, proj.budget.unit),
+          'Budget Total': formatValueWithUnit(proj.budget.total, proj.budget.unit),
           'Timeline Progress': `${Math.round((proj.timeline.elapsed / proj.timeline.total) * 100)}%`,
           'Deliverables': `${proj.deliverables.completed}/${proj.deliverables.total}`,
           'Velocity': proj.safe.velocity,

@@ -38,137 +38,137 @@ interface AttributionAnalysis {
 const CORE_KPIS: KPI[] = [
   {
     id: 'kpi-001',
-    name: 'Operating Profit',
+    name: 'Revenue Growth',
     category: 'financial',
-    baseline: 820,
-    target: 950,
-    current: 892,
+    baseline: 18200,
+    target: 21000,
+    current: 19850,
     unit: '$m',
     trend: 'up',
     status: 'on-track',
     attribution: [
-      { initiative: 'Claims', contribution: 32, confidence: 85 },
-      { initiative: 'Cost Efficiency Programme', contribution: 45, confidence: 92 },
-      { initiative: 'Process Automation', contribution: 23, confidence: 78 }
+      { initiative: 'FPL Solar Expansion', contribution: 35, confidence: 92 },
+      { initiative: 'NEER Wind Repowering', contribution: 42, confidence: 88 },
+      { initiative: 'Grid Modernization', contribution: 23, confidence: 78 }
     ]
   },
   {
     id: 'kpi-002',
-    name: 'Customer NPS',
+    name: 'Customer Reliability Index',
     category: 'customer',
-    baseline: 42,
-    target: 55,
-    current: 51,
-    unit: 'pts',
+    baseline: 92,
+    target: 99.5,
+    current: 98.2,
+    unit: '%',
     trend: 'up',
     status: 'on-track',
     attribution: [
-      { initiative: 'Customer Portal Upgrade', contribution: 55, confidence: 88 },
-      { initiative: 'Claims', contribution: 30, confidence: 75 },
-      { initiative: 'Mobile App Launch', contribution: 15, confidence: 82 }
+      { initiative: 'Grid Modernization', contribution: 55, confidence: 90 },
+      { initiative: 'Storm Hardening Program', contribution: 30, confidence: 85 },
+      { initiative: 'Smart Meter Deployment', contribution: 15, confidence: 82 }
     ]
   },
   {
     id: 'kpi-003',
-    name: 'Claims Processing Time',
+    name: 'Outage Response Time',
     category: 'operational',
-    baseline: 14,
-    target: 5,
-    current: 7.2,
-    unit: 'days',
+    baseline: 120,
+    target: 45,
+    current: 68,
+    unit: 'min',
     trend: 'down',
     status: 'at-risk',
     attribution: [
-      { initiative: 'Claims', contribution: 65, confidence: 90 },
-      { initiative: 'Process Automation', contribution: 35, confidence: 85 }
+      { initiative: 'Grid Modernization', contribution: 65, confidence: 90 },
+      { initiative: 'AI Predictive Maintenance', contribution: 35, confidence: 85 }
     ]
   },
   {
     id: 'kpi-004',
-    name: 'Digital Adoption Rate',
+    name: 'Renewable Capacity',
     category: 'strategic',
-    baseline: 45,
-    target: 75,
-    current: 68,
-    unit: '%',
+    baseline: 28500,
+    target: 35000,
+    current: 32400,
+    unit: 'MW',
     trend: 'up',
     status: 'on-track',
     attribution: [
-      { initiative: 'Customer Portal Upgrade', contribution: 40, confidence: 92 },
-      { initiative: 'Mobile App Launch', contribution: 45, confidence: 88 },
-      { initiative: 'Digital Marketing Campaign', contribution: 15, confidence: 70 }
+      { initiative: 'NEER Wind Repowering', contribution: 45, confidence: 92 },
+      { initiative: 'FPL Solar Expansion', contribution: 40, confidence: 88 },
+      { initiative: 'Battery Storage Deployment', contribution: 15, confidence: 75 }
     ]
   },
   {
     id: 'kpi-005',
-    name: 'Cost-to-Income Ratio',
+    name: 'Carbon Reduction',
     category: 'financial',
-    baseline: 58,
-    target: 50,
-    current: 52.4,
+    baseline: 42,
+    target: 70,
+    current: 58,
     unit: '%',
-    trend: 'down',
+    trend: 'up',
     status: 'on-track',
     attribution: [
-      { initiative: 'Cost Efficiency Programme', contribution: 60, confidence: 95 },
-      { initiative: 'Process Automation', contribution: 25, confidence: 82 },
-      { initiative: 'Vendor Consolidation', contribution: 15, confidence: 75 }
+      { initiative: 'Coal Plant Retirement', contribution: 50, confidence: 95 },
+      { initiative: 'NEER Wind Repowering', contribution: 30, confidence: 88 },
+      { initiative: 'FPL Solar Expansion', contribution: 20, confidence: 82 }
     ]
   },
   {
     id: 'kpi-006',
-    name: 'Employee Engagement',
+    name: 'Safety Performance (TRIR)',
     category: 'strategic',
-    baseline: 72,
-    target: 82,
-    current: 76,
-    unit: '%',
+    baseline: 0.85,
+    target: 0.50,
+    current: 0.62,
+    unit: '',
     trend: 'stable',
     status: 'at-risk',
     attribution: [
-      { initiative: 'Workplace Transformation', contribution: 50, confidence: 80 },
-      { initiative: 'Learning & Development', contribution: 30, confidence: 75 },
-      { initiative: 'Hybrid Working Programme', contribution: 20, confidence: 85 }
+      { initiative: 'Safety Excellence Program', contribution: 50, confidence: 88 },
+      { initiative: 'Field Operations Training', contribution: 30, confidence: 82 },
+      { initiative: 'Contractor Management', contribution: 20, confidence: 75 }
     ]
   }
 ];
 
 const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
   {
-    initiative: 'Claims',
+    initiative: 'FPL Solar Expansion',
     kpiImpact: [
-      { kpi: 'Operating Profit', contribution: '+$23m', confidence: 85 },
-      { kpi: 'Customer NPS', contribution: '+4 pts', confidence: 75 },
-      { kpi: 'Claims Processing Time', contribution: '-4.5 days', confidence: 90 }
+      { kpi: 'Revenue Growth', contribution: '+$580M', confidence: 92 },
+      { kpi: 'Renewable Capacity', contribution: '+1,200 MW', confidence: 95 },
+      { kpi: 'Carbon Reduction', contribution: '+8%', confidence: 88 }
     ],
-    totalValue: '$47m',
+    totalValue: '$1.2B',
     evidenceStrength: 'strong'
   },
   {
-    initiative: 'Cost Efficiency Programme',
+    initiative: 'NEER Wind Repowering',
     kpiImpact: [
-      { kpi: 'Operating Profit', contribution: '+$33m', confidence: 92 },
-      { kpi: 'Cost-to-Income Ratio', contribution: '-3.4%', confidence: 95 }
+      { kpi: 'Revenue Growth', contribution: '+$690M', confidence: 88 },
+      { kpi: 'Renewable Capacity', contribution: '+2,100 MW', confidence: 92 }
     ],
-    totalValue: '$33m',
+    totalValue: '$1.8B',
     evidenceStrength: 'strong'
   },
   {
-    initiative: 'Customer Portal Upgrade',
+    initiative: 'Grid Modernization',
     kpiImpact: [
-      { kpi: 'Customer NPS', contribution: '+5 pts', confidence: 88 },
-      { kpi: 'Digital Adoption Rate', contribution: '+9%', confidence: 92 }
+      { kpi: 'Customer Reliability Index', contribution: '+4.2%', confidence: 90 },
+      { kpi: 'Outage Response Time', contribution: '-35 min', confidence: 85 }
     ],
-    totalValue: '$18m',
+    totalValue: '$450M',
     evidenceStrength: 'moderate'
   }
 ];
 
 const AI_SUGGESTED_KPIS = [
-  { name: 'First Contact Resolution Rate', rationale: 'Strong correlation with NPS improvements in similar transformations', confidence: 87 },
-  { name: 'Automation Coverage %', rationale: 'Leading indicator for operational efficiency gains', confidence: 82 },
-  { name: 'Time to Value (New Features)', rationale: 'Measures speed of capability delivery to customers', confidence: 79 },
-  { name: 'Carbon Footprint Reduction', rationale: 'Aligns with NextEra ESG commitments and Climate Report targets', confidence: 91 }
+  { name: 'Battery Storage Capacity', rationale: 'Critical metric for grid reliability and renewable integration', confidence: 94 },
+  { name: 'Customer Self-Service Rate', rationale: 'Leading indicator for digital transformation success', confidence: 82 },
+  { name: 'Grid Resilience Score', rationale: 'Measures storm hardening effectiveness for Florida operations', confidence: 88 },
+  { name: 'Clean Energy Generation %', rationale: 'Aligns with NextEra Real Zero carbon goals and ESG commitments', confidence: 96 }
 ];
 
 export function KPIAttributionPanel() {

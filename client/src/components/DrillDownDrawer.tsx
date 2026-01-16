@@ -19,6 +19,7 @@ import {
 } from '@/lib/safe6Data';
 import type { Feature, Story, Task } from '@/lib/safe6Model';
 import { getDrilldownContent, type DrilldownContent } from '@/lib/drilldownRegistry';
+import { formatValueWithUnit } from '@/lib/formatters';
 
 interface DrillDownDrawerProps {
   isOpen: boolean;
@@ -557,7 +558,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       'Priority': enrichedProject.priority.charAt(0).toUpperCase() + enrichedProject.priority.slice(1),
       'Status': enrichedProject.status === 'green' ? 'On Track' : enrichedProject.status === 'amber' ? 'At Risk' : 'Critical',
       'Stage': getStageLabel(enrichedProject.safeStage),
-      'Budget': `${enrichedProject.budget.spent}/${enrichedProject.budget.total} ${enrichedProject.budget.unit}`,
+      'Budget': `${formatValueWithUnit(enrichedProject.budget.spent, enrichedProject.budget.unit)} / ${formatValueWithUnit(enrichedProject.budget.total, enrichedProject.budget.unit)}`,
       'Timeline': `${enrichedProject.timeline.elapsed}/${enrichedProject.timeline.total} ${enrichedProject.timeline.unit}`,
       'Deliverables': `${enrichedProject.deliverables.completed}/${enrichedProject.deliverables.total}`,
       'Velocity': enrichedProject.safe.velocity.toString(),

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { PMOProject, SAFePortfolioStage } from '@/lib/buPrograms';
+import { formatValueWithUnit } from '@/lib/formatters';
 
 interface PMOProjectWorkspaceProps {
   project: PMOProject;
@@ -255,8 +256,8 @@ export function PMOProjectWorkspace({ project, onClose }: PMOProjectWorkspacePro
               $ Budget
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-xl font-bold">{project.budget.spent}</span>
-              <span className="text-sm text-white/60">/ {project.budget.total} {project.budget.unit}</span>
+              <span className="text-xl font-bold">{formatValueWithUnit(project.budget.spent, project.budget.unit)}</span>
+              <span className="text-sm text-white/60">/ {formatValueWithUnit(project.budget.total, project.budget.unit)}</span>
             </div>
             <Progress value={budgetProgress} className="h-1 mt-2" />
           </div>

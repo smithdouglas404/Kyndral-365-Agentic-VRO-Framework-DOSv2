@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { aiAlerts, industryBenchmarks } from "@/lib/lgData";
 import { useFullDivision } from "@/hooks/useNexteraData";
-import { formatMoney } from "@/lib/formatters";
+import { formatMoney, formatValueWithUnit } from "@/lib/formatters";
 import { getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
 import { useEnrichedProjects } from "@/hooks/useProjects";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
@@ -962,7 +962,7 @@ export default function SegmentPage() {
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <div className="flex justify-between text-sm mb-1">
                             <span className="text-gray-600">Budget</span>
-                            <span className="font-medium">{project.budget.spent}/{project.budget.total} {project.budget.unit}</span>
+                            <span className="font-medium">{formatValueWithUnit(project.budget.spent, project.budget.unit)} / {formatValueWithUnit(project.budget.total, project.budget.unit)}</span>
                           </div>
                           <Progress value={(project.budget.spent / project.budget.total) * 100} className="h-2" />
                         </div>

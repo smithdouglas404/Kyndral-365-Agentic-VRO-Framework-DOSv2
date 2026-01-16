@@ -75,3 +75,28 @@ export function formatDisplayValue(value: number, isInMillions: boolean = true):
   }
   return formatLargeNumber(value);
 }
+
+/**
+ * Format a value with its unit, ensuring proper placement of currency symbols
+ * Handles units like "$m", "$M", "$bn", "%", "days", "MW", etc.
+ * @param value - The numeric value
+ * @param unit - The unit string (e.g., "$m", "%", "days")
+ */
+export function formatValueWithUnit(value: number, unit: string): string {
+  // Handle currency units - put $ before the number
+  if (unit === '$m' || unit === '$M') {
+    return `$${value}M`;
+  }
+  if (unit === '$bn' || unit === '$B' || unit === '$b') {
+    return `$${value}B`;
+  }
+  if (unit === '$k' || unit === '$K') {
+    return `$${value}K`;
+  }
+  if (unit.startsWith('$')) {
+    // Generic currency - put $ first, unit suffix after
+    return `$${value}${unit.slice(1).toUpperCase()}`;
+  }
+  // For all other units, put value first then unit
+  return `${value}${unit}`;
+}

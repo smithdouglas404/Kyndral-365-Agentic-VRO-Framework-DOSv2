@@ -225,7 +225,7 @@ export default function GovernanceDashboard() {
       <NavBar />
       
       <div className="flex">
-        <AgentSidebar dataMode={dataMode} onModeChange={setDataMode} />
+        <AgentSidebar />
         
         <main className="flex-1 px-8 py-8">
           <div className="mb-8">
