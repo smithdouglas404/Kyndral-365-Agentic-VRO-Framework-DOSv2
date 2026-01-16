@@ -73,7 +73,7 @@ export function PageContextProvider({ children }: { children: ReactNode }) {
         pageType: 'dashboard',
         breadcrumb: ['Dashboard']
       });
-    } else if (path === '/risk' || path === '/climate') {
+    } else if (path === '/risk' || path === '/sustainability') {
       // Tool pages - base context, pages will override with specifics
       setContext({
         pageType: 'tool',

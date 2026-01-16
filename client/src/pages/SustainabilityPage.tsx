@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { climateData, lgCompanyOverview } from "@/lib/lgData";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, RadialBarChart, RadialBar } from "recharts";
 
-export default function ClimatePage() {
+export default function SustainabilityPage() {
   const [, navigate] = useLocation();
   const { setPageContext } = usePageContext();
   const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
@@ -21,9 +21,9 @@ export default function ClimatePage() {
   useEffect(() => {
     setPageContext({
       pageType: 'tool',
-      entityId: 'climate',
-      entityName: 'Climate & Nature',
-      breadcrumb: ['Dashboard', 'Climate']
+      entityId: 'sustainability',
+      entityName: 'Sustainability & ESG',
+      breadcrumb: ['Dashboard', 'Sustainability']
     });
   }, [setPageContext]);
 

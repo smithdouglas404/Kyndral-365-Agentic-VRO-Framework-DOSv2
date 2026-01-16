@@ -20,7 +20,7 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import ValueProposition from "@/pages/value-proposition";
 import SegmentPage from "@/pages/SegmentPage";
-import ClimatePage from "@/pages/ClimatePage";
+import SustainabilityPage from "@/pages/SustainabilityPage";
 import RiskCenter from "@/pages/RiskCenter";
 import VROFramework from "@/pages/vro-framework";
 import TMODashboard from "@/pages/dashboard-tmo";
@@ -50,7 +50,7 @@ function Router() {
       <Route path="/value-proposition" component={ValueProposition} />
       <Route path="/segment/:id" component={SegmentPage} />
       <Route path="/division/:id" component={SegmentPage} />
-      <Route path="/climate" component={ClimatePage} />
+      <Route path="/sustainability" component={SustainabilityPage} />
       <Route path="/risk" component={RiskCenter} />
       <Route path="/vro-framework" component={VROFramework} />
       <Route path="/project/:id" component={ProjectDetailPage} />

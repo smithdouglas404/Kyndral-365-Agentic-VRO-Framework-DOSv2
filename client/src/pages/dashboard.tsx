@@ -502,8 +502,8 @@ function DashboardContent() {
       navigate(`/segment/${id}?fromTab=${activeTab}`);
       return;
     }
-    if (type === 'climate' && id === 'climate-overview') {
-      navigate('/climate');
+    if (type === 'sustainability' && id === 'sustainability-overview') {
+      navigate('/sustainability');
       return;
     }
     if (type === 'risk' && id === 'risk-overview') {
