@@ -174,6 +174,11 @@ const AI_SUGGESTED_KPIS = [
 export function KPIAttributionPanel() {
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('tracking');
+  const [addedKpis, setAddedKpis] = useState<Set<string>>(new Set());
+
+  const handleAddKpi = (kpiName: string) => {
+    setAddedKpis(prev => new Set(Array.from(prev).concat(kpiName)));
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -395,29 +400,40 @@ export function KPIAttributionPanel() {
                 Based on NextEra's strategic objectives and industry benchmarks, consider adding these KPIs:
               </p>
               <div className="space-y-3">
-                {AI_SUGGESTED_KPIS.map((suggestion, idx) => (
-                  <motion.div
-                    key={suggestion.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex items-start justify-between p-4 bg-gray-50 rounded-lg border"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 size={16} className="text-green-600" />
-                        <h4 className="font-semibold">{suggestion.name}</h4>
+                {AI_SUGGESTED_KPIS.map((suggestion, idx) => {
+                  const isAdded = addedKpis.has(suggestion.name);
+                  return (
+                    <motion.div
+                      key={suggestion.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className={`flex items-start justify-between p-4 rounded-lg border ${isAdded ? 'bg-green-50 border-green-300' : 'bg-gray-50'}`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 size={16} className={isAdded ? "text-green-600" : "text-gray-400"} />
+                          <h4 className="font-semibold">{suggestion.name}</h4>
+                          {isAdded && <Badge className="bg-green-100 text-green-700 text-xs">Added</Badge>}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">{suggestion.rationale}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">{suggestion.rationale}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">{suggestion.confidence}% relevant</Badge>
-                      <Button size="sm" variant="outline">
-                        <ArrowRight size={14} />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{suggestion.confidence}% relevant</Badge>
+                        <Button 
+                          size="sm" 
+                          variant={isAdded ? "default" : "outline"}
+                          className={isAdded ? "bg-green-600 hover:bg-green-700" : ""}
+                          onClick={() => handleAddKpi(suggestion.name)}
+                          disabled={isAdded}
+                          data-testid={`btn-add-kpi-${suggestion.name.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {isAdded ? <CheckCircle2 size={14} /> : <ArrowRight size={14} />}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
