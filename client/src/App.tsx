@@ -19,7 +19,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import ValueProposition from "@/pages/value-proposition";
-import DivisionPage from "@/pages/DivisionPage";
+import SegmentPage from "@/pages/SegmentPage";
 import ClimatePage from "@/pages/ClimatePage";
 import RiskCenter from "@/pages/RiskCenter";
 import VROFramework from "@/pages/vro-framework";
@@ -48,7 +48,8 @@ function Router() {
       <Route path="/dashboard/planning" component={PlanningDashboard} />
       <Route path="/dashboard/ocm" component={OCMDashboard} />
       <Route path="/value-proposition" component={ValueProposition} />
-      <Route path="/division/:id" component={DivisionPage} />
+      <Route path="/segment/:id" component={SegmentPage} />
+      <Route path="/division/:id" component={SegmentPage} />
       <Route path="/climate" component={ClimatePage} />
       <Route path="/risk" component={RiskCenter} />
       <Route path="/vro-framework" component={VROFramework} />
@@ -77,6 +78,7 @@ function GlobalAIOverlay() {
   const shouldShowOverlay = location && (
     location === '/dashboard' || 
     location.startsWith('/dashboard/') || 
+    location.startsWith('/segment/') ||
     location.startsWith('/division/') ||
     location.startsWith('/project/')
   );

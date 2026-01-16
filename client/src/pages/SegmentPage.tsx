@@ -18,43 +18,37 @@ import { usePageContext } from "@/contexts/PageContext";
 import { buPortfolios, type BUPortfolio } from "@/lib/buPrograms";
 import { Brain } from "lucide-react";
 
-// Legacy slug mapping for backward compatibility
+// Legacy slug mapping for backward compatibility (maps old L&G IDs to new NextEra segment IDs)
 const legacySlugs: Record<string, string> = {
-  'lgim': 'asset-management',
-  'lgc': 'capital',
-  'lgri': 'institutional-retirement',
-  'lgr': 'retail',
-  'lgf': 'fintech',
-  'lgi': 'insurance'
+  'lgim': 'neer',
+  'lgc': 'corporate-other',
+  'lgri': 'fpl',
+  'lgr': 'fpl',
+  'lgf': 'corporate-other',
+  'lgi': 'corporate-other',
+  'asset-management': 'neer',
+  'institutional-retirement': 'fpl',
+  'retail': 'fpl',
+  'capital': 'corporate-other',
+  'insurance': 'corporate-other',
+  'fintech': 'corporate-other',
+  'florida-power-light': 'fpl',
+  'nextera-energy-resources': 'neer'
 };
 
-// BU name mapping for filtering enriched projects (covers all division IDs)
-const buNameMapping: Record<string, string[]> = {
-  'institutional-retirement': ['Florida Power & Light'],
-  'asset-management': ['NextEra Energy Resources'],
-  'retail': ['Florida Power & Light'],
-  'corporate-investments': ['Corporate & Other'],
-  'corporate': ['Corporate & Other'],
-  'capital': ['Corporate & Other'],
-  'insurance': ['Corporate & Other'],
-  'fintech': ['Corporate & Other'],
-  'risk-center': ['Corporate & Other'],
-  'climate': ['Corporate & Other', 'Corporate & Other'],
-  'group-functions': ['Corporate & Other'],
-  'technology': ['Corporate & Other'],
-  'default': ['Florida Power & Light', 'NextEra Energy Resources', 'Florida Power & Light', 'Corporate & Other', 'Corporate & Other', 'Corporate & Other']
+// Segment name mapping for filtering enriched projects (NextEra SEC segment names)
+const segmentNameMapping: Record<string, string[]> = {
+  'fpl': ['FPL', 'Florida Power & Light'],
+  'neer': ['NEER', 'NextEra Energy Resources'],
+  'corporate-other': ['Corporate and Other', 'Corporate & Other'],
+  'default': ['FPL', 'NEER', 'Corporate and Other']
 };
 
-// Division ID to Portfolio ID mapping for VRO/PMO metrics
-const divisionToPortfolioMapping: Record<string, string> = {
-  'institutional-retirement': 'portfolio-ir',
-  'asset-management': 'portfolio-am',
-  'retail': 'portfolio-retail',
-  'corporate': 'portfolio-ci',
-  'corporate-investments': 'portfolio-ci',
-  'capital': 'portfolio-ci',
-  'insurance': 'portfolio-rc',
-  'risk-center': 'portfolio-rc',
+// Segment ID to Portfolio ID mapping for VRO/PMO metrics
+const segmentToPortfolioMapping: Record<string, string> = {
+  'fpl': 'portfolio-fpl',
+  'neer': 'portfolio-neer',
+  'corporate-other': 'portfolio-corp',
 };
 
 // Helper to parse keyResults JSON string
@@ -111,18 +105,18 @@ export default function DivisionPage() {
     }
   }, [division, setPageContext]);
   
-  // Get enriched projects for this business unit (supports multiple BU mappings)
-  const buNames = buNameMapping[resolvedId || ''] || buNameMapping['default'] || [];
-  const divisionProjects = useMemo(() => {
-    if (buNames.length === 0) return enrichedProjects;
-    return enrichedProjects.filter(p => buNames.includes(p.bu));
-  }, [buNames, enrichedProjects]);
+  // Get enriched projects for this segment (supports multiple name mappings for legacy data)
+  const segmentNames = segmentNameMapping[resolvedId || ''] || segmentNameMapping['default'] || [];
+  const segmentProjects = useMemo(() => {
+    if (segmentNames.length === 0) return enrichedProjects;
+    return enrichedProjects.filter(p => segmentNames.includes(p.bu));
+  }, [segmentNames, enrichedProjects]);
   
   // Apply stage filter
   const filteredProjects = useMemo(() => {
-    if (stageFilter === "all") return divisionProjects;
-    return divisionProjects.filter(p => p.safeStage === stageFilter);
-  }, [divisionProjects, stageFilter]);
+    if (stageFilter === "all") return segmentProjects;
+    return segmentProjects.filter(p => p.safeStage === stageFilter);
+  }, [segmentProjects, stageFilter]);
   
   const handleDrillDown = (type: string, id: string) => {
     // Always navigate to full project detail page for projects
@@ -133,13 +127,13 @@ export default function DivisionPage() {
     setSelectedEntity({ type, id });
   };
   
-  // Show loading state while fetching division data
+  // Show loading state while fetching segment data
   if (isLoadingDivision) {
     return (
       <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-          <p className="text-muted-foreground">Loading division data...</p>
+          <p className="text-muted-foreground">Loading segment data...</p>
         </div>
       </div>
     );
@@ -150,7 +144,7 @@ export default function DivisionPage() {
     return (
       <div className="min-h-screen bg-[#F6F6F6] flex items-center justify-center">
         <Card className="p-8">
-          <h1 className="text-2xl font-bold text-[#C50B30]">Group Function not found</h1>
+          <h1 className="text-2xl font-bold text-[#C50B30]">Segment not found</h1>
           <Link href="/dashboard">
             <Button className="mt-4" onClick={() => setLocation('/dashboard')} data-testid="link-back-dashboard">Return to Dashboard</Button>
           </Link>
@@ -162,7 +156,7 @@ export default function DivisionPage() {
   const divisionAlerts = aiAlerts.filter(a => a.division === division.name);
   
   // Get portfolio data for VRO/PMO metrics
-  const portfolioId = divisionToPortfolioMapping[resolvedId || ''];
+  const portfolioId = segmentToPortfolioMapping[resolvedId || ''];
   const portfolioData = portfolioId ? buPortfolios.find(p => p.id === portfolioId) : undefined;
   
   const kpiChartData = divisionKpis.slice(0, 4).map(kpi => ({

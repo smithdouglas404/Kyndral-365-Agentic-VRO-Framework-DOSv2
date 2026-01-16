@@ -51,10 +51,11 @@ export function FloatingAlertBanner() {
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
-  // Show on dashboard and division pages
+  // Show on dashboard and segment pages
   const shouldShowBanner = location && (
     location === '/dashboard' || 
     location.startsWith('/dashboard/') || 
+    location.startsWith('/segment/') ||
     location.startsWith('/division/') ||
     location.startsWith('/project/')
   );

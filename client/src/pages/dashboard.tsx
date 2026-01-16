@@ -498,8 +498,8 @@ function DashboardContent() {
   }, []);
   
   const handleDrillDown = (type: string, id: string) => {
-    if (type === 'division') {
-      navigate(`/division/${id}?fromTab=${activeTab}`);
+    if (type === 'division' || type === 'segment') {
+      navigate(`/segment/${id}?fromTab=${activeTab}`);
       return;
     }
     if (type === 'climate' && id === 'climate-overview') {
@@ -582,20 +582,20 @@ function DashboardContent() {
                   <div className="col-span-3 flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
                   </div>
-                ) : divisions.map((division) => (
+                ) : divisions.map((segment) => (
                 <div 
-                  key={division.id}
+                  key={segment.id}
                   className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
-                  style={{ borderLeftColor: division.color || '#666', borderLeftWidth: '4px' }}
-                  data-testid={`card-division-${division.id}`}
-                  onClick={() => handleDrillDown("division", division.id)}
+                  style={{ borderLeftColor: segment.color || '#666', borderLeftWidth: '4px' }}
+                  data-testid={`card-segment-${segment.id}`}
+                  onClick={() => handleDrillDown("segment", segment.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-gray-500">{division.name.split(' ')[0]}</p>
-                      <p className="text-lg font-bold" style={{ color: division.color || '#333' }}>{formatMoney(division.profit2024 ?? 0)}</p>
-                      <Badge variant={(division.changePercent ?? 0) >= 0 ? "default" : "destructive"} className="text-xs mt-1">
-                        {(division.changePercent ?? 0) >= 0 ? "+" : ""}{division.changePercent ?? 0}%
+                      <p className="text-xs text-gray-500">{segment.name}</p>
+                      <p className="text-lg font-bold" style={{ color: segment.color || '#333' }}>{formatMoney(segment.profit2024 ?? 0)}</p>
+                      <Badge variant={(segment.changePercent ?? 0) >= 0 ? "default" : "destructive"} className="text-xs mt-1">
+                        {(segment.changePercent ?? 0) >= 0 ? "+" : ""}{segment.changePercent ?? 0}%
                       </Badge>
                     </div>
                     <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />

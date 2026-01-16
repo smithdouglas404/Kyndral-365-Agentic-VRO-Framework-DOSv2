@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { useLocation } from 'wouter';
 
 export interface PageContextData {
-  pageType: 'dashboard' | 'division' | 'project' | 'portfolio' | 'tool' | 'framework' | 'overview' | 'other';
+  pageType: 'dashboard' | 'segment' | 'division' | 'project' | 'portfolio' | 'tool' | 'framework' | 'overview' | 'other';
   entityId?: string;
   entityName?: string;
   businessUnit?: string;
@@ -46,12 +46,12 @@ export function PageContextProvider({ children }: { children: ReactNode }) {
         pageType: 'dashboard',
         breadcrumb: ['Dashboard']
       });
-    } else if (path.startsWith('/division/')) {
-      const divisionId = path.split('/')[2];
+    } else if (path.startsWith('/segment/') || path.startsWith('/division/')) {
+      const segmentId = path.split('/')[2];
       setContext({
-        pageType: 'division',
-        entityId: divisionId,
-        breadcrumb: ['Dashboard', 'Group Function']
+        pageType: 'segment',
+        entityId: segmentId,
+        breadcrumb: ['Dashboard', 'Segment']
       });
     } else if (path.startsWith('/project/')) {
       const projectId = path.split('/')[2];

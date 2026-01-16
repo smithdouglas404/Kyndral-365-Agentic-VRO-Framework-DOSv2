@@ -395,25 +395,25 @@ export default function FinOpsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {divisions.map((division) => (
-                  <Link key={division.id} href={`/division/${division.id}`}>
+                {divisions.map((segment) => (
+                  <Link key={segment.id} href={`/segment/${segment.id}`}>
                     <div 
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segment.color, borderLeftWidth: '4px' }}
                     >
-                      <p className="text-sm font-medium text-gray-500">{division.name}</p>
-                      <p className="text-2xl font-bold" style={{ color: division.color }}>{formatMoney(division.profit2024)}</p>
+                      <p className="text-sm font-medium text-gray-500">{segment.name}</p>
+                      <p className="text-2xl font-bold" style={{ color: segment.color }}>{formatMoney(segment.profit2024)}</p>
                       <div className="flex items-center gap-1 mt-1">
-                        {division.changePercent >= 0 ? (
+                        {segment.changePercent >= 0 ? (
                           <ArrowUpRight className="h-4 w-4 text-green-500" />
                         ) : (
                           <ArrowDownRight className="h-4 w-4 text-red-500" />
                         )}
-                        <span className={`text-sm font-medium ${division.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {division.changePercent >= 0 ? '+' : ''}{division.changePercent}%
+                        <span className={`text-sm font-medium ${segment.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {segment.changePercent >= 0 ? '+' : ''}{segment.changePercent}%
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">{division.ceo}</p>
+                      <p className="text-xs text-gray-400 mt-1">{segment.ceo}</p>
                     </div>
                   </Link>
                 ))}

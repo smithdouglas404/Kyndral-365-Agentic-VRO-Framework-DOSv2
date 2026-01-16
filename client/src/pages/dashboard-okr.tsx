@@ -363,7 +363,7 @@ export default function OKRDashboard() {
 
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Strategic Objectives from L&G Group Functions</h2>
+              <h2 className="text-lg font-semibold">Strategic Objectives from NextEra Segments</h2>
               <Badge variant="outline" className="text-xs">Click to expand for initiative details</Badge>
             </div>
             {objectives.map((objective) => (
@@ -377,15 +377,15 @@ export default function OKRDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {divisions.slice(0, 4).map((division) => (
-                  <Link key={division.id} href={`/division/${division.id}`}>
+                {divisions.slice(0, 4).map((segment) => (
+                  <Link key={segment.id} href={`/segment/${segment.id}`}>
                     <div 
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segment.color, borderLeftWidth: '4px' }}
                     >
-                      <p className="text-sm font-medium text-gray-500">{division.name}</p>
+                      <p className="text-sm font-medium text-gray-500">{segment.name}</p>
                       <div className="mt-2 space-y-2">
-                        {division.okrs.slice(0, 2).map((okr, i) => (
+                        {segment.okrs.slice(0, 2).map((okr, i) => (
                           <div key={i} className="text-xs">
                             <p className="font-medium text-gray-700">{okr.objective}</p>
                             <div className="flex items-center gap-2 mt-1">

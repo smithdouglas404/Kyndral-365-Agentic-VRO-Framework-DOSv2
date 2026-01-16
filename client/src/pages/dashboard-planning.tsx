@@ -404,28 +404,28 @@ export default function PlanningDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {divisions.map((division) => (
-                  <Link key={division.id} href={`/division/${division.id}`}>
+                {divisions.map((segment) => (
+                  <Link key={segment.id} href={`/segment/${segment.id}`}>
                     <div 
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: division.color, borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segment.color, borderLeftWidth: '4px' }}
                     >
-                      <p className="text-sm font-medium text-gray-500">{division.name}</p>
+                      <p className="text-sm font-medium text-gray-500">{segment.name}</p>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-2xl font-bold" style={{ color: division.color }}>
-                          {division.potentialProjects.length}
+                        <span className="text-2xl font-bold" style={{ color: segment.color }}>
+                          {segment.potentialProjects.length}
                         </span>
                         <span className="text-sm text-gray-500">projects</span>
                       </div>
                       <div className="flex gap-2 mt-2">
-                        {division.potentialProjects.filter(p => p.status === 'in-progress').length > 0 && (
+                        {segment.potentialProjects.filter(p => p.status === 'in-progress').length > 0 && (
                           <Badge variant="secondary" className="text-[10px]">
-                            {division.potentialProjects.filter(p => p.status === 'in-progress').length} active
+                            {segment.potentialProjects.filter(p => p.status === 'in-progress').length} active
                           </Badge>
                         )}
-                        {division.potentialProjects.filter(p => p.priority === 'high').length > 0 && (
+                        {segment.potentialProjects.filter(p => p.priority === 'high').length > 0 && (
                           <Badge variant="destructive" className="text-[10px]">
-                            {division.potentialProjects.filter(p => p.priority === 'high').length} high priority
+                            {segment.potentialProjects.filter(p => p.priority === 'high').length} high priority
                           </Badge>
                         )}
                       </div>
