@@ -67,13 +67,7 @@ export default function SustainabilityPage() {
               variant="ghost" 
               size="icon" 
               className="text-white hover:bg-green-700" 
-              onClick={() => {
-                if (window.history.length > 1) {
-                  window.history.back();
-                } else {
-                  navigate('/dashboard');
-                }
-              }}
+              onClick={() => navigate('/dashboard')}
               data-testid="button-back"
             >
               <ArrowLeft className="h-5 w-5" />
