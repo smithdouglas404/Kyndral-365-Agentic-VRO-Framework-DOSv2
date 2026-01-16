@@ -643,11 +643,20 @@ export function getObjectivesFromDivisions(mode: DataMode): TransformedObjective
       status: status as 'on-track' | 'at-risk' | 'ahead',
       keyResults: okr.keyResults.map((kr, j) => {
         const krProgress = Math.min(100, Math.max(0, kr.progress + mult.progressBoost));
+        // Format values with proper unit placement ($ before number, M after)
+        const formatWithUnit = (value: number, unit: string): string => {
+          if (unit === '$m' || unit === '$M') {
+            return `$${value}M`;
+          } else if (unit.startsWith('$')) {
+            return `$${value}${unit.slice(1).toUpperCase()}`;
+          }
+          return `${value}${unit}`;
+        };
         return {
           title: kr.result,
           progress: Math.round(krProgress),
-          target: `${kr.target}${kr.unit}`,
-          current: `${kr.progress}${kr.unit}`,
+          target: formatWithUnit(kr.target, kr.unit),
+          current: formatWithUnit(kr.progress, kr.unit),
           linkedInitiatives: relatedProjects.map((p, k) => {
             const initStatus: 'on-track' | 'at-risk' | 'complete' = mode === 'VRO' 
               ? (p.status === 'completed' ? 'complete' : 'on-track')
