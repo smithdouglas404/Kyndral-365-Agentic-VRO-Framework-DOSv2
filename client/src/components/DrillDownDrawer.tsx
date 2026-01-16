@@ -541,9 +541,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
   
   // Determine if we should use registry-based rendering
   // Only use registry renderer for full dossiers (action playbooks, metrics, teams, etc.)
-  // SAFe entities, projects, and portfolios use legacy renderer for richer detailed views
+  // SAFe entities, projects, portfolios, and configured metrics use legacy renderer for richer detailed views
   const useRegistryRenderer = registryContent?.isFullDossier === true && 
-    entityType !== 'project' && entityType !== 'portfolio';
+    entityType !== 'project' && entityType !== 'portfolio' && entityType !== 'metric';
   
   // Create a fallback for project types using enriched project data
   const projectDrilldown = enrichedProject ? {
