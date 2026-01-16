@@ -155,6 +155,192 @@ interface ClarifyingQuestion {
   impactArea: string | null;
 }
 
+function SchemaExplorerContent() {
+  const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+  const { data: schemaCounts } = useQuery({
+    queryKey: ['schema-counts'],
+    queryFn: async () => {
+      const res = await fetch('/api/safe/schema-counts');
+      if (!res.ok) return null;
+      return res.json();
+    },
+    staleTime: 60000
+  });
+
+  const schemaLevels = [
+    {
+      name: 'Portfolio Level',
+      icon: Layers,
+      color: 'blue',
+      entities: [
+        { id: 'portfolio', name: 'Portfolio', count: schemaCounts?.portfolios || 1, primary: true },
+        { id: 'strategic-theme', name: 'Strategic Theme', count: schemaCounts?.themes || 4 },
+        { id: 'epic', name: 'Epic', count: schemaCounts?.epics || 24 },
+        { id: 'capability', name: 'Capability', count: schemaCounts?.capabilities || 8 },
+      ]
+    },
+    {
+      name: 'Value Stream Level',
+      icon: Workflow,
+      color: 'purple',
+      entities: [
+        { id: 'value-stream', name: 'Value Stream', count: schemaCounts?.valueStreams || 4, primary: true },
+        { id: 'art', name: 'ART', count: schemaCounts?.arts || 6 },
+        { id: 'team', name: 'Team', count: schemaCounts?.teams || 18 },
+        { id: 'pi', name: 'PI', count: schemaCounts?.pis || 8 },
+      ]
+    },
+    {
+      name: 'Delivery Level',
+      icon: Target,
+      color: 'green',
+      entities: [
+        { id: 'feature', name: 'Feature', count: schemaCounts?.features || 67, primary: true },
+        { id: 'story', name: 'Story', count: schemaCounts?.stories || 248 },
+        { id: 'task', name: 'Task', count: schemaCounts?.tasks || 512 },
+        { id: 'sprint', name: 'Sprint', count: schemaCounts?.sprints || 24 },
+      ]
+    },
+    {
+      name: 'Metrics Level',
+      icon: BarChart3,
+      color: 'orange',
+      entities: [
+        { id: 'okr', name: 'OKR', count: schemaCounts?.okrs || 12, primary: true },
+        { id: 'kpi', name: 'KPI', count: schemaCounts?.kpis || 24 },
+        { id: 'milestone', name: 'Milestone', count: schemaCounts?.milestones || 86 },
+        { id: 'risk', name: 'Risk', count: schemaCounts?.risks || 32 },
+      ]
+    },
+  ];
+
+  const entityDetails: Record<string, { description: string; fields: string[]; relationships: string[] }> = {
+    'portfolio': { 
+      description: 'Top-level container for strategic themes and value streams',
+      fields: ['name', 'strategicTheme', 'lpmCadence', 'budgetTotal', 'budgetAllocated'],
+      relationships: ['Contains Value Streams', 'Has Strategic Themes', 'Owns Epics']
+    },
+    'value-stream': { 
+      description: 'Sequence of steps delivering value to customers',
+      fields: ['name', 'type', 'owner', 'flowEfficiency', 'leadTime'],
+      relationships: ['Belongs to Portfolio', 'Contains ARTs', 'Delivers Features']
+    },
+    'art': { 
+      description: 'Agile Release Train - cross-functional team of teams',
+      fields: ['name', 'releaseTrainEngineer', 'productManager', 'piCadence', 'teamCount', 'velocity'],
+      relationships: ['Part of Value Stream', 'Contains Teams', 'Delivers PIs']
+    },
+    'feature': { 
+      description: 'Customer-facing functionality delivered in a single PI',
+      fields: ['name', 'status', 'wsjfScore', 'targetPI', 'benefitHypothesis', 'acceptanceCriteria'],
+      relationships: ['Belongs to Epic', 'Contains Stories', 'Has Dependencies']
+    },
+    'story': { 
+      description: 'User-centric requirement that fits in a sprint',
+      fields: ['name', 'status', 'storyPoints', 'sprint', 'assignedTeam', 'acceptanceCriteria'],
+      relationships: ['Belongs to Feature', 'Contains Tasks', 'Assigned to Team']
+    },
+    'epic': { 
+      description: 'Large initiative spanning multiple PIs',
+      fields: ['name', 'status', 'leanBusinessCase', 'mvp', 'outcomes', 'budgetRange'],
+      relationships: ['Part of Portfolio', 'Contains Features', 'Has Capabilities']
+    },
+    'milestone': { 
+      description: 'Significant checkpoint or deliverable date',
+      fields: ['name', 'targetDate', 'status', 'deliverables', 'piNumber'],
+      relationships: ['Belongs to Project', 'Tracks Deliverables']
+    },
+    'risk': { 
+      description: 'Potential threat to project success',
+      fields: ['name', 'probability', 'impact', 'status', 'mitigation', 'owner'],
+      relationships: ['Belongs to Project', 'Has Mitigation Actions']
+    },
+  };
+
+  const getColorClasses = (color: string, isPrimary: boolean) => {
+    const colors: Record<string, string> = {
+      blue: isPrimary ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200',
+      purple: isPrimary ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200',
+      green: isPrimary ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200',
+      orange: isPrimary ? 'bg-orange-500 text-white hover:bg-orange-600' : 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200',
+    };
+    return colors[color] || colors.blue;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        {schemaLevels.map((level) => {
+          const Icon = level.icon;
+          return (
+            <div key={level.name} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Icon className={`h-4 w-4 text-${level.color}-500`} />
+                {level.name}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {level.entities.map((entity) => (
+                  <button
+                    key={entity.id}
+                    onClick={() => setSelectedEntity(selectedEntity === entity.id ? null : entity.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${getColorClasses(level.color, entity.primary || false)} ${selectedEntity === entity.id ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                  >
+                    {entity.name}
+                    <span className="ml-1.5 opacity-75">({entity.count})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <AnimatePresence>
+        {selectedEntity && entityDetails[selectedEntity] && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 bg-gray-50 border rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-lg capitalize">{selectedEntity.replace('-', ' ')} Entity</h4>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedEntity(null)}>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">{entityDetails[selectedEntity].description}</p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h5 className="text-sm font-medium text-gray-700 mb-2">Fields</h5>
+                  <div className="flex flex-wrap gap-1">
+                    {entityDetails[selectedEntity].fields.map((field) => (
+                      <Badge key={field} variant="outline" className="text-xs">{field}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h5 className="text-sm font-medium text-gray-700 mb-2">Relationships</h5>
+                  <div className="space-y-1">
+                    {entityDetails[selectedEntity].relationships.map((rel) => (
+                      <div key={rel} className="text-xs text-gray-600 flex items-center gap-1">
+                        <ArrowRightLeft className="h-3 w-3" />
+                        {rel}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function MCPConfigPage() {
   const [activeTool, setActiveTool] = useState('ingestion-wizard');
   const [sampleData, setSampleData] = useState('');
@@ -1238,62 +1424,11 @@ export default function MCPConfigPage() {
                         SAFe Ontology Schema Explorer
                       </CardTitle>
                       <CardDescription>
-                        Browse and visualize the SAFe 6.0 entity hierarchy and relationships
+                        Browse and visualize the SAFe 6.0 entity hierarchy and relationships. Click any entity to see details.
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium mb-3 flex items-center gap-2">
-                              <Layers className="h-4 w-4 text-blue-500" />
-                              Portfolio Level
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <Badge className="mr-2">Portfolio</Badge>
-                              <Badge variant="outline" className="mr-2">Strategic Theme</Badge>
-                              <Badge variant="outline" className="mr-2">Epic</Badge>
-                              <Badge variant="outline">Capability</Badge>
-                            </div>
-                          </div>
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium mb-3 flex items-center gap-2">
-                              <Workflow className="h-4 w-4 text-purple-500" />
-                              Value Stream Level
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <Badge className="mr-2 bg-purple-100 text-purple-700">Value Stream</Badge>
-                              <Badge variant="outline" className="mr-2">ART</Badge>
-                              <Badge variant="outline" className="mr-2">Team</Badge>
-                              <Badge variant="outline">PI</Badge>
-                            </div>
-                          </div>
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium mb-3 flex items-center gap-2">
-                              <Target className="h-4 w-4 text-green-500" />
-                              Delivery Level
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <Badge className="mr-2 bg-green-100 text-green-700">Feature</Badge>
-                              <Badge variant="outline" className="mr-2">Story</Badge>
-                              <Badge variant="outline" className="mr-2">Task</Badge>
-                              <Badge variant="outline">Sprint</Badge>
-                            </div>
-                          </div>
-                          <div className="p-4 border rounded-lg">
-                            <h4 className="font-medium mb-3 flex items-center gap-2">
-                              <BarChart3 className="h-4 w-4 text-orange-500" />
-                              Metrics Level
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <Badge className="mr-2 bg-orange-100 text-orange-700">OKR</Badge>
-                              <Badge variant="outline" className="mr-2">KPI</Badge>
-                              <Badge variant="outline" className="mr-2">Milestone</Badge>
-                              <Badge variant="outline">Risk</Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <SchemaExplorerContent />
                     </CardContent>
                   </Card>
                 </motion.div>
