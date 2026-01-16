@@ -29,33 +29,33 @@ export default function SustainabilityPage() {
 
   const emissionsTrajectory = [
     { year: "2019", emissions: 100, target: 100 },
-    { year: "2020", emissions: 92, target: 95 },
-    { year: "2021", emissions: 88, target: 90 },
-    { year: "2022", emissions: 78, target: 85 },
-    { year: "2023", emissions: 70, target: 75 },
-    { year: "2024", emissions: 63, target: 65 },
-    { year: "2025", emissions: null, target: 55 },
-    { year: "2030", emissions: null, target: 50 }
+    { year: "2020", emissions: 88, target: 95 },
+    { year: "2021", emissions: 78, target: 90 },
+    { year: "2022", emissions: 68, target: 80 },
+    { year: "2023", emissions: 55, target: 65 },
+    { year: "2024", emissions: 40, target: 50 },
+    { year: "2030", emissions: null, target: 30 },
+    { year: "2045", emissions: null, target: 0 }
   ];
 
   const operationalBreakdown = [
-    { name: "Private Markets Real Estate", value: 24647, color: "#C50B30" },
-    { name: "Office Operations", value: 3200, color: "#007FAA" },
-    { name: "Business Travel", value: 1800, color: "#f59e0b" },
-    { name: "Data Centers", value: 950, color: "#6366f1" },
-    { name: "Other", value: 850, color: "#94a3b8" }
+    { name: "Natural Gas Generation", value: 35800, color: "#C50B30" },
+    { name: "Wind Operations", value: 22800, color: "#007FAA" },
+    { name: "Solar Operations", value: 9200, color: "#f59e0b" },
+    { name: "Battery Storage", value: 4800, color: "#6366f1" },
+    { name: "Nuclear & Other", value: 5400, color: "#94a3b8" }
   ];
 
   const temperatureData = [
-    { name: "Current Portfolio", value: 2.4, fill: "#f59e0b" },
+    { name: "Current Portfolio", value: 1.8, fill: "#f59e0b" },
     { name: "Paris Target", value: 1.5, fill: "#10b981" }
   ];
 
-  const housingProgress = [
-    { category: "LGAH Gas-Free", current: 61, target: 100 },
-    { category: "SBTR Gas-Free", current: 100, target: 100 },
-    { category: "Heat Pump Installs", current: 45, target: 100 },
-    { category: "Solar Coverage", current: 38, target: 80 }
+  const gridInfrastructureProgress = [
+    { category: "Smart Meter Deployment", current: 99, target: 100 },
+    { category: "Substation Automation", current: 99, target: 100 },
+    { category: "Storm Hardening", current: 88, target: 100 },
+    { category: "Renewable Integration", current: 52, target: 80 }
   ];
 
   return (
@@ -166,7 +166,7 @@ export default function SustainabilityPage() {
             <TabsTrigger value="emissions" data-testid="tab-emissions">Emissions</TabsTrigger>
             <TabsTrigger value="targets" data-testid="tab-targets">Targets & Progress</TabsTrigger>
             <TabsTrigger value="operations" data-testid="tab-operations">Operations</TabsTrigger>
-            <TabsTrigger value="housing" data-testid="tab-housing">Sustainable Housing</TabsTrigger>
+            <TabsTrigger value="housing" data-testid="tab-housing">Grid Infrastructure</TabsTrigger>
             <TabsTrigger value="nature" data-testid="tab-nature">Nature</TabsTrigger>
             <TabsTrigger value="context" data-testid="tab-context">Climate Context</TabsTrigger>
           </TabsList>
@@ -370,18 +370,18 @@ export default function SustainabilityPage() {
           </TabsContent>
 
           <TabsContent value="housing" className="space-y-6">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('netzero-homes', 'housing-001')} data-testid="card-netzero-homes">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('grid-infrastructure', 'grid-001')} data-testid="card-grid-infrastructure">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Home className="h-5 w-5 text-green-600" />
-                  Net Zero Carbon Homes Progress
+                  Grid Infrastructure & Clean Energy Progress
                 </CardTitle>
-                <CardDescription>Commitment: New homes operating at net zero carbon by 2030</CardDescription>
+                <CardDescription>Commitment: Net zero carbon operations by 2045</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    {housingProgress.map((item, i) => (
+                    {gridInfrastructureProgress.map((item, i) => (
                       <div key={i} className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('housing-progress', `housing-${item.category.toLowerCase().replace(/\s+/g, '-')}`); }} data-testid={`metric-housing-${i}`}>
                         <div className="flex justify-between mb-2">
                           <span className="font-medium">{item.category}</span>
