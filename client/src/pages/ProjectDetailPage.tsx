@@ -502,48 +502,20 @@ export default function ProjectDetailPage() {
                 <CardContent>
                   <p className="text-gray-700 leading-relaxed">{project.description}</p>
                   <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div 
-                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => openDrilldown('kpi', 'project-timeline')}
-                      data-testid="tile-start-date"
-                    >
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-500">Start Date</p>
-                        <ExternalLink className="h-3 w-3 text-gray-400" />
-                      </div>
+                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-start-date">
+                      <p className="text-sm text-gray-500">Start Date</p>
                       <p className="font-medium">{project.startDate}</p>
                     </div>
-                    <div 
-                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => openDrilldown('kpi', 'project-timeline')}
-                      data-testid="tile-end-date"
-                    >
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-500">Target End Date</p>
-                        <ExternalLink className="h-3 w-3 text-gray-400" />
-                      </div>
+                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-end-date">
+                      <p className="text-sm text-gray-500">Target End Date</p>
                       <p className="font-medium">{project.targetEndDate}</p>
                     </div>
-                    <div 
-                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => openDrilldown('theme', project.portfolioTheme)}
-                      data-testid="tile-theme"
-                    >
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-500">Portfolio Theme</p>
-                        <ExternalLink className="h-3 w-3 text-gray-400" />
-                      </div>
+                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-theme">
+                      <p className="text-sm text-gray-500">Portfolio Theme</p>
                       <p className="font-medium">{project.portfolioTheme}</p>
                     </div>
-                    <div 
-                      className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => openDrilldown('team', project.artName)}
-                      data-testid="tile-art"
-                    >
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-500">Agile Release Train</p>
-                        <ExternalLink className="h-3 w-3 text-gray-400" />
-                      </div>
+                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-art">
+                      <p className="text-sm text-gray-500">Agile Release Train</p>
                       <p className="font-medium">{project.artName}</p>
                     </div>
                   </div>
