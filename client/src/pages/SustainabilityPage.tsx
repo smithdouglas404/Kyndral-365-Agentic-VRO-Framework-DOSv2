@@ -77,9 +77,9 @@ export default function SustainabilityPage() {
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <Leaf className="h-8 w-8" />
-                <h1 className="text-3xl font-bold" data-testid="text-page-title">Climate & Nature</h1>
+                <h1 className="text-3xl font-bold" data-testid="text-page-title">Sustainability & ESG</h1>
               </div>
-              <p className="text-green-100 mt-1">NextEra Energy Sustainability Report 2024 | TCFD Aligned</p>
+              <p className="text-green-100 mt-1">NextEra Energy SASB Report 2024 | TCFD Aligned</p>
             </div>
             <div className="text-right">
               <p className="text-green-100 text-sm">Net Zero Target</p>

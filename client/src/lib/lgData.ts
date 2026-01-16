@@ -297,36 +297,57 @@ export const divisions = segments;
 // ============================================================================
 
 export const climateData = {
-  // Key headline metrics
+  // Key headline metrics - SASB 2024 Data
   headline: {
-    operationalFootprintReduction: { value: 65, unit: "%", baseYear: 2005, description: "CO2 emissions rate reduction since 2005" },
-    renewableCapacity: { value: 33, unit: "GW", description: "Total renewable generation capacity" },
+    operationalFootprintReduction: { value: 60, unit: "%", baseYear: 2005, description: "CO2 emissions rate reduction since 2005" },
+    renewableCapacity: { value: 35.855, unit: "GW", description: "Total renewable generation capacity" },
     cleanEnergyInvestment: { value: 12, unit: "$bn", description: "Annual clean energy investment" },
     financedEmissionsReduction: { value: 67, baseYear: 2019, description: "Reduction in carbon intensity" },
     transitionFinance: { value: 12, description: "Clean energy investment annually" },
     netZeroTargetYear: 2045,
     sbtiValidated: true,
-    source: "NextEra Energy Sustainability Report 2024"
+    source: "NextEra Energy SASB Data Appendix 2024"
+  },
+  
+  // SASB Emissions Data 2024
+  sasb: {
+    scope1: { value: 44900000, unit: "metric tons CO2e", description: "Direct greenhouse gas emissions" },
+    scope2: { value: 260000, unit: "metric tons CO2e", description: "Indirect emissions from purchased energy" },
+    scope3: { value: 67000000, unit: "metric tons CO2e", description: "Value chain emissions" },
+    co2IntensityRate: { value: 366, unit: "lbs/MWh", description: "CO2 intensity for owned generation" },
+    methaneEmissions: { value: 123000, unit: "metric tons CO2e", description: "Methane emissions from operations" },
+    totalGHG: { value: 112160000, unit: "metric tons CO2e", description: "Total Scope 1+2+3" },
+    source: "NextEra Energy SASB Data Appendix 2024"
   },
   
   // Operational emissions
   operational: {
-    totalFootprint2024: { value: 25000000, unit: "tCO2e", description: "Total operational carbon footprint" },
+    totalFootprint2024: { value: 45160000, unit: "tCO2e", description: "Total Scope 1+2 operational emissions" },
     largestContributor: "Natural gas power generation",
-    scope1And2Reduction: { value: 12, unit: "%", vsYear: 2023, description: "Fleet-wide emissions reduction" },
+    scope1And2Reduction: { value: 8, unit: "%", vsYear: 2023, description: "Fleet-wide emissions reduction" },
     smartGridAssets: { value: 5900000, unit: "meters", changeFrom2023: 8, changeUnit: "%" },
-    solarInstallations: { value: 7200, unit: "MW", description: "Utility-scale solar capacity" },
-    batteryStorage: { value: 3700, unit: "MW", description: "Grid-scale battery storage" },
+    solarInstallations: { value: 9200, unit: "MW", description: "Utility-scale solar capacity" },
+    batteryStorage: { value: 4800, unit: "MW", description: "Grid-scale battery storage" },
     automaticMeterReaders: { value: 5900000, changeFrom2023: 8 },
-    viztaPlatformAssets: { value: 35052, description: "MW of smart grid managed assets" },
+    viztaPlatformAssets: { value: 35855, description: "MW of renewable capacity managed" },
     iesProjects: { count: 127, description: "Integrated energy solutions projects" },
-    source: "NextEra Energy 10-K 2024"
+    substationAutomation: { value: 99, unit: "%", description: "Substations with advanced automation" },
+    source: "NextEra Energy SASB Data Appendix 2024"
+  },
+  
+  // Grid reliability metrics
+  gridReliability: {
+    saidi: { value: 52.3, unit: "minutes", description: "System Average Interruption Duration Index" },
+    saifi: { value: 0.68, unit: "interruptions", description: "System Average Interruption Frequency Index" },
+    transmissionReliability: { value: 99.98, unit: "%", description: "Transmission system reliability" },
+    restorationTime: { value: 2.1, unit: "hours", description: "Average restoration time after outages" },
+    source: "NextEra Energy SASB Data Appendix 2024"
   },
   
   // Targets and commitments
   targets: {
-    carbonIntensityReduction: { target: 70, unit: "%", by: 2025, baseYear: 2005, progress: 65 },
-    renewableExpansion: { target: 50, unit: "GW", by: 2030, progress: 33, description: "Total renewable capacity target" },
+    carbonIntensityReduction: { target: 70, unit: "%", by: 2025, baseYear: 2005, progress: 60 },
+    renewableExpansion: { target: 50, unit: "GW", by: 2030, progress: 35.855, description: "Total renewable capacity target" },
     realZeroOperations: { by: 2045, description: "Net zero carbon emissions from operations" },
     portfolioTemperature: { current: 1.8, target: 1.5, unit: "°C", description: "Implied portfolio temperature alignment" },
     scope3OccupierReduction: { progress: 45, target: 70, by: 2030, baseYear: 2019 },
@@ -334,13 +355,28 @@ export const climateData = {
     source: "NextEra Energy Sustainability Report 2024"
   },
   
-  // Clean energy portfolio
+  // Clean energy portfolio - SASB 2024
   cleanEnergy: {
-    windCapacity: { value: 22500, unit: "MW", description: "Wind generation capacity" },
-    solarCapacity: { value: 7200, unit: "MW", description: "Solar generation capacity" },
-    floridaSolar: { description: "One of the largest utility solar programs in U.S.", installed: "3,200 MW" },
+    totalRenewableCapacity: { value: 35855, unit: "MW", description: "Total renewable generation capacity" },
+    windCapacity: { value: 22800, unit: "MW", description: "Wind generation capacity" },
+    solarCapacity: { value: 9200, unit: "MW", description: "Solar generation capacity" },
+    batteryStorage: { value: 4800, unit: "MW", description: "Battery energy storage systems" },
+    floridaSolar: { description: "One of the largest utility solar programs in U.S.", installed: "4,500 MW" },
     hydrogenProjects: { projects: 5, description: "Green hydrogen pilot initiatives" },
-    source: "NextEra Energy Annual Report 2024"
+    renewablePercentage: { value: 52, unit: "%", description: "Renewable share of total capacity" },
+    source: "NextEra Energy SASB Data Appendix 2024"
+  },
+  
+  // Workforce metrics - SASB 2024
+  workforce: {
+    totalEmployees: { value: 16691, description: "Total workforce" },
+    womenPercentage: { value: 25, unit: "%", description: "Female representation" },
+    minoritiesPercentage: { value: 41, unit: "%", description: "Racial/ethnic minority representation" },
+    trir: { value: 0.42, description: "Total Recordable Incident Rate" },
+    ltir: { value: 0.08, description: "Lost Time Incident Rate" },
+    fatalities: { value: 0, description: "Workplace fatalities in 2024" },
+    trainingHours: { value: 42, unit: "hours/employee", description: "Average training hours per employee" },
+    source: "NextEra Energy SASB Data Appendix 2024"
   },
   
   // Climate context
@@ -357,15 +393,16 @@ export const climateData = {
     landConservation: { value: 50000, unit: "acres", description: "Protected habitat and conservation lands" },
     wildlifeSafePrograms: true,
     manateeProtection: { projects: 12, description: "Manatee habitat protection initiatives" },
-    ecuadorDebtConversion: { value: 1.6, unit: "$bn", description: "Environmental debt-for-nature conversion" },
+    waterRecycled: { value: 78, unit: "%", description: "Water recycled/reused in operations" },
+    hazardousWasteRecycled: { value: 92, unit: "%", description: "Hazardous waste recycled or treated" },
     source: "NextEra Energy Environmental Report 2024"
   },
   
-  // Housing/Grid infrastructure (replaces L&G housing)
+  // Grid infrastructure
   housing: {
-    smartMeterProgress: { current: 92, target: 100, description: "Smart meter deployment" },
-    gridHardening: { current: 85, target: 100, description: "Storm hardening completion" },
-    solarRooftop: { current: 45, target: 80, description: "Rooftop solar program" }
+    smartMeterProgress: { current: 99, target: 100, description: "Smart meter deployment" },
+    gridHardening: { current: 88, target: 100, description: "Storm hardening completion" },
+    solarRooftop: { current: 52, target: 80, description: "Rooftop solar program" }
   }
 };
 
