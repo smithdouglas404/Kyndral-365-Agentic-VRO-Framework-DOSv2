@@ -914,22 +914,230 @@ export function getDrilldownContent(entityType: string, entityId: string): Drill
       };
     }
     
+    // Project-level KPI dossiers (for project detail page)
+    const projectKpiDossiers: Record<string, DrilldownContent> = {
+      'budget-analysis': {
+        title: 'Budget Analysis',
+        subtitle: 'Project Financial Overview',
+        description: 'Detailed breakdown of project budget allocation, spend tracking, and financial health indicators.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'budget-analysis',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Budget Utilization', value: '39%', trend: 'stable', color: 'green' },
+          { label: 'Monthly Burn Rate', value: '$2.4M', trend: 'stable' },
+          { label: 'Variance to Plan', value: '+2%', trend: 'up' },
+          { label: 'Forecast Accuracy', value: '94%', trend: 'up' }
+        ],
+        actions: [
+          { id: 'budget-1', label: 'View Cost Breakdown', type: 'navigate', targetEntityType: 'report', targetEntityId: 'cost-breakdown', description: 'See detailed cost categories' },
+          { id: 'budget-2', label: 'Forecast Analysis', type: 'investigate', description: 'Review spend projections' },
+          { id: 'budget-3', label: 'Variance Report', type: 'navigate', targetEntityType: 'report', targetEntityId: 'variance', description: 'Analyze budget variances' }
+        ],
+        relatedItems: [
+          { id: 'fin-1', name: 'FinOps Agent', type: 'Agent', entityType: 'agent', entityId: 'finops', status: 'active' },
+          { id: 'fin-2', name: 'Monthly Financials', type: 'Report', entityType: 'report', entityId: 'monthly-financials' }
+        ],
+        aiInsight: 'FinOps Agent: Budget tracking healthy with 39% utilization at project midpoint. Current burn rate supports on-time delivery within budget.',
+        agentSource: 'finops'
+      },
+      'velocity-metrics': {
+        title: 'Velocity Metrics',
+        subtitle: 'Sprint Performance Tracking',
+        description: 'Team velocity trends, story point completion rates, and sprint-over-sprint performance analysis.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'velocity-metrics',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Current Velocity', value: '42 pts', trend: 'up', color: 'blue' },
+          { label: 'Sprint Completion', value: '94%', trend: 'up' },
+          { label: 'Velocity Trend', value: '+8%', trend: 'up' },
+          { label: 'Carry-over Rate', value: '6%', trend: 'down' }
+        ],
+        actions: [
+          { id: 'vel-1', label: 'View Sprint History', type: 'navigate', targetEntityType: 'report', targetEntityId: 'sprint-history', description: 'See historical velocity data' },
+          { id: 'vel-2', label: 'Capacity Planning', type: 'investigate', description: 'Review team capacity' },
+          { id: 'vel-3', label: 'Burndown Charts', type: 'navigate', targetEntityType: 'report', targetEntityId: 'burndown', description: 'View sprint burndowns' }
+        ],
+        relatedItems: [
+          { id: 'tmo-1', name: 'TMO Agent', type: 'Agent', entityType: 'agent', entityId: 'tmo', status: 'active' },
+          { id: 'vel-2', name: 'Sprint Metrics', type: 'Report', entityType: 'report', entityId: 'sprint-metrics' }
+        ],
+        aiInsight: 'TMO Agent: Velocity trending upward with 8% improvement over last 3 sprints. Team has stabilized capacity and reduced carry-over items.',
+        agentSource: 'tmo'
+      },
+      'resource-allocation': {
+        title: 'Resource Allocation',
+        subtitle: 'Team Capacity & Utilization',
+        description: 'Full-time equivalent allocation, team utilization rates, and resource availability across project workstreams.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'resource-allocation',
+        isFullDossier: true,
+        metrics: [
+          { label: 'FTE Allocated', value: '4', trend: 'stable', color: 'purple' },
+          { label: 'Utilization Rate', value: '87%', trend: 'stable' },
+          { label: 'Skill Coverage', value: '92%', trend: 'up' },
+          { label: 'Bench Availability', value: '2 FTE', trend: 'stable' }
+        ],
+        actions: [
+          { id: 'res-1', label: 'View Team Roster', type: 'navigate', targetEntityType: 'team', targetEntityId: 'project-team', description: 'See team members and roles' },
+          { id: 'res-2', label: 'Skills Matrix', type: 'investigate', description: 'Review team capabilities' },
+          { id: 'res-3', label: 'Capacity Forecast', type: 'navigate', targetEntityType: 'report', targetEntityId: 'capacity', description: 'View future availability' }
+        ],
+        relatedItems: [
+          { id: 'ocm-1', name: 'OCM Agent', type: 'Agent', entityType: 'agent', entityId: 'ocm', status: 'active' },
+          { id: 'res-2', name: 'Resource Plan', type: 'Report', entityType: 'report', entityId: 'resource-plan' }
+        ],
+        aiInsight: 'OCM Agent: Resource allocation is balanced. Team has 87% utilization which is within healthy range. No immediate staffing concerns identified.',
+        agentSource: 'ocm'
+      },
+      'quality-score': {
+        title: 'Quality Score',
+        subtitle: 'Code & Delivery Quality Metrics',
+        description: 'Composite quality score based on test coverage, defect rates, code review metrics, and delivery reliability.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'quality-score',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Overall Score', value: '80%', trend: 'up', color: 'green' },
+          { label: 'Test Coverage', value: '76%', trend: 'up' },
+          { label: 'Defect Density', value: '0.8/KLOC', trend: 'down' },
+          { label: 'Code Review Rate', value: '100%', trend: 'stable' }
+        ],
+        actions: [
+          { id: 'qual-1', label: 'View Test Reports', type: 'navigate', targetEntityType: 'report', targetEntityId: 'test-coverage', description: 'See detailed test results' },
+          { id: 'qual-2', label: 'Defect Analysis', type: 'investigate', description: 'Review open defects' },
+          { id: 'qual-3', label: 'Quality Trends', type: 'navigate', targetEntityType: 'report', targetEntityId: 'quality-trends', description: 'Track quality over time' }
+        ],
+        relatedItems: [
+          { id: 'qa-1', name: 'TMO Agent', type: 'Agent', entityType: 'agent', entityId: 'tmo', status: 'active' },
+          { id: 'qa-2', name: 'Quality Dashboard', type: 'Report', entityType: 'report', entityId: 'quality-dashboard' }
+        ],
+        aiInsight: 'TMO Agent: Quality score at 80% with improving trend. Test coverage increased 4% this sprint. Recommend maintaining current review practices.',
+        agentSource: 'tmo'
+      },
+      'features-summary': {
+        title: 'Features Progress',
+        subtitle: 'Feature Delivery Status',
+        description: 'Overview of feature completion, in-progress work, and upcoming feature deliverables.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'features-summary',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Total Features', value: '8', trend: 'stable' },
+          { label: 'Completed', value: '3', trend: 'up' },
+          { label: 'In Progress', value: '4', trend: 'stable' },
+          { label: 'Blocked', value: '0', trend: 'stable', color: 'green' }
+        ],
+        actions: [
+          { id: 'feat-1', label: 'View All Features', type: 'navigate', description: 'See complete feature list' },
+          { id: 'feat-2', label: 'Feature Roadmap', type: 'navigate', description: 'View delivery timeline' }
+        ],
+        aiInsight: 'TMO Agent: Feature delivery on track with 37% completion. No blocked features. Next milestone: 2 features due in Sprint 4.',
+        agentSource: 'tmo'
+      },
+      'stories-summary': {
+        title: 'Stories Progress',
+        subtitle: 'User Story Completion',
+        description: 'User story breakdown across features showing completion status and remaining work.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'stories-summary',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Total Stories', value: '24', trend: 'stable' },
+          { label: 'Completed', value: '12', trend: 'up' },
+          { label: 'In Sprint', value: '6', trend: 'stable' },
+          { label: 'Backlog', value: '6', trend: 'down' }
+        ],
+        actions: [
+          { id: 'story-1', label: 'View Story Board', type: 'navigate', description: 'See Kanban board' },
+          { id: 'story-2', label: 'Sprint Backlog', type: 'navigate', description: 'View current sprint items' }
+        ],
+        aiInsight: 'TMO Agent: 50% of stories completed with healthy flow through sprint. Backlog refinement on track.',
+        agentSource: 'tmo'
+      },
+      'tasks-summary': {
+        title: 'Tasks Progress',
+        subtitle: 'Task Execution Status',
+        description: 'Granular task-level progress showing work breakdown and completion across all stories.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'tasks-summary',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Total Tasks', value: '48', trend: 'stable' },
+          { label: 'Done', value: '28', trend: 'up' },
+          { label: 'In Progress', value: '12', trend: 'stable' },
+          { label: 'Todo', value: '8', trend: 'down' }
+        ],
+        actions: [
+          { id: 'task-1', label: 'View Task Board', type: 'navigate', description: 'See detailed task status' },
+          { id: 'task-2', label: 'Blockers', type: 'investigate', description: 'Check for blocked tasks' }
+        ],
+        aiInsight: 'TMO Agent: 58% task completion rate. Work flowing smoothly with no blockers identified.',
+        agentSource: 'tmo'
+      },
+      'burndown-health': {
+        title: 'Burndown Health',
+        subtitle: 'Sprint Progress Indicator',
+        description: 'Sprint burndown tracking showing actual vs ideal progress and delivery predictability.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'burndown-health',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Health Score', value: '75%', trend: 'stable', color: 'blue' },
+          { label: 'Days Remaining', value: '5', trend: 'down' },
+          { label: 'Points Remaining', value: '18', trend: 'down' },
+          { label: 'Forecast', value: 'On Track', trend: 'stable', color: 'green' }
+        ],
+        actions: [
+          { id: 'burn-1', label: 'View Burndown Chart', type: 'navigate', description: 'See visual burndown' },
+          { id: 'burn-2', label: 'Sprint Risks', type: 'investigate', description: 'Check sprint health risks' }
+        ],
+        aiInsight: 'TMO Agent: Burndown trajectory indicates on-time completion. Current velocity supports remaining commitment.',
+        agentSource: 'tmo'
+      },
+      'project-timeline': {
+        title: 'Project Timeline',
+        subtitle: 'Schedule & Milestones',
+        description: 'Project timeline overview showing key dates, milestones, and schedule performance.',
+        level: 2,
+        entityType: 'kpi',
+        entityId: 'project-timeline',
+        isFullDossier: true,
+        metrics: [
+          { label: 'Days Elapsed', value: '120', trend: 'stable' },
+          { label: 'Days Remaining', value: '180', trend: 'down' },
+          { label: 'Schedule Performance', value: '98%', trend: 'up', color: 'green' },
+          { label: 'Milestones Complete', value: '3/8', trend: 'stable' }
+        ],
+        actions: [
+          { id: 'time-1', label: 'View Gantt Chart', type: 'navigate', description: 'See project timeline' },
+          { id: 'time-2', label: 'Milestone Status', type: 'navigate', description: 'Check upcoming milestones' }
+        ],
+        aiInsight: 'Planning Agent: Project on schedule with 98% schedule performance index. Next milestone: Phase 2 completion in 30 days.',
+        agentSource: 'planning'
+      }
+    };
+    
+    if (projectKpiDossiers[entityId]) {
+      return projectKpiDossiers[entityId];
+    }
+
     const kpiToMetric: Record<string, string> = {
       'roi': 'roi',
       'value-realized': 'value-realized',
       'okr-progress': 'okr-progress',
       'cycle-time': 'cycle-time',
       'flow-efficiency': 'flow-efficiency',
-      'throughput': 'throughput',
-      'budget-analysis': 'roi',
-      'velocity-metrics': 'throughput',
-      'resource-allocation': 'throughput',
-      'quality-score': 'okr-progress',
-      'features-summary': 'throughput',
-      'stories-summary': 'throughput',
-      'tasks-summary': 'throughput',
-      'burndown-health': 'flow-efficiency',
-      'project-timeline': 'cycle-time'
+      'throughput': 'throughput'
     };
     const metricId = kpiToMetric[entityId] || entityId;
     if (metricDossiers[metricId]) {
