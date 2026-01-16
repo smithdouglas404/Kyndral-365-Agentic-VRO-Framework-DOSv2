@@ -188,7 +188,13 @@ export default function SegmentPage() {
     );
   }
 
-  const divisionAlerts = aiAlerts.filter(a => a.division === division.name);
+  // Filter alerts by division name - check both exact match and segment name mappings
+  const divisionAlerts = aiAlerts.filter(a => {
+    if (a.division === division.name) return true;
+    // Also check if alert division matches any of the segment name mappings
+    const mappedNames = segmentNameMapping[resolvedId || ''] || [];
+    return mappedNames.includes(a.division);
+  });
   
   // Get portfolio data for VRO/PMO metrics
   const portfolioId = segmentToPortfolioMapping[resolvedId || ''];
