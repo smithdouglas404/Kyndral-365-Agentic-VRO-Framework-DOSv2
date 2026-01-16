@@ -38,8 +38,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFullProject } from "@/hooks/useProjects";
 import { getProjectById } from "@/lib/projects";
 import type { Feature, Story, Task, Milestone, Resource, Dependency } from "@/lib/safeProjectData";
-import { aiAlerts } from "@/lib/lgData";
-import { Lightbulb } from "lucide-react";
 
 const statusColors = {
   green: 'bg-green-500',
@@ -609,53 +607,57 @@ export default function ProjectDetailPage() {
               </Card>
             )}
 
-            {/* AI Insights Section - matching SegmentPage design */}
-            {(() => {
-              const projectAlerts = aiAlerts.filter(a => 
-                a.division === project.bu || 
-                a.division === 'Florida Power & Light' || 
-                a.division === 'NextEra Energy Resources'
-              ).slice(0, 2);
-              
-              return projectAlerts.length > 0 ? (
-                <Card className="border-l-4 border-purple-600">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Lightbulb className="h-5 w-5 text-amber-500" />
-                      AI Insights for {project.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {projectAlerts.map(alert => (
-                        <div key={alert.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                          <AlertTriangle className={`h-5 w-5 mt-0.5 ${alert.severity === "critical" ? "text-red-500" : alert.severity === "warning" ? "text-amber-500" : "text-blue-500"}`} />
-                          <div className="flex-1">
-                            <p className="font-medium">{alert.title}</p>
-                            <p className="text-sm text-gray-600 mt-1">{alert.description}</p>
-                            <div className="flex gap-2 mt-2">
-                              {alert.actions.map((action, i) => (
-                                <Button 
-                                  key={i} 
-                                  size="sm" 
-                                  variant={action.type === "primary" ? "default" : "outline"} 
-                                  className={action.type === "primary" ? "bg-purple-600 hover:bg-purple-700" : ""}
-                                  onClick={() => openDrilldown('alert-action', `${alert.id}-${action.label}`)}
-                                  data-testid={`alert-action-${alert.id}-${i}`}
-                                >
-                                  {action.label}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                          <Badge variant="outline">{alert.confidence}% confidence</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : null;
-            })()}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-blue-600" />
+                    VRO Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {project.vroInsights.map((insight, idx) => (
+                      <li 
+                        key={idx} 
+                        className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => openDrilldown('kpi', `vro-insight-${idx}`)}
+                        data-testid={`vro-insight-${idx}`}
+                      >
+                        <Sparkles className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-blue-800 flex-1">{insight}</span>
+                        <ExternalLink className="h-3 w-3 text-blue-400 mt-0.5 flex-shrink-0" />
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-green-600" />
+                    PMO Data Feeds
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {project.pmoDataFeeds.map((feed, idx) => (
+                      <li 
+                        key={idx} 
+                        className="flex items-start gap-2 p-2 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition-colors"
+                        onClick={() => openDrilldown('kpi', `pmo-feed-${idx}`)}
+                        data-testid={`pmo-feed-${idx}`}
+                      >
+                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-green-800 flex-1">{feed}</span>
+                        <ExternalLink className="h-3 w-3 text-green-400 mt-0.5 flex-shrink-0" />
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="features" className="space-y-4">
