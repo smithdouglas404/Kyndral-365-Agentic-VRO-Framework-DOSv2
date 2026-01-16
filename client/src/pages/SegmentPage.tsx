@@ -18,6 +18,41 @@ import { usePageContext } from "@/contexts/PageContext";
 import { buPortfolios, type BUPortfolio } from "@/lib/buPrograms";
 import { Brain } from "lucide-react";
 
+// Helper function to format KPI values based on their unit type
+function formatKpiValue(value: string | number | null, unit: string | null): string {
+  const numValue = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
+  const unitStr = unit || '';
+  
+  // Handle currency values in millions ($m)
+  if (unitStr === '$m' || unitStr === '$M') {
+    if (numValue >= 1000) {
+      return `$${(numValue / 1000).toFixed(1)}B`;
+    }
+    return `$${numValue}M`;
+  }
+  
+  // Handle currency values in billions ($bn or $B)
+  if (unitStr === '$bn' || unitStr === '$B' || unitStr === '$b') {
+    return `$${numValue}B`;
+  }
+  
+  // Handle percentages
+  if (unitStr === '%') {
+    return `${numValue}%`;
+  }
+  
+  // Handle large numbers with K/M/B notation
+  if (numValue >= 1000000) {
+    return `${(numValue / 1000000).toFixed(1)}M${unitStr}`;
+  }
+  if (numValue >= 1000) {
+    return `${(numValue / 1000).toFixed(1)}K${unitStr}`;
+  }
+  
+  // Default: number with unit
+  return `${numValue}${unitStr}`;
+}
+
 // Legacy slug mapping for backward compatibility (maps old L&G IDs to new NextEra segment IDs)
 const legacySlugs: Record<string, string> = {
   'lgim': 'neer',
@@ -234,7 +269,7 @@ export default function SegmentPage() {
                       <div key={i} className="p-4 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-500">{kpi.name}</p>
                         <p className="text-2xl font-bold" style={{ color: division.color || '#666' }}>
-                          {kpi.value2024}{kpi.unit}
+                          {formatKpiValue(kpi.value2024, kpi.unit)}
                         </p>
                         <div className="flex items-center gap-1 mt-1">
                           {kpi.trend === "up" ? (
@@ -627,7 +662,7 @@ export default function SegmentPage() {
                             </div>
                             <div className="text-right">
                               <div className="text-xl font-bold" style={{ color: okrColor }}>
-                                {kpi.value2024}{kpi.unit}
+                                {formatKpiValue(kpi.value2024, kpi.unit)}
                               </div>
                               <div className="flex items-center gap-1 justify-end">
                                 {variance >= 0 ? (
@@ -652,8 +687,8 @@ export default function SegmentPage() {
                               <Progress value={Math.min(100, progressPercent)} className="h-2" />
                             </div>
                             <div className="flex justify-between text-[10px] text-gray-400">
-                              <span>Current: {kpi.value2024}{kpi.unit}</span>
-                              <span>Target: {kpi.target2025}{kpi.unit}</span>
+                              <span>Current: {formatKpiValue(kpi.value2024, kpi.unit)}</span>
+                              <span>Target: {formatKpiValue(kpi.target2025, kpi.unit)}</span>
                             </div>
                           </div>
                         </CardContent>
