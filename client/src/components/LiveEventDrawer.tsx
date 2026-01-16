@@ -14,6 +14,8 @@ import {
 import { useState, useEffect } from "react";
 import { SimulationEvent } from "@/lib/liveSimulation";
 import { useSimulation } from "@/contexts/SimulationContext";
+import { useConfirmationToast } from "@/hooks/useConfirmationToast";
+import { TraceabilityDrawer } from "@/components/TraceabilityDrawer";
 
 const priorityColors: Record<string, string> = {
   critical: "#D50032",
@@ -127,6 +129,7 @@ function generateAgentActions(event: SimulationEvent): AgentAction[] {
 export function LiveEventDrawer() {
   const { selectedEvent, setSelectedEvent, markAsRead } = useSimulation();
   const [agentActions, setAgentActions] = useState<AgentAction[]>([]);
+  const { showConfirmation, selectedCode, drawerOpen, setDrawerOpen } = useConfirmationToast();
   
   useEffect(() => {
     if (selectedEvent) {
@@ -136,10 +139,23 @@ export function LiveEventDrawer() {
     }
   }, [selectedEvent?.id]);
   
-  const handleActionResponse = (actionId: string, accepted: boolean) => {
+  const handleActionResponse = async (actionId: string, accepted: boolean) => {
+    const action = agentActions.find(a => a.id === actionId);
+    
     setAgentActions(prev => prev.map(a => 
       a.id === actionId ? { ...a, status: accepted ? 'accepted' : 'declined' } : a
     ));
+
+    await showConfirmation({
+      actionType: accepted ? 'approved' : 'dismissed',
+      entityType: 'recommendation',
+      entityId: actionId,
+      entityTitle: action?.question || 'Agent Recommendation',
+      agentSource: selectedEvent?.source || 'AI Insights Agent',
+      projectId: selectedEvent?.relatedEntity?.id,
+      projectName: selectedEvent?.relatedEntity?.name,
+      componentSource: 'LiveEventDrawer'
+    });
   };
   
   if (!selectedEvent) return null;
@@ -152,6 +168,7 @@ export function LiveEventDrawer() {
   };
 
   return (
+    <>
     <Dialog open={!!selectedEvent} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -447,5 +464,12 @@ export function LiveEventDrawer() {
         </Tabs>
       </DialogContent>
     </Dialog>
+    
+    <TraceabilityDrawer 
+      confirmationCode={selectedCode}
+      open={drawerOpen}
+      onOpenChange={setDrawerOpen}
+    />
+    </>
   );
 }

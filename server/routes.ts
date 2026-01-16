@@ -1113,6 +1113,41 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Audit Trail endpoints for traceability
+  app.post("/api/audit-trail", async (req, res) => {
+    try {
+      const entry = await storage.createAuditTrail(req.body);
+      res.json({ success: true, confirmationCode: entry.confirmationCode, entry });
+    } catch (error: any) {
+      console.error("Create audit trail error:", error);
+      res.status(500).json({ error: "Failed to create audit trail entry" });
+    }
+  });
+
+  app.get("/api/audit-trail/:confirmationCode", async (req, res) => {
+    try {
+      const entry = await storage.getAuditTrailByCode(req.params.confirmationCode);
+      if (!entry) {
+        return res.status(404).json({ error: "Audit trail entry not found" });
+      }
+      res.json(entry);
+    } catch (error: any) {
+      console.error("Get audit trail error:", error);
+      res.status(500).json({ error: "Failed to fetch audit trail entry" });
+    }
+  });
+
+  app.get("/api/audit-trail", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const entries = await storage.getRecentAuditTrail(limit);
+      res.json({ entries });
+    } catch (error: any) {
+      console.error("Get recent audit trail error:", error);
+      res.status(500).json({ error: "Failed to fetch audit trail" });
+    }
+  });
+
   // Agent discussion endpoints with database persistence (both /api/discussions and /api/agent-discussions)
   const discussionsHandler = async (req: any, res: any) => {
     try {

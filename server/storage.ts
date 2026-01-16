@@ -64,6 +64,7 @@ import {
   type ScheduledReport, type InsertScheduledReport,
   type ExportJob, type InsertExportJob,
   type TutorialProgress, type InsertTutorialProgress,
+  type AuditTrail, type InsertAuditTrail,
   users, policies, businessUnits, projects, projectTemplates, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -75,7 +76,7 @@ import {
   syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
   ingestionSessions, qaReviews, clarifyingQuestions,
   vroMetrics, benchmarks, appConfig, dashboardWidgets,
-  notifications, userRoles, scheduledReports, exportJobs, tutorialProgress
+  notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -339,6 +340,11 @@ export interface IStorage {
   createProjectTemplate(template: InsertProjectTemplate): Promise<ProjectTemplate>;
   updateProjectTemplate(id: string, updates: Partial<ProjectTemplate>): Promise<ProjectTemplate | undefined>;
   deleteProjectTemplate(id: string): Promise<void>;
+  
+  // Audit Trail Methods
+  createAuditTrail(entry: InsertAuditTrail): Promise<AuditTrail>;
+  getAuditTrailByCode(confirmationCode: string): Promise<AuditTrail | undefined>;
+  getRecentAuditTrail(limit?: number): Promise<AuditTrail[]>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -2664,6 +2670,24 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProjectTemplate(id: string): Promise<void> {
     await db.delete(projectTemplates).where(eq(projectTemplates.id, id));
+  }
+
+  // Audit Trail Methods
+  async createAuditTrail(entry: InsertAuditTrail): Promise<AuditTrail> {
+    const result = await db.insert(auditTrail).values(entry).returning();
+    return result[0];
+  }
+
+  async getAuditTrailByCode(confirmationCode: string): Promise<AuditTrail | undefined> {
+    const result = await db.select().from(auditTrail)
+      .where(eq(auditTrail.confirmationCode, confirmationCode)).limit(1);
+    return result[0];
+  }
+
+  async getRecentAuditTrail(limit: number = 20): Promise<AuditTrail[]> {
+    return await db.select().from(auditTrail)
+      .orderBy(desc(auditTrail.createdAt))
+      .limit(limit);
   }
 }
 

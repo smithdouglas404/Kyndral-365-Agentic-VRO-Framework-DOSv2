@@ -1798,3 +1798,33 @@ export const insertTutorialProgressSchema = createInsertSchema(tutorialProgress)
 
 export type InsertTutorialProgress = z.infer<typeof insertTutorialProgressSchema>;
 export type TutorialProgress = typeof tutorialProgress.$inferSelect;
+
+// ============================================================================
+// AUDIT TRAIL - Track all user actions with confirmation codes for traceability
+// ============================================================================
+
+export const auditTrail = pgTable("audit_trail", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  confirmationCode: varchar("confirmation_code", { length: 12 }).notNull().unique(),
+  actionType: text("action_type").notNull(), // approved, dismissed, escalated, acknowledged, created
+  actionStatus: text("action_status").notNull().default("completed"), // completed, failed, pending
+  entityType: text("entity_type").notNull(), // intervention, recommendation, discussion, risk
+  entityId: varchar("entity_id"),
+  entityTitle: text("entity_title"),
+  agentSource: text("agent_source"), // Which AI agent generated the item
+  projectId: varchar("project_id"),
+  projectName: text("project_name"),
+  userId: varchar("user_id"),
+  userName: text("user_name"),
+  componentSource: text("component_source"), // Which UI component the action came from
+  metadata: text("metadata"), // JSON for additional context
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAuditTrailSchema = createInsertSchema(auditTrail).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAuditTrail = z.infer<typeof insertAuditTrailSchema>;
+export type AuditTrail = typeof auditTrail.$inferSelect;
