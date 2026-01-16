@@ -1370,18 +1370,18 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const demoAlerts = [
         {
           title: 'Budget Threshold Exceeded',
-          message: 'Grid Modernization Initiative has exceeded 90% of allocated budget with only 65% completion. Immediate review required.',
+          message: 'FPL Grid Modernization has exceeded 90% of allocated budget with only 65% completion. Immediate review required.',
           severity: 'critical',
           category: 'budget',
           status: 'active',
           source: 'FinOps Agent',
           sourceEntityType: 'project',
-          sourceEntityId: 'grid-mod-001',
+          sourceEntityId: 'nee-fpl-001',
           metadata: JSON.stringify({ budgetSpent: 112.5, budgetTotal: 125, completion: 65 })
         },
         {
           title: 'Sync Conflict Detected',
-          message: 'Azure DevOps sync detected 3 conflicting field updates in Customer Experience stories. Manual resolution required.',
+          message: 'Azure DevOps sync detected 3 conflicting field updates in NEER Solar stories. Manual resolution required.',
           severity: 'high',
           category: 'sync',
           status: 'active',
@@ -1391,19 +1391,19 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Schedule Variance Warning',
-          message: 'ERP Modernization SPI dropped to 0.82, below 0.85 threshold. 3-week delay projected without intervention.',
+          message: 'FPL Storm Hardening SPI dropped to 0.82, below 0.85 threshold. 3-week delay projected without intervention.',
           severity: 'high',
           category: 'schedule',
           status: 'acknowledged',
           source: 'TMO Agent',
           sourceEntityType: 'project',
-          sourceEntityId: 'erp-mod-001',
+          sourceEntityId: 'nee-fpl-004',
           acknowledgedBy: 'system',
           metadata: JSON.stringify({ spi: 0.82, projectedDelay: 21 })
         },
         {
           title: 'Dependency Risk Escalation',
-          message: 'API Gateway dependency blocking 5 downstream features across 2 ARTs. Cross-ART coordination needed.',
+          message: 'SCADA integration blocking 5 downstream features across Grid Resilience and Renewable Generation ARTs.',
           severity: 'high',
           category: 'risk',
           status: 'active',
@@ -1413,49 +1413,49 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Quality Gate Failed',
-          message: 'Data Platform feature "Real-time Analytics" failed QA gate with 78% test coverage (minimum 80% required).',
+          message: 'NextEra Cybersecurity feature "Access Control" failed QA gate with 78% test coverage (minimum 80% required for NERC CIP).',
           severity: 'medium',
           category: 'quality',
           status: 'active',
           source: 'QA Agent',
           sourceEntityType: 'feature',
-          sourceEntityId: 'feat-analytics-001',
+          sourceEntityId: 'feat-cybersec-001',
           metadata: JSON.stringify({ testCoverage: 78, required: 80 })
         },
         {
           title: 'New Integration Connected',
-          message: 'Jira Cloud integration successfully connected. 245 epics and 1,842 stories ready for sync.',
+          message: 'Azure DevOps integration successfully connected. 36 epics and 245 stories ready for sync.',
           severity: 'info',
           category: 'sync',
           status: 'resolved',
           source: 'MCP Connector',
           resolvedBy: 'auto',
-          metadata: JSON.stringify({ epics: 245, stories: 1842 })
+          metadata: JSON.stringify({ epics: 36, stories: 245 })
         },
         {
           title: 'Agent Collaboration Completed',
-          message: 'Resource Agent and FinOps Agent completed joint analysis of Cloud Infrastructure allocation. Report available.',
+          message: 'Planning Agent and FinOps Agent completed joint analysis of Google Data Center resource allocation. Report available.',
           severity: 'info',
           category: 'agent',
           status: 'resolved',
           source: 'Orchestration Engine',
           resolvedBy: 'auto',
-          metadata: JSON.stringify({ participants: ['resource-agent', 'finops-agent'], duration: 45 })
+          metadata: JSON.stringify({ participants: ['planning-agent', 'finops-agent'], duration: 45 })
         },
         {
           title: 'Risk Score Increased',
-          message: 'Climate Analytics Platform risk score increased from 3.2 to 5.8 due to regulatory timeline changes.',
+          message: 'NEER Wind Portfolio risk score increased from 3.2 to 5.8 due to Vestas turbine delivery delays.',
           severity: 'high',
           category: 'risk',
           status: 'active',
           source: 'Risk Agent',
           sourceEntityType: 'project',
-          sourceEntityId: 'climate-001',
-          metadata: JSON.stringify({ previousScore: 3.2, newScore: 5.8, trigger: 'regulatory_change' })
+          sourceEntityId: 'nee-neer-001',
+          metadata: JSON.stringify({ previousScore: 3.2, newScore: 5.8, trigger: 'vendor_delay' })
         },
         {
           title: 'Resource Overallocation',
-          message: 'Senior Architect team member allocated at 145% across 3 projects. Rebalancing recommended.',
+          message: 'Senior Grid Engineer allocated at 145% across FPL Grid Modernization, Storm Hardening, and AMI projects. Rebalancing recommended.',
           severity: 'medium',
           category: 'resource',
           status: 'active',
