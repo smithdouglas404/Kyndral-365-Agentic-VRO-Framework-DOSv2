@@ -9,10 +9,12 @@ import {
   Zap, 
   Target,
   GitBranch,
-  Compass
+  Compass,
+  Settings
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 
 type DataMode = "VRO" | "PMO";
 
@@ -138,6 +140,56 @@ export function DashboardSectionSidebar({
             ))}
           </nav>
         )}
+
+        <nav className="space-y-1 pt-4 border-t border-slate-200">
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 mb-2">
+            Admin
+          </p>
+          <Link href="/settings">
+            <button
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              data-testid="nav-settings"
+            >
+              <span className="text-slate-500">
+                <Settings size={18} />
+              </span>
+              Dashboard Settings
+            </button>
+          </Link>
+          <Link href="/mcp-config">
+            <button
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              data-testid="nav-mcp-config"
+            >
+              <span className="text-slate-500">
+                <GitBranch size={18} />
+              </span>
+              MCP Configuration
+            </button>
+          </Link>
+          <Link href="/ingestion">
+            <button
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              data-testid="nav-ingestion"
+            >
+              <span className="text-slate-500">
+                <Zap size={18} />
+              </span>
+              Data Ingestion
+            </button>
+          </Link>
+          <Link href="/command-center">
+            <button
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              data-testid="nav-command-center"
+            >
+              <span className="text-slate-500">
+                <Brain size={18} />
+              </span>
+              Command Center
+            </button>
+          </Link>
+        </nav>
       </div>
     </div>
   );
