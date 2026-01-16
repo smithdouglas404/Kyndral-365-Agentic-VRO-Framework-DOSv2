@@ -36,6 +36,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFullProject } from "@/hooks/useProjects";
+import { getProjectById } from "@/lib/projects";
 import type { Feature, Story, Task, Milestone, Resource, Dependency } from "@/lib/safeProjectData";
 
 const statusColors = {
@@ -972,7 +973,7 @@ export default function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-4">
                     {project.dependencies.map(dep => {
-                      const targetProject = getSafeProjectById(dep.targetProjectId);
+                      const targetProject = getProjectById(dep.targetProjectId);
                       return (
                         <div 
                           key={dep.id} 
