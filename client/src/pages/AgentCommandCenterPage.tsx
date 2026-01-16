@@ -822,7 +822,7 @@ export default function AgentCommandCenterPage() {
                             className="px-4 py-2 border-b border-gray-800 hover:bg-gray-800/50 transition-colors"
                           >
                             <div className="flex items-start gap-3">
-                              <span className="text-gray-600 whitespace-nowrap">{time}.{msec}</span>
+                              <span className="text-gray-400 whitespace-nowrap">{time}.{msec}</span>
                               <span className={`${eventColor} font-bold w-16`}>[{eventLabel}]</span>
                               <div className="flex-1">
                                 <span className="text-cyan-400">{activity.primaryAgentName}</span>
