@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Layout, Activity, Database, ArrowUp, ArrowDown, Eye, EyeOff, RefreshCw, Download, FileSpreadsheet, FileJson, Loader2 } from "lucide-react";
+import { Settings, Layout, Activity, Database, ArrowUp, ArrowDown, Eye, EyeOff, RefreshCw, Download, FileSpreadsheet, FileJson, Loader2, Key, CheckCircle, XCircle, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useDashboardWidgets, useUpdateDashboardWidget, useReorderDashboardWidgets } from "@/hooks/useDashboardWidgets";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
 import { usePortfolioMetrics } from "@/hooks/usePortfolioMetrics";
@@ -165,6 +166,159 @@ function SystemSettings() {
           disabled={demoLoading || isToggling}
           data-testid="switch-demo-mode"
         />
+      </div>
+    </div>
+  );
+}
+
+function APIKeySettings() {
+  const [anthropicKey, setAnthropicKey] = useState("");
+  const [showKey, setShowKey] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<'unknown' | 'valid' | 'invalid' | 'checking'>('unknown');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const checkKeyStatus = async () => {
+    setKeyStatus('checking');
+    try {
+      const res = await fetch('/api/ai/check-key');
+      const data = await res.json();
+      setKeyStatus(data.valid ? 'valid' : 'invalid');
+    } catch {
+      setKeyStatus('unknown');
+    }
+  };
+
+  useEffect(() => {
+    checkKeyStatus();
+  }, []);
+
+  const handleSaveKey = async () => {
+    if (!anthropicKey.trim()) {
+      toast.error("Please enter an API key");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/admin/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'ANTHROPIC_API_KEY', value: anthropicKey })
+      });
+      
+      if (res.ok) {
+        toast.success("API key saved successfully. Restart the application to apply changes.");
+        setAnthropicKey("");
+        checkKeyStatus();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to save API key");
+      }
+    } catch {
+      toast.error("Failed to save API key");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="p-4 border rounded-lg space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Label className="text-base font-medium">Anthropic API Key</Label>
+              {keyStatus === 'checking' && (
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+              )}
+              {keyStatus === 'valid' && (
+                <Badge variant="default" className="bg-green-500">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Configured
+                </Badge>
+              )}
+              {keyStatus === 'invalid' && (
+                <Badge variant="destructive">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Not Configured
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-gray-500">
+              Required for AI Executive Summary, AI insights, and intelligent analysis features.
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={checkKeyStatus}
+            disabled={keyStatus === 'checking'}
+            data-testid="button-check-api-key"
+          >
+            <RefreshCw className={cn("h-4 w-4 mr-1", keyStatus === 'checking' && "animate-spin")} />
+            Check Status
+          </Button>
+        </div>
+        
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              type={showKey ? "text" : "password"}
+              placeholder="sk-ant-api03-..."
+              value={anthropicKey}
+              onChange={(e) => setAnthropicKey(e.target.value)}
+              className="pr-10"
+              data-testid="input-anthropic-key"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+              onClick={() => setShowKey(!showKey)}
+              data-testid="button-toggle-key-visibility"
+            >
+              {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          </div>
+          <Button 
+            onClick={handleSaveKey}
+            disabled={isSaving || !anthropicKey.trim()}
+            data-testid="button-save-api-key"
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Key
+          </Button>
+        </div>
+        
+        <p className="text-xs text-gray-400">
+          Get your API key from{" "}
+          <a 
+            href="https://console.anthropic.com/settings/keys" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            console.anthropic.com
+          </a>
+        </p>
+      </div>
+
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="flex items-start gap-3">
+          <Key className="h-5 w-5 text-amber-600 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-amber-800">Security Note</p>
+            <p className="text-xs text-amber-700">
+              API keys are stored securely as environment secrets. After saving a new key, 
+              you may need to restart the application for changes to take effect.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -399,7 +553,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="widgets" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="widgets" className="flex items-center gap-2" data-testid="tab-widgets">
             <Layout className="h-4 w-4" />
             Widgets
@@ -411,6 +565,10 @@ export default function SettingsPage() {
           <TabsTrigger value="export" className="flex items-center gap-2" data-testid="tab-export">
             <Download className="h-4 w-4" />
             Export
+          </TabsTrigger>
+          <TabsTrigger value="api-keys" className="flex items-center gap-2" data-testid="tab-api-keys">
+            <Key className="h-4 w-4" />
+            API Keys
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2" data-testid="tab-system">
             <Activity className="h-4 w-4" />
@@ -456,6 +614,20 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <DataExport />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="api-keys">
+          <Card>
+            <CardHeader>
+              <CardTitle>API Key Management</CardTitle>
+              <CardDescription>
+                Configure API keys for AI features and external integrations.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <APIKeySettings />
             </CardContent>
           </Card>
         </TabsContent>

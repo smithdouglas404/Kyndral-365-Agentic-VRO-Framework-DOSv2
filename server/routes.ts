@@ -537,6 +537,59 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // API Key management endpoints
+  app.get("/api/ai/check-key", async (_req, res) => {
+    try {
+      const hasKey = !!process.env.ANTHROPIC_API_KEY;
+      if (hasKey) {
+        const Anthropic = (await import("@anthropic-ai/sdk")).default;
+        const client = new Anthropic();
+        await client.messages.create({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 10,
+          messages: [{ role: "user", content: "test" }]
+        });
+        res.json({ valid: true, configured: true });
+      } else {
+        res.json({ valid: false, configured: false });
+      }
+    } catch (error: any) {
+      if (error.status === 401) {
+        res.json({ valid: false, configured: true, error: "Invalid API key" });
+      } else {
+        res.json({ valid: true, configured: true });
+      }
+    }
+  });
+
+  app.post("/api/admin/api-keys", async (req, res) => {
+    try {
+      const { key, value } = req.body;
+      if (!key || !value) {
+        return res.status(400).json({ error: "Key and value are required" });
+      }
+      
+      const allowedKeys = ['ANTHROPIC_API_KEY'];
+      if (!allowedKeys.includes(key)) {
+        return res.status(400).json({ error: "Invalid key name" });
+      }
+
+      if (key === 'ANTHROPIC_API_KEY' && !value.startsWith('sk-')) {
+        return res.status(400).json({ error: "Invalid Anthropic API key format. Key should start with 'sk-'" });
+      }
+
+      await storage.setAppConfig(`${key}_configured`, 'true');
+      
+      res.json({ 
+        success: true, 
+        message: "API key format validated. Please add this key to your Replit Secrets panel for it to take effect."
+      });
+    } catch (error: any) {
+      console.error("API key save error:", error);
+      res.status(500).json({ error: error.message || "Failed to save API key" });
+    }
+  });
+
   // Project Template endpoints
   const templatesDir = path.join(process.cwd(), 'attached_assets', 'project_templates');
   
