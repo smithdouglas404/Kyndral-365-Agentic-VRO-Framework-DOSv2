@@ -982,6 +982,430 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       ],
       insight: 'Rebecca Kujawa oversees 6 risk categories with 12 open items. 2 items escalated to executive committee this week.',
       summary: 'Enterprise risk governance under CRO oversight. Next quarterly risk review scheduled for Feb 2026.'
+    },
+    'planning-phase': {
+      label: 'Current Phase',
+      category: 'PMO',
+      metrics: {
+        'Current Phase': '3/6',
+        'Phase Name': 'Development',
+        'Days Remaining': '45',
+        'Milestones Complete': '8/12',
+        'Critical Path Status': 'On Track'
+      },
+      projectBreakdown: [
+        { name: 'Phase 1: Discovery', value: 'Complete', budget: 'On schedule' },
+        { name: 'Phase 2: Design', value: 'Complete', budget: '2 days ahead' },
+        { name: 'Phase 3: Development', value: 'In Progress', budget: '45 days remaining' },
+        { name: 'Phase 4: Testing', value: 'Upcoming', budget: 'Starts Q2' }
+      ],
+      pendingAlerts: [
+        { id: 'plan-1', title: 'Resource Constraint: Senior Developers', severity: 'warning', description: '3 senior devs needed for Phase 4 prep', dueDate: '14 days', actionLabel: 'Request Resources', agent: 'Planning Agent' },
+        { id: 'plan-2', title: 'Dependency: API Integration', severity: 'info', description: 'Waiting on external API access from vendor', dueDate: '7 days', actionLabel: 'Follow Up', agent: 'TMO Agent' }
+      ],
+      insight: 'Development phase on track with 45 days remaining. Resource planning needed for upcoming testing phase.',
+      summary: 'Phase 3 of 6 in progress. Planning Agent monitoring critical path and resource allocation.'
+    },
+    'planning-progress': {
+      label: 'Overall Progress',
+      category: 'VRO',
+      metrics: {
+        'Overall Progress': '67%',
+        'Value Delivered': '$42M',
+        'Remaining Work': '33%',
+        'Sprint Velocity': '48 pts/sprint',
+        'Projected Completion': 'Q3 2026'
+      },
+      projectBreakdown: [
+        { name: 'FPL Projects', value: '72%', budget: 'Ahead' },
+        { name: 'NEER Projects', value: '65%', budget: 'On Track' },
+        { name: 'Corporate Projects', value: '61%', budget: 'Slight Delay' }
+      ],
+      pendingAlerts: [],
+      insight: 'Portfolio progress at 67% with FPL leading. Corporate projects showing slight delay requiring attention.',
+      summary: 'Overall program on track for Q3 2026 completion. VRO Agent validates $42M value delivered.'
+    },
+    'planning-budget': {
+      label: 'Budget Status',
+      category: 'VRO',
+      metrics: {
+        'Total Budget': '$156M',
+        'YTD Spend': '$89.4M',
+        'Utilization': '57%',
+        'Forecast EOY': '$148M',
+        'Variance': '-$8M under budget'
+      },
+      projectBreakdown: [
+        { name: 'Technology Investments', value: '$52M', budget: '55% spent' },
+        { name: 'Grid Modernization', value: '$64M', budget: '62% spent' },
+        { name: 'Renewable Expansion', value: '$40M', budget: '48% spent' }
+      ],
+      pendingAlerts: [
+        { id: 'budget-1', title: 'Underspend: Renewable Expansion', severity: 'info', description: 'Permitting delays causing budget lag', dueDate: 'Q2 review', actionLabel: 'Reallocate Funds', agent: 'FinOps Agent' }
+      ],
+      insight: 'Budget tracking $8M under plan. Renewable Expansion underspend due to permitting delays.',
+      summary: 'Financial health strong with 57% utilization. FinOps Agent recommends reallocation review.'
+    },
+    'planning-deadlines': {
+      label: 'Deadlines On Track',
+      category: 'PMO',
+      metrics: {
+        'On Track': '8/12',
+        'At Risk': '3',
+        'Missed': '1',
+        'Upcoming (30 days)': '4',
+        'Critical Deadlines': '2'
+      },
+      projectBreakdown: [
+        { name: 'Regulatory Filing', value: 'On Track', budget: 'Due: 21 days' },
+        { name: 'System Cutover', value: 'At Risk', budget: 'Due: 35 days' },
+        { name: 'Vendor Contract', value: 'At Risk', budget: 'Due: 14 days' },
+        { name: 'Board Presentation', value: 'On Track', budget: 'Due: 28 days' }
+      ],
+      pendingAlerts: [
+        { id: 'deadline-1', title: 'System Cutover at Risk', severity: 'critical', description: 'Integration testing behind schedule', dueDate: '35 days', actionLabel: 'Escalate to TMO', agent: 'Planning Agent' },
+        { id: 'deadline-2', title: 'Vendor Contract Negotiation', severity: 'warning', description: 'Terms still under review', dueDate: '14 days', actionLabel: 'Schedule Call', agent: 'FinOps Agent' },
+        { id: 'deadline-3', title: 'Q1 Milestone Missed', severity: 'warning', description: 'Data migration delayed 5 days', dueDate: 'Completed late', actionLabel: 'Document Lessons', agent: 'TMO Agent' }
+      ],
+      insight: '3 deadlines at risk requiring immediate attention. System Cutover is the most critical.',
+      summary: '8 of 12 deadlines on track. Planning Agent recommending escalation for at-risk items.'
+    },
+    'planning-projects': {
+      label: 'Active Projects',
+      category: 'PMO',
+      metrics: {
+        'Active Projects': '18',
+        'Green Status': '12',
+        'Amber Status': '4',
+        'Red Status': '2',
+        'Resources Allocated': '142 FTEs'
+      },
+      projectBreakdown: [
+        { name: 'Grid Modernization', value: 'Green', budget: '12 projects' },
+        { name: 'Digital Transformation', value: 'Amber', budget: '4 projects' },
+        { name: 'Regulatory Compliance', value: 'Green', budget: '2 projects' }
+      ],
+      pendingAlerts: [
+        { id: 'proj-1', title: 'Red Project: Legacy Migration', severity: 'critical', description: 'Critical blocker on data validation', dueDate: 'Immediate', actionLabel: 'View Details', agent: 'TMO Agent' },
+        { id: 'proj-2', title: 'Red Project: Customer Portal', severity: 'critical', description: 'Vendor resource gap impacting timeline', dueDate: '7 days', actionLabel: 'Request Support', agent: 'Planning Agent' }
+      ],
+      insight: '18 active projects with 2 in red status requiring executive attention.',
+      summary: 'Portfolio health at 67% green. TMO Agent tracking 2 critical projects for recovery.'
+    },
+    'finops-budget': {
+      label: 'Total Budget',
+      category: 'VRO',
+      metrics: {
+        'Total Budget': '$2.4B',
+        'Allocated': '$2.1B',
+        'Unallocated': '$300M',
+        'Contingency Reserve': '$180M',
+        'Capital vs OpEx': '65% / 35%'
+      },
+      projectBreakdown: [
+        { name: 'FPL Operations', value: '$1.2B', budget: '50% of total' },
+        { name: 'NEER Investments', value: '$780M', budget: '33% of total' },
+        { name: 'Corporate & Other', value: '$420M', budget: '17% of total' }
+      ],
+      pendingAlerts: [
+        { id: 'fin-1', title: 'Budget Reallocation Request', severity: 'warning', description: 'NEER requesting $45M from contingency', dueDate: '10 days', actionLabel: 'Review Request', agent: 'FinOps Agent' },
+        { id: 'fin-2', title: 'Quarterly Budget Review', severity: 'info', description: 'Q1 close-out variance analysis pending', dueDate: '5 days', actionLabel: 'Schedule Review', agent: 'FinOps Agent' }
+      ],
+      insight: '$2.4B total portfolio budget with strong allocation discipline. Contingency reserves healthy at $180M.',
+      summary: 'Budget allocation on track. FinOps Agent monitoring reallocation request from NEER segment.'
+    },
+    'finops-spend': {
+      label: 'YTD Spend',
+      category: 'VRO',
+      metrics: {
+        'YTD Spend': '$892M',
+        'Budget Utilization': '37%',
+        'Monthly Run Rate': '$148M',
+        'Projected EOY': '$2.2B',
+        'Variance': '-$200M under'
+      },
+      projectBreakdown: [
+        { name: 'Capital Projects', value: '$580M', budget: '65% of spend' },
+        { name: 'Operating Expenses', value: '$312M', budget: '35% of spend' }
+      ],
+      pendingAlerts: [],
+      insight: 'YTD spend at $892M with healthy utilization rate. Projected to finish $200M under budget.',
+      summary: 'Spending discipline strong across all segments. FinOps Agent tracking monthly run rates.'
+    },
+    'finops-forecast': {
+      label: 'Forecast',
+      category: 'VRO',
+      metrics: {
+        'Current Forecast': '$2.2B',
+        'Original Budget': '$2.4B',
+        'Favorable Variance': '$200M',
+        'Confidence Level': '87%',
+        'Risk Adjustment': '-$50M'
+      },
+      projectBreakdown: [
+        { name: 'Committed Spend', value: '$1.8B', budget: '82% of forecast' },
+        { name: 'Planned Spend', value: '$320M', budget: '14% of forecast' },
+        { name: 'Contingency', value: '$80M', budget: '4% of forecast' }
+      ],
+      pendingAlerts: [
+        { id: 'fore-1', title: 'Forecast Model Update', severity: 'info', description: 'Incorporate Q1 actuals into projection', dueDate: '3 days', actionLabel: 'Run Update', agent: 'FinOps Agent' }
+      ],
+      insight: 'Forecast showing $200M favorable variance. High confidence at 87% based on committed spend.',
+      summary: 'Financial outlook positive. FinOps Agent recommends updating model with Q1 actuals.'
+    },
+    'finops-savings': {
+      label: 'Savings Identified',
+      category: 'VRO',
+      metrics: {
+        'Total Savings': '$67M',
+        'Realized': '$42M',
+        'In Progress': '$18M',
+        'Identified': '$7M',
+        'ROI': '340%'
+      },
+      projectBreakdown: [
+        { name: 'Procurement Optimization', value: '$28M', budget: 'Realized' },
+        { name: 'Process Automation', value: '$22M', budget: 'In Progress' },
+        { name: 'Vendor Consolidation', value: '$17M', budget: 'Identified' }
+      ],
+      pendingAlerts: [
+        { id: 'save-1', title: 'Vendor Consolidation Opportunity', severity: 'info', description: '3 overlapping contracts identified', dueDate: '30 days', actionLabel: 'Review Contracts', agent: 'FinOps Agent' }
+      ],
+      insight: '$67M in savings identified with 63% already realized. Vendor consolidation next opportunity.',
+      summary: 'Strong savings performance with 340% ROI. FinOps Agent tracking pipeline of opportunities.'
+    },
+    'finops-profit': {
+      label: 'Group Profit',
+      category: 'VRO',
+      metrics: {
+        'Total Profit': '$8.2B',
+        'FPL Contribution': '$4.8B',
+        'NEER Contribution': '$2.9B',
+        'YoY Growth': '+12%',
+        'Margin': '18.5%'
+      },
+      projectBreakdown: [
+        { name: 'FPL Regulated', value: '$4.8B', budget: '59% of profit' },
+        { name: 'NEER Clean Energy', value: '$2.9B', budget: '35% of profit' },
+        { name: 'Corporate & Other', value: '$500M', budget: '6% of profit' }
+      ],
+      pendingAlerts: [],
+      insight: '$8.2B group profit with strong 12% YoY growth. FPL regulated segment leading contribution.',
+      summary: 'Profitability on track. VRO Agent monitoring value creation across all segments.'
+    },
+    'ocm-readiness': {
+      label: 'Change Readiness',
+      category: 'PMO',
+      metrics: {
+        'Overall Readiness': '72%',
+        'Target': '85%',
+        'Gap': '13%',
+        'Trend': '+5% this month',
+        'Survey Responses': '4,200'
+      },
+      projectBreakdown: [
+        { name: 'Leadership Alignment', value: '89%', budget: 'Strong' },
+        { name: 'Employee Awareness', value: '76%', budget: 'Good' },
+        { name: 'Skill Readiness', value: '68%', budget: 'Developing' },
+        { name: 'Cultural Adoption', value: '62%', budget: 'Needs Focus' }
+      ],
+      pendingAlerts: [
+        { id: 'ocm-1', title: 'Cultural Adoption Gap', severity: 'warning', description: 'Field operations showing resistance', dueDate: 'Ongoing', actionLabel: 'Plan Intervention', agent: 'OCM Agent' },
+        { id: 'ocm-2', title: 'Skill Training Needed', severity: 'info', description: '800 employees need digital skills training', dueDate: '45 days', actionLabel: 'Schedule Training', agent: 'OCM Agent' }
+      ],
+      insight: 'Change readiness at 72% with cultural adoption needing focused intervention.',
+      summary: 'Positive trend at +5% monthly improvement. OCM Agent monitoring adoption barriers.'
+    },
+    'ocm-training': {
+      label: 'Training Completion',
+      category: 'PMO',
+      metrics: {
+        'Completion Rate': '78%',
+        'Enrolled': '5,400',
+        'Completed': '4,212',
+        'In Progress': '890',
+        'Not Started': '298'
+      },
+      projectBreakdown: [
+        { name: 'Digital Tools Training', value: '92%', budget: 'Excellent' },
+        { name: 'Process Change Training', value: '74%', budget: 'Good' },
+        { name: 'Leadership Training', value: '85%', budget: 'Strong' },
+        { name: 'Safety Compliance', value: '98%', budget: 'Complete' }
+      ],
+      pendingAlerts: [
+        { id: 'train-1', title: 'Process Training Lag', severity: 'warning', description: '298 employees not started on mandatory training', dueDate: '21 days', actionLabel: 'Send Reminders', agent: 'OCM Agent' }
+      ],
+      insight: '78% training completion with Safety Compliance leading at 98%.',
+      summary: 'Training program on track. OCM Agent tracking 298 employees needing completion reminders.'
+    },
+    'ocm-sentiment': {
+      label: 'Stakeholder Sentiment',
+      category: 'PMO',
+      metrics: {
+        'Positive Groups': '4/6',
+        'NPS Score': '+42',
+        'Engagement Rate': '78%',
+        'Concerns Addressed': '156/180',
+        'Open Feedback': '24 items'
+      },
+      projectBreakdown: [
+        { name: 'Executive Sponsors', value: 'Positive', budget: 'NPS +65' },
+        { name: 'Middle Management', value: 'Neutral', budget: 'NPS +12' },
+        { name: 'Field Operations', value: 'Mixed', budget: 'NPS -8' },
+        { name: 'Corporate Staff', value: 'Positive', budget: 'NPS +48' }
+      ],
+      pendingAlerts: [
+        { id: 'sent-1', title: 'Field Operations Concerns', severity: 'critical', description: 'Negative sentiment in 3 service territories', dueDate: 'Immediate', actionLabel: 'Schedule Town Halls', agent: 'OCM Agent' },
+        { id: 'sent-2', title: 'Middle Management Neutral', severity: 'warning', description: 'Need more change champion engagement', dueDate: '14 days', actionLabel: 'Activate Champions', agent: 'OCM Agent' }
+      ],
+      insight: 'Field Operations showing negative NPS requiring immediate intervention.',
+      summary: '4 of 6 stakeholder groups positive. OCM Agent recommending town halls for field operations.'
+    },
+    'ocm-satisfaction': {
+      label: 'Avg Satisfaction',
+      category: 'PMO',
+      metrics: {
+        'Overall Score': '4.2/5',
+        'Content Quality': '4.5/5',
+        'Instructor Rating': '4.6/5',
+        'Relevance': '4.0/5',
+        'Accessibility': '4.1/5'
+      },
+      projectBreakdown: [
+        { name: 'Leadership Programs', value: '4.6/5', budget: 'Excellent' },
+        { name: 'Technical Training', value: '4.3/5', budget: 'Good' },
+        { name: 'Compliance Training', value: '3.8/5', budget: 'Needs Refresh' }
+      ],
+      pendingAlerts: [
+        { id: 'sat-1', title: 'Compliance Training Feedback', severity: 'info', description: 'Participants requesting updated content', dueDate: '30 days', actionLabel: 'Review Curriculum', agent: 'OCM Agent' }
+      ],
+      insight: 'Training satisfaction at 4.2/5 with instructor ratings leading at 4.6.',
+      summary: 'High satisfaction overall. OCM Agent reviewing compliance training curriculum updates.'
+    },
+    'ocm-staff': {
+      label: 'Impacted Staff',
+      category: 'PMO',
+      metrics: {
+        'Total Impacted': '16,500',
+        'High Impact': '3,200',
+        'Medium Impact': '8,400',
+        'Low Impact': '4,900',
+        'Support Ratio': '1:85'
+      },
+      projectBreakdown: [
+        { name: 'FPL Operations', value: '9,200', budget: '56% of total' },
+        { name: 'NEER Staff', value: '4,100', budget: '25% of total' },
+        { name: 'Corporate', value: '3,200', budget: '19% of total' }
+      ],
+      pendingAlerts: [],
+      insight: '16,500 employees impacted with 3,200 in high-impact roles requiring intensive support.',
+      summary: 'Change support team maintaining 1:85 ratio. OCM Agent monitoring high-impact group closely.'
+    },
+    'tmo-adoption': {
+      label: 'Overall Adoption',
+      category: 'PMO',
+      metrics: {
+        'Adoption Rate': '74%',
+        'Target': '85%',
+        'Gap': '11%',
+        'Weekly Active Users': '12,400',
+        'Trend': '+3% this week'
+      },
+      projectBreakdown: [
+        { name: 'Digital Workflows', value: '82%', budget: 'Strong' },
+        { name: 'Analytics Platform', value: '71%', budget: 'Growing' },
+        { name: 'Collaboration Tools', value: '78%', budget: 'Good' },
+        { name: 'Mobile Apps', value: '65%', budget: 'Emerging' }
+      ],
+      pendingAlerts: [
+        { id: 'tmo-1', title: 'Mobile App Adoption Low', severity: 'warning', description: 'Field crews underutilizing mobile tools', dueDate: 'Ongoing', actionLabel: 'Plan Campaign', agent: 'TMO Agent' },
+        { id: 'tmo-2', title: 'Analytics Training Gap', severity: 'info', description: '400 users need advanced analytics training', dueDate: '21 days', actionLabel: 'Schedule Sessions', agent: 'TMO Agent' }
+      ],
+      insight: 'Overall adoption at 74% with mobile apps showing lowest uptake at 65%.',
+      summary: 'Positive adoption trend at +3% weekly. TMO Agent focusing on mobile app adoption campaign.'
+    },
+    'tmo-users': {
+      label: 'Active Users',
+      category: 'PMO',
+      metrics: {
+        'Total Users': '14,200',
+        'Daily Active': '8,900',
+        'Weekly Active': '12,400',
+        'Power Users': '1,850',
+        'New This Month': '420'
+      },
+      projectBreakdown: [
+        { name: 'FPL Users', value: '8,100', budget: '57% of total' },
+        { name: 'NEER Users', value: '3,800', budget: '27% of total' },
+        { name: 'Corporate Users', value: '2,300', budget: '16% of total' }
+      ],
+      pendingAlerts: [],
+      insight: '14,200 total users with 63% daily active rate indicating healthy engagement.',
+      summary: 'User base growing with 420 new users this month. TMO Agent tracking power user growth.'
+    },
+    'tmo-initiatives': {
+      label: 'Complete Initiatives',
+      category: 'PMO',
+      metrics: {
+        'Complete': '8/12',
+        'In Progress': '3',
+        'At Risk': '1',
+        'Value Delivered': '$86M',
+        'Remaining Value': '$42M'
+      },
+      projectBreakdown: [
+        { name: 'Workflow Automation', value: 'Complete', budget: '$32M value' },
+        { name: 'Data Platform', value: 'Complete', budget: '$28M value' },
+        { name: 'Customer Portal', value: 'In Progress', budget: '$18M value' },
+        { name: 'Field Mobility', value: 'At Risk', budget: '$8M value' }
+      ],
+      pendingAlerts: [
+        { id: 'init-1', title: 'Field Mobility at Risk', severity: 'critical', description: 'Device procurement delays impacting rollout', dueDate: '30 days', actionLabel: 'Expedite Procurement', agent: 'TMO Agent' }
+      ],
+      insight: '8 of 12 initiatives complete delivering $86M in value. Field Mobility at risk.',
+      summary: '67% initiative completion rate. TMO Agent escalating Field Mobility procurement issue.'
+    },
+    'tmo-value': {
+      label: 'Value Impact',
+      category: 'VRO',
+      metrics: {
+        'Total Value': '$128M',
+        'Realized': '$86M',
+        'Projected': '$42M',
+        'Cost Savings': '$62M',
+        'Revenue Impact': '$66M'
+      },
+      projectBreakdown: [
+        { name: 'Operational Efficiency', value: '$48M', budget: 'Realized' },
+        { name: 'Customer Experience', value: '$38M', budget: 'Realized' },
+        { name: 'New Capabilities', value: '$42M', budget: 'Projected' }
+      ],
+      pendingAlerts: [],
+      insight: '$128M total value impact with 67% already realized. On track to exceed targets.',
+      summary: 'Value realization exceeding expectations. VRO Agent validating projected value pipeline.'
+    },
+    'tmo-at-risk': {
+      label: 'At Risk Items',
+      category: 'PMO',
+      metrics: {
+        'At Risk Count': '3',
+        'Critical': '1',
+        'High': '1',
+        'Medium': '1',
+        'Value at Risk': '$12M'
+      },
+      projectBreakdown: [
+        { name: 'Field Mobility', value: 'Critical', budget: '$8M at risk' },
+        { name: 'Analytics Rollout', value: 'High', budget: '$3M at risk' },
+        { name: 'Training Platform', value: 'Medium', budget: '$1M at risk' }
+      ],
+      pendingAlerts: [
+        { id: 'atrisk-1', title: 'Field Mobility Critical', severity: 'critical', description: 'Device shortage blocking Phase 2 rollout', dueDate: 'Immediate', actionLabel: 'Emergency Meeting', agent: 'TMO Agent' },
+        { id: 'atrisk-2', title: 'Analytics Rollout Delayed', severity: 'warning', description: 'Data quality issues in 2 regions', dueDate: '14 days', actionLabel: 'Assign Data Team', agent: 'TMO Agent' },
+        { id: 'atrisk-3', title: 'Training Platform Upgrade', severity: 'info', description: 'Vendor timeline slipped by 2 weeks', dueDate: '30 days', actionLabel: 'Negotiate Timeline', agent: 'Planning Agent' }
+      ],
+      insight: '3 items at risk with $12M value exposure. Field Mobility is most critical.',
+      summary: 'Risk exposure manageable. TMO Agent coordinating recovery actions across all at-risk items.'
     }
   };
   
@@ -1008,7 +1432,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     events: [],
     metrics: metricConfig.metrics,
     projectBreakdown: metricConfig.projectBreakdown,
-    actions: entityId.startsWith('governance-') ? [] : [
+    actions: (metricConfig as any).pendingAlerts?.length > 0 ? [] : [
       { id: 'analyze', label: 'Deep Dive Analysis', type: 'investigate' },
       { id: 'forecast', label: 'Run Forecast Scenario', type: 'accelerate' },
       { id: 'alert', label: 'Set Alert Threshold', type: 'mitigate' },
@@ -1023,7 +1447,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     ],
     aiInsight: metricConfig.insight,
     summary: metricConfig.summary,
-    relatedEntities: entityId.startsWith('governance-') ? [] : [
+    relatedEntities: (metricConfig as any).pendingAlerts?.length > 0 ? [] : [
       { type: 'Portfolio', id: 'PF-TMO', name: 'Transformation Office Portfolio' },
       { type: 'OKR', id: 'OKR-Q4-01', name: 'Improve Operational Efficiency' },
       { type: 'Project', id: 'PRJ-DIG-001', name: 'Digital Transformation Initiative' }
@@ -1512,8 +1936,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                       </Card>
                     )}
 
-                    {/* Pending Alerts for Governance Metrics - actionable items */}
-                    {entityType === 'metric' && entityId.startsWith('governance-') && entityId !== 'governance-decisions' && metricDrilldown?.pendingAlerts && metricDrilldown.pendingAlerts.length > 0 && (
+                    {/* Pending Alerts for All Metrics with actionable items */}
+                    {entityType === 'metric' && entityId !== 'governance-decisions' && metricDrilldown?.pendingAlerts && metricDrilldown.pendingAlerts.length > 0 && (
                       <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2 text-amber-800">
