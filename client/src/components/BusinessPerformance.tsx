@@ -41,6 +41,7 @@ import {
   Globe,
   Info
 } from "lucide-react";
+import { formatValueInMillions } from "@/lib/formatters";
 
 const NEE_BLUE = "#0072CE";
 const NEE_GREEN = "#00A651";
@@ -71,8 +72,8 @@ function CorporateKPIs() {
       label: "Cost Savings", 
       value: lgAnnualReportData.costSavings.actual2025,
       unit: "$m",
-      baseline: `2024: $${lgAnnualReportData.costSavings.baseline2024}m`,
-      target: `Target: $${lgAnnualReportData.costSavings.target2026}m`,
+      baseline: `2024: ${formatValueInMillions(lgAnnualReportData.costSavings.baseline2024)}`,
+      target: `Target: ${formatValueInMillions(lgAnnualReportData.costSavings.target2026)}`,
       progress: Math.round((lgAnnualReportData.costSavings.actual2025 / lgAnnualReportData.costSavings.target2026) * 100),
       color: "text-[#00A651]",
       source: lgAnnualReportData.costSavings.source
@@ -81,8 +82,8 @@ function CorporateKPIs() {
       label: "Digital Investment", 
       value: lgAnnualReportData.digitalInvestment.actual2025,
       unit: "$m",
-      baseline: `2024: $${lgAnnualReportData.digitalInvestment.baseline2024}m`,
-      target: `Target: $${lgAnnualReportData.digitalInvestment.target2026}m`,
+      baseline: `2024: ${formatValueInMillions(lgAnnualReportData.digitalInvestment.baseline2024)}`,
+      target: `Target: ${formatValueInMillions(lgAnnualReportData.digitalInvestment.target2026)}`,
       progress: Math.round((lgAnnualReportData.digitalInvestment.actual2025 / lgAnnualReportData.digitalInvestment.target2026) * 100),
       color: "text-[#0072CE]",
       source: lgAnnualReportData.digitalInvestment.source
@@ -196,9 +197,9 @@ function DivisionalProfitChart() {
             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `$${v}m`} />
+              <YAxis tickFormatter={(v) => formatValueInMillions(v)} />
               <RechartsTooltip 
-                formatter={(value: number) => [`$${value}m`, '']}
+                formatter={(value: number) => [formatValueInMillions(value), '']}
                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb' }}
               />
               <Legend />
@@ -437,15 +438,15 @@ function ShareholderReturnsCard() {
         <div className="space-y-2">
           <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
             <span className="text-sm">2024 Buyback (Completed)</span>
-            <Badge variant="secondary">${shareholderReturns.buyback2024Completed}m</Badge>
+            <Badge variant="secondary">{formatValueInMillions(shareholderReturns.buyback2024Completed)}</Badge>
           </div>
           <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
             <span className="text-sm">New Buyback (Announced)</span>
-            <Badge className="bg-[#0072CE]">${shareholderReturns.buybackAnnounced}m</Badge>
+            <Badge className="bg-[#0072CE]">{formatValueInMillions(shareholderReturns.buybackAnnounced)}</Badge>
           </div>
           <div className="flex justify-between items-center p-2 bg-green-50 rounded">
             <span className="text-sm">Post-US Sale Buyback</span>
-            <Badge className="bg-[#00A651]">${(shareholderReturns.additionalBuybackPostUSSale / 1000).toFixed(0)}bn</Badge>
+            <Badge className="bg-[#00A651]">{formatValueInMillions(shareholderReturns.additionalBuybackPostUSSale)}</Badge>
           </div>
         </div>
         <div className="mt-3 text-center text-xs text-muted-foreground">

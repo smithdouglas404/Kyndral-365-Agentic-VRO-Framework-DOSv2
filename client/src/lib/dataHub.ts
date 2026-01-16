@@ -6,6 +6,7 @@
 import { pmoProjects, vroPrograms, riskIssues, buPortfolios, PMOProject, VROProgram, RiskIssue, BUPortfolio } from './buPrograms';
 import { SimulationEvent } from './liveSimulation';
 import { getProjectsByMetricId, EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
+import { formatValueInMillions } from './formatters';
 
 export type AgentType = 'integrated-management' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
 
@@ -546,14 +547,14 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         project: p.name,
         bu: p.bu,
         value: `${Math.round((p.deliverables.completed / p.deliverables.total) * 100)}% complete`,
-        contribution: `$${p.budget.spent}m / $${p.budget.total}m`,
+        contribution: `${formatValueInMillions(p.budget.spent)} / ${formatValueInMillions(p.budget.total)}`,
         status: p.safeStage
       }));
       metrics = {
         'On Track': `${onTrackProjects.length} projects`,
         'Total Projects': `${allProjects.length} projects`,
         'Health Rate': `${Math.round((onTrackProjects.length / allProjects.length) * 100)}%`,
-        'Total Budget': `$${onTrackProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Total Budget': formatValueInMillions(onTrackProjects.reduce((sum, p) => sum + p.budget.total, 0)),
         'Avg Velocity': `${Math.round(onTrackProjects.reduce((sum, p) => sum + p.safe.velocity, 0) / Math.max(onTrackProjects.length, 1))}`
       };
       relatedEntities = onTrackProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -578,7 +579,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'At Risk': `${atRiskProjects.length} projects`,
         'Total Projects': `${allProjects.length} projects`,
         'Risk Rate': `${Math.round((atRiskProjects.length / allProjects.length) * 100)}%`,
-        'Total Budget at Risk': `$${atRiskProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Total Budget at Risk': formatValueInMillions(atRiskProjects.reduce((sum, p) => sum + p.budget.total, 0)),
         'Avg Predictability': `${Math.round(atRiskProjects.reduce((sum, p) => sum + p.safe.predictability, 0) / Math.max(atRiskProjects.length, 1))}%`
       };
       relatedEntities = atRiskProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -602,7 +603,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Critical': `${criticalProjects.length} projects`,
         'Total Projects': `${allProjects.length} projects`,
         'Critical Rate': `${Math.round((criticalProjects.length / allProjects.length) * 100)}%`,
-        'Total Budget at Risk': `$${criticalProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`
+        'Total Budget at Risk': formatValueInMillions(criticalProjects.reduce((sum, p) => sum + p.budget.total, 0))
       };
       relatedEntities = criticalProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
       break;
@@ -618,7 +619,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         project: p.name,
         bu: p.bu,
         value: `${Math.round((p.deliverables.completed / p.deliverables.total) * 100)}% complete`,
-        contribution: `$${p.budget.spent}m / $${p.budget.total}m`,
+        contribution: `${formatValueInMillions(p.budget.spent)} / ${formatValueInMillions(p.budget.total)}`,
         status: p.status === 'green' ? 'On Track' : p.status === 'amber' ? 'At Risk' : 'Critical'
       }));
       metrics = {
@@ -626,7 +627,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'On Track': allProjects.filter(p => p.status === 'green').length,
         'At Risk': allProjects.filter(p => p.status === 'amber').length,
         'Critical': allProjects.filter(p => p.status === 'red').length,
-        'Total Budget': `$${allProjects.reduce((sum, p) => sum + p.budget.total, 0).toFixed(1)}m`,
+        'Total Budget': formatValueInMillions(allProjects.reduce((sum, p) => sum + p.budget.total, 0)),
         'Implementing': allProjects.filter(p => p.safeStage === 'implementing').length
       };
       relatedEntities = allProjects.map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -708,8 +709,8 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
     case 'value':
       entityName = `${config.name} - Value Portfolio`;
       metrics = {
-        'Total Value': `$${agentData.metrics.totalValue}m`,
-        'Realized Value': `$${agentData.metrics.realizedValue}m`,
+        'Total Value': formatValueInMillions(agentData.metrics.totalValue),
+        'Realized Value': formatValueInMillions(agentData.metrics.realizedValue),
         'Realization Rate': `${Math.round((agentData.metrics.realizedValue / Math.max(agentData.metrics.totalValue, 1)) * 100)}%`,
         'Programs Tracked': agentData.programs.length
       };
@@ -752,9 +753,9 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
       const totalBudget = agentData.projects.reduce((sum, p) => sum + p.budget.total, 0);
       const spentBudget = agentData.projects.reduce((sum, p) => sum + p.budget.spent, 0);
       metrics = {
-        'Total Budget': `$${totalBudget.toFixed(1)}m`,
-        'Spent': `$${spentBudget.toFixed(1)}m`,
-        'Remaining': `$${(totalBudget - spentBudget).toFixed(1)}m`,
+        'Total Budget': formatValueInMillions(totalBudget),
+        'Spent': formatValueInMillions(spentBudget),
+        'Remaining': formatValueInMillions(totalBudget - spentBudget),
         'Burn Rate': `${Math.round((spentBudget / Math.max(totalBudget, 1)) * 100)}%`
       };
       relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -765,7 +766,7 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
         'Avg Confidence': `${agentData.metrics.avgConfidence}%`,
         'Healthy Projects': agentData.metrics.healthyProjects,
         'At Risk': agentData.metrics.atRiskProjects,
-        'Value Realized': `$${agentData.metrics.realizedValue}m`
+        'Value Realized': formatValueInMillions(agentData.metrics.realizedValue)
       };
       relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
       break;
@@ -826,7 +827,7 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
       metrics = {
         'Total Projects': agentData.metrics.totalProjects,
         'Active Alerts': agentData.metrics.activeAlerts,
-        'Value Realized': `$${agentData.metrics.realizedValue}m`,
+        'Value Realized': formatValueInMillions(agentData.metrics.realizedValue),
         'Confidence': `${agentData.metrics.avgConfidence}%`
       };
       relatedEntities = agentData.projects.slice(0, 3).map(p => ({ type: 'project', id: p.id, name: p.name }));
@@ -887,7 +888,7 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
         relatedAgents = ['integrated-management', 'finops', 'okr'];
         metrics = {
           'Expected ROI': prog.expectedROI,
-          'Value Realized': `$${prog.valueRealized}m`,
+          'Value Realized': formatValueInMillions(prog.valueRealized),
           'Strategic Alignment': `${prog.strategicAlignment}%`,
           'Status': prog.valueStatus,
           'Velocity': prog.safe.velocity,
@@ -916,8 +917,8 @@ export function getEntityDrilldown(entityType: string, entityId: string, events:
         metrics = {
           'Total Programs': portfolio.programCount,
           'Total Projects': portfolio.projectCount,
-          'Total Budget': `$${portfolio.totalBudget}m`,
-          'Realized Value': `$${portfolio.valueRealized}m`
+          'Total Budget': formatValueInMillions(portfolio.totalBudget),
+          'Realized Value': formatValueInMillions(portfolio.valueRealized)
         };
       }
       break;

@@ -518,45 +518,45 @@ export const vroPrograms: VROProgram[] = [
     trendData: [{ week: "W28", value: 15 }, { week: "W29", value: 18 }, { week: "W30", value: 22 }, { week: "W31", value: 28 }, { week: "W32", value: 35 }]
   },
 
-  // Asset Management - Eric Adler
+  // Wind Portfolio - Rebecca Kujawa
   {
     id: "vro-am-001",
-    name: "Private Markets Growth Engine",
+    name: "NEER Wind Repowering Initiative",
     bu: "NextEra Energy Resources",
     valueStatus: "accelerating",
-    expectedROI: "$2.5bn new AUM by 2028",
-    roiValue: 2500,
-    valueRealized: 890,
+    expectedROI: "$450M annual revenue increase",
+    roiValue: 450,
+    valueRealized: 180,
     strategicAlignment: 96,
-    aiInsight: "ESG investor demand analysis shows 340% increase in sustainable infrastructure interest - accelerate clean power fund",
-    prediction: "DC pension consolidation trend creating $18bn addressable market - first-mover advantage critical",
+    aiInsight: "Repowered turbines achieving 35% capacity factor improvement - accelerate Phase 2 sites",
+    prediction: "ITC/PTC extension creates 3-year window for maximum incentive capture - prioritize 2025 completions",
     keyOutcomes: [
-      { outcome: "Private Markets AUM", progress: 57, target: 85, unit: "$bn" },
-      { outcome: "Clean power allocation", progress: 2.8, target: 4.0, unit: "$bn" },
-      { outcome: "Fee-related earnings", progress: 9, target: 15, unit: "% CAGR" }
+      { outcome: "MW repowered", progress: 2800, target: 4500, unit: "MW" },
+      { outcome: "Capacity factor improvement", progress: 32, target: 40, unit: "%" },
+      { outcome: "PPA revenue increase", progress: 280, target: 450, unit: "$M/yr" }
     ],
-    collaborators: ["Eric Adler", "Sustainability", "Distribution"],
-    riskMitigation: "Market volatility hedging through diversified vintage years",
+    collaborators: ["Wind Operations", "Development", "Finance"],
+    riskMitigation: "Turbine supply secured through 2027 via GE Vernova partnership",
     safe: {
       velocity: 55,
       predictability: 85,
       flowEfficiency: 72,
       currentPI: "PI 25.1",
       epicId: "EPIC-VRO-AM-01",
-      epicName: "Private Markets Expansion",
+      epicName: "Wind Fleet Optimization",
       epicProgress: 58,
-      okr: { objective: "Grow Private Markets AUM to $85bn", keyResult: "Launch 3 new fund products", progress: 62 },
+      okr: { objective: "Repower 4,500 MW by 2026", keyResult: "Achieve 40% capacity factor", progress: 62 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 52, predictability: 82 }, { pi: "PI 25.1", velocity: 55, predictability: 85 }]
     },
     aiSignals: [
-      { type: "opportunity", message: "ESG demand up 340% - accelerate clean power fund launch", confidence: 94, dataSource: "Investor sentiment AI" },
-      { type: "prediction", message: "$18bn DC consolidation market emerging - first-mover wins", confidence: 88, dataSource: "Market intelligence" }
+      { type: "opportunity", message: "ITC/PTC window - accelerate 2025 completions", confidence: 94, dataSource: "Policy analytics" },
+      { type: "prediction", message: "35% capacity improvement trending above plan", confidence: 88, dataSource: "SCADA analytics" }
     ],
     proactiveActions: [
-      { id: "vpa-005", action: "Fast-track clean power fund to market", impact: "Capture $800m inflows", urgency: "immediate", type: "accelerate" },
-      { id: "vpa-006", action: "Target top 5 consolidating DC schemes", impact: "$4bn AUM potential", urgency: "this-week", type: "accelerate" }
+      { id: "vpa-005", action: "Fast-track high-wind sites for 2025 completion", impact: "Capture $120M additional incentives", urgency: "immediate", type: "accelerate" },
+      { id: "vpa-006", action: "Negotiate volume discount with GE Vernova", impact: "$45M savings potential", urgency: "this-week", type: "accelerate" }
     ],
-    trendData: [{ week: "W28", value: 750 }, { week: "W29", value: 790 }, { week: "W30", value: 820 }, { week: "W31", value: 860 }, { week: "W32", value: 890 }]
+    trendData: [{ week: "W28", value: 2600 }, { week: "W29", value: 2650 }, { week: "W30", value: 2700 }, { week: "W31", value: 2750 }, { week: "W32", value: 2800 }]
   },
   {
     id: "vro-am-002",
@@ -640,42 +640,42 @@ export const vroPrograms: VROProgram[] = [
   },
   {
     id: "vro-rt-002",
-    name: "Workplace Pension Growth",
+    name: "FPL Solar Expansion Program",
     bu: "Florida Power & Light",
     valueStatus: "on-track",
-    expectedROI: "$183bn DC AUM target",
-    roiValue: 183000,
-    valueRealized: 0,
+    expectedROI: "$320M annual cost savings",
+    roiValue: 320,
+    valueRealized: 85,
     strategicAlignment: 94,
-    aiInsight: "Auto-enrollment contribution trends suggest 12% AUM growth in 2025 - recommend capacity planning",
-    prediction: "Employer market consolidation creating opportunity - 5 large schemes in acquisition pipeline",
+    aiInsight: "SolarTogether program achieving 15% above target enrollment - recommend capacity expansion",
+    prediction: "Solar installation costs declining 8% YoY - opportunity to accelerate deployment timeline",
     keyOutcomes: [
-      { outcome: "DC members", progress: 5.2, target: 5.6, unit: "m" },
-      { outcome: "Individual annuities", progress: 38000, target: 45000, unit: "policies" },
-      { outcome: "Protection APE", progress: 850, target: 920, unit: "$m" }
+      { outcome: "Solar MW deployed", progress: 4200, target: 5000, unit: "MW" },
+      { outcome: "Customer enrollments", progress: 185000, target: 220000, unit: "" },
+      { outcome: "Cost per kWh reduction", progress: 12, target: 15, unit: "%" }
     ],
-    collaborators: ["Workplace Team", "Distribution", "Finance"],
-    riskMitigation: "Persistency monitoring active - early lapse detection saving $3.2m annually",
+    collaborators: ["Solar Operations", "Customer Programs", "Grid Planning"],
+    riskMitigation: "Panel supply chain diversified - 3 tier-1 suppliers under contract",
     safe: {
       velocity: 52,
       predictability: 86,
       flowEfficiency: 72,
       currentPI: "PI 25.1",
       epicId: "EPIC-VRO-RT-02",
-      epicName: "Workplace Pensions Scale-up",
+      epicName: "Solar Portfolio Scale-up",
       epicProgress: 58,
-      okr: { objective: "Reach 5.6m DC members", keyResult: "Achieve 12% AUM growth", progress: 65 },
+      okr: { objective: "Deploy 5,000 MW solar by 2025", keyResult: "Achieve 15% cost reduction", progress: 65 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 80 }, { pi: "PI 24.2", velocity: 48, predictability: 82 }, { pi: "PI 24.3", velocity: 50, predictability: 84 }, { pi: "PI 25.1", velocity: 52, predictability: 86 }]
     },
     aiSignals: [
-      { type: "opportunity", message: "5 large DC schemes in acquisition pipeline - act now", confidence: 79, dataSource: "Market intelligence" },
-      { type: "prediction", message: "12% AUM growth projected from auto-enrollment trends", confidence: 86, dataSource: "Contribution analytics" }
+      { type: "opportunity", message: "Panel pricing at historic low - accelerate procurement", confidence: 79, dataSource: "Market intelligence" },
+      { type: "prediction", message: "Enrollment trend suggests 220K target achievable by Q3", confidence: 86, dataSource: "Customer analytics" }
     ],
     proactiveActions: [
-      { id: "vpa-011", action: "Prioritize top 3 acquisition targets for outreach", impact: "$2bn potential AUM", urgency: "immediate", type: "accelerate" },
-      { id: "vpa-012", action: "Scale infrastructure for 12% growth", impact: "Avoid capacity constraints", urgency: "this-month", type: "mitigate" }
+      { id: "vpa-011", action: "Lock in panel pricing for next 500MW", impact: "$15M savings potential", urgency: "immediate", type: "accelerate" },
+      { id: "vpa-012", action: "Scale interconnection capacity for growth", impact: "Avoid grid constraints", urgency: "this-month", type: "mitigate" }
     ],
-    trendData: [{ week: "W28", value: 5.05 }, { week: "W29", value: 5.08 }, { week: "W30", value: 5.12 }, { week: "W31", value: 5.16 }, { week: "W32", value: 5.2 }]
+    trendData: [{ week: "W28", value: 4000 }, { week: "W29", value: 4050 }, { week: "W30", value: 4100 }, { week: "W31", value: 4150 }, { week: "W32", value: 4200 }]
   },
 
   // Corporate Investments - Laura Mason

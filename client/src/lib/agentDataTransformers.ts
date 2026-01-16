@@ -4,6 +4,7 @@ import {
   riskData 
 } from './lgData';
 import { DataMode, SimulationMultipliers } from '../contexts/SimulationContext';
+import { formatValueInMillions } from './formatters';
 
 export type { DataMode, SimulationMultipliers };
 
@@ -64,7 +65,7 @@ export function getCostCategoriesFromDivisions(mode: DataMode): TransformedCostC
       division: div.ceo,
       savings,
       aiInsight: mode === 'VRO' 
-        ? `AI analysis of ${kpiCount} KPIs identified $${savings}M optimization across ${projectCount} projects`
+        ? `AI analysis of ${kpiCount} KPIs identified ${formatValueInMillions(savings)} optimization across ${projectCount} projects`
         : `Manual review of ${kpiCount} KPIs pending. ${projectCount} projects require assessment.`
     };
   });
@@ -550,7 +551,7 @@ export function getInitiativesFromDivisions(mode: DataMode): TransformedInitiati
           name: kr.result,
           contribution: mode === 'VRO' ? 20 + j * 10 + k * 5 : 5 + j * 2 + k
         })),
-        valueImpact: mode === 'VRO' ? `+$${Math.round(roiValue * 0.3)}M value` : 'TBD'
+        valueImpact: mode === 'VRO' ? `+${formatValueInMillions(Math.round(roiValue * 0.3))} value` : 'TBD'
       })),
       collaboratingAgents: mode === 'VRO' 
         ? agents.slice(0, 3 + (i % 3)).map((a, j) => ({

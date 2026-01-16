@@ -25,6 +25,7 @@ import {
   GitBranch, Calendar, BarChart3, Eye, X
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, BarChart, Bar } from "recharts";
+import { formatValueInMillions } from "@/lib/formatters";
 
 type DataMode = "VRO" | "PMO";
 
@@ -36,9 +37,7 @@ interface BUProgramsSectionProps {
 const BU_COLORS: Record<string, string> = {
   "Florida Power & Light": "#005EB8",
   "NextEra Energy Resources": "#00843D",
-  "Florida Power & Light": "#005EB8",
-  "Corporate & Other": "#424242",
-  "Corporate & Other": "#D50032"
+  "Corporate & Other": "#424242"
 };
 
 const signalIcons: Record<AISignal["type"], React.ReactNode> = {
@@ -231,7 +230,7 @@ function ProjectDetailModal({
                       <p className="text-xs text-teal-600">Expected ROI</p>
                     </div>
                     <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-2xl font-bold text-green-700">${program?.valueRealized || 4.2}m</p>
+                      <p className="text-2xl font-bold text-green-700">{formatValueInMillions(program?.valueRealized || 4.2)}</p>
                       <p className="text-xs text-green-600">Value Realized</p>
                     </div>
                   </div>
@@ -619,7 +618,7 @@ export function PortfolioCard({ portfolio, onDrillDown }: { portfolio: BUPortfol
               <div className="space-y-1.5">
                 <div className="flex justify-between items-baseline">
                   <span className="text-[10px] text-teal-600">Realized</span>
-                  <span className="text-sm font-bold text-teal-700">${portfolio.valueRealized}m</span>
+                  <span className="text-sm font-bold text-teal-700">{formatValueInMillions(portfolio.valueRealized)}</span>
                 </div>
                 <div className="flex justify-between items-baseline">
                   <span className="text-[10px] text-teal-600">Programs</span>
@@ -942,7 +941,7 @@ function VROProgramCard({ program, onViewDetails }: { program: VROProgram; onVie
               <p className="text-[10px] text-teal-600">Expected ROI</p>
             </div>
             <div className="p-2 bg-green-50 rounded text-center">
-              <p className="text-lg font-bold text-green-700">${program.valueRealized}m</p>
+              <p className="text-lg font-bold text-green-700">{formatValueInMillions(program.valueRealized)}</p>
               <p className="text-[10px] text-green-600">Realized</p>
             </div>
           </div>
@@ -1248,7 +1247,7 @@ function UnifiedProjectCard({ project, onViewDetails, liveAlert }: { project: Un
                 </div>
                 <div className="flex justify-between items-baseline">
                   <span className="text-[10px] text-teal-600">Realized</span>
-                  <span className="text-sm font-bold text-green-700">${project.valueRealized}m</span>
+                  <span className="text-sm font-bold text-green-700">{formatValueInMillions(project.valueRealized)}</span>
                 </div>
                 {valuePercent > 0 && (
                   <Progress value={valuePercent} className="h-1 [&>div]:bg-teal-500" />
@@ -1533,7 +1532,7 @@ export function BUProgramsSection({ dataMode, onDrillDown }: BUProgramsSectionPr
           <div className="flex gap-2 items-center">
             <div className="flex items-center gap-1 px-2 py-1 bg-teal-50 rounded border border-teal-200">
               <span className="text-[10px] text-teal-600">VRO:</span>
-              <span className="text-xs font-bold text-teal-700">${vroSummary.totalRealized}m</span>
+              <span className="text-xs font-bold text-teal-700">{formatValueInMillions(vroSummary.totalRealized)}</span>
             </div>
             <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded border border-blue-200">
               <span className="text-[10px] text-blue-600">PMO:</span>

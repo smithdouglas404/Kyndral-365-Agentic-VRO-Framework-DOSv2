@@ -13,6 +13,7 @@ import { AgentType } from '@/lib/dataHub';
 import { DrillDownDrawer } from './DrillDownDrawer';
 import { CrossAgentActivityFeed } from './CrossAgentActivityFeed';
 import { AlertBubble } from './AlertBubble';
+import { formatValueInMillions } from '@/lib/formatters';
 
 interface AgentDashboardProps {
   agentId: AgentType;
@@ -79,7 +80,7 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500">Total Value</p>
-                <p className="text-2xl font-bold">${data.metrics.totalValue}m</p>
+                <p className="text-2xl font-bold">{formatValueInMillions(data.metrics.totalValue)}</p>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
                 <TrendingUp className="h-5 w-5 text-green-600" />
@@ -87,7 +88,7 @@ export function AgentDashboard({ agentId, title, subtitle }: AgentDashboardProps
             </div>
             <div className="flex items-center gap-1 mt-2">
               <span className="text-xs text-gray-500">Realized:</span>
-              <span className="text-xs font-medium">${data.metrics.realizedValue}m</span>
+              <span className="text-xs font-medium">{formatValueInMillions(data.metrics.realizedValue)}</span>
               <Progress value={(data.metrics.realizedValue / data.metrics.totalValue) * 100} className="h-1 flex-1 ml-2" />
             </div>
           </CardContent>

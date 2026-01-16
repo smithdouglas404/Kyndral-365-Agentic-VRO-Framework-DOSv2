@@ -1,10 +1,43 @@
+/**
+ * Format a value in millions to proper USD notation with B/M/K suffixes
+ * @param valueInMillions - The value in millions (e.g., 185910 = $185.9B)
+ */
 export function formatMoney(valueInMillions: number): string {
   if (valueInMillions >= 1000) {
     return `$${(valueInMillions / 1000).toFixed(1)}B`;
   }
-  return `$${valueInMillions}m`;
+  if (valueInMillions >= 1) {
+    return `$${valueInMillions.toFixed(1)}M`;
+  }
+  if (valueInMillions >= 0.001) {
+    return `$${(valueInMillions * 1000).toFixed(0)}K`;
+  }
+  return `$${valueInMillions.toFixed(2)}M`;
 }
 
+/**
+ * Format a value in millions to display value - handles billions properly
+ * @param valueInMillions - The value in millions
+ */
+export function formatValueInMillions(valueInMillions: number): string {
+  if (valueInMillions >= 1000) {
+    return `$${(valueInMillions / 1000).toFixed(1)}B`;
+  }
+  if (valueInMillions >= 100) {
+    return `$${valueInMillions.toFixed(0)}M`;
+  }
+  if (valueInMillions >= 1) {
+    return `$${valueInMillions.toFixed(1)}M`;
+  }
+  if (valueInMillions >= 0.001) {
+    return `$${(valueInMillions * 1000).toFixed(0)}K`;
+  }
+  return `$${valueInMillions.toFixed(2)}M`;
+}
+
+/**
+ * Format large raw numbers with appropriate suffix (B/M/K)
+ */
 export function formatLargeNumber(value: number, unit: string = ''): string {
   if (value >= 1000000000) {
     return `${(value / 1000000000).toFixed(1)}B${unit}`;
@@ -18,10 +51,27 @@ export function formatLargeNumber(value: number, unit: string = ''): string {
   return `${value}${unit}`;
 }
 
+/**
+ * Format a percentage value
+ */
 export function formatPercent(value: number, decimals: number = 1): string {
   return `${value.toFixed(decimals)}%`;
 }
 
+/**
+ * Format raw currency value with locale formatting
+ */
 export function formatCurrency(value: number, currency: string = '$'): string {
   return `${currency}${value.toLocaleString()}`;
+}
+
+/**
+ * Format value for display cards - auto-detects and formats appropriately
+ * For values that are already in millions, use this to get proper B/M notation
+ */
+export function formatDisplayValue(value: number, isInMillions: boolean = true): string {
+  if (isInMillions) {
+    return formatValueInMillions(value);
+  }
+  return formatLargeNumber(value);
 }
