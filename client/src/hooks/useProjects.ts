@@ -66,7 +66,7 @@ function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
   // Map dependencies - matches ProjectDependency interface
   const dependencies = (p.dependencies || []).map(dep => ({
     projectId: dep.targetProjectId || dep.projectId || '',
-    projectName: dep.name,
+    projectName: dep.targetProjectName || dep.name,
     type: mapDependencyType(dep.dependencyType),
     health: mapHealthStatus(dep.status),
     description: dep.description || `Dependency on ${dep.name}`,

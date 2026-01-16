@@ -901,6 +901,10 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const allAlerts = await storage.getAlerts();
       const allInterventions = await storage.getInterventions();
       
+      // Create a map of project IDs to names for dependency lookup
+      const projectNameMap = new Map<string, string>();
+      allProjects.forEach(proj => projectNameMap.set(proj.id, proj.name));
+      
       const enrichedList = await Promise.all(allProjects.map(async (p) => {
         const [feats, strs, tsks, ress, deps, mils] = await Promise.all([
           storage.getFeatures(p.id),
@@ -919,6 +923,12 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           .sort((a, b) => new Date(a.targetDate || 0).getTime() - new Date(b.targetDate || 0).getTime());
         const nextMilestone = upcomingMilestones[0]?.name || '';
         
+        // Enrich dependencies with target project name
+        const enrichedDeps = deps.map(dep => ({
+          ...dep,
+          targetProjectName: dep.targetProjectId ? projectNameMap.get(dep.targetProjectId) || dep.name : dep.name
+        }));
+        
         return {
           ...p,
           featureCount: feats.length,
@@ -928,7 +938,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           dependencyCount: deps.length,
           alerts: projectAlerts,
           interventions: projectInterventions,
-          dependencies: deps,
+          dependencies: enrichedDeps,
           nextMilestone
         };
       }));
