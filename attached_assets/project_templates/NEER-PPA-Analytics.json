@@ -64,10 +64,18 @@
     { "id": "ms-ppa-003", "name": "AI Optimization Module", "date": "2025-07-01", "status": "pending", "deliverables": ["Optimization recommendations", "Risk alerts"] }
   ],
   "risks": [
-    { "id": "risk-ppa-001", "name": "Data Quality", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Data governance program; source system integration", "owner": "Data Team" }
+    { "id": "risk-ppa-001", "name": "Data Quality", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Data governance program; source system integration", "owner": "Data Team" },
+    { "id": "risk-ppa-002", "name": "Model Accuracy", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Backtesting against actuals; expert review of valuations", "owner": "Quant Team" }
   ],
   "dependencies": [
-    { "id": "dep-ppa-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Requires unified data infrastructure" }
+    { "id": "dep-ppa-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Requires unified data infrastructure" },
+    { "id": "dep-ppa-002", "name": "Market Data Feeds", "type": "related", "status": "green", "description": "Real-time forward curve data" }
+  ],
+  "stakeholders": [
+    { "id": "sh-ppa-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ppa-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-ppa-003", "name": "Commercial Operations Team", "role": "Primary Users", "department": "Commercial", "influence": "high", "interest": "high" },
+    { "id": "sh-ppa-004", "name": "Risk Management", "role": "Risk Oversight", "department": "Finance", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 26, "opex": 6, "contingency": 3.2, "npv": 145, "irr": 42, "paybackMonths": 12 },
   "qualityMetrics": { "defectDensity": 0.3, "testCoverage": 94, "technicalDebtDays": 5, "codeReviewCoverage": 100, "documentationScore": 92 }

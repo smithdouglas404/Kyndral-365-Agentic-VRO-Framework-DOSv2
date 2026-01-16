@@ -83,6 +83,12 @@
     { "id": "dep-bess-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Co-location with wind projects" },
     { "id": "dep-bess-002", "name": "Solar Development", "type": "related", "status": "green", "description": "Hybrid solar+storage projects" }
   ],
+  "stakeholders": [
+    { "id": "sh-bess-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-bess-002", "name": "ERCOT/CAISO Grid Operators", "role": "Market Operators", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-bess-003", "name": "Armando Pimentel", "role": "EVP Power Generation", "department": "Operations", "influence": "high", "interest": "high" },
+    { "id": "sh-bess-004", "name": "Battery Cell Suppliers", "role": "Strategic Vendors", "department": "External", "influence": "medium", "interest": "high" }
+  ],
   "financials": { "capitalex": 342, "opex": 38, "contingency": 38, "npv": 580, "irr": 15, "paybackMonths": 72 },
   "qualityMetrics": { "defectDensity": 0.3, "testCoverage": 90, "technicalDebtDays": 10, "codeReviewCoverage": 100, "documentationScore": 88 }
 }

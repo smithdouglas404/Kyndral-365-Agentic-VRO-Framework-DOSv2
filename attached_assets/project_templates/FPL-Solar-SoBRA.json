@@ -80,7 +80,14 @@
     { "id": "risk-solar-002", "name": "Interconnection Delays", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Early engagement with transmission planning", "owner": "Grid Engineering" }
   ],
   "dependencies": [
-    { "id": "dep-solar-001", "name": "Transmission Upgrades", "type": "blocked-by", "status": "green", "description": "Requires substation upgrades for interconnection" }
+    { "id": "dep-solar-001", "name": "Transmission Upgrades", "type": "blocked-by", "status": "green", "description": "Requires substation upgrades for interconnection" },
+    { "id": "dep-solar-002", "name": "Battery Storage Program", "type": "related", "status": "green", "description": "Co-located storage for grid stabilization" }
+  ],
+  "stakeholders": [
+    { "id": "sh-solar-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-003", "name": "Matt Valle", "role": "VP Generation", "department": "Power Generation", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-004", "name": "Environmental Groups", "role": "Community Stakeholder", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 1620, "opex": 180, "contingency": 180, "npv": 890, "irr": 12, "paybackMonths": 96 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 95, "technicalDebtDays": 5, "codeReviewCoverage": 100, "documentationScore": 95 }

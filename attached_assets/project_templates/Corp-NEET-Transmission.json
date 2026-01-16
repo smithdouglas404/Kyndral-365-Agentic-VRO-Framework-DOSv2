@@ -84,6 +84,12 @@
     { "id": "dep-tx-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Enables renewable delivery" },
     { "id": "dep-tx-002", "name": "Solar Development", "type": "related", "status": "green", "description": "Transmission for solar interconnection" }
   ],
+  "stakeholders": [
+    { "id": "sh-tx-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-tx-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-tx-003", "name": "MISO/SPP/PJM RTOs", "role": "Regional Grid Operators", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-tx-004", "name": "NEET Leadership", "role": "Transmission Division", "department": "NEET", "influence": "high", "interest": "high" }
+  ],
   "financials": { "capitalex": 405, "opex": 45, "contingency": 45, "npv": 1250, "irr": 11, "paybackMonths": 120 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 92, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 90 }
 }

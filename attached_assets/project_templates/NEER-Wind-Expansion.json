@@ -84,6 +84,12 @@
     { "id": "dep-wind-001", "name": "Battery Storage Program", "type": "related", "status": "green", "description": "Co-located storage for grid services" },
     { "id": "dep-wind-002", "name": "NEET Transmission", "type": "related", "status": "yellow", "description": "New transmission lines for delivery" }
   ],
+  "stakeholders": [
+    { "id": "sh-wind-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-wind-002", "name": "Major Utility Offtakers", "role": "PPA Counterparties", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-wind-003", "name": "Mark Hickson", "role": "EVP Development", "department": "Development", "influence": "high", "interest": "high" },
+    { "id": "sh-wind-004", "name": "Institutional Investors", "role": "Tax Equity Partners", "department": "External", "influence": "medium", "interest": "high" }
+  ],
   "financials": { "capitalex": 468, "opex": 52, "contingency": 52, "npv": 1450, "irr": 14, "paybackMonths": 84 },
   "qualityMetrics": { "defectDensity": 0.3, "testCoverage": 92, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 90 }
 }

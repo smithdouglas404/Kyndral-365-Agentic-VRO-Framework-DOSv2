@@ -64,10 +64,18 @@
     { "id": "ms-solar-neer-003", "name": "Texas Portfolio 1 GW", "date": "2026-03-31", "status": "pending", "deliverables": ["Texas projects complete"] }
   ],
   "risks": [
-    { "id": "risk-solar-neer-001", "name": "Panel Tariff Uncertainty", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Diversified supply chain; domestic content sourcing", "owner": "Supply Chain" }
+    { "id": "risk-solar-neer-001", "name": "Panel Tariff Uncertainty", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Diversified supply chain; domestic content sourcing", "owner": "Supply Chain" },
+    { "id": "risk-solar-neer-002", "name": "Interconnection Queue Delays", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Early queue positions; multiple project options", "owner": "Grid Integration" }
   ],
   "dependencies": [
-    { "id": "dep-solar-neer-001", "name": "Battery Storage Program", "type": "related", "status": "green", "description": "Co-located storage deployment" }
+    { "id": "dep-solar-neer-001", "name": "Battery Storage Program", "type": "related", "status": "green", "description": "Co-located storage deployment" },
+    { "id": "dep-solar-neer-002", "name": "Transmission Access", "type": "related", "status": "green", "description": "Grid interconnection capacity" }
+  ],
+  "stakeholders": [
+    { "id": "sh-solar-neer-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-neer-002", "name": "Investment-Grade Utilities", "role": "PPA Offtakers", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-neer-003", "name": "Mark Hickson", "role": "EVP Development", "department": "Development", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-neer-004", "name": "Panel Manufacturers", "role": "Strategic Suppliers", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 378, "opex": 42, "contingency": 42, "npv": 980, "irr": 13, "paybackMonths": 90 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 94, "technicalDebtDays": 6, "codeReviewCoverage": 100, "documentationScore": 92 }

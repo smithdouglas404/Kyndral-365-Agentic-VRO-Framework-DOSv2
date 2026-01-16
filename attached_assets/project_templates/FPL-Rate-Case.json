@@ -64,10 +64,18 @@
     { "id": "ms-rate-003", "name": "Filing Support", "date": "2025-07-01", "status": "pending", "deliverables": ["Full rate case package", "Testimony support"] }
   ],
   "risks": [
-    { "id": "risk-rate-001", "name": "PSC Methodology Changes", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Flexible architecture to accommodate rule changes", "owner": "Regulatory Affairs" }
+    { "id": "risk-rate-001", "name": "PSC Methodology Changes", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Flexible architecture to accommodate rule changes", "owner": "Regulatory Affairs" },
+    { "id": "risk-rate-002", "name": "Data Accuracy Challenges", "probability": "medium", "impact": "high", "status": "mitigating", "mitigation": "Multi-level validation; reconciliation with source systems", "owner": "Data Quality Team" }
   ],
   "dependencies": [
-    { "id": "dep-rate-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Requires integrated financial data from all systems" }
+    { "id": "dep-rate-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Requires integrated financial data from all systems" },
+    { "id": "dep-rate-002", "name": "Financial Systems", "type": "related", "status": "green", "description": "Integration with SAP for cost data" }
+  ],
+  "stakeholders": [
+    { "id": "sh-rate-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-rate-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-rate-003", "name": "Robert Escoto", "role": "VP Regulatory Affairs", "department": "Regulatory", "influence": "high", "interest": "high" },
+    { "id": "sh-rate-004", "name": "Office of Public Counsel", "role": "Consumer Advocate", "department": "External", "influence": "high", "interest": "high" }
   ],
   "financials": { "capitalex": 10, "opex": 2, "contingency": 1.2, "npv": 45, "irr": 42, "paybackMonths": 10 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 96, "technicalDebtDays": 4, "codeReviewCoverage": 100, "documentationScore": 95 }

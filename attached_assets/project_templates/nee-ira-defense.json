@@ -203,5 +203,18 @@
     "npv": "2400",
     "irr": "0",
     "paybackMonths": "0"
+  },
+  "stakeholders": [
+    { "id": "sh-policy-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-policy-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-policy-003", "name": "US Congress", "role": "Federal Legislature", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-policy-004", "name": "NEE Investors", "role": "Shareholders", "department": "External", "influence": "high", "interest": "high" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.2",
+    "testCoverage": "92",
+    "technicalDebtDays": "5",
+    "codeReviewCoverage": "100",
+    "documentationScore": "90"
   }
 }

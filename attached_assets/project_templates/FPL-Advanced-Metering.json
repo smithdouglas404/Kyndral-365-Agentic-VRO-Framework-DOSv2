@@ -76,10 +76,18 @@
     { "id": "ms-ami-003", "name": "Full Deployment - 5.8M Meters", "date": "2025-07-15", "status": "pending", "deliverables": ["Statewide coverage", "Full analytics suite"] }
   ],
   "risks": [
-    { "id": "risk-ami-001", "name": "Supply Chain Delays", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Dual-source meter suppliers; 6-month inventory buffer", "owner": "Procurement Team" }
+    { "id": "risk-ami-001", "name": "Supply Chain Delays", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Dual-source meter suppliers; 6-month inventory buffer", "owner": "Procurement Team" },
+    { "id": "risk-ami-002", "name": "Customer Data Privacy Concerns", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Enhanced data encryption; transparent privacy policy; opt-out provisions", "owner": "Legal & Compliance" }
   ],
   "dependencies": [
-    { "id": "dep-ami-001", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Shares communication infrastructure" }
+    { "id": "dep-ami-001", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Shares communication infrastructure" },
+    { "id": "dep-ami-002", "name": "Customer Digital Platform", "type": "related", "status": "green", "description": "Provides data for customer portal" }
+  ],
+  "stakeholders": [
+    { "id": "sh-ami-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ami-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-ami-003", "name": "Marlene Santos", "role": "VP Customer Service", "department": "Customer Operations", "influence": "high", "interest": "high" },
+    { "id": "sh-ami-004", "name": "FPL Residential Customers", "role": "End User", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 28, "opex": 7, "contingency": 3.5, "npv": 180, "irr": 32, "paybackMonths": 18 },
   "qualityMetrics": { "defectDensity": 0.5, "testCoverage": 92, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 90 }

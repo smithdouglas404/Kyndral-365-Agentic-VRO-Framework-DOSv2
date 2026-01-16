@@ -199,5 +199,18 @@
     "npv": "4200",
     "irr": "18",
     "paybackMonths": "84"
+  },
+  "stakeholders": [
+    { "id": "sh-google-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-google-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-google-003", "name": "Google Cloud", "role": "Strategic Partner", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-google-004", "name": "Rebecca Kujawa", "role": "President & CEO NEER", "department": "NEER Executive", "influence": "high", "interest": "high" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.2",
+    "testCoverage": "94",
+    "technicalDebtDays": "8",
+    "codeReviewCoverage": "100",
+    "documentationScore": "92"
   }
 }

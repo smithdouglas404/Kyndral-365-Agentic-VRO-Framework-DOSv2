@@ -76,10 +76,18 @@
     { "id": "ms-sec-003", "name": "Full Deployment", "date": "2025-09-01", "status": "pending", "deliverables": ["Enterprise rollout", "24/7 SOC integration"] }
   ],
   "risks": [
-    { "id": "risk-sec-001", "name": "OT Security Complexity", "probability": "medium", "impact": "high", "status": "mitigating", "mitigation": "Specialized OT security team; vendor partnerships", "owner": "OT Security Lead" }
+    { "id": "risk-sec-001", "name": "OT Security Complexity", "probability": "medium", "impact": "high", "status": "mitigating", "mitigation": "Specialized OT security team; vendor partnerships", "owner": "OT Security Lead" },
+    { "id": "risk-sec-002", "name": "Evolving Threat Landscape", "probability": "high", "impact": "high", "status": "monitoring", "mitigation": "24/7 SOC; threat intelligence partnerships; regular assessments", "owner": "Security Operations" }
   ],
   "dependencies": [
-    { "id": "dep-sec-001", "name": "Enterprise Data Platform", "type": "related", "status": "green", "description": "Security data integration" }
+    { "id": "dep-sec-001", "name": "Enterprise Data Platform", "type": "related", "status": "green", "description": "Security data integration" },
+    { "id": "dep-sec-002", "name": "Network Infrastructure", "type": "blocked-by", "status": "green", "description": "Network segmentation prerequisites" }
+  ],
+  "stakeholders": [
+    { "id": "sh-sec-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-sec-002", "name": "Charles Pastrana", "role": "CIO", "department": "Information Technology", "influence": "high", "interest": "high" },
+    { "id": "sh-sec-003", "name": "NERC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-sec-004", "name": "CISO Team", "role": "Security Leadership", "department": "Information Security", "influence": "high", "interest": "high" }
   ],
   "financials": { "capitalex": 22, "opex": 6, "contingency": 2.8, "npv": 120, "irr": 38, "paybackMonths": 16 },
   "qualityMetrics": { "defectDensity": 0.1, "testCoverage": 98, "technicalDebtDays": 3, "codeReviewCoverage": 100, "documentationScore": 98 }

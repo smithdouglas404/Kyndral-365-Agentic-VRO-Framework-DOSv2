@@ -91,7 +91,16 @@
     { "id": "risk-data-001", "name": "Data Quality Issues", "probability": "high", "impact": "medium", "status": "mitigating", "mitigation": "Data governance program; source system remediation", "owner": "Data Quality Team" },
     { "id": "risk-data-002", "name": "Integration Complexity", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Phased rollout; dedicated integration team", "owner": "Integration Lead" }
   ],
-  "dependencies": [],
+  "dependencies": [
+    { "id": "dep-data-001", "name": "Cloud Infrastructure", "type": "related", "status": "green", "description": "AWS platform foundation" },
+    { "id": "dep-data-002", "name": "Source System Access", "type": "blocked-by", "status": "yellow", "description": "API access to legacy systems" }
+  ],
+  "stakeholders": [
+    { "id": "sh-data-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-data-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-data-003", "name": "Charles Pastrana", "role": "CIO", "department": "Information Technology", "influence": "high", "interest": "high" },
+    { "id": "sh-data-004", "name": "Business Unit Data Owners", "role": "Data Stewards", "department": "FPL/NEER", "influence": "medium", "interest": "high" }
+  ],
   "financials": { "capitalex": 52, "opex": 13, "contingency": 6.5, "npv": 195, "irr": 32, "paybackMonths": 18 },
   "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 88, "technicalDebtDays": 12, "codeReviewCoverage": 100, "documentationScore": 85 }
 }

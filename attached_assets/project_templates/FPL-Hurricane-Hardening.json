@@ -81,7 +81,14 @@
     { "id": "risk-storm-002", "name": "Contractor Availability", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Multi-year contracts with 3 major contractors", "owner": "Procurement" }
   ],
   "dependencies": [
-    { "id": "dep-storm-001", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Smart switch installation coordinated with undergrounding" }
+    { "id": "dep-storm-001", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Smart switch installation coordinated with undergrounding" },
+    { "id": "dep-storm-002", "name": "Municipal Permitting", "type": "blocked-by", "status": "yellow", "description": "Requires coordination with local governments for right-of-way" }
+  ],
+  "stakeholders": [
+    { "id": "sh-storm-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-storm-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-storm-003", "name": "Manny Miranda", "role": "VP Transmission & Distribution", "department": "T&D Operations", "influence": "high", "interest": "high" },
+    { "id": "sh-storm-004", "name": "Florida Emergency Management", "role": "Emergency Coordinator", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 225, "opex": 25, "contingency": 25, "npv": 520, "irr": 18, "paybackMonths": 36 },
   "qualityMetrics": { "defectDensity": 0.1, "testCoverage": 98, "technicalDebtDays": 3, "codeReviewCoverage": 100, "documentationScore": 92 }

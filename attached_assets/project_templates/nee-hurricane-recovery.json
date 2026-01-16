@@ -212,5 +212,18 @@
     "npv": "-850",
     "irr": "-5",
     "paybackMonths": "0"
+  },
+  "stakeholders": [
+    { "id": "sh-crisis-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-crisis-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-crisis-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-crisis-004", "name": "FPL Customers", "role": "Ratepayers", "department": "External", "influence": "medium", "interest": "high" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.1",
+    "testCoverage": "98",
+    "technicalDebtDays": "3",
+    "codeReviewCoverage": "100",
+    "documentationScore": "95"
   }
 }

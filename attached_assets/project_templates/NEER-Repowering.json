@@ -64,10 +64,18 @@
     { "id": "ms-rep-003", "name": "Texas Repowering Start", "date": "2026-03-31", "status": "pending", "deliverables": ["Texas projects initiated"] }
   ],
   "risks": [
-    { "id": "risk-rep-001", "name": "PTC Qualification Timeline", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Accelerate safe harbor activities", "owner": "Tax Team" }
+    { "id": "risk-rep-001", "name": "PTC Qualification Timeline", "probability": "low", "impact": "high", "status": "monitoring", "mitigation": "Accelerate safe harbor activities", "owner": "Tax Team" },
+    { "id": "risk-rep-002", "name": "Decommissioning Complexity", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Experienced decommissioning contractors; detailed site assessments", "owner": "Project Management" }
   ],
   "dependencies": [
-    { "id": "dep-rep-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Shared turbine procurement" }
+    { "id": "dep-rep-001", "name": "Wind Expansion", "type": "related", "status": "green", "description": "Shared turbine procurement" },
+    { "id": "dep-rep-002", "name": "Existing PPA Amendments", "type": "blocked-by", "status": "green", "description": "Contract modifications for repowered assets" }
+  ],
+  "stakeholders": [
+    { "id": "sh-rep-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-rep-002", "name": "Existing PPA Counterparties", "role": "Contract Holders", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-rep-003", "name": "Tax Equity Investors", "role": "Financial Partners", "department": "External", "influence": "medium", "interest": "high" },
+    { "id": "sh-rep-004", "name": "Asset Management Team", "role": "Fleet Operations", "department": "Operations", "influence": "high", "interest": "high" }
   ],
   "financials": { "capitalex": 252, "opex": 28, "contingency": 28, "npv": 680, "irr": 18, "paybackMonths": 60 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 92, "technicalDebtDays": 7, "codeReviewCoverage": 100, "documentationScore": 90 }

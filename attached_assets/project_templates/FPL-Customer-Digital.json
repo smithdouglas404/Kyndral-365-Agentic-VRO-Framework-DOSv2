@@ -76,10 +76,18 @@
     { "id": "ms-cust-003", "name": "Phase 2 Features", "date": "2025-08-01", "status": "pending", "deliverables": ["Advanced analytics", "Smart home integration"] }
   ],
   "risks": [
-    { "id": "risk-cust-001", "name": "Customer Adoption", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Targeted marketing campaign; incentives for digital enrollment", "owner": "Marketing" }
+    { "id": "risk-cust-001", "name": "Customer Adoption", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Targeted marketing campaign; incentives for digital enrollment", "owner": "Marketing" },
+    { "id": "risk-cust-002", "name": "AI Chatbot Accuracy", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Continuous training; human escalation path; quality monitoring", "owner": "AI Team" }
   ],
   "dependencies": [
-    { "id": "dep-cust-001", "name": "AMI 2.0", "type": "related", "status": "green", "description": "Real-time usage data from smart meters" }
+    { "id": "dep-cust-001", "name": "AMI 2.0", "type": "related", "status": "green", "description": "Real-time usage data from smart meters" },
+    { "id": "dep-cust-002", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Real-time outage data for customer notifications" }
+  ],
+  "stakeholders": [
+    { "id": "sh-cust-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-cust-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-cust-003", "name": "Marlene Santos", "role": "VP Customer Service", "department": "Customer Operations", "influence": "high", "interest": "high" },
+    { "id": "sh-cust-004", "name": "JD Power", "role": "Industry Benchmark", "department": "External", "influence": "medium", "interest": "medium" }
   ],
   "financials": { "capitalex": 22, "opex": 6, "contingency": 2.8, "npv": 125, "irr": 35, "paybackMonths": 15 },
   "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 94, "technicalDebtDays": 6, "codeReviewCoverage": 100, "documentationScore": 88 }

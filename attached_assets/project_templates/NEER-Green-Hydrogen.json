@@ -69,7 +69,14 @@
     { "id": "risk-h2-002", "name": "Technology Performance", "probability": "low", "impact": "medium", "status": "monitoring", "mitigation": "Vendor performance guarantees; extended warranty", "owner": "Engineering" }
   ],
   "dependencies": [
-    { "id": "dep-h2-001", "name": "Wind Expansion", "type": "blocked-by", "status": "green", "description": "Requires dedicated renewable generation" }
+    { "id": "dep-h2-001", "name": "Wind Expansion", "type": "blocked-by", "status": "green", "description": "Requires dedicated renewable generation" },
+    { "id": "dep-h2-002", "name": "DOE Hydrogen Hub Funding", "type": "related", "status": "yellow", "description": "Federal funding for scale-up" }
+  ],
+  "stakeholders": [
+    { "id": "sh-h2-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-h2-002", "name": "Department of Energy", "role": "Federal Funding Agency", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-h2-003", "name": "Industrial Hydrogen Customers", "role": "Offtakers", "department": "External", "influence": "medium", "interest": "high" },
+    { "id": "sh-h2-004", "name": "Dr. James Park", "role": "VP New Technology", "department": "R&D", "influence": "high", "interest": "high" }
   ],
   "financials": { "capitalex": 102, "opex": 18, "contingency": 12, "npv": 85, "irr": 8, "paybackMonths": 120 },
   "qualityMetrics": { "defectDensity": 0.5, "testCoverage": 85, "technicalDebtDays": 15, "codeReviewCoverage": 100, "documentationScore": 82 }

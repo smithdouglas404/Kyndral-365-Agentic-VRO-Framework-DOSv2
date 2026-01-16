@@ -210,5 +210,18 @@
     "npv": "420",
     "irr": "85",
     "paybackMonths": "18"
+  },
+  "stakeholders": [
+    { "id": "sh-ai-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ai-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-ai-003", "name": "Google Cloud", "role": "Technology Partner", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-ai-004", "name": "Charles Pastrana", "role": "CIO", "department": "Information Technology", "influence": "high", "interest": "high" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.4",
+    "testCoverage": "88",
+    "technicalDebtDays": "15",
+    "codeReviewCoverage": "100",
+    "documentationScore": "82"
   }
 }

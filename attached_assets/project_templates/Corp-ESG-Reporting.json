@@ -76,10 +76,18 @@
     { "id": "ms-esg-003", "name": "Full Platform Launch", "date": "2025-04-01", "status": "pending", "deliverables": ["Sustainability report automation", "Stakeholder portal"] }
   ],
   "risks": [
-    { "id": "risk-esg-001", "name": "Regulatory Timeline Changes", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Flexible architecture; early SEC engagement", "owner": "Legal" }
+    { "id": "risk-esg-001", "name": "Regulatory Timeline Changes", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Flexible architecture; early SEC engagement", "owner": "Legal" },
+    { "id": "risk-esg-002", "name": "Data Completeness", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Data gap analysis; phased approach to Scope 3", "owner": "Sustainability Team" }
   ],
   "dependencies": [
-    { "id": "dep-esg-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Emissions data from data lake" }
+    { "id": "dep-esg-001", "name": "Enterprise Data Platform", "type": "blocked-by", "status": "green", "description": "Emissions data from data lake" },
+    { "id": "dep-esg-002", "name": "Financial Reporting Systems", "type": "related", "status": "green", "description": "SEC filing integration" }
+  ],
+  "stakeholders": [
+    { "id": "sh-esg-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-esg-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
+    { "id": "sh-esg-003", "name": "Nicole Daggs", "role": "VP Sustainability", "department": "Sustainability", "influence": "high", "interest": "high" },
+    { "id": "sh-esg-004", "name": "SEC & ESG Rating Agencies", "role": "External Stakeholders", "department": "External", "influence": "high", "interest": "medium" }
   ],
   "financials": { "capitalex": 6.5, "opex": 1.5, "contingency": 0.8, "npv": 35, "irr": 45, "paybackMonths": 10 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 95, "technicalDebtDays": 4, "codeReviewCoverage": 100, "documentationScore": 95 }

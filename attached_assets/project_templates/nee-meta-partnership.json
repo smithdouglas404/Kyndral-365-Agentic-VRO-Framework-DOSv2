@@ -165,6 +165,15 @@
       "status": "monitoring",
       "mitigation": "Secured domestic supply chain; tariff cost pass-through provisions in PPAs",
       "owner": "Jennifer Park"
+    },
+    {
+      "id": "risk-meta-002",
+      "name": "Interconnection Delays",
+      "probability": "medium",
+      "impact": "medium",
+      "status": "mitigating",
+      "mitigation": "Early engagement with utilities; parallel permitting tracks for multiple sites",
+      "owner": "Marcus Williams"
     }
   ],
   "financials": {
@@ -174,5 +183,18 @@
     "npv": "520",
     "irr": "22",
     "paybackMonths": "60"
+  },
+  "stakeholders": [
+    { "id": "sh-meta-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-meta-002", "name": "Meta", "role": "Strategic Partner & Offtaker", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-meta-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-meta-004", "name": "PNM", "role": "Transmission Provider", "department": "External", "influence": "medium", "interest": "medium" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.2",
+    "testCoverage": "94",
+    "technicalDebtDays": "6",
+    "codeReviewCoverage": "100",
+    "documentationScore": "92"
   }
 }

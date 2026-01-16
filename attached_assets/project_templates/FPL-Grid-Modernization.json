@@ -112,8 +112,10 @@
     { "id": "dep-002", "name": "AMI Infrastructure", "type": "related", "status": "green", "description": "Shares communication backbone for grid sensors" }
   ],
   "stakeholders": [
-    { "id": "sh-001", "name": "Eric Silagy", "role": "Executive Sponsor", "department": "FPL Executive", "influence": "high", "interest": "high" },
-    { "id": "sh-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" }
+    { "id": "sh-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
+    { "id": "sh-003", "name": "Armando Pimentel", "role": "VP Distribution Operations", "department": "Operations", "influence": "high", "interest": "high" },
+    { "id": "sh-004", "name": "Customer Advisory Council", "role": "Customer Representative", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 58, "opex": 10, "contingency": 6.8, "npv": 245, "irr": 28, "paybackMonths": 24 },
   "qualityMetrics": { "defectDensity": 0.8, "testCoverage": 87, "technicalDebtDays": 12, "codeReviewCoverage": 100, "documentationScore": 85 }

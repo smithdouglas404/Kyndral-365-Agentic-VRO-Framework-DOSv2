@@ -197,5 +197,18 @@
     "npv": "850",
     "irr": "15",
     "paybackMonths": "96"
+  },
+  "stakeholders": [
+    { "id": "sh-nuclear-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-nuclear-002", "name": "Google", "role": "PPA Offtaker", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-nuclear-003", "name": "Nuclear Regulatory Commission", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-nuclear-004", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.1",
+    "testCoverage": "98",
+    "technicalDebtDays": "5",
+    "codeReviewCoverage": "100",
+    "documentationScore": "95"
   }
 }

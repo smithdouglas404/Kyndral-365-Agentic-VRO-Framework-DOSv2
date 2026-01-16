@@ -170,5 +170,18 @@
     "npv": "285",
     "irr": "14",
     "paybackMonths": "108"
+  },
+  "stakeholders": [
+    { "id": "sh-ccus-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ccus-002", "name": "ExxonMobil", "role": "Technology Partner", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-ccus-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ccus-004", "name": "EPA", "role": "Environmental Regulator", "department": "External", "influence": "high", "interest": "medium" }
+  ],
+  "qualityMetrics": {
+    "defectDensity": "0.3",
+    "testCoverage": "90",
+    "technicalDebtDays": "10",
+    "codeReviewCoverage": "100",
+    "documentationScore": "88"
   }
 }

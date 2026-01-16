@@ -79,7 +79,16 @@
     { "id": "risk-nuc-001", "name": "NRC Restart Regulatory Process", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Early NRC engagement; experienced regulatory team", "owner": "Regulatory Affairs" },
     { "id": "risk-nuc-002", "name": "Cost Escalation", "probability": "medium", "impact": "high", "status": "monitoring", "mitigation": "Contingency allowance; detailed engineering before commitment", "owner": "Project Controls" }
   ],
-  "dependencies": [],
+  "dependencies": [
+    { "id": "dep-nuc-001", "name": "NRC Regulatory Approval", "type": "blocked-by", "status": "yellow", "description": "Requires NRC restart license approval" },
+    { "id": "dep-nuc-002", "name": "Data Center Customer Agreement", "type": "related", "status": "green", "description": "Commercial arrangement with large customer" }
+  ],
+  "stakeholders": [
+    { "id": "sh-nuc-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-nuc-002", "name": "Nuclear Regulatory Commission", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
+    { "id": "sh-nuc-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-nuc-004", "name": "Potential Data Center Customers", "role": "Offtakers", "department": "External", "influence": "high", "interest": "high" }
+  ],
   "financials": { "capitalex": 20, "opex": 5, "contingency": 5, "npv": 45, "irr": 25, "paybackMonths": 24 },
   "qualityMetrics": { "defectDensity": 0.2, "testCoverage": 95, "technicalDebtDays": 5, "codeReviewCoverage": 100, "documentationScore": 95 }
 }

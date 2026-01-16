@@ -64,10 +64,18 @@
     { "id": "ms-dev-003", "name": "Full Rollout", "date": "2025-06-01", "status": "pending", "deliverables": ["All regions live", "Mobile app"] }
   ],
   "risks": [
-    { "id": "risk-dev-001", "name": "User Adoption", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Change management program; executive sponsorship", "owner": "Change Management" }
+    { "id": "risk-dev-001", "name": "User Adoption", "probability": "medium", "impact": "medium", "status": "monitoring", "mitigation": "Change management program; executive sponsorship", "owner": "Change Management" },
+    { "id": "risk-dev-002", "name": "Data Migration Complexity", "probability": "medium", "impact": "medium", "status": "mitigating", "mitigation": "Phased migration; data validation checkpoints", "owner": "Data Migration Team" }
   ],
   "dependencies": [
-    { "id": "dep-dev-001", "name": "Enterprise Data Platform", "type": "related", "status": "green", "description": "Data integration" }
+    { "id": "dep-dev-001", "name": "Enterprise Data Platform", "type": "related", "status": "green", "description": "Data integration" },
+    { "id": "dep-dev-002", "name": "GIS & Land Systems", "type": "related", "status": "green", "description": "Site and land data integration" }
+  ],
+  "stakeholders": [
+    { "id": "sh-dev-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-dev-002", "name": "Mark Hickson", "role": "EVP Development", "department": "Development", "influence": "high", "interest": "high" },
+    { "id": "sh-dev-003", "name": "Regional Development Directors", "role": "Primary Users", "department": "Development", "influence": "high", "interest": "high" },
+    { "id": "sh-dev-004", "name": "Land & Permitting Teams", "role": "Key Contributors", "department": "Development", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 18, "opex": 4, "contingency": 2.2, "npv": 75, "irr": 38, "paybackMonths": 14 },
   "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 90, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 88 }
