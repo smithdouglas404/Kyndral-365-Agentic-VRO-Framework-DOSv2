@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
 import { interventionEvents } from '@/lib/interventionEvents';
+import { useConfirmationToast } from '@/hooks/useConfirmationToast';
+import { TraceabilityDrawer } from '@/components/TraceabilityDrawer';
 
 interface RiskIntervention {
   id: string;
@@ -178,6 +180,7 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
   const [discussionIndex, setDiscussionIndex] = useState(0);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { showConfirmation, selectedCode, drawerOpen, setDrawerOpen } = useConfirmationToast();
 
   // Fetch interventions from database
   const fetchInterventions = useCallback(async () => {
@@ -294,10 +297,17 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     }
     setProcessingId(null);
     
-    toast.success(`Intervention approved for ${intervention?.projectName}`, {
-      description: `${intervention?.agentSource} executing: ${intervention?.suggestedAction.substring(0, 50)}...`
+    await showConfirmation({
+      actionType: 'approved',
+      entityType: 'intervention',
+      entityId: id,
+      entityTitle: intervention.title,
+      agentSource: intervention.agentSource,
+      projectId: intervention.projectId,
+      projectName: intervention.projectName,
+      componentSource: 'AgentCommandCenter'
     });
-  }, [interventions, selectedIntervention]);
+  }, [interventions, selectedIntervention, showConfirmation]);
 
   const handleDismissIntervention = useCallback(async (id: string) => {
     const intervention = interventions.find(i => i.id === id);
@@ -330,8 +340,18 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
     if (selectedIntervention?.id === id) {
       setSelectedIntervention(prev => prev ? { ...prev, status: 'dismissed' as const } : null);
     }
-    toast.info(`Intervention dismissed - logged to Command Center`);
-  }, [interventions, selectedIntervention]);
+    
+    await showConfirmation({
+      actionType: 'dismissed',
+      entityType: 'intervention',
+      entityId: id,
+      entityTitle: intervention?.title || 'Intervention',
+      agentSource: intervention?.agentSource || 'Agent',
+      projectId: intervention?.projectId,
+      projectName: intervention?.projectName,
+      componentSource: 'AgentCommandCenter'
+    });
+  }, [interventions, selectedIntervention, showConfirmation]);
 
   const handleSendChat = async () => {
     if (!chatInput.trim()) return;
@@ -886,6 +906,12 @@ export function AgentCommandCenter({ onNavigateToProject }: AgentCommandCenterPr
           </Card>
         </TabsContent>
       </Tabs>
+      
+      <TraceabilityDrawer 
+        confirmationCode={selectedCode}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 }
