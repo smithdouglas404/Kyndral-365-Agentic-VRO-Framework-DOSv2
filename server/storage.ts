@@ -3,6 +3,7 @@ import {
   type Policy, type InsertPolicy,
   type BusinessUnit, type InsertBusinessUnit,
   type Project, type InsertProject,
+  type ProjectTemplate, type InsertProjectTemplate,
   type PolicyBusinessUnitLink, type InsertPolicyBusinessUnitLink,
   type PolicyProjectLink, type InsertPolicyProjectLink,
   type AgentMemory, type InsertAgentMemory,
@@ -63,7 +64,7 @@ import {
   type ScheduledReport, type InsertScheduledReport,
   type ExportJob, type InsertExportJob,
   type TutorialProgress, type InsertTutorialProgress,
-  users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
+  users, policies, businessUnits, projects, projectTemplates, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
   okrs, keyResults, kpis,
@@ -329,6 +330,14 @@ export interface IStorage {
   updateDashboardWidget(id: string, updates: Partial<DashboardWidget>): Promise<DashboardWidget | undefined>;
   deleteDashboardWidget(id: string): Promise<void>;
   reorderDashboardWidgets(widgetOrders: { id: string; sortOrder: number }[]): Promise<void>;
+  
+  // Project Template Methods
+  getProjectTemplates(category?: string): Promise<ProjectTemplate[]>;
+  getProjectTemplate(id: string): Promise<ProjectTemplate | undefined>;
+  getProjectTemplateBySlug(slug: string): Promise<ProjectTemplate | undefined>;
+  createProjectTemplate(template: InsertProjectTemplate): Promise<ProjectTemplate>;
+  updateProjectTemplate(id: string, updates: Partial<ProjectTemplate>): Promise<ProjectTemplate | undefined>;
+  deleteProjectTemplate(id: string): Promise<void>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -2609,6 +2618,47 @@ export class DatabaseStorage implements IStorage {
         eq(tutorialProgress.tutorialId, tutorialId)
       ));
   }
+
+  // Project Template Methods
+  async getProjectTemplates(category?: string): Promise<ProjectTemplate[]> {
+    if (category) {
+      return await db.select().from(projectTemplates)
+        .where(and(eq(projectTemplates.category, category), eq(projectTemplates.isActive, true)))
+        .orderBy(projectTemplates.name);
+    }
+    return await db.select().from(projectTemplates)
+      .where(eq(projectTemplates.isActive, true))
+      .orderBy(projectTemplates.name);
+  }
+
+  async getProjectTemplate(id: string): Promise<ProjectTemplate | undefined> {
+    const result = await db.select().from(projectTemplates)
+      .where(eq(projectTemplates.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getProjectTemplateBySlug(slug: string): Promise<ProjectTemplate | undefined> {
+    const result = await db.select().from(projectTemplates)
+      .where(eq(projectTemplates.slug, slug)).limit(1);
+    return result[0];
+  }
+
+  async createProjectTemplate(template: InsertProjectTemplate): Promise<ProjectTemplate> {
+    const result = await db.insert(projectTemplates).values(template).returning();
+    return result[0];
+  }
+
+  async updateProjectTemplate(id: string, updates: Partial<ProjectTemplate>): Promise<ProjectTemplate | undefined> {
+    const result = await db.update(projectTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(projectTemplates.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteProjectTemplate(id: string): Promise<void> {
+    await db.delete(projectTemplates).where(eq(projectTemplates.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
@@ -2635,4 +2685,61 @@ storage.seedAppConfig().catch(err => {
 
 storage.seedDashboardWidgets().catch(err => {
   console.error("Failed to seed dashboard widgets:", err);
+});
+
+// Seed project templates from JSON files
+async function seedProjectTemplates() {
+  const fs = await import('fs');
+  const path = await import('path');
+  
+  const templatesDir = path.join(process.cwd(), 'attached_assets', 'project_templates');
+  
+  if (!fs.existsSync(templatesDir)) {
+    console.log("No project templates directory found, skipping seed");
+    return;
+  }
+  
+  const existingTemplates = await storage.getProjectTemplates();
+  if (existingTemplates.length > 0) {
+    console.log(`${existingTemplates.length} templates already exist in database, skipping seed`);
+    return;
+  }
+  
+  const files = fs.readdirSync(templatesDir).filter((f: string) => f.endsWith('.json'));
+  console.log(`[TemplateSeed] Migrating ${files.length} project templates to database...`);
+  
+  for (const file of files) {
+    try {
+      const filePath = path.join(templatesDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(content);
+      
+      const slug = file.replace('.json', '');
+      let category = 'Other';
+      if (slug.startsWith('FPL-') || slug.startsWith('fpl-')) category = 'FPL';
+      else if (slug.startsWith('NEER-') || slug.startsWith('neer-')) category = 'NEER';
+      else if (slug.startsWith('Corp-') || slug.startsWith('corp-') || slug.startsWith('nee-')) category = 'Corporate';
+      
+      await storage.createProjectTemplate({
+        name: data.name || slug.replace(/-/g, ' '),
+        slug: slug,
+        bu: data.bu || category,
+        division: data.division,
+        description: data.description,
+        category: category,
+        templateData: content,
+        isActive: true,
+      });
+      
+      console.log(`[TemplateSeed] Migrated: ${slug}`);
+    } catch (err) {
+      console.error(`[TemplateSeed] Failed to migrate ${file}:`, err);
+    }
+  }
+  
+  console.log("[TemplateSeed] Template migration complete");
+}
+
+seedProjectTemplates().catch(err => {
+  console.error("Failed to seed project templates:", err);
 });

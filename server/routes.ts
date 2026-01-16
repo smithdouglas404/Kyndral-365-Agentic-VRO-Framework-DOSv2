@@ -590,16 +590,13 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Project Template endpoints
-  const templatesDir = path.join(process.cwd(), 'attached_assets', 'project_templates');
-  
-  app.get("/api/templates", async (_req, res) => {
+  // Project Template endpoints (database-backed)
+  app.get("/api/templates", async (req, res) => {
     try {
-      if (!fs.existsSync(templatesDir)) {
-        fs.mkdirSync(templatesDir, { recursive: true });
-      }
-      const files = fs.readdirSync(templatesDir).filter(f => f.endsWith('.json'));
-      res.json({ templates: files });
+      const category = req.query.category as string | undefined;
+      const templates = await storage.getProjectTemplates(category);
+      // Return as array of slugs for backward compatibility
+      res.json({ templates: templates.map(t => `${t.slug}.json`) });
     } catch (error: any) {
       console.error("Templates list error:", error);
       res.status(500).json({ error: "Failed to list templates" });
@@ -608,15 +605,41 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/templates/:name", async (req, res) => {
     try {
-      const templatePath = path.join(templatesDir, req.params.name);
-      if (!fs.existsSync(templatePath)) {
+      // Support both "FPL-Grid-Modernization.json" and "FPL-Grid-Modernization"
+      const slug = req.params.name.replace('.json', '');
+      const template = await storage.getProjectTemplateBySlug(slug);
+      
+      if (!template) {
         return res.status(404).json({ error: "Template not found" });
       }
-      const content = fs.readFileSync(templatePath, 'utf-8');
-      res.json(JSON.parse(content));
+      
+      // Return the parsed template data
+      res.json(JSON.parse(template.templateData));
     } catch (error: any) {
       console.error("Template fetch error:", error);
       res.status(500).json({ error: "Failed to fetch template" });
+    }
+  });
+  
+  // Full template list with metadata (for admin/management)
+  app.get("/api/project-templates", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const templates = await storage.getProjectTemplates(category);
+      res.json(templates.map(t => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug,
+        bu: t.bu,
+        division: t.division,
+        description: t.description,
+        category: t.category,
+        isActive: t.isActive,
+        createdAt: t.createdAt,
+      })));
+    } catch (error: any) {
+      console.error("Project templates list error:", error);
+      res.status(500).json({ error: "Failed to list project templates" });
     }
   });
 
