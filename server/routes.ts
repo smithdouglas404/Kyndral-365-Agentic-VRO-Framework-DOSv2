@@ -1988,6 +1988,42 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  app.post("/api/integrations/source-systems/:id/connect", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { credentials } = req.body;
+      
+      const system = await storage.getSourceSystem(id);
+      if (!system) {
+        return res.status(404).json({ error: "Source system not found" });
+      }
+      
+      const hasCredentials = credentials?.apiKey || (credentials?.username && credentials?.password);
+      if (!hasCredentials) {
+        return res.status(400).json({ error: "Credentials are required" });
+      }
+      
+      await storage.updateSourceSystemStatus(id, 'connected');
+      
+      await storage.createAgentActivityLog({
+        eventType: 'connection_established',
+        primaryAgentId: 'mcp-integration',
+        primaryAgentName: 'MCP Integration Service',
+        summary: `Successfully connected to ${system.name}`,
+        details: JSON.stringify({ systemId: id, systemType: system.type }),
+      });
+      
+      res.json({ 
+        success: true, 
+        message: `Connected to ${system.name} successfully`,
+        connectedAt: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Connect source system error:", error);
+      res.status(500).json({ error: "Failed to connect to source system" });
+    }
+  });
+
   // MCP Adapters
   app.get("/api/integrations/mcp-adapters", async (req, res) => {
     try {

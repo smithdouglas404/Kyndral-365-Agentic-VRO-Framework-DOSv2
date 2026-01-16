@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   ArrowLeft, Settings, Link2, FileJson, ShieldCheck, Activity,
   RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle,
@@ -29,6 +32,7 @@ interface SourceSystem {
   syncFrequency: string;
   lastConnectedAt: string | null;
   capabilities: string;
+  authType: string;
 }
 
 interface IngestionJob {
@@ -391,6 +395,9 @@ export default function MCPConfigPage() {
   const [questions, setQuestions] = useState<ClarifyingQuestion[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+  const [connectingSystem, setConnectingSystem] = useState<SourceSystem | null>(null);
+  const [connectionCredentials, setConnectionCredentials] = useState({ apiKey: '', username: '', password: '' });
+  const [isConnecting, setIsConnecting] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: sourceSystems } = useQuery<{ sourceSystems: SourceSystem[] }>({
@@ -430,6 +437,35 @@ export default function MCPConfigPage() {
       toast.error('Failed to start sync job');
     },
   });
+
+  const handleConnect = async () => {
+    if (!connectingSystem) return;
+    
+    setIsConnecting(true);
+    try {
+      const res = await fetch(`/api/integrations/source-systems/${connectingSystem.id}/connect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credentials: connectionCredentials,
+        }),
+      });
+      
+      const result = await res.json();
+      if (result.success) {
+        toast.success(`Connected to ${connectingSystem.name} successfully!`);
+        queryClient.invalidateQueries({ queryKey: ['source-systems'] });
+        setConnectingSystem(null);
+        setConnectionCredentials({ apiKey: '', username: '', password: '' });
+      } else {
+        toast.error(result.error || 'Connection failed');
+      }
+    } catch {
+      toast.error('Failed to connect to system');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   const [selectedSourceType, setSelectedSourceType] = useState('jira_epic');
   const [useAI, setUseAI] = useState(true);
@@ -642,16 +678,22 @@ export default function MCPConfigPage() {
                               <button
                                 key={system.id}
                                 onClick={() => {
-                                  toast.info(`Connecting to ${system.name}...`);
+                                  setConnectingSystem(system);
+                                  setConnectionCredentials({ apiKey: '', username: '', password: '' });
                                 }}
-                                className="p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
+                                className={`p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left ${system.status === 'connected' ? 'border-green-500 bg-green-50' : ''}`}
                                 data-testid={`wizard-connect-${system.id}`}
                               >
                                 <div className="flex items-center gap-2 mb-2">
                                   {getStatusIcon(system.status)}
                                   <span className="font-medium">{system.name}</span>
                                 </div>
-                                <Badge variant="outline" className="text-xs">{system.type}</Badge>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">{system.type}</Badge>
+                                  {system.status === 'connected' && (
+                                    <Badge className="bg-green-100 text-green-700 text-xs">Connected</Badge>
+                                  )}
+                                </div>
                               </button>
                             ))}
                           </div>
@@ -1055,9 +1097,8 @@ export default function MCPConfigPage() {
                                 size="sm" 
                                 variant={system.status === 'connected' ? 'outline' : 'default'}
                                 onClick={() => {
-                                  if (system.status !== 'connected') {
-                                    toast.info('Connection wizard would open here');
-                                  }
+                                  setConnectingSystem(system);
+                                  setConnectionCredentials({ apiKey: '', username: '', password: '' });
                                 }}
                                 data-testid={`connect-${system.id}`}
                               >
@@ -1594,6 +1635,90 @@ export default function MCPConfigPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={!!connectingSystem} onOpenChange={(open) => !open && setConnectingSystem(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-blue-500" />
+              Connect to {connectingSystem?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Enter your credentials to connect to {connectingSystem?.type}. Credentials are stored securely.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {connectingSystem?.authType === 'api_key' || connectingSystem?.authType === 'pat' ? (
+              <div className="space-y-2">
+                <Label htmlFor="apiKey">API Key / Personal Access Token</Label>
+                <Input
+                  id="apiKey"
+                  type="password"
+                  placeholder="Enter your API key or PAT"
+                  value={connectionCredentials.apiKey}
+                  onChange={(e) => setConnectionCredentials(prev => ({ ...prev, apiKey: e.target.value }))}
+                  data-testid="input-api-key"
+                />
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username / Email</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username or email"
+                    value={connectionCredentials.username}
+                    onChange={(e) => setConnectionCredentials(prev => ({ ...prev, username: e.target.value }))}
+                    data-testid="input-username"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password / API Token</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password or API token"
+                    value={connectionCredentials.password}
+                    onChange={(e) => setConnectionCredentials(prev => ({ ...prev, password: e.target.value }))}
+                    data-testid="input-password"
+                  />
+                </div>
+              </>
+            )}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-700">
+                <strong>Endpoint:</strong> {connectingSystem?.baseUrl || 'Not configured'}
+              </p>
+              <p className="text-sm text-blue-700 mt-1">
+                <strong>Auth Type:</strong> {connectingSystem?.authType}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setConnectingSystem(null)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConnect} 
+              disabled={isConnecting}
+              data-testid="button-connect-confirm"
+            >
+              {isConnecting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Link2 className="h-4 w-4 mr-2" />
+                  Connect
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

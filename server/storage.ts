@@ -202,6 +202,7 @@ export interface IStorage {
   
   // MCP & Integration Methods
   getSourceSystems(): Promise<SourceSystem[]>;
+  getSourceSystem(id: string): Promise<SourceSystem | undefined>;
   createSourceSystem(ss: InsertSourceSystem): Promise<SourceSystem>;
   updateSourceSystemStatus(id: string, status: string): Promise<void>;
   getMcpAdapters(sourceSystemId?: string): Promise<McpAdapter[]>;
@@ -1565,6 +1566,11 @@ export class DatabaseStorage implements IStorage {
   // MCP & Integration Methods
   async getSourceSystems(): Promise<SourceSystem[]> {
     return await db.select().from(sourceSystems);
+  }
+
+  async getSourceSystem(id: string): Promise<SourceSystem | undefined> {
+    const results = await db.select().from(sourceSystems).where(eq(sourceSystems.id, id));
+    return results[0];
   }
 
   async createSourceSystem(ss: InsertSourceSystem): Promise<SourceSystem> {
