@@ -605,16 +605,16 @@ function DashboardContent() {
               
               <div 
                 className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" 
-                data-testid="card-climate"
-                onClick={() => handleDrillDown("climate", "climate-overview")}
+                data-testid="card-sustainability"
+                onClick={() => handleDrillDown("sustainability", "sustainability-overview")}
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-1">
                       <Leaf className="h-4 w-4 text-green-600" />
-                      <p className="text-xs text-green-700 font-medium">Climate</p>
+                      <p className="text-xs text-green-700 font-medium">Sustainability</p>
                     </div>
-                    <p className="text-lg font-bold text-green-600">-37%</p>
+                    <p className="text-lg font-bold text-green-600">-60%</p>
                     <p className="text-xs text-green-600">emissions</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-green-400 group-hover:text-green-600 transition-colors" />
