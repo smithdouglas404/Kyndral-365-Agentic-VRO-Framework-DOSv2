@@ -1021,7 +1021,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'NEER Projects', value: '65%', budget: 'On Track' },
         { name: 'Corporate Projects', value: '61%', budget: 'Slight Delay' }
       ],
-      pendingAlerts: [],
+      pendingAlerts: [
+        { id: 'prog-1', title: 'Corporate Projects Delay', severity: 'warning', description: '3 projects showing 5% schedule variance', dueDate: 'Q2 review', actionLabel: 'Review Recovery Plan', agent: 'Planning Agent' }
+      ],
       insight: 'Portfolio progress at 67% with FPL leading. Corporate projects showing slight delay requiring attention.',
       summary: 'Overall program on track for Q3 2026 completion. VRO Agent validates $42M value delivered.'
     },
@@ -1128,7 +1130,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Capital Projects', value: '$580M', budget: '65% of spend' },
         { name: 'Operating Expenses', value: '$312M', budget: '35% of spend' }
       ],
-      pendingAlerts: [],
+      pendingAlerts: [
+        { id: 'spend-1', title: 'Capital Spend Acceleration', severity: 'info', description: 'Grid modernization projects need Q2 spend ramp-up', dueDate: 'Q2 2026', actionLabel: 'Review Schedule', agent: 'FinOps Agent' }
+      ],
       insight: 'YTD spend at $892M with healthy utilization rate. Projected to finish $200M under budget.',
       summary: 'Spending discipline strong across all segments. FinOps Agent tracking monthly run rates.'
     },
@@ -1189,7 +1193,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'NEER Clean Energy', value: '$2.9B', budget: '35% of profit' },
         { name: 'Corporate & Other', value: '$500M', budget: '6% of profit' }
       ],
-      pendingAlerts: [],
+      pendingAlerts: [
+        { id: 'profit-1', title: 'Q1 Earnings Prep', severity: 'info', description: 'Board presentation materials due for review', dueDate: '12 days', actionLabel: 'Review Materials', agent: 'FinOps Agent' }
+      ],
       insight: '$8.2B group profit with strong 12% YoY growth. FPL regulated segment leading contribution.',
       summary: 'Profitability on track. VRO Agent monitoring value creation across all segments.'
     },
@@ -1297,7 +1303,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'NEER Staff', value: '4,100', budget: '25% of total' },
         { name: 'Corporate', value: '3,200', budget: '19% of total' }
       ],
-      pendingAlerts: [],
+      pendingAlerts: [
+        { id: 'staff-1', title: 'High-Impact Group Support', severity: 'warning', description: '3,200 employees need intensive change support', dueDate: 'Ongoing', actionLabel: 'Review Support Plan', agent: 'OCM Agent' }
+      ],
       insight: '16,500 employees impacted with 3,200 in high-impact roles requiring intensive support.',
       summary: 'Change support team maintaining 1:85 ratio. OCM Agent monitoring high-impact group closely.'
     },
@@ -1339,7 +1347,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'NEER Users', value: '3,800', budget: '27% of total' },
         { name: 'Corporate Users', value: '2,300', budget: '16% of total' }
       ],
-      pendingAlerts: [],
+      pendingAlerts: [
+        { id: 'users-1', title: 'Power User Growth Target', severity: 'info', description: 'Identify 150 more power user candidates', dueDate: '30 days', actionLabel: 'View Candidates', agent: 'TMO Agent' }
+      ],
       insight: '14,200 total users with 63% daily active rate indicating healthy engagement.',
       summary: 'User base growing with 420 new users this month. TMO Agent tracking power user growth.'
     },
@@ -1380,7 +1390,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Customer Experience', value: '$38M', budget: 'Realized' },
         { name: 'New Capabilities', value: '$42M', budget: 'Projected' }
       ],
-      pendingAlerts: [],
+      pendingAlerts: [
+        { id: 'value-1', title: 'Projected Value Validation', severity: 'info', description: 'Q2 value realization tracking due', dueDate: '21 days', actionLabel: 'Schedule Review', agent: 'VRO Agent' }
+      ],
       insight: '$128M total value impact with 67% already realized. On track to exceed targets.',
       summary: 'Value realization exceeding expectations. VRO Agent validating projected value pipeline.'
     },
