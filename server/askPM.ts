@@ -30,10 +30,10 @@ Strategic Themes (${strategicThemes.length}):
 ${strategicThemes.map(t => `  - ${t.name}: ${t.budgetAllocation}% budget | Status: ${t.status}`).join('\n')}
 
 Value Streams (${valueStreams.length}):
-${valueStreams.map(vs => `  - ${vs.name}: ${vs.linkedARTs.length} ARTs | Budget: £${vs.annualBudget}M`).join('\n')}
+${valueStreams.map(vs => `  - ${vs.name}: ${vs.linkedARTs.length} ARTs | Budget: $${vs.annualBudget}M`).join('\n')}
 
 Portfolio Epics (${portfolioEpics.length}):
-${portfolioEpics.map(e => `  - ${e.name}: £${e.estimatedCost}M | Status: ${e.status} | WSJF: ${e.wsjfScore}`).join('\n')}
+${portfolioEpics.map(e => `  - ${e.name}: $${e.estimatedCost}M | Status: ${e.status} | WSJF: ${e.wsjfScore}`).join('\n')}
 
 Portfolio OKRs (${portfolioOKRs.length}):
 ${portfolioOKRs.map(o => {
@@ -66,7 +66,7 @@ Teams (${teams.length}):
 ${teams.map(t => `  - ${t.name}: ${t.capacity} pts/sprint | ${t.members.length} members`).join('\n')}
 
 Team Members (${teamMembers.length}):
-${teamMembers.map(m => `  - ${m.name}: ${m.role} | £${m.dailyCostRate}/day | ${m.skills.join(', ')}`).join('\n')}
+${teamMembers.map(m => `  - ${m.name}: ${m.role} | $${m.dailyCostRate}/day | ${m.skills.join(', ')}`).join('\n')}
 
 Stories (${stories.length}):
 ${stories.map(s => `  - ${s.title}: ${s.storyPoints} pts | ${s.status} | Feature: ${features.find(f => f.id === s.featureId)?.title || 'N/A'}`).join('\n')}
@@ -87,7 +87,7 @@ ${dependencies.map(d => {
 
 Financial Snapshots (${financialSnapshots.length}):
 ${financialSnapshots.map(f => {
-  return `  - ${f.entityName}: Budget £${f.totalBudget}M | Actual £${f.actualSpend}M | EV: £${f.earnedValue}M | SPI: ${f.schedulePerformanceIndex.toFixed(2)} | CPI: ${f.costPerformanceIndex.toFixed(2)}`;
+  return `  - ${f.entityName}: Budget $${f.totalBudget}M | Actual $${f.actualSpend}M | EV: $${f.earnedValue}M | SPI: ${f.schedulePerformanceIndex.toFixed(2)} | CPI: ${f.costPerformanceIndex.toFixed(2)}`;
 }).join('\n')}
 
 Risk Register (${riskRegister.length}):
@@ -109,9 +109,9 @@ const projectSummaries = [
   { id: 'proj-digital-onboarding', name: 'Digital Customer Onboarding', bu: 'Retail', status: 'green', priority: 'high', stage: 'implementing', budget: 2.2, spent: 1.1, roi: 5.5, roiConf: 88, ftes: 4.0, velocity: 40, deps: [], riskFlags: [], aiRecs: ['Conversion rates exceeding target', 'Mobile completion rate 20% higher'] },
   { id: 'proj-mobile-app-refresh', name: 'Retail Mobile App Modernization', bu: 'Retail', status: 'green', priority: 'medium', stage: 'backlog', budget: 3.5, spent: 0.075, roi: 8, roiConf: 70, ftes: 0.5, velocity: 0, deps: ['proj-digital-onboarding'], riskFlags: [], aiRecs: ['Consider React Native', 'Strong demand for investment tracking'] },
   { id: 'proj-advisor-portal', name: 'Financial Advisor Portal', bu: 'Retail', status: 'green', priority: 'medium', stage: 'reviewing', budget: 2.8, spent: 0.045, roi: 6.5, roiConf: 65, ftes: 1.0, velocity: 0, deps: [], riskFlags: [], aiRecs: ['Survey top 50 advisors', 'Consider API-first approach'] },
-  { id: 'proj-data-foundation', name: 'Enterprise Data Foundation', bu: 'Group Functions', status: 'amber', priority: 'critical', stage: 'implementing', budget: 12, spent: 8.5, roi: 40, roiConf: 72, ftes: 8.0, velocity: 52, deps: [], riskFlags: ['Full data lake milestone at-risk', 'Budget overrun £1.2M', 'Key architect shared'], aiRecs: ['CRITICAL: Blocking 4 other initiatives', 'Consider phased MDM rollout', 'Data quality issues causing rework'] },
+  { id: 'proj-data-foundation', name: 'Enterprise Data Foundation', bu: 'Group Functions', status: 'amber', priority: 'critical', stage: 'implementing', budget: 12, spent: 8.5, roi: 40, roiConf: 72, ftes: 8.0, velocity: 52, deps: [], riskFlags: ['Full data lake milestone at-risk', 'Budget overrun $1.2M', 'Key architect shared'], aiRecs: ['CRITICAL: Blocking 4 other initiatives', 'Consider phased MDM rollout', 'Data quality issues causing rework'] },
   { id: 'proj-api-gateway', name: 'Enterprise API Gateway', bu: 'Group Functions', status: 'green', priority: 'high', stage: 'implementing', budget: 1.8, spent: 0.95, roi: 4.5, roiConf: 85, ftes: 3.0, velocity: 32, deps: [], riskFlags: [], aiRecs: ['Early adoption exceeding expectations', 'Consider GraphQL gateway'] },
-  { id: 'proj-cloud-migration', name: 'Cloud Infrastructure Migration', bu: 'Group Functions', status: 'green', priority: 'high', stage: 'implementing', budget: 6.5, spent: 4.2, roi: 15, roiConf: 80, ftes: 5.0, velocity: 38, deps: [], riskFlags: [], aiRecs: ['Reserved instances could save £400K', 'Consider Spot for batch workloads'] },
+  { id: 'proj-cloud-migration', name: 'Cloud Infrastructure Migration', bu: 'Group Functions', status: 'green', priority: 'high', stage: 'implementing', budget: 6.5, spent: 4.2, roi: 15, roiConf: 80, ftes: 5.0, velocity: 38, deps: [], riskFlags: [], aiRecs: ['Reserved instances could save $400K', 'Consider Spot for batch workloads'] },
   { id: 'proj-regulatory-reporting', name: 'Regulatory Reporting Automation', bu: 'Risk & Compliance', status: 'amber', priority: 'critical', stage: 'implementing', budget: 4.5, spent: 3.1, roi: 8, roiConf: 75, ftes: 4.0, velocity: 35, deps: ['proj-data-foundation'], riskFlags: ['QRT automation milestone at-risk', 'Data Foundation dependency yellow', 'EIOPA deadline regulatory'], aiRecs: ['Consider parallel development', 'Escalate blockers immediately'] },
   { id: 'proj-fraud-detection', name: 'AI-Powered Fraud Detection', bu: 'Risk & Compliance', status: 'green', priority: 'high', stage: 'analyzing', budget: 3.2, spent: 0.12, roi: 12, roiConf: 70, ftes: 0.5, velocity: 0, deps: ['proj-data-foundation'], riskFlags: [], aiRecs: ['40% reduction in false positives achievable', 'Consider ensemble model approach'] },
   { id: 'proj-grc-platform', name: 'Integrated GRC Platform', bu: 'Risk & Compliance', status: 'green', priority: 'medium', stage: 'funnel', budget: 5, spent: 0.025, roi: 10, roiConf: 60, ftes: 0.25, velocity: 0, deps: [], riskFlags: [], aiRecs: ['Strong build vs buy candidates', 'Integration with ServiceNow possible'] },
@@ -135,8 +135,8 @@ function buildProjectContext(): string {
 PROJECT: ${p.name} (ID: ${p.id})
 - Business Unit: ${p.bu}
 - Status: ${p.status.toUpperCase()} | Priority: ${p.priority} | Stage: ${p.stage}
-- Budget: £${p.budget}M | Spent: £${p.spent}M (${Math.round(p.spent/p.budget*100)}%)
-- Projected ROI: £${p.roi}M (${p.roiConf}% confidence)
+- Budget: $${p.budget}M | Spent: $${p.spent}M (${Math.round(p.spent/p.budget*100)}%)
+- Projected ROI: $${p.roi}M (${p.roiConf}% confidence)
 - Team: ${p.ftes} FTE | Velocity: ${p.velocity} pts/sprint
 - Dependencies: ${p.deps.length > 0 ? p.deps.join(', ') : 'None'}
 - Risk Flags: ${p.riskFlags.length > 0 ? p.riskFlags.join('; ') : 'None'}
@@ -145,9 +145,9 @@ PROJECT: ${p.name} (ID: ${p.id})
 
   return `
 PORTFOLIO SUMMARY (${projectSummaries.length} Projects):
-- Total Budget: £${totalBudget.toFixed(1)}M
-- Total Spent: £${totalSpent.toFixed(1)}M (${Math.round(totalSpent/totalBudget*100)}% utilized)
-- Total Projected ROI: £${totalROI.toFixed(1)}M
+- Total Budget: $${totalBudget.toFixed(1)}M
+- Total Spent: $${totalSpent.toFixed(1)}M (${Math.round(totalSpent/totalBudget*100)}% utilized)
+- Total Projected ROI: $${totalROI.toFixed(1)}M
 - Status: ${greenCount} Green, ${amberCount} Amber, ${redCount} Red
 - At-Risk Projects: ${atRiskProjects.length}
 - Cross-Project Dependencies: ${criticalDeps.length}
@@ -207,9 +207,9 @@ CURRENT PROJECT IN VIEW:
 - Status: ${project.status.toUpperCase()}
 - Priority: ${project.priority}
 - Stage: ${project.stage}
-- Current Budget: £${project.budget}M
-- Spent: £${project.spent}M (${Math.round(project.spent/project.budget*100)}%)
-- Projected ROI: £${project.roi}M (${project.roiConf}% confidence)
+- Current Budget: $${project.budget}M
+- Spent: $${project.spent}M (${Math.round(project.spent/project.budget*100)}%)
+- Projected ROI: $${project.roi}M (${project.roiConf}% confidence)
 - FTEs: ${project.ftes}
 - Dependencies: ${project.deps.length > 0 ? project.deps.join(', ') : 'None'}
 - Risk Flags: ${project.riskFlags.length > 0 ? project.riskFlags.join('; ') : 'None'}`;

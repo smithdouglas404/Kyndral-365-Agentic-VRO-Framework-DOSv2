@@ -95,19 +95,19 @@ ENTERPRISE TRANSFORMATION PORTFOLIO EXECUTIVE SUMMARY
 =====================================================
 
 PORTFOLIO FINANCIALS:
-- Total Portfolio Budget: £${totalBudget.toFixed(1)}M across ${portfolioEpics.length} epics
-- Latest Financial Snapshot: ${latestFinancial ? `Actual: £${latestFinancial.actualSpend}M vs Planned: £${latestFinancial.plannedSpend}M (Variance: ${latestFinancial.variance > 0 ? '+' : ''}${latestFinancial.variance}%)` : 'N/A'}
+- Total Portfolio Budget: $${totalBudget.toFixed(1)}M across ${portfolioEpics.length} epics
+- Latest Financial Snapshot: ${latestFinancial ? `Actual: $${latestFinancial.actualSpend}M vs Planned: $${latestFinancial.plannedSpend}M (Variance: ${latestFinancial.variance > 0 ? '+' : ''}${latestFinancial.variance}%)` : 'N/A'}
 - Forecast Accuracy: ${latestFinancial?.forecastAccuracy || 'N/A'}%
 
 STRATEGIC THEMES (${strategicThemes.length}):
 ${strategicThemes.map(t => `  • ${t.name}: ${t.budgetAllocation}% budget allocation | Status: ${t.status.toUpperCase()}`).join('\n')}
 
 VALUE STREAMS (${valueStreams.length}):
-${valueStreams.map(vs => `  • ${vs.name}: £${vs.annualBudget}M annual budget | ${vs.linkedARTs.length} ARTs`).join('\n')}
+${valueStreams.map(vs => `  • ${vs.name}: $${vs.annualBudget}M annual budget | ${vs.linkedARTs.length} ARTs`).join('\n')}
 
 PORTFOLIO EPICS STATUS:
 - Total: ${portfolioEpics.length} | On Track: ${portfolioEpics.filter(e => e.status === 'on-track').length} | At Risk: ${atRiskEpics.length}
-${atRiskEpics.map(e => `  ⚠️ ${e.name}: £${e.estimatedCost}M | Status: ${e.status} | WSJF: ${e.wsjfScore}`).join('\n')}
+${atRiskEpics.map(e => `  ⚠️ ${e.name}: $${e.estimatedCost}M | Status: ${e.status} | WSJF: ${e.wsjfScore}`).join('\n')}
 
 PORTFOLIO OKRS:
 ${portfolioOKRs.map(o => {
@@ -138,8 +138,8 @@ ${arts.map(art => {
   return `  • ${art.name}: ${art.teams.length} teams | Current PI: ${pi?.name || 'N/A'} | Velocity: ${art.averageVelocity} pts`;
 }).join('\n')}
 
-DIVISION PERFORMANCE:
-${divisions.slice(0, 6).map(d => `  • ${d.name}: £${d.profit2024}m profit | ${d.changePercent >= 0 ? '+' : ''}${d.changePercent}% YoY`).join('\n')}
+SEGMENT PERFORMANCE (SEC Reportable Segments):
+${divisions.slice(0, 6).map(d => `  • ${d.name}: $${d.profit2024 >= 1000 ? (d.profit2024/1000).toFixed(1) + 'B' : d.profit2024 + 'M'} profit | ${d.changePercent >= 0 ? '+' : ''}${d.changePercent}% YoY`).join('\n')}
 `;
 }
 
@@ -172,7 +172,7 @@ Generate a JSON response with this exact structure:
   "keyRisks": [
     {
       "title": "Risk title",
-      "impact": "Quantified impact (e.g., '£2.5M potential value leakage')",
+      "impact": "Quantified impact (e.g., '$2.5M potential value leakage')",
       "mitigation": "Recommended mitigation action",
       "severity": "high" | "medium" | "low",
       "linkedEntity": "Related project or epic name"
@@ -181,7 +181,7 @@ Generate a JSON response with this exact structure:
   "opportunities": [
     {
       "title": "Opportunity title",
-      "potentialValue": "Quantified value (e.g., '£4M acceleration opportunity')",
+      "potentialValue": "Quantified value (e.g., '$4M acceleration opportunity')",
       "action": "Specific action to capture value",
       "linkedEntity": "Related project or epic name"
     }
@@ -249,7 +249,7 @@ Focus on the most critical items requiring executive attention.`;
       keyRisks: [
         {
           title: "Cross-team dependency bottleneck",
-          impact: "£3.2M potential delay cost across 4 initiatives",
+          impact: "$3.2M potential delay cost across 4 initiatives",
           mitigation: "Establish daily stand-up between Platform and Trading teams",
           severity: "high",
           linkedEntity: "Trading Platform Modernization"
@@ -263,7 +263,7 @@ Focus on the most critical items requiring executive attention.`;
         },
         {
           title: "Vendor delivery uncertainty",
-          impact: "£1.5M contingency may be required",
+          impact: "$1.5M contingency may be required",
           mitigation: "Activate parallel internal development track",
           severity: "medium",
           linkedEntity: "Private Markets Platform"
@@ -272,13 +272,13 @@ Focus on the most critical items requiring executive attention.`;
       opportunities: [
         {
           title: "Accelerate customer portal rollout",
-          potentialValue: "£4.2M in accelerated benefits",
+          potentialValue: "$4.2M in accelerated benefits",
           action: "Approve additional sprint capacity for Q2",
           linkedEntity: "Customer Portal Enhancement"
         },
         {
           title: "Consolidate risk tooling",
-          potentialValue: "£1.8M annual operational savings",
+          potentialValue: "$1.8M annual operational savings",
           action: "Initiate vendor rationalization assessment",
           linkedEntity: "Risk Engine Upgrade"
         }
@@ -286,7 +286,7 @@ Focus on the most critical items requiring executive attention.`;
       recommendations: [
         {
           action: "Convene dependency resolution session with Platform leads",
-          rationale: "3 blocked dependencies affecting £8M in projected value",
+          rationale: "3 blocked dependencies affecting $8M in projected value",
           priority: "urgent",
           actionRef: "REVIEW_DEPENDENCIES"
         },
