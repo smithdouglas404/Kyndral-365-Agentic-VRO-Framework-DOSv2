@@ -269,7 +269,7 @@ export default function SegmentPage() {
                   {(division.changePercent ?? 0) >= 0 ? "+" : ""}{division.changePercent ?? 0}% YoY
                 </Badge>
               </div>
-              <p className="text-gray-600 mt-1">President: {division.ceo}</p>
+              <p className="text-gray-600 mt-1">{division.ceo}</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Operating Profit 2024</p>
