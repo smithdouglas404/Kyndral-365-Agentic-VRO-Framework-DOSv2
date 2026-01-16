@@ -175,9 +175,53 @@ const SELF_APPROVED_ACTIONS = [
   { action: 'Automated compliance documentation', impact: 'Updated TCFD/SFDR records ahead of audit' },
 ];
 
+const PENDING_ALERTS = [
+  { title: 'Budget Variance Detected', description: 'Cost trending 8% above forecast. Review recommended.', severity: 'high', type: 'budget' },
+  { title: 'Schedule Risk Identified', description: 'Critical path task showing 3-day slip. Mitigation needed.', severity: 'critical', type: 'timeline' },
+  { title: 'Resource Constraint Alert', description: 'Team utilization at 115%. Burnout risk increasing.', severity: 'high', type: 'resource' },
+  { title: 'Quality Gate Warning', description: 'Test coverage dropped below 75% threshold.', severity: 'medium', type: 'quality' },
+  { title: 'Dependency Blocker', description: 'Upstream team delivery delayed. Replanning required.', severity: 'high', type: 'dependency' },
+  { title: 'Vendor Delivery Risk', description: 'Key vendor showing signs of delay. Contingency recommended.', severity: 'medium', type: 'risk' },
+  { title: 'Compliance Gap Detected', description: 'Documentation incomplete for upcoming audit.', severity: 'critical', type: 'quality' },
+];
+
 let simulationInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
 let selfApprovedCounter = 0;
+let pendingAlertCounter = 0;
+
+async function maybeCreatePendingAlert(): Promise<void> {
+  pendingAlertCounter++;
+  if (pendingAlertCounter % 8 !== 0) return; // Create pending alert every ~96 seconds
+  
+  const agent = pickRandom(AGENTS);
+  const project = pickRandom(PROJECTS);
+  const alertTemplate = pickRandom(PENDING_ALERTS);
+  
+  const intervention: InsertIntervention = {
+    type: alertTemplate.type,
+    severity: alertTemplate.severity as 'critical' | 'high' | 'medium' | 'low',
+    title: alertTemplate.title,
+    description: `${alertTemplate.description} Detected in ${project}.`,
+    projectId: `proj-${project.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    projectName: project,
+    confidence: String((0.75 + Math.random() * 0.2).toFixed(2)),
+    suggestedAction: `Review and address ${alertTemplate.type} issue`,
+    impact: `Potential impact to ${project} delivery`,
+    status: 'pending',
+    agentSource: agent.name,
+    isAutonomous: 'true',
+    selfApproved: 'false',
+    triggerSource: 'metric_breach',
+  };
+  
+  try {
+    await storage.createIntervention(intervention);
+    console.log(`[AgentSimulation] Created PENDING alert: ${agent.name} - ${alertTemplate.title}`);
+  } catch (error) {
+    console.error('[AgentSimulation] Error creating pending alert:', error);
+  }
+}
 
 async function maybeCreateSelfApprovedIntervention(): Promise<void> {
   selfApprovedCounter++;
@@ -232,6 +276,9 @@ export async function startAgentSimulation(intervalMs: number = 12000): Promise<
       
       // Occasionally create a self-approved intervention
       await maybeCreateSelfApprovedIntervention();
+      
+      // Occasionally create a pending alert (triggers floating banner)
+      await maybeCreatePendingAlert();
     } catch (error) {
       console.error('[AgentSimulation] Error generating activity:', error);
     }

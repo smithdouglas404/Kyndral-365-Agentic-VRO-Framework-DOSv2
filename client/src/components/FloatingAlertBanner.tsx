@@ -51,13 +51,14 @@ export function FloatingAlertBanner() {
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
-  // Show on dashboard and segment pages
+  // Show on dashboard, segment, and command center pages
   const shouldShowBanner = location && (
     location === '/dashboard' || 
     location.startsWith('/dashboard/') || 
     location.startsWith('/segment/') ||
     location.startsWith('/division/') ||
-    location.startsWith('/project/')
+    location.startsWith('/project/') ||
+    location === '/command-center'
   );
 
   // Poll Command Center for new interventions
