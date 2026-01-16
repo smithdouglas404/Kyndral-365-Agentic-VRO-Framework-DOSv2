@@ -321,7 +321,7 @@ export default function GovernanceDashboard() {
                 <p className="text-xs text-gray-500 mt-2">Actively monitored</p>
               </CardContent>
             </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-cro')} data-testid="metric-cro">
+            <Card data-testid="metric-cro">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
