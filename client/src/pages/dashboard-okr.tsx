@@ -374,7 +374,7 @@ export default function OKRDashboard() {
 
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-lg">Group Function OKRs Overview</CardTitle>
+              <CardTitle className="text-lg">Reportable Segments OKRs Overview</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

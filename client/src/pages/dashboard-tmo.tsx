@@ -272,7 +272,7 @@ function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiativ
 
               <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-4">
-                  <span><strong>Group Function:</strong> {initiative.division}</span>
+                  <span><strong>Segment:</strong> {initiative.division}</span>
                   <span><strong>Owner:</strong> {initiative.owner}</span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -444,7 +444,7 @@ export default function TMODashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Group Function Adoption Rates</span>
+                  <span>Segment Adoption Rates</span>
                   <Badge variant="outline" className="text-xs">From NextEra Business Units</Badge>
                 </CardTitle>
               </CardHeader>
@@ -461,7 +461,7 @@ export default function TMODashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Active Change Initiatives</span>
-                  <Badge variant="outline" className="text-xs">From Group Function Projects</Badge>
+                  <Badge variant="outline" className="text-xs">From Segment Projects</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

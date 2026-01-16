@@ -91,7 +91,7 @@ export function PMOPipeline({ onDrillDown }: PMOPipelineProps) {
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
         <div className="flex items-center gap-2 mb-2">
           <Building2 className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Coverage by Group Function</span>
+          <span className="text-sm font-medium text-gray-700">Coverage by Reportable Segment</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {groupFunctions.map(([fn, count]) => (
