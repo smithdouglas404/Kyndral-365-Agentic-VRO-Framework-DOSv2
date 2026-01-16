@@ -278,6 +278,30 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 
+// Project Templates - Stores reusable project templates for the ingestion wizard
+export const projectTemplates = pgTable("project_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(), // URL-friendly identifier (e.g., "FPL-Grid-Modernization")
+  bu: text("bu"), // Business unit
+  division: text("division"),
+  description: text("description"),
+  category: text("category"), // FPL, NEER, Corporate
+  templateData: text("template_data").notNull(), // Full JSON template
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertProjectTemplateSchema = createInsertSchema(projectTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProjectTemplate = z.infer<typeof insertProjectTemplateSchema>;
+export type ProjectTemplate = typeof projectTemplates.$inferSelect;
+
 export const features = pgTable("features", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   projectId: varchar("project_id").notNull(),
