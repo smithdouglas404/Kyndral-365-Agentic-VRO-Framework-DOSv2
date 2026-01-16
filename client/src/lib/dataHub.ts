@@ -681,7 +681,10 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
     return getTopLevelMetricDrilldown(metricId, events);
   }
   
-  const [agentId, metricType] = metricId.split('-') as [AgentType, string];
+  // Handle compound metric types like 'okr-at-risk', 'okr-on-track'
+  const parts = metricId.split('-');
+  const agentId = parts[0] as AgentType;
+  const metricType = parts.slice(1).join('-'); // Join the rest for compound types like 'at-risk'
   const config = AGENT_CONFIG[agentId];
   
   // Guard against invalid agentId
@@ -821,6 +824,60 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
         'Escalations': agentData.metrics.atRiskProjects
       };
       relatedEntities = agentData.risks.slice(0, 5).map(r => ({ type: 'risk', id: r.id, name: r.category }));
+      break;
+    case 'at-risk':
+      entityName = `${config.name} - At-Risk Items`;
+      const atRiskProjects = agentData.projects.filter(p => p.status === 'red' || p.status === 'amber');
+      const atRiskPrograms = agentData.programs.filter(p => p.valueStatus === 'blocked' || p.valueStatus === 'delayed');
+      metrics = {
+        'At-Risk Projects': atRiskProjects.length,
+        'At-Risk Programs': atRiskPrograms.length,
+        'Critical Issues': agentData.risks.filter(r => r.severity === 'critical').length,
+        'Needs Immediate Action': atRiskProjects.filter(p => p.status === 'red').length
+      };
+      relatedEntities = [
+        ...atRiskProjects.slice(0, 3).map(p => ({ type: 'project', id: p.id, name: p.name })),
+        ...atRiskPrograms.slice(0, 3).map(p => ({ type: 'program', id: p.id, name: p.name }))
+      ];
+      break;
+    case 'on-track':
+      entityName = `${config.name} - On-Track Items`;
+      const onTrackProjects = agentData.projects.filter(p => p.status === 'green');
+      const onTrackPrograms = agentData.programs.filter(p => p.valueStatus === 'on-track' || p.valueStatus === 'accelerating');
+      metrics = {
+        'On-Track Projects': onTrackProjects.length,
+        'On-Track Programs': onTrackPrograms.length,
+        'Healthy Rate': `${Math.round((onTrackProjects.length / Math.max(agentData.projects.length, 1)) * 100)}%`,
+        'Accelerating': agentData.programs.filter(p => p.valueStatus === 'accelerating').length
+      };
+      relatedEntities = [
+        ...onTrackProjects.slice(0, 3).map(p => ({ type: 'project', id: p.id, name: p.name })),
+        ...onTrackPrograms.slice(0, 3).map(p => ({ type: 'program', id: p.id, name: p.name }))
+      ];
+      break;
+    case 'ahead':
+      entityName = `${config.name} - Ahead of Schedule`;
+      const aheadPrograms = agentData.programs.filter(p => p.valueStatus === 'accelerating');
+      metrics = {
+        'Programs Ahead': aheadPrograms.length,
+        'Value Accelerated': formatValueInMillions(aheadPrograms.reduce((sum, p) => sum + p.valueRealized, 0)),
+        'Avg Strategic Alignment': `${Math.round(aheadPrograms.reduce((sum, p) => sum + p.strategicAlignment, 0) / Math.max(aheadPrograms.length, 1))}%`,
+        'High Performers': aheadPrograms.filter(p => p.strategicAlignment > 90).length
+      };
+      relatedEntities = aheadPrograms.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
+      break;
+    case 'initiatives':
+      entityName = `${config.name} - Linked Initiatives`;
+      metrics = {
+        'Total Initiatives': agentData.projects.length + agentData.programs.length,
+        'Projects': agentData.projects.length,
+        'Programs': agentData.programs.length,
+        'Value Tracked': formatValueInMillions(agentData.metrics.totalValue)
+      };
+      relatedEntities = [
+        ...agentData.projects.slice(0, 3).map(p => ({ type: 'project', id: p.id, name: p.name })),
+        ...agentData.programs.slice(0, 3).map(p => ({ type: 'program', id: p.id, name: p.name }))
+      ];
       break;
     default:
       entityName = `${config.name} - ${metricType.charAt(0).toUpperCase() + metricType.slice(1)}`;
