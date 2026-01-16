@@ -894,25 +894,42 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // All projects with counts (enriched list)
+  // All projects with counts and full related data (enriched list)
   app.get("/api/projects/enriched", async (req, res) => {
     try {
       const allProjects = await storage.getProjects();
+      const allAlerts = await storage.getAlerts();
+      const allInterventions = await storage.getInterventions();
+      
       const enrichedList = await Promise.all(allProjects.map(async (p) => {
-        const [feats, strs, tsks, ress, deps] = await Promise.all([
+        const [feats, strs, tsks, ress, deps, mils] = await Promise.all([
           storage.getFeatures(p.id),
           storage.getStoriesByProject(p.id),
           storage.getTasksByProject(p.id),
           storage.getResources(p.id),
-          storage.getDependencies(p.id)
+          storage.getDependencies(p.id),
+          storage.getMilestones(p.id)
         ]);
+        
+        const projectAlerts = allAlerts.filter(a => a.sourceEntityId === p.id);
+        const projectInterventions = allInterventions.filter(i => i.projectId === p.id);
+        
+        const upcomingMilestones = mils
+          .filter(m => m.status !== 'completed')
+          .sort((a, b) => new Date(a.targetDate || 0).getTime() - new Date(b.targetDate || 0).getTime());
+        const nextMilestone = upcomingMilestones[0]?.name || '';
+        
         return {
           ...p,
           featureCount: feats.length,
           storyCount: strs.length,
           taskCount: tsks.length,
           resourceCount: ress.length,
-          dependencyCount: deps.length
+          dependencyCount: deps.length,
+          alerts: projectAlerts,
+          interventions: projectInterventions,
+          dependencies: deps,
+          nextMilestone
         };
       }));
       res.json(enrichedList);

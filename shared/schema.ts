@@ -261,6 +261,12 @@ export const projects = pgTable("projects", {
   budgetSpent: text("budget_spent"),
   budgetTotal: text("budget_total"),
   budgetUnit: text("budget_unit").default("$m"),
+  okrObjective: text("okr_objective"),
+  okrKeyResult: text("okr_key_result"),
+  okrProgress: integer("okr_progress"),
+  aiRecommendation: text("ai_recommendation"),
+  timelineElapsed: integer("timeline_elapsed"),
+  timelineTotal: integer("timeline_total"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

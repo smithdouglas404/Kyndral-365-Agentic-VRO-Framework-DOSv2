@@ -32,9 +32,47 @@ export interface APIProject {
   taskCount: number;
   resourceCount: number;
   dependencyCount: number;
+  okrObjective?: string;
+  okrKeyResult?: string;
+  okrProgress?: number;
+  aiRecommendation?: string;
+  timelineElapsed?: number;
+  timelineTotal?: number;
+  alerts?: any[];
+  interventions?: any[];
+  dependencies?: any[];
+  nextMilestone?: string;
 }
 
 function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
+  // Map alerts to aiSignals format - matches AISignal interface
+  const aiSignals = (p.alerts || []).map(alert => ({
+    type: mapAlertCategory(alert.category),
+    message: alert.message || alert.title,
+    confidence: alert.metadata?.confidence || 75,
+    dataSource: alert.source || 'AI Agent'
+  }));
+
+  // Map interventions to proactiveActions format - matches ProactiveAction interface
+  const proactiveActions = (p.interventions || []).map((inv, idx) => ({
+    id: inv.id || `action-${idx}`,
+    action: inv.suggestedAction || inv.title,
+    impact: inv.impact || '',
+    urgency: mapUrgency(inv.severity),
+    type: mapInterventionType(inv.type),
+    isAutonomous: inv.isAutonomous || false
+  }));
+
+  // Map dependencies - matches ProjectDependency interface
+  const dependencies = (p.dependencies || []).map(dep => ({
+    projectId: dep.targetProjectId || dep.projectId || '',
+    projectName: dep.name,
+    type: mapDependencyType(dep.dependencyType),
+    health: mapHealthStatus(dep.status),
+    description: dep.description || `Dependency on ${dep.name}`,
+    impactIfDelayed: dep.impactIfDelayed
+  }));
+
   return {
     id: p.id,
     name: p.name,
@@ -43,17 +81,21 @@ function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
     expectedROI: p.expectedRoi,
     roiValue: parseInt(p.roiValue) || 0,
     priority: p.priority,
-    aiRecommendation: "",
+    aiRecommendation: p.aiRecommendation || "",
     status: p.status,
     budget: {
       spent: parseInt(p.budgetSpent) || 0,
       total: parseInt(p.budgetTotal) || 0,
       unit: p.budgetUnit || "$m",
     },
-    timeline: { elapsed: 0, total: 0, unit: "months" },
-    deliverables: { completed: 0, total: 0 },
+    timeline: { 
+      elapsed: p.timelineElapsed || 0, 
+      total: p.timelineTotal || 0, 
+      unit: "months" 
+    },
+    deliverables: { completed: p.featureCount || 0, total: (p.featureCount || 0) + 2 },
     risks: [],
-    nextMilestone: "",
+    nextMilestone: p.nextMilestone || "",
     safe: {
       velocity: parseInt(p.velocity) || 0,
       predictability: parseInt(p.predictability) || 0,
@@ -62,19 +104,56 @@ function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
       epicId: p.epicId,
       epicName: p.epicName,
       epicProgress: parseInt(p.epicProgress) || 0,
+      okr: p.okrObjective ? {
+        objective: p.okrObjective,
+        keyResult: p.okrKeyResult || '',
+        progress: p.okrProgress || 0
+      } : undefined,
       piTrend: [],
     },
     safeStage: p.safeStage as any,
-    aiSignals: [],
-    proactiveActions: [],
+    aiSignals,
+    proactiveActions,
     trendData: [],
-    dependencies: [],
+    dependencies,
     artName: p.artName,
     portfolioTheme: p.portfolioTheme,
     currentPI: parseInt(p.currentPi?.replace(/\D/g, "") || "0") || 0,
     totalPIs: parseInt(p.totalPis) || 0,
     velocity: parseInt(p.velocity) || 0,
   };
+}
+
+function mapUrgency(severity: string): 'immediate' | 'this-week' | 'this-month' {
+  if (severity === 'critical' || severity === 'high') return 'immediate';
+  if (severity === 'medium') return 'this-week';
+  return 'this-month';
+}
+
+function mapAlertCategory(category: string): 'warning' | 'opportunity' | 'insight' | 'prediction' {
+  if (category === 'risk') return 'warning';
+  if (category === 'opportunity') return 'opportunity';
+  if (category === 'insight') return 'insight';
+  return 'insight';
+}
+
+function mapInterventionType(type: string): 'mitigate' | 'accelerate' | 'investigate' | 'escalate' {
+  if (type === 'risk' || type === 'quality') return 'mitigate';
+  if (type === 'budget') return 'investigate';
+  if (type === 'timeline') return 'accelerate';
+  return 'investigate';
+}
+
+function mapDependencyType(type: string): 'blocks' | 'blocked-by' | 'related' {
+  if (type === 'blocked-by') return 'blocked-by';
+  if (type === 'blocks') return 'blocks';
+  return 'related';
+}
+
+function mapHealthStatus(status: string): 'green' | 'yellow' | 'red' {
+  if (status === 'green') return 'green';
+  if (status === 'red') return 'red';
+  return 'yellow'; // amber and yellow both map to yellow
 }
 
 export function useEnrichedProjects() {
