@@ -541,8 +541,29 @@ export default function SegmentPage() {
                 {divisionOkrs.map((okr, i) => {
                   const okrColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
                   const okrColor = okrColors[i % okrColors.length];
+                  const keyResults = parseKeyResults(okr.keyResults);
                   const overallProgress = Math.round(
-                    parseKeyResults(okr.keyResults).reduce((sum: number, kr: ParsedKeyResult) => sum + (kr.progress / kr.target) * 100, 0) / (parseKeyResults(okr.keyResults).length || 1)
+                    keyResults.reduce((sum: number, kr: ParsedKeyResult) => {
+                      // Detect reduction metrics (where current > target means we haven't reached goal yet)
+                      // E.g., "Reduce outage duration" where current=18, target=5 (lower is better)
+                      const isReductionMetric = kr.result.toLowerCase().includes('reduce') || 
+                                                kr.result.toLowerCase().includes('decrease') ||
+                                                kr.result.toLowerCase().includes('lower');
+                      
+                      let progress: number;
+                      if (isReductionMetric && kr.progress > kr.target) {
+                        // For reduction metrics where current > target, calculate inverse progress
+                        // Assume baseline is 2x the current value for rough progress calculation
+                        const baseline = kr.progress * 2;
+                        const reduction = baseline - kr.progress;
+                        const targetReduction = baseline - kr.target;
+                        progress = Math.min(100, (reduction / targetReduction) * 100);
+                      } else {
+                        // Normal metric: higher is better
+                        progress = Math.min(100, (kr.progress / kr.target) * 100);
+                      }
+                      return sum + progress;
+                    }, 0) / (keyResults.length || 1)
                   );
                   const linkedKpiCount = divisionKpis.filter((_, ki) => ki % divisionOkrs.length === i).length;
                   
@@ -588,8 +609,23 @@ export default function SegmentPage() {
                       </CardHeader>
                       <CardContent className="pt-0">
                         <div className="space-y-3">
-                          {parseKeyResults(okr.keyResults).map((kr: ParsedKeyResult, j: number) => {
-                            const krProgress = Math.round((kr.progress / kr.target) * 100);
+                          {keyResults.map((kr: ParsedKeyResult, j: number) => {
+                            // Detect reduction metrics
+                            const isReductionMetric = kr.result.toLowerCase().includes('reduce') || 
+                                                      kr.result.toLowerCase().includes('decrease') ||
+                                                      kr.result.toLowerCase().includes('lower');
+                            
+                            let krProgress: number;
+                            if (isReductionMetric && kr.progress > kr.target) {
+                              // For reduction metrics: show inverse progress
+                              const baseline = kr.progress * 2;
+                              const reduction = baseline - kr.progress;
+                              const targetReduction = baseline - kr.target;
+                              krProgress = Math.round(Math.min(100, (reduction / targetReduction) * 100));
+                            } else {
+                              krProgress = Math.round(Math.min(100, (kr.progress / kr.target) * 100));
+                            }
+                            
                             return (
                               <div key={j} className="p-3 bg-gray-50 rounded-lg">
                                 <div className="flex justify-between items-center mb-2">
@@ -601,7 +637,7 @@ export default function SegmentPage() {
                                     {kr.progress}/{kr.target} {kr.unit}
                                   </Badge>
                                 </div>
-                                <Progress value={Math.min(100, krProgress)} className="h-2" />
+                                <Progress value={krProgress} className="h-2" />
                               </div>
                             );
                           })}
