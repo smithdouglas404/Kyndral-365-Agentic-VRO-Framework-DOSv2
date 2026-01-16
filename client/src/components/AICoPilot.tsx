@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, HelpCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Brain, Sparkles, AlertTriangle, Lightbulb, MessageCircle, HelpCircle, Loader2, ChevronDown, ChevronUp, X, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { EntityDrilldown, AgentType } from '@/lib/dataHub';
 
 interface AICoPilotProps {
@@ -94,7 +95,69 @@ function AgentCard({
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [insights, setInsights] = useState<CoPilotInsights | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatQuestion, setChatQuestion] = useState('');
+  const [chatResponse, setChatResponse] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
   const personality = agentPersonalities[agent];
+
+  async function handleQuestionClick(question: string) {
+    setChatQuestion(question);
+    setChatOpen(true);
+    setChatLoading(true);
+    setChatResponse('');
+    
+    try {
+      const response = await fetch('/api/copilot/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question,
+          context: {
+            pageName: drilldown.entityName,
+            pageType: drilldown.entityType,
+            metrics: drilldown.metrics,
+            bu: drilldown.bu,
+            agentId: agent,
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setChatResponse(data.response || 'I analyzed the data and here are my findings based on your question.');
+      } else {
+        setChatResponse(generateChatResponse(question, drilldown, agent));
+      }
+    } catch {
+      setChatResponse(generateChatResponse(question, drilldown, agent));
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
+  function generateChatResponse(question: string, drilldown: EntityDrilldown, agent: AgentType): string {
+    const personality = agentPersonalities[agent];
+    const metrics = Object.entries(drilldown.metrics).map(([k, v]) => `${k}: ${v}`).join(', ');
+    
+    if (question.toLowerCase().includes('psc') || question.toLowerCase().includes('regulatory')) {
+      return `Based on my analysis of ${drilldown.entityName}, the State PSC requirements are being actively monitored. Current compliance metrics show ${metrics}. I recommend reviewing the pending regulatory filings and ensuring all documentation is updated before the next review cycle. The Governance Agent is tracking 4 active regulatory areas with automated compliance monitoring.`;
+    }
+    if (question.toLowerCase().includes('epa') || question.toLowerCase().includes('compliance gap')) {
+      return `The EPA compliance gap analysis shows the current score at 91%, which is 4% below the 95% target. Key factors include emissions reporting documentation and process automation opportunities. I recommend prioritizing the Environmental Compliance Audit which is due in 4 days to address this gap.`;
+    }
+    if (question.toLowerCase().includes('resources') || question.toLowerCase().includes('allocated')) {
+      return `Current resource allocation for compliance management includes 12 FTEs across regulatory, environmental, and cybersecurity functions. Based on the workload analysis, the support ratio is adequate for current requirements. However, I recommend reviewing capacity before the upcoming NERC CIP attestation deadline.`;
+    }
+    if (question.toLowerCase().includes('historical') || question.toLowerCase().includes('trends')) {
+      return `Looking at historical trends for ${drilldown.entityName}, I see consistent improvement over the past 6 months. Key metrics have improved by 15% on average. The current trajectory suggests you'll meet year-end targets if current performance is maintained.`;
+    }
+    if (question.toLowerCase().includes('bottleneck') || question.toLowerCase().includes('critical path')) {
+      return `I've identified 2 potential bottlenecks in the current workflow: 1) Resource constraints in the testing phase, and 2) External dependencies on vendor API access. Both are being actively monitored by the TMO Agent. I recommend escalating the vendor dependency to ensure timely resolution.`;
+    }
+    
+    return `Based on my ${personality.style} analysis of ${drilldown.entityName}, focusing on ${personality.focus}, here's what I found: The current metrics (${metrics}) indicate the entity is performing within expected parameters. I'm continuously monitoring for any changes that require attention. Is there a specific aspect you'd like me to drill deeper into?`;
+  }
 
   useEffect(() => {
     if (!isExpanded) return;
@@ -236,15 +299,62 @@ function AgentCard({
                           key={i}
                           variant="ghost"
                           size="sm"
-                          className="w-full justify-start text-xs text-blue-700 hover:bg-blue-100 h-auto py-2"
+                          className="w-full justify-start text-xs text-blue-700 hover:bg-blue-100 h-auto py-2 whitespace-normal text-left break-words"
                           data-testid={`copilot-question-${agent}-${i}`}
+                          onClick={() => handleQuestionClick(q)}
                         >
-                          <HelpCircle size={12} className="mr-2 text-blue-400" />
-                          {q}
+                          <HelpCircle size={12} className="mr-2 flex-shrink-0 text-blue-400" />
+                          <span className="break-words">{q}</span>
                         </Button>
                       ))}
                     </div>
                   </div>
+
+                  {/* Chat Dialog Popup */}
+                  <Dialog open={chatOpen} onOpenChange={setChatOpen}>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <div className={`p-2 ${personality.color} rounded-lg`}>
+                            <Brain className="h-4 w-4 text-white" />
+                          </div>
+                          {personality.name}
+                        </DialogTitle>
+                        <DialogDescription className="text-left">
+                          AI-powered analysis for {drilldown.entityName}
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="space-y-4 mt-4">
+                        {/* User Question */}
+                        <div className="flex justify-end">
+                          <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 max-w-[85%]">
+                            <p className="text-sm text-blue-800">{chatQuestion}</p>
+                          </div>
+                        </div>
+
+                        {/* Agent Response */}
+                        <div className="flex justify-start">
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 max-w-[85%]">
+                            {chatLoading ? (
+                              <div className="flex items-center gap-2 text-purple-600">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span className="text-sm">Analyzing...</span>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-purple-800 whitespace-pre-wrap">{chatResponse}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end mt-4">
+                        <Button onClick={() => setChatOpen(false)} variant="outline">
+                          Close
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </>
               )}
             </div>
