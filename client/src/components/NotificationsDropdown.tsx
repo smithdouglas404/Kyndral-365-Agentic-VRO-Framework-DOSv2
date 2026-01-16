@@ -1,9 +1,10 @@
-import { Bell, Check, X, AlertCircle, CheckCircle, Info, AlertTriangle, ExternalLink } from "lucide-react";
+import { Bell, Check, X, AlertCircle, CheckCircle, Info, AlertTriangle, ExternalLink, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDismissNotification, type Notification } from "@/hooks/useNotifications";
+import { useWebSocketContext } from "@/contexts/WebSocketContext";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
@@ -112,6 +113,7 @@ export function NotificationsDropdown() {
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const dismiss = useDismissNotification();
+  const { isConnected } = useWebSocketContext();
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -128,11 +130,26 @@ export function NotificationsDropdown() {
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
+          {isConnected && (
+            <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-white" title="Live updates active" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold text-sm">Notifications</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">Notifications</h3>
+            {isConnected ? (
+              <span className="flex items-center gap-1 text-[10px] text-green-600">
+                <Wifi className="h-3 w-3" />
+                Live
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                <WifiOff className="h-3 w-3" />
+              </span>
+            )}
+          </div>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 

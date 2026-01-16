@@ -8,6 +8,7 @@ import { generateExecutiveInsights, refreshInsights } from "./executiveInsights"
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
+import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
@@ -1068,6 +1069,18 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.post("/api/interventions", async (req, res) => {
     try {
       const intervention = await storage.createIntervention(req.body);
+      
+      if (intervention.severity === 'critical' || intervention.severity === 'high') {
+        broadcastCriticalAlert({
+          id: intervention.id,
+          title: intervention.title,
+          message: intervention.description,
+          severity: intervention.severity as 'critical' | 'high' | 'medium' | 'low',
+          projectName: intervention.projectName || undefined,
+          agentSource: intervention.agentSource || undefined,
+        });
+      }
+      
       res.json(intervention);
     } catch (error: any) {
       console.error("Create intervention error:", error);

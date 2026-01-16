@@ -12,6 +12,8 @@ import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
 import { AlertBubble } from "@/components/AlertBubble";
 import { AskPMChat } from "@/components/AskPMChat";
+import { RealTimeNotifications } from "@/components/RealTimeNotifications";
+import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import { useLiveMetrics, useCrossAgentFeed } from "@/hooks/useAgentData";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -194,20 +196,23 @@ function GlobalAIOverlay() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SimulationProvider>
-        <EventSimulationProvider>
-          <PageContextProvider>
-            <TooltipProvider>
-              <Toaster />
-              <FloatingAlertBanner />
-              <LiveEventDrawer />
-              <GlobalAIOverlay />
-              <AskPMChat />
-              <Router />
-            </TooltipProvider>
-          </PageContextProvider>
-        </EventSimulationProvider>
-      </SimulationProvider>
+      <WebSocketProvider>
+        <SimulationProvider>
+          <EventSimulationProvider>
+            <PageContextProvider>
+              <TooltipProvider>
+                <Toaster />
+                <RealTimeNotifications />
+                <FloatingAlertBanner />
+                <LiveEventDrawer />
+                <GlobalAIOverlay />
+                <AskPMChat />
+                <Router />
+              </TooltipProvider>
+            </PageContextProvider>
+          </EventSimulationProvider>
+        </SimulationProvider>
+      </WebSocketProvider>
     </QueryClientProvider>
   );
 }
