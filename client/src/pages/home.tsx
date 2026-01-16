@@ -16,13 +16,6 @@ export default function Home() {
           <Link href="/">
             <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" />
           </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/dashboard" className="text-sm font-medium text-[#0072CE]">Dashboard</Link>
-            <Link href="/command-center" className="text-sm font-medium text-[#0072CE] flex items-center gap-1">
-              <Brain className="h-4 w-4" />
-              Command Center
-            </Link>
-          </nav>
         </div>
       </header>
 
