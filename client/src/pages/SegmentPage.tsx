@@ -81,9 +81,9 @@ const segmentNameMapping: Record<string, string[]> = {
 
 // Segment ID to Portfolio ID mapping for VRO/PMO metrics
 const segmentToPortfolioMapping: Record<string, string> = {
-  'fpl': 'portfolio-fpl',
-  'neer': 'portfolio-neer',
-  'corporate-other': 'portfolio-corp',
+  'fpl': 'portfolio-ir',
+  'neer': 'portfolio-am',
+  'corporate-other': 'portfolio-ci',
 };
 
 // Helper to parse keyResults JSON string
