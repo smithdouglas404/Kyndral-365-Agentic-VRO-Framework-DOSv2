@@ -879,6 +879,53 @@ export function getMetricDrilldown(metricId: string, events: SimulationEvent[] =
         ...agentData.programs.slice(0, 3).map(p => ({ type: 'program', id: p.id, name: p.name }))
       ];
       break;
+    case 'spend':
+      entityName = `${config.name} - YTD Spend Analysis`;
+      const totalSpent = agentData.projects.reduce((sum, p) => sum + p.budget.spent, 0);
+      const totalBudgetSpend = agentData.projects.reduce((sum, p) => sum + p.budget.total, 0);
+      metrics = {
+        'YTD Spend': formatValueInMillions(totalSpent),
+        'Budget Allocation': formatValueInMillions(totalBudgetSpend),
+        'Utilization Rate': `${Math.round((totalSpent / Math.max(totalBudgetSpend, 1)) * 100)}%`,
+        'Projects Tracked': agentData.projects.length
+      };
+      relatedEntities = agentData.projects.slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'forecast':
+      entityName = `${config.name} - Forecast Analysis`;
+      const budgetTotal = agentData.projects.reduce((sum, p) => sum + p.budget.total, 0);
+      const spentToDate = agentData.projects.reduce((sum, p) => sum + p.budget.spent, 0);
+      const projectedSpend = Math.round(spentToDate * 1.15);
+      const variance = ((projectedSpend - budgetTotal) / Math.max(budgetTotal, 1)) * 100;
+      metrics = {
+        'Forecast Total': formatValueInMillions(projectedSpend),
+        'Budget Total': formatValueInMillions(budgetTotal),
+        'Variance': `${variance > 0 ? '+' : ''}${variance.toFixed(1)}%`,
+        'Projects at Risk': agentData.projects.filter(p => p.status !== 'green').length
+      };
+      relatedEntities = agentData.projects.filter(p => p.status !== 'green').slice(0, 5).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      break;
+    case 'savings':
+      entityName = `${config.name} - Savings Opportunities`;
+      const savingsIdentified = agentData.programs.reduce((sum, p) => sum + (p.valueRealized * 0.15), 0);
+      metrics = {
+        'Savings Identified': formatValueInMillions(savingsIdentified),
+        'Opportunities': agentData.programs.length,
+        'Avg Confidence': `${agentData.metrics.avgConfidence}%`,
+        'Validated': agentData.programs.filter(p => p.valueStatus === 'on-track').length
+      };
+      relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
+      break;
+    case 'profit':
+      entityName = `${config.name} - Group Profit Overview`;
+      metrics = {
+        'Group Profit': formatValueInMillions(agentData.metrics.totalValue),
+        'YoY Growth': '+7%',
+        'Segments Contributing': 3,
+        'On-Track Programs': agentData.programs.filter(p => p.valueStatus === 'on-track' || p.valueStatus === 'accelerating').length
+      };
+      relatedEntities = agentData.programs.slice(0, 5).map(p => ({ type: 'program', id: p.id, name: p.name }));
+      break;
     default:
       entityName = `${config.name} - ${metricType.charAt(0).toUpperCase() + metricType.slice(1)}`;
       metrics = {

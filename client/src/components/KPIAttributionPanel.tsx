@@ -209,6 +209,15 @@ export function KPIAttributionPanel() {
     }
   };
 
+  const formatValueWithUnit = (value: number, unit: string): string => {
+    if (unit === '$m' || unit === '$M') {
+      return `$${value}M`;
+    } else if (unit.startsWith('$')) {
+      return `$${value}${unit.slice(1).toUpperCase()}`;
+    }
+    return `${value}${unit}`;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -271,12 +280,12 @@ export function KPIAttributionPanel() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Progress</span>
-                        <span className="font-semibold">{kpi.current}{kpi.unit} / {kpi.target}{kpi.unit}</span>
+                        <span className="font-semibold">{formatValueWithUnit(kpi.current, kpi.unit)} / {formatValueWithUnit(kpi.target, kpi.unit)}</span>
                       </div>
                       <Progress value={getProgressPercentage(kpi)} />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Baseline: {kpi.baseline}{kpi.unit}</span>
-                        <span>Target: {kpi.target}{kpi.unit}</span>
+                        <span>Baseline: {formatValueWithUnit(kpi.baseline, kpi.unit)}</span>
+                        <span>Target: {formatValueWithUnit(kpi.target, kpi.unit)}</span>
                       </div>
                     </div>
 
