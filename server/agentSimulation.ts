@@ -12,13 +12,14 @@ const AGENTS = [
 ];
 
 const PROJECTS = [
-  'Enterprise Data Platform',
-  'Climate Analytics Platform', 
-  'Customer 360 Platform',
-  'Digital Transformation Program',
-  'Regulatory Compliance Suite',
-  'API Gateway Modernization',
-  'Cloud Migration Phase 2',
+  'FPL Grid Modernization & Automation',
+  'FPL Advanced Metering Infrastructure 2.0', 
+  'FPL SolarTogether Phase III',
+  'FPL Storm Protection Plan',
+  'NEER Wind Portfolio Expansion',
+  'NEER Battery Energy Storage Systems',
+  'NextEra Cybersecurity Enhancement',
+  'Google Data Center Partnership',
 ];
 
 const WORKFLOW_TEMPLATES = {
