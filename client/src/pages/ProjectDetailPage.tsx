@@ -26,7 +26,8 @@ import {
   Activity,
   ExternalLink,
   Loader2,
-  X
+  X,
+  Zap
 } from "lucide-react";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { Button } from "@/components/ui/button";
@@ -183,9 +184,55 @@ export default function ProjectDetailPage() {
         impactIfDelayed: d.impactIfDelayed || ''
       })),
       riskFlags: (fullProject.risks || []).map((r: any) => r.description || r.name),
-      aiRecommendations: [`Expected ROI: ${p.expectedRoi}`],
+      aiRecommendations: [
+        `Expected ROI: ${p.expectedRoi}`,
+        `Consider accelerating ${p.name?.includes('Solar') ? 'interconnection' : 'procurement'} timeline to capture early value`,
+        `Resource optimization opportunity: consolidate overlapping skillsets across teams`
+      ],
       vroInsights: [`Value aligned with ${p.portfolioTheme} strategic priorities`],
-      pmoDataFeeds: [`Budget utilization: ${Math.round((budgetSpent / budgetTotal) * 100)}%`]
+      pmoDataFeeds: [`Budget utilization: ${Math.round((budgetSpent / budgetTotal) * 100)}%`],
+      epicProgress: parseInt(p.epicProgress) || 55,
+      flowEfficiency: parseInt(p.flowEfficiency) || 68,
+      okrs: [
+        {
+          objective: p.name?.includes('Solar') ? 'Achieve 1.5GW solar deployment' : 
+                     p.name?.includes('Battery') ? 'Deploy 2GW battery storage capacity' :
+                     p.name?.includes('Wind') ? 'Complete turbine repowering for 3GW fleet' :
+                     'Deliver enterprise transformation milestones on schedule',
+          keyResult: p.name?.includes('Solar') ? 'Complete 80% site permitting by Q2' :
+                     p.name?.includes('Battery') ? 'Achieve 90% system availability' :
+                     p.name?.includes('Wind') ? 'Reduce levelized cost by 15%' :
+                     'Achieve 85% feature completion by PI end',
+          progress: Math.floor(Math.random() * 30) + 40
+        }
+      ],
+      aiInsights: [
+        {
+          message: `${p.name} is trending ${budgetSpent / budgetTotal < 0.8 ? 'under' : 'at'} budget with ${Math.round((budgetSpent / budgetTotal) * 100)}% utilization`,
+          confidence: 87,
+          source: 'FinOps Agent'
+        },
+        {
+          message: `Velocity metrics suggest team capacity is ${parseInt(p.velocity) > 40 ? 'optimal' : 'constrained'} - consider ${parseInt(p.velocity) > 40 ? 'maintaining' : 'adding'} sprint commitments`,
+          confidence: 82,
+          source: 'Planning Agent'
+        }
+      ],
+      proactiveActions: [
+        {
+          title: p.name?.includes('Solar') ? 'Expedite interconnection queue position' :
+                 p.name?.includes('Battery') ? 'Secure battery cell supply agreement' :
+                 p.name?.includes('Wind') ? 'Lock in turbine pricing before Q3' :
+                 'Escalate blocked dependencies to steering committee',
+          impact: p.priority === 'critical' ? 'High - $10M+ value at risk' : 'Medium - schedule impact possible',
+          urgency: p.status === 'red' ? 'immediate' : 'this_sprint'
+        },
+        {
+          title: 'Schedule stakeholder alignment session for next milestone',
+          impact: 'Medium - ensures smooth handoffs',
+          urgency: 'this_sprint'
+        }
+      ]
     };
   }, [fullProject]);
   
@@ -329,7 +376,13 @@ export default function ProjectDetailPage() {
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={() => window.history.back()} 
+              onClick={() => {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  setLocation('/dashboard');
+                }
+              }} 
               data-testid="button-back"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -404,80 +457,186 @@ export default function ProjectDetailPage() {
       </AnimatePresence>
 
       <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+        {/* L&G Design: VRO VALUE + PMO DELIVERY Dual-Lane Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {/* VRO VALUE section (teal) */}
           <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-teal-300"
-            onClick={() => openDrilldown('kpi', 'budget-analysis')}
-            data-testid="card-kpi-budget"
+            className="border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => openDrilldown('kpi', 'value-realized')}
+            data-testid="card-vro-value"
           >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="text-sm">Budget</span>
-                </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-teal-500" />
+                <span className="text-sm font-bold text-teal-700">VRO VALUE</span>
               </div>
-              <p className="text-2xl font-bold">${(project.financials.budget / 1000000).toFixed(1)}M</p>
-              <Progress value={budgetUtilization} className="h-2 mt-2" />
-              <p className="text-xs text-gray-500 mt-1">{budgetUtilization}% utilized</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-xs text-teal-600 block">Expected</span>
+                  <span className="text-xl font-bold text-teal-700">${(project.financials.roi.projected / 1000000).toFixed(0)}M annual</span>
+                </div>
+                <div>
+                  <span className="text-xs text-teal-600 block">Epic</span>
+                  <span className="text-xl font-bold text-teal-700">{project.epicProgress || 55}%</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
+          {/* PMO DELIVERY section (blue) */}
           <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300"
-            onClick={() => openDrilldown('kpi', 'velocity-metrics')}
-            data-testid="card-kpi-velocity"
+            className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => openDrilldown('kpi', 'flow-efficiency')}
+            data-testid="card-pmo-delivery"
           >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4" />
-                  <span className="text-sm">Velocity</span>
-                </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-sm font-bold text-blue-700">PMO DELIVERY</span>
               </div>
-              <p className="text-2xl font-bold">{project.velocity}</p>
-              <p className="text-xs text-gray-500 mt-1">story points/sprint</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-purple-300"
-            onClick={() => openDrilldown('kpi', 'resource-allocation')}
-            data-testid="card-kpi-resources"
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm">Resources</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-xs text-blue-600 block">On-Time</span>
+                  <span className="text-xl font-bold text-blue-700">{82 + Math.floor(Math.random() * 10)}%</span>
                 </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
-              </div>
-              <p className="text-2xl font-bold">{project.totalFTE}</p>
-              <p className="text-xs text-gray-500 mt-1">FTE allocated</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-green-300"
-            onClick={() => openDrilldown('kpi', 'quality-score')}
-            data-testid="card-kpi-quality"
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  <span className="text-sm">Quality Score</span>
+                <div>
+                  <span className="text-xs text-blue-600 block">Deliverables</span>
+                  <span className="text-xl font-bold text-blue-700">{project.features.filter(f => f.status === 'done').length}/{project.features.length}</span>
                 </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
-              <p className="text-2xl font-bold">{project.qualityScore}%</p>
-              <Progress value={project.qualityScore} className="h-2 mt-2" />
             </CardContent>
           </Card>
         </div>
+
+        {/* L&G Design: Key Metrics Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card className="text-center cursor-pointer hover:shadow-md" onClick={() => openDrilldown('kpi', 'velocity-metrics')} data-testid="metric-velocity">
+            <CardContent className="py-4">
+              <p className="text-2xl font-bold text-gray-900">{project.velocity}</p>
+              <p className="text-xs text-gray-500">Velocity</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center cursor-pointer hover:shadow-md" onClick={() => openDrilldown('kpi', 'quality-score')} data-testid="metric-predictability">
+            <CardContent className="py-4">
+              <p className="text-2xl font-bold text-gray-900">{project.qualityScore}%</p>
+              <p className="text-xs text-gray-500">Predict.</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center cursor-pointer hover:shadow-md" onClick={() => openDrilldown('kpi', 'flow-efficiency')} data-testid="metric-flow-eff">
+            <CardContent className="py-4">
+              <p className="text-2xl font-bold text-gray-900">{project.flowEfficiency || 68}%</p>
+              <p className="text-xs text-gray-500">Flow Eff.</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center cursor-pointer hover:shadow-md" onClick={() => openDrilldown('kpi', 'project-timeline')} data-testid="metric-pi">
+            <CardContent className="py-4">
+              <p className="text-2xl font-bold text-gray-900">PI {project.currentPI}.{Math.floor(project.currentPI * 10) % 10}</p>
+              <p className="text-xs text-gray-500">PI</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* L&G Design: Budget + Timeline Progress */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card className="cursor-pointer hover:shadow-md" onClick={() => openDrilldown('kpi', 'budget-analysis')} data-testid="card-budget-progress">
+            <CardContent className="py-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Budget</span>
+                <span className="text-sm font-bold">{(project.financials.spent / 1000000).toFixed(1)}/{(project.financials.budget / 1000000).toFixed(1)} $M</span>
+              </div>
+              <Progress value={budgetUtilization} className="h-3" />
+            </CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:shadow-md" onClick={() => openDrilldown('kpi', 'project-timeline')} data-testid="card-timeline-progress">
+            <CardContent className="py-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Timeline</span>
+                <span className="text-sm font-bold">{Math.floor((project.currentPI / project.totalPIs) * 12)}/{12} months</span>
+              </div>
+              <Progress value={(project.currentPI / project.totalPIs) * 100} className="h-3" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* L&G Design: OKR Section */}
+        {project.okrs && project.okrs.length > 0 && (
+          <Card className="mb-6 border-l-4 border-l-amber-400 bg-amber-50" data-testid="card-okr">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Target className="h-5 w-5 text-amber-600" />
+                  <div>
+                    <p className="font-medium text-gray-900">OKR: {project.okrs[0]?.objective || 'Reduce processing time by 40%'}</p>
+                    <p className="text-xs text-amber-700">Key Result: {project.okrs[0]?.keyResult || 'Achieve 3-day turnaround'}</p>
+                  </div>
+                </div>
+                <span className="text-xl font-bold text-amber-700">{project.okrs[0]?.progress || 45}%</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* L&G Design: AI Insights with Confidence */}
+        {project.aiInsights && project.aiInsights.length > 0 && (
+          <div className="space-y-3 mb-6">
+            {project.aiInsights.slice(0, 2).map((insight, idx) => (
+              <Card 
+                key={idx} 
+                className="border-l-4 border-l-purple-400 cursor-pointer hover:shadow-md"
+                onClick={() => openDrilldown('kpi', `ai-insight-${idx}`)}
+                data-testid={`card-ai-insight-${idx}`}
+              >
+                <CardContent className="py-3">
+                  <div className="flex items-start gap-3">
+                    <Activity className="h-4 w-4 text-purple-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">{insight.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">{insight.confidence}% confidence · {insight.source}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* L&G Design: Proactive Actions */}
+        {project.proactiveActions && project.proactiveActions.length > 0 && (
+          <Card className="mb-6 border-amber-200 bg-amber-50" data-testid="card-proactive-actions">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-bold text-amber-800">Proactive Actions ({project.proactiveActions.length})</span>
+              </div>
+              <div className="space-y-3">
+                {project.proactiveActions.slice(0, 2).map((action, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-white rounded border border-amber-200">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{action.title}</p>
+                      <p className="text-xs text-amber-700">Impact: {action.impact}</p>
+                    </div>
+                    <Badge className={action.urgency === 'immediate' ? 'bg-red-100 text-red-700 border-red-300' : 'bg-amber-100 text-amber-700 border-amber-300'}>
+                      {action.urgency}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* L&G Design: AI Recommendation */}
+        {project.aiRecommendations && project.aiRecommendations.length > 0 && (
+          <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50" data-testid="card-ai-recommendation">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-bold text-purple-800">AI Recommendation</span>
+              </div>
+              <p className="text-sm text-gray-700">{project.aiRecommendations[0]}</p>
+            </CardContent>
+          </Card>
+        )}
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-white shadow-sm flex-wrap">
