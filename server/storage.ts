@@ -62,6 +62,7 @@ import {
   type UserRole, type InsertUserRole,
   type ScheduledReport, type InsertScheduledReport,
   type ExportJob, type InsertExportJob,
+  type TutorialProgress, type InsertTutorialProgress,
   users, policies, businessUnits, projects, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -73,7 +74,7 @@ import {
   syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
   ingestionSessions, qaReviews, clarifyingQuestions,
   vroMetrics, benchmarks, appConfig, dashboardWidgets,
-  notifications, userRoles, scheduledReports, exportJobs
+  notifications, userRoles, scheduledReports, exportJobs, tutorialProgress
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -2539,6 +2540,74 @@ export class DatabaseStorage implements IStorage {
   async updateExportJob(id: string, updates: Partial<ExportJob>): Promise<ExportJob | undefined> {
     const result = await db.update(exportJobs).set(updates).where(eq(exportJobs.id, id)).returning();
     return result[0];
+  }
+
+  // ============================================================================
+  // TUTORIAL PROGRESS
+  // ============================================================================
+
+  async getTutorialProgress(userId: string): Promise<TutorialProgress[]> {
+    return await db.select().from(tutorialProgress)
+      .where(eq(tutorialProgress.userId, userId))
+      .orderBy(tutorialProgress.startedAt);
+  }
+
+  async getTutorialProgressByTutorial(userId: string, tutorialId: string): Promise<TutorialProgress | undefined> {
+    const result = await db.select().from(tutorialProgress)
+      .where(and(
+        eq(tutorialProgress.userId, userId),
+        eq(tutorialProgress.tutorialId, tutorialId)
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async createTutorialProgress(progress: InsertTutorialProgress): Promise<TutorialProgress> {
+    const result = await db.insert(tutorialProgress).values(progress).returning();
+    return result[0];
+  }
+
+  async updateTutorialProgress(id: string, updates: Partial<TutorialProgress>): Promise<TutorialProgress | undefined> {
+    const result = await db.update(tutorialProgress)
+      .set({ ...updates, lastViewedAt: new Date() })
+      .where(eq(tutorialProgress.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async completeTutorial(userId: string, tutorialId: string): Promise<TutorialProgress | undefined> {
+    const existing = await this.getTutorialProgressByTutorial(userId, tutorialId);
+    if (existing) {
+      return await this.updateTutorialProgress(existing.id, {
+        isCompleted: true,
+        completedAt: new Date(),
+      });
+    }
+    return undefined;
+  }
+
+  async skipTutorial(userId: string, tutorialId: string, totalSteps: number): Promise<TutorialProgress> {
+    const existing = await this.getTutorialProgressByTutorial(userId, tutorialId);
+    if (existing) {
+      const result = await this.updateTutorialProgress(existing.id, {
+        isSkipped: true,
+      });
+      return result!;
+    }
+    return await this.createTutorialProgress({
+      userId,
+      tutorialId,
+      totalSteps,
+      isSkipped: true,
+    });
+  }
+
+  async resetTutorialProgress(userId: string, tutorialId: string): Promise<void> {
+    await db.delete(tutorialProgress)
+      .where(and(
+        eq(tutorialProgress.userId, userId),
+        eq(tutorialProgress.tutorialId, tutorialId)
+      ));
   }
 }
 

@@ -1742,3 +1742,29 @@ export const insertExportJobSchema = createInsertSchema(exportJobs).omit({
 
 export type InsertExportJob = z.infer<typeof insertExportJobSchema>;
 export type ExportJob = typeof exportJobs.$inferSelect;
+
+// ============================================================================
+// TUTORIAL PROGRESS - Track user progress through guided tours
+// ============================================================================
+
+export const tutorialProgress = pgTable("tutorial_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  tutorialId: text("tutorial_id").notNull(), // e.g., "dashboard_tour", "mcp_setup", "settings_intro"
+  currentStep: integer("current_step").default(0),
+  totalSteps: integer("total_steps").notNull(),
+  isCompleted: boolean("is_completed").default(false),
+  isSkipped: boolean("is_skipped").default(false),
+  completedAt: timestamp("completed_at"),
+  startedAt: timestamp("started_at").defaultNow(),
+  lastViewedAt: timestamp("last_viewed_at").defaultNow(),
+});
+
+export const insertTutorialProgressSchema = createInsertSchema(tutorialProgress).omit({
+  id: true,
+  startedAt: true,
+  lastViewedAt: true,
+});
+
+export type InsertTutorialProgress = z.infer<typeof insertTutorialProgressSchema>;
+export type TutorialProgress = typeof tutorialProgress.$inferSelect;

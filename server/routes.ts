@@ -3985,6 +3985,149 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // TUTORIAL PROGRESS API
+  // ============================================================================
+
+  const tutorialStartSchema = z.object({
+    tutorialId: z.string().min(1),
+    totalSteps: z.number().int().positive(),
+  });
+
+  const tutorialStepSchema = z.object({
+    currentStep: z.number().int().min(0),
+  });
+
+  const tutorialSkipSchema = z.object({
+    totalSteps: z.number().int().positive().optional(),
+  });
+
+  function getTutorialUserId(req: any): string {
+    const userId = req.user?.claims?.sub || req.session?.userId;
+    if (!userId) {
+      return `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    }
+    return userId;
+  }
+
+  app.get("/api/tutorials/progress", async (req, res) => {
+    try {
+      const userId = getTutorialUserId(req);
+      const progress = await storage.getTutorialProgress(userId);
+      res.json(progress);
+    } catch (error: any) {
+      console.error("Get tutorial progress error:", error);
+      res.status(500).json({ error: "Failed to get tutorial progress" });
+    }
+  });
+
+  app.post("/api/tutorials/start", async (req, res) => {
+    try {
+      const parseResult = tutorialStartSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request", details: parseResult.error.issues });
+      }
+
+      const userId = getTutorialUserId(req);
+      const { tutorialId, totalSteps } = parseResult.data;
+
+      const existing = await storage.getTutorialProgressByTutorial(userId, tutorialId);
+      if (existing) {
+        return res.json(existing);
+      }
+
+      const progress = await storage.createTutorialProgress({
+        userId,
+        tutorialId,
+        totalSteps,
+        currentStep: 0,
+        isCompleted: false,
+        isSkipped: false,
+      });
+      res.json(progress);
+    } catch (error: any) {
+      console.error("Start tutorial error:", error);
+      res.status(500).json({ error: "Failed to start tutorial" });
+    }
+  });
+
+  app.post("/api/tutorials/:tutorialId/complete", async (req, res) => {
+    try {
+      const userId = getTutorialUserId(req);
+      const { tutorialId } = req.params;
+      
+      if (!tutorialId || tutorialId.length < 1) {
+        return res.status(400).json({ error: "Invalid tutorialId" });
+      }
+      
+      const progress = await storage.completeTutorial(userId, tutorialId);
+      if (!progress) {
+        return res.status(404).json({ error: "Tutorial progress not found" });
+      }
+      res.json(progress);
+    } catch (error: any) {
+      console.error("Complete tutorial error:", error);
+      res.status(500).json({ error: "Failed to complete tutorial" });
+    }
+  });
+
+  app.post("/api/tutorials/:tutorialId/skip", async (req, res) => {
+    try {
+      const parseResult = tutorialSkipSchema.safeParse(req.body);
+      
+      const userId = getTutorialUserId(req);
+      const { tutorialId } = req.params;
+      const totalSteps = parseResult.success && parseResult.data.totalSteps ? parseResult.data.totalSteps : 1;
+      
+      const progress = await storage.skipTutorial(userId, tutorialId, totalSteps);
+      res.json(progress);
+    } catch (error: any) {
+      console.error("Skip tutorial error:", error);
+      res.status(500).json({ error: "Failed to skip tutorial" });
+    }
+  });
+
+  app.post("/api/tutorials/:tutorialId/reset", async (req, res) => {
+    try {
+      const userId = getTutorialUserId(req);
+      const { tutorialId } = req.params;
+      
+      if (!tutorialId || tutorialId.length < 1) {
+        return res.status(400).json({ error: "Invalid tutorialId" });
+      }
+      
+      await storage.resetTutorialProgress(userId, tutorialId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Reset tutorial error:", error);
+      res.status(500).json({ error: "Failed to reset tutorial" });
+    }
+  });
+
+  app.patch("/api/tutorials/:tutorialId/step", async (req, res) => {
+    try {
+      const parseResult = tutorialStepSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request", details: parseResult.error.issues });
+      }
+
+      const userId = getTutorialUserId(req);
+      const { tutorialId } = req.params;
+      const { currentStep } = parseResult.data;
+      
+      const existing = await storage.getTutorialProgressByTutorial(userId, tutorialId);
+      if (!existing) {
+        return res.status(404).json({ error: "Tutorial progress not found" });
+      }
+
+      const progress = await storage.updateTutorialProgress(existing.id, { currentStep });
+      res.json(progress);
+    } catch (error: any) {
+      console.error("Update tutorial step error:", error);
+      res.status(500).json({ error: "Failed to update tutorial step" });
+    }
+  });
+
   // Register webhook routes
   registerWebhookRoutes(app);
 

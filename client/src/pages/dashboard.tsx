@@ -45,6 +45,7 @@ import { toast } from "sonner";
 import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
+import { HelpMenu } from "@/components/HelpMenu";
 
 // NextEra Design System Colors (Enterprise Transformation Team 2026)
 const NEE = {
@@ -428,6 +429,7 @@ function NavBar() {
           />
         </div>
         <NotificationsDropdown />
+        <HelpMenu />
         <Button size="icon" variant="ghost" className="rounded-full" data-testid="button-user" onClick={() => alert('User Profile\n\nAccount settings, preferences, and logout options would appear here.')}>
           <User className="h-5 w-5 text-muted-foreground" />
         </Button>
