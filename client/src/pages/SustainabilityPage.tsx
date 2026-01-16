@@ -63,17 +63,15 @@ export default function SustainabilityPage() {
       <header className="bg-gradient-to-r from-green-800 to-green-600 text-white shadow-lg">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-green-700" 
-                onClick={() => navigate('/dashboard')}
-                data-testid="button-back"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white hover:bg-green-700" 
+              onClick={() => window.history.back()}
+              data-testid="button-back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <Leaf className="h-8 w-8" />
