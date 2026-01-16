@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useEnrichedProjects } from "@/hooks/useProjects";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -173,16 +174,7 @@ async function fetchDiscussions(): Promise<AgentMessage[]> {
   }));
 }
 
-const projects = [
-  { id: 'all', name: 'All Projects' },
-  { id: 'proj-data-platform', name: 'Enterprise Data Platform' },
-  { id: 'proj-climate-analytics', name: 'Climate Transition Analytics' },
-  { id: 'proj-pricing-engine', name: 'Bulk Annuity Pricing Engine' },
-  { id: 'proj-client-portal', name: 'Client Portal Modernization' },
-  { id: 'proj-regulatory', name: 'Regulatory Change Management' },
-  { id: 'proj-chatbot', name: 'AI Chatbot Implementation' },
-  { id: 'proj-esg', name: 'ESG Analytics Dashboard' },
-];
+// Project list will be populated from database via useEnrichedProjects hook
 
 export default function AgentCommandCenterPage() {
   const [, setLocation] = useLocation();
@@ -196,6 +188,18 @@ export default function AgentCommandCenterPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
+  
+  // Fetch projects from database
+  const { data: dbProjects = [] } = useEnrichedProjects();
+  
+  // Build project dropdown list from database
+  const projects = useMemo(() => {
+    const projectList = [{ id: 'all', name: 'All Projects' }];
+    dbProjects.slice(0, 10).forEach(p => {
+      projectList.push({ id: p.id, name: p.name });
+    });
+    return projectList;
+  }, [dbProjects]);
 
   // Handle deep-linking from URL query params
   useEffect(() => {
