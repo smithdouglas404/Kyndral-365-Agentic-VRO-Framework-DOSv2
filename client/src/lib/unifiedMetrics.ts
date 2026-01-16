@@ -79,122 +79,122 @@ export const SAFE_STAGE_LABELS: Record<SAFePortfolioStage, string> = {
 export const EXPANDED_PMO_PROJECTS = [
   ...pmoProjects,
   {
-    id: "pmo-gt-001",
-    name: "Cloud Migration Program",
-    bu: "Group Technology",
+    id: "pmo-fpl-001",
+    name: "FPL Grid Modernization & Automation",
+    bu: "FPL",
     status: "green" as const,
-    budget: { spent: 3.2, total: 4.5, unit: "$m" },
+    budget: { spent: 320, total: 450, unit: "$M" },
     timeline: { elapsed: 10, total: 18, unit: "months" },
     deliverables: { completed: 14, total: 24 },
-    risks: ["Legacy system dependencies", "Data migration complexity"],
-    nextMilestone: "Phase 3 AWS migration - Week 35",
+    risks: ["Legacy SCADA dependencies", "Substation integration complexity"],
+    nextMilestone: "Phase 3 SCADA integration - Week 35",
     safe: {
       velocity: 52,
       predictability: 85,
       flowEfficiency: 72,
       currentPI: "PI 24.4",
-      epicId: "EPIC-GT-001",
-      epicName: "Enterprise Cloud Transformation",
+      epicId: "EPIC-FPL-001",
+      epicName: "Enterprise Grid Transformation",
       epicProgress: 58,
-      okr: { objective: "Migrate 80% workloads to cloud", keyResult: "Reduce infrastructure costs 40%", progress: 62 },
+      okr: { objective: "Modernize 80% of grid infrastructure", keyResult: "Reduce outage duration 40%", progress: 62 },
       piTrend: [{ pi: "PI 24.1", velocity: 45, predictability: 78 }, { pi: "PI 24.2", velocity: 48, predictability: 80 }, { pi: "PI 24.3", velocity: 50, predictability: 82 }, { pi: "PI 24.4", velocity: 52, predictability: 85 }]
     },
     safeStage: "implementing" as const,
     aiSignals: [
-      { type: "opportunity" as const, message: "Kubernetes adoption could accelerate by 25%", confidence: 84, dataSource: "DevOps metrics" }
+      { type: "opportunity" as const, message: "Smart sensor deployment could accelerate by 25%", confidence: 84, dataSource: "Grid analytics" }
     ],
     proactiveActions: [
-      { id: "pa-gt-001", action: "Accelerate container migration for quick wins", impact: "30% faster deployment", urgency: "this-week" as const, type: "accelerate" as const }
+      { id: "pa-fpl-001", action: "Accelerate sensor deployment for quick wins", impact: "30% faster grid visibility", urgency: "this-week" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W28", value: 52 }, { week: "W29", value: 56 }, { week: "W30", value: 60 }, { week: "W31", value: 64 }, { week: "W32", value: 68 }]
   },
   {
-    id: "pmo-gt-002",
-    name: "API Gateway Modernization",
-    bu: "Group Technology",
+    id: "pmo-neer-001",
+    name: "NEER Wind Portfolio Expansion 2024-2027",
+    bu: "NEER",
     status: "amber" as const,
-    budget: { spent: 1.1, total: 1.8, unit: "$m" },
+    budget: { spent: 1100, total: 1800, unit: "$M" },
     timeline: { elapsed: 4, total: 8, unit: "months" },
     deliverables: { completed: 5, total: 12 },
-    risks: ["Third-party API compatibility"],
-    nextMilestone: "Security audit - Week 28",
+    risks: ["Vestas turbine delivery delays"],
+    nextMilestone: "ERCOT interconnection - Week 28",
     safe: {
       velocity: 42,
       predictability: 75,
       flowEfficiency: 65,
       currentPI: "PI 25.1",
-      epicId: "EPIC-GT-002",
-      epicName: "API First Architecture",
+      epicId: "EPIC-NEER-001",
+      epicName: "Renewable Generation Expansion",
       epicProgress: 42,
-      okr: { objective: "Enable seamless API integrations", keyResult: "100% API catalog coverage", progress: 48 },
+      okr: { objective: "Add 2,400 MW wind capacity", keyResult: "100% PPA coverage", progress: 48 },
       piTrend: [{ pi: "PI 24.1", velocity: 38, predictability: 70 }, { pi: "PI 24.2", velocity: 40, predictability: 72 }, { pi: "PI 24.3", velocity: 41, predictability: 74 }, { pi: "PI 24.4", velocity: 42, predictability: 75 }]
     },
     safeStage: "analyzing" as const,
     aiSignals: [
-      { type: "warning" as const, message: "3 legacy APIs need urgent refactoring", confidence: 88, dataSource: "API health scan" }
+      { type: "warning" as const, message: "3 turbine orders need urgent vendor follow-up", confidence: 88, dataSource: "Supply chain tracker" }
     ],
     proactiveActions: [
-      { id: "pa-gt-002", action: "Prioritize legacy API refactoring", impact: "Unblock 4 downstream projects", urgency: "immediate" as const, type: "mitigate" as const }
+      { id: "pa-neer-001", action: "Prioritize alternate turbine vendors", impact: "Unblock 4 downstream projects", urgency: "immediate" as const, type: "mitigate" as const }
     ],
     trendData: [{ week: "W28", value: 38 }, { week: "W29", value: 42 }, { week: "W30", value: 44 }, { week: "W31", value: 46 }, { week: "W32", value: 48 }]
   },
   {
-    id: "pmo-gh-001",
-    name: "Workforce Analytics Platform",
-    bu: "Group HR",
+    id: "pmo-fpl-002",
+    name: "FPL SolarTogether Phase III",
+    bu: "FPL",
     status: "green" as const,
-    budget: { spent: 0.8, total: 1.2, unit: "$m" },
+    budget: { spent: 80, total: 120, unit: "$M" },
     timeline: { elapsed: 5, total: 7, unit: "months" },
     deliverables: { completed: 8, total: 11 },
-    risks: ["GDPR compliance validation"],
-    nextMilestone: "Pilot launch - Week 26",
+    risks: ["Solar panel supply chain constraints"],
+    nextMilestone: "Site commissioning - Week 26",
     safe: {
       velocity: 58,
       predictability: 88,
       flowEfficiency: 78,
       currentPI: "PI 24.3",
-      epicId: "EPIC-GH-001",
-      epicName: "People Analytics",
+      epicId: "EPIC-FPL-002",
+      epicName: "Community Solar Expansion",
       epicProgress: 72,
-      okr: { objective: "Data-driven talent decisions", keyResult: "Reduce attrition by 15%", progress: 65 },
+      okr: { objective: "Add 1,000 MW community solar", keyResult: "Enroll 200K subscribers", progress: 65 },
       piTrend: [{ pi: "PI 24.1", velocity: 50, predictability: 82 }, { pi: "PI 24.2", velocity: 53, predictability: 84 }, { pi: "PI 24.3", velocity: 55, predictability: 86 }, { pi: "PI 24.4", velocity: 58, predictability: 88 }]
     },
     safeStage: "implementing" as const,
     aiSignals: [
-      { type: "insight" as const, message: "Predictive attrition model achieving 82% accuracy", confidence: 91, dataSource: "ML model metrics" }
+      { type: "insight" as const, message: "Customer enrollment rate exceeding forecast by 23%", confidence: 91, dataSource: "Enrollment analytics" }
     ],
     proactiveActions: [
-      { id: "pa-gh-001", action: "Expand pilot to 3 additional business units", impact: "Faster enterprise value", urgency: "this-month" as const, type: "accelerate" as const }
+      { id: "pa-fpl-002", action: "Expand marketing to 3 additional counties", impact: "Faster subscriber acquisition", urgency: "this-month" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W28", value: 62 }, { week: "W29", value: 68 }, { week: "W30", value: 72 }, { week: "W31", value: 78 }, { week: "W32", value: 82 }]
   },
   {
-    id: "pmo-gh-002",
-    name: "Learning Management Refresh",
-    bu: "Group HR",
+    id: "pmo-neer-002",
+    name: "NEER Battery Energy Storage Systems",
+    bu: "NEER",
     status: "amber" as const,
-    budget: { spent: 0.4, total: 0.6, unit: "$m" },
+    budget: { spent: 400, total: 600, unit: "$M" },
     timeline: { elapsed: 3, total: 5, unit: "months" },
     deliverables: { completed: 4, total: 8 },
-    risks: ["Content migration from legacy LMS"],
-    nextMilestone: "Content review - Week 27",
+    risks: ["Battery supply from Tesla/BYD"],
+    nextMilestone: "Site preparation - Week 27",
     safe: {
       velocity: 45,
       predictability: 78,
       flowEfficiency: 68,
       currentPI: "PI 25.2",
-      epicId: "EPIC-GH-002",
-      epicName: "Digital Learning Experience",
+      epicId: "EPIC-NEER-002",
+      epicName: "Grid-Scale Storage Deployment",
       epicProgress: 52,
-      okr: { objective: "Enable continuous learning culture", keyResult: "80% completion rate", progress: 45 },
+      okr: { objective: "Deploy 2,800 MW storage capacity", keyResult: "95% availability SLA", progress: 45 },
       piTrend: [{ pi: "PI 24.1", velocity: 40, predictability: 72 }, { pi: "PI 24.2", velocity: 42, predictability: 74 }, { pi: "PI 24.3", velocity: 44, predictability: 76 }, { pi: "PI 24.4", velocity: 45, predictability: 78 }]
     },
     safeStage: "portfolio-backlog" as const,
     aiSignals: [
-      { type: "warning" as const, message: "Legacy content requires 40% more effort than planned", confidence: 82, dataSource: "Migration analysis" }
+      { type: "warning" as const, message: "Battery delivery delays may require 40% schedule buffer", confidence: 82, dataSource: "Supply chain analysis" }
     ],
     proactiveActions: [
-      { id: "pa-gh-002", action: "Prioritize high-value content migration", impact: "Focus resources effectively", urgency: "this-week" as const, type: "mitigate" as const }
+      { id: "pa-neer-002", action: "Prioritize sites with confirmed battery deliveries", impact: "Focus resources effectively", urgency: "this-week" as const, type: "mitigate" as const }
     ],
     trendData: [{ week: "W28", value: 42 }, { week: "W29", value: 48 }, { week: "W30", value: 52 }, { week: "W31", value: 55 }, { week: "W32", value: 58 }]
   },
@@ -439,11 +439,11 @@ export const EXPANDED_PMO_PROJECTS = [
     trendData: [{ week: "W32", value: 12 }]
   },
   {
-    id: "pmo-ir-reviewing-001",
-    name: "Bulk Annuity Platform v2",
-    bu: "Florida Power & Light",
+    id: "pmo-fpl-reviewing-001",
+    name: "FPL Advanced Metering Infrastructure 2.0",
+    bu: "FPL",
     status: "green" as const,
-    budget: { spent: 0.3, total: 2.8, unit: "$m" },
+    budget: { spent: 30, total: 280, unit: "$M" },
     timeline: { elapsed: 2, total: 16, unit: "months" },
     deliverables: { completed: 3, total: 22 },
     risks: ["Technical architecture decisions pending"],
@@ -453,10 +453,10 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 72,
       flowEfficiency: 58,
       currentPI: "PI 25.2",
-      epicId: "EPIC-IR-REVIEW",
-      epicName: "Next Gen Bulk Annuity",
+      epicId: "EPIC-FPL-AMI",
+      epicName: "Next Gen Smart Metering",
       epicProgress: 15,
-      okr: { objective: "Double bulk annuity capacity", keyResult: "Process $20bn annually", progress: 12 },
+      okr: { objective: "Deploy 5M smart meters", keyResult: "Process 100M daily readings", progress: 12 },
       piTrend: [{ pi: "PI 24.4", velocity: 38, predictability: 72 }]
     },
     safeStage: "reviewing" as const,
@@ -464,7 +464,7 @@ export const EXPANDED_PMO_PROJECTS = [
       { type: "insight" as const, message: "Cloud-native architecture could reduce costs 35%", confidence: 82, dataSource: "Architecture analysis" }
     ],
     proactiveActions: [
-      { id: "pa-ir-r-001", action: "Schedule architecture decision workshop", impact: "Unblock detailed design", urgency: "this-week" as const, type: "accelerate" as const }
+      { id: "pa-fpl-r-001", action: "Schedule architecture decision workshop", impact: "Unblock detailed design", urgency: "this-week" as const, type: "accelerate" as const }
     ],
     trendData: [{ week: "W32", value: 15 }]
   },

@@ -177,8 +177,8 @@ export function initializeDefaultThresholds(): void {
     {
       metricId: 'schedule-performance',
       metricName: 'Schedule Performance Index (SPI)',
-      projectId: 'proj-digital-transformation',
-      projectName: 'Digital Transformation Program',
+      projectId: 'nee-fpl-004',
+      projectName: 'FPL Storm Protection Plan',
       warningThreshold: 0.95,
       criticalThreshold: 0.85,
       direction: 'below',
@@ -194,8 +194,8 @@ export function initializeDefaultThresholds(): void {
     {
       metricId: 'cost-performance',
       metricName: 'Cost Performance Index (CPI)',
-      projectId: 'proj-cloud-migration',
-      projectName: 'Cloud Infrastructure Migration',
+      projectId: 'nee-fpl-001',
+      projectName: 'FPL Grid Modernization & Automation',
       warningThreshold: 0.92,
       criticalThreshold: 0.80,
       direction: 'below',

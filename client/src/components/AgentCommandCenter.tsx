@@ -98,9 +98,9 @@ const initialInterventions: RiskIntervention[] = [
     type: 'timeline',
     severity: 'high',
     title: 'Regulatory Deadline Risk',
-    description: 'TCFD Reporting Automation may miss Q1 2025 compliance deadline based on current velocity.',
-    projectId: 'pmo-lgc-002',
-    projectName: 'Climate Transition Analytics',
+    description: 'NERC CIP compliance may miss Q1 2025 deadline based on current velocity.',
+    projectId: 'nee-corp-001',
+    projectName: 'NextEra Cybersecurity Enhancement',
     confidence: 82,
     suggestedAction: 'Add 2 contractors for TCFD feature, parallel track with Net-Zero Tracker',
     impact: 'Regulatory compliance maintained',
@@ -113,9 +113,9 @@ const initialInterventions: RiskIntervention[] = [
     type: 'resource',
     severity: 'medium',
     title: 'Key Resource Allocation Conflict',
-    description: 'Lead architect assigned to 3 overlapping projects with 150% allocation.',
-    projectId: 'pmo-rt-002',
-    projectName: 'AI Chatbot Implementation',
+    description: 'Lead grid engineer assigned to 3 overlapping projects with 150% allocation.',
+    projectId: 'nee-fpl-001',
+    projectName: 'FPL Grid Modernization & Automation',
     confidence: 78,
     suggestedAction: 'Reassign secondary architect from Client Portal; defer non-critical design reviews',
     impact: 'Prevents burnout, maintains quality',
@@ -128,9 +128,9 @@ const initialInterventions: RiskIntervention[] = [
     type: 'quality',
     severity: 'high',
     title: 'Technical Debt Threshold Exceeded',
-    description: 'Bulk Annuity Pricing Engine has 23 critical code quality issues blocking deployment.',
-    projectId: 'pmo-ir-003',
-    projectName: 'Bulk Annuity Pricing Engine',
+    description: 'FPL Smart Meter Data Analytics has 23 critical code quality issues blocking deployment.',
+    projectId: 'nee-fpl-002',
+    projectName: 'FPL Advanced Metering Infrastructure',
     confidence: 91,
     suggestedAction: 'Allocate 1 sprint for tech debt remediation before next feature release',
     impact: 'Reduces production incident risk by 65%',
@@ -151,14 +151,14 @@ const agentDiscussion: AgentMessage[] = [
 ];
 
 const projects = [
-  { id: 'pmo-grp-001', name: 'Enterprise Data Platform', status: 'amber' },
-  { id: 'pmo-lgc-002', name: 'Climate Transition Analytics', status: 'green' },
-  { id: 'pmo-ir-003', name: 'Bulk Annuity Pricing Engine', status: 'green' },
-  { id: 'pmo-am-003', name: 'Client Portal Modernization', status: 'green' },
-  { id: 'pmo-rc-003', name: 'Regulatory Change Management', status: 'green' },
-  { id: 'pmo-rt-002', name: 'AI Chatbot Implementation', status: 'green' },
-  { id: 'pmo-lgim-001', name: 'ESG Analytics Dashboard', status: 'green' },
-  { id: 'pmo-lgc-003', name: 'Operational Resilience Framework', status: 'amber' }
+  { id: 'nee-fpl-001', name: 'FPL Grid Modernization & Automation', status: 'amber' },
+  { id: 'nee-fpl-002', name: 'FPL Advanced Metering Infrastructure', status: 'green' },
+  { id: 'nee-fpl-003', name: 'FPL SolarTogether Phase III', status: 'green' },
+  { id: 'nee-fpl-004', name: 'FPL Storm Protection Plan', status: 'amber' },
+  { id: 'nee-neer-001', name: 'NEER Wind Portfolio Expansion', status: 'green' },
+  { id: 'nee-neer-002', name: 'NEER Battery Energy Storage Systems', status: 'green' },
+  { id: 'nee-corp-001', name: 'NextEra Cybersecurity Enhancement', status: 'green' },
+  { id: 'nee-corp-002', name: 'Google Data Center Partnership', status: 'green' }
 ];
 
 interface AgentCommandCenterProps {
