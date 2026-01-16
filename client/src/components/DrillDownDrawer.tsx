@@ -991,7 +991,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     ],
     aiInsight: metricConfig.insight,
     summary: metricConfig.summary,
-    relatedEntities: [
+    relatedEntities: entityId.startsWith('governance-') ? [] : [
       { type: 'Portfolio', id: 'PF-TMO', name: 'Transformation Office Portfolio' },
       { type: 'OKR', id: 'OKR-Q4-01', name: 'Improve Operational Efficiency' },
       { type: 'Project', id: 'PRJ-DIG-001', name: 'Digital Transformation Initiative' }
