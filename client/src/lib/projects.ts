@@ -68,6 +68,11 @@ export interface EnrichedProject {
   
   // Linked VRO program (if applicable)
   linkedVROProgramId?: string;
+  
+  // Counts from database (for enriched projects from API)
+  featureCount?: number;
+  storyCount?: number;
+  taskCount?: number;
 }
 
 // ============================================================================

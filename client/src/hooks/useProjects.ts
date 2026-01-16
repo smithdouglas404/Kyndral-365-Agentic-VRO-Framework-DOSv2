@@ -121,6 +121,9 @@ function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
     currentPI: parseInt(p.currentPi?.replace(/\D/g, "") || "0") || 0,
     totalPIs: parseInt(p.totalPis) || 0,
     velocity: parseInt(p.velocity) || 0,
+    featureCount: p.featureCount || 0,
+    storyCount: p.storyCount || 0,
+    taskCount: p.taskCount || 0,
   };
 }
 

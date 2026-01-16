@@ -360,7 +360,7 @@ export default function SegmentPage() {
                         </div>
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm text-blue-600">Features</span>
-                          <span className="text-xl font-bold text-blue-700">{segmentProjects.reduce((sum, p) => sum + (p.features?.length || 0), 0)}</span>
+                          <span className="text-xl font-bold text-blue-700">{segmentProjects.reduce((sum, p) => sum + (p.featureCount || p.features?.length || 0), 0)}</span>
                         </div>
                       </div>
                     </CardContent>
