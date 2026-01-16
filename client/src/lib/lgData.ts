@@ -1,12 +1,16 @@
 // ============================================================================
 // NEXTERA ENERGY COMPREHENSIVE DATA - FROM OFFICIAL FILINGS
-// Sources: Annual Report 2024, 10-K 2024, Investor Presentations
+// Primary Sources:
+//   - Form 10-K 2024 (SEC Filing, filed January 2025)
+//   - NextEra Energy Annual Report 2024
+//   - Investor Presentations Q4 2024
+// SEC CIK: 0000753308
 // ============================================================================
 
 // Company Overview
 export const lgCompanyOverview = {
   yearsOfHistory: 100,
-  employees: 16800,
+  employees: 16800,  // Source: NEE 10-K 2024, pg. 7 - "approximately 16,800 employees"
   adjustedOperatingProfit: { value: 24753, unit: "$m", year: 2024 },
   assetsUnderManagement: { value: 180, unit: "$bn" },
   proprietaryAssets: { value: 68, unit: "GW" },
@@ -19,7 +23,8 @@ export const lgCompanyOverview = {
   cfo: "Kirk Crews",
   cro: "Rebecca Kujawa",
   climateDirector: "Eric Silagy",
-  source: "NextEra Energy Annual Report 2024"
+  source: "NextEra Energy Form 10-K 2024 (SEC Filing)",
+  sourceUrl: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000753308"
 };
 
 // ============================================================================

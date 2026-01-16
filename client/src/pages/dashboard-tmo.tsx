@@ -431,7 +431,8 @@ export default function TMODashboard() {
                   </div>
                   <CheckCircle2 className="h-8 w-8 text-green-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">total workforce</p>
+                <p className="text-xs text-gray-500 mt-1">total workforce</p>
+                <p className="text-[10px] text-gray-400 italic">Source: NEE 10-K 2024</p>
               </CardContent>
             </Card>
           </div>
