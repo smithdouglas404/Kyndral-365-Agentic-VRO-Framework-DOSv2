@@ -267,10 +267,7 @@ export default function GovernanceDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-decisions')} data-testid="metric-decisions">
-              {liveData.metrics.activeAlerts > 0 && (
-                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
-              )}
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'governance-decisions')} data-testid="metric-decisions">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
