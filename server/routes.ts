@@ -620,7 +620,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           if (feat.stories && Array.isArray(feat.stories)) {
             for (const st of feat.stories) {
               const story = await storage.createStory({
-                id: st.id,
                 featureId: feature.id,
                 projectId: project.id,
                 name: st.name,
@@ -633,7 +632,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
               if (st.tasks && Array.isArray(st.tasks)) {
                 for (const task of st.tasks) {
                   await storage.createTask({
-                    id: task.id,
                     storyId: story.id,
                     featureId: feature.id,
                     projectId: project.id,
@@ -654,7 +652,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.stories && Array.isArray(projectData.stories)) {
         for (const st of projectData.stories) {
           await storage.createStory({
-            id: st.id,
             featureId: st.featureId,
             projectId: project.id,
             name: st.name,
@@ -670,7 +667,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.tasks && Array.isArray(projectData.tasks)) {
         for (const task of projectData.tasks) {
           await storage.createTask({
-            id: task.id,
             storyId: task.storyId,
             featureId: task.featureId,
             projectId: project.id,
@@ -688,7 +684,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.resources && Array.isArray(projectData.resources)) {
         for (const res of projectData.resources) {
           await storage.createResource({
-            id: res.id,
             projectId: project.id,
             name: res.name,
             role: res.role,
@@ -704,7 +699,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.milestones && Array.isArray(projectData.milestones)) {
         for (const ms of projectData.milestones) {
           await storage.createMilestone({
-            id: ms.id,
             projectId: project.id,
             name: ms.name,
             targetDate: ms.date ? new Date(ms.date) : null,
@@ -718,7 +712,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.dependencies && Array.isArray(projectData.dependencies)) {
         for (const dep of projectData.dependencies) {
           await storage.createDependency({
-            id: dep.id,
             projectId: project.id,
             name: dep.name,
             dependencyType: dep.type,
@@ -732,7 +725,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.risks && Array.isArray(projectData.risks)) {
         for (const risk of projectData.risks) {
           await storage.createRisk({
-            id: risk.id,
             projectId: project.id,
             name: risk.name,
             probability: risk.probability,

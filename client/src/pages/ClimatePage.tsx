@@ -79,11 +79,11 @@ export default function ClimatePage() {
                 <Leaf className="h-8 w-8" />
                 <h1 className="text-3xl font-bold" data-testid="text-page-title">Climate & Nature</h1>
               </div>
-              <p className="text-green-100 mt-1">L&G Climate and Nature Report 2024 | TCFD Aligned</p>
+              <p className="text-green-100 mt-1">NextEra Energy Sustainability Report 2024 | TCFD Aligned</p>
             </div>
             <div className="text-right">
               <p className="text-green-100 text-sm">Net Zero Target</p>
-              <p className="text-4xl font-bold">2050</p>
+              <p className="text-4xl font-bold">{climateData.headline.netZeroTargetYear}</p>
               <Badge className="bg-white text-green-800 mt-1">SBTi Validated</Badge>
             </div>
           </div>
@@ -336,7 +336,7 @@ export default function ClimatePage() {
                   <div className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('ies-projects', 'ies-001'); }} data-testid="metric-ies-projects">
                     <div className="flex justify-between items-center">
                       <span>IES Projects</span>
-                      <Badge variant="outline">{climateData.operational.iesProjects.value} assets</Badge>
+                      <Badge variant="outline">{climateData.operational.iesProjects.count} projects</Badge>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">Integrated Energy Solutions</p>
                   </div>
@@ -392,18 +392,18 @@ export default function ClimatePage() {
                     ))}
                   </div>
                   <div className="space-y-4">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('millfield-green', 'millfield-001'); }} data-testid="metric-millfield-green">
-                      <h4 className="font-semibold text-green-800">Millfield Green</h4>
-                      <p className="text-sm text-green-700 mt-1">{climateData.housing.millfieldGreen.description}</p>
-                      <Badge className="mt-2 bg-green-600">Opened {climateData.housing.millfieldGreen.opened}</Badge>
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('smart-meters', 'smart-meter-001'); }} data-testid="metric-smart-meters">
+                      <h4 className="font-semibold text-green-800">Smart Meter Deployment</h4>
+                      <p className="text-sm text-green-700 mt-1">{climateData.housing.smartMeterProgress.description}</p>
+                      <Badge className="mt-2 bg-green-600">{climateData.housing.smartMeterProgress.current}% Complete</Badge>
                     </div>
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('heat-pumps', 'heatpump-001'); }} data-testid="metric-heat-pumps">
-                      <h4 className="font-semibold text-blue-800">Ground Source Heat Pumps</h4>
-                      <p className="text-sm text-blue-700 mt-1">Supplied by {climateData.housing.groundSourceHeatPumps.supplier}</p>
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('grid-hardening', 'grid-001'); }} data-testid="metric-grid-hardening">
+                      <h4 className="font-semibold text-blue-800">Grid Hardening Program</h4>
+                      <p className="text-sm text-blue-700 mt-1">{climateData.housing.gridHardening.description}</p>
                     </div>
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('hvo-deployment', 'hvo-001'); }} data-testid="metric-hvo-deployment">
-                      <h4 className="font-semibold text-amber-800">HVO Deployment</h4>
-                      <p className="text-sm text-amber-700 mt-1">CALA Group successfully deploying Hydrotreated Vegetable Oil as diesel replacement</p>
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('solar-rooftop', 'solar-001'); }} data-testid="metric-solar-rooftop">
+                      <h4 className="font-semibold text-amber-800">Rooftop Solar Program</h4>
+                      <p className="text-sm text-amber-700 mt-1">{climateData.housing.solarRooftop.description}</p>
                     </div>
                   </div>
                 </div>
@@ -413,16 +413,16 @@ export default function ClimatePage() {
 
           <TabsContent value="nature" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('ecuador-debt', 'ecuador-001')} data-testid="card-ecuador-debt">
+              <Card className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleDrillDown('conservation-lands', 'conservation-001')} data-testid="card-conservation-lands">
                 <CardHeader>
-                  <CardTitle>Ecuador Debt Conversion</CardTitle>
+                  <CardTitle>Land Conservation</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-4">
-                    <p className="text-4xl font-bold text-green-600">${climateData.nature.ecuadorDebtConversion.value}m</p>
-                    <p className="text-gray-600 mt-2">Over {climateData.nature.ecuadorDebtConversion.duration}</p>
-                    <p className="text-sm text-gray-500 mt-4">{climateData.nature.ecuadorDebtConversion.description}</p>
-                    <Badge className="mt-3 bg-green-600">Second debt conversion in Ecuador</Badge>
+                    <p className="text-4xl font-bold text-green-600">{climateData.nature.landConservation.value.toLocaleString()}</p>
+                    <p className="text-gray-600 mt-2">{climateData.nature.landConservation.unit} protected</p>
+                    <p className="text-sm text-gray-500 mt-4">{climateData.nature.landConservation.description}</p>
+                    <Badge className="mt-3 bg-green-600">Wildlife Safe Programs Active</Badge>
                   </div>
                 </CardContent>
               </Card>

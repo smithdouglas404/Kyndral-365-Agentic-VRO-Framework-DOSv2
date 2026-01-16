@@ -283,6 +283,8 @@ export const climateData = {
     operationalFootprintReduction: { value: 65, unit: "%", baseYear: 2005, description: "CO2 emissions rate reduction since 2005" },
     renewableCapacity: { value: 33, unit: "GW", description: "Total renewable generation capacity" },
     cleanEnergyInvestment: { value: 12, unit: "$bn", description: "Annual clean energy investment" },
+    financedEmissionsReduction: { value: 67, baseYear: 2019, description: "Reduction in carbon intensity" },
+    transitionFinance: { value: 12, description: "Clean energy investment annually" },
     netZeroTargetYear: 2045,
     sbtiValidated: true,
     source: "NextEra Energy Sustainability Report 2024"
@@ -296,6 +298,9 @@ export const climateData = {
     smartGridAssets: { value: 5900000, unit: "meters", changeFrom2023: 8, changeUnit: "%" },
     solarInstallations: { value: 7200, unit: "MW", description: "Utility-scale solar capacity" },
     batteryStorage: { value: 3700, unit: "MW", description: "Grid-scale battery storage" },
+    automaticMeterReaders: { value: 5900000, changeFrom2023: 8 },
+    viztaPlatformAssets: { value: 35052, description: "MW of smart grid managed assets" },
+    iesProjects: { count: 127, description: "Integrated energy solutions projects" },
     source: "NextEra Energy 10-K 2024"
   },
   
@@ -305,6 +310,8 @@ export const climateData = {
     renewableExpansion: { target: 50, unit: "GW", by: 2030, progress: 33, description: "Total renewable capacity target" },
     realZeroOperations: { by: 2045, description: "Net zero carbon emissions from operations" },
     portfolioTemperature: { current: 1.8, target: 1.5, unit: "°C", description: "Implied portfolio temperature alignment" },
+    scope3OccupierReduction: { progress: 45, target: 70, by: 2030, baseYear: 2019 },
+    supplierEngagement: { progress: 62, target: 100, by: 2026, description: "Suppliers with science-based targets" },
     source: "NextEra Energy Sustainability Report 2024"
   },
   
@@ -331,7 +338,15 @@ export const climateData = {
     landConservation: { value: 50000, unit: "acres", description: "Protected habitat and conservation lands" },
     wildlifeSafePrograms: true,
     manateeProtection: { projects: 12, description: "Manatee habitat protection initiatives" },
+    ecuadorDebtConversion: { value: 1.6, unit: "$bn", description: "Environmental debt-for-nature conversion" },
     source: "NextEra Energy Environmental Report 2024"
+  },
+  
+  // Housing/Grid infrastructure (replaces L&G housing)
+  housing: {
+    smartMeterProgress: { current: 92, target: 100, description: "Smart meter deployment" },
+    gridHardening: { current: 85, target: 100, description: "Storm hardening completion" },
+    solarRooftop: { current: 45, target: 80, description: "Rooftop solar program" }
   }
 };
 
