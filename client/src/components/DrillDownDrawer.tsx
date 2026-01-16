@@ -883,7 +883,10 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         { name: 'Environmental Compliance Audit', value: 'In Review', budget: 'Due in 4 days' }
       ],
       pendingAlerts: [
-        { id: 'gov-alert-1', title: 'Environmental Compliance Audit', severity: 'warning', description: 'Awaiting final review from Legal team', dueDate: '4 days', actionLabel: 'Complete Review' }
+        { id: 'gov-alert-1', title: 'Environmental Compliance Audit', severity: 'warning', description: 'Awaiting final review from Legal team', dueDate: '4 days', actionLabel: 'Complete Review' },
+        { id: 'gov-alert-2', title: 'Grid Reliability Assessment', severity: 'info', description: 'Final sign-off required from Engineering', dueDate: '2 days', actionLabel: 'Approve' },
+        { id: 'gov-alert-3', title: 'Energy Market Risk Review', severity: 'info', description: 'Market analysis pending confirmation', dueDate: '3 days', actionLabel: 'Confirm' },
+        { id: 'gov-alert-4', title: 'Regulatory Compliance Review', severity: 'info', description: 'Documentation review in progress', dueDate: '5 days', actionLabel: 'Review Docs' }
       ],
       insight: '3 of 4 governance decisions completed this cycle. Environmental Compliance Audit is currently in review and expected to complete within SLA.',
       summary: 'Governance queue performing well with 87% on-time completion rate. One decision pending final review.'
