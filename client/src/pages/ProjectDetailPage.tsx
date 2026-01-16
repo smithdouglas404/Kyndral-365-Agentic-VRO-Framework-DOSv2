@@ -330,11 +330,13 @@ export default function ProjectDetailPage() {
               variant="ghost" 
               size="icon" 
               onClick={() => {
-                if (window.history.length > 1) {
-                  window.history.back();
-                } else {
-                  setLocation('/dashboard');
-                }
+                const segmentMap: Record<string, string> = {
+                  'Florida Power & Light': 'fpl',
+                  'NextEra Energy Resources': 'neer',
+                  'Corporate & Other': 'corporate-other'
+                };
+                const segmentId = segmentMap[project.bu] || 'fpl';
+                setLocation(`/segment/${segmentId}`);
               }} 
               data-testid="button-back"
             >
