@@ -37,6 +37,56 @@ export interface SAFeMetrics {
   epicProgress: number; // 0-100%
   okr?: { objective: string; keyResult: string; progress: number };
   piTrend: { pi: string; velocity: number; predictability: number }[];
+  // Full SAFe context from database
+  portfolio?: {
+    id: string;
+    name: string;
+    strategicTheme?: string;
+    lpmCadence?: string;
+    budgetTotal?: string;
+    budgetAllocated?: string;
+  };
+  valueStream?: {
+    id: string;
+    name: string;
+    type?: string;
+    owner?: string;
+    flowEfficiency?: string;
+    leadTime?: string;
+  };
+  art?: {
+    id: string;
+    name: string;
+    releaseTrainEngineer?: string;
+    productManager?: string;
+    systemArchitect?: string;
+    piCadence?: string;
+    teamCount?: string;
+    velocity?: string;
+    predictability?: string;
+  };
+  team?: {
+    id: string;
+    name: string;
+    type?: string;
+    scrumMaster?: string;
+    productOwner?: string;
+    techLead?: string;
+    memberCount?: string;
+    capacity?: string;
+    velocity?: string;
+  };
+  programIncrement?: {
+    id: string;
+    name: string;
+    piNumber?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    committedPoints?: string;
+    deliveredPoints?: string;
+    predictability?: string;
+  };
 }
 
 // SAFe 6.0 Portfolio Stages

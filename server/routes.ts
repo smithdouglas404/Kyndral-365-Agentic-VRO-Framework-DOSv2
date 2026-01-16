@@ -901,18 +901,34 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const allAlerts = await storage.getAlerts();
       const allInterventions = await storage.getInterventions();
       
+      // Fetch SAFe hierarchy data for enrichment
+      const [allPortfolios, allValueStreams, allArts, allTeams, allPIs] = await Promise.all([
+        storage.getPortfolios(),
+        storage.getValueStreams(),
+        storage.getArts(),
+        storage.getTeams(),
+        storage.getProgramIncrements()
+      ]);
+      
+      // Create lookup maps for SAFe entities
+      const portfolioMap = new Map(allPortfolios.map(p => [p.id, p]));
+      const valueStreamMap = new Map(allValueStreams.map(vs => [vs.id, vs]));
+      const artMap = new Map(allArts.map(a => [a.id, a]));
+      const teamMap = new Map(allTeams.map(t => [t.id, t]));
+      
       // Create a map of project IDs to names for dependency lookup
       const projectNameMap = new Map<string, string>();
       allProjects.forEach(proj => projectNameMap.set(proj.id, proj.name));
       
       const enrichedList = await Promise.all(allProjects.map(async (p) => {
-        const [feats, strs, tsks, ress, deps, mils] = await Promise.all([
+        const [feats, strs, tsks, ress, deps, mils, risks] = await Promise.all([
           storage.getFeatures(p.id),
           storage.getStoriesByProject(p.id),
           storage.getTasksByProject(p.id),
           storage.getResources(p.id),
           storage.getDependencies(p.id),
-          storage.getMilestones(p.id)
+          storage.getMilestones(p.id),
+          storage.getRisks(p.id)
         ]);
         
         const projectAlerts = allAlerts.filter(a => a.sourceEntityId === p.id);
@@ -929,6 +945,68 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           targetProjectName: dep.targetProjectId ? projectNameMap.get(dep.targetProjectId) || dep.name : dep.name
         }));
         
+        // Get SAFe hierarchy details
+        const portfolio = p.portfolioId ? portfolioMap.get(p.portfolioId) : null;
+        const valueStream = p.valueStreamId ? valueStreamMap.get(p.valueStreamId) : null;
+        const art = p.artId ? artMap.get(p.artId) : null;
+        const team = p.teamId ? teamMap.get(p.teamId) : null;
+        
+        // Find current PI for this ART
+        const currentPI = art ? allPIs.find(pi => pi.artId === art.id && pi.status === 'executing') : null;
+        
+        // Build SAFe context object with full details
+        const safeContext = {
+          portfolio: portfolio ? {
+            id: portfolio.id,
+            name: portfolio.name,
+            strategicTheme: portfolio.strategicTheme,
+            lpmCadence: portfolio.lpmCadence,
+            budgetTotal: portfolio.budgetTotal,
+            budgetAllocated: portfolio.budgetAllocated
+          } : null,
+          valueStream: valueStream ? {
+            id: valueStream.id,
+            name: valueStream.name,
+            type: valueStream.type,
+            owner: valueStream.valueStreamOwner,
+            flowEfficiency: valueStream.flowEfficiency,
+            leadTime: valueStream.leadTime
+          } : null,
+          art: art ? {
+            id: art.id,
+            name: art.name,
+            releaseTrainEngineer: art.releaseTrainEngineer,
+            productManager: art.productManager,
+            systemArchitect: art.systemArchitect,
+            piCadence: art.piCadence,
+            teamCount: art.teamCount,
+            velocity: art.velocity,
+            predictability: art.predictability
+          } : null,
+          team: team ? {
+            id: team.id,
+            name: team.name,
+            type: team.type,
+            scrumMaster: team.scrumMaster,
+            productOwner: team.productOwner,
+            techLead: team.techLead,
+            memberCount: team.memberCount,
+            capacity: team.capacity,
+            velocity: team.velocity
+          } : null,
+          programIncrement: currentPI ? {
+            id: currentPI.id,
+            name: currentPI.name,
+            piNumber: currentPI.piNumber,
+            startDate: currentPI.startDate,
+            endDate: currentPI.endDate,
+            status: currentPI.status,
+            committedPoints: currentPI.committedPoints,
+            deliveredPoints: currentPI.deliveredPoints,
+            predictability: currentPI.predictability
+          } : null
+        };
+        
         return {
           ...p,
           featureCount: feats.length,
@@ -936,10 +1014,14 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           taskCount: tsks.length,
           resourceCount: ress.length,
           dependencyCount: deps.length,
+          riskCount: risks.length,
           alerts: projectAlerts,
           interventions: projectInterventions,
           dependencies: enrichedDeps,
-          nextMilestone
+          risks: risks,
+          milestones: mils,
+          nextMilestone,
+          safeContext
         };
       }));
       res.json(enrichedList);

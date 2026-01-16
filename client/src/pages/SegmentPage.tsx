@@ -196,9 +196,39 @@ export default function SegmentPage() {
     return mappedNames.includes(a.division);
   });
   
-  // Get portfolio data for VRO/PMO metrics
+  // Get portfolio data for VRO/PMO metrics (static fallback)
   const portfolioId = segmentToPortfolioMapping[resolvedId || ''];
-  const portfolioData = portfolioId ? buPortfolios.find(p => p.id === portfolioId) : undefined;
+  const staticPortfolioData = portfolioId ? buPortfolios.find(p => p.id === portfolioId) : undefined;
+  
+  // Calculate real metrics from database projects
+  const projectsWithVelocity = segmentProjects.filter(p => p.safe?.velocity > 0);
+  const avgVelocity = projectsWithVelocity.length > 0 
+    ? Math.round(projectsWithVelocity.reduce((sum, p) => sum + p.safe.velocity, 0) / projectsWithVelocity.length)
+    : staticPortfolioData?.velocity || 0;
+    
+  const projectsWithPredictability = segmentProjects.filter(p => p.safe?.predictability > 0);
+  const avgPredictability = projectsWithPredictability.length > 0
+    ? Math.round(projectsWithPredictability.reduce((sum, p) => sum + p.safe.predictability, 0) / projectsWithPredictability.length)
+    : staticPortfolioData?.predictability || 0;
+    
+  const currentPIProject = segmentProjects.find(p => p.safe?.currentPI);
+  const currentPI = currentPIProject?.safe?.currentPI || staticPortfolioData?.currentPI || 'PI 25.1';
+  
+  const totalValueRealized = segmentProjects.reduce((sum, p) => sum + (p.roiValue || 0), 0);
+  const healthyProjects = segmentProjects.filter(p => p.status === 'green').length;
+  const healthScore = segmentProjects.length > 0 
+    ? Math.round((healthyProjects / segmentProjects.length) * 100)
+    : staticPortfolioData?.healthScore || 0;
+    
+  // Create calculated portfolioData that prefers real data
+  const portfolioData = staticPortfolioData ? {
+    ...staticPortfolioData,
+    velocity: avgVelocity,
+    predictability: avgPredictability,
+    currentPI: currentPI,
+    valueRealized: totalValueRealized,
+    healthScore: healthScore
+  } : undefined;
   
   const kpiChartData = divisionKpis.slice(0, 4).map(kpi => ({
     name: kpi.name.length > 15 ? kpi.name.slice(0, 15) + "..." : kpi.name,

@@ -41,7 +41,61 @@ export interface APIProject {
   alerts?: any[];
   interventions?: any[];
   dependencies?: any[];
+  risks?: any[];
+  milestones?: any[];
   nextMilestone?: string;
+  riskCount?: number;
+  safeContext?: {
+    portfolio?: {
+      id: string;
+      name: string;
+      strategicTheme?: string;
+      lpmCadence?: string;
+      budgetTotal?: string;
+      budgetAllocated?: string;
+    };
+    valueStream?: {
+      id: string;
+      name: string;
+      type?: string;
+      owner?: string;
+      flowEfficiency?: string;
+      leadTime?: string;
+    };
+    art?: {
+      id: string;
+      name: string;
+      releaseTrainEngineer?: string;
+      productManager?: string;
+      systemArchitect?: string;
+      piCadence?: string;
+      teamCount?: string;
+      velocity?: string;
+      predictability?: string;
+    };
+    team?: {
+      id: string;
+      name: string;
+      type?: string;
+      scrumMaster?: string;
+      productOwner?: string;
+      techLead?: string;
+      memberCount?: string;
+      capacity?: string;
+      velocity?: string;
+    };
+    programIncrement?: {
+      id: string;
+      name: string;
+      piNumber?: string;
+      startDate?: string;
+      endDate?: string;
+      status?: string;
+      committedPoints?: string;
+      deliveredPoints?: string;
+      predictability?: string;
+    };
+  };
 }
 
 function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
@@ -97,10 +151,10 @@ function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
     risks: [],
     nextMilestone: p.nextMilestone || "",
     safe: {
-      velocity: parseInt(p.velocity) || 0,
-      predictability: parseInt(p.predictability) || 0,
-      flowEfficiency: parseInt(p.flowEfficiency) || 0,
-      currentPI: p.currentPi,
+      velocity: parseInt(p.velocity) || parseInt(p.safeContext?.team?.velocity || '0') || parseInt(p.safeContext?.art?.velocity || '0') || 0,
+      predictability: parseInt(p.predictability?.replace('%', '') || '0') || parseInt(p.safeContext?.programIncrement?.predictability || '0') || parseInt(p.safeContext?.art?.predictability || '0') || 0,
+      flowEfficiency: parseInt(p.flowEfficiency) || parseInt(p.safeContext?.valueStream?.flowEfficiency || '0') || 0,
+      currentPI: p.currentPi || p.safeContext?.programIncrement?.piNumber || '',
       epicId: p.epicId,
       epicName: p.epicName,
       epicProgress: parseInt(p.epicProgress) || 0,
@@ -110,17 +164,23 @@ function mapAPIProjectToEnriched(p: APIProject): EnrichedProject {
         progress: p.okrProgress || 0
       } : undefined,
       piTrend: [],
+      // Full SAFe context from database
+      portfolio: p.safeContext?.portfolio,
+      valueStream: p.safeContext?.valueStream,
+      art: p.safeContext?.art,
+      team: p.safeContext?.team,
+      programIncrement: p.safeContext?.programIncrement,
     },
     safeStage: p.safeStage as any,
     aiSignals,
     proactiveActions,
     trendData: [],
     dependencies,
-    artName: p.artName,
-    portfolioTheme: p.portfolioTheme,
+    artName: p.artName || p.safeContext?.art?.name || '',
+    portfolioTheme: p.portfolioTheme || p.safeContext?.portfolio?.strategicTheme || '',
     currentPI: parseInt(p.currentPi?.replace(/\D/g, "") || "0") || 0,
     totalPIs: parseInt(p.totalPis) || 0,
-    velocity: parseInt(p.velocity) || 0,
+    velocity: parseInt(p.velocity) || parseInt(p.safeContext?.team?.velocity || '0') || 0,
     featureCount: p.featureCount || 0,
     storyCount: p.storyCount || 0,
     taskCount: p.taskCount || 0,
