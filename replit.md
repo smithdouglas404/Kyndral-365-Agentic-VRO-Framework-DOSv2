@@ -125,7 +125,7 @@ The application features a comprehensive MCP (Model Context Protocol) integratio
 10. **Batch Import**: CSV/Excel/JSON file import
 
 ### External PPM Tool API Clients
-The application includes production-ready API clients for three major PPM tools:
+The application includes production-ready API clients for 9 major PPM tools:
 
 **Jira** (`server/jiraClient.ts`)
 - Authentication: Basic Auth with API Token
@@ -141,6 +141,36 @@ The application includes production-ready API clients for three major PPM tools:
 - Authentication: Personal Access Token (PAT)
 - Required config: `organization`, `project`, `personalAccessToken`
 - Syncs: Projects, Epics/Features, User Stories/PBIs, Tasks
+
+**Planview** (`server/planviewClient.ts`)
+- Authentication: API Key or OAuth
+- Required config: `instanceUrl`, `apiKey`
+- Syncs: Portfolios, Programs, Projects, Work Items
+
+**Microsoft Project Online** (`server/msProjectClient.ts`)
+- Authentication: Azure AD OAuth (client credentials)
+- Required config: `tenantId`, `clientId`, `clientSecret`
+- Syncs: Projects, Buckets → Features, Tasks
+
+**Smartsheet** (`server/smartsheetClient.ts`)
+- Authentication: Access Token
+- Required config: `accessToken`
+- Syncs: Sheets → Projects, Rows → Features/Stories/Tasks (hierarchy-aware)
+
+**Rally/Broadcom** (`server/rallyClient.ts`)
+- Authentication: API Key (ZSESSIONID)
+- Required config: `apiKey`
+- Syncs: Portfolio Items (Epics/Features), User Stories, Tasks
+
+**Monday.com** (`server/mondayClient.ts`)
+- Authentication: API Key
+- Required config: `apiKey`
+- Syncs: Boards → Projects, Groups → Features, Items → Stories, Subitems → Tasks
+
+**Asana** (`server/asanaClient.ts`)
+- Authentication: Personal Access Token or OAuth
+- Required config: `accessToken`, optional `workspaceGid`
+- Syncs: Projects, Sections → Features, Tasks → Stories, Subtasks → Tasks
 
 ### Sync Job Scheduling
 - **Cron-based scheduling**: Configure sync jobs with cron expressions

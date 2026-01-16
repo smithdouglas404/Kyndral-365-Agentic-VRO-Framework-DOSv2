@@ -2,6 +2,12 @@ import { storage } from "./storage";
 import { createJiraClientFromAdapter } from "./jiraClient";
 import { createServiceNowClientFromAdapter } from "./serviceNowClient";
 import { createAzureDevOpsClientFromAdapter } from "./azureDevOpsClient";
+import { createPlanviewClientFromAdapter } from "./planviewClient";
+import { createMSProjectClientFromAdapter } from "./msProjectClient";
+import { createSmartsheetClientFromAdapter } from "./smartsheetClient";
+import { createRallyClientFromAdapter } from "./rallyClient";
+import { createMondayClientFromAdapter } from "./mondayClient";
+import { createAsanaClientFromAdapter } from "./asanaClient";
 
 interface ScheduledJob {
   jobId: string;
@@ -157,8 +163,164 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
+      } else if (job.syncType === 'planview' && job.mcpAdapterId) {
+        const client = await createPlanviewClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Planview client - check adapter configuration (instanceUrl, apiKey)");
+        }
+        
+        let config: { projectId?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const projectId = config.projectId;
+        if (!projectId) {
+          throw new Error("Missing projectId in sync job filterCriteria");
+        }
+        
+        const result = await client.syncProject(projectId, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType === 'msproject' && job.mcpAdapterId) {
+        const client = await createMSProjectClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create MS Project client - check adapter configuration (tenantId, clientId, clientSecret)");
+        }
+        
+        let config: { projectId?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const projectId = config.projectId;
+        if (!projectId) {
+          throw new Error("Missing projectId in sync job filterCriteria");
+        }
+        
+        const result = await client.syncProject(projectId, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType === 'smartsheet' && job.mcpAdapterId) {
+        const client = await createSmartsheetClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Smartsheet client - check adapter configuration (accessToken)");
+        }
+        
+        let config: { sheetId?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const sheetId = config.sheetId;
+        if (!sheetId) {
+          throw new Error("Missing sheetId in sync job filterCriteria");
+        }
+        
+        const result = await client.syncSheet(sheetId, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType === 'rally' && job.mcpAdapterId) {
+        const client = await createRallyClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Rally client - check adapter configuration (apiKey)");
+        }
+        
+        let config: { projectRef?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const projectRef = config.projectRef;
+        if (!projectRef) {
+          throw new Error("Missing projectRef in sync job filterCriteria");
+        }
+        
+        const result = await client.syncProject(projectRef, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType === 'monday' && job.mcpAdapterId) {
+        const client = await createMondayClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Monday.com client - check adapter configuration (apiKey)");
+        }
+        
+        let config: { boardId?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const boardId = config.boardId;
+        if (!boardId) {
+          throw new Error("Missing boardId in sync job filterCriteria");
+        }
+        
+        const result = await client.syncBoard(boardId, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
+      } else if (job.syncType === 'asana' && job.mcpAdapterId) {
+        const client = await createAsanaClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create Asana client - check adapter configuration (accessToken)");
+        }
+        
+        let config: { projectGid?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+        
+        const projectGid = config.projectGid;
+        if (!projectGid) {
+          throw new Error("Missing projectGid in sync job filterCriteria");
+        }
+        
+        const result = await client.syncProject(projectGid, job.mcpAdapterId);
+        recordsCreated = (result.projectsCreated || 0) + 
+                        (result.featuresCreated || 0) + 
+                        (result.storiesCreated || 0) + 
+                        (result.tasksCreated || 0);
+        recordsProcessed = recordsCreated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
       } else {
-        throw new Error(`Unsupported sync type: ${job.syncType} - configure mcpAdapterId with proper adapter type`);
+        throw new Error(`Unsupported sync type: ${job.syncType} - supported types: jira, servicenow, azure_devops, planview, msproject, smartsheet, rally, monday, asana`);
       }
 
       await storage.updateSyncJobRun(run.id, {
