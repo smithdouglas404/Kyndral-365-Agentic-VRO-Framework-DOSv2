@@ -37,7 +37,7 @@ const THRESHOLD_CONFIGS: ThresholdConfig[] = [
     warningThreshold: 0.92,
     criticalThreshold: 0.80,
     suggestedAction: 'Notify Finance team and freeze non-essential spending',
-    autonomousAction: { type: 'freeze-spending', description: 'Freeze discretionary spend above £5K' }
+    autonomousAction: { type: 'freeze-spending', description: 'Freeze discretionary spend above $5K' }
   },
   {
     metricKey: 'okr_progress',

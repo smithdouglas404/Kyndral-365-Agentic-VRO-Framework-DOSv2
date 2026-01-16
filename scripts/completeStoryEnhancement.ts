@@ -165,7 +165,7 @@ const allStoryCriteria: Record<string, string[]> = {
     'Given 7 days arrears threshold reached, When case escalated, Then dedicated arrears officer assigned with full tenant payment history'
   ],
   'Arrears Management': [
-    'Given arrears exceed £500, When payment plan workflow triggers, Then tenant is offered structured repayment options via portal',
+    'Given arrears exceed $500, When payment plan workflow triggers, Then tenant is offered structured repayment options via portal',
     'Given payment plan agreed and signed, When schedule activated, Then automated collections adjust to plan installments',
     'Given pre-action protocol threshold reached (8 weeks arrears), When legal process initiates, Then compliant Section 8 notice pack generates'
   ],
@@ -228,7 +228,7 @@ const allStoryCriteria: Record<string, string[]> = {
   ],
   'Sensitivity Analysis Tools': [
     'Given base case quote is generated, When sensitivity analysis initiated, Then impact of +/-50bps gilt yield shift is calculated and displayed',
-    'Given mortality improvement assumption varied, When scenario runs, Then liability impact in £m is quantified with chart',
+    'Given mortality improvement assumption varied, When scenario runs, Then liability impact in $m is quantified with chart',
     'Given multiple scenarios requested for stress testing, When batch processed, Then comparison table with tornado diagram is generated'
   ],
 
@@ -245,7 +245,7 @@ const allStoryCriteria: Record<string, string[]> = {
   ],
   'Climate Data Pipeline': [
     'Given CDP releases annual climate questionnaire responses, When data ingested, Then company climate scores available in platform within 48 hours of publication',
-    'Given company reports Scope 1/2/3 GHG emissions, When data normalized to tCO2e per £m revenue, Then peer comparison across GICS sectors is enabled',
+    'Given company reports Scope 1/2/3 GHG emissions, When data normalized to tCO2e per $m revenue, Then peer comparison across GICS sectors is enabled',
     'Given company sets or achieves SBTi-validated target, When SBTi database syncs, Then Net Zero commitment status reflects current validation within 1 week'
   ],
   'SFDR PAI Reporting': [
@@ -259,12 +259,12 @@ const allStoryCriteria: Record<string, string[]> = {
     'Given EU Taxonomy Delegated Acts are updated, When regulatory change implemented, Then technical screening criteria reflect new thresholds within 2 months of publication'
   ],
   'Portfolio Carbon Calculator': [
-    'Given portfolio holdings with weights provided, When WACI calculated, Then weighted average carbon intensity (tCO2e per £m invested) displayed with sector attribution',
+    'Given portfolio holdings with weights provided, When WACI calculated, Then weighted average carbon intensity (tCO2e per $m invested) displayed with sector attribution',
     'Given Net Zero 2050 target commitment exists, When decarbonization trajectory modeled, Then year-by-year interim target pathway with current position vs trajectory shown',
     'Given carbon attribution drill-down requested, When analysis runs, Then top 10 carbon contributors by absolute financed emissions identified with engagement priority ranking'
   ],
   'TCFD Scenario Analysis': [
-    'Given NGFS climate scenarios (orderly/disorderly/hot house) selected, When portfolio stress test runs, Then value at risk impact quantified in £m across time horizons',
+    'Given NGFS climate scenarios (orderly/disorderly/hot house) selected, When portfolio stress test runs, Then value at risk impact quantified in $m across time horizons',
     'Given physical risk assessment needed for real assets, When geocoding and climate hazard mapping complete, Then flood/wildfire/heat stress scores display at asset level',
     'Given transition risk from carbon pricing modeled, When carbon price pathway (e.g., IEA Net Zero) applied, Then stranded asset exposure calculated for fossil fuel holdings'
   ],
@@ -341,7 +341,7 @@ const allStoryCriteria: Record<string, string[]> = {
   // ========== REMAINING TEMPLATES WITH CONTEXTUAL CRITERIA ==========
   // Climate Transition Analytics
   'Climate Scenario Engine': [
-    'Given NGFS climate scenario is selected, When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 time horizons in £m value at risk',
+    'Given NGFS climate scenario is selected, When portfolio analyzed, Then asset-level impact quantified across 2030/2040/2050 time horizons in $m value at risk',
     'Given orderly vs disorderly transition pathways compared, When results displayed, Then differential impact on fossil fuel vs clean energy holdings is clear',
     'Given scenario assumptions updated by NGFS, When new scenario version released, Then platform incorporates updated parameters within 1 month'
   ],

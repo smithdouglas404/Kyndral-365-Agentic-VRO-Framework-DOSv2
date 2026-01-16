@@ -24,7 +24,7 @@ const domainEnhancements: Record<string, { criteria: (storyName: string) => stri
   },
   'Climate_Transition_Analytics': {
     criteria: (storyName: string) => [
-      `Given portfolio holdings for ${storyName.toLowerCase()} are analyzed, When climate scenarios applied, Then NGFS 1.5°C/2°C/3°C+ impacts are quantified in £m value at risk`,
+      `Given portfolio holdings for ${storyName.toLowerCase()} are analyzed, When climate scenarios applied, Then NGFS 1.5°C/2°C/3°C+ impacts are quantified in $m value at risk`,
       `Given physical risk assessment needed, When geocoding completes, Then asset-level flood/wildfire/heat stress scores use IPCC AR6 projections`,
       `Given Net Zero pathway required, When trajectory modeled, Then year-by-year Scope 1/2/3 reduction targets align with SBTi framework`
     ],

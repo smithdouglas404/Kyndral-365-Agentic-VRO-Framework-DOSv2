@@ -155,7 +155,7 @@ const storySpecificCriteria: Record<string, Record<string, string[]>> = {
     ],
     'Climate Data Pipeline': [
       'Given CDP data is released annually, When ingested, Then company climate scores are available within 48 hours of publication',
-      'Given Scope 1/2/3 emissions reported, When normalized, Then tCO2e per £m revenue enables peer comparison',
+      'Given Scope 1/2/3 emissions reported, When normalized, Then tCO2e per $m revenue enables peer comparison',
       'Given SBTi target validation updates, When synced, Then company Net Zero commitment status is current within 1 week'
     ],
     'PAI Indicators Calculation': [
@@ -169,7 +169,7 @@ const storySpecificCriteria: Record<string, Record<string, string[]>> = {
       'Given Taxonomy regulation updates, When implemented, Then technical screening criteria are updated within 2 months'
     ],
     'Portfolio Carbon Footprint': [
-      'Given portfolio holdings provided, When WACI calculated, Then weighted average carbon intensity is shown in tCO2e per £m invested',
+      'Given portfolio holdings provided, When WACI calculated, Then weighted average carbon intensity is shown in tCO2e per $m invested',
       'Given Net Zero target set, When trajectory modeled, Then year-by-year decarbonization pathway with interim milestones is displayed',
       'Given carbon attribution analyzed, When drill-down requested, Then top 10 contributors by absolute emissions are identified'
     ]

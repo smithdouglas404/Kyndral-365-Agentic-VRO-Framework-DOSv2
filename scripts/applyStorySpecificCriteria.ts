@@ -190,7 +190,7 @@ const storySpecificCriteria: Record<string, string[]> = {
   ],
   'Climate Data Pipeline': [
     'Given CDP data is released annually, When ingested, Then company climate scores are available within 48 hours',
-    'Given Scope 1/2/3 emissions reported, When normalized, Then tCO2e per £m revenue enables peer comparison',
+    'Given Scope 1/2/3 emissions reported, When normalized, Then tCO2e per $m revenue enables peer comparison',
     'Given SBTi target validation updates, When synced, Then company Net Zero commitment status is current'
   ],
   'SFDR PAI Reporting': [
@@ -204,12 +204,12 @@ const storySpecificCriteria: Record<string, string[]> = {
     'Given Taxonomy regulation updates, When implemented, Then technical screening criteria are updated within 2 months'
   ],
   'Portfolio Carbon Calculator': [
-    'Given portfolio holdings provided, When WACI calculated, Then weighted average carbon intensity is shown in tCO2e/£m',
+    'Given portfolio holdings provided, When WACI calculated, Then weighted average carbon intensity is shown in tCO2e/$m',
     'Given Net Zero target set, When trajectory modeled, Then year-by-year decarbonization pathway is displayed',
     'Given carbon attribution analyzed, When drill-down requested, Then top 10 contributors by absolute emissions are identified'
   ],
   'TCFD Scenario Analysis': [
-    'Given NGFS climate scenarios selected, When portfolio stress test runs, Then impact on holdings is quantified in £m',
+    'Given NGFS climate scenarios selected, When portfolio stress test runs, Then impact on holdings is quantified in $m',
     'Given physical risk assessment requested, When geocoding completes, Then asset-level risk scores are shown',
     'Given transition risk modeled, When carbon price pathway applied, Then stranded asset exposure is calculated'
   ],

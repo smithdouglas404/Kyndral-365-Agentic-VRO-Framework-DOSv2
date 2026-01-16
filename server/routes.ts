@@ -576,7 +576,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       
       // Create project with full SAFe data
       const project = await storage.createProject({
-        id: projectData.id,
         name: projectData.name,
         description: projectData.description || `${projectData.name} - SAFe 6.0 Managed Project`,
         businessUnitId: projectData.bu,
@@ -606,7 +605,6 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (projectData.features && Array.isArray(projectData.features)) {
         for (const feat of projectData.features) {
           const feature = await storage.createFeature({
-            id: feat.id,
             projectId: project.id,
             name: feat.name,
             description: feat.description,
@@ -1003,8 +1001,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           projectId: 'proj-climate-analytics',
           projectName: 'Climate Transition Analytics',
           confidence: '0.92',
-          suggestedAction: 'Reallocate £450K from contingency reserve and accelerate Phase 2 deliverables to recover timeline.',
-          impact: 'Without intervention, project NPV decreases by £2.1M and TCFD compliance deadline at risk.',
+          suggestedAction: 'Reallocate $450K from contingency reserve and accelerate Phase 2 deliverables to recover timeline.',
+          impact: 'Without intervention, project NPV decreases by $2.1M and TCFD compliance deadline at risk.',
           status: 'pending',
           agentSource: 'FinOps Agent'
         },
@@ -1017,7 +1015,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           projectName: 'Bulk Annuity Pricing Engine',
           confidence: '0.87',
           suggestedAction: 'Deploy additional actuarial resources and implement parallel testing tracks.',
-          impact: 'Delay may result in £1.8M penalty and reputational risk with regulator.',
+          impact: 'Delay may result in $1.8M penalty and reputational risk with regulator.',
           status: 'pending',
           agentSource: 'TMO Agent'
         },
@@ -1030,7 +1028,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           projectName: 'Enterprise Data Platform',
           confidence: '0.94',
           suggestedAction: 'Escalate to Architecture Board and implement temporary data bridge solution.',
-          impact: '£3.2M in blocked project value across portfolio.',
+          impact: '$3.2M in blocked project value across portfolio.',
           status: 'pending',
           agentSource: 'Integrated Management Agent'
         },
@@ -1090,7 +1088,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           discussionId: discussion.id,
           agentId: 'finops',
           agentName: 'FinOps Agent',
-          content: 'Yes, creating critical intervention now. Recommending the £450K contingency reallocation pathway.',
+          content: 'Yes, creating critical intervention now. Recommending the $450K contingency reallocation pathway.',
           messageType: 'action'
         }
       ];

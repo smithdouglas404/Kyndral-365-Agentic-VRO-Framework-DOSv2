@@ -479,9 +479,9 @@ export function generateImpactSummary(result: ImpactAnalysisResult): string {
   // Financial Impact
   lines.push('');
   lines.push('### Financial Impact');
-  lines.push(`- **Direct cost**: £${result.directCostImpact.toLocaleString()}`);
-  lines.push(`- **Cascade cost**: £${result.cascadeCostImpact.toLocaleString()}`);
-  lines.push(`- **Total cost impact**: £${result.totalCostImpact.toLocaleString()}`);
+  lines.push(`- **Direct cost**: $${result.directCostImpact.toLocaleString()}`);
+  lines.push(`- **Cascade cost**: $${result.cascadeCostImpact.toLocaleString()}`);
+  lines.push(`- **Total cost impact**: $${result.totalCostImpact.toLocaleString()}`);
   
   if (result.roiImpact.originalROI > 0) {
     lines.push(`- **ROI impact**: ${result.roiImpact.percentChange.toFixed(1)}% reduction`);
@@ -515,7 +515,7 @@ export function generateImpactSummary(result: ImpactAnalysisResult): string {
     lines.push('### Mitigation Options');
     for (const option of result.mitigationOptions) {
       lines.push(`- **${option.option}**`);
-      lines.push(`  - Cost: £${option.costToImplement.toLocaleString()}`);
+      lines.push(`  - Cost: $${option.costToImplement.toLocaleString()}`);
       lines.push(`  - Recovery: ${option.scheduleRecoveryDays} days`);
       lines.push(`  - Feasibility: ${option.feasibility}`);
     }

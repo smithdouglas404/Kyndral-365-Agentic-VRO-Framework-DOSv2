@@ -142,7 +142,7 @@ const templateEnhancements: Record<string, { domain: string; features: { name: s
           {
             name: 'TCFD Climate Scenario Analysis',
             criteria: [
-              'Given NGFS climate scenarios are selected, When portfolio stress test runs, Then impact on holdings is quantified in £m',
+              'Given NGFS climate scenarios are selected, When portfolio stress test runs, Then impact on holdings is quantified in $m',
               'Given physical risk assessment is requested, When geocoding completes, Then asset-level flood/wildfire/heat risk scores are shown',
               'Given transition risk is modeled, When carbon price pathway is applied, Then stranded asset exposure is calculated'
             ],
@@ -173,7 +173,7 @@ const templateEnhancements: Record<string, { domain: string; features: { name: s
           {
             name: 'Carbon Footprint Calculator',
             criteria: [
-              'Given portfolio holdings are provided, When carbon footprint is calculated, Then tCO2e per £m invested is shown (WACI)',
+              'Given portfolio holdings are provided, When carbon footprint is calculated, Then tCO2e per $m invested is shown (WACI)',
               'Given Scope 3 emissions are included, When financed emissions are calculated, Then PCAF methodology is applied',
               'Given Net Zero target is set, When trajectory is modeled, Then year-by-year decarbonization path is displayed'
             ],
