@@ -866,6 +866,101 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       ],
       insight: 'Portfolio velocity at 53 points is near target. Group Technology leads with highest velocity. Planning agent recommends cross-team knowledge sharing to improve velocity across business units.',
       summary: 'Velocity trending positive with 26% improvement from baseline. Sprint commitment at 96% indicates healthy capacity planning.'
+    },
+    'governance-decisions': {
+      label: 'Decisions Complete',
+      category: 'VRO',
+      metrics: {
+        'Completed': '3/4',
+        'Pending Review': '1',
+        'Avg Decision Time': '2.3 days',
+        'On-Time Rate': '87%'
+      },
+      projectBreakdown: [
+        { name: 'Grid Reliability Assessment', value: 'Complete', budget: 'On schedule' },
+        { name: 'Energy Market Risk Review', value: 'Complete', budget: '1 day ahead' },
+        { name: 'Regulatory Compliance Review', value: 'Complete', budget: 'On schedule' },
+        { name: 'Environmental Compliance Audit', value: 'In Review', budget: 'Due in 4 days' }
+      ],
+      insight: '3 of 4 governance decisions completed this cycle. Environmental Compliance Audit is currently in review and expected to complete within SLA.',
+      summary: 'Governance queue performing well with 87% on-time completion rate. One decision pending final review.'
+    },
+    'governance-pending': {
+      label: 'Pending Actions',
+      category: 'PMO',
+      metrics: {
+        'Pending Items': '4',
+        'High Priority': '1',
+        'Medium Priority': '2',
+        'Low Priority': '1',
+        'Oldest Item': '5 days'
+      },
+      projectBreakdown: [
+        { name: 'Environmental Compliance Audit', value: 'High', budget: 'Due: 4 days' },
+        { name: 'Q1 Rate Case Filing Review', value: 'Medium', budget: 'Due: 8 days' },
+        { name: 'NERC CIP Attestation', value: 'Medium', budget: 'Due: 12 days' },
+        { name: 'Board ESG Report Approval', value: 'Low', budget: 'Due: 20 days' }
+      ],
+      insight: 'Environmental Compliance Audit requires immediate attention - currently 1 day from due date. NERC CIP Attestation on track but needs scheduling.',
+      summary: '4 governance actions pending. Governance Agent recommends prioritizing Environmental Compliance Audit to maintain SLA compliance.'
+    },
+    'governance-compliance': {
+      label: 'Compliance Score',
+      category: 'VRO',
+      metrics: {
+        'Current Score': '93%',
+        'Target': '95%',
+        'FERC Compliance': '98%',
+        'EPA Compliance': '91%',
+        'NERC CIP': '94%',
+        'State PSC': '89%'
+      },
+      projectBreakdown: [
+        { name: 'FERC Regulatory Compliance', value: '98%', budget: 'Excellent' },
+        { name: 'NERC CIP Cybersecurity', value: '94%', budget: 'On Track' },
+        { name: 'EPA Environmental', value: '91%', budget: 'Needs Attention' },
+        { name: 'Florida PSC Rate Case', value: '89%', budget: 'Under Review' }
+      ],
+      insight: 'Overall compliance at 93% with FERC leading at 98%. EPA and Florida PSC areas need focus to reach 95% target.',
+      summary: 'Strong regulatory compliance posture. Governance Agent monitoring 4 active regulatory areas with automated tracking.'
+    },
+    'governance-high-risks': {
+      label: 'High Risks',
+      category: 'PMO',
+      metrics: {
+        'High Risks': '4',
+        'Critical': '1',
+        'Severe': '3',
+        'Under Mitigation': '3',
+        'New This Week': '1'
+      },
+      projectBreakdown: [
+        { name: 'Hurricane Season Exposure', value: 'Critical', budget: '$1.2B potential impact' },
+        { name: 'Renewable Project Delays', value: 'Severe', budget: '3 projects affected' },
+        { name: 'NERC CIP Audit Finding', value: 'Severe', budget: 'Remediation in progress' },
+        { name: 'Supply Chain Constraints', value: 'Severe', budget: 'Solar panel delays' }
+      ],
+      insight: 'Hurricane Season Exposure is the highest risk with potential $1.2B impact. Storm hardening program 85% complete. 3 risks have active mitigation plans.',
+      summary: '4 high-severity risks actively monitored. Risk Agent recommends accelerating storm hardening completion before peak season.'
+    },
+    'governance-cro': {
+      label: 'CRO Overview',
+      category: 'VRO',
+      metrics: {
+        'CRO': 'Rebecca Kujawa',
+        'Risk Categories': '6',
+        'Open Issues': '12',
+        'Escalations': '2',
+        'Last Review': 'Jan 15, 2026'
+      },
+      projectBreakdown: [
+        { name: 'Operational Risk', value: '4 sub-risks', budget: 'Actively managed' },
+        { name: 'Regulatory Risk', value: '4 sub-risks', budget: 'Under review' },
+        { name: 'Market Risk', value: '4 sub-risks', budget: 'Monitored' },
+        { name: 'Climate & Environmental', value: '3 sub-risks', budget: 'High priority' }
+      ],
+      insight: 'Rebecca Kujawa oversees 6 risk categories with 12 open items. 2 items escalated to executive committee this week.',
+      summary: 'Enterprise risk governance under CRO oversight. Next quarterly risk review scheduled for Feb 2026.'
     }
   };
 
