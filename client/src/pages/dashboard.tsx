@@ -418,7 +418,7 @@ function DashboardContent() {
     setPageContext({
       pageType: 'dashboard',
       entityId: 'integrated-management',
-      entityName: 'Value Realization Co-pilot',
+      entityName: 'Value Realization',
       breadcrumb: ['Dashboard']
     });
   }, [setPageContext]);
@@ -497,7 +497,7 @@ function DashboardContent() {
               transition={{ duration: 0.3 }}
             >
               <h1 className="text-[48px] font-bold text-foreground tracking-tight" data-testid="text-dashboard-title">
-                Value Realization Co-pilot
+                Value Realization
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl">
                 AI-powered Insights supporting the Value Realization and Project Execution Process
