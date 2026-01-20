@@ -1750,7 +1750,7 @@ export class DatabaseStorage implements IStorage {
 
     const divisionData: InsertDivision[] = [
       {
-        id: "florida-power-light",
+        id: "fpl",
         name: "Florida Power & Light",
         ceo: "Armando Pimentel",
         profit2023: 4850,
@@ -1760,7 +1760,7 @@ export class DatabaseStorage implements IStorage {
         color: "#0072CE"
       },
       {
-        id: "nextera-energy-resources",
+        id: "neer",
         name: "NextEra Energy Resources",
         ceo: "Rebecca Kujawa",
         profit2023: 2100,
@@ -1787,10 +1787,10 @@ export class DatabaseStorage implements IStorage {
 
     // Seed KPIs for FPL
     const fplKpis: InsertDivisionKpi[] = [
-      { divisionId: "florida-power-light", name: "Operating Revenue", value2023: "17200", value2024: "18500", target2025: "19500", unit: "$m", trend: "up", status: "on-track" },
-      { divisionId: "florida-power-light", name: "Net Generating Capacity", value2023: "33500", value2024: "35052", target2025: "37000", unit: "MW", trend: "up", status: "on-track" },
-      { divisionId: "florida-power-light", name: "Customer Accounts", value2023: "5.7", value2024: "5.9", target2025: "6.1", unit: "m", trend: "up", status: "on-track" },
-      { divisionId: "florida-power-light", name: "System Reliability", value2023: "99.96", value2024: "99.98", target2025: "99.99", unit: "%", trend: "up", status: "on-track" }
+      { divisionId: "fpl", name: "Operating Revenue", value2023: "17200", value2024: "18500", target2025: "19500", unit: "$m", trend: "up", status: "on-track" },
+      { divisionId: "fpl", name: "Net Generating Capacity", value2023: "33500", value2024: "35052", target2025: "37000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "fpl", name: "Customer Accounts", value2023: "5.7", value2024: "5.9", target2025: "6.1", unit: "m", trend: "up", status: "on-track" },
+      { divisionId: "fpl", name: "System Reliability", value2023: "99.96", value2024: "99.98", target2025: "99.99", unit: "%", trend: "up", status: "on-track" }
     ];
 
     for (const kpi of fplKpis) {
@@ -1799,10 +1799,10 @@ export class DatabaseStorage implements IStorage {
 
     // Seed KPIs for NEER
     const neerKpis: InsertDivisionKpi[] = [
-      { divisionId: "nextera-energy-resources", name: "Operating Revenue", value2023: "6200", value2024: "6800", target2025: "7500", unit: "$m", trend: "up", status: "on-track" },
-      { divisionId: "nextera-energy-resources", name: "Wind Capacity", value2023: "21000", value2024: "22500", target2025: "25000", unit: "MW", trend: "up", status: "on-track" },
-      { divisionId: "nextera-energy-resources", name: "Solar Capacity", value2023: "5800", value2024: "7200", target2025: "9000", unit: "MW", trend: "up", status: "on-track" },
-      { divisionId: "nextera-energy-resources", name: "Battery Storage", value2023: "2800", value2024: "3700", target2025: "5000", unit: "MW", trend: "up", status: "on-track" }
+      { divisionId: "neer", name: "Operating Revenue", value2023: "6200", value2024: "6800", target2025: "7500", unit: "$m", trend: "up", status: "on-track" },
+      { divisionId: "neer", name: "Wind Capacity", value2023: "21000", value2024: "22500", target2025: "25000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "neer", name: "Solar Capacity", value2023: "5800", value2024: "7200", target2025: "9000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "neer", name: "Battery Storage", value2023: "2800", value2024: "3700", target2025: "5000", unit: "MW", trend: "up", status: "on-track" }
     ];
 
     for (const kpi of neerKpis) {
@@ -1812,7 +1812,7 @@ export class DatabaseStorage implements IStorage {
     // Seed OKRs
     const divOkrs: InsertDivisionOkr[] = [
       { 
-        divisionId: "florida-power-light", 
+        divisionId: "fpl", 
         objective: "Accelerate grid modernization through automation",
         keyResults: JSON.stringify([
           { result: "Reduce outage duration", progress: 18, target: 5, unit: "minutes" },
@@ -1823,7 +1823,7 @@ export class DatabaseStorage implements IStorage {
         dueDate: "Q4 2025"
       },
       { 
-        divisionId: "nextera-energy-resources", 
+        divisionId: "neer", 
         objective: "Expand renewable energy generation capacity",
         keyResults: JSON.stringify([
           { result: "Add new wind capacity", progress: 1500, target: 3000, unit: "MW" },
@@ -1841,10 +1841,10 @@ export class DatabaseStorage implements IStorage {
 
     // Seed Risks
     const divRisks: InsertDivisionRisk[] = [
-      { divisionId: "florida-power-light", type: "Hurricane", level: "high", description: "Florida exposure to severe weather events", mitigation: "Grid hardening and storm preparation protocols" },
-      { divisionId: "florida-power-light", type: "Regulatory", level: "medium", description: "Rate case outcomes and regulatory changes", mitigation: "Proactive regulatory engagement" },
-      { divisionId: "nextera-energy-resources", type: "Supply Chain", level: "medium", description: "Solar panel and battery component availability", mitigation: "Diversified supplier relationships" },
-      { divisionId: "nextera-energy-resources", type: "Policy", level: "medium", description: "Changes to renewable energy incentives", mitigation: "Geographic and technology diversification" }
+      { divisionId: "fpl", type: "Hurricane", level: "high", description: "Florida exposure to severe weather events", mitigation: "Grid hardening and storm preparation protocols" },
+      { divisionId: "fpl", type: "Regulatory", level: "medium", description: "Rate case outcomes and regulatory changes", mitigation: "Proactive regulatory engagement" },
+      { divisionId: "neer", type: "Supply Chain", level: "medium", description: "Solar panel and battery component availability", mitigation: "Diversified supplier relationships" },
+      { divisionId: "neer", type: "Policy", level: "medium", description: "Changes to renewable energy incentives", mitigation: "Geographic and technology diversification" }
     ];
 
     for (const risk of divRisks) {
