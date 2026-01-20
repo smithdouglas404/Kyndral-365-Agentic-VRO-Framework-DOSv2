@@ -1387,6 +1387,21 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Full reset - clears and reseeds divisions with correct IDs
+  app.post("/api/demo/reset-divisions", async (_req, res) => {
+    try {
+      await storage.forceSeedDivisions();
+      
+      res.json({ 
+        success: true, 
+        message: 'Division data reset complete. Divisions reseeded with correct IDs (fpl, neer, corporate-other).',
+      });
+    } catch (error: any) {
+      console.error("Division reset error:", error);
+      res.status(500).json({ error: "Failed to reset divisions" });
+    }
+  });
+
   // Seed demo data with autonomy labels
   app.post("/api/demo/seed", async (_req, res) => {
     try {

@@ -148,6 +148,8 @@ export interface IStorage {
   
   seedDemoInterventions(): Promise<void>;
   clearInterventions(): Promise<void>;
+  clearDivisions(): Promise<void>;
+  forceSeedDivisions(): Promise<void>;
   
   getFeatures(projectId: string): Promise<Feature[]>;
   createFeature(feature: InsertFeature): Promise<Feature>;
@@ -786,6 +788,124 @@ export class DatabaseStorage implements IStorage {
 
   async clearInterventions(): Promise<void> {
     await db.delete(interventions);
+  }
+
+  async clearDivisions(): Promise<void> {
+    // Clear in order due to foreign key constraints
+    await db.delete(divisionRisks);
+    await db.delete(divisionOkrs);
+    await db.delete(divisionKpis);
+    await db.delete(divisions);
+    console.log("[Storage] Cleared all division data");
+  }
+
+  async forceSeedDivisions(): Promise<void> {
+    await this.clearDivisions();
+    // Now seed - the existing check will pass since we cleared
+    const divisionData: InsertDivision[] = [
+      {
+        id: "fpl",
+        name: "Florida Power & Light",
+        ceo: "Armando Pimentel",
+        profit2023: 4850,
+        profit2024: 5200,
+        changePercent: 7,
+        description: "Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
+        color: "#0072CE"
+      },
+      {
+        id: "neer",
+        name: "NextEra Energy Resources",
+        ceo: "Rebecca Kujawa",
+        profit2023: 2100,
+        profit2024: 2350,
+        changePercent: 12,
+        description: "World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
+        color: "#00A651"
+      },
+      {
+        id: "corporate-other",
+        name: "Corporate & Other",
+        ceo: "John Ketchum",
+        profit2023: 450,
+        profit2024: 480,
+        changePercent: 7,
+        description: "Corporate functions including finance, legal, IT, human resources, and other shared services supporting NextEra Energy operations.",
+        color: "#8B5CF6"
+      }
+    ];
+
+    for (const div of divisionData) {
+      await db.insert(divisions).values(div);
+    }
+
+    // Seed KPIs for FPL
+    const fplKpis: InsertDivisionKpi[] = [
+      { divisionId: "fpl", name: "Operating Revenue", value2023: "17200", value2024: "18500", target2025: "19500", unit: "$m", trend: "up", status: "on-track" },
+      { divisionId: "fpl", name: "Net Generating Capacity", value2023: "33500", value2024: "35052", target2025: "37000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "fpl", name: "Customer Accounts", value2023: "5.7", value2024: "5.9", target2025: "6.1", unit: "m", trend: "up", status: "on-track" },
+      { divisionId: "fpl", name: "System Reliability", value2023: "99.96", value2024: "99.98", target2025: "99.99", unit: "%", trend: "up", status: "on-track" }
+    ];
+
+    for (const kpi of fplKpis) {
+      await db.insert(divisionKpis).values(kpi);
+    }
+
+    // Seed KPIs for NEER
+    const neerKpis: InsertDivisionKpi[] = [
+      { divisionId: "neer", name: "Operating Revenue", value2023: "6200", value2024: "6800", target2025: "7500", unit: "$m", trend: "up", status: "on-track" },
+      { divisionId: "neer", name: "Wind Capacity", value2023: "21000", value2024: "22500", target2025: "25000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "neer", name: "Solar Capacity", value2023: "5800", value2024: "7200", target2025: "9000", unit: "MW", trend: "up", status: "on-track" },
+      { divisionId: "neer", name: "Battery Storage", value2023: "2800", value2024: "3700", target2025: "5000", unit: "MW", trend: "up", status: "on-track" }
+    ];
+
+    for (const kpi of neerKpis) {
+      await db.insert(divisionKpis).values(kpi);
+    }
+
+    // Seed OKRs
+    const divOkrs: InsertDivisionOkr[] = [
+      { 
+        divisionId: "fpl", 
+        objective: "Accelerate grid modernization through automation",
+        keyResults: JSON.stringify([
+          { result: "Reduce outage duration", progress: 18, target: 5, unit: "minutes" },
+          { result: "Increase smart meter coverage", progress: 92, target: 100, unit: "%" },
+          { result: "Automate grid switching", progress: 75, target: 95, unit: "%" }
+        ]),
+        owner: "Armando Pimentel",
+        dueDate: "Q4 2025"
+      },
+      { 
+        divisionId: "neer", 
+        objective: "Expand renewable energy generation capacity",
+        keyResults: JSON.stringify([
+          { result: "Add new wind capacity", progress: 1500, target: 3000, unit: "MW" },
+          { result: "Deploy solar installations", progress: 1200, target: 2000, unit: "MW" },
+          { result: "Secure long-term contracts", progress: 4, target: 8, unit: "GW" }
+        ]),
+        owner: "Rebecca Kujawa",
+        dueDate: "2026"
+      }
+    ];
+
+    for (const okr of divOkrs) {
+      await db.insert(divisionOkrs).values(okr);
+    }
+
+    // Seed Risks
+    const divRisks: InsertDivisionRisk[] = [
+      { divisionId: "fpl", type: "Hurricane", level: "high", description: "Florida exposure to severe weather events", mitigation: "Grid hardening and storm preparation protocols" },
+      { divisionId: "fpl", type: "Regulatory", level: "medium", description: "Rate case outcomes and regulatory changes", mitigation: "Proactive regulatory engagement" },
+      { divisionId: "neer", type: "Supply Chain", level: "medium", description: "Solar panel and battery component availability", mitigation: "Diversified supplier relationships" },
+      { divisionId: "neer", type: "Policy", level: "medium", description: "Changes to renewable energy incentives", mitigation: "Geographic and technology diversification" }
+    ];
+
+    for (const risk of divRisks) {
+      await db.insert(divisionRisks).values(risk);
+    }
+
+    console.log("[Storage] Force reseeded 3 divisions with KPIs, OKRs, and risks");
   }
 
   async seedDemoInterventions(): Promise<void> {
