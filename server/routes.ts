@@ -53,26 +53,39 @@ const parsePolicyRequestSchema = z.object({
 });
 
 // Legacy slug mapping for backward compatibility (maps old URLs to current database IDs)
-const legacyDivisionSlugs: Record<string, string> = {
-  'lgim': 'neer',
-  'lgc': 'corporate-other',
-  'lgri': 'fpl',
-  'lgr': 'fpl',
-  'lgf': 'corporate-other',
-  'lgi': 'corporate-other',
-  'asset-management': 'neer',
-  'institutional-retirement': 'fpl',
-  'retail': 'fpl',
-  'capital': 'corporate-other',
-  'insurance': 'corporate-other',
-  'fintech': 'corporate-other',
-  'florida-power-light': 'fpl',
-  'nextera-energy-resources': 'neer',
-  'corporate-and-other': 'corporate-other',
+// Supports both short IDs (fpl, neer) and long IDs (florida-power-light, nextera-energy-resources)
+const legacyDivisionSlugs: Record<string, string[]> = {
+  // Short ID aliases
+  'fpl': ['fpl', 'florida-power-light'],
+  'neer': ['neer', 'nextera-energy-resources'],
+  'corporate-other': ['corporate-other'],
+  // Long ID aliases
+  'florida-power-light': ['fpl', 'florida-power-light'],
+  'nextera-energy-resources': ['neer', 'nextera-energy-resources'],
+  'corporate-and-other': ['corporate-other'],
+  // Legacy L&G aliases
+  'lgim': ['neer', 'nextera-energy-resources'],
+  'lgc': ['corporate-other'],
+  'lgri': ['fpl', 'florida-power-light'],
+  'lgr': ['fpl', 'florida-power-light'],
+  'lgf': ['corporate-other'],
+  'lgi': ['corporate-other'],
+  'asset-management': ['neer', 'nextera-energy-resources'],
+  'institutional-retirement': ['fpl', 'florida-power-light'],
+  'retail': ['fpl', 'florida-power-light'],
+  'capital': ['corporate-other'],
+  'insurance': ['corporate-other'],
+  'fintech': ['corporate-other'],
 };
 
-function resolveDivisionId(id: string): string {
-  return legacyDivisionSlugs[id] || id;
+// Try each possible ID until one works (handles both dev and prod database IDs)
+async function resolveDivisionIdAsync(id: string): Promise<string> {
+  const candidates = legacyDivisionSlugs[id] || [id];
+  for (const candidateId of candidates) {
+    const division = await storage.getDivision(candidateId);
+    if (division) return candidateId;
+  }
+  return candidates[0]; // Fallback to first candidate
 }
 
 export async function registerRoutes(
@@ -2492,7 +2505,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id", async (req, res) => {
     try {
-      const resolvedId = resolveDivisionId(req.params.id);
+      const resolvedId = await resolveDivisionIdAsync(req.params.id);
       const division = await storage.getDivision(resolvedId);
       if (!division) {
         return res.status(404).json({ error: "Division not found" });
@@ -2506,7 +2519,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/full", async (req, res) => {
     try {
-      const resolvedId = resolveDivisionId(req.params.id);
+      const resolvedId = await resolveDivisionIdAsync(req.params.id);
       const fullDivision = await storage.getFullDivision(resolvedId);
       if (!fullDivision) {
         return res.status(404).json({ error: "Division not found" });
@@ -2520,7 +2533,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/kpis", async (req, res) => {
     try {
-      const resolvedId = resolveDivisionId(req.params.id);
+      const resolvedId = await resolveDivisionIdAsync(req.params.id);
       const kpis = await storage.getDivisionKpis(resolvedId);
       res.json(kpis);
     } catch (error: any) {
@@ -2531,7 +2544,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/okrs", async (req, res) => {
     try {
-      const resolvedId = resolveDivisionId(req.params.id);
+      const resolvedId = await resolveDivisionIdAsync(req.params.id);
       const okrs = await storage.getDivisionOkrs(resolvedId);
       res.json(okrs);
     } catch (error: any) {
@@ -2542,7 +2555,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/risks", async (req, res) => {
     try {
-      const resolvedId = resolveDivisionId(req.params.id);
+      const resolvedId = await resolveDivisionIdAsync(req.params.id);
       const risks = await storage.getDivisionRisks(resolvedId);
       res.json(risks);
     } catch (error: any) {
