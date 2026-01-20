@@ -80,9 +80,9 @@ export function FloatingAlertBanner() {
           const data = await response.json();
           const interventions: CommandCenterIntervention[] = data.interventions || [];
           
-          // Find newest pending intervention we haven't shown
+          // Find newest CRITICAL pending intervention we haven't shown
           const pendingInterventions = interventions
-            .filter(i => i.status === 'pending' && !seenIdsRef.current.has(i.id))
+            .filter(i => i.status === 'pending' && i.severity === 'critical' && !seenIdsRef.current.has(i.id))
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           
           if (pendingInterventions.length > 0) {
@@ -113,7 +113,7 @@ export function FloatingAlertBanner() {
     };
 
     fetchInterventions();
-    const interval = setInterval(fetchInterventions, 10000); // Poll every 10 seconds
+    const interval = setInterval(fetchInterventions, 180000); // Poll every 3 minutes for critical alerts only
     
     return () => {
       clearInterval(interval);
