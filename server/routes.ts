@@ -52,6 +52,29 @@ const parsePolicyRequestSchema = z.object({
   documentId: z.string().optional().nullable(),
 });
 
+// Legacy slug mapping for backward compatibility (maps old URLs to current database IDs)
+const legacyDivisionSlugs: Record<string, string> = {
+  'lgim': 'neer',
+  'lgc': 'corporate-other',
+  'lgri': 'fpl',
+  'lgr': 'fpl',
+  'lgf': 'corporate-other',
+  'lgi': 'corporate-other',
+  'asset-management': 'neer',
+  'institutional-retirement': 'fpl',
+  'retail': 'fpl',
+  'capital': 'corporate-other',
+  'insurance': 'corporate-other',
+  'fintech': 'corporate-other',
+  'florida-power-light': 'fpl',
+  'nextera-energy-resources': 'neer',
+  'corporate-and-other': 'corporate-other',
+};
+
+function resolveDivisionId(id: string): string {
+  return legacyDivisionSlugs[id] || id;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -2469,7 +2492,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id", async (req, res) => {
     try {
-      const division = await storage.getDivision(req.params.id);
+      const resolvedId = resolveDivisionId(req.params.id);
+      const division = await storage.getDivision(resolvedId);
       if (!division) {
         return res.status(404).json({ error: "Division not found" });
       }
@@ -2482,7 +2506,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/full", async (req, res) => {
     try {
-      const fullDivision = await storage.getFullDivision(req.params.id);
+      const resolvedId = resolveDivisionId(req.params.id);
+      const fullDivision = await storage.getFullDivision(resolvedId);
       if (!fullDivision) {
         return res.status(404).json({ error: "Division not found" });
       }
@@ -2495,7 +2520,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/kpis", async (req, res) => {
     try {
-      const kpis = await storage.getDivisionKpis(req.params.id);
+      const resolvedId = resolveDivisionId(req.params.id);
+      const kpis = await storage.getDivisionKpis(resolvedId);
       res.json(kpis);
     } catch (error: any) {
       console.error("Get division KPIs error:", error);
@@ -2505,7 +2531,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/okrs", async (req, res) => {
     try {
-      const okrs = await storage.getDivisionOkrs(req.params.id);
+      const resolvedId = resolveDivisionId(req.params.id);
+      const okrs = await storage.getDivisionOkrs(resolvedId);
       res.json(okrs);
     } catch (error: any) {
       console.error("Get division OKRs error:", error);
@@ -2515,7 +2542,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/divisions/:id/risks", async (req, res) => {
     try {
-      const risks = await storage.getDivisionRisks(req.params.id);
+      const resolvedId = resolveDivisionId(req.params.id);
+      const risks = await storage.getDivisionRisks(resolvedId);
       res.json(risks);
     } catch (error: any) {
       console.error("Get division risks error:", error);
