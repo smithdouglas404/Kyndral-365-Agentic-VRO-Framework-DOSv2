@@ -112,7 +112,19 @@ let monitorInterval: NodeJS.Timeout | null = null;
 let scenarioInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
 let lastChecks: Record<string, { value: number; timestamp: Date }> = {};
-let actionNotificationCallback: ((agentName: string, action: string, target: string) => void) | null = null;
+let actionNotificationCallback: ((agentName: string, action: string, target: string, severity: 'critical' | 'warning' | 'info') => void) | null = null;
+
+// Map action types to severity levels
+const ACTION_SEVERITY: Record<string, 'critical' | 'warning' | 'info'> = {
+  'escalate': 'critical',
+  'investigate': 'critical',
+  'mitigate': 'critical',
+  'notify': 'warning',
+  'update-status': 'info',
+  'create-task': 'info',
+  'reassign': 'info',
+  'accelerate': 'warning'
+};
 
 const DEMO_SCENARIOS = ['budget-breach', 'critical-project', 'value-at-risk'];
 const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
@@ -137,7 +149,7 @@ const ACTION_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export function setActionNotificationCallback(
-  callback: (agentName: string, action: string, target: string) => void
+  callback: (agentName: string, action: string, target: string, severity: 'critical' | 'warning' | 'info') => void
 ): void {
   actionNotificationCallback = callback;
 }
@@ -146,7 +158,8 @@ export function notifyAction(agentId: AgentType, actionType: string, targetName:
   if (actionNotificationCallback) {
     const agentName = AGENT_DISPLAY_NAMES[agentId] || agentId;
     const actionText = ACTION_DISPLAY_NAMES[actionType] || actionType;
-    actionNotificationCallback(agentName, actionText, targetName);
+    const severity = ACTION_SEVERITY[actionType] || 'info';
+    actionNotificationCallback(agentName, actionText, targetName, severity);
   }
 }
 

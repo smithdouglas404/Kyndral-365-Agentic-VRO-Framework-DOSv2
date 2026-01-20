@@ -442,12 +442,15 @@ function DashboardContent() {
   }, []);
   
   // Start background agent monitor, orchestrator, and scenario simulation with toast notifications
+  // Only show toast notifications for critical agent messages
   useEffect(() => {
-    setActionNotificationCallback((agentName, action, target) => {
-      toast.info(`${agentName} ${action} ${target}`, {
-        description: "Agent action completed",
-        duration: 5000,
-      });
+    setActionNotificationCallback((agentName, action, target, severity) => {
+      if (severity === 'critical') {
+        toast.error(`🚨 ${agentName} ${action} ${target}`, {
+          description: "Critical agent action - immediate attention required",
+          duration: 8000,
+        });
+      }
     });
     startBackgroundMonitor(15000);
     startOrchestrator(5000, 45000);
