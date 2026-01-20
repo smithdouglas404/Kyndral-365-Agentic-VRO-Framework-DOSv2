@@ -53,24 +53,36 @@ function formatKpiValue(value: string | number | null, unit: string | null): str
   return `${numValue}${unitStr}`;
 }
 
+// Legacy slug mapping for backward compatibility (maps old L&G IDs to new NextEra segment IDs)
+const legacySlugs: Record<string, string> = {
+  'lgim': 'neer',
+  'lgc': 'corporate-other',
+  'lgri': 'fpl',
+  'lgr': 'fpl',
+  'lgf': 'corporate-other',
+  'lgi': 'corporate-other',
+  'asset-management': 'neer',
+  'institutional-retirement': 'fpl',
+  'retail': 'fpl',
+  'capital': 'corporate-other',
+  'insurance': 'corporate-other',
+  'fintech': 'corporate-other',
+  'florida-power-light': 'fpl',
+  'nextera-energy-resources': 'neer'
+};
+
 // Segment name mapping for filtering enriched projects (NextEra SEC segment names)
-// Supports both short IDs (fpl, neer) and long IDs (florida-power-light, nextera-energy-resources)
 const segmentNameMapping: Record<string, string[]> = {
   'fpl': ['FPL', 'Florida Power & Light'],
-  'florida-power-light': ['FPL', 'Florida Power & Light'],
   'neer': ['NEER', 'NextEra Energy Resources'],
-  'nextera-energy-resources': ['NEER', 'NextEra Energy Resources'],
   'corporate-other': ['Corporate and Other', 'Corporate & Other'],
   'default': ['FPL', 'NEER', 'Corporate and Other']
 };
 
 // Segment ID to Portfolio ID mapping for VRO/PMO metrics
-// Supports both short IDs and long IDs
 const segmentToPortfolioMapping: Record<string, string> = {
   'fpl': 'portfolio-ir',
-  'florida-power-light': 'portfolio-ir',
   'neer': 'portfolio-am',
-  'nextera-energy-resources': 'portfolio-am',
   'corporate-other': 'portfolio-ci',
 };
 
