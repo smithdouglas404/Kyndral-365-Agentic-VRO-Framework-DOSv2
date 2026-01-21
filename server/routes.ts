@@ -1402,14 +1402,207 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Seed demo data with autonomy labels
+  // Seed all projects from templates
+  app.post("/api/demo/seed-projects", async (_req, res) => {
+    try {
+      const existingProjects = await storage.getProjects();
+      if (existingProjects.length > 5) {
+        return res.json({ success: true, message: `${existingProjects.length} projects already exist, skipping seed.` });
+      }
+      
+      const templates = await storage.getProjectTemplates();
+      let created = 0;
+      
+      for (const template of templates) {
+        try {
+          const projectData = JSON.parse(template.templateData);
+          
+          const project = await storage.createProject({
+            name: projectData.name,
+            description: projectData.description || `${projectData.name} - SAFe 6.0 Managed Project`,
+            businessUnitId: projectData.bu,
+            divisionId: projectData.division,
+            status: projectData.status || 'planning',
+            startDate: projectData.timeline?.startDate ? new Date(projectData.timeline.startDate) : null,
+            endDate: projectData.timeline?.endDate ? new Date(projectData.timeline.endDate) : null,
+            priority: projectData.priority,
+            expectedRoi: projectData.expectedROI,
+            roiValue: projectData.roiValue?.toString(),
+            artName: projectData.artName,
+            portfolioTheme: projectData.portfolioTheme,
+            safeStage: projectData.safeStage || 'funnel',
+            currentPi: projectData.safe?.currentPI,
+            totalPis: projectData.safe?.totalPIs?.toString(),
+            velocity: projectData.safe?.velocity?.toString(),
+            predictability: projectData.safe?.predictability?.toString(),
+            flowEfficiency: projectData.safe?.flowEfficiency?.toString(),
+            epicId: projectData.safe?.epicId,
+            epicName: projectData.safe?.epicName,
+            epicProgress: projectData.safe?.epicProgress?.toString(),
+            budgetSpent: projectData.budget?.spent?.toString(),
+            budgetTotal: projectData.budget?.total?.toString(),
+            budgetUnit: projectData.budget?.unit || '$m'
+          });
+          
+          // Create features/stories/tasks if present
+          if (projectData.features?.length) {
+            for (const feat of projectData.features) {
+              const feature = await storage.createFeature({
+                projectId: project.id,
+                name: feat.name,
+                description: feat.description,
+                status: feat.status,
+                storyPoints: feat.storyPoints?.toString(),
+                completedPoints: feat.completedPoints?.toString(),
+                priority: feat.priority,
+                targetPi: feat.targetPi?.toString(),
+                acceptanceCriteria: JSON.stringify(feat.acceptanceCriteria || []),
+                wsjfScore: feat.wsjf?.score?.toString()
+              });
+              
+              if (feat.stories?.length) {
+                for (const st of feat.stories) {
+                  const story = await storage.createStory({
+                    featureId: feature.id,
+                    projectId: project.id,
+                    name: st.name,
+                    description: st.description,
+                    status: st.status,
+                    storyPoints: st.storyPoints?.toString(),
+                    acceptanceCriteria: JSON.stringify(st.acceptanceCriteria || [])
+                  });
+                  
+                  if (st.tasks?.length) {
+                    for (const task of st.tasks) {
+                      await storage.createTask({
+                        storyId: story.id,
+                        featureId: feature.id,
+                        projectId: project.id,
+                        name: task.name,
+                        status: task.status,
+                        effortHours: task.effortHours?.toString(),
+                        assignee: task.assignee,
+                        skills: JSON.stringify(task.skills || [])
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          created++;
+        } catch (err) {
+          console.error(`Failed to seed project from template ${template.slug}:`, err);
+        }
+      }
+      
+      res.json({ success: true, message: `Created ${created} projects from ${templates.length} templates.` });
+    } catch (error: any) {
+      console.error("Seed projects error:", error);
+      res.status(500).json({ error: "Failed to seed projects" });
+    }
+  });
+
+  // Seed demo data with autonomy labels AND projects from templates
   app.post("/api/demo/seed", async (_req, res) => {
     try {
+      // Seed projects from templates first
+      let projectsCreated = 0;
+      const templates = await storage.getProjectTemplates();
+      
+      if (templates.length > 0) {
+        
+        for (const template of templates) {
+          try {
+            const projectData = JSON.parse(template.templateData);
+            
+            const project = await storage.createProject({
+              name: projectData.name,
+              description: projectData.description || `${projectData.name} - SAFe 6.0 Managed Project`,
+              businessUnitId: projectData.bu,
+              divisionId: projectData.division,
+              status: projectData.status || 'planning',
+              startDate: projectData.timeline?.startDate ? new Date(projectData.timeline.startDate) : null,
+              endDate: projectData.timeline?.endDate ? new Date(projectData.timeline.endDate) : null,
+              priority: projectData.priority,
+              expectedRoi: projectData.expectedROI,
+              roiValue: projectData.roiValue?.toString(),
+              artName: projectData.artName,
+              portfolioTheme: projectData.portfolioTheme,
+              safeStage: projectData.safeStage || 'funnel',
+              currentPi: projectData.safe?.currentPI,
+              totalPis: projectData.safe?.totalPIs?.toString(),
+              velocity: projectData.safe?.velocity?.toString(),
+              predictability: projectData.safe?.predictability?.toString(),
+              flowEfficiency: projectData.safe?.flowEfficiency?.toString(),
+              epicId: projectData.safe?.epicId,
+              epicName: projectData.safe?.epicName,
+              epicProgress: projectData.safe?.epicProgress?.toString(),
+              budgetSpent: projectData.budget?.spent?.toString(),
+              budgetTotal: projectData.budget?.total?.toString(),
+              budgetUnit: projectData.budget?.unit || '$m'
+            });
+            
+            if (projectData.features?.length) {
+              for (const feat of projectData.features) {
+                const feature = await storage.createFeature({
+                  projectId: project.id,
+                  name: feat.name,
+                  description: feat.description,
+                  status: feat.status,
+                  storyPoints: feat.storyPoints?.toString(),
+                  completedPoints: feat.completedPoints?.toString(),
+                  priority: feat.priority,
+                  targetPi: feat.targetPi?.toString(),
+                  acceptanceCriteria: JSON.stringify(feat.acceptanceCriteria || []),
+                  wsjfScore: feat.wsjf?.score?.toString()
+                });
+                
+                if (feat.stories?.length) {
+                  for (const st of feat.stories) {
+                    const story = await storage.createStory({
+                      featureId: feature.id,
+                      projectId: project.id,
+                      name: st.name,
+                      description: st.description,
+                      status: st.status,
+                      storyPoints: st.storyPoints?.toString(),
+                      acceptanceCriteria: JSON.stringify(st.acceptanceCriteria || [])
+                    });
+                    
+                    if (st.tasks?.length) {
+                      for (const task of st.tasks) {
+                        await storage.createTask({
+                          storyId: story.id,
+                          featureId: feature.id,
+                          projectId: project.id,
+                          name: task.name,
+                          status: task.status,
+                          effortHours: task.effortHours?.toString(),
+                          assignee: task.assignee,
+                          skills: JSON.stringify(task.skills || [])
+                        });
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            
+            projectsCreated++;
+          } catch (err) {
+            console.error(`Failed to seed project from template ${template.slug}:`, err);
+          }
+        }
+      }
+      
+      // Then seed interventions
       await storage.seedDemoInterventions();
       
       res.json({ 
         success: true, 
-        message: 'Demo seeded with autonomous intervention examples.',
+        message: `Demo seeded: ${projectsCreated} projects from templates, plus intervention examples.`,
       });
     } catch (error: any) {
       console.error("Demo seed error:", error);
