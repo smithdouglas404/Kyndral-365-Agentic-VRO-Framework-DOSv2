@@ -25,7 +25,8 @@
       "WebFetch(domain:agentic-nexus--dsmith49.replit.app)",
       "Bash(npm run type-check:*)",
       "Bash(npm run build:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
