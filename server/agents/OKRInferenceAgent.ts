@@ -165,9 +165,80 @@ Always query real data before making inferences.`;
               criticalPriority: assessments.filter(a => a.priority === 'critical').length,
             };
 
+            // AUTO-CREATE INTERVENTIONS for critical data quality issues
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const assessment of assessments) {
+              // Rule 1: High-value project + low data completeness
+              if (assessment.isHighValue && assessment.completenessScore < 50) {
+                const missingFields: string[] = [];
+                if (!assessment.dataCompleteness.hasPortfolio) missingFields.push('Portfolio');
+                if (!assessment.dataCompleteness.hasTheme) missingFields.push('Theme');
+                if (!assessment.dataCompleteness.hasBudget) missingFields.push('Budget');
+                if (!assessment.dataCompleteness.hasExpectedROI) missingFields.push('Expected ROI');
+                if (!assessment.dataCompleteness.hasDivision) missingFields.push('Division');
+                if (!assessment.dataCompleteness.hasOKR) missingFields.push('OKR Linkage');
+
+                await this.storage.createIntervention({
+                  type: 'data_quality_critical',
+                  severity: 'critical',
+                  title: `Critical Data Gap: ${assessment.projectName}`,
+                  description: `High-value project ($${assessment.budget.toFixed(1)}M) has only ${assessment.completenessScore}% data completeness. Missing critical fields: ${missingFields.join(', ')}. This severely limits agent decision-making accuracy.`,
+                  suggestedAction: 'Immediate data collection required. Contact project owner to provide missing information.',
+                  projectId: assessment.projectId,
+                  projectName: assessment.projectName,
+                  agentSource: 'OKR Inference Agent',
+                  confidence: '0.95',
+                  isAutonomous: 'false', // Requires human review
+                });
+
+                // Send Slack/Teams alert
+                await notificationMCP.sendDataQualityAlert({
+                  projectName: assessment.projectName,
+                  projectId: assessment.projectId,
+                  completenessScore: assessment.completenessScore,
+                  missingFields,
+                  budget: assessment.budget,
+                });
+
+                interventionsCreated++;
+              }
+              // Rule 2: Any project with very low data completeness (<40%)
+              else if (assessment.completenessScore < 40) {
+                const missingFields: string[] = [];
+                if (!assessment.dataCompleteness.hasPortfolio) missingFields.push('Portfolio');
+                if (!assessment.dataCompleteness.hasTheme) missingFields.push('Theme');
+                if (!assessment.dataCompleteness.hasBudget) missingFields.push('Budget');
+                if (!assessment.dataCompleteness.hasExpectedROI) missingFields.push('Expected ROI');
+                if (!assessment.dataCompleteness.hasDivision) missingFields.push('Division');
+                if (!assessment.dataCompleteness.hasOKR) missingFields.push('OKR Linkage');
+
+                await this.storage.createIntervention({
+                  type: 'data_quality_high',
+                  severity: 'high',
+                  title: `Low Data Quality: ${assessment.projectName}`,
+                  description: `Project has only ${assessment.completenessScore}% data completeness. Missing: ${missingFields.join(', ')}. Recommend data enrichment for accurate tracking.`,
+                  suggestedAction: 'Schedule data collection session with project team.',
+                  projectId: assessment.projectId,
+                  projectName: assessment.projectName,
+                  agentSource: 'OKR Inference Agent',
+                  confidence: '0.85',
+                  isAutonomous: 'false',
+                });
+
+                interventionsCreated++;
+              }
+
+              // Limit intervention creation to avoid overwhelming PMO
+              if (interventionsCreated >= 20) break;
+            }
+
             return JSON.stringify({
               stats,
               assessments: filtered.slice(0, 50), // Return top 50
+              interventionsCreated,
             });
           } catch (error: any) {
             return JSON.stringify({ error: error.message });
@@ -328,6 +399,26 @@ Always query real data before making inferences.`;
               recommendation = 'auto_apply';
             } else if (confidence >= 0.5) {
               recommendation = 'human_review';
+            }
+
+            // AUTO-CREATE INTERVENTION for high-confidence OKR inferences
+            if (confidence >= 0.7) {
+              const severity = confidence >= 0.8 ? 'medium' : 'low';
+
+              await this.storage.createIntervention({
+                type: 'okr_inference',
+                severity,
+                title: `OKR Mapping Suggested: ${project.name}`,
+                description: `Inferred OKR linkage with ${(confidence * 100).toFixed(0)}% confidence.\n\n**Suggested OKR:**\n- Objective: ${inferredOKR.objective}\n- Key Result: ${inferredOKR.keyResult}\n\n**Reasoning:** ${reasoning}`,
+                suggestedAction: confidence >= 0.8
+                  ? 'Review and approve OKR mapping. High confidence - recommend auto-apply.'
+                  : 'Review inferred OKR mapping for accuracy before applying.',
+                projectId,
+                projectName: project.name,
+                agentSource: 'OKR Inference Agent',
+                confidence: confidence.toFixed(2),
+                isAutonomous: confidence >= 0.8 ? 'true' : 'false',
+              });
             }
 
             return JSON.stringify({

@@ -123,6 +123,29 @@ app.use((req, res, next) => {
       startSyncScheduler().catch(err => {
         console.error("Failed to start sync scheduler:", err);
       });
+
+      // Start automatic data sync scheduler for Planview/Google Sheets
+      const { createSyncScheduler } = await import("./mcp/SyncScheduler.js");
+      const dataSyncScheduler = createSyncScheduler(storage, {
+        planview: {
+          enabled: !!process.env.PLANVIEW_URL && !!process.env.PLANVIEW_API_KEY,
+          intervalMs: 4 * 60 * 60 * 1000, // 4 hours
+          portfolioId: process.env.PLANVIEW_DEFAULT_PORTFOLIO_ID,
+        },
+        googleSheets: {
+          enabled: !!process.env.GOOGLE_SHEETS_API_KEY && !!process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
+          intervalMs: 6 * 60 * 60 * 1000, // 6 hours
+          spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || '',
+          sheetName: process.env.GOOGLE_SHEETS_SHEET_NAME,
+        },
+      });
+
+      if (dataSyncScheduler.getStatus().planviewEnabled || dataSyncScheduler.getStatus().googleSheetsEnabled) {
+        dataSyncScheduler.start();
+        console.log("[Server] Automatic data sync scheduler started");
+      } else {
+        console.log("[Server] Automatic data sync scheduler disabled (no credentials configured)");
+      }
     },
   );
 })();

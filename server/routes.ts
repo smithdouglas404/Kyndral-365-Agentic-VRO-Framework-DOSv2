@@ -5124,6 +5124,79 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Get sync scheduler status
+  app.get("/api/data/sync/scheduler/status", async (_req, res) => {
+    try {
+      const { getSyncScheduler } = await import("./mcp/SyncScheduler.js");
+      const scheduler = getSyncScheduler();
+
+      if (!scheduler) {
+        return res.json({
+          isRunning: false,
+          planviewEnabled: false,
+          googleSheetsEnabled: false,
+          message: "Sync scheduler not initialized"
+        });
+      }
+
+      const status = scheduler.getStatus();
+      const history = scheduler.getSyncHistory();
+
+      res.json({
+        ...status,
+        recentSyncs: history.slice(-10), // Last 10 syncs
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Manually trigger Planview sync via scheduler
+  app.post("/api/data/sync/scheduler/planview", async (_req, res) => {
+    try {
+      const { getSyncScheduler } = await import("./mcp/SyncScheduler.js");
+      const scheduler = getSyncScheduler();
+
+      if (!scheduler) {
+        return res.status(400).json({ error: "Sync scheduler not initialized" });
+      }
+
+      const result = await scheduler.syncPlanview();
+
+      res.json({
+        success: result.success,
+        projectsSynced: result.projectsSynced,
+        error: result.error,
+        timestamp: result.timestamp,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Manually trigger Google Sheets sync via scheduler
+  app.post("/api/data/sync/scheduler/googlesheets", async (_req, res) => {
+    try {
+      const { getSyncScheduler } = await import("./mcp/SyncScheduler.js");
+      const scheduler = getSyncScheduler();
+
+      if (!scheduler) {
+        return res.status(400).json({ error: "Sync scheduler not initialized" });
+      }
+
+      const result = await scheduler.syncGoogleSheets();
+
+      res.json({
+        success: result.success,
+        projectsSynced: result.projectsSynced,
+        error: result.error,
+        timestamp: result.timestamp,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // ============================================================================
   // A2A (AGENT-TO-AGENT) AND MCP PROTOCOL ENDPOINTS
   // ============================================================================

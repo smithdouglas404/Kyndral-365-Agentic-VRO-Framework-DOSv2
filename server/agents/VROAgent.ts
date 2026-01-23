@@ -103,11 +103,53 @@ You are the VALUE GUARDIAN - PMO handles execution, YOU handle value delivery.`;
 
             const underperforming = benefitsData.filter(b => b.realizationStatus === 'UNDERPERFORMING');
 
+            // AUTO-CREATE INTERVENTIONS for critical ROI variances
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const benefit of underperforming) {
+              const variance = parseFloat(benefit.variance);
+              if (Math.abs(variance) >= minVariance) {
+                const severity = Math.abs(variance) >= 30 ? 'critical' : 'high';
+
+                await this.storage.createIntervention({
+                  type: 'value_realization',
+                  severity,
+                  title: `ROI Variance Alert: ${benefit.projectName}`,
+                  description: `Project showing ${benefit.variance} ROI variance. Expected: $${benefit.expectedRoi}M, Actual: $${benefit.actualValueRealized}M. Value realization is significantly behind projections.`,
+                  suggestedAction: severity === 'critical'
+                    ? 'URGENT: Review business case assumptions and consider pivot/stop decision. Schedule VRO assessment with project sponsor.'
+                    : 'Schedule value realization review to identify root causes and corrective actions.',
+                  projectId: benefit.projectId,
+                  projectName: benefit.projectName,
+                  agentSource: 'VRO Agent',
+                  confidence: '0.90',
+                  isAutonomous: 'false',
+                });
+
+                // Send Slack/Teams notification
+                if (severity === 'critical' || (severity === 'high' && benefit.expectedRoi > 10)) {
+                  await notificationMCP.sendValueRealizationAlert({
+                    projectName: benefit.projectName,
+                    projectId: benefit.projectId,
+                    expectedROI: parseFloat(benefit.expectedRoi.toString()),
+                    actualValue: parseFloat(benefit.actualValueRealized),
+                    variance: variance,
+                  });
+                }
+
+                interventionsCreated++;
+                if (interventionsCreated >= 15) break; // Limit to avoid overwhelming PMO
+              }
+            }
+
             return JSON.stringify({
               totalProjects: benefitsData.length,
               underperformingCount: underperforming.length,
               benefitsData: benefitsData.slice(0, 30),
               criticalIssues: underperforming.slice(0, 10),
+              interventionsCreated,
             });
           } catch (error: any) {
             return JSON.stringify({ error: error.message });
@@ -181,10 +223,50 @@ You are the VALUE GUARDIAN - PMO handles execution, YOU handle value delivery.`;
               }
             }
 
+            // AUTO-CREATE INTERVENTIONS for invalid business case assumptions
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const validation of validationResults) {
+              if (validation.severity === 'high' || (validation.severity === 'medium' && validation.invalidAssumptions.length >= 2)) {
+                await this.storage.createIntervention({
+                  type: 'business_case_invalid',
+                  severity: validation.severity,
+                  title: `Business Case Assumptions Invalid: ${validation.projectName}`,
+                  description: `Multiple business case assumptions no longer valid:\n\n${validation.invalidAssumptions.map((a: string) => `• ${a}`).join('\n')}\n\nRecommend comprehensive business case review and possible pivot/stop decision.`,
+                  suggestedAction: validation.severity === 'high'
+                    ? 'URGENT: Conduct business case reassessment with sponsor. Consider project pivot or cancellation if assumptions cannot be recovered.'
+                    : 'Schedule business case review session to validate assumptions and adjust projections.',
+                  projectId: validation.projectId,
+                  projectName: validation.projectName,
+                  agentSource: 'VRO Agent',
+                  confidence: '0.85',
+                  isAutonomous: 'false',
+                });
+
+                // Send critical alert for high severity
+                if (validation.severity === 'high') {
+                  await notificationMCP.sendCriticalAlert({
+                    title: `Business Case Invalid: ${validation.projectName}`,
+                    message: `Multiple critical assumptions invalidated:\n${validation.invalidAssumptions.join('\n')}`,
+                    agent: 'VRO Agent',
+                    projectName: validation.projectName,
+                    projectId: validation.projectId,
+                    actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                  });
+                }
+
+                interventionsCreated++;
+                if (interventionsCreated >= 15) break;
+              }
+            }
+
             return JSON.stringify({
               projectsValidated: projects.length,
               projectsWithInvalidAssumptions: validationResults.length,
               validationResults: validationResults.slice(0, 20),
+              interventionsCreated,
             });
           } catch (error: any) {
             return JSON.stringify({ error: error.message });
@@ -253,12 +335,59 @@ You are the VALUE GUARDIAN - PMO handles execution, YOU handle value delivery.`;
             const misaligned = alignmentData.filter(a => a.alignmentStatus === 'MISALIGNED');
             const atRisk = alignmentData.filter(a => a.alignmentStatus === 'AT_RISK');
 
+            // AUTO-CREATE INTERVENTIONS for strategic misalignments on high-value projects
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const alignment of [...misaligned, ...atRisk]) {
+              // Get project details to check if high-value
+              const project = projects.find(p => p.id === alignment.projectId);
+              const budget = parseFloat(project?.budget || project?.budgetTotal || '0');
+              const isHighValue = budget > 10; // >$10M
+
+              if (alignment.alignmentStatus === 'MISALIGNED' || (alignment.alignmentStatus === 'AT_RISK' && isHighValue)) {
+                const severity = alignment.alignmentStatus === 'MISALIGNED' && isHighValue ? 'critical' : alignment.alignmentStatus === 'MISALIGNED' ? 'high' : 'medium';
+
+                await this.storage.createIntervention({
+                  type: 'strategic_misalignment',
+                  severity,
+                  title: `Strategic Misalignment: ${alignment.projectName}`,
+                  description: `Project has ${alignment.alignmentScore}% strategic alignment score. ${isHighValue ? `This is a high-value project ($${budget.toFixed(1)}M) requiring immediate strategic clarity.` : ''}\n\n**Issues:**\n${alignment.issues.map((i: string) => `• ${i}`).join('\n')}`,
+                  suggestedAction: severity === 'critical'
+                    ? 'URGENT: Verify strategic fit with portfolio owner. If no clear OKR linkage, recommend project cancellation or reassignment.'
+                    : 'Schedule strategic alignment review with portfolio owner to clarify business value and OKR linkage.',
+                  projectId: alignment.projectId,
+                  projectName: alignment.projectName,
+                  agentSource: 'VRO Agent',
+                  confidence: '0.88',
+                  isAutonomous: 'false',
+                });
+
+                // Send critical alert for high-value misaligned projects
+                if (severity === 'critical') {
+                  await notificationMCP.sendCriticalAlert({
+                    title: `Strategic Misalignment: ${alignment.projectName}`,
+                    message: `High-value project ($${budget.toFixed(1)}M) with only ${alignment.alignmentScore}% strategic alignment. Unclear strategic fit and business value.`,
+                    agent: 'VRO Agent',
+                    projectName: alignment.projectName,
+                    projectId: alignment.projectId,
+                    actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                  });
+                }
+
+                interventionsCreated++;
+                if (interventionsCreated >= 15) break;
+              }
+            }
+
             return JSON.stringify({
               totalProjects: alignmentData.length,
               misalignedCount: misaligned.length,
               atRiskCount: atRisk.length,
               alignmentData: alignmentData.slice(0, 30),
               criticalMisalignments: misaligned.slice(0, 10),
+              interventionsCreated,
             });
           } catch (error: any) {
             return JSON.stringify({ error: error.message });
@@ -334,10 +463,50 @@ You are the VALUE GUARDIAN - PMO handles execution, YOU handle value delivery.`;
             // Sort by value at risk (highest first)
             valueLeakage.sort((a, b) => parseFloat(b.valueAtRisk) - parseFloat(a.valueAtRisk));
 
+            // AUTO-CREATE INTERVENTIONS for significant value leakage
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const leakage of valueLeakage) {
+              if (leakage.severity === 'critical' || (leakage.severity === 'high' && parseFloat(leakage.valueAtRisk) > 5)) {
+                await this.storage.createIntervention({
+                  type: 'value_leakage',
+                  severity: leakage.severity,
+                  title: `Value Leakage Detected: ${leakage.projectName}`,
+                  description: `Significant value leakage detected (${leakage.leakageScore}% score). At risk of losing $${leakage.valueAtRisk}M in value.\n\n**Leakage Factors:**\n${leakage.leakageFactors.map((f: string) => `• ${f}`).join('\n')}\n\nExpected ROI: $${leakage.expectedRoi}M`,
+                  suggestedAction: leakage.severity === 'critical'
+                    ? 'URGENT: Conduct value recovery session. Address root causes immediately to prevent further value erosion.'
+                    : 'Schedule project health review to address leakage factors and implement corrective actions.',
+                  projectId: leakage.projectId,
+                  projectName: leakage.projectName,
+                  agentSource: 'VRO Agent',
+                  confidence: '0.82',
+                  isAutonomous: 'false',
+                });
+
+                // Send critical alert for high value at risk
+                if (leakage.severity === 'critical' || parseFloat(leakage.valueAtRisk) > 10) {
+                  await notificationMCP.sendCriticalAlert({
+                    title: `Critical Value Leakage: ${leakage.projectName}`,
+                    message: `$${leakage.valueAtRisk}M value at risk due to: ${leakage.leakageFactors.join(', ')}. Immediate action required.`,
+                    agent: 'VRO Agent',
+                    projectName: leakage.projectName,
+                    projectId: leakage.projectId,
+                    actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                  });
+                }
+
+                interventionsCreated++;
+                if (interventionsCreated >= 15) break;
+              }
+            }
+
             return JSON.stringify({
               projectsWithLeakage: valueLeakage.length,
               totalValueAtRisk: valueLeakage.reduce((sum, v) => sum + parseFloat(v.valueAtRisk), 0).toFixed(2),
               valueLeakage: valueLeakage.slice(0, limit),
+              interventionsCreated,
             });
           } catch (error: any) {
             return JSON.stringify({ error: error.message });
