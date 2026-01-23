@@ -226,6 +226,10 @@ export class OBDAService {
   private async queryPostgreSQL(sql: string): Promise<any[]> {
     try {
       // Use storage layer to execute raw SQL
+      if (!this.storage.executeRawQuery) {
+        console.warn('[OBDA] executeRawQuery not available on storage');
+        return [];
+      }
       const results = await this.storage.executeRawQuery(sql);
 
       // Transform to RDF-like format with URIs

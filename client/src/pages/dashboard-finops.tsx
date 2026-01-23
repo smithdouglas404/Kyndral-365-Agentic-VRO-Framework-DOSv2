@@ -15,6 +15,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
+import AgentActionQueue from '@/components/AgentActionQueue';
 import { useDivisions } from '@/hooks/useNexteraData';
 import { formatMoney } from '@/lib/formatters';
 import { useSimulation } from '@/contexts/SimulationContext';
@@ -437,6 +438,10 @@ export default function FinOpsDashboard() {
               </CardContent>
             </Card>
           )}
+
+          <div className="mb-8">
+            <AgentActionQueue />
+          </div>
 
           <div className="mb-8">
             <AIRecommendations agentType="finops" />

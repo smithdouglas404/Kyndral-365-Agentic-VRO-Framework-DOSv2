@@ -1098,18 +1098,18 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           portfolio: portfolio ? {
             id: portfolio.id,
             name: portfolio.name,
-            strategicTheme: portfolio.strategicTheme,
-            lpmCadence: portfolio.lpmCadence,
-            budgetTotal: portfolio.budgetTotal,
-            budgetAllocated: portfolio.budgetAllocated
+            strategicThemes: portfolio.strategicThemes,
+            budgetAllocation: portfolio.budgetAllocation,
+            budgetUnit: portfolio.budgetUnit,
+            fiscalYear: portfolio.fiscalYear
           } : null,
           valueStream: valueStream ? {
             id: valueStream.id,
             name: valueStream.name,
             type: valueStream.type,
-            owner: valueStream.valueStreamOwner,
-            flowEfficiency: valueStream.flowEfficiency,
-            leadTime: valueStream.leadTime
+            owner: valueStream.owner,
+            leadTime: valueStream.leadTime,
+            throughput: valueStream.throughput
           } : null,
           art: art ? {
             id: art.id,
@@ -4993,8 +4993,10 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       await agent.runScheduledScan();
 
       // Get recent interventions from this agent
-      const interventions = await storage.getInterventions({ agentId });
-      const recentInterventions = interventions.slice(0, 5);
+      const allInterventions = await storage.getInterventions();
+      const recentInterventions = allInterventions
+        .filter(i => i.agentSource === agentId)
+        .slice(0, 5);
 
       res.json({
         success: true,

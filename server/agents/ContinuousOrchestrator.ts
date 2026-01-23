@@ -467,8 +467,9 @@ export class ContinuousOrchestrator {
 
     // Risk Agent: Check for risk indicators
     if (config.agentId === 'risk') {
-      const interventions = await this.storage.getInterventions({ projectId: project.id });
-      const criticalInterventions = interventions.filter(i => i.severity === 'critical' || i.severity === 'high');
+      const allInterventions = await this.storage.getInterventions();
+      const projectInterventions = allInterventions.filter(i => i.projectId === project.id);
+      const criticalInterventions = projectInterventions.filter(i => i.severity === 'critical' || i.severity === 'high');
 
       if (criticalInterventions.length >= 3) {
         return {

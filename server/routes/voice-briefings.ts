@@ -24,9 +24,19 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization of OpenAI client - only when API key is available
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI | null {
+  if (!process.env.OPENAI_API_KEY) {
+    return null;
+  }
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+}
 
 interface VoiceBriefingRequest {
   projectId?: string;
@@ -67,7 +77,7 @@ RECENT INTERVENTIONS:
 ${interventions.slice(0, 3).map(i => `- ${i.type}: ${i.title} (${i.agentSource})`).join('\n')}
 
 ACTIVE RISKS:
-${risks.slice(0, 3).map(r => `- ${r.title} (${r.severity} severity)`).join('\n')}
+${risks.slice(0, 3).map(r => `- ${r.name} (${r.impact} impact)`).join('\n')}
 `;
   }
 
@@ -143,6 +153,11 @@ async function generateAudioFromScript(script: string, briefingId: string): Prom
   audioUrl: string;
   duration: number;
 }> {
+  const openai = getOpenAI();
+  if (!openai) {
+    throw new Error('OpenAI API key not configured. Voice briefings require OPENAI_API_KEY.');
+  }
+  
   try {
     // Parse script into segments
     const segments = parseScriptToSegments(script);

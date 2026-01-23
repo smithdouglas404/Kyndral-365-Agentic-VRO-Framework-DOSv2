@@ -11,7 +11,8 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Shield, TrendingUp, Grid, FileText, Map } from 'lucide-react';
+import { AlertTriangle, Shield, TrendingUp, Grid, FileText, Map, Brain } from 'lucide-react';
+import { useRiskInsights } from '@/hooks/useAgentInsights';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,9 @@ export default function RiskManagement() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('register');
   const [selectedProject, setSelectedProject] = useState<string>('all');
+
+  // Fetch agent-calculated risk insights
+  const { data: riskInsights, isLoading: riskInsightsLoading } = useRiskInsights();
 
   // Fetch risks
   const { data: risks = [] } = useQuery({
@@ -100,6 +104,93 @@ export default function RiskManagement() {
           <Button>Add Risk</Button>
         </div>
       </div>
+
+      {/* Agent-Calculated Risk Metrics */}
+      {riskInsights && (
+        <Card className="mb-6 border-purple-200 bg-purple-50/30">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-600" />
+              Agent-Calculated Risk Metrics
+              <Badge variant="outline" className="ml-2 text-xs">
+                Real-time from Risk Agent
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              Quantitative risk analysis across portfolio
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-lg border">
+                <p className="text-xs text-gray-500 mb-1">Total Risk Exposure</p>
+                <p className="text-2xl font-bold text-red-600">
+                  ${(riskInsights.aggregated.totalRiskExposure / 1000000).toFixed(1)}M
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Potential financial impact
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg border">
+                <p className="text-xs text-gray-500 mb-1">Total Risks</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {riskInsights.aggregated.totalRisks}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Across {riskInsights.aggregated.totalProjects} projects
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg border">
+                <p className="text-xs text-gray-500 mb-1">Avg Risk Exposure</p>
+                <p className="text-2xl font-bold text-amber-600">
+                  ${(riskInsights.aggregated.avgRiskExposure / 1000).toFixed(0)}K
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Per project average
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg border">
+                <p className="text-xs text-gray-500 mb-1">High Risk Projects</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {riskInsights.aggregated.highRiskProjects}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {((riskInsights.aggregated.highRiskProjects / riskInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="bg-white p-4 rounded-lg border border-red-200">
+                <p className="text-xs text-gray-500 mb-1">High Risk</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {riskInsights.aggregated.highRiskProjects}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Immediate attention required
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg border border-amber-200">
+                <p className="text-xs text-gray-500 mb-1">Medium Risk</p>
+                <p className="text-2xl font-bold text-amber-600">
+                  {riskInsights.aggregated.mediumRiskProjects}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Monitor closely
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-lg border border-green-200">
+                <p className="text-xs text-gray-500 mb-1">Low Risk</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {riskInsights.aggregated.lowRiskProjects}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Stable and on track
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">

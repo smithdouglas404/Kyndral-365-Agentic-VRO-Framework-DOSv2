@@ -3,6 +3,7 @@ import { Activity, Clock, TrendingUp, Filter, Search, User, Target, Link as Link
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect, useMemo } from "react";
 import { usePageContext } from "@/contexts/PageContext";
@@ -17,6 +18,7 @@ import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
 import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
+import { useValueInsights } from "@/hooks/useAgentInsights";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
 import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
@@ -408,9 +410,12 @@ function DashboardContent() {
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
   
   const { state, toggleLive, forceUpdate } = useSimulation();
-  
+
   // Fetch divisions from API (DB-backed)
   const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
+
+  // Fetch agent-calculated value insights
+  const { data: valueInsights, isLoading: valueInsightsLoading } = useValueInsights();
 
   // Update page context for Ask PM
   useEffect(() => {
@@ -522,6 +527,90 @@ function DashboardContent() {
 
             {/* Agent Action Queue - HITL Dashboard for Agent Recommendations */}
             <AgentActionQueue />
+
+            {/* Agent-Calculated Value Realization Metrics */}
+            {valueInsights && (
+              <Card className="border-purple-200 bg-purple-50/30">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-purple-600" />
+                    Agent-Calculated Value Realization Metrics
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Real-time from Value Realization Agent
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-xs text-gray-500 mb-1">Total Planned Value</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        ${(valueInsights.aggregated.totalPlannedValue / 1000000).toFixed(1)}M
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Across {valueInsights.aggregated.totalProjects} projects
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-xs text-gray-500 mb-1">Total Actual Value</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        ${(valueInsights.aggregated.totalActualValue / 1000000).toFixed(1)}M
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Benefits realized to date
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-xs text-gray-500 mb-1">Value Leakage</p>
+                      <p className={`text-2xl font-bold ${valueInsights.aggregated.totalValueLeakage > 1000000 ? 'text-red-600' : 'text-amber-600'}`}>
+                        ${(valueInsights.aggregated.totalValueLeakage / 1000000).toFixed(1)}M
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {((valueInsights.aggregated.totalValueLeakage / valueInsights.aggregated.totalPlannedValue) * 100).toFixed(1)}% of planned value
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-xs text-gray-500 mb-1">Avg Realization Rate</p>
+                      <p className={`text-2xl font-bold ${valueInsights.aggregated.avgRealizationRate >= 0.9 ? 'text-green-600' : valueInsights.aggregated.avgRealizationRate >= 0.75 ? 'text-amber-600' : 'text-red-600'}`}>
+                        {(valueInsights.aggregated.avgRealizationRate * 100).toFixed(0)}%
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {valueInsights.aggregated.avgRealizationRate >= 0.9 ? 'Excellent' : valueInsights.aggregated.avgRealizationRate >= 0.75 ? 'Acceptable' : 'Needs attention'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    <div className="bg-white p-4 rounded-lg border border-green-200">
+                      <p className="text-xs text-gray-500 mb-1">On Track</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {valueInsights.aggregated.projectsOnTrack}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {((valueInsights.aggregated.projectsOnTrack / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-amber-200">
+                      <p className="text-xs text-gray-500 mb-1">At Risk</p>
+                      <p className="text-2xl font-bold text-amber-600">
+                        {valueInsights.aggregated.projectsAtRisk}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {((valueInsights.aggregated.projectsAtRisk / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-red-200">
+                      <p className="text-xs text-gray-500 mb-1">High Risk</p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {valueInsights.aggregated.projectsHighRisk}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {((valueInsights.aggregated.projectsHighRisk / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Unified Metrics Section - VRO and PMO side by side */}
             <UnifiedMetricsSection onDrillDown={handleDrillDown} />
