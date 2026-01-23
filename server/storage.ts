@@ -134,6 +134,7 @@ import pkg from "pg";
 const { Pool } = pkg;
 
 export interface IStorage {
+  db: typeof Pool.prototype; // Raw database connection pool for direct SQL queries
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
@@ -450,6 +451,9 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 
 export class DatabaseStorage implements IStorage {
+  // Expose raw database pool for direct SQL queries (needed by RAG, LLM Router, etc.)
+  db = pool;
+
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0];

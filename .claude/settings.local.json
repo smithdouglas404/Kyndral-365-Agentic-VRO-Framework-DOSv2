@@ -39,7 +39,11 @@
       "Bash(sleep 3 echo \"=== Resources API \\(TIER 2\\) - RETRY ===\" curl -s http://localhost:5000/api/resources)",
       "Bash(head -c 300 echo -e \"\\\\n\\\\n=== Analytics Predictions API \\(Option C\\) - RETRY ===\" curl -s http://localhost:5000/api/analytics/predictions)",
       "Bash(ss:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npm run db:migrate:*)",
+      "Bash(npm run:*)",
+      "Bash(tsx:*)"
     ]
   }
 }

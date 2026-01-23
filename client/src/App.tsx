@@ -64,6 +64,7 @@ import SystemSettings from "@/pages/admin/SystemSettings";
 import AgentConfiguration from "@/pages/admin/AgentConfiguration";
 import CustomFieldManagement from "@/pages/admin/CustomFieldManagement";
 import WorkflowBuilder from "@/pages/admin/WorkflowBuilder";
+import COPDashboard from "@/pages/COPDashboard";
 
 function Router() {
   return (
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/pmo" component={Dashboard} />
+      <Route path="/cop" component={COPDashboard} />
       <Route path="/dashboard/tmo" component={TMODashboard} />
       <Route path="/dashboard/finops" component={FinOpsDashboard} />
       <Route path="/dashboard/okr" component={OKRDashboard} />

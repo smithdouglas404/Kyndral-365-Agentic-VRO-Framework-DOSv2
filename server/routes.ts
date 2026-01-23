@@ -25,6 +25,12 @@ import { registerCollaborationRoutes } from "./routes/collaboration.js";
 import { registerWhiteLabelRoutes } from "./routes/admin/white-label.js";
 import { registerAgentInsightsRoutes } from "./routes/agent-insights.js";
 import { registerVoiceBriefingRoutes } from "./routes/voice-briefings.js";
+import { createLLMConfigRoutes } from "./routes/llm-config.js";
+import { createKnowledgeBaseRoutes } from "./routes/knowledge-base.js";
+import { createBattleRhythmRoutes } from "./routes/battle-rhythm.js";
+import { createCommandersIntentRoutes } from "./routes/commanders-intent.js";
+import { createCOPRoutes } from "./routes/cop.js";
+import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -154,6 +160,24 @@ export async function registerRoutes(
 
   // Register Voice Briefing routes (NotebookLM-style podcast summaries)
   registerVoiceBriefingRoutes(app, storage);
+
+  // Register LLM Configuration routes (PLUG-AND-PLAY LLM SWITCHING)
+  app.use("/api/llm-config", createLLMConfigRoutes(storage));
+
+  // Register Knowledge Base routes (PMBOK, Prince2, PMI, SAFe, SOPs)
+  app.use("/api/knowledge-base", createKnowledgeBaseRoutes(storage));
+
+  // Register Battle Rhythm routes (Military-inspired cadence-aware scheduling)
+  app.use("/api/battle-rhythm", createBattleRhythmRoutes(storage));
+
+  // Register Commander's Intent routes (One-page project directive)
+  app.use("/api/commanders-intent", createCommandersIntentRoutes(storage));
+
+  // Register Common Operational Picture routes (Three-layer view)
+  app.use("/api/cop", createCOPRoutes(storage));
+
+  // Register Data Ingestion routes (Jira, Azure DevOps, MS Project sync)
+  app.use("/api/data-ingestion", createDataIngestionRoutes(storage));
 
   // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
   registerOrchestrationRoutes(app, storage);

@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
+import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
 import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 import { setupWebSocket } from "./websocket";
@@ -14,6 +15,9 @@ import { registerHealthRoutes, trackRequestMetrics } from "./routes/health.js";
 
 // Export agent scheduler instance (initialized after server starts)
 export let agentScheduler: AgentScheduler | null = null;
+
+// Export Battle Rhythm orchestrator (cadence-aware weekly scheduling)
+export let battleRhythmOrchestrator: BattleRhythmOrchestrator | null = null;
 
 const app = express();
 const httpServer = createServer(app);
@@ -116,15 +120,26 @@ app.use((req, res, next) => {
       log(`serving on port ${port}`);
 
       // ===================================================================
-      // Start LangChain Agent Scheduler (REPLACES SIMULATION)
-      // This starts real intelligent agents that monitor actual project data
-      // NO MORE FAKE DATA - agents query real projects via ontology/OBDA
-      // Includes 24x7 continuous orchestration with A2A and MCP protocols
+      // Start Battle Rhythm Orchestrator (MILITARY-INSPIRED CADENCE)
+      // Weekly decision-making rhythm: Sunday Recon → Mon-Fri events
+      // Replaces continuous 15-second agent polling with scheduled synthesis
       // ===================================================================
+      log("🎖️  Initializing Battle Rhythm Orchestrator...");
+      battleRhythmOrchestrator = new BattleRhythmOrchestrator(storage);
+      await battleRhythmOrchestrator.start();
+      log("✅ Battle Rhythm Orchestrator started - Weekly cadence active");
+
+      // ===================================================================
+      // Start LangChain Agent Scheduler (INTEGRATED WITH BATTLE RHYTHM)
+      // Agents now compile findings for weekly synthesis instead of continuous alerts
+      // Agent runs triggered by Battle Rhythm events (Sun → Mon → Tue → Wed → Thu → Fri)
+      // ===================================================================
+      log("🤖 Initializing Agent Scheduler...");
       agentScheduler = createAgentScheduler(storage);
       agentScheduler.startAll().catch(err => {
         console.error("Failed to start agent scheduler:", err);
       });
+      log("✅ Agent Scheduler started - Integrated with Battle Rhythm");
 
       // Start MCP sync scheduler for cron-based sync jobs
       startSyncScheduler().catch(err => {
