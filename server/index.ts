@@ -5,11 +5,14 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { createAgentScheduler } from "./agents/AgentScheduler.js";
+import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 import { setupWebSocket } from "./websocket";
 import { log } from "./log";
+
+// Export agent scheduler instance (initialized after server starts)
+export let agentScheduler: AgentScheduler | null = null;
 
 const app = express();
 const httpServer = createServer(app);
@@ -109,8 +112,9 @@ app.use((req, res, next) => {
       // Start LangChain Agent Scheduler (REPLACES SIMULATION)
       // This starts real intelligent agents that monitor actual project data
       // NO MORE FAKE DATA - agents query real projects via ontology/OBDA
+      // Includes 24x7 continuous orchestration with A2A and MCP protocols
       // ===================================================================
-      const agentScheduler = createAgentScheduler(storage);
+      agentScheduler = createAgentScheduler(storage);
       agentScheduler.startAll().catch(err => {
         console.error("Failed to start agent scheduler:", err);
       });

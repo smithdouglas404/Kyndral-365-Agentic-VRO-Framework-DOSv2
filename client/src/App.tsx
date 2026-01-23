@@ -36,6 +36,7 @@ import ProjectIngestionPage from "@/pages/ProjectIngestionPage";
 import AgentCommandCenterPage from "@/pages/AgentCommandCenterPage";
 import MCPConfigPage from "@/pages/MCPConfigPage";
 import SettingsPage from "@/pages/SettingsPage";
+import DataQualityPage from "@/pages/DataQualityPage";
 
 function Router() {
   return (
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/command-center" component={AgentCommandCenterPage} />
       <Route path="/mcp-config" component={MCPConfigPage} />
       <Route path="/settings" component={SettingsPage} />
+      <Route path="/data-quality" component={DataQualityPage} />
       <Route component={NotFound} />
     </Switch>
   );

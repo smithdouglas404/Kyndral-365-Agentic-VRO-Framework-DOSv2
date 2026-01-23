@@ -2,34 +2,50 @@ import { FinOpsAgent } from './FinOpsAgent.js';
 import { TMOAgent } from './TMOAgent.js';
 import { RiskAgent } from './RiskAgent.js';
 import { GovernanceAgent, PlanningAgent, OCMAgent, IntegratedMgmtAgent } from './AllAgents.js';
+import { VROAgent } from './VROAgent.js';
+import { OKRInferenceAgent } from './OKRInferenceAgent.js';
+import { ContinuousOrchestrator } from './ContinuousOrchestrator.js';
 import type { IStorage } from '../storage.js';
 
 /**
- * AgentScheduler - Replaces the simulation system
+ * AgentScheduler - Dual-Mode Agent System
  *
- * CRITICAL DIFFERENCE FROM SIMULATION:
- * - Simulation: Generated fake data every 12 seconds
- * - AgentScheduler: Runs intelligent agents on schedules to monitor REAL data
+ * MODE 1: Continuous 24x7 Coordination (via ContinuousOrchestrator)
+ * - Agents communicate via A2A (Agent-to-Agent) protocol every 15 seconds
+ * - Real-time collaboration and cross-agent intelligence
+ * - MCP protocol support for external service integration
  *
- * This scheduler:
- * 1. Runs agents at appropriate intervals (not every 12 seconds!)
- * 2. Agents query real project data via OBDA/ontology
- * 3. Agents create interventions ONLY when real problems are detected
- * 4. Full LangSmith tracing for observability
+ * MODE 2: Scheduled Deep Scans (traditional scheduling)
+ * - Periodic comprehensive analysis at domain-appropriate intervals
+ * - Deeper analysis with full tool execution
+ * - Complements continuous monitoring
+ *
+ * PROTOCOLS:
+ * - A2A: Agent-to-Agent messaging for internal coordination
+ * - MCP: Model Context Protocol for external services (Jira, Azure, etc.)
+ *
+ * This combines the best of:
+ * - Old simulation (24x7 continuous coordination)
+ * - LangChain agents (real intelligence, LangSmith observability)
  */
 export class AgentScheduler {
   private agents: Map<string, any>;
   private scheduledJobs: Map<string, NodeJS.Timeout>;
   private storage: IStorage;
   private isRunning: boolean = false;
+  private orchestrator: ContinuousOrchestrator | null = null;
 
   constructor(storage: IStorage) {
     this.storage = storage;
     this.agents = new Map();
     this.scheduledJobs = new Map();
 
-    // Initialize all 7 agents
+    // Initialize all 9 agents (7 PMO + 1 VRO + 1 Inference)
     this.initializeAgents();
+
+    // Initialize continuous orchestrator with A2A and MCP support
+    this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
+    console.log('[AgentScheduler] Continuous orchestrator initialized with A2A and MCP protocols');
   }
 
   /**
@@ -49,6 +65,8 @@ export class AgentScheduler {
       this.agents.set('risk', new RiskAgent(this.storage));
       this.agents.set('governance', new GovernanceAgent(this.storage));
       this.agents.set('planning', new PlanningAgent(this.storage));
+      this.agents.set('vro', new VROAgent(this.storage)); // Value Realization Office
+      this.agents.set('okr-inference', new OKRInferenceAgent(this.storage)); // OKR Mapping & Data Quality
 
       console.log(`[AgentScheduler] Initialized ${this.agents.size} agents`);
 
@@ -64,15 +82,25 @@ export class AgentScheduler {
   }
 
   /**
-   * Start all agent scheduled scans
+   * Start all agent systems (continuous + scheduled)
    *
-   * IMPORTANT: These intervals are much longer than the old 12-second simulation!
-   * Agents run at appropriate intervals based on their domain:
-   * - Financial: Every 30 minutes (not real-time, budget changes are slower)
-   * - Schedule: Every 20 minutes (sprint/timeline monitoring)
-   * - Risk: Every 60 minutes (risk assessment is strategic)
-   * - Quality: Every 45 minutes (test results don't change constantly)
-   * - Governance: Every 2 hours (compliance checks are periodic)
+   * DUAL-MODE OPERATION:
+   *
+   * Mode 1: Continuous 24x7 Coordination (via ContinuousOrchestrator)
+   * - Runs every 15 seconds
+   * - Agents communicate via A2A protocol
+   * - Real-time collaboration and alerts
+   * - MCP integration for external services
+   *
+   * Mode 2: Scheduled Deep Scans (traditional scheduling)
+   * - Financial: Every 30 minutes
+   * - Schedule: Every 20 minutes
+   * - Risk: Every 60 minutes
+   * - Quality: Every 45 minutes
+   * - Governance: Every 2 hours
+   * - VRO: Every 60 minutes
+   *
+   * This gives us BOTH real-time coordination AND deep periodic analysis
    */
   async startAll() {
     if (this.isRunning) {
@@ -81,7 +109,17 @@ export class AgentScheduler {
     }
 
     this.isRunning = true;
-    console.log('[AgentScheduler] Starting all agents with production schedules...');
+    console.log('[AgentScheduler] Starting DUAL-MODE agent system...');
+    console.log('[AgentScheduler] Mode 1: 24x7 Continuous Coordination (A2A + MCP)');
+    console.log('[AgentScheduler] Mode 2: Scheduled Deep Scans');
+
+    // Start Mode 1: Continuous orchestration (every 15 seconds)
+    if (this.orchestrator) {
+      await this.orchestrator.start(15000); // 15 second intervals
+      console.log('[AgentScheduler] ✅ Continuous orchestration started (15s interval)');
+    }
+
+    // Start Mode 2: Scheduled deep scans
 
     // FinOps Agent: Every 30 minutes
     this.schedule('finops', 30 * 60 * 1000, async () => {
@@ -125,7 +163,19 @@ export class AgentScheduler {
       await agent.runScheduledScan();
     });
 
-    console.log('[AgentScheduler] ✅ All agents scheduled and running');
+    // VRO Agent: Every 60 minutes (strategic value realization tracking)
+    this.schedule('vro', 60 * 60 * 1000, async () => {
+      const agent = this.agents.get('vro') as VROAgent;
+      await agent.runScheduledScan();
+    });
+
+    // OKR Inference Agent: Every 2 hours (data quality assessment + OKR mapping)
+    this.schedule('okr-inference', 120 * 60 * 1000, async () => {
+      const agent = this.agents.get('okr-inference') as OKRInferenceAgent;
+      await agent.runScheduledScan();
+    });
+
+    console.log('[AgentScheduler] ✅ All 9 agents scheduled and running (7 PMO + 1 VRO + 1 Inference)');
     console.log('[AgentScheduler] 🎯 NO MORE FAKE DATA - Agents monitor real projects');
 
     // Run an initial scan immediately (optional - can remove if not desired)
@@ -164,7 +214,7 @@ export class AgentScheduler {
    */
   private async runInitialScans() {
     // Run only critical agents initially to avoid overwhelming the system
-    const criticalAgents = ['finops', 'tmo', 'risk'];
+    const criticalAgents = ['finops', 'tmo', 'risk', 'vro', 'okr-inference'];
 
     for (const agentId of criticalAgents) {
       const agent = this.agents.get(agentId);
@@ -245,32 +295,76 @@ export class AgentScheduler {
   }
 
   /**
-   * Stop all agents
+   * Get agents Map (for direct access)
+   */
+  getAgentsMap(): Map<string, any> {
+    return this.agents;
+  }
+
+  /**
+   * Stop all agents (both modes)
    */
   stopAll() {
-    console.log('[AgentScheduler] Stopping all agents...');
+    console.log('[AgentScheduler] Stopping all agent systems...');
 
+    // Stop continuous orchestration
+    if (this.orchestrator) {
+      this.orchestrator.stop();
+      console.log('[AgentScheduler] Stopped continuous orchestration');
+    }
+
+    // Stop scheduled jobs
     for (const [agentId, job] of this.scheduledJobs.entries()) {
       clearInterval(job);
-      console.log(`[AgentScheduler] Stopped ${agentId}`);
+      console.log(`[AgentScheduler] Stopped scheduled job: ${agentId}`);
     }
 
     this.scheduledJobs.clear();
     this.isRunning = false;
 
-    console.log('[AgentScheduler] All agents stopped');
+    console.log('[AgentScheduler] All agent systems stopped');
   }
 
   /**
-   * Get scheduler status
+   * Get scheduler status (both modes)
    */
   getStatus() {
+    const orchestratorStatus = this.orchestrator?.getStatus() || null;
+
     return {
       isRunning: this.isRunning,
       agentCount: this.agents.size,
       scheduledJobs: this.scheduledJobs.size,
       agents: Array.from(this.agents.keys()),
+      continuousOrchestration: orchestratorStatus,
     };
+  }
+
+  /**
+   * Get continuous orchestrator
+   */
+  getOrchestrator(): ContinuousOrchestrator | null {
+    return this.orchestrator;
+  }
+
+  /**
+   * Agent calls MCP service (convenience method)
+   */
+  async agentCallMCPService(agentId: string, serviceName: string, action: string, params: any): Promise<any> {
+    if (!this.orchestrator) {
+      throw new Error('Orchestrator not initialized');
+    }
+    return this.orchestrator.agentCallMCPService(agentId, serviceName, action, params);
+  }
+
+  /**
+   * Broadcast alert to multiple agents (convenience method)
+   */
+  async broadcastAlert(fromAgentId: string, recipientIds: string[], alert: any): Promise<void> {
+    if (!this.orchestrator) {
+      throw new Error('Orchestrator not initialized');
+    }
+    return this.orchestrator.broadcastAlert(fromAgentId, recipientIds, alert);
   }
 }
 

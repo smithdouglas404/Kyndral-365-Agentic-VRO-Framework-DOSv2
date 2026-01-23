@@ -4903,11 +4903,12 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const scheduler = createAgentScheduler(storage);
 
       // Get the specific agent
-      const agent = scheduler.agents.get(agentId);
+      const agentsMap = scheduler.getAgentsMap();
+      const agent = agentsMap.get(agentId);
       if (!agent) {
         return res.status(404).json({
           error: "Agent not found",
-          availableAgents: Array.from(scheduler.agents.keys())
+          availableAgents: Array.from(agentsMap.keys())
         });
       }
 
@@ -4939,8 +4940,360 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ============================================================================
+  // DATA INGESTION - Excel, CSV, Planview Import (PRODUCTION-READY)
+  // ============================================================================
+
+  // Configure multer for Excel/CSV uploads
+  const dataUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+    fileFilter: (_req, file, cb) => {
+      const allowedTypes = [
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        'application/csv'
+      ];
+      if (allowedTypes.includes(file.mimetype) || file.originalname.match(/\.(xlsx?|csv)$/i)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only Excel (.xlsx, .xls) and CSV files are allowed'));
+      }
+    }
+  });
+
+  // Upload and import Excel/CSV file
+  app.post("/api/data/import/file", dataUpload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const { createExcelSheetsMCP } = await import("./mcp/ExcelSheetsMCP.js");
+      const excelMCP = createExcelSheetsMCP(storage);
+
+      let importedCount = 0;
+      const fileName = req.file.originalname;
+
+      console.log(`[DataIngestion] Processing file: ${fileName}`);
+
+      if (fileName.endsWith('.csv')) {
+        const fileContent = req.file.buffer.toString('utf-8');
+        importedCount = await excelMCP.processCSVFile(fileContent);
+      } else {
+        const sheetName = req.body.sheetName || undefined;
+        importedCount = await excelMCP.processExcelFile(req.file.buffer, sheetName);
+      }
+
+      // Trigger immediate agent scan on newly imported projects
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+      const agentsMap = scheduler.getAgentsMap();
+
+      // Trigger OKR Inference and VRO agents to process new data
+      const okrAgent = agentsMap.get('okr-inference');
+      const vroAgent = agentsMap.get('vro');
+
+      if (okrAgent) {
+        okrAgent.runScheduledScan().catch((err: Error) =>
+          console.error('[DataIngestion] OKR Inference scan error:', err)
+        );
+      }
+      if (vroAgent) {
+        vroAgent.runScheduledScan().catch((err: Error) =>
+          console.error('[DataIngestion] VRO scan error:', err)
+        );
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully imported ${importedCount} projects from ${fileName}`,
+        importedCount,
+        fileName,
+        triggerredAgents: ['okr-inference', 'vro']
+      });
+    } catch (error: any) {
+      console.error('[DataIngestion] File import error:', error);
+      res.status(500).json({
+        error: error.message,
+        details: error.stack
+      });
+    }
+  });
+
+  // Import from Google Sheets
+  app.post("/api/data/import/google-sheets", async (req, res) => {
+    try {
+      const { spreadsheetId, sheetName } = req.body;
+
+      if (!spreadsheetId) {
+        return res.status(400).json({ error: "spreadsheetId is required" });
+      }
+
+      const { createExcelSheetsMCP } = await import("./mcp/ExcelSheetsMCP.js");
+      const excelMCP = createExcelSheetsMCP(storage, {
+        googleSheetsApiKey: process.env.GOOGLE_SHEETS_API_KEY
+      });
+
+      const importedCount = await excelMCP.processGoogleSheet(spreadsheetId, sheetName);
+
+      res.json({
+        success: true,
+        message: `Successfully imported ${importedCount} projects from Google Sheets`,
+        importedCount,
+        spreadsheetId
+      });
+    } catch (error: any) {
+      console.error('[DataIngestion] Google Sheets import error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Sync from Planview
+  app.post("/api/data/sync/planview", async (req, res) => {
+    try {
+      const { portfolioId } = req.body;
+
+      const { createPlanviewMCP } = await import("./mcp/PlanviewMCP.js");
+      const planviewMCP = createPlanviewMCP(storage);
+
+      // Test connection first
+      const isConnected = await planviewMCP.testConnection();
+      if (!isConnected) {
+        return res.status(503).json({
+          error: "Cannot connect to Planview. Check API credentials.",
+          configured: !!process.env.PLANVIEW_API_KEY
+        });
+      }
+
+      const syncedCount = await planviewMCP.syncProjectsToDatabase({ portfolioId });
+
+      res.json({
+        success: true,
+        message: `Successfully synced ${syncedCount} projects from Planview`,
+        syncedCount,
+        portfolioId: portfolioId || 'all'
+      });
+    } catch (error: any) {
+      console.error('[DataIngestion] Planview sync error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Test Planview connection
+  app.get("/api/data/planview/test", async (_req, res) => {
+    try {
+      const { createPlanviewMCP } = await import("./mcp/PlanviewMCP.js");
+      const planviewMCP = createPlanviewMCP(storage);
+
+      const isConnected = await planviewMCP.testConnection();
+
+      res.json({
+        success: true,
+        connected: isConnected,
+        configured: !!process.env.PLANVIEW_API_KEY,
+        message: isConnected
+          ? "Planview connection successful"
+          : "Cannot connect to Planview"
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        connected: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Get Planview portfolios
+  app.get("/api/data/planview/portfolios", async (_req, res) => {
+    try {
+      const { createPlanviewMCP } = await import("./mcp/PlanviewMCP.js");
+      const planviewMCP = createPlanviewMCP(storage);
+
+      const portfolios = await planviewMCP.fetchPortfolios();
+
+      res.json({
+        success: true,
+        portfolios,
+        count: portfolios.length
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ============================================================================
+  // A2A (AGENT-TO-AGENT) AND MCP PROTOCOL ENDPOINTS
+  // ============================================================================
+
+  // Get orchestration status (A2A and MCP)
+  app.get("/api/orchestration/status", async (req, res) => {
+    try {
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+
+      const status = scheduler.getStatus();
+
+      res.json({
+        success: true,
+        status,
+        protocols: {
+          a2a: "Agent-to-Agent messaging for internal coordination",
+          mcp: "Model Context Protocol for external service integration"
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Send A2A message from one agent to another
+  app.post("/api/orchestration/a2a/send", async (req, res) => {
+    try {
+      const { from, to, type, content, projectId, severity } = req.body;
+
+      if (!from || !to || !type || !content) {
+        return res.status(400).json({
+          error: "Missing required fields: from, to, type, content"
+        });
+      }
+
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+      const orchestrator = scheduler.getOrchestrator();
+
+      if (!orchestrator) {
+        return res.status(500).json({ error: "Orchestrator not initialized" });
+      }
+
+      const a2aBus = orchestrator.getA2ABus();
+      await a2aBus.send({ from, to, type, content, projectId, severity });
+
+      res.json({
+        success: true,
+        message: "A2A message sent",
+        from,
+        to,
+        type
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Broadcast A2A alert to multiple agents
+  app.post("/api/orchestration/a2a/broadcast", async (req, res) => {
+    try {
+      const { fromAgentId, recipientIds, alert } = req.body;
+
+      if (!fromAgentId || !recipientIds || !alert) {
+        return res.status(400).json({
+          error: "Missing required fields: fromAgentId, recipientIds, alert"
+        });
+      }
+
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+
+      await scheduler.broadcastAlert(fromAgentId, recipientIds, alert);
+
+      res.json({
+        success: true,
+        message: "A2A alert broadcast",
+        from: fromAgentId,
+        recipients: recipientIds.length
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Agent calls MCP service
+  app.post("/api/orchestration/mcp/call", async (req, res) => {
+    try {
+      const { agentId, serviceName, action, params } = req.body;
+
+      if (!agentId || !serviceName || !action) {
+        return res.status(400).json({
+          error: "Missing required fields: agentId, serviceName, action"
+        });
+      }
+
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+
+      const result = await scheduler.agentCallMCPService(agentId, serviceName, action, params || {});
+
+      res.json({
+        success: true,
+        result,
+        agentId,
+        serviceName,
+        action
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get available MCP services
+  app.get("/api/orchestration/mcp/services", async (req, res) => {
+    try {
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+      const orchestrator = scheduler.getOrchestrator();
+
+      if (!orchestrator) {
+        return res.status(500).json({ error: "Orchestrator not initialized" });
+      }
+
+      const mcpHandler = orchestrator.getMCPHandler();
+      const services = mcpHandler.getServices();
+
+      res.json({
+        success: true,
+        services,
+        count: services.length
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get A2A message queue status
+  app.get("/api/orchestration/a2a/status", async (req, res) => {
+    try {
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+      const orchestrator = scheduler.getOrchestrator();
+
+      if (!orchestrator) {
+        return res.status(500).json({ error: "Orchestrator not initialized" });
+      }
+
+      const a2aBus = orchestrator.getA2ABus();
+      const status = a2aBus.getStatus();
+
+      res.json({
+        success: true,
+        status
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   console.log("[Routes] Ontology and OBDA endpoints registered");
   console.log("[Routes] Agent test endpoint registered: POST /api/agents/test/:agentId");
+  console.log("[Routes] A2A and MCP protocol endpoints registered:");
+  console.log("  - GET  /api/orchestration/status");
+  console.log("  - POST /api/orchestration/a2a/send");
+  console.log("  - POST /api/orchestration/a2a/broadcast");
+  console.log("  - GET  /api/orchestration/a2a/status");
+  console.log("  - POST /api/orchestration/mcp/call");
+  console.log("  - GET  /api/orchestration/mcp/services");
 
   return httpServer;
 }

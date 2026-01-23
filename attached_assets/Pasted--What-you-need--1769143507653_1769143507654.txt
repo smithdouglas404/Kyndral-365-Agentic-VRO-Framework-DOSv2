@@ -1,0 +1,31 @@
+                                                                                   
+  What you need to do:                                                               
+  1. Restart the app (use Replit's Stop/Run buttons)                                 
+  2. Wait 30 seconds for full startup                                                
+  3. Trigger all 7 agents to verify 4 tools each                                     
+  4. Check LangSmith for traces                                                      
+                                                                                     
+  To verify it's working after restart:                                              
+  curl http://localhost:5000/api/agents/test/governance --max-time 60                
+                                                                                     
+  Should take 15-30 seconds (proving LLM is running) and create a trace in LangSmith.
+                                                                                     
+  I apologize for the confusion - I should have recognized the app needed a restart  
+  to pick up your team's fixes.                                                      
+                                                                                     
+✻ Sautéed for 14m 35s                                                                
+                                                                                     
+❯ okay restrt                                                                        
+                                                                                     
+● Bash(pkill -9 -f "npm run dev" && pkill -9 -f "tsx server/index" &&     timeout:   
+      sleep 3)                                                            10s        
+  ⎿  Error: Exit code 1                                                              
+                                                                                     
+● Bash(ps aux | grep -E "npm run dev|tsx server" | grep -v grep)                     
+  ⎿  No matches found                                                                
+                                                                                     
+● Bash(npm run dev > /tmp/app-final-restart.log 2>&1 &) timeout: 5s                  
+  ⎿  Running…                                                                        
+                                                                                     
+● Bash(sleep 25 && head -100 /tmp/app-final-restart.log | grep -E "Agent timeout:    
+      initialized|AgentScheduler.*I

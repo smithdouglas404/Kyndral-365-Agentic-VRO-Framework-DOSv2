@@ -19,7 +19,13 @@
       "Bash(for agent in finops tmo risk governance planning ocm integrated)",
       "Bash(do echo \"Testing $agent...\")",
       "Bash(echo:*)",
-      "Bash(echo \"✗ $agent failed\" done)"
+      "Bash(echo \"✗ $agent failed\" done)",
+      "Bash(lsof:*)",
+      "Bash(journalctl:*)",
+      "WebFetch(domain:agentic-nexus--dsmith49.replit.app)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run build:*)",
+      "Bash(node -e:*)"
     ]
   }
 }
