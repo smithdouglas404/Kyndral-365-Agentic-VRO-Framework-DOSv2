@@ -70,13 +70,26 @@ export abstract class AgentBase {
       },
     });
 
-    // Initialize memory
+    // Initialize memory with message filtering to prevent corruption
     this.memory = new BufferMemory({
       returnMessages: true,
       memoryKey: "chat_history",
       inputKey: "input",
       outputKey: "output",
     });
+
+    // Override loadMemoryVariables to filter out malformed "not_implemented" messages
+    const originalLoadMemoryVariables = this.memory.loadMemoryVariables.bind(this.memory);
+    this.memory.loadMemoryVariables = async (values: any) => {
+      const result = await originalLoadMemoryVariables(values);
+      if (result.chat_history && Array.isArray(result.chat_history)) {
+        // Filter out malformed messages with type "not_implemented"
+        result.chat_history = result.chat_history.filter((msg: any) => {
+          return msg && typeof msg === 'object' && msg.type !== 'not_implemented';
+        });
+      }
+      return result;
+    };
 
     // Initialize tools (to be defined by subclasses)
     this.tools = this.defineTools();
@@ -145,7 +158,7 @@ export abstract class AgentBase {
     try {
       // Execute with LangSmith tracer callback if enabled
       const callbacks = this.tracer ? [this.tracer] : [];
-      
+
       const result = await this.executor.invoke(
         {
           input,
@@ -173,8 +186,27 @@ export abstract class AgentBase {
         interventions,
       };
     } catch (error: any) {
+      // If agent hit max_iterations, clear memory to prevent history corruption
+      if (error.message?.includes('max_iterations') || error.message?.includes('Agent stopped')) {
+        console.warn(`[${this.config.agentName}] Max iterations reached, clearing memory to prevent corruption`);
+        await this.clearMemory();
+      }
+
       await this.logActivity('agent_error', `Error: ${error.message}`);
       throw error;
+    }
+  }
+
+  /**
+   * Clear agent memory to prevent history buildup
+   * Call this after max_iterations or between coordination cycles
+   */
+  async clearMemory(): Promise<void> {
+    try {
+      await this.memory.clear();
+      console.log(`[${this.config.agentName}] Memory cleared`);
+    } catch (error) {
+      console.error(`[${this.config.agentName}] Failed to clear memory:`, error);
     }
   }
 

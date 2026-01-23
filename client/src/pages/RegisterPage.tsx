@@ -1,10 +1,11 @@
 /**
- * REGISTRATION PAGE
+ * REGISTRATION PAGE - Firebase Authentication
  */
 
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { UserPlus, Loader2 } from 'lucide-react';
+import { signUp, getIdToken } from '@/lib/firebase';
 
 export default function RegisterPage() {
   const [, navigate] = useLocation();
@@ -14,6 +15,7 @@ export default function RegisterPage() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
+    role: 'pm', // Default role
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,12 +38,30 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
+      // Create Firebase user
+      const userCredential = await signUp(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName
+      );
+
+      // Get Firebase ID token
+      const idToken = await getIdToken();
+
+      if (!idToken) {
+        throw new Error('Failed to get authentication token');
+      }
+
+      // Register with backend and set role
+      const response = await fetch('/api/auth/firebase/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
+          role: formData.role,
           firstName: formData.firstName,
           lastName: formData.lastName,
         }),
@@ -54,14 +74,14 @@ export default function RegisterPage() {
 
       const data = await response.json();
 
-      // Store token and user
-      localStorage.setItem('auth_token', data.token);
+      // Store user data
       localStorage.setItem('auth_user', JSON.stringify(data.user));
 
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Navigate to role-specific home page
+      const homePage = data.homePage || '/dashboard';
+      navigate(homePage);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -130,6 +150,28 @@ export default function RegisterPage() {
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700"
               placeholder="you@example.com"
             />
+          </div>
+
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium mb-2">
+              Role
+            </label>
+            <select
+              id="role"
+              value={formData.role}
+              onChange={(e) => updateField('role', e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700"
+            >
+              <option value="pm">Project Manager</option>
+              <option value="vro">Value Realization Office</option>
+              <option value="tmo">Timeline Management Office</option>
+              <option value="finops">Financial Operations</option>
+              <option value="risk">Risk Management</option>
+              <option value="governance">Governance & Compliance</option>
+              <option value="ocm">Organizational Change Management</option>
+              <option value="executive">Executive Leadership</option>
+            </select>
           </div>
 
           <div>

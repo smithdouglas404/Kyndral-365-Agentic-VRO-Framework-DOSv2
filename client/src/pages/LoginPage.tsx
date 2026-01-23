@@ -1,10 +1,11 @@
 /**
- * LOGIN PAGE
+ * LOGIN PAGE - Firebase Authentication
  */
 
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { LogIn, Loader2 } from 'lucide-react';
+import { signIn, getIdToken } from '@/lib/firebase';
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -19,10 +20,23 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      // Sign in with Firebase
+      const userCredential = await signIn(email, password);
+
+      // Get Firebase ID token
+      const idToken = await getIdToken();
+
+      if (!idToken) {
+        throw new Error('Failed to get authentication token');
+      }
+
+      // Verify with backend and get user data
+      const response = await fetch('/api/auth/firebase/verify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
       });
 
       if (!response.ok) {
@@ -32,14 +46,14 @@ export default function LoginPage() {
 
       const data = await response.json();
 
-      // Store token and user
-      localStorage.setItem('auth_token', data.token);
+      // Store user data
       localStorage.setItem('auth_user', JSON.stringify(data.user));
 
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Navigate to role-specific home page
+      const homePage = data.homePage || '/dashboard';
+      navigate(homePage);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }

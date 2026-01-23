@@ -347,7 +347,12 @@ export class ContinuousOrchestrator {
         await this.createSelfApprovedAction(agent);
       }
 
-      // Phase 6: Log coordination activity
+      // Phase 6: Clear agent memory to prevent history buildup between cycles
+      if (agent && typeof agent.clearMemory === 'function') {
+        await agent.clearMemory();
+      }
+
+      // Phase 7: Log coordination activity
       const executionTime = Date.now() - startTime;
       console.log(`[ContinuousOrchestrator] Cycle ${this.cycleCount} completed in ${executionTime}ms\n`);
 
@@ -676,8 +681,16 @@ Keep response brief and actionable.`;
 
         console.log(`[ContinuousOrchestrator] ${config.agentName} responded to ${fromConfig?.agentName} via A2A`);
 
-      } catch (error) {
+      } catch (error: any) {
         console.error(`[ContinuousOrchestrator] Error processing request for ${config.agentName}:`, error);
+
+        // Clear memory if max_iterations was hit
+        if (error.message?.includes('max_iterations') || error.message?.includes('Agent stopped')) {
+          console.warn(`[ContinuousOrchestrator] ${config.agentName} hit max_iterations, clearing memory`);
+          if (typeof agent.clearMemory === 'function') {
+            await agent.clearMemory();
+          }
+        }
       }
     }
   }

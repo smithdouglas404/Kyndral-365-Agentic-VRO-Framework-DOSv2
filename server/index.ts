@@ -7,6 +7,7 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
+import { initializeFirebaseAuthService } from "./auth/firebaseAdmin.js";
 import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 import { setupWebSocket } from "./websocket";
@@ -118,6 +119,19 @@ app.use((req, res, next) => {
     },
     async () => {
       log(`serving on port ${port}`);
+
+      // ===================================================================
+      // Initialize Firebase Authentication Service
+      // Provides Firebase Admin SDK integration for user authentication
+      // ===================================================================
+      try {
+        log("🔥 Initializing Firebase Authentication...");
+        initializeFirebaseAuthService(storage);
+        log("✅ Firebase Authentication initialized");
+      } catch (error: any) {
+        log(`⚠️  Firebase Authentication not configured: ${error.message}`);
+        log("   Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY to enable Firebase auth");
+      }
 
       // ===================================================================
       // Start Battle Rhythm Orchestrator (MILITARY-INSPIRED CADENCE)

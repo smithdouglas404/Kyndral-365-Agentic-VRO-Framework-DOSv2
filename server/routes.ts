@@ -6,6 +6,7 @@ import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
 import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";
 import { registerAuthRoutes } from "./routes/auth.js";
+import { registerFirebaseAuthRoutes } from "./routes/firebase-auth.js";
 import { registerFinancialRoutes } from "./routes/financials.js";
 import { registerPredictiveRoutes } from "./routes/predictive.js";
 import { registerCrossProjectImpactRoutes } from "./routes/cross-project-impact.js";
@@ -31,6 +32,7 @@ import { createBattleRhythmRoutes } from "./routes/battle-rhythm.js";
 import { createCommandersIntentRoutes } from "./routes/commanders-intent.js";
 import { createCOPRoutes } from "./routes/cop.js";
 import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
+import { createComplianceRoutes } from "./routes/compliance.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -125,6 +127,9 @@ export async function registerRoutes(
   // Setup authentication (must be before other routes)
   registerAuthRoutes(app, storage);
 
+  // Setup Firebase authentication (alternative to JWT auth)
+  registerFirebaseAuthRoutes(app, storage);
+
   // Register Integration Management routes (ADMIN - External data source configuration)
   registerIntegrationRoutes(app);
 
@@ -178,6 +183,9 @@ export async function registerRoutes(
 
   // Register Data Ingestion routes (Jira, Azure DevOps, MS Project sync)
   app.use("/api/data-ingestion", createDataIngestionRoutes(storage));
+
+  // Register Compliance Validation routes (Regulatory framework checking)
+  app.use("/api/compliance", createComplianceRoutes(storage));
 
   // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
   registerOrchestrationRoutes(app, storage);
