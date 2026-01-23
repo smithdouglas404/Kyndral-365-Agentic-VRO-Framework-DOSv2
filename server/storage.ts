@@ -65,6 +65,10 @@ import {
   type ExportJob, type InsertExportJob,
   type TutorialProgress, type InsertTutorialProgress,
   type AuditTrail, type InsertAuditTrail,
+  type OntologyEntity, type InsertOntologyEntity,
+  type OntologyMapping, type InsertOntologyMapping,
+  type OBDAQueryCache, type InsertOBDAQueryCache,
+  type GraphSyncLog, type InsertGraphSyncLog,
   users, policies, businessUnits, projects, projectTemplates, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
@@ -76,7 +80,8 @@ import {
   syncJobs, syncJobRuns, webhookEndpoints, webhookEvents,
   ingestionSessions, qaReviews, clarifyingQuestions,
   vroMetrics, benchmarks, appConfig, dashboardWidgets,
-  notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail
+  notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail,
+  ontologyEntities, ontologyMappings, obdaQueryCache, graphSyncLog
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -347,6 +352,13 @@ export interface IStorage {
   createAuditTrail(entry: InsertAuditTrail): Promise<AuditTrail>;
   getAuditTrailByCode(confirmationCode: string): Promise<AuditTrail | undefined>;
   getRecentAuditTrail(limit?: number): Promise<AuditTrail[]>;
+
+  // OBDA Query Cache Methods (for ontology-based data access)
+  getOBDAQueryCache?(queryHash: string): Promise<any | undefined>;
+  cacheOBDAQuery?(cache: any): Promise<any>;
+
+  // Raw Query Execution (for OBDA query rewriting)
+  executeRawQuery?(sql: string): Promise<any[]>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -2808,6 +2820,52 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(auditTrail)
       .orderBy(desc(auditTrail.createdAt))
       .limit(limit);
+  }
+
+  // OBDA Query Cache Methods
+  async getOBDAQueryCache(queryHash: string): Promise<any | undefined> {
+    // Query obda_query_cache table
+    const result = await pool.query(
+      'SELECT * FROM obda_query_cache WHERE query_hash = $1 LIMIT 1',
+      [queryHash]
+    );
+    return result.rows[0];
+  }
+
+  async cacheOBDAQuery(cache: any): Promise<any> {
+    // Insert or update cache entry
+    const result = await pool.query(
+      `INSERT INTO obda_query_cache
+       (query_hash, sparql_query, rewritten_query, result_set, source_systems, execution_time_ms, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (query_hash)
+       DO UPDATE SET
+         result_set = $4,
+         expires_at = $7,
+         created_at = NOW()
+       RETURNING *`,
+      [
+        cache.queryHash,
+        cache.sparqlQuery,
+        cache.rewrittenQuery,
+        cache.resultSet,
+        cache.sourceSystems,
+        cache.executionTimeMs || 0,
+        cache.expiresAt,
+      ]
+    );
+    return result.rows[0];
+  }
+
+  // Raw Query Execution for OBDA
+  async executeRawQuery(sql: string): Promise<any[]> {
+    try {
+      const result = await pool.query(sql);
+      return result.rows;
+    } catch (error) {
+      console.error('[Storage] Raw query error:', error);
+      throw error;
+    }
   }
 }
 

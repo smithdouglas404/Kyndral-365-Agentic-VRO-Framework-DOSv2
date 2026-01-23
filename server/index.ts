@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { startAgentSimulation } from "./agentSimulation";
+import { createAgentScheduler } from "./agents/AgentScheduler.js";
 import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 import { setupWebSocket } from "./websocket";
@@ -101,12 +101,17 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
-      
-      // Start continuous agent simulation (generates activity every 12 seconds)
-      startAgentSimulation(12000).catch(err => {
-        console.error("Failed to start agent simulation:", err);
+
+      // ===================================================================
+      // Start LangChain Agent Scheduler (REPLACES SIMULATION)
+      // This starts real intelligent agents that monitor actual project data
+      // NO MORE FAKE DATA - agents query real projects via ontology/OBDA
+      // ===================================================================
+      const agentScheduler = createAgentScheduler(storage);
+      agentScheduler.startAll().catch(err => {
+        console.error("Failed to start agent scheduler:", err);
       });
-      
+
       // Start MCP sync scheduler for cron-based sync jobs
       startSyncScheduler().catch(err => {
         console.error("Failed to start sync scheduler:", err);

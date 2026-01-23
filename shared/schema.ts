@@ -1828,3 +1828,98 @@ export const insertAuditTrailSchema = createInsertSchema(auditTrail).omit({
 
 export type InsertAuditTrail = z.infer<typeof insertAuditTrailSchema>;
 export type AuditTrail = typeof auditTrail.$inferSelect;
+
+// ============================================================================
+// ONTOLOGY ENTITIES - Virtual representation of triple store
+// ============================================================================
+
+export const ontologyEntities = pgTable("ontology_entities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityUri: text("entity_uri").notNull().unique(), // RDF URI
+  entityType: text("entity_type").notNull(), // Class name from ontology (pm:Project, safe:Epic, etc.)
+  localEntityType: text("local_entity_type"), // projects, epics, features, stories, tasks
+  localEntityId: varchar("local_entity_id"), // FK to local table
+  externalSystem: text("external_system"), // jira, azure, excel, servicenow, etc.
+  externalId: text("external_id"), // ID in external system
+  metadata: text("metadata"), // JSON with additional RDF properties
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOntologyEntitySchema = createInsertSchema(ontologyEntities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertOntologyEntity = z.infer<typeof insertOntologyEntitySchema>;
+export type OntologyEntity = typeof ontologyEntities.$inferSelect;
+
+// ============================================================================
+// ONTOLOGY MAPPINGS - Track how data sources map to ontology
+// ============================================================================
+
+export const ontologyMappings = pgTable("ontology_mappings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sourceSystem: text("source_system").notNull(), // jira, azure, postgresql, excel
+  sourceEntityType: text("source_entity_type").notNull(), // issue, work_item, project, task
+  sourceFieldPath: text("source_field_path").notNull(), // e.g., "fields.System.Title", "summary"
+  ontologyClass: text("ontology_class").notNull(), // pm:Project, safe:Epic, pm:Task
+  ontologyProperty: text("ontology_property").notNull(), // pm:hasBudget, pm:taskName
+  transformFunction: text("transform_function"), // JavaScript function for complex mappings
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOntologyMappingSchema = createInsertSchema(ontologyMappings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertOntologyMapping = z.infer<typeof insertOntologyMappingSchema>;
+export type OntologyMapping = typeof ontologyMappings.$inferSelect;
+
+// ============================================================================
+// OBDA QUERY CACHE - Cache for virtual data federation queries
+// ============================================================================
+
+export const obdaQueryCache = pgTable("obda_query_cache", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  queryHash: text("query_hash").notNull().unique(),
+  sparqlQuery: text("sparql_query").notNull(), // Original SPARQL query
+  rewrittenQuery: text("rewritten_query"), // Rewritten SQL/JQL/WIQL query
+  resultSet: text("result_set"), // JSON cached results
+  sourceSystems: text("source_systems"), // JSON array of sources queried
+  executionTimeMs: integer("execution_time_ms"), // Query execution time
+  expiresAt: timestamp("expires_at"), // Cache expiration (5 minutes TTL)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOBDAQueryCacheSchema = createInsertSchema(obdaQueryCache).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertOBDAQueryCache = z.infer<typeof insertOBDAQueryCacheSchema>;
+export type OBDAQueryCache = typeof obdaQueryCache.$inferSelect;
+
+// ============================================================================
+// GRAPH SYNC LOG - Track synchronization between PostgreSQL and Neo4j
+// ============================================================================
+
+export const graphSyncLog = pgTable("graph_sync_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: text("entity_type").notNull(), // project, epic, feature, story, task, resource, risk
+  entityId: varchar("entity_id").notNull(),
+  syncStatus: text("sync_status").notNull(), // pending, synced, failed
+  errorMessage: text("error_message"),
+  syncedAt: timestamp("synced_at").defaultNow(),
+});
+
+export const insertGraphSyncLogSchema = createInsertSchema(graphSyncLog).omit({
+  id: true,
+  syncedAt: true,
+});
+
+export type InsertGraphSyncLog = z.infer<typeof insertGraphSyncLogSchema>;
+export type GraphSyncLog = typeof graphSyncLog.$inferSelect;

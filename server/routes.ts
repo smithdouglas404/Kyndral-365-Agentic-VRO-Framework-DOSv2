@@ -14,6 +14,10 @@ import multer from "multer";
 import { PDFParse } from "pdf-parse";
 import * as fs from "fs";
 import * as path from "path";
+import { createOBDAService } from "./obda/index.js";
+import { createGraphQLSchema, createGraphQLContext } from "./graphql/schema.js";
+import { createHandler } from "graphql-http/lib/use/express";
+import { ontologyService } from "./ontology/index.js";
 
 async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string; numpages: number; info: any }> {
   const parser = new PDFParse({ data: buffer });
@@ -4784,6 +4788,159 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       res.status(500).json({ error: error.message });
     }
   });
+
+  // ============================================================================
+  // ONTOLOGY & OBDA ENDPOINTS
+  // Virtual data federation without materialization
+  // ============================================================================
+
+  // Initialize OBDA service
+  const obdaService = createOBDAService(storage);
+
+  // GraphQL endpoint for unified queries (with storage access for comprehensive queries)
+  const graphqlSchema = createGraphQLSchema(obdaService);
+  app.all(
+    "/api/graphql",
+    createHandler({
+      schema: graphqlSchema,
+      context: async () => createGraphQLContext(obdaService, storage),
+    })
+  );
+
+  // SPARQL endpoint for direct semantic queries
+  app.post("/api/sparql", async (req, res) => {
+    try {
+      const { query } = req.body;
+      if (!query) {
+        return res.status(400).json({ error: "SPARQL query required" });
+      }
+
+      const result = await obdaService.executeSPARQL(query);
+      res.json(result);
+    } catch (error: any) {
+      console.error("[SPARQL] Query error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Ontology explorer - get all classes
+  app.get("/api/ontology/classes", async (_req, res) => {
+    try {
+      const classes = ontologyService.getClasses();
+      res.json({ classes });
+    } catch (error: any) {
+      console.error("[Ontology] Get classes error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Ontology explorer - get all properties
+  app.get("/api/ontology/properties", async (_req, res) => {
+    try {
+      const properties = ontologyService.getProperties();
+      res.json(properties);
+    } catch (error: any) {
+      console.error("[Ontology] Get properties error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Ontology explorer - get equivalent concepts
+  app.get("/api/ontology/equivalent/:conceptUri", async (req, res) => {
+    try {
+      const conceptUri = decodeURIComponent(req.params.conceptUri);
+      const equivalents = ontologyService.getEquivalentConcepts(conceptUri);
+      res.json({ conceptUri, equivalents });
+    } catch (error: any) {
+      console.error("[Ontology] Get equivalents error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Ontology statistics
+  app.get("/api/ontology/statistics", async (_req, res) => {
+    try {
+      const stats = ontologyService.getStatistics();
+      res.json(stats);
+    } catch (error: any) {
+      console.error("[Ontology] Get statistics error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Semantic reconciliation - map external entity types
+  app.post("/api/ontology/reconcile", async (req, res) => {
+    try {
+      const { sourceType, sourceSystem } = req.body;
+      if (!sourceType || !sourceSystem) {
+        return res.status(400).json({ error: "sourceType and sourceSystem required" });
+      }
+
+      const ontologyConcept = ontologyService.reconcileEntity(sourceType, sourceSystem);
+      const label = ontologyService.getLabel(ontologyConcept);
+
+      res.json({
+        sourceType,
+        sourceSystem,
+        ontologyConcept,
+        label,
+      });
+    } catch (error: any) {
+      console.error("[Ontology] Reconcile error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ============================================================================
+  // AGENT TEST ENDPOINT (Trigger agent manually for LangSmith testing)
+  // ============================================================================
+  app.post("/api/agents/test/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+
+      // Import agent scheduler dynamically
+      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
+      const scheduler = createAgentScheduler(storage);
+
+      // Get the specific agent
+      const agent = scheduler.agents.get(agentId);
+      if (!agent) {
+        return res.status(404).json({
+          error: "Agent not found",
+          availableAgents: Array.from(scheduler.agents.keys())
+        });
+      }
+
+      console.log(`[Test] Manually triggering ${agentId} agent...`);
+
+      // Execute the agent
+      await agent.runScheduledScan();
+
+      // Get recent interventions from this agent
+      const interventions = await storage.getInterventions({ agentId });
+      const recentInterventions = interventions.slice(0, 5);
+
+      res.json({
+        success: true,
+        agentId,
+        message: `${agentId} agent executed successfully`,
+        interventionsCreated: recentInterventions.length,
+        recentInterventions,
+        langsmithProject: process.env.LANGCHAIN_PROJECT || "nextera-eto",
+        langsmithUrl: "https://smith.langchain.com/",
+        note: "Check LangSmith dashboard for agent traces"
+      });
+    } catch (error: any) {
+      console.error("[Test] Agent test error:", error);
+      res.status(500).json({
+        error: error.message,
+        stack: error.stack
+      });
+    }
+  });
+
+  console.log("[Routes] Ontology and OBDA endpoints registered");
+  console.log("[Routes] Agent test endpoint registered: POST /api/agents/test/:agentId");
 
   return httpServer;
 }
