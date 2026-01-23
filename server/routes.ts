@@ -23,6 +23,8 @@ import { registerResourceRoutes } from "./routes/resources.js";
 import { registerPortfolioOptimizationRoutes } from "./routes/portfolio-optimization.js";
 import { registerCollaborationRoutes } from "./routes/collaboration.js";
 import { registerWhiteLabelRoutes } from "./routes/admin/white-label.js";
+import { registerAgentInsightsRoutes } from "./routes/agent-insights.js";
+import { registerVoiceBriefingRoutes } from "./routes/voice-briefings.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -146,6 +148,12 @@ export async function registerRoutes(
 
   // Register Real-Time Collaboration routes (TIER 3 - Presence, Comments)
   registerCollaborationRoutes(app, storage);
+
+  // Register Agent Insights routes (NEW - Expose agent calculations to UI)
+  registerAgentInsightsRoutes(app, storage);
+
+  // Register Voice Briefing routes (NotebookLM-style podcast summaries)
+  registerVoiceBriefingRoutes(app, storage);
 
   // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
   registerOrchestrationRoutes(app, storage);

@@ -26,6 +26,7 @@ import { MultiAgentDiscussion } from "@/components/MultiAgentDiscussion";
 import { AgentCommandCenter } from "@/components/AgentCommandCenter";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
+import AgentActionQueue from "@/components/AgentActionQueue";
 import { useDivisions } from "@/hooks/useNexteraData";
 import { useVroMetrics } from "@/hooks/useVroMetrics";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
@@ -518,10 +519,13 @@ function DashboardContent() {
           <TabsContent value="overview" className="space-y-8">
             {/* AI Executive Intelligence - Portfolio-level insights and recommendations */}
             <AIExecutiveInsights />
-            
+
+            {/* Agent Action Queue - HITL Dashboard for Agent Recommendations */}
+            <AgentActionQueue />
+
             {/* Unified Metrics Section - VRO and PMO side by side */}
             <UnifiedMetricsSection onDrillDown={handleDrillDown} />
-            
+
           </TabsContent>
 
           {/* Portfolios Tab - BU Programs */}

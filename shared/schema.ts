@@ -42,6 +42,32 @@ export type InsertBusinessUnit = z.infer<typeof insertBusinessUnitSchema>;
 export type BusinessUnit = typeof businessUnits.$inferSelect;
 
 // ============================================================================
+// COMPANIES - Top-level legal entities (for multi-company support)
+// ============================================================================
+
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  ticker: text("ticker"), // Stock ticker symbol (e.g., NEE)
+  legalEntity: text("legal_entity"), // Full legal name
+  parentCompanyId: varchar("parent_company_id"), // For subsidiaries
+  headquarters: text("headquarters"),
+  industry: text("industry"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type Company = typeof companies.$inferSelect;
+
+// ============================================================================
 // DIVISIONS - NextEra Energy Business Segments (from official filings)
 // ============================================================================
 
@@ -55,6 +81,7 @@ export const divisions = pgTable("divisions", {
   description: text("description"),
   color: text("color"), // Brand color hex
   portfolioId: varchar("portfolio_id"), // Link to SAFe portfolio
+  companyId: varchar("company_id"), // FK to companies - organizational hierarchy
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -107,6 +134,54 @@ export const insertDivisionOkrSchema = createInsertSchema(divisionOkrs).omit({
 
 export type InsertDivisionOkr = z.infer<typeof insertDivisionOkrSchema>;
 export type DivisionOkr = typeof divisionOkrs.$inferSelect;
+
+// OKR Linkages - Cascade OKRs from division to projects/epics/features
+export const okrLinkages = pgTable("okr_linkages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  parentOkrId: varchar("parent_okr_id"), // Can reference divisionOkrs or another okrLinkage
+  childEntityType: text("child_entity_type").notNull(), // project, epic, feature, team
+  childEntityId: varchar("child_entity_id").notNull(),
+  alignmentScore: real("alignment_score"), // 0.0-1.0 confidence of alignment
+  confidence: text("confidence").default("medium"), // low, medium, high
+  inferredBy: text("inferred_by"), // Agent that created this linkage
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOkrLinkageSchema = createInsertSchema(okrLinkages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertOkrLinkage = z.infer<typeof insertOkrLinkageSchema>;
+export type OkrLinkage = typeof okrLinkages.$inferSelect;
+
+// Benefits Realization - Track planned vs actual benefits over time (for VRO agent)
+export const benefitsRealization = pgTable("benefits_realization", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  benefitName: text("benefit_name").notNull(),
+  benefitCategory: text("benefit_category"), // cost_reduction, revenue_increase, efficiency, customer_satisfaction
+  plannedValue: real("planned_value"), // Expected benefit in dollars or percentage
+  actualValue: real("actual_value"), // Realized benefit to date
+  realizationDate: timestamp("realization_date"), // When benefit was/will be realized
+  status: text("status").default("planned"), // planned, on_track, at_risk, realized, delayed
+  valueUnit: text("value_unit").default("$"), // $, %, hours, etc.
+  notes: text("notes"),
+  measuredBy: text("measured_by"), // How the benefit is measured
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertBenefitsRealizationSchema = createInsertSchema(benefitsRealization).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertBenefitsRealization = z.infer<typeof insertBenefitsRealizationSchema>;
+export type BenefitsRealization = typeof benefitsRealization.$inferSelect;
 
 // Division Risks - Risk registry by division
 export const divisionRisks = pgTable("division_risks", {
@@ -271,6 +346,15 @@ export const projects = pgTable("projects", {
   actualCost: text("actual_cost"),
   cpiValue: real("cpi_value"),
   spiValue: real("spi_value"),
+  // EVM (Earned Value Management) fields for FinOps agent
+  earnedValue: real("earned_value"), // EV - value of work actually completed
+  plannedValue: real("planned_value"), // PV - value of work scheduled to be completed
+  budgetAtCompletion: real("bac"), // BAC - total planned budget
+  estimateAtCompletion: real("eac"), // EAC - forecasted total cost at completion
+  estimateToComplete: real("etc"), // ETC - forecasted cost to finish remaining work
+  costVariance: real("cv"), // CV = EV - AC
+  scheduleVariance: real("sv"), // SV = EV - PV
+  varianceAtCompletion: real("vac"), // VAC = BAC - EAC
   progress: integer("progress"),
   progressPercentage: real("progress_percentage"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -460,11 +544,17 @@ export const risks = pgTable("risks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   projectId: varchar("project_id").notNull(),
   name: text("name").notNull(),
-  probability: text("probability").default("medium"),
-  impact: text("impact").default("medium"),
+  probability: text("probability").default("medium"), // low/medium/high (qualitative)
+  impact: text("impact").default("medium"), // low/medium/high (qualitative)
   status: text("status").default("open"),
   mitigation: text("mitigation"),
   owner: text("owner"),
+  // Quantitative risk fields for Risk agent
+  riskScore: real("risk_score"), // Probability × Impact (0-100)
+  riskCategory: text("risk_category"), // schedule, cost, technical, resource, external, compliance
+  identifiedDate: timestamp("identified_date"),
+  probabilityNumeric: real("probability_numeric"), // 0.0-1.0 for Monte Carlo
+  impactNumeric: real("impact_numeric"), // Dollar amount or percentage impact
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1616,6 +1706,7 @@ export const portfolios = pgTable("portfolios", {
   budgetAllocation: text("budget_allocation"),
   budgetUnit: text("budget_unit").default("$M"),
   fiscalYear: text("fiscal_year"),
+  divisionId: varchar("division_id"), // FK to divisions - organizational hierarchy
   // External sync fields
   externalSystem: text("external_system"), // jira, azure-devops, servicenow, etc.
   externalId: text("external_id"),
