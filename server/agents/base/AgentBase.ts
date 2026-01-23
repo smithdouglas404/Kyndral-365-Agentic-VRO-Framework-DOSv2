@@ -3,6 +3,8 @@ import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { BufferMemory } from "langchain/memory";
+import { Client } from "langsmith";
+import { LangChainTracer } from "langchain/callbacks";
 import type { IStorage } from "../../storage.js";
 import type { InsertAgentActivityLog, InsertIntervention } from "@shared/schema";
 
@@ -19,7 +21,7 @@ export interface AgentConfig {
  * AgentBase - Foundation for all LangChain-based intelligent agents
  * Replaces the simulation system with real AI-powered autonomous agents
  * 
- * LangSmith tracing is enabled automatically via environment variables:
+ * LangSmith tracing is enabled via LangChainTracer:
  * - LANGCHAIN_TRACING_V2=true
  * - LANGCHAIN_API_KEY=your_key
  * - LANGCHAIN_PROJECT=your_project
@@ -31,20 +33,32 @@ export abstract class AgentBase {
   protected memory: BufferMemory;
   protected tools: DynamicStructuredTool[];
   protected storage: IStorage;
+  protected tracingEnabled: boolean = false;
+  protected langsmithClient: Client | null = null;
+  protected tracer: LangChainTracer | null = null;
 
   constructor(config: AgentConfig, storage: IStorage) {
     this.config = config;
     this.storage = storage;
 
-    // LangSmith auto-tracing is enabled via environment variables
-    // No need to manually create tracer - LangChain handles it automatically
-    if (process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true') {
-      console.log(`[${config.agentName}] LangSmith auto-tracing enabled for project: ${process.env.LANGCHAIN_PROJECT}`);
+    // Check if LangSmith tracing is configured
+    this.tracingEnabled = !!(process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true');
+    if (this.tracingEnabled) {
+      console.log(`[${config.agentName}] LangSmith tracing enabled for project: ${process.env.LANGCHAIN_PROJECT}`);
+      // Initialize LangSmith client and tracer
+      this.langsmithClient = new Client({
+        apiKey: process.env.LANGCHAIN_API_KEY,
+        apiUrl: process.env.LANGCHAIN_ENDPOINT || "https://api.smith.langchain.com",
+      });
+      this.tracer = new LangChainTracer({
+        projectName: process.env.LANGCHAIN_PROJECT || "DFIN-Pipeline",
+        client: this.langsmithClient,
+      });
     } else {
       console.warn(`[${config.agentName}] LangSmith tracing NOT enabled - check LANGCHAIN_API_KEY and LANGCHAIN_TRACING_V2`);
     }
 
-    // Initialize Anthropic model - LangSmith will auto-trace all LLM calls
+    // Initialize Anthropic model
     this.model = new ChatAnthropic({
       modelName: config.modelName || "claude-sonnet-4-5-20250929",
       temperature: config.temperature || 0.7,
@@ -104,14 +118,13 @@ export abstract class AgentBase {
       verbose: process.env.NODE_ENV === 'development',
       maxIterations: 5,
       returnIntermediateSteps: true,
-      callbacks: this.model.callbacks, // Propagate callbacks from model
     });
 
     console.log(`[${this.config.agentName}] Agent initialized with ${this.tools.length} tools`);
   }
 
   /**
-   * Execute agent with input
+   * Execute agent with input - with LangSmith tracing via callbacks
    */
   async execute(input: string, context?: Record<string, any>): Promise<{
     output: string;
@@ -125,10 +138,24 @@ export abstract class AgentBase {
     await this.logActivity('agent_execution', `Executing ${this.config.agentName}: ${input}`);
 
     try {
-      const result = await this.executor.invoke({
-        input,
-        ...context,
-      });
+      // Execute with LangSmith tracer callback if enabled
+      const callbacks = this.tracer ? [this.tracer] : [];
+      
+      const result = await this.executor.invoke(
+        {
+          input,
+          ...context,
+        },
+        {
+          callbacks,
+          runName: this.config.agentName,
+          metadata: {
+            agentId: this.config.agentId,
+            focus: this.config.focus,
+            autonomy: this.config.autonomy,
+          },
+        }
+      );
 
       // Parse interventions from output
       const interventions = await this.parseInterventions(result.output);
@@ -151,10 +178,18 @@ export abstract class AgentBase {
    * Agents can output structured interventions using XML-like tags
    */
   private async parseInterventions(output: string): Promise<any[]> {
+    if (!output || typeof output !== 'string') {
+      return [];
+    }
+    
     // Extract structured interventions from agent response
     // Format expected: <INTERVENTION type="budget" severity="high">...</INTERVENTION>
-    const interventionRegex = /<INTERVENTION.*?type="([^"]+)".*?severity="([^"]+)".*?>(.*?)<\/INTERVENTION>/gs;
-    const matches = [...output.matchAll(interventionRegex)];
+    const interventionRegex = /<INTERVENTION.*?type="([^"]+)".*?severity="([^"]+)".*?>([\s\S]*?)<\/INTERVENTION>/g;
+    const matches: RegExpExecArray[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = interventionRegex.exec(output)) !== null) {
+      matches.push(match);
+    }
 
     const interventions: any[] = [];
 
