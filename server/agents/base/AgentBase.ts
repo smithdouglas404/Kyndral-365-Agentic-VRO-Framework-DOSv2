@@ -3,6 +3,7 @@ import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { BufferMemory } from "langchain/memory";
+import { LangChainTracer } from "@langchain/core/tracers/tracer_langchain";
 import type { IStorage } from "../../storage.js";
 import type { InsertAgentActivityLog, InsertIntervention } from "@shared/schema";
 
@@ -31,21 +32,37 @@ export abstract class AgentBase {
     this.config = config;
     this.storage = storage;
 
+    // Initialize LangSmith tracer
+    const callbacks = [];
+
+    // Add LangSmith tracer if configured (case-insensitive check)
+    if (process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true') {
+      const tracer = new LangChainTracer({
+        projectName: process.env.LANGCHAIN_PROJECT || "nextera-eto",
+        client: undefined, // Will use env vars
+      });
+      callbacks.push(tracer);
+      console.log(`[${config.agentName}] LangSmith tracing enabled for project: ${process.env.LANGCHAIN_PROJECT}`);
+    } else {
+      console.warn(`[${config.agentName}] LangSmith tracing NOT enabled - check LANGCHAIN_API_KEY and LANGCHAIN_TRACING_V2`);
+    }
+
+    // Add activity logging callback
+    callbacks.push({
+      handleLLMStart: async () => {
+        await this.logActivity('llm_call', `Starting LLM call for ${this.config.agentName}`);
+      },
+      handleLLMEnd: async () => {
+        await this.logActivity('llm_response', `Received response from LLM`);
+      },
+    });
+
     // Initialize Anthropic model with LangSmith tracing
     this.model = new ChatAnthropic({
       modelName: config.modelName || "claude-sonnet-4-5-20250929",
       temperature: config.temperature || 0.7,
       anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks: [
-        {
-          handleLLMStart: async () => {
-            await this.logActivity('llm_call', `Starting LLM call for ${this.config.agentName}`);
-          },
-          handleLLMEnd: async () => {
-            await this.logActivity('llm_response', `Received response from LLM`);
-          },
-        },
-      ],
+      callbacks,
     });
 
     // Initialize memory
@@ -101,6 +118,7 @@ export abstract class AgentBase {
       verbose: process.env.NODE_ENV === 'development',
       maxIterations: 5,
       returnIntermediateSteps: true,
+      callbacks: this.model.callbacks, // Propagate callbacks from model
     });
 
     console.log(`[${this.config.agentName}] Agent initialized with ${this.tools.length} tools`);

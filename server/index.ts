@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config(); // Load .env file FIRST before anything else
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
