@@ -922,6 +922,392 @@ It serves as a blueprint for organizations building intelligent PPM/VRO systems 
 
 ---
 
+---
+
+## APPENDIX A: MERMAID ARCHITECTURE DIAGRAMS
+
+### A.1 System Context Diagram
+
+```mermaid
+C4Context
+    title NextEra ETO Agentic PPM System Context
+
+    Person(pm, "Project Manager", "Manages projects and reviews agent recommendations")
+    Person(exec, "Executive", "Views dashboards and executive insights")
+
+    System(eto, "ETO Agentic Platform", "AI-powered portfolio management with autonomous agents")
+
+    System_Ext(jira, "Jira", "Issue tracking")
+    System_Ext(azure, "Azure DevOps", "Work items")
+    System_Ext(snow, "ServiceNow", "ITSM")
+    System_Ext(langsmith, "LangSmith", "Decision tracing")
+    System_Ext(anthropic, "Anthropic", "Claude AI")
+
+    Rel(pm, eto, "Views insights, approves interventions")
+    Rel(exec, eto, "Reviews executive dashboard")
+    Rel(eto, jira, "Syncs projects/epics")
+    Rel(eto, azure, "Syncs work items")
+    Rel(eto, snow, "Syncs incidents")
+    Rel(eto, langsmith, "Traces decisions", "DFIN-Pipeline")
+    Rel(eto, anthropic, "AI reasoning")
+```
+
+### A.2 Agent Communication Flow
+
+```mermaid
+sequenceDiagram
+    participant Orch as ContinuousOrchestrator
+    participant FinOps as FinOps Agent
+    participant TMO as TMO Agent
+    participant VRO as VRO Agent
+    participant A2A as A2A Message Bus
+    participant DB as PostgreSQL
+
+    loop Every 15 seconds
+        Orch->>Orch: Select agent (round-robin)
+        Orch->>FinOps: Activate for scan
+        FinOps->>DB: Query projects
+        DB-->>FinOps: Project data
+        FinOps->>FinOps: Analyze (CPI < 0.85?)
+
+        alt Critical Issue Found
+            FinOps->>A2A: Send request to TMO
+            A2A->>TMO: Forward message
+            TMO->>DB: Query schedule data
+            TMO-->>A2A: Response (SPI analysis)
+            A2A-->>FinOps: Collaboration response
+            FinOps->>DB: Create intervention
+        end
+    end
+```
+
+### A.3 Ontology Hierarchy
+
+```mermaid
+classDiagram
+    class pm_Portfolio {
+        +hasProject()
+        +hasProgram()
+        +hasBudget()
+    }
+
+    class pm_Program {
+        +hasProject()
+        +hasValueStream()
+    }
+
+    class pm_Project {
+        +projectName
+        +projectStatus
+        +cpiValue
+        +spiValue
+        +hasBudget()
+        +hasTask()
+        +hasRisk()
+    }
+
+    class pm_Epic {
+        +hasFeature()
+    }
+
+    class pm_Feature {
+        +hasStory()
+        +wsjfScore
+    }
+
+    class pm_Story {
+        +storyPoints
+        +acceptanceCriteria
+    }
+
+    class pm_Task {
+        +taskName
+        +assignee
+        +dueDate
+        +effortHours
+    }
+
+    pm_Portfolio "1" --> "*" pm_Program
+    pm_Portfolio "1" --> "*" pm_Project
+    pm_Program "1" --> "*" pm_Project
+    pm_Project "1" --> "*" pm_Epic
+    pm_Epic "1" --> "*" pm_Feature
+    pm_Feature "1" --> "*" pm_Story
+    pm_Story "1" --> "*" pm_Task
+
+    class safe_ValueStream {
+        +hasART()
+    }
+
+    class safe_ART {
+        +hasPI()
+        +velocity
+    }
+
+    safe_ValueStream --|> pm_Program
+    safe_ART --|> pm_Team
+```
+
+### A.4 Data Federation (OBDA) Flow
+
+```mermaid
+flowchart TB
+    subgraph Client["Client Layer"]
+        Q[SPARQL Query]
+    end
+
+    subgraph OBDA["OBDA Service"]
+        P[Query Parser]
+        R[Query Rewriter]
+        E[Federated Executor]
+        M[Result Merger]
+    end
+
+    subgraph Sources["Data Sources"]
+        PG[(PostgreSQL)]
+        J[Jira API]
+        AZ[Azure DevOps]
+        SN[ServiceNow]
+    end
+
+    subgraph Ontology["Ontology Layer"]
+        O1[core.ttl]
+        O2[safe.ttl]
+        O3[pmbok.ttl]
+        O4[bridging.ttl]
+    end
+
+    Q --> P
+    P --> R
+    R --> |SQL| PG
+    R --> |JQL| J
+    R --> |WIQL| AZ
+    R --> |REST| SN
+    PG --> E
+    J --> E
+    AZ --> E
+    SN --> E
+    E --> M
+    M --> |Unified Results| Client
+    R -.-> Ontology
+```
+
+### A.5 LangSmith Tracing Architecture
+
+```mermaid
+flowchart LR
+    subgraph Agents["9 AI Agents"]
+        A1[FinOps]
+        A2[TMO]
+        A3[VRO]
+        A4[Risk]
+        A5[Governance]
+        A6[Planning]
+        A7[OCM]
+        A8[Integrated]
+        A9[OKR Inference]
+    end
+
+    subgraph Tracing["LangSmith Tracing"]
+        T[LangChainTracer]
+        P[DFIN-Pipeline Project]
+    end
+
+    subgraph Traces["Trace Types"]
+        T1[detection]
+        T2[agent_to_agent]
+        T3[intervention]
+        T4[approval]
+        T5[mcp_call]
+    end
+
+    A1 --> T
+    A2 --> T
+    A3 --> T
+    A4 --> T
+    A5 --> T
+    A6 --> T
+    A7 --> T
+    A8 --> T
+    A9 --> T
+    T --> P
+    P --> Traces
+```
+
+---
+
+## APPENDIX B: DETAILED AGENT SPECIFICATIONS
+
+### B.1 FinOps Agent
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `finops` |
+| **Purpose** | Budget monitoring, cost optimization, EVM analysis |
+| **Autonomy** | Full |
+| **Trigger Conditions** | CPI < 0.85, Budget variance > 10% |
+| **Primary Tools** | `analyze_budget`, `query_financials`, `create_budget_alert`, `calculate_evm` |
+| **Collaboration Partners** | TMO, VRO, Planning |
+| **Ontology Classes** | pm:Budget, pm:Project (cpiValue), pmbok:ActualCost, pmbok:EarnedValue |
+
+**Decision Flow:**
+```
+1. Query projects with budget data
+2. Calculate CPI = EV / AC
+3. If CPI < 0.85:
+   a. Request TMO for schedule impact
+   b. Request VRO for value impact
+   c. Create intervention with combined analysis
+4. Auto-approve for CPI 0.80-0.85
+5. Require human approval for CPI < 0.80
+```
+
+### B.2 TMO Agent (Technical Management Office)
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `tmo` |
+| **Purpose** | Schedule tracking, delivery management, velocity analysis |
+| **Autonomy** | Full |
+| **Trigger Conditions** | SPI < 0.85, Milestone at risk |
+| **Primary Tools** | `analyze_schedule`, `query_milestones`, `critical_path_analysis`, `velocity_forecast` |
+| **Collaboration Partners** | FinOps, Planning, Risk |
+| **Ontology Classes** | pm:Schedule, pm:Milestone, safe:Sprint, safe:PI (spiValue) |
+
+### B.3 VRO Agent (Value Realization Office)
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `vro` |
+| **Purpose** | Value tracking, benefits realization, ROI monitoring |
+| **Autonomy** | Full |
+| **Trigger Conditions** | Value variance > 20%, Benefits delayed |
+| **Primary Tools** | `assess_value`, `query_benefits`, `roi_calculation`, `benefits_forecast` |
+| **Collaboration Partners** | FinOps, TMO |
+| **Ontology Classes** | pm:Deliverable, pm:Budget (ROI), prince2:BusinessCase |
+
+### B.4 Risk Agent
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `risk` |
+| **Purpose** | Risk identification, threat assessment, mitigation tracking |
+| **Autonomy** | Supervised |
+| **Trigger Conditions** | Multiple critical interventions, Risk score threshold |
+| **Primary Tools** | `assess_risk`, `query_risks`, `escalate_risk`, `monte_carlo_simulation` |
+| **Collaboration Partners** | Governance, Planning |
+| **Ontology Classes** | pm:Risk (probability, impact, mitigation), pmbok:RiskRegister |
+
+### B.5 Governance Agent
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `governance` |
+| **Purpose** | Compliance monitoring, policy enforcement, audit trails |
+| **Autonomy** | Supervised |
+| **Trigger Conditions** | Missing portfolio assignment, Policy violations |
+| **Primary Tools** | `check_compliance`, `audit_trail`, `escalate_governance`, `policy_check` |
+| **Collaboration Partners** | Risk |
+| **Ontology Classes** | pm:Portfolio, prince2:Stage, prince2:Tolerance |
+
+### B.6 Planning Agent
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `planning` |
+| **Purpose** | Dependency management, resource planning, roadmap optimization |
+| **Autonomy** | Full |
+| **Trigger Conditions** | Dependency conflicts, Resource contention |
+| **Primary Tools** | `analyze_dependencies`, `query_projects`, `replan_suggestion`, `resource_optimization` |
+| **Collaboration Partners** | All agents (coordinator role) |
+| **Ontology Classes** | pm:Dependency, pm:Resource, pm:Task (dependsOn) |
+
+### B.7 OCM Agent (Organizational Change Management)
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `ocm` |
+| **Purpose** | Change adoption tracking, stakeholder engagement, training management |
+| **Autonomy** | Supervised |
+| **Trigger Conditions** | Adoption metrics below target |
+| **Primary Tools** | `assess_adoption`, `stakeholder_analysis`, `training_recommendation`, `communication_plan` |
+| **Collaboration Partners** | Governance |
+| **Ontology Classes** | pm:Stakeholder, pm:Team |
+
+### B.8 Integrated Management Agent
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `integrated` |
+| **Purpose** | Quality monitoring, process improvement, predictability tracking |
+| **Autonomy** | Full |
+| **Trigger Conditions** | Predictability < 75%, Quality score decline |
+| **Primary Tools** | `quality_assessment`, `process_audit`, `improvement_plan`, `predictability_analysis` |
+| **Collaboration Partners** | TMO, FinOps |
+| **Ontology Classes** | pm:Quality, safe:PI (piObjectives) |
+
+### B.9 OKR Inference Agent
+
+| Attribute | Value |
+|-----------|-------|
+| **ID** | `okr_inference` |
+| **Purpose** | OKR alignment analysis, objective tracking, strategic cascade |
+| **Autonomy** | Full |
+| **Trigger Conditions** | OKR alignment gaps, Strategic drift |
+| **Primary Tools** | `infer_okrs`, `alignment_check`, `cascade_objectives`, `strategic_analysis` |
+| **Collaboration Partners** | VRO, Governance |
+| **Ontology Classes** | safe:StrategicTheme, pm:Portfolio |
+
+---
+
+## APPENDIX C: LANGSMITH CONFIGURATION
+
+### C.1 Environment Setup
+
+```bash
+# Required environment variables for unified tracing
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=your_api_key
+LANGCHAIN_PROJECT=DFIN-Pipeline
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+```
+
+### C.2 Trace Metadata
+
+All agent traces include standardized metadata:
+
+```typescript
+{
+  layer: "agent",
+  agent_type: "finops" | "tmo" | "vro" | ...,
+  system: "multi-agent-orchestration",
+  projectId?: string,
+  severity?: "critical" | "high" | "medium" | "low",
+  protocol: "A2A" | "MCP"
+}
+```
+
+### C.3 Querying Traces
+
+```typescript
+// Find all critical decisions for a project
+const traces = await langsmith.listRuns({
+  projectName: "DFIN-Pipeline",
+  filter: 'and(eq(metadata.projectId, "P-123"), eq(metadata.severity, "critical"))',
+  executionOrder: "desc",
+});
+
+// Find A2A communications between agents
+const a2aTraces = await langsmith.listRuns({
+  projectName: "DFIN-Pipeline",
+  filter: 'eq(metadata.protocol, "A2A")',
+  startTime: new Date(Date.now() - 3600000), // Last hour
+});
+```
+
+---
+
 **License:** MIT
-**Maintainer:** Enterprise Architecture Team
-**Contact:** ppm-architecture@company.com
+**Maintainer:** NextEra Energy Enterprise Architecture Team
+**Contact:** eto-architecture@nexteraenergy.com
+**Last Updated:** January 23, 2026
