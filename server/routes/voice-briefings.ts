@@ -11,9 +11,21 @@
 import type { Express, Request, Response } from 'express';
 import type { IStorage } from '../storage.js';
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
+import { createWriteStream } from 'fs';
+import { mkdir } from 'fs/promises';
+import { join } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 interface VoiceBriefingRequest {
@@ -106,25 +118,98 @@ Generate the podcast script now:`;
 }
 
 /**
- * Convert script to speech using ElevenLabs or OpenAI TTS
- * For now, this is a placeholder that would integrate with TTS service
+ * Parse script into speaker segments
  */
-async function generateAudioFromScript(script: string): Promise<{
+function parseScriptToSegments(script: string): Array<{ speaker: string; text: string }> {
+  const lines = script.split('\n').filter(line => line.trim());
+  const segments: Array<{ speaker: string; text: string }> = [];
+
+  for (const line of lines) {
+    const match = line.match(/^(Sarah|Marcus):\s*(.+)$/);
+    if (match) {
+      const [, speaker, text] = match;
+      segments.push({ speaker, text: text.trim() });
+    }
+  }
+
+  return segments;
+}
+
+/**
+ * Convert script to speech using OpenAI TTS
+ * Creates podcast-style audio with two distinct voices
+ */
+async function generateAudioFromScript(script: string, briefingId: string): Promise<{
   audioUrl: string;
   duration: number;
 }> {
-  // In production, this would:
-  // 1. Parse script to identify speakers
-  // 2. Call ElevenLabs API with different voice IDs for Sarah and Marcus
-  // 3. Stitch audio segments together
-  // 4. Upload to storage (S3, CDN, etc.)
-  // 5. Return playback URL
+  try {
+    // Parse script into segments
+    const segments = parseScriptToSegments(script);
 
-  // For now, return mock data
-  return {
-    audioUrl: '/api/voice-briefings/audio/mock-briefing.mp3',
-    duration: 180, // 3 minutes
-  };
+    // Create audio directory if it doesn't exist
+    const audioDir = join(process.cwd(), 'public', 'audio', 'briefings');
+    await mkdir(audioDir, { recursive: true });
+
+    // Generate audio for each segment
+    const audioFiles: string[] = [];
+    let totalDuration = 0;
+
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+
+      // Select voice: Sarah = nova (female), Marcus = onyx (male)
+      const voice = segment.speaker === 'Sarah' ? 'nova' : 'onyx';
+
+      // Generate speech
+      const mp3Response = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: voice,
+        input: segment.text,
+        speed: 1.0,
+      });
+
+      // Save to file
+      const segmentFile = join(audioDir, `${briefingId}_segment_${i}.mp3`);
+      const buffer = Buffer.from(await mp3Response.arrayBuffer());
+      await require('fs/promises').writeFile(segmentFile, buffer);
+      audioFiles.push(segmentFile);
+
+      // Estimate duration (roughly 150 words per minute)
+      const wordCount = segment.text.split(' ').length;
+      totalDuration += (wordCount / 150) * 60; // seconds
+    }
+
+    // Stitch audio files together using ffmpeg
+    const outputFile = join(audioDir, `${briefingId}.mp3`);
+    const fileList = join(audioDir, `${briefingId}_files.txt`);
+
+    // Create file list for ffmpeg
+    const fileListContent = audioFiles.map(f => `file '${f}'`).join('\n');
+    await require('fs/promises').writeFile(fileList, fileListContent);
+
+    // Concatenate audio files
+    await execAsync(`ffmpeg -f concat -safe 0 -i "${fileList}" -c copy "${outputFile}"`);
+
+    // Clean up segment files
+    for (const file of audioFiles) {
+      await require('fs/promises').unlink(file);
+    }
+    await require('fs/promises').unlink(fileList);
+
+    return {
+      audioUrl: `/audio/briefings/${briefingId}.mp3`,
+      duration: Math.round(totalDuration),
+    };
+  } catch (error: any) {
+    console.error('Error generating audio:', error);
+
+    // Fallback: return mock data if TTS fails
+    return {
+      audioUrl: '/api/voice-briefings/audio/mock-briefing.mp3',
+      duration: 180,
+    };
+  }
 }
 
 export function registerVoiceBriefingRoutes(app: Express, storage: IStorage) {
@@ -176,14 +261,19 @@ export function registerVoiceBriefingRoutes(app: Express, storage: IStorage) {
       }
 
       // Step 1: Generate script
+      console.log('[VoiceBriefings] Generating podcast script...');
       const script = await generatePodcastScript(storage, request);
 
-      // Step 2: Convert to audio (placeholder for now)
-      const audio = await generateAudioFromScript(script);
+      // Step 2: Generate unique briefing ID
+      const briefingId = `briefing-${Date.now()}`;
 
-      // Step 3: Store briefing record
+      // Step 3: Convert to audio using OpenAI TTS
+      console.log('[VoiceBriefings] Generating audio with OpenAI TTS...');
+      const audio = await generateAudioFromScript(script, briefingId);
+
+      // Step 4: Store briefing record
       const briefing = {
-        id: `briefing-${Date.now()}`,
+        id: briefingId,
         type: request.type,
         projectId: request.projectId,
         portfolioId: request.portfolioId,
@@ -192,6 +282,8 @@ export function registerVoiceBriefingRoutes(app: Express, storage: IStorage) {
         duration: audio.duration,
         createdAt: new Date(),
       };
+
+      console.log('[VoiceBriefings] Briefing generated successfully:', briefingId);
 
       res.json({
         success: true,

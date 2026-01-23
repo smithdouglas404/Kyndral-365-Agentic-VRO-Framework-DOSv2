@@ -28,6 +28,7 @@ import {
 } from '@/lib/agentDataTransformers';
 import { AIRecommendations } from "@/components/AIRecommendations";
 import { formatValueInMillions } from "@/lib/formatters";
+import AgentActionQueue from "@/components/AgentActionQueue";
 
 function NavBar() {
   return (
@@ -436,6 +437,10 @@ export default function TMODashboard() {
                 <p className="text-[10px] text-gray-400 italic">Source: NEE 10-K 2024</p>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mb-8">
+            <AgentActionQueue />
           </div>
 
           <div className="mb-8">

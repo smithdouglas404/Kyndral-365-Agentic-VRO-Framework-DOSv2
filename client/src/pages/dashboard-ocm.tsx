@@ -28,6 +28,7 @@ import {
   type TransformedTrainingProgram
 } from '@/lib/agentDataTransformers';
 import { AIRecommendations } from "@/components/AIRecommendations";
+import AgentActionQueue from "@/components/AgentActionQueue";
 
 function NavBar() {
   return (
@@ -390,6 +391,10 @@ export default function OCMDashboard() {
           </div>
 
           <div className="mb-8">
+          <div className="mb-8">
+            <AgentActionQueue />
+          </div>
+
             <AIRecommendations agentType="ocm" />
           </div>
 
