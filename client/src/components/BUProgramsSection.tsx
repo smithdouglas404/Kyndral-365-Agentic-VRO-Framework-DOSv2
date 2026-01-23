@@ -575,9 +575,7 @@ export function PortfolioCard({ portfolio, onDrillDown }: { portfolio: BUPortfol
   const BU_COLORS: Record<string, string> = {
     "Florida Power & Light": "#005EB8",
     "NextEra Energy Resources": "#00843D",
-    "Florida Power & Light": "#005EB8",
-    "Corporate & Other": "#424242",
-    "Corporate & Other": "#D50032"
+    "Corporate & Other": "#424242"
   };
 
   return (

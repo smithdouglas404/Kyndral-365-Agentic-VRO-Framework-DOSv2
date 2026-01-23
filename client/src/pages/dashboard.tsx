@@ -26,7 +26,6 @@ import { MultiAgentDiscussion } from "@/components/MultiAgentDiscussion";
 import { AgentCommandCenter } from "@/components/AgentCommandCenter";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
-import { Scenario, scenarios, lgAnnualReportData } from "@/lib/scenarios";
 import { useDivisions } from "@/hooks/useNexteraData";
 import { useVroMetrics } from "@/hooks/useVroMetrics";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
@@ -403,8 +402,7 @@ function NavBar() {
 function DashboardContent() {
   const [location, navigate] = useLocation();
   const { setPageContext } = usePageContext();
-  const [selectedScenario] = useState<Scenario>(scenarios[0]);
-    const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
   

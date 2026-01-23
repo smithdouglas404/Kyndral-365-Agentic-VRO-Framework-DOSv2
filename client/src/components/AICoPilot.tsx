@@ -23,6 +23,8 @@ interface CoPilotInsights {
 
 const agentPersonalities: Record<AgentType, { name: string; style: string; focus: string; color: string }> = {
   'integrated-management': { name: 'Integrated Management Agent', style: 'unified', focus: 'value realization and project delivery', color: 'bg-gradient-to-r from-teal-500 to-blue-500' },
+  vro: { name: 'VRO Agent', style: 'value-focused', focus: 'business value realization and ROI', color: 'bg-green-500' },
+  pmo: { name: 'PMO Agent', style: 'process-oriented', focus: 'project execution and delivery', color: 'bg-purple-500' },
   tmo: { name: 'TMO Agent', style: 'transformational', focus: 'change adoption and initiative success', color: 'bg-blue-500' },
   finops: { name: 'FinOps Agent', style: 'analytical', focus: 'cost optimization and financial efficiency', color: 'bg-amber-500' },
   okr: { name: 'OKR Agent', style: 'strategic', focus: 'objective alignment and key results tracking', color: 'bg-orange-500' },

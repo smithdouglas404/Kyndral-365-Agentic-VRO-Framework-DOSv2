@@ -15,7 +15,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { divisions } from '@/lib/lgData';
+import { useDivisions } from '@/hooks/useNexteraData';
 import { formatMoney } from '@/lib/formatters';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
@@ -202,6 +202,7 @@ export default function FinOpsDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('finops');
+  const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -394,30 +395,36 @@ export default function FinOpsDashboard() {
               <CardTitle className="text-lg">Reportable Segments Financial Performance</CardTitle>
             </CardHeader>
             <CardContent>
+              {divisionsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+                </div>
+              ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {divisions.map((segment) => (
                   <Link key={segment.id} href={`/segment/${segment.id}`}>
-                    <div 
+                    <div
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: segment.color, borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segment.color || '#666', borderLeftWidth: '4px' }}
                     >
                       <p className="text-sm font-medium text-gray-500">{segment.name}</p>
-                      <p className="text-2xl font-bold" style={{ color: segment.color }}>{formatMoney(segment.profit2024)}</p>
+                      <p className="text-2xl font-bold" style={{ color: segment.color || '#333' }}>{formatMoney(segment.profit2024 ?? 0)}</p>
                       <div className="flex items-center gap-1 mt-1">
-                        {segment.changePercent >= 0 ? (
+                        {(segment.changePercent ?? 0) >= 0 ? (
                           <ArrowUpRight className="h-4 w-4 text-green-500" />
                         ) : (
                           <ArrowDownRight className="h-4 w-4 text-red-500" />
                         )}
-                        <span className={`text-sm font-medium ${segment.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {segment.changePercent >= 0 ? '+' : ''}{segment.changePercent}%
+                        <span className={`text-sm font-medium ${(segment.changePercent ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {(segment.changePercent ?? 0) >= 0 ? '+' : ''}{segment.changePercent ?? 0}%
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">{segment.ceo}</p>
+                      <p className="text-xs text-gray-400 mt-1">{segment.ceo ?? 'N/A'}</p>
                     </div>
                   </Link>
                 ))}
               </div>
+              )}
             </CardContent>
           </Card>
 

@@ -306,7 +306,6 @@ export class OntologyService {
       // Story points (SAFe specific)
       'storypoints': `${this.baseIRI}pm#storyPoints`,
       'points': `${this.baseIRI}pm#storyPoints`,
-      'effort': `${this.baseIRI}pm#storyPoints`,
     };
 
     return fieldMappings[normalizedField] || `${this.baseIRI}pm#${fieldName}`;

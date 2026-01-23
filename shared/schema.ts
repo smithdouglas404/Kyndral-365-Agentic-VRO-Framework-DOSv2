@@ -267,6 +267,12 @@ export const projects = pgTable("projects", {
   aiRecommendation: text("ai_recommendation"),
   timelineElapsed: integer("timeline_elapsed"),
   timelineTotal: integer("timeline_total"),
+  budget: text("budget"),
+  actualCost: text("actual_cost"),
+  cpiValue: real("cpi_value"),
+  spiValue: real("spi_value"),
+  progress: integer("progress"),
+  progressPercentage: real("progress_percentage"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -359,6 +365,7 @@ export const tasks = pgTable("tasks", {
   assignee: text("assignee"),
   skills: text("skills"),
   priority: text("priority").default("medium"),
+  dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -468,6 +475,770 @@ export const insertRiskSchema = createInsertSchema(risks).omit({
 
 export type InsertRisk = z.infer<typeof insertRiskSchema>;
 export type Risk = typeof risks.$inferSelect;
+
+// ============================================================================
+// ISSUES - Project Issue Tracking
+// ============================================================================
+
+export const issues = pgTable("issues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  priority: text("priority").default("medium"), // critical, high, medium, low
+  status: text("status").default("open"), // open, in_progress, resolved, closed, blocked
+  category: text("category").default("other"), // technical, business, resource, scope, schedule, quality, risk, other
+  impact: text("impact").default("medium"), // high, medium, low
+  assignedTo: varchar("assigned_to"),
+  createdBy: varchar("created_by"),
+  dueDate: timestamp("due_date"),
+  resolvedAt: timestamp("resolved_at"),
+  resolution: text("resolution"),
+  tags: text("tags"), // JSON array of tags
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIssueSchema = createInsertSchema(issues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertIssue = z.infer<typeof insertIssueSchema>;
+export type Issue = typeof issues.$inferSelect;
+
+export const issueComments = pgTable("issue_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  issueId: varchar("issue_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIssueCommentSchema = createInsertSchema(issueComments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertIssueComment = z.infer<typeof insertIssueCommentSchema>;
+export type IssueComment = typeof issueComments.$inferSelect;
+
+// ============================================================================
+// CHANGE REQUESTS - Project Change Management
+// ============================================================================
+
+export const changeRequests = pgTable("change_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  requestedBy: varchar("requested_by").notNull(),
+  changeType: text("change_type").notNull(), // scope, schedule, budget, quality, resource, technical, other
+  priority: text("priority").default("medium"), // critical, high, medium, low
+  status: text("status").default("submitted"), // submitted, under_review, approved, rejected, implemented, cancelled
+  estimatedCost: real("estimated_cost"),
+  estimatedDuration: integer("estimated_duration"), // days
+  businessJustification: text("business_justification"),
+  impactAssessment: text("impact_assessment"),
+  reviewedBy: varchar("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at"),
+  approvalNotes: text("approval_notes"),
+  createdBy: varchar("created_by"),
+  updatedBy: varchar("updated_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertChangeRequestSchema = createInsertSchema(changeRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertChangeRequest = z.infer<typeof insertChangeRequestSchema>;
+export type ChangeRequest = typeof changeRequests.$inferSelect;
+
+// ============================================================================
+// SSO CONFIGURATION - SAML, OAuth, OIDC
+// ============================================================================
+
+export const ssoConfigs = pgTable("sso_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  provider: text("provider").notNull(), // saml, oauth, oidc, azure_ad, okta, google
+  enabled: boolean("enabled").default(false),
+  config: text("config").notNull(), // JSON config (entityId, ssoUrl, certificate, clientId, clientSecret, etc.)
+  domains: text("domains"), // JSON array of allowed email domains
+  defaultRole: varchar("default_role").default("user"),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSsoConfigSchema = createInsertSchema(ssoConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSsoConfig = z.infer<typeof insertSsoConfigSchema>;
+export type SsoConfig = typeof ssoConfigs.$inferSelect;
+
+// ============================================================================
+// PASSWORD POLICIES
+// ============================================================================
+
+export const passwordPolicies = pgTable("password_policies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  minLength: integer("min_length").default(12),
+  requireUppercase: boolean("require_uppercase").default(true),
+  requireLowercase: boolean("require_lowercase").default(true),
+  requireNumbers: boolean("require_numbers").default(true),
+  requireSpecialChars: boolean("require_special_chars").default(true),
+  maxAge: integer("max_age"), // days before password must be changed
+  preventReuse: integer("prevent_reuse").default(5), // number of previous passwords to prevent
+  lockoutThreshold: integer("lockout_threshold").default(5), // failed attempts before lockout
+  lockoutDuration: integer("lockout_duration").default(30), // minutes
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPasswordPolicySchema = createInsertSchema(passwordPolicies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPasswordPolicy = z.infer<typeof insertPasswordPolicySchema>;
+export type PasswordPolicy = typeof passwordPolicies.$inferSelect;
+
+// ============================================================================
+// FIELD-LEVEL PERMISSIONS
+// ============================================================================
+
+export const fieldPermissions = pgTable("field_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  role: text("role").notNull(), // admin, pm, user, viewer
+  entityType: text("entity_type").notNull(), // project, task, risk, etc.
+  fieldName: text("field_name").notNull(),
+  canView: boolean("can_view").default(true),
+  canEdit: boolean("can_edit").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFieldPermissionSchema = createInsertSchema(fieldPermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertFieldPermission = z.infer<typeof insertFieldPermissionSchema>;
+export type FieldPermission = typeof fieldPermissions.$inferSelect;
+
+// ============================================================================
+// PICKLIST VALUES - Status, Priority, Category configurations
+// ============================================================================
+
+export const picklistValues = pgTable("picklist_values", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  picklistType: text("picklist_type").notNull(), // status, priority, category, etc.
+  entityType: text("entity_type").notNull(), // project, task, issue, risk
+  value: text("value").notNull(),
+  label: text("label").notNull(),
+  color: text("color"), // hex color for UI
+  icon: text("icon"), // icon name
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPicklistValueSchema = createInsertSchema(picklistValues).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPicklistValue = z.infer<typeof insertPicklistValueSchema>;
+export type PicklistValue = typeof picklistValues.$inferSelect;
+
+// ============================================================================
+// NOTIFICATION TEMPLATES
+// ============================================================================
+
+export const notificationTemplates = pgTable("notification_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  event: text("event").notNull(), // project_created, task_assigned, risk_elevated, etc.
+  channel: text("channel").notNull(), // email, slack, teams, in_app
+  subject: text("subject"),
+  template: text("template").notNull(), // template with {{variables}}
+  enabled: boolean("enabled").default(true),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
+export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
+
+// ============================================================================
+// DATA RETENTION POLICIES
+// ============================================================================
+
+export const retentionPolicies = pgTable("retention_policies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  entityType: text("entity_type").notNull(), // audit_logs, notifications, old_projects, etc.
+  retentionDays: integer("retention_days").notNull(),
+  action: text("action").default("archive"), // archive, delete
+  enabled: boolean("enabled").default(true),
+  lastRun: timestamp("last_run"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertRetentionPolicySchema = createInsertSchema(retentionPolicies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertRetentionPolicy = z.infer<typeof insertRetentionPolicySchema>;
+export type RetentionPolicy = typeof retentionPolicies.$inferSelect;
+
+// ============================================================================
+// CUSTOM FIELDS - User-defined fields for entities
+// ============================================================================
+
+export const customFields = pgTable("custom_fields", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: text("entity_type").notNull(), // project, task, risk, etc.
+  fieldName: text("field_name").notNull(),
+  fieldLabel: text("field_label").notNull(),
+  fieldType: text("field_type").notNull(), // text, number, date, boolean, select, multiselect
+  options: text("options"), // JSON array for select/multiselect
+  required: boolean("required").default(false),
+  defaultValue: text("default_value"),
+  validation: text("validation"), // JSON validation rules
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCustomFieldSchema = createInsertSchema(customFields).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCustomField = z.infer<typeof insertCustomFieldSchema>;
+export type CustomField = typeof customFields.$inferSelect;
+
+export const customFieldValues = pgTable("custom_field_values", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customFieldId: varchar("custom_field_id").notNull(),
+  entityId: varchar("entity_id").notNull(),
+  value: text("value"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCustomFieldValueSchema = createInsertSchema(customFieldValues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCustomFieldValue = z.infer<typeof insertCustomFieldValueSchema>;
+export type CustomFieldValue = typeof customFieldValues.$inferSelect;
+
+// ============================================================================
+// RESOURCE MANAGEMENT
+// ============================================================================
+
+export const resourcePools = pgTable("resource_pools", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  poolType: text("pool_type").default("general"), // general, specialized, contractor
+  capacity: integer("capacity"),
+  manager: varchar("manager"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertResourcePoolSchema = createInsertSchema(resourcePools).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertResourcePool = z.infer<typeof insertResourcePoolSchema>;
+export type ResourcePool = typeof resourcePools.$inferSelect;
+
+export const resourceAllocations = pgTable("resource_allocations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  resourceId: varchar("resource_id").notNull(),
+  projectId: varchar("project_id").notNull(),
+  allocationPercent: integer("allocation_percent").notNull(), // 0-100
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  role: text("role"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertResourceAllocationSchema = createInsertSchema(resourceAllocations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertResourceAllocation = z.infer<typeof insertResourceAllocationSchema>;
+export type ResourceAllocation = typeof resourceAllocations.$inferSelect;
+
+export const timesheets = pgTable("timesheets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  projectId: varchar("project_id").notNull(),
+  taskId: varchar("task_id"),
+  date: timestamp("date").notNull(),
+  hours: real("hours").notNull(),
+  status: text("status").default("draft"), // draft, submitted, approved, rejected
+  description: text("description"),
+  approvedBy: varchar("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTimesheetSchema = createInsertSchema(timesheets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTimesheet = z.infer<typeof insertTimesheetSchema>;
+export type Timesheet = typeof timesheets.$inferSelect;
+
+// ============================================================================
+// FINANCIAL MANAGEMENT
+// ============================================================================
+
+export const purchaseOrders = pgTable("purchase_orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  poNumber: text("po_number").notNull(),
+  vendor: text("vendor").notNull(),
+  description: text("description"),
+  amount: real("amount").notNull(),
+  currency: text("currency").default("USD"),
+  status: text("status").default("draft"), // draft, approved, issued, received, closed
+  requestedBy: varchar("requested_by"),
+  approvedBy: varchar("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  issueDate: timestamp("issue_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPurchaseOrderSchema = createInsertSchema(purchaseOrders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPurchaseOrder = z.infer<typeof insertPurchaseOrderSchema>;
+export type PurchaseOrder = typeof purchaseOrders.$inferSelect;
+
+export const invoices = pgTable("invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  poId: varchar("po_id"),
+  invoiceNumber: text("invoice_number").notNull(),
+  vendor: text("vendor").notNull(),
+  amount: real("amount").notNull(),
+  currency: text("currency").default("USD"),
+  status: text("status").default("received"), // received, approved, paid, disputed
+  dueDate: timestamp("due_date"),
+  paidDate: timestamp("paid_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Invoice = typeof invoices.$inferSelect;
+
+export const costCategories = pgTable("cost_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  code: text("code").notNull(),
+  description: text("description"),
+  parentId: varchar("parent_id"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCostCategorySchema = createInsertSchema(costCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCostCategory = z.infer<typeof insertCostCategorySchema>;
+export type CostCategory = typeof costCategories.$inferSelect;
+
+export const budgetAllocations = pgTable("budget_allocations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  phase: text("phase"), // planning, execution, closeout
+  workstream: text("workstream"),
+  categoryId: varchar("category_id"),
+  allocatedAmount: real("allocated_amount").notNull(),
+  spentAmount: real("spent_amount").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertBudgetAllocationSchema = createInsertSchema(budgetAllocations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertBudgetAllocation = z.infer<typeof insertBudgetAllocationSchema>;
+export type BudgetAllocation = typeof budgetAllocations.$inferSelect;
+
+// ============================================================================
+// DOCUMENT MANAGEMENT
+// ============================================================================
+
+export const documents = pgTable("documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  filePath: text("file_path").notNull(),
+  fileSize: integer("file_size"),
+  mimeType: text("mime_type"),
+  version: integer("version").default(1),
+  status: text("status").default("draft"), // draft, review, approved, archived
+  checkedOutBy: varchar("checked_out_by"),
+  checkedOutAt: timestamp("checked_out_at"),
+  uploadedBy: varchar("uploaded_by"),
+  tags: text("tags"), // JSON array
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDocumentSchema = createInsertSchema(documents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;
+
+export const documentVersions = pgTable("document_versions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  documentId: varchar("document_id").notNull(),
+  version: integer("version").notNull(),
+  filePath: text("file_path").notNull(),
+  fileSize: integer("file_size"),
+  changeNotes: text("change_notes"),
+  uploadedBy: varchar("uploaded_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDocumentVersionSchema = createInsertSchema(documentVersions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDocumentVersion = z.infer<typeof insertDocumentVersionSchema>;
+export type DocumentVersion = typeof documentVersions.$inferSelect;
+
+export const documentApprovals = pgTable("document_approvals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  documentId: varchar("document_id").notNull(),
+  approverId: varchar("approver_id").notNull(),
+  status: text("status").default("pending"), // pending, approved, rejected
+  comments: text("comments"),
+  decidedAt: timestamp("decided_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDocumentApprovalSchema = createInsertSchema(documentApprovals).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDocumentApproval = z.infer<typeof insertDocumentApprovalSchema>;
+export type DocumentApproval = typeof documentApprovals.$inferSelect;
+
+// ============================================================================
+// COLLABORATION
+// ============================================================================
+
+export const discussionForums = pgTable("discussion_forums", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDiscussionForumSchema = createInsertSchema(discussionForums).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDiscussionForum = z.infer<typeof insertDiscussionForumSchema>;
+export type DiscussionForum = typeof discussionForums.$inferSelect;
+
+export const forumPosts = pgTable("forum_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  forumId: varchar("forum_id").notNull(),
+  parentId: varchar("parent_id"), // for threaded replies
+  content: text("content").notNull(),
+  authorId: varchar("author_id").notNull(),
+  mentions: text("mentions"), // JSON array of user IDs
+  attachments: text("attachments"), // JSON array
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+export type ForumPost = typeof forumPosts.$inferSelect;
+
+export const meetingMinutes = pgTable("meeting_minutes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  title: text("title").notNull(),
+  meetingDate: timestamp("meeting_date").notNull(),
+  attendees: text("attendees"), // JSON array of user IDs
+  agenda: text("agenda"),
+  notes: text("notes"),
+  actionItems: text("action_items"), // JSON array
+  nextMeetingDate: timestamp("next_meeting_date"),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMeetingMinutesSchema = createInsertSchema(meetingMinutes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertMeetingMinutes = z.infer<typeof insertMeetingMinutesSchema>;
+export type MeetingMinutes = typeof meetingMinutes.$inferSelect;
+
+export const decisionLogs = pgTable("decision_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  title: text("title").notNull(),
+  decision: text("decision").notNull(),
+  rationale: text("rationale"),
+  alternatives: text("alternatives"), // JSON array
+  decisionMaker: varchar("decision_maker"),
+  stakeholders: text("stakeholders"), // JSON array
+  impact: text("impact").default("medium"),
+  status: text("status").default("active"), // active, superseded, cancelled
+  decisionDate: timestamp("decision_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDecisionLogSchema = createInsertSchema(decisionLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDecisionLog = z.infer<typeof insertDecisionLogSchema>;
+export type DecisionLog = typeof decisionLogs.$inferSelect;
+
+// ============================================================================
+// WORKFLOW ENGINE
+// ============================================================================
+
+export const workflowDefinitions = pgTable("workflow_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  entityType: text("entity_type").notNull(), // project, issue, change_request, document
+  triggerEvent: text("trigger_event").notNull(), // created, updated, status_changed
+  conditions: text("conditions"), // JSON rules
+  actions: text("actions").notNull(), // JSON array of actions
+  enabled: boolean("enabled").default(true),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWorkflowDefinitionSchema = createInsertSchema(workflowDefinitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWorkflowDefinition = z.infer<typeof insertWorkflowDefinitionSchema>;
+export type WorkflowDefinition = typeof workflowDefinitions.$inferSelect;
+
+export const workflowExecutions = pgTable("workflow_executions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  workflowId: varchar("workflow_id").notNull(),
+  entityId: varchar("entity_id").notNull(),
+  status: text("status").default("running"), // running, completed, failed, cancelled
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  result: text("result"), // JSON execution result
+  error: text("error"),
+});
+
+export const insertWorkflowExecutionSchema = createInsertSchema(workflowExecutions).omit({
+  id: true,
+  startedAt: true,
+});
+
+export type InsertWorkflowExecution = z.infer<typeof insertWorkflowExecutionSchema>;
+export type WorkflowExecution = typeof workflowExecutions.$inferSelect;
+
+export const approvalQueues = pgTable("approval_queues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: text("entity_type").notNull(),
+  entityId: varchar("entity_id").notNull(),
+  requestedBy: varchar("requested_by").notNull(),
+  approvers: text("approvers").notNull(), // JSON array of user IDs
+  currentApprover: varchar("current_approver"),
+  status: text("status").default("pending"), // pending, approved, rejected, cancelled
+  comments: text("comments"),
+  decidedBy: varchar("decided_by"),
+  decidedAt: timestamp("decided_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertApprovalQueueSchema = createInsertSchema(approvalQueues).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertApprovalQueue = z.infer<typeof insertApprovalQueueSchema>;
+export type ApprovalQueue = typeof approvalQueues.$inferSelect;
+
+// ============================================================================
+// PROGRAM/PORTFOLIO MANAGEMENT
+// ============================================================================
+
+export const programs = pgTable("programs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  portfolioId: varchar("portfolio_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  manager: varchar("manager"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  budget: real("budget"),
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertProgramSchema = createInsertSchema(programs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProgram = z.infer<typeof insertProgramSchema>;
+export type Program = typeof programs.$inferSelect;
+
+export const projectDependencies = pgTable("project_dependencies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  predecessorId: varchar("predecessor_id").notNull(),
+  successorId: varchar("successor_id").notNull(),
+  dependencyType: text("dependency_type").default("finish_to_start"), // FS, SS, FF, SF
+  lagDays: integer("lag_days").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertProjectDependencySchema = createInsertSchema(projectDependencies).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProjectDependency = z.infer<typeof insertProjectDependencySchema>;
+export type ProjectDependency = typeof projectDependencies.$inferSelect;
+
+export const masterSchedule = pgTable("master_schedule", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  programId: varchar("program_id"),
+  portfolioId: varchar("portfolio_id"),
+  name: text("name").notNull(),
+  baseline: text("baseline"), // JSON snapshot
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMasterScheduleSchema = createInsertSchema(masterSchedule).omit({
+  id: true,
+  lastUpdated: true,
+  createdAt: true,
+});
+
+export type InsertMasterSchedule = z.infer<typeof insertMasterScheduleSchema>;
+export type MasterSchedule = typeof masterSchedule.$inferSelect;
+
+// ============================================================================
+// RISK MANAGEMENT (EXTENDED)
+// ============================================================================
+
+export const riskCategories = pgTable("risk_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  color: text("color"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertRiskCategorySchema = createInsertSchema(riskCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRiskCategory = z.infer<typeof insertRiskCategorySchema>;
+export type RiskCategory = typeof riskCategories.$inferSelect;
+
+export const riskResponses = pgTable("risk_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  riskId: varchar("risk_id").notNull(),
+  strategy: text("strategy").notNull(), // avoid, mitigate, transfer, accept
+  actionPlan: text("action_plan").notNull(),
+  owner: varchar("owner"),
+  dueDate: timestamp("due_date"),
+  status: text("status").default("planned"),
+  effectivenessScore: integer("effectiveness_score"), // 0-100
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertRiskResponseSchema = createInsertSchema(riskResponses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertRiskResponse = z.infer<typeof insertRiskResponseSchema>;
+export type RiskResponse = typeof riskResponses.$inferSelect;
 
 export const policyBusinessUnitLinks = pgTable("policy_business_unit_links", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1098,6 +1869,7 @@ export const sprints = pgTable("sprints", {
   plannedPoints: text("planned_points"),
   completedPoints: text("completed_points"),
   velocity: text("velocity"),
+  actualVelocity: text("actual_velocity"),
   // External sync fields
   externalSystem: text("external_system"),
   externalId: text("external_id"),
@@ -1711,7 +2483,7 @@ export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
 });
 
 export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
-export type UserRole = typeof userRoles.$inferSelect;
+export type UserRoleAssignment = typeof userRoles.$inferSelect;
 
 // ============================================================================
 // SCHEDULED REPORTS - Report scheduling and distribution
@@ -1854,6 +2626,35 @@ export const insertOntologyEntitySchema = createInsertSchema(ontologyEntities).o
 
 export type InsertOntologyEntity = z.infer<typeof insertOntologyEntitySchema>;
 export type OntologyEntity = typeof ontologyEntities.$inferSelect;
+
+// ============================================================================
+// INTEGRATIONS - External data source configurations
+// ============================================================================
+
+export const integrations = pgTable("integrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // jira, azure-devops, servicenow, sap, github, etc.
+  status: text("status").default('disconnected'), // connected, disconnected, error
+  connectionDetails: text("connection_details"), // JSON: URL, API endpoints, etc.
+  credentials: text("credentials"), // JSON: Encrypted credentials
+  syncSchedule: text("sync_schedule").default('manual'), // manual, hourly, daily, weekly
+  fieldMappings: text("field_mappings"), // JSON: Field mapping configuration
+  lastSyncAt: timestamp("last_sync_at"),
+  lastSyncStatus: text("last_sync_status"), // success, failed, partial
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIntegrationSchema = createInsertSchema(integrations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
+export type Integration = typeof integrations.$inferSelect;
 
 // ============================================================================
 // ONTOLOGY MAPPINGS - Track how data sources map to ontology

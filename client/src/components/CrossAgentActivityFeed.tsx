@@ -8,6 +8,7 @@ import { AgentType, CrossAgentMessage } from '@/lib/dataHub';
 import { DrillDownDrawer } from './DrillDownDrawer';
 
 const agentColors: Record<AgentType, string> = {
+  'integrated-management': 'bg-indigo-500',
   vro: 'bg-green-500',
   pmo: 'bg-purple-500',
   tmo: 'bg-blue-500',
@@ -19,6 +20,7 @@ const agentColors: Record<AgentType, string> = {
 };
 
 const agentShortNames: Record<AgentType, string> = {
+  'integrated-management': 'Integrated',
   vro: 'VRO',
   pmo: 'PMO',
   tmo: 'TMO',

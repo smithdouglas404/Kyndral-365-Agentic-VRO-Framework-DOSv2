@@ -70,14 +70,14 @@ Always query the ontology using your tools before making decisions.`;
 
             if (minCPI !== undefined) {
               filtered = filtered.filter(p => {
-                const cpi = parseFloat(p.cpiValue || '1.0');
+                const cpi = parseFloat(String(p.cpiValue || '1.0'));
                 return cpi >= minCPI;
               });
             }
 
             if (maxCPI !== undefined) {
               filtered = filtered.filter(p => {
-                const cpi = parseFloat(p.cpiValue || '1.0');
+                const cpi = parseFloat(String(p.cpiValue || '1.0'));
                 return cpi <= maxCPI;
               });
             }
@@ -90,7 +90,7 @@ Always query the ontology using your tools before making decisions.`;
             for (const project of filtered) {
               const budget = parseFloat(project.budgetTotal || '0');
               const spent = parseFloat(project.budgetSpent || '0');
-              const cpi = parseFloat(project.cpiValue || '1.0');
+              const cpi = parseFloat(String(project.cpiValue || '1.0'));
 
               // Calculate budget variance
               const overrunAmount = spent - budget;
@@ -187,7 +187,7 @@ Always query the ontology using your tools before making decisions.`;
 
             const budget = parseFloat(project.budgetTotal || '0');
             const spent = parseFloat(project.budgetSpent || '0');
-            const cpi = parseFloat(project.cpiValue || '1.0');
+            const cpi = parseFloat(String(project.cpiValue || '1.0'));
 
             // Calculate Estimate at Completion (EAC)
             const remainingWork = budget - spent;

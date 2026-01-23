@@ -201,6 +201,8 @@ export interface Feature {
   dependencies: FeatureDependency[];
   estimatedStoryPoints: number;
   actualStoryPoints: number;
+  storyPoints: number;
+  completedPoints: number;
   estimatedCost: number;
   actualCost: number;
   plannedStart: string;

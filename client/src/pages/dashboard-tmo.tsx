@@ -15,7 +15,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { divisions } from '@/lib/lgData';
+import { useDivisions } from '@/hooks/useNexteraData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
@@ -292,6 +292,7 @@ export default function TMODashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('tmo');
+  const { data: divisions = [] } = useDivisions();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 

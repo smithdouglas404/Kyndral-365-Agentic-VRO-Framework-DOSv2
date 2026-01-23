@@ -73,14 +73,14 @@ Always use your tools to query real data before making decisions.`;
             // Filter by SPI
             if (minSPI !== undefined) {
               projects = projects.filter(p => {
-                const spi = parseFloat(p.spiValue || '1.0');
+                const spi = parseFloat(String(p.spiValue || '1.0'));
                 return spi >= minSPI;
               });
             }
 
             if (maxSPI !== undefined) {
               projects = projects.filter(p => {
-                const spi = parseFloat(p.spiValue || '1.0');
+                const spi = parseFloat(String(p.spiValue || '1.0'));
                 return spi <= maxSPI;
               });
             }
@@ -91,7 +91,7 @@ Always use your tools to query real data before making decisions.`;
             let interventionsCreated = 0;
 
             for (const project of projects) {
-              const spi = parseFloat(project.spiValue || '1.0');
+              const spi = parseFloat(String(project.spiValue || '1.0'));
               const startDate = project.startDate ? new Date(project.startDate) : null;
               const endDate = project.endDate ? new Date(project.endDate) : null;
               const now = new Date();
@@ -192,8 +192,8 @@ Always use your tools to query real data before making decisions.`;
               return JSON.stringify({ error: "Project not found" });
             }
 
-            const spi = parseFloat(project.spiValue || '1.0');
-            const progress = parseFloat(project.progressPercentage || '0');
+            const spi = parseFloat(String(project.spiValue || '1.0'));
+            const progress = parseFloat(String(project.progressPercentage || '0'));
 
             // Calculate forecasted completion
             const startDate = project.startDate ? new Date(project.startDate) : new Date();

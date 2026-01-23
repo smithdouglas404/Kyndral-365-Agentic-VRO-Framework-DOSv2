@@ -32,6 +32,8 @@ interface DrillDownDrawerProps {
 
 const agentColors: Record<AgentType, string> = {
   'integrated-management': 'bg-gradient-to-r from-teal-500 to-blue-500',
+  vro: 'bg-green-500',
+  pmo: 'bg-purple-500',
   tmo: 'bg-blue-500',
   finops: 'bg-amber-500',
   okr: 'bg-orange-500',
@@ -42,6 +44,8 @@ const agentColors: Record<AgentType, string> = {
 
 const agentNames: Record<AgentType, string> = {
   'integrated-management': 'Integrated Management Agent',
+  vro: 'VRO Agent',
+  pmo: 'PMO Agent',
   tmo: 'TMO Agent',
   finops: 'FinOps Agent',
   okr: 'OKR Agent',
@@ -129,7 +133,7 @@ function lookupSAFeEntity(entityType: string, entityId: string) {
 }
 
 // Build drill-down data for SAFe entities
-function buildSAFeDrilldown(entityType: string, entityId: string, entity: any) {
+function buildSAFeDrilldown(entityType: string, entityId: string, entity: any): any {
   const baseData = {
     entityType,
     entityId,
@@ -609,6 +613,7 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
     projectBreakdown: { name: string; value: string; budget: string }[];
     insight: string;
     summary: string;
+    pendingAlerts?: any[];
   }> = {
     'current-roi': {
       label: 'Current ROI',
@@ -2080,14 +2085,15 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                         <CardContent>
                           <div className="space-y-2 max-h-64 overflow-y-auto">
                             {displayData.relatedEntities.map((entity, index) => {
-                              const healthColor = entity.status === 'green' ? 'bg-green-500' : 
-                                                  entity.status === 'yellow' ? 'bg-yellow-500' : 
-                                                  entity.status === 'red' ? 'bg-red-500' : 
-                                                  entity.status === 'amber' ? 'bg-amber-500' : 'bg-gray-400';
-                              const borderColor = entity.status === 'green' ? 'border-green-200' : 
-                                                  entity.status === 'yellow' ? 'border-yellow-200' : 
-                                                  entity.status === 'red' ? 'border-red-200' : 
-                                                  entity.status === 'amber' ? 'border-amber-200' : 'border-gray-200';
+                              const status = 'status' in entity ? entity.status : undefined;
+                              const healthColor = status === 'green' ? 'bg-green-500' :
+                                                  status === 'yellow' ? 'bg-yellow-500' :
+                                                  status === 'red' ? 'bg-red-500' :
+                                                  status === 'amber' ? 'bg-amber-500' : 'bg-gray-400';
+                              const borderColor = status === 'green' ? 'border-green-200' :
+                                                  status === 'yellow' ? 'border-yellow-200' :
+                                                  status === 'red' ? 'border-red-200' :
+                                                  status === 'amber' ? 'border-amber-200' : 'border-gray-200';
                               return (
                                 <div
                                   key={entity.id}
@@ -2115,18 +2121,18 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
                                           : "text-xs bg-indigo-50 text-indigo-700 border-indigo-200"}>
                                           {entity.type}
                                         </Badge>
-                                        {entityType === 'project' && entity.status && (
+                                        {entityType === 'project' && status && (
                                           <Badge variant="outline" className={
-                                            entity.status === 'green' ? "text-xs bg-green-50 text-green-700 border-green-200" :
-                                            entity.status === 'yellow' ? "text-xs bg-yellow-50 text-yellow-700 border-yellow-200" :
-                                            entity.status === 'red' ? "text-xs bg-red-50 text-red-700 border-red-200" :
-                                            entity.status === 'amber' ? "text-xs bg-amber-50 text-amber-700 border-amber-200" :
+                                            status === 'green' ? "text-xs bg-green-50 text-green-700 border-green-200" :
+                                            status === 'yellow' ? "text-xs bg-yellow-50 text-yellow-700 border-yellow-200" :
+                                            status === 'red' ? "text-xs bg-red-50 text-red-700 border-red-200" :
+                                            status === 'amber' ? "text-xs bg-amber-50 text-amber-700 border-amber-200" :
                                             "text-xs bg-gray-50 text-gray-700 border-gray-200"
                                           }>
-                                            {entity.status === 'green' ? 'Healthy' : 
-                                             entity.status === 'yellow' ? 'Warning' : 
-                                             entity.status === 'red' ? 'Critical' :
-                                             entity.status === 'amber' ? 'At Risk' : entity.status}
+                                            {status === 'green' ? 'Healthy' :
+                                             status === 'yellow' ? 'Warning' :
+                                             status === 'red' ? 'Critical' :
+                                             status === 'amber' ? 'At Risk' : status}
                                           </Badge>
                                         )}
                                       </div>

@@ -15,7 +15,8 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { divisions } from '@/lib/lgData';
+import { useDivisions } from '@/hooks/useNexteraData';
+import { useProjects } from '@/hooks/useDashboardData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
@@ -210,6 +211,8 @@ export default function PlanningDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('planning');
+  const { data: divisions = [] } = useDivisions();
+  const { data: projectsData } = useProjects();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -240,8 +243,8 @@ export default function PlanningDashboard() {
   const onTrackDeadlines = deadlines.filter(d => d.status === 'on-track' || d.status === 'complete').length;
   const atRiskDeadlines = deadlines.filter(d => d.status === 'at-risk').length;
 
-  const allProjects = divisions.flatMap(d => d.potentialProjects);
-  const inProgressProjects = allProjects.filter(p => p.status === 'in-progress').length;
+  const allProjects = projectsData?.projects || [];
+  const inProgressProjects = allProjects.filter((p: any) => p.status === 'active').length;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -404,34 +407,39 @@ export default function PlanningDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {divisions.map((segment) => (
+                {divisions.map((segment) => {
+                  const segmentProjects = allProjects.filter((p: any) => p.businessUnitId === segment.id);
+                  const activeProjects = segmentProjects.filter((p: any) => p.status === 'active');
+                  const highPriProjects = segmentProjects.filter((p: any) => p.priority === 'high');
+
+                  return (
                   <Link key={segment.id} href={`/segment/${segment.id}`}>
-                    <div 
+                    <div
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: segment.color, borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segment.color || '#666', borderLeftWidth: '4px' }}
                     >
                       <p className="text-sm font-medium text-gray-500">{segment.name}</p>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-2xl font-bold" style={{ color: segment.color }}>
-                          {segment.potentialProjects.length}
+                        <span className="text-2xl font-bold" style={{ color: segment.color || '#333' }}>
+                          {segmentProjects.length}
                         </span>
                         <span className="text-sm text-gray-500">projects</span>
                       </div>
                       <div className="flex gap-2 mt-2">
-                        {segment.potentialProjects.filter(p => p.status === 'in-progress').length > 0 && (
+                        {activeProjects.length > 0 && (
                           <Badge variant="secondary" className="text-[10px]">
-                            {segment.potentialProjects.filter(p => p.status === 'in-progress').length} active
+                            {activeProjects.length} active
                           </Badge>
                         )}
-                        {segment.potentialProjects.filter(p => p.priority === 'high').length > 0 && (
+                        {highPriProjects.length > 0 && (
                           <Badge variant="destructive" className="text-[10px]">
-                            {segment.potentialProjects.filter(p => p.priority === 'high').length} high priority
+                            {highPriProjects.length} high priority
                           </Badge>
                         )}
                       </div>
                     </div>
                   </Link>
-                ))}
+                )})}
               </div>
             </CardContent>
           </Card>

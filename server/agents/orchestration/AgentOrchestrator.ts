@@ -15,7 +15,7 @@
 
 import type { IStorage } from '../../storage.js';
 import { ChatAnthropic } from "@langchain/anthropic";
-import { LangChainTracer } from "@langchain/core/tracers/tracer_langchain";
+import { LangChainTracer } from "langchain/callbacks";
 
 export interface CollaborationEvent {
   triggeredBy: string; // Agent ID that triggered collaboration
@@ -58,7 +58,7 @@ export class AgentOrchestrator {
     const callbacks = [];
     if (process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true') {
       const tracer = new LangChainTracer({
-        projectName: process.env.LANGCHAIN_PROJECT || "nextera-eto",
+        projectName: process.env.LANGCHAIN_PROJECT || "DFIN-Pipeline",
         client: undefined,
       });
       callbacks.push(tracer);
@@ -69,6 +69,11 @@ export class AgentOrchestrator {
       temperature: 0.7,
       anthropicApiKey: process.env.ANTHROPIC_API_KEY,
       callbacks,
+      metadata: {
+        layer: "orchestration",
+        component: "coordinator",
+        system: "multi-agent-orchestration",
+      },
     });
 
     // Define when collaboration is needed
@@ -125,9 +130,10 @@ export class AgentOrchestrator {
   private async getRecentFindingsForProject(projectId: string): Promise<AgentFinding[]> {
     try {
       // Get recent interventions (last 24 hours) for this project
-      const interventions = await this.storage.getInterventions({ projectId });
-      const recentInterventions = interventions.filter(i => {
-        const createdAt = new Date(i.createdAt);
+      const allInterventions = await this.storage.getInterventions();
+      const interventions = allInterventions.filter((i: any) => i.projectId === projectId);
+      const recentInterventions = interventions.filter((i: any) => {
+        const createdAt = new Date(i.createdAt || Date.now());
         const hoursAgo = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
         return hoursAgo < 24;
       });

@@ -5,12 +5,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Layout, Activity, Database, ArrowUp, ArrowDown, Eye, EyeOff, RefreshCw, Download, FileSpreadsheet, FileJson, Loader2, Key, CheckCircle, XCircle, Save } from "lucide-react";
+import { Settings, Layout, Activity, Database, ArrowUp, ArrowDown, Eye, EyeOff, RefreshCw, Download, FileSpreadsheet, FileJson, Loader2, Key, CheckCircle, XCircle, Save, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useDashboardWidgets, useUpdateDashboardWidget, useReorderDashboardWidgets } from "@/hooks/useDashboardWidgets";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
 import { usePortfolioMetrics } from "@/hooks/usePortfolioMetrics";
 import { useExportJobs, useCreateExportJob } from "@/hooks/useExportJobs";
+import { MFASettings } from "@/components/MFASettings";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -553,7 +554,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="widgets" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="widgets" className="flex items-center gap-2" data-testid="tab-widgets">
             <Layout className="h-4 w-4" />
             Widgets
@@ -565,6 +566,10 @@ export default function SettingsPage() {
           <TabsTrigger value="export" className="flex items-center gap-2" data-testid="tab-export">
             <Download className="h-4 w-4" />
             Export
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2" data-testid="tab-security">
+            <Shield className="h-4 w-4" />
+            Security
           </TabsTrigger>
           <TabsTrigger value="api-keys" className="flex items-center gap-2" data-testid="tab-api-keys">
             <Key className="h-4 w-4" />
@@ -614,6 +619,20 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <DataExport />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+              <CardDescription>
+                Manage your account security and authentication methods.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MFASettings />
             </CardContent>
           </Card>
         </TabsContent>

@@ -9,6 +9,12 @@ import { registerAuthRoutes } from "./routes/auth.js";
 import { registerFinancialRoutes } from "./routes/financials.js";
 import { registerPredictiveRoutes } from "./routes/predictive.js";
 import { registerCrossProjectImpactRoutes } from "./routes/cross-project-impact.js";
+import { registerOrchestrationRoutes } from "./routes/orchestration.js";
+import { registerIssueRoutes } from "./routes/issues.js";
+import { registerChangeRequestRoutes } from "./routes/change-requests.js";
+import { registerDeepAgentRoutes } from "./routes/deep-agents.js";
+import { registerDashboardDataRoutes } from "./routes/dashboard-data.js";
+import { registerIntegrationRoutes } from "./routes/admin/integrations.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -103,6 +109,15 @@ export async function registerRoutes(
   // Setup authentication (must be before other routes)
   registerAuthRoutes(app, storage);
 
+  // Register Integration Management routes (ADMIN - External data source configuration)
+  registerIntegrationRoutes(app);
+
+  // Register Dashboard Data routes (REPLACES ALL STATIC DATA)
+  registerDashboardDataRoutes(app, storage);
+
+  // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
+  registerOrchestrationRoutes(app, storage);
+
   // Register Financial Intelligence routes (for agents and dashboards)
   registerFinancialRoutes(app, storage);
 
@@ -111,6 +126,15 @@ export async function registerRoutes(
 
   // Register Cross-Project Impact routes (THE KILLER FEATURE - cascade impact analysis)
   registerCrossProjectImpactRoutes(app, storage);
+
+  // Register Issue Management routes (CRITICAL - PM systems lack good issue tracking)
+  registerIssueRoutes(app, storage);
+
+  // Register Change Request routes (CRITICAL - Scope control and governance)
+  registerChangeRequestRoutes(app, storage);
+
+  // Register Deep Agent routes (ENHANCED INTELLIGENCE - Planning + Reflection + Multi-step reasoning)
+  registerDeepAgentRoutes(app, storage);
 
   // Register AI CoPilot routes
   registerCoPilotRoutes(app);
@@ -4938,7 +4962,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         message: `${agentId} agent executed successfully`,
         interventionsCreated: recentInterventions.length,
         recentInterventions,
-        langsmithProject: process.env.LANGCHAIN_PROJECT || "nextera-eto",
+        langsmithProject: process.env.LANGCHAIN_PROJECT || "DFIN-Pipeline",
         langsmithUrl: "https://smith.langchain.com/",
         note: "Check LangSmith dashboard for agent traces"
       });

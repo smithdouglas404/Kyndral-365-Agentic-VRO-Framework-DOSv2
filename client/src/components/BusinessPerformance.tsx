@@ -39,7 +39,8 @@ import {
   DollarSign,
   BarChart3,
   Globe,
-  Info
+  Info,
+  PoundSterling
 } from "lucide-react";
 import { formatValueInMillions } from "@/lib/formatters";
 

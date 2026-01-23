@@ -37,6 +37,29 @@ import AgentCommandCenterPage from "@/pages/AgentCommandCenterPage";
 import MCPConfigPage from "@/pages/MCPConfigPage";
 import SettingsPage from "@/pages/SettingsPage";
 import DataQualityPage from "@/pages/DataQualityPage";
+import LiquidIntelligencePage from "@/pages/LiquidIntelligencePage";
+import OrchestrationMonitoringPage from "@/pages/OrchestrationMonitoringPage";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import PasswordResetPage from "@/pages/PasswordResetPage";
+import PasswordResetConfirmPage from "@/pages/PasswordResetConfirmPage";
+import IssueManagement from "@/pages/IssueManagement";
+import DeepAgentMonitoring from "@/pages/DeepAgentMonitoring";
+import ChangeRequestManagement from "@/pages/ChangeRequestManagement";
+import ResourceManagement from "@/pages/ResourceManagement";
+import FinancialManagement from "@/pages/FinancialManagement";
+import DocumentManagement from "@/pages/DocumentManagement";
+import ProgramManagement from "@/pages/ProgramManagement";
+import ReportingAnalytics from "@/pages/ReportingAnalytics";
+import RiskManagement from "@/pages/RiskManagement";
+import CollaborationHub from "@/pages/CollaborationHub";
+import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import SystemConfiguration from "@/pages/admin/SystemConfiguration";
+import UserManagement from "@/pages/admin/UserManagement";
+import IntegrationManagement from "@/pages/admin/IntegrationManagement";
+import SystemSettings from "@/pages/admin/SystemSettings";
+import AgentConfiguration from "@/pages/admin/AgentConfiguration";
 
 function Router() {
   return (
@@ -62,6 +85,29 @@ function Router() {
       <Route path="/mcp-config" component={MCPConfigPage} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/data-quality" component={DataQualityPage} />
+      <Route path="/intelligence" component={LiquidIntelligencePage} />
+      <Route path="/monitoring" component={OrchestrationMonitoringPage} />
+      <Route path="/deep-agent-monitoring" component={DeepAgentMonitoring} />
+      <Route path="/issues" component={IssueManagement} />
+      <Route path="/change-requests" component={ChangeRequestManagement} />
+      <Route path="/resources" component={ResourceManagement} />
+      <Route path="/financial" component={FinancialManagement} />
+      <Route path="/documents" component={DocumentManagement} />
+      <Route path="/programs" component={ProgramManagement} />
+      <Route path="/reports" component={ReportingAnalytics} />
+      <Route path="/risks" component={RiskManagement} />
+      <Route path="/collaboration" component={CollaborationHub} />
+      <Route path="/analytics" component={AdvancedAnalytics} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      <Route path="/password-reset" component={PasswordResetPage} />
+      <Route path="/password-reset/confirm" component={PasswordResetConfirmPage} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/users" component={UserManagement} />
+      <Route path="/admin/integrations" component={IntegrationManagement} />
+      <Route path="/admin/settings" component={SystemSettings} />
+      <Route path="/admin/agents" component={AgentConfiguration} />
+      <Route path="/admin/system-config" component={SystemConfiguration} />
       <Route component={NotFound} />
     </Switch>
   );

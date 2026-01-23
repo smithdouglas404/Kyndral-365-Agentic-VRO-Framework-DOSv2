@@ -624,6 +624,219 @@ export class AuthSystem {
   }
 
   /**
+   * Enable MFA for user (with password verification and backup codes)
+   */
+  async enableMFA(userId: string, password: string): Promise<{ secret: string; qrCode: string; backupCodes: string[] }> {
+    // Get user and verify password
+    const user = await this.storage.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!isValidPassword) {
+      throw new Error('Invalid password');
+    }
+
+    // Generate MFA secret
+    const secret = randomBytes(20).toString('hex');
+
+    // Generate backup codes (10 codes, 8 characters each)
+    const backupCodes: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      backupCodes.push(randomBytes(4).toString('hex').toUpperCase());
+    }
+
+    // Hash backup codes for storage
+    const backupCodeHashes = await Promise.all(
+      backupCodes.map(code => bcrypt.hash(code, 10))
+    );
+
+    // Store secret and backup codes
+    await this.storage.updateUser(userId, {
+      mfaSecret: secret,
+      isMfaEnabled: true,
+      mfaBackupCodes: backupCodeHashes,
+    });
+
+    // Generate QR code (URL for authenticator app)
+    const qrCode = `otpauth://totp/VRO-PMO:${user.email}?secret=${secret}&issuer=VRO-PMO`;
+
+    // Audit log
+    await this.logAudit({
+      userId,
+      action: 'mfa_enabled',
+      resourceType: 'user',
+      resourceId: userId,
+    });
+
+    console.log(`[AuthSystem] MFA enabled for user: ${user.email}`);
+
+    return { secret, qrCode, backupCodes };
+  }
+
+  /**
+   * Disable MFA for user
+   */
+  async disableMFA(userId: string): Promise<void> {
+    await this.storage.updateUser(userId, {
+      isMfaEnabled: false,
+      mfaSecret: null,
+      mfaBackupCodes: null,
+    });
+
+    // Audit log
+    await this.logAudit({
+      userId,
+      action: 'mfa_disabled',
+      resourceType: 'user',
+      resourceId: userId,
+    });
+
+    const user = await this.storage.getUser(userId);
+    console.log(`[AuthSystem] MFA disabled for user: ${user?.email}`);
+  }
+
+  /**
+   * Verify MFA code for user
+   */
+  async verifyMFACode(userId: string, code: string): Promise<boolean> {
+    const user = await this.storage.getUser(userId);
+    if (!user || !user.isMfaEnabled) {
+      return false;
+    }
+
+    return this.verifyMfaCode(user, code);
+  }
+
+  /**
+   * Confirm password reset with token (alias for resetPassword)
+   */
+  async confirmPasswordReset(token: string, newPassword: string): Promise<void> {
+    return this.resetPassword(token, newPassword);
+  }
+
+  /**
+   * Change password (requires current password)
+   */
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    // Get user
+    const user = await this.storage.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValidPassword) {
+      throw new Error('Invalid current password');
+    }
+
+    // Validate new password
+    if (!this.isStrongPassword(newPassword)) {
+      throw new Error('Password must be at least 12 characters with uppercase, lowercase, number, and special character');
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(newPassword, this.bcryptRounds);
+
+    // Update password
+    await this.storage.updateUser(userId, {
+      passwordHash,
+      updatedAt: new Date(),
+    });
+
+    // Audit log
+    await this.logAudit({
+      userId,
+      action: 'password_changed',
+      resourceType: 'user',
+      resourceId: userId,
+    });
+
+    console.log(`[AuthSystem] Password changed for user: ${user.email}`);
+  }
+
+  /**
+   * Refresh JWT token
+   */
+  async refreshToken(userId: string): Promise<string> {
+    const user = await this.storage.getUser(userId);
+    if (!user || !user.isActive) {
+      throw new Error('User not found or inactive');
+    }
+
+    // Generate new token
+    const token = this.generateJWT(user);
+
+    // Create new session
+    await this.createSession(userId, token);
+
+    return token;
+  }
+
+  /**
+   * Generate API key for user (alias with different naming)
+   */
+  async generateAPIKey(
+    userId: string,
+    name: string,
+    permissions?: string[],
+    expiresInDays?: number
+  ): Promise<{ key: string; name: string; expiresAt?: Date }> {
+    const expiresAt = expiresInDays
+      ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000)
+      : undefined;
+
+    const result = await this.generateApiKey({
+      userId,
+      name,
+      permissions: permissions || [],
+      expiresAt,
+    });
+
+    return {
+      key: result.key,
+      name: result.apiKey.name,
+      expiresAt: result.apiKey.expiresAt,
+    };
+  }
+
+  /**
+   * List API keys for user
+   */
+  async listAPIKeys(userId: string): Promise<any[]> {
+    const allKeys = await this.storage.getApiKeys();
+    return allKeys.filter(key => key.userId === userId);
+  }
+
+  /**
+   * Revoke API key
+   */
+  async revokeAPIKey(keyId: string, userId: string): Promise<void> {
+    const apiKey = await this.storage.getApiKey(keyId);
+    if (!apiKey) {
+      throw new Error('API key not found');
+    }
+
+    if (apiKey.userId !== userId) {
+      throw new Error('Unauthorized to revoke this API key');
+    }
+
+    await this.storage.updateApiKey(keyId, {
+      isActive: false,
+    });
+
+    // Audit log
+    await this.logAudit({
+      userId,
+      action: 'api_key_revoked',
+      resourceType: 'api_key',
+      resourceId: keyId,
+    });
+  }
+
+  /**
    * Helper: Create session
    */
   private async createSession(

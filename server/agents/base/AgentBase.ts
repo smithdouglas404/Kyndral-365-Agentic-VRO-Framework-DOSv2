@@ -63,6 +63,11 @@ export abstract class AgentBase {
       modelName: config.modelName || "claude-sonnet-4-5-20250929",
       temperature: config.temperature || 0.7,
       anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      metadata: {
+        layer: "agent",
+        agent_type: config.agentName.toLowerCase(),
+        system: "multi-agent-orchestration",
+      },
     });
 
     // Initialize memory

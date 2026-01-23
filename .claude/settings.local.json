@@ -28,7 +28,10 @@
       "Bash(node -e:*)",
       "Bash(npx tsc:*)",
       "Bash(npx drizzle-kit generate:*)",
-      "Bash(npx drizzle-kit push)"
+      "Bash(npx drizzle-kit push)",
+      "Bash(npm run check:*)",
+      "Bash(npm run seed:production:*)",
+      "Bash(done)"
     ]
   }
 }

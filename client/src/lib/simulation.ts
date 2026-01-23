@@ -225,5 +225,10 @@ export const citations = {
     value: "$185m",
     source: "NextEra Energy Annual Report 2024, p.34",
     context: "Technology modernization investment"
+  },
+  prtVolume: {
+    value: "68.5 GW",
+    source: "NextEra Energy Annual Report 2024, p.18",
+    context: "Total clean energy portfolio capacity"
   }
 };

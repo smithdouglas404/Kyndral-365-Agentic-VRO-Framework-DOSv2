@@ -26,6 +26,39 @@ import {
   type Dependency, type InsertDependency,
   type ProjectFinancials, type InsertProjectFinancials,
   type Risk, type InsertRisk,
+  type Issue, type InsertIssue,
+  type IssueComment, type InsertIssueComment,
+  type ChangeRequest, type InsertChangeRequest,
+  type SsoConfig, type InsertSsoConfig,
+  type PasswordPolicy, type InsertPasswordPolicy,
+  type FieldPermission, type InsertFieldPermission,
+  type PicklistValue, type InsertPicklistValue,
+  type NotificationTemplate, type InsertNotificationTemplate,
+  type RetentionPolicy, type InsertRetentionPolicy,
+  type CustomField, type InsertCustomField,
+  type CustomFieldValue, type InsertCustomFieldValue,
+  type ResourcePool, type InsertResourcePool,
+  type ResourceAllocation, type InsertResourceAllocation,
+  type Timesheet, type InsertTimesheet,
+  type PurchaseOrder, type InsertPurchaseOrder,
+  type Invoice, type InsertInvoice,
+  type CostCategory, type InsertCostCategory,
+  type BudgetAllocation, type InsertBudgetAllocation,
+  type Document, type InsertDocument,
+  type DocumentVersion, type InsertDocumentVersion,
+  type DocumentApproval, type InsertDocumentApproval,
+  type DiscussionForum, type InsertDiscussionForum,
+  type ForumPost, type InsertForumPost,
+  type MeetingMinutes, type InsertMeetingMinutes,
+  type DecisionLog, type InsertDecisionLog,
+  type WorkflowDefinition, type InsertWorkflowDefinition,
+  type WorkflowExecution, type InsertWorkflowExecution,
+  type ApprovalQueue, type InsertApprovalQueue,
+  type Program, type InsertProgram,
+  type ProjectDependency, type InsertProjectDependency,
+  type MasterSchedule, type InsertMasterSchedule,
+  type RiskCategory, type InsertRiskCategory,
+  type RiskResponse, type InsertRiskResponse,
   type Okr, type InsertOkr,
   type KeyResult, type InsertKeyResult,
   type Kpi, type InsertKpi,
@@ -63,7 +96,7 @@ import {
   type AppConfig, type InsertAppConfig,
   type DashboardWidget, type InsertDashboardWidget,
   type Notification, type InsertNotification,
-  type UserRole, type InsertUserRole,
+  type UserRoleAssignment, type InsertUserRole,
   type ScheduledReport, type InsertScheduledReport,
   type ExportJob, type InsertExportJob,
   type TutorialProgress, type InsertTutorialProgress,
@@ -76,6 +109,14 @@ import {
   policies, businessUnits, projects, projectTemplates, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
+  issues, issueComments, changeRequests,
+  ssoConfigs, passwordPolicies, fieldPermissions, picklistValues, notificationTemplates, retentionPolicies,
+  customFields, customFieldValues, resourcePools, resourceAllocations, timesheets,
+  purchaseOrders, invoices, costCategories, budgetAllocations,
+  documents, documentVersions, documentApprovals,
+  discussionForums, forumPosts, meetingMinutes, decisionLogs,
+  workflowDefinitions, workflowExecutions, approvalQueues,
+  programs, projectDependencies, masterSchedule, riskCategories, riskResponses,
   okrs, keyResults, kpis,
   portfolios, valueStreams, arts, teams, programIncrements, epics, capabilities, sprints, strategicThemes,
   sourceSystems, mcpAdapters, fieldMappings, ingestionJobs, mcpToolMappings,
@@ -201,6 +242,23 @@ export interface IStorage {
   upsertProjectFinancials(financials: InsertProjectFinancials): Promise<ProjectFinancials>;
   getRisks(projectId: string): Promise<Risk[]>;
   createRisk(risk: InsertRisk): Promise<Risk>;
+
+  // Issue Management Methods
+  getIssues(filters?: { projectId?: string; status?: string; priority?: string; category?: string }): Promise<Issue[]>;
+  getIssue(issueId: string): Promise<Issue | undefined>;
+  createIssue(issue: InsertIssue): Promise<Issue>;
+  updateIssue(issueId: string, updates: Partial<InsertIssue>): Promise<Issue>;
+  deleteIssue(issueId: string): Promise<void>;
+  getIssueComments(issueId: string): Promise<IssueComment[]>;
+  createIssueComment(comment: InsertIssueComment): Promise<IssueComment>;
+
+  // Change Request Management Methods
+  getChangeRequests(filters?: { projectId?: string; status?: string; changeType?: string; priority?: string }): Promise<ChangeRequest[]>;
+  getChangeRequest(changeRequestId: string): Promise<ChangeRequest | undefined>;
+  createChangeRequest(changeRequest: InsertChangeRequest): Promise<ChangeRequest>;
+  updateChangeRequest(changeRequestId: string, updates: Partial<InsertChangeRequest>): Promise<ChangeRequest>;
+  deleteChangeRequest(changeRequestId: string): Promise<void>;
+
   getFullProject(projectId: string): Promise<{
     project: Project;
     features: Feature[];
@@ -1611,6 +1669,103 @@ export class DatabaseStorage implements IStorage {
   async createRisk(risk: InsertRisk): Promise<Risk> {
     const result = await db.insert(risks).values(risk).returning();
     return result[0];
+  }
+
+  // ============================================================================
+  // ISSUE MANAGEMENT IMPLEMENTATIONS
+  // ============================================================================
+
+  async getIssues(filters?: { projectId?: string; status?: string; priority?: string; category?: string }): Promise<Issue[]> {
+    let query = db.select().from(issues);
+
+    if (filters) {
+      const conditions = [];
+      if (filters.projectId) conditions.push(eq(issues.projectId, filters.projectId));
+      if (filters.status) conditions.push(eq(issues.status, filters.status));
+      if (filters.priority) conditions.push(eq(issues.priority, filters.priority));
+      if (filters.category) conditions.push(eq(issues.category, filters.category));
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions)) as any;
+      }
+    }
+
+    return await query.orderBy(desc(issues.createdAt));
+  }
+
+  async getIssue(issueId: string): Promise<Issue | undefined> {
+    const result = await db.select().from(issues).where(eq(issues.id, issueId)).limit(1);
+    return result[0];
+  }
+
+  async createIssue(issue: InsertIssue): Promise<Issue> {
+    const result = await db.insert(issues).values(issue).returning();
+    return result[0];
+  }
+
+  async updateIssue(issueId: string, updates: Partial<InsertIssue>): Promise<Issue> {
+    const result = await db.update(issues)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(issues.id, issueId))
+      .returning();
+    return result[0];
+  }
+
+  async deleteIssue(issueId: string): Promise<void> {
+    await db.delete(issues).where(eq(issues.id, issueId));
+  }
+
+  async getIssueComments(issueId: string): Promise<IssueComment[]> {
+    return await db.select().from(issueComments).where(eq(issueComments.issueId, issueId)).orderBy(issueComments.createdAt);
+  }
+
+  async createIssueComment(comment: InsertIssueComment): Promise<IssueComment> {
+    const result = await db.insert(issueComments).values(comment).returning();
+    return result[0];
+  }
+
+  // ============================================================================
+  // CHANGE REQUEST MANAGEMENT IMPLEMENTATIONS
+  // ============================================================================
+
+  async getChangeRequests(filters?: { projectId?: string; status?: string; changeType?: string; priority?: string }): Promise<ChangeRequest[]> {
+    let query = db.select().from(changeRequests);
+
+    if (filters) {
+      const conditions = [];
+      if (filters.projectId) conditions.push(eq(changeRequests.projectId, filters.projectId));
+      if (filters.status) conditions.push(eq(changeRequests.status, filters.status));
+      if (filters.changeType) conditions.push(eq(changeRequests.changeType, filters.changeType));
+      if (filters.priority) conditions.push(eq(changeRequests.priority, filters.priority));
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions)) as any;
+      }
+    }
+
+    return await query.orderBy(desc(changeRequests.createdAt));
+  }
+
+  async getChangeRequest(changeRequestId: string): Promise<ChangeRequest | undefined> {
+    const result = await db.select().from(changeRequests).where(eq(changeRequests.id, changeRequestId)).limit(1);
+    return result[0];
+  }
+
+  async createChangeRequest(changeRequest: InsertChangeRequest): Promise<ChangeRequest> {
+    const result = await db.insert(changeRequests).values(changeRequest).returning();
+    return result[0];
+  }
+
+  async updateChangeRequest(changeRequestId: string, updates: Partial<InsertChangeRequest>): Promise<ChangeRequest> {
+    const result = await db.update(changeRequests)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(changeRequests.id, changeRequestId))
+      .returning();
+    return result[0];
+  }
+
+  async deleteChangeRequest(changeRequestId: string): Promise<void> {
+    await db.delete(changeRequests).where(eq(changeRequests.id, changeRequestId));
   }
 
   async getFullProject(projectId: string): Promise<{

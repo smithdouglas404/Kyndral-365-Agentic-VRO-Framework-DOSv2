@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, Brain, AlertTriangle, CheckCircle2, Clock, 
+import {
+  Activity, Brain, AlertTriangle, CheckCircle2, Clock,
   ArrowRight, MessageCircle, Zap, ChevronDown, ChevronUp,
   DollarSign, GitBranch, Repeat, Calculator, Target, Shield, Calendar, Users,
-  Link2, FileText, History, Building2, User, ExternalLink, X
+  Link2, FileText, History, Building2, User, ExternalLink, X, TrendingUp, Folder
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,8 @@ import { AgentType } from '@/lib/dataHub';
 
 const AGENT_ICONS: Record<AgentType, React.ElementType> = {
   'integrated-management': Brain,
+  vro: TrendingUp,
+  pmo: Folder,
   tmo: Repeat,
   finops: Calculator,
   okr: Target,
@@ -37,8 +39,10 @@ const AGENT_ICONS: Record<AgentType, React.ElementType> = {
 
 const AGENT_COLORS: Record<AgentType, string> = {
   'integrated-management': 'bg-gradient-to-r from-teal-500 to-blue-500',
+  vro: 'bg-green-500',
+  pmo: 'bg-purple-500',
   tmo: 'bg-teal-500',
-  finops: 'bg-green-500',
+  finops: 'bg-amber-500',
   okr: 'bg-orange-500',
   governance: 'bg-red-500',
   planning: 'bg-indigo-500',

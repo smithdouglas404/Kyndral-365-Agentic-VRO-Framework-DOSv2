@@ -522,9 +522,9 @@ export function AICommandCenter() {
         actionType: 'approve',
         sourceComponent: 'AI Command Center',
         interventionData: {
-          type: alert?.category === 'risk' ? 'quality' : 
-                alert?.category === 'financial' ? 'budget' : 
-                alert?.category === 'operational' ? 'resource' : 'timeline',
+          type: alert?.type === 'risk' ? 'quality' :
+                alert?.type === 'performance' ? 'budget' :
+                alert?.type === 'governance' ? 'resource' : 'timeline',
           severity: alert?.severity === 'critical' ? 'critical' : 
                     alert?.severity === 'warning' ? 'high' : 'medium',
           title: alert?.title || 'AI Alert Action',
@@ -615,7 +615,7 @@ export function AICommandCenter() {
     const task = governanceTasks.find(t => t.id === taskId);
     
     // Map priority to severity correctly: critical→critical, high→high, medium/low→medium
-    const mapPriorityToSeverity = (priority?: string): 'critical' | 'high' | 'medium' | 'low' => {
+    const mapPriorityToSeverity = (priority?: string): 'critical' | 'high' | 'medium' => {
       if (priority === 'critical') return 'critical';
       if (priority === 'high') return 'high';
       return 'medium';

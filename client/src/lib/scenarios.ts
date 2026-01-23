@@ -217,6 +217,11 @@ export const globalPRTData = {
   transmission2024: 2500,  // miles (NEET)
   cleanEnergyPercent2024: 48.7,  // %
   carbonReduction2024: 65,  // % since 2005
+  ukPRT2024: 25.2,  // GW
+  usPRT2024: 35.8,  // GW
+  canadaPRT2024: 7.5,  // GW
+  ukSolvencyMargin2024: 185,  // %
+  ifrsNewBusinessMargin2024: 8.2,  // %
   source: "NextEra Energy Annual Report 2024"
 };
 
@@ -249,6 +254,7 @@ export const climateMetrics = {
   renewableElectricity: { target2025: 100, unit: "%" },
   coalPhaseOut: { target: 2025 },
   netZeroTarget: { target: 2045 },
+  transitionFinance: { current: 8.5, unit: "$bn" },
   source: "NextEra Energy Sustainability Report 2024"
 };
 
@@ -269,6 +275,7 @@ export const riskGovernance = {
 export const shareholderReturns = {
   buyback2024Completed: 250,  // $m
   buybackAnnounced: 625,  // $m
+  additionalBuybackPostUSSale: 400,  // $m
   capitalInvestment: 12000,  // $m annual clean energy investment
   totalReturnTarget2024_27: 6250,  // $m
   dividendGrowth2025Plus: 10,  // % per annum

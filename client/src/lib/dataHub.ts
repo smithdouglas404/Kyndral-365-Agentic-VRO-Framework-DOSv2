@@ -8,7 +8,7 @@ import { SimulationEvent } from './liveSimulation';
 import { getProjectsByMetricId, EXPANDED_PMO_PROJECTS } from './unifiedMetrics';
 import { formatValueInMillions, formatValueWithUnit } from './formatters';
 
-export type AgentType = 'integrated-management' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
+export type AgentType = 'integrated-management' | 'vro' | 'pmo' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
 
 export interface AgentDataSlice {
   agentId: AgentType;

@@ -16,7 +16,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { divisions } from '@/lib/lgData';
+import { useDivisions } from '@/hooks/useNexteraData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
@@ -202,6 +202,7 @@ export default function OKRDashboard() {
   const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('okr');
+  const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -377,30 +378,35 @@ export default function OKRDashboard() {
               <CardTitle className="text-lg">Reportable Segments OKRs Overview</CardTitle>
             </CardHeader>
             <CardContent>
+              {divisionsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+                </div>
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {divisions.slice(0, 4).map((segment) => (
                   <Link key={segment.id} href={`/segment/${segment.id}`}>
-                    <div 
+                    <div
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: segment.color, borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segment.color || '#666', borderLeftWidth: '4px' }}
                     >
                       <p className="text-sm font-medium text-gray-500">{segment.name}</p>
-                      <div className="mt-2 space-y-2">
-                        {segment.okrs.slice(0, 2).map((okr, i) => (
-                          <div key={i} className="text-xs">
-                            <p className="font-medium text-gray-700">{okr.objective}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-gray-500">{okr.keyResults.length} KRs</span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-gray-500">Due: {okr.dueDate}</span>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="text-xs text-gray-500">
+                          <p>2024 Profit: {formatValueInMillions(segment.profit2024 ?? 0)}</p>
+                          <p className="mt-1">
+                            <Badge variant={(segment.changePercent ?? 0) >= 0 ? 'default' : 'destructive'} className="text-xs">
+                              {(segment.changePercent ?? 0) >= 0 ? '+' : ''}{segment.changePercent ?? 0}% YoY
+                            </Badge>
+                          </p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-gray-400" />
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
+              )}
             </CardContent>
           </Card>
 

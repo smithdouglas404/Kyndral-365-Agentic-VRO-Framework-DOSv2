@@ -1,0 +1,521 @@
+/**
+ * DEEP AGENT BASE
+ *
+ * Enhanced agent with Deep Agent capabilities:
+ * - Planning: Think before acting
+ * - Reflection: Evaluate outcomes and adjust
+ * - Multi-step reasoning: Break down complex tasks
+ * - Memory: Maintain context across interactions
+ *
+ * Based on LangChain Deep Agents pattern
+ */
+
+import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { DynamicStructuredTool } from "@langchain/core/tools";
+import type { IStorage } from "../../storage.js";
+
+/**
+ * Plan step for multi-step reasoning
+ */
+interface PlanStep {
+  step: number;
+  description: string;
+  tool?: string;
+  expectedOutcome: string;
+  dependencies: number[]; // Steps that must complete first
+  status: 'pending' | 'executing' | 'completed' | 'failed';
+  result?: any;
+  reflection?: string;
+}
+
+/**
+ * Agent plan with steps and reasoning
+ */
+interface AgentPlan {
+  goal: string;
+  reasoning: string;
+  steps: PlanStep[];
+  estimatedComplexity: 'low' | 'medium' | 'high';
+  requiresCollaboration: boolean;
+  createdAt: Date;
+}
+
+/**
+ * Reflection on action outcome
+ */
+interface ActionReflection {
+  action: string;
+  outcome: any;
+  success: boolean;
+  learnings: string[];
+  adjustments: string[];
+  timestamp: Date;
+}
+
+/**
+ * Deep Agent configuration
+ */
+export interface DeepAgentConfig {
+  agentName: string;
+  agentType: string;
+  description: string;
+  capabilities: string[];
+  enablePlanning?: boolean;
+  enableReflection?: boolean;
+  maxPlanSteps?: number;
+  reflectionThreshold?: number; // How many actions before reflecting
+}
+
+/**
+ * Deep Agent Base Class
+ * Extends basic agent with planning, reflection, and multi-step reasoning
+ */
+export abstract class DeepAgentBase {
+  protected config: DeepAgentConfig;
+  protected storage: IStorage;
+  protected model: ChatAnthropic;
+  protected plannerModel: ChatAnthropic;
+  protected reflectorModel: ChatAnthropic;
+
+  protected tracingEnabled: boolean;
+
+  protected currentPlan?: AgentPlan;
+  protected reflectionHistory: ActionReflection[] = [];
+  protected actionCount: number = 0;
+
+  constructor(config: DeepAgentConfig, storage: IStorage) {
+    this.config = {
+      enablePlanning: true,
+      enableReflection: true,
+      maxPlanSteps: 10,
+      reflectionThreshold: 3,
+      ...config,
+    };
+    this.storage = storage;
+
+    // Initialize tracing (disabled for now)
+    this.tracingEnabled = false;
+
+    // Initialize models with different temperatures for different purposes
+    const callbacks: any[] = [];
+
+    // Main execution model
+    this.model = new ChatAnthropic({
+      modelName: "claude-sonnet-4-5-20250929",
+      temperature: 0.7,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      callbacks,
+      metadata: {
+        layer: "deep-agent",
+        agent_type: config.agentName.toLowerCase(),
+        system: "deep-agent-architecture",
+      },
+    });
+
+    // Planner model (lower temperature for more structured thinking)
+    this.plannerModel = new ChatAnthropic({
+      modelName: "claude-sonnet-4-5-20250929",
+      temperature: 0.3,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      callbacks,
+      metadata: {
+        layer: "deep-agent-planning",
+        agent_type: config.agentName.toLowerCase(),
+        component: "planner",
+      },
+    });
+
+    // Reflector model (balanced temperature for evaluation)
+    this.reflectorModel = new ChatAnthropic({
+      modelName: "claude-sonnet-4-5-20250929",
+      temperature: 0.5,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      callbacks,
+      metadata: {
+        layer: "deep-agent-reflection",
+        agent_type: config.agentName.toLowerCase(),
+        component: "reflector",
+      },
+    });
+
+    console.log(`[${config.agentName}] Deep Agent initialized with planning=${this.config.enablePlanning}, reflection=${this.config.enableReflection}`);
+  }
+
+  /**
+   * Define agent-specific tools
+   * Subclasses must implement this
+   */
+  protected abstract defineTools(): DynamicStructuredTool[];
+
+  /**
+   * Get agent system prompt
+   * Subclasses must implement this
+   */
+  protected abstract getSystemPrompt(): string;
+
+  /**
+   * PHASE 1: PLANNING
+   * Create a multi-step plan before executing
+   */
+  protected async createPlan(goal: string, context: any): Promise<AgentPlan> {
+    console.log(`[${this.config.agentName}] Creating plan for goal: ${goal}`);
+
+    const tools = this.defineTools();
+    const toolDescriptions = tools.map(t => `- ${t.name}: ${t.description}`).join('\n');
+
+    const planningPrompt = ChatPromptTemplate.fromMessages([
+      ["system", `You are a planning expert for ${this.config.agentName}.
+
+Your role: Analyze the goal and create a detailed, step-by-step plan.
+
+Available tools:
+${toolDescriptions}
+
+Create a plan with these characteristics:
+1. Break down complex goals into clear, sequential steps
+2. Identify dependencies between steps
+3. Specify which tool to use for each step
+4. Estimate expected outcomes
+5. Determine if collaboration with other agents is needed
+
+Return a JSON plan with this structure:
+{
+  "reasoning": "Why this approach?",
+  "estimatedComplexity": "low|medium|high",
+  "requiresCollaboration": true|false,
+  "steps": [
+    {
+      "step": 1,
+      "description": "What to do",
+      "tool": "tool_name or null",
+      "expectedOutcome": "What we expect",
+      "dependencies": []
+    }
+  ]
+}`],
+      ["human", `Goal: {goal}
+
+Context: {context}
+
+Create a plan to achieve this goal.`],
+    ]);
+
+    const chain = planningPrompt.pipe(this.plannerModel);
+    const response = await chain.invoke({
+      goal,
+      context: JSON.stringify(context, null, 2),
+    });
+
+    // Parse the plan from response
+    const planText = response.content.toString();
+    let parsedPlan;
+
+    try {
+      // Extract JSON from markdown code blocks if present
+      const jsonMatch = planText.match(/```json\s*([\s\S]*?)\s*```/) || planText.match(/```\s*([\s\S]*?)\s*```/);
+      const jsonText = jsonMatch ? jsonMatch[1] : planText;
+      parsedPlan = JSON.parse(jsonText);
+    } catch (error) {
+      console.error(`[${this.config.agentName}] Failed to parse plan, using fallback`);
+      parsedPlan = {
+        reasoning: "Direct execution needed",
+        estimatedComplexity: "low",
+        requiresCollaboration: false,
+        steps: [
+          {
+            step: 1,
+            description: goal,
+            tool: null,
+            expectedOutcome: "Complete the goal",
+            dependencies: [],
+          }
+        ]
+      };
+    }
+
+    // Build AgentPlan object
+    const plan: AgentPlan = {
+      goal,
+      reasoning: parsedPlan.reasoning,
+      estimatedComplexity: parsedPlan.estimatedComplexity || 'medium',
+      requiresCollaboration: parsedPlan.requiresCollaboration || false,
+      steps: parsedPlan.steps.map((step: any) => ({
+        ...step,
+        status: 'pending' as const,
+      })),
+      createdAt: new Date(),
+    };
+
+    this.currentPlan = plan;
+    console.log(`[${this.config.agentName}] Plan created with ${plan.steps.length} steps, complexity: ${plan.estimatedComplexity}`);
+
+    return plan;
+  }
+
+  /**
+   * PHASE 2: EXECUTION
+   * Execute the plan step by step
+   */
+  protected async executePlan(plan: AgentPlan): Promise<any> {
+    console.log(`[${this.config.agentName}] Executing plan: ${plan.goal}`);
+
+    const results: any[] = [];
+
+    for (const step of plan.steps) {
+      // Check dependencies
+      const depsComplete = step.dependencies.every(depStep => {
+        const dep = plan.steps.find(s => s.step === depStep);
+        return dep?.status === 'completed';
+      });
+
+      if (!depsComplete) {
+        console.log(`[${this.config.agentName}] Step ${step.step} waiting for dependencies`);
+        step.status = 'pending';
+        continue;
+      }
+
+      // Execute step
+      step.status = 'executing';
+      console.log(`[${this.config.agentName}] Executing step ${step.step}: ${step.description}`);
+
+      try {
+        const result = await this.executeStep(step, results);
+        step.result = result;
+        step.status = 'completed';
+        results.push(result);
+
+        console.log(`[${this.config.agentName}] Step ${step.step} completed`);
+
+        // Trigger reflection if threshold reached
+        this.actionCount++;
+        if (this.config.enableReflection && this.actionCount >= (this.config.reflectionThreshold || 3)) {
+          await this.reflect(step, result);
+          this.actionCount = 0;
+        }
+      } catch (error: any) {
+        step.status = 'failed';
+        step.result = { error: error.message };
+        console.error(`[${this.config.agentName}] Step ${step.step} failed:`, error);
+
+        // Reflect on failure
+        if (this.config.enableReflection) {
+          await this.reflect(step, { error: error.message });
+        }
+
+        throw error;
+      }
+    }
+
+    return {
+      goal: plan.goal,
+      steps: plan.steps.map(s => ({
+        step: s.step,
+        description: s.description,
+        status: s.status,
+        result: s.result,
+        reflection: s.reflection,
+      })),
+      success: plan.steps.every(s => s.status === 'completed'),
+    };
+  }
+
+  /**
+   * Execute a single plan step
+   */
+  protected async executeStep(step: PlanStep, previousResults: any[]): Promise<any> {
+    const tools = this.defineTools();
+    const context = {
+      step: step.step,
+      description: step.description,
+      expectedOutcome: step.expectedOutcome,
+      previousResults,
+    };
+
+    // If step specifies a tool, use it
+    if (step.tool) {
+      const tool = tools.find(t => t.name === step.tool);
+      if (tool) {
+        console.log(`[${this.config.agentName}] Using tool: ${step.tool}`);
+        // Tool execution would happen here
+        // For now, return a mock result
+        return { toolUsed: step.tool, context };
+      }
+    }
+
+    // Otherwise, use LLM to execute step
+    const prompt = ChatPromptTemplate.fromMessages([
+      ["system", this.getSystemPrompt()],
+      ["human", `Execute this step:
+Description: {description}
+Expected outcome: {expectedOutcome}
+Context: {context}
+
+Provide the result of executing this step.`],
+    ]);
+
+    const chain = prompt.pipe(this.model);
+    const response = await chain.invoke({
+      description: step.description,
+      expectedOutcome: step.expectedOutcome,
+      context: JSON.stringify(context, null, 2),
+    });
+
+    return {
+      stepResult: response.content.toString(),
+      context,
+    };
+  }
+
+  /**
+   * PHASE 3: REFLECTION
+   * Evaluate the outcome and learn from it
+   */
+  protected async reflect(step: PlanStep, outcome: any): Promise<ActionReflection> {
+    console.log(`[${this.config.agentName}] Reflecting on step ${step.step}`);
+
+    const reflectionPrompt = ChatPromptTemplate.fromMessages([
+      ["system", `You are a reflection expert for ${this.config.agentName}.
+
+Analyze the action and its outcome. Provide:
+1. Was it successful?
+2. What did we learn?
+3. What adjustments should we make?
+
+Return JSON:
+{
+  "success": true|false,
+  "learnings": ["learning 1", "learning 2"],
+  "adjustments": ["adjustment 1", "adjustment 2"]
+}`],
+      ["human", `Action: {action}
+Expected: {expected}
+Actual outcome: {outcome}
+
+Reflect on this action.`],
+    ]);
+
+    const chain = reflectionPrompt.pipe(this.reflectorModel);
+    const response = await chain.invoke({
+      action: step.description,
+      expected: step.expectedOutcome,
+      outcome: JSON.stringify(outcome, null, 2),
+    });
+
+    let reflection;
+    try {
+      const reflectionText = response.content.toString();
+      const jsonMatch = reflectionText.match(/```json\s*([\s\S]*?)\s*```/) || reflectionText.match(/```\s*([\s\S]*?)\s*```/);
+      const jsonText = jsonMatch ? jsonMatch[1] : reflectionText;
+      reflection = JSON.parse(jsonText);
+    } catch (error) {
+      reflection = {
+        success: true,
+        learnings: ["Completed step"],
+        adjustments: [],
+      };
+    }
+
+    const actionReflection: ActionReflection = {
+      action: step.description,
+      outcome,
+      success: reflection.success,
+      learnings: reflection.learnings || [],
+      adjustments: reflection.adjustments || [],
+      timestamp: new Date(),
+    };
+
+    this.reflectionHistory.push(actionReflection);
+    step.reflection = JSON.stringify(reflection, null, 2);
+
+    console.log(`[${this.config.agentName}] Reflection: Success=${reflection.success}, Learnings=${reflection.learnings.length}`);
+
+    return actionReflection;
+  }
+
+  /**
+   * PUBLIC: Run agent with Deep Agent capabilities
+   */
+  async run(goal: string, context: any = {}): Promise<any> {
+    console.log(`[${this.config.agentName}] Deep Agent run started: ${goal}`);
+
+    try {
+      // PHASE 1: PLANNING
+      let plan: AgentPlan;
+      if (this.config.enablePlanning) {
+        plan = await this.createPlan(goal, context);
+      } else {
+        // Direct execution without planning
+        plan = {
+          goal,
+          reasoning: "Direct execution",
+          estimatedComplexity: 'low',
+          requiresCollaboration: false,
+          steps: [{
+            step: 1,
+            description: goal,
+            expectedOutcome: "Complete the goal",
+            dependencies: [],
+            status: 'pending',
+          }],
+          createdAt: new Date(),
+        };
+      }
+
+      // PHASE 2: EXECUTION
+      const result = await this.executePlan(plan);
+
+      // PHASE 3: FINAL REFLECTION (if enabled)
+      if (this.config.enableReflection) {
+        const finalReflection = await this.reflectOnPlan(plan, result);
+        result.finalReflection = finalReflection;
+      }
+
+      console.log(`[${this.config.agentName}] Deep Agent run completed`);
+      return result;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Deep Agent run failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reflect on entire plan execution
+   */
+  protected async reflectOnPlan(plan: AgentPlan, result: any): Promise<string> {
+    const prompt = ChatPromptTemplate.fromMessages([
+      ["system", `Reflect on the entire plan execution for ${this.config.agentName}.
+Summarize learnings and future improvements.`],
+      ["human", `Plan goal: {goal}
+Steps: {steps}
+Result: {result}
+Reflection history: {reflectionHistory}
+
+Provide a summary of what was learned and how to improve next time.`],
+    ]);
+
+    const chain = prompt.pipe(this.reflectorModel);
+    const response = await chain.invoke({
+      goal: plan.goal,
+      steps: JSON.stringify(plan.steps, null, 2),
+      result: JSON.stringify(result, null, 2),
+      reflectionHistory: JSON.stringify(this.reflectionHistory, null, 2),
+    });
+
+    return response.content.toString();
+  }
+
+  /**
+   * Get reflection history
+   */
+  getReflectionHistory(): ActionReflection[] {
+    return this.reflectionHistory;
+  }
+
+  /**
+   * Get current plan
+   */
+  getCurrentPlan(): AgentPlan | undefined {
+    return this.currentPlan;
+  }
+}
