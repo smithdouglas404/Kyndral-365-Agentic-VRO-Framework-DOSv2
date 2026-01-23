@@ -3,7 +3,6 @@ import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { BufferMemory } from "langchain/memory";
-import { LangChainTracer } from "@langchain/core/tracers/tracer_langchain";
 import type { IStorage } from "../../storage.js";
 import type { InsertAgentActivityLog, InsertIntervention } from "@shared/schema";
 
@@ -19,6 +18,11 @@ export interface AgentConfig {
 /**
  * AgentBase - Foundation for all LangChain-based intelligent agents
  * Replaces the simulation system with real AI-powered autonomous agents
+ * 
+ * LangSmith tracing is enabled automatically via environment variables:
+ * - LANGCHAIN_TRACING_V2=true
+ * - LANGCHAIN_API_KEY=your_key
+ * - LANGCHAIN_PROJECT=your_project
  */
 export abstract class AgentBase {
   protected config: AgentConfig;
@@ -32,37 +36,19 @@ export abstract class AgentBase {
     this.config = config;
     this.storage = storage;
 
-    // Initialize LangSmith tracer
-    const callbacks = [];
-
-    // Add LangSmith tracer if configured (case-insensitive check)
+    // LangSmith auto-tracing is enabled via environment variables
+    // No need to manually create tracer - LangChain handles it automatically
     if (process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true') {
-      const tracer = new LangChainTracer({
-        projectName: process.env.LANGCHAIN_PROJECT || "nextera-eto",
-        client: undefined, // Will use env vars
-      });
-      callbacks.push(tracer);
-      console.log(`[${config.agentName}] LangSmith tracing enabled for project: ${process.env.LANGCHAIN_PROJECT}`);
+      console.log(`[${config.agentName}] LangSmith auto-tracing enabled for project: ${process.env.LANGCHAIN_PROJECT}`);
     } else {
       console.warn(`[${config.agentName}] LangSmith tracing NOT enabled - check LANGCHAIN_API_KEY and LANGCHAIN_TRACING_V2`);
     }
 
-    // Add activity logging callback
-    callbacks.push({
-      handleLLMStart: async () => {
-        await this.logActivity('llm_call', `Starting LLM call for ${this.config.agentName}`);
-      },
-      handleLLMEnd: async () => {
-        await this.logActivity('llm_response', `Received response from LLM`);
-      },
-    });
-
-    // Initialize Anthropic model with LangSmith tracing
+    // Initialize Anthropic model - LangSmith will auto-trace all LLM calls
     this.model = new ChatAnthropic({
       modelName: config.modelName || "claude-sonnet-4-5-20250929",
       temperature: config.temperature || 0.7,
       anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks,
     });
 
     // Initialize memory
