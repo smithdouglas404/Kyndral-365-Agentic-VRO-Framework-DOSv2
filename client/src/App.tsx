@@ -46,7 +46,7 @@ import PasswordResetConfirmPage from "@/pages/PasswordResetConfirmPage";
 import IssueManagement from "@/pages/IssueManagement";
 import DeepAgentMonitoring from "@/pages/DeepAgentMonitoring";
 import ChangeRequestManagement from "@/pages/ChangeRequestManagement";
-import ResourceManagement from "@/pages/ResourceManagement";
+import ResourceManagementPage from "@/pages/ResourceManagement";
 import FinancialManagement from "@/pages/FinancialManagement";
 import DocumentManagement from "@/pages/DocumentManagement";
 import ProgramManagement from "@/pages/ProgramManagement";
@@ -54,12 +54,16 @@ import ReportingAnalytics from "@/pages/ReportingAnalytics";
 import RiskManagement from "@/pages/RiskManagement";
 import CollaborationHub from "@/pages/CollaborationHub";
 import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
+import AdvancedFinancialManagement from "@/pages/AdvancedFinancialManagement";
+import CustomReportBuilder from "@/pages/CustomReportBuilder";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import SystemConfiguration from "@/pages/admin/SystemConfiguration";
 import UserManagement from "@/pages/admin/UserManagement";
 import IntegrationManagement from "@/pages/admin/IntegrationManagement";
 import SystemSettings from "@/pages/admin/SystemSettings";
 import AgentConfiguration from "@/pages/admin/AgentConfiguration";
+import CustomFieldManagement from "@/pages/admin/CustomFieldManagement";
+import WorkflowBuilder from "@/pages/admin/WorkflowBuilder";
 
 function Router() {
   return (
@@ -90,7 +94,7 @@ function Router() {
       <Route path="/deep-agent-monitoring" component={DeepAgentMonitoring} />
       <Route path="/issues" component={IssueManagement} />
       <Route path="/change-requests" component={ChangeRequestManagement} />
-      <Route path="/resources" component={ResourceManagement} />
+      <Route path="/resources" component={ResourceManagementPage} />
       <Route path="/financial" component={FinancialManagement} />
       <Route path="/documents" component={DocumentManagement} />
       <Route path="/programs" component={ProgramManagement} />
@@ -98,6 +102,8 @@ function Router() {
       <Route path="/risks" component={RiskManagement} />
       <Route path="/collaboration" component={CollaborationHub} />
       <Route path="/analytics" component={AdvancedAnalytics} />
+      <Route path="/financial-advanced" component={AdvancedFinancialManagement} />
+      <Route path="/report-builder" component={CustomReportBuilder} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/password-reset" component={PasswordResetPage} />
@@ -108,6 +114,8 @@ function Router() {
       <Route path="/admin/settings" component={SystemSettings} />
       <Route path="/admin/agents" component={AgentConfiguration} />
       <Route path="/admin/system-config" component={SystemConfiguration} />
+      <Route path="/admin/custom-fields" component={CustomFieldManagement} />
+      <Route path="/admin/workflows" component={WorkflowBuilder} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,0 +1,92 @@
+But there's a gap: Divisions → Portfolios linkage is incomplete
+Looking at your schema:
+* divisions table has portfolioId ✓
+* portfolios table has NO divisionId ✗
+* projects table has both divisionId AND portfolioId (independent, not cascading)
+
+How External PPM Tools Handle Organizational Hierarchy
+Tool	Has Org Hierarchy?	Structure
+Jira	Partial	Site → Projects (flat), OR with Jira Align: Portfolio → Solution → ART → Team
+Azure DevOps	Yes	Organization → Projects → Teams → Area Paths
+ServiceNow	Yes	Company → Business Unit → Department → Cost Center
+Rally/Broadcom	Yes (SAFe native)	Portfolio → Value Stream → ART → Team → Project
+Planview	Yes	Organization → Portfolio → Program → Project
+Smartsheet	No	Flat sheets, folders are manual
+Monday.com	Partial	Workspace → Board → Groups
+Key insight: Most enterprise PPM tools have their own organizational hierarchy that may or may not map cleanly to your SAFe structure.
+
+The Mapping Problem
+Your System External Tool (e.g., Jira)
+═══════════════════════════ ═══════════════════════════
+Division: FPL ??? (no equivalent)
+└── Portfolio: FPL Digital Site: nextera-energy
+└── Value Stream └── Project: grid-modernization
+└── ART └── Component: frontend
+└── Project └── Epic → Story → Task
+
+What's typically missing from external tools:
+1. Division/Company - Most tools assume single-company use
+2. Value Stream - Only SAFe-specific tools (Rally, Jira Align) have this
+3. Business Unit - ServiceNow has this, most others don't
+
+Recommended Ontology Enhancement
+Add explicit organizational bridging:
+# Add to bridging.ttl
+pm:Division a owl:Class ;
+rdfs:label "Division" ;
+rdfs:comment "Major business segment of the company" .
+
+pm:belongsToDivision a owl:ObjectProperty ;
+rdfs:domain pm:Portfolio ;
+rdfs:range pm:Division .
+
+pm:Company a owl:Class ;
+rdfs:label "Company" ;
+rdfs:comment "Top-level legal entity" .
+
+pm:belongsToCompany a owl:ObjectProperty ;
+rdfs:domain pm:Division ;
+rdfs:range pm:Company .
+
+And add to database:
+-- Add missing linkage
+ALTER TABLE portfolios ADD COLUMN division_id VARCHAR REFERENCES divisions(id);
+
+-- Add company table (for multi-company support)
+CREATE TABLE companies (
+id VARCHAR PRIMARY KEY,
+name TEXT NOT NULL,
+ticker TEXT, -- NEE
+legal_entity TEXT,
+parent_company_id VARCHAR -- For subsidiaries
+);
+
+ALTER TABLE divisions ADD COLUMN company_id VARCHAR REFERENCES companies(id);
+
+
+Mapping Strategy for External Tools
+The MCP adapters need field mapping rules to bridge external org structures to yours:
+		
+		
+		
+		
+		
+		
+UI/UX Impact
+Your current UI shows this hierarchy in places like:
+* Dashboard filters (by Division, Portfolio)
+* Project cards (showing ART, Value Stream)
+* Drill-down navigation
+What needs to change:
+1. Add Company level to hierarchy breadcrumb
+2. Ensure Portfolio → Division → Company is navigable
+3. Show org mapping in MCP sync config UI
+
+Would you like me to create a task list to:
+1. Add the missing divisionId to portfolios table
+2. Add Company entity to ontology and schema
+3. Update the MCP adapters to handle org hierarchy mapping
+4. Enhance the UI hierarchy navigation?
+
+Scroll to latest
+Q

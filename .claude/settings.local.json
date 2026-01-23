@@ -31,7 +31,14 @@
       "Bash(npx drizzle-kit push)",
       "Bash(npm run check:*)",
       "Bash(npm run seed:production:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(timeout 15 npm start:*)",
+      "Bash(timeout 20 npm start:*)",
+      "Bash(fuser:*)",
+      "Bash(timeout 25 npm start:*)",
+      "Bash(sleep 3 echo \"=== Resources API \\(TIER 2\\) - RETRY ===\" curl -s http://localhost:5000/api/resources)",
+      "Bash(head -c 300 echo -e \"\\\\n\\\\n=== Analytics Predictions API \\(Option C\\) - RETRY ===\" curl -s http://localhost:5000/api/analytics/predictions)",
+      "Bash(ss:*)"
     ]
   }
 }

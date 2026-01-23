@@ -5,8 +5,10 @@ import { fileURLToPath } from 'url';
 
 const { namedNode, literal, quad } = DataFactory;
 
-// Get current directory for ES modules
-const __filename = fileURLToPath(import.meta.url);
+// Get current directory for ES modules (with CommonJS fallback)
+const __filename = typeof import.meta !== 'undefined' && import.meta.url
+  ? fileURLToPath(import.meta.url)
+  : join(process.cwd(), 'server', 'ontology', 'index.ts');
 const __dirname = dirname(__filename);
 
 /**

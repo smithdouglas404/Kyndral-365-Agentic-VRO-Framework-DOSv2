@@ -15,6 +15,14 @@ import { registerChangeRequestRoutes } from "./routes/change-requests.js";
 import { registerDeepAgentRoutes } from "./routes/deep-agents.js";
 import { registerDashboardDataRoutes } from "./routes/dashboard-data.js";
 import { registerIntegrationRoutes } from "./routes/admin/integrations.js";
+import { registerUserManagementRoutes } from "./routes/admin/users.js";
+import { registerAnalyticsRoutes } from "./routes/analytics.js";
+import { registerCustomFieldRoutes } from "./routes/admin/custom-fields.js";
+import { registerWorkflowRoutes } from "./routes/admin/workflows.js";
+import { registerResourceRoutes } from "./routes/resources.js";
+import { registerPortfolioOptimizationRoutes } from "./routes/portfolio-optimization.js";
+import { registerCollaborationRoutes } from "./routes/collaboration.js";
+import { registerWhiteLabelRoutes } from "./routes/admin/white-label.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -112,8 +120,32 @@ export async function registerRoutes(
   // Register Integration Management routes (ADMIN - External data source configuration)
   registerIntegrationRoutes(app);
 
+  // Register User Management routes (ADMIN - User account management)
+  registerUserManagementRoutes(app);
+
+  // Register Custom Field Management routes (ADMIN - Custom field definitions)
+  registerCustomFieldRoutes(app);
+
+  // Register Workflow Management routes (ADMIN - Workflow & approval definitions)
+  registerWorkflowRoutes(app);
+
+  // Register White-Label & Theming routes (TIER 3 - Customization)
+  registerWhiteLabelRoutes(app);
+
+  // Register Resource Management routes (Capacity planning & skill tracking)
+  registerResourceRoutes(app, storage);
+
   // Register Dashboard Data routes (REPLACES ALL STATIC DATA)
   registerDashboardDataRoutes(app, storage);
+
+  // Register Analytics Engine routes (PREDICTIVE, IMPACT, FINANCIAL)
+  registerAnalyticsRoutes(app, storage);
+
+  // Register Portfolio Optimization routes (TIER 3 - AI Optimization)
+  registerPortfolioOptimizationRoutes(app, storage);
+
+  // Register Real-Time Collaboration routes (TIER 3 - Presence, Comments)
+  registerCollaborationRoutes(app, storage);
 
   // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
   registerOrchestrationRoutes(app, storage);

@@ -12,6 +12,7 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Database, CheckCircle, XCircle, AlertCircle, Edit, Trash2, Play } from 'lucide-react';
+import { FieldMappingEditor } from '@/components/FieldMappingEditor';
 
 interface Integration {
   id: string;
@@ -209,9 +210,10 @@ function IntegrationWizard({ integration, onClose, onSuccess }: any) {
     apiToken: integration?.config?.apiToken || '',
     syncFrequency: integration?.config?.syncFrequency || '4h',
     projects: integration?.config?.projects || '',
+    fieldMappings: integration?.fieldMappings || '',
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5; // Added field mapping step
 
   const handleSubmit = async () => {
     try {
@@ -241,7 +243,7 @@ function IntegrationWizard({ integration, onClose, onSuccess }: any) {
 
         {/* Progress Steps */}
         <div className="flex items-center mb-8">
-          {[1, 2, 3, 4].map((s) => (
+          {[1, 2, 3, 4, 5].map((s) => (
             <div key={s} className="flex items-center flex-1">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
@@ -373,7 +375,20 @@ function IntegrationWizard({ integration, onClose, onSuccess }: any) {
 
           {step === 4 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-4">4. Review & Save</h3>
+              <h3 className="text-lg font-semibold mb-4">4. Field Mapping</h3>
+              <FieldMappingEditor
+                integrationType={formData.type}
+                existingMappings={integration?.fieldMappings}
+                onSave={(mappings) => {
+                  setFormData({ ...formData, fieldMappings: JSON.stringify(mappings) });
+                }}
+              />
+            </div>
+          )}
+
+          {step === 5 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold mb-4">5. Review & Save</h3>
               <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type:</span>
@@ -390,6 +405,12 @@ function IntegrationWizard({ integration, onClose, onSuccess }: any) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Sync Frequency:</span>
                   <span className="font-medium">{formData.syncFrequency}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Field Mappings:</span>
+                  <span className="font-medium">
+                    {formData.fieldMappings ? 'Configured ✓' : 'Not configured'}
+                  </span>
                 </div>
               </div>
             </div>

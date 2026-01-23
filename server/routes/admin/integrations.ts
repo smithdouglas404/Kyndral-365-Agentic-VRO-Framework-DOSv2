@@ -15,8 +15,8 @@ import { eq, desc } from "drizzle-orm";
 
 export function registerIntegrationRoutes(app: Express) {
 
-  // GET /api/admin/integrations - List all integrations
-  app.get("/api/admin/integrations", async (req: Request, res: Response) => {
+  // GET /api/integrations - List all integrations
+  app.get("/api/integrations", async (req: Request, res: Response) => {
     try {
       const allIntegrations = await db
         .select()
@@ -37,8 +37,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // GET /api/admin/integrations/:id - Get single integration
-  app.get("/api/admin/integrations/:id", async (req: Request, res: Response) => {
+  // GET /api/integrations/:id - Get single integration
+  app.get("/api/integrations/:id", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -69,8 +69,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // POST /api/admin/integrations - Create new integration
-  app.post("/api/admin/integrations", async (req: Request, res: Response) => {
+  // POST /api/integrations - Create new integration
+  app.post("/api/integrations", async (req: Request, res: Response) => {
     try {
       const integrationData = req.body;
 
@@ -119,8 +119,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // PUT /api/admin/integrations/:id - Update integration
-  app.put("/api/admin/integrations/:id", async (req: Request, res: Response) => {
+  // PUT /api/integrations/:id - Update integration
+  app.put("/api/integrations/:id", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -170,8 +170,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // DELETE /api/admin/integrations/:id - Delete integration
-  app.delete("/api/admin/integrations/:id", async (req: Request, res: Response) => {
+  // DELETE /api/integrations/:id - Delete integration
+  app.delete("/api/integrations/:id", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -207,8 +207,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // POST /api/admin/integrations/:id/test - Test connection
-  app.post("/api/admin/integrations/:id/test", async (req: Request, res: Response) => {
+  // POST /api/integrations/:id/test - Test connection
+  app.post("/api/integrations/:id/test", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -259,8 +259,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // POST /api/admin/integrations/:id/sync - Trigger manual sync
-  app.post("/api/admin/integrations/:id/sync", async (req: Request, res: Response) => {
+  // POST /api/integrations/:id/sync - Trigger manual sync
+  app.post("/api/integrations/:id/sync", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -312,8 +312,8 @@ export function registerIntegrationRoutes(app: Express) {
     }
   });
 
-  // GET /api/admin/integrations/sync-history - Get sync history
-  app.get("/api/admin/integrations/sync-history", async (req: Request, res: Response) => {
+  // GET /api/integrations/sync-history - Get sync history
+  app.get("/api/integrations/sync-history", async (req: Request, res: Response) => {
     try {
       // TODO: Implement proper sync history tracking
       // For now, return mock data based on integrations
