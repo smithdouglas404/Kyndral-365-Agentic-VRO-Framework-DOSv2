@@ -10,6 +10,7 @@ import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 import { setupWebSocket } from "./websocket";
 import { log } from "./log";
+import { registerHealthRoutes, trackRequestMetrics } from "./routes/health.js";
 
 // Export agent scheduler instance (initialized after server starts)
 export let agentScheduler: AgentScheduler | null = null;
@@ -34,6 +35,12 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+// PRODUCTION: Track request metrics for health monitoring
+app.use(trackRequestMetrics());
+
+// PRODUCTION: Register health check endpoints FIRST (before auth/other middleware)
+registerHealthRoutes(app, storage);
 
 export { log };
 
@@ -105,7 +112,7 @@ app.use((req, res, next) => {
       host: "0.0.0.0",
       reusePort: true,
     },
-    () => {
+    async () => {
       log(`serving on port ${port}`);
 
       // ===================================================================

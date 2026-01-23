@@ -62,11 +62,17 @@ Always use your tools to query real data before making decisions.`;
         }),
         func: async ({ projectId, status, minProbability, limit }) => {
           try {
-            let risks = await this.storage.getRisks();
+            let risks: any[] = [];
 
-            // Filter by project
+            // Get risks - either for specific project or all projects
             if (projectId) {
-              risks = risks.filter(r => r.projectId === projectId);
+              risks = await this.storage.getRisks(projectId);
+            } else {
+              const projects = await this.storage.getProjects();
+              for (const project of projects) {
+                const projectRisks = await this.storage.getRisks(project.id);
+                risks.push(...projectRisks);
+              }
             }
 
             // Filter by status
@@ -185,7 +191,16 @@ Always use your tools to query real data before making decisions.`;
         }),
         func: async ({ riskId }) => {
           try {
-            const risk = await this.storage.getRisk(riskId);
+            // Get all risks and find the specific one
+            const projects = await this.storage.getProjects();
+            let risk: any = null;
+
+            for (const project of projects) {
+              const projectRisks = await this.storage.getRisks(project.id);
+              risk = projectRisks.find(r => r.id === riskId);
+              if (risk) break;
+            }
+
             if (!risk) {
               return JSON.stringify({ error: "Risk not found" });
             }
@@ -228,10 +243,17 @@ Always use your tools to query real data before making decisions.`;
         }),
         func: async ({ projectId }) => {
           try {
-            let risks = await this.storage.getRisks();
+            let risks: any[] = [];
 
+            // Get risks - either for specific project or all projects
             if (projectId) {
-              risks = risks.filter(r => r.projectId === projectId);
+              risks = await this.storage.getRisks(projectId);
+            } else {
+              const projects = await this.storage.getProjects();
+              for (const project of projects) {
+                const projectRisks = await this.storage.getRisks(project.id);
+                risks.push(...projectRisks);
+              }
             }
 
             // Find risks that are high impact/probability but lack mitigation
@@ -322,7 +344,7 @@ Always use your tools to query real data before making decisions.`;
             const trendData = [];
 
             for (const project of projects) {
-              const risks = await this.storage.getRisksByProject(project.id);
+              const risks = await this.storage.getRisks(project.id);
 
               const openRisks = risks.filter(r => r.status === 'open').length;
               const highRisks = risks.filter(r => r.probability === 'high' || r.impact === 'high').length;

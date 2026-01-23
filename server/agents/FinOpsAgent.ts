@@ -323,7 +323,8 @@ Always query the ontology using your tools before making decisions.`;
             const results = [];
 
             for (const portfolio of targetPortfolios) {
-              const projects = await this.storage.getProjectsByPortfolio(portfolio.id);
+              const allProjects = await this.storage.getProjects();
+              const projects = allProjects.filter(p => p.portfolioId === portfolio.id);
 
               let totalBudget = 0;
               let totalSpent = 0;

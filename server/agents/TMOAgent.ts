@@ -280,7 +280,7 @@ Always use your tools to query real data before making decisions.`;
             const results = [];
 
             for (const team of teams) {
-              const sprints = await this.storage.getSprintsByTeam(team.id);
+              const sprints = await this.storage.getSprints(undefined, team.id);
 
               let totalVelocity = 0;
               let completedSprints = 0;
@@ -328,14 +328,14 @@ Always use your tools to query real data before making decisions.`;
             }
 
             // Get all tasks for the project (via features -> stories -> tasks)
-            const features = await this.storage.getFeaturesByEpic(projectId);
+            const features = await this.storage.getFeatures(projectId);
             const criticalItems = [];
 
             for (const feature of features) {
-              const stories = await this.storage.getStoriesByFeature(feature.id);
+              const stories = await this.storage.getStories(feature.id);
 
               for (const story of stories) {
-                const tasks = await this.storage.getTasksByStory(story.id);
+                const tasks = await this.storage.getTasks(story.id);
 
                 // Identify tasks that are delayed or blocked
                 for (const task of tasks) {

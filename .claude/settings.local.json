@@ -26,7 +26,9 @@
       "Bash(npm run type-check:*)",
       "Bash(npm run build:*)",
       "Bash(node -e:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx drizzle-kit generate:*)",
+      "Bash(npx drizzle-kit push)"
     ]
   }
 }

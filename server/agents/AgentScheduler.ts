@@ -71,7 +71,7 @@ export class AgentScheduler {
       console.log(`[AgentScheduler] Initialized ${this.agents.size} agents`);
 
       // Log agent configurations
-      for (const [id, agent] of this.agents.entries()) {
+      for (const [id, agent] of Array.from(this.agents.entries())) {
         const config = agent.getConfig();
         console.log(`  - ${config.agentName} (${config.autonomy} autonomy)`);
       }
@@ -314,7 +314,7 @@ export class AgentScheduler {
     }
 
     // Stop scheduled jobs
-    for (const [agentId, job] of this.scheduledJobs.entries()) {
+    for (const [agentId, job] of Array.from(this.scheduledJobs.entries())) {
       clearInterval(job);
       console.log(`[AgentScheduler] Stopped scheduled job: ${agentId}`);
     }

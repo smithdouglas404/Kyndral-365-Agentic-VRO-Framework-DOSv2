@@ -5,7 +5,10 @@ import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } 
 import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
 import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";
-import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+import { registerAuthRoutes } from "./routes/auth.js";
+import { registerFinancialRoutes } from "./routes/financials.js";
+import { registerPredictiveRoutes } from "./routes/predictive.js";
+import { registerCrossProjectImpactRoutes } from "./routes/cross-project-impact.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -98,8 +101,16 @@ export async function registerRoutes(
 ): Promise<Server> {
 
   // Setup authentication (must be before other routes)
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  registerAuthRoutes(app, storage);
+
+  // Register Financial Intelligence routes (for agents and dashboards)
+  registerFinancialRoutes(app, storage);
+
+  // Register Predictive Analytics routes (for risk prediction and forecasting)
+  registerPredictiveRoutes(app, storage);
+
+  // Register Cross-Project Impact routes (THE KILLER FEATURE - cascade impact analysis)
+  registerCrossProjectImpactRoutes(app, storage);
 
   // Register AI CoPilot routes
   registerCoPilotRoutes(app);

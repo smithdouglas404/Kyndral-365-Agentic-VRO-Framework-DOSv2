@@ -1,5 +1,8 @@
-import { 
-  type User, type UpsertUser, 
+import {
+  type User, type UpsertUser,
+  type AuthSession, type InsertAuthSession,
+  type ApiKey, type InsertApiKey,
+  type PasswordResetToken, type InsertPasswordResetToken,
   type Policy, type InsertPolicy,
   type BusinessUnit, type InsertBusinessUnit,
   type Project, type InsertProject,
@@ -69,7 +72,8 @@ import {
   type OntologyMapping, type InsertOntologyMapping,
   type OBDAQueryCache, type InsertOBDAQueryCache,
   type GraphSyncLog, type InsertGraphSyncLog,
-  users, policies, businessUnits, projects, projectTemplates, policyBusinessUnitLinks, policyProjectLinks,
+  users, authSessions, apiKeys, passwordResetTokens,
+  policies, businessUnits, projects, projectTemplates, policyBusinessUnitLinks, policyProjectLinks,
   agentMemory, agentPatterns, agentTaskQueue, interventions, agentDiscussions, discussionMessages,
   projectMetrics, agentActivityLog, alerts, features, stories, tasks, resources, milestones, dependencies, projectFinancials, risks,
   okrs, keyResults, kpis,
@@ -90,7 +94,30 @@ const { Pool } = pkg;
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+
+  // Auth sessions
+  createAuthSession(session: InsertAuthSession): Promise<AuthSession>;
+  getAuthSession(token: string): Promise<AuthSession | undefined>;
+  deleteAuthSession(token: string): Promise<void>;
+  deleteUserSessions(userId: string): Promise<void>;
+
+  // API keys
+  createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
+  getApiKey(keyHash: string): Promise<ApiKey | undefined>;
+  listApiKeys(userId: string): Promise<ApiKey[]>;
+  revokeApiKey(id: string): Promise<void>;
+  updateApiKeyLastUsed(id: string): Promise<void>;
+
+  // Password reset tokens
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(token: string): Promise<void>;
+  deleteExpiredPasswordResetTokens(): Promise<void>;
+
   getPolicies(): Promise<Policy[]>;
   getPolicy(id: string): Promise<Policy | undefined>;
   createPolicy(policy: InsertPolicy): Promise<Policy>;
@@ -370,6 +397,25 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+
+  async createUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
@@ -383,6 +429,100 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  // ============================================================================
+  // AUTH SESSIONS
+  // ============================================================================
+
+  async createAuthSession(session: InsertAuthSession): Promise<AuthSession> {
+    const [authSession] = await db.insert(authSessions).values(session).returning();
+    return authSession;
+  }
+
+  async getAuthSession(token: string): Promise<AuthSession | undefined> {
+    const result = await db.select().from(authSessions).where(eq(authSessions.token, token)).limit(1);
+    return result[0];
+  }
+
+  async deleteAuthSession(token: string): Promise<void> {
+    await db.delete(authSessions).where(eq(authSessions.token, token));
+  }
+
+  async deleteUserSessions(userId: string): Promise<void> {
+    await db.delete(authSessions).where(eq(authSessions.userId, userId));
+  }
+
+  // ============================================================================
+  // API KEYS
+  // ============================================================================
+
+  async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
+    const [key] = await db.insert(apiKeys).values(apiKey).returning();
+    return key;
+  }
+
+  async getApiKey(keyHash: string): Promise<ApiKey | undefined> {
+    const result = await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.keyHash, keyHash))
+      .limit(1);
+    return result[0];
+  }
+
+  async listApiKeys(userId: string): Promise<ApiKey[]> {
+    return db.select().from(apiKeys).where(eq(apiKeys.userId, userId));
+  }
+
+  async revokeApiKey(id: string): Promise<void> {
+    await db
+      .update(apiKeys)
+      .set({ revokedAt: new Date() })
+      .where(eq(apiKeys.id, id));
+  }
+
+  async updateApiKeyLastUsed(id: string): Promise<void> {
+    await db
+      .update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, id));
+  }
+
+  // ============================================================================
+  // PASSWORD RESET TOKENS
+  // ============================================================================
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [resetToken] = await db.insert(passwordResetTokens).values(token).returning();
+    return resetToken;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const result = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.token, token))
+      .limit(1);
+    return result[0];
+  }
+
+  async markPasswordResetTokenUsed(token: string): Promise<void> {
+    await db
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.token, token));
+  }
+
+  async deleteExpiredPasswordResetTokens(): Promise<void> {
+    const now = new Date();
+    await db
+      .delete(passwordResetTokens)
+      .where(and(
+        eq(passwordResetTokens.usedAt, null as any),
+        // @ts-ignore - Drizzle ORM types don't handle lt correctly
+        sql`${passwordResetTokens.expiresAt} < ${now}`
+      ));
   }
 
   async getPolicies(): Promise<Policy[]> {
