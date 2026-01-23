@@ -15,7 +15,11 @@
       "Bash(netstat:*)",
       "Bash(python3:*)",
       "Bash(kill:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(for agent in finops tmo risk governance planning ocm integrated)",
+      "Bash(do echo \"Testing $agent...\")",
+      "Bash(echo:*)",
+      "Bash(echo \"✗ $agent failed\" done)"
     ]
   }
 }
