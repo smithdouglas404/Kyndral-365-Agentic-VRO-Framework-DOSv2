@@ -85,6 +85,73 @@ Always use your tools to query real data before making decisions.`;
               });
             }
 
+            // AUTO-CREATE INTERVENTIONS for new high/critical risks
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const risk of risks) {
+              const isHighProbability = risk.probability === 'high';
+              const isHighImpact = risk.impact === 'high' || risk.impact === 'critical';
+              const isOpen = risk.status === 'open';
+              const lacksMitigation = !risk.mitigation || risk.mitigation.trim() === '';
+
+              // Rule 1: High/Critical risk without mitigation
+              if (isOpen && (isHighProbability || isHighImpact) && lacksMitigation && interventionsCreated < 15) {
+                const severity = isHighProbability && isHighImpact ? 'critical' : 'high';
+
+                await this.storage.createIntervention({
+                  type: 'risk_unmitigated',
+                  severity,
+                  title: `Unmitigated Risk: ${risk.name}`,
+                  description: `${severity === 'critical' ? 'CRITICAL' : 'High'} risk detected without mitigation plan. Risk: "${risk.description}". Probability: ${risk.probability}, Impact: ${risk.impact}. Project: ${risk.projectName}`,
+                  suggestedAction: severity === 'critical'
+                    ? 'URGENT: Develop mitigation plan immediately. This critical risk could severely impact project success. Assign risk owner and create contingency plan within 24 hours.'
+                    : 'Develop and document mitigation strategy. Assign risk owner and establish monitoring cadence. Create contingency plan for high-impact scenarios.',
+                  projectId: risk.projectId || '',
+                  projectName: risk.projectName || 'Unknown',
+                  agentSource: 'Risk Agent',
+                  confidence: '0.92',
+                  isAutonomous: 'false',
+                });
+
+                // Send critical alert for critical risks
+                if (severity === 'critical') {
+                  await notificationMCP.sendCriticalAlert({
+                    title: `Critical Risk Detected: ${risk.name}`,
+                    message: `Critical unmitigated risk identified: "${risk.description}". Probability: ${risk.probability}, Impact: ${risk.impact}. Project: ${risk.projectName}. Immediate mitigation plan required.`,
+                    agent: 'Risk Agent',
+                    projectName: risk.projectName || 'Unknown',
+                    projectId: risk.projectId || '',
+                    actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                  });
+                }
+
+                interventionsCreated++;
+              }
+              // Rule 2: Old open risks (>30 days without action)
+              else if (isOpen && risk.createdAt && interventionsCreated < 15) {
+                const daysOpen = Math.floor((Date.now() - new Date(risk.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+
+                if (daysOpen > 30 && (isHighProbability || isHighImpact)) {
+                  await this.storage.createIntervention({
+                    type: 'risk_stale',
+                    severity: 'high',
+                    title: `Stale Risk: ${risk.name}`,
+                    description: `Risk has been open for ${daysOpen} days without resolution. Risk: "${risk.description}". Probability: ${risk.probability}, Impact: ${risk.impact}. Project: ${risk.projectName}`,
+                    suggestedAction: 'Review risk status and update mitigation progress. If risk is no longer relevant, close it. If active, accelerate mitigation activities or escalate.',
+                    projectId: risk.projectId || '',
+                    projectName: risk.projectName || 'Unknown',
+                    agentSource: 'Risk Agent',
+                    confidence: '0.80',
+                    isAutonomous: 'false',
+                  });
+
+                  interventionsCreated++;
+                }
+              }
+            }
+
             const results = risks.slice(0, limit).map(r => ({
               id: r.id,
               projectId: r.projectId,
@@ -101,6 +168,7 @@ Always use your tools to query real data before making decisions.`;
             return JSON.stringify({
               totalRisks: risks.length,
               returned: results.length,
+              interventionsCreated,
               risks: results,
             });
           } catch (error: any) {
@@ -173,6 +241,48 @@ Always use your tools to query real data before making decisions.`;
               return isHighRisk && lacksMitigation && r.status === 'open';
             });
 
+            // AUTO-CREATE INTERVENTIONS for unmitigated high-priority risks
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const risk of unmitigatedRisks) {
+              if (interventionsCreated >= 15) break;
+
+              const daysOpen = Math.floor((Date.now() - new Date(risk.createdAt || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
+              const isCritical = risk.probability === 'high' && risk.impact === 'high';
+              const severity = isCritical ? 'critical' : 'high';
+
+              await this.storage.createIntervention({
+                type: 'risk_unmitigated',
+                severity,
+                title: `Unmitigated ${isCritical ? 'Critical' : 'High'} Risk: ${risk.name}`,
+                description: `${isCritical ? 'CRITICAL' : 'High-priority'} risk has been open for ${daysOpen} days without mitigation plan. Risk: "${risk.description}". Probability: ${risk.probability}, Impact: ${risk.impact}. Project: ${risk.projectName}`,
+                suggestedAction: severity === 'critical'
+                  ? 'URGENT: Assign risk owner immediately. Develop comprehensive mitigation strategy within 24 hours. Consider project hold if risk cannot be adequately mitigated.'
+                  : 'Assign risk owner and develop mitigation plan within 72 hours. Document mitigation actions and contingency plans.',
+                projectId: risk.projectId || '',
+                projectName: risk.projectName || 'Unknown',
+                agentSource: 'Risk Agent',
+                confidence: '0.95',
+                isAutonomous: 'false',
+              });
+
+              // Send critical alert for critical unmitigated risks
+              if (severity === 'critical') {
+                await notificationMCP.sendCriticalAlert({
+                  title: `Critical Unmitigated Risk: ${risk.name}`,
+                  message: `Critical risk without mitigation (open ${daysOpen} days): "${risk.description}". Project: ${risk.projectName}. Probability: ${risk.probability}, Impact: ${risk.impact}. Immediate action required.`,
+                  agent: 'Risk Agent',
+                  projectName: risk.projectName || 'Unknown',
+                  projectId: risk.projectId || '',
+                  actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                });
+              }
+
+              interventionsCreated++;
+            }
+
             const results = unmitigatedRisks.map(r => ({
               id: r.id,
               projectId: r.projectId,
@@ -186,6 +296,7 @@ Always use your tools to query real data before making decisions.`;
 
             return JSON.stringify({
               totalUnmitigatedRisks: results.length,
+              interventionsCreated,
               risks: results.slice(0, 20),
             });
           } catch (error: any) {

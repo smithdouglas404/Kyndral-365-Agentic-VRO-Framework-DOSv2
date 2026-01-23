@@ -82,6 +82,72 @@ Always query the ontology using your tools before making decisions.`;
               });
             }
 
+            // AUTO-CREATE INTERVENTIONS for critical budget overruns
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const project of filtered) {
+              const budget = parseFloat(project.budgetTotal || '0');
+              const spent = parseFloat(project.budgetSpent || '0');
+              const cpi = parseFloat(project.cpiValue || '1.0');
+
+              // Calculate budget variance
+              const overrunAmount = spent - budget;
+              const overrunPercent = budget > 0 ? (overrunAmount / budget) * 100 : 0;
+
+              // Rule 1: Budget overrun >20%
+              if (overrunPercent > 20 && interventionsCreated < 15) {
+                const severity = overrunPercent > 30 ? 'critical' : 'high';
+
+                await this.storage.createIntervention({
+                  type: 'budget_overrun',
+                  severity,
+                  title: `Budget Overrun: ${project.name}`,
+                  description: `Project is ${overrunPercent.toFixed(1)}% over budget. Budget: $${budget.toFixed(2)}M, Spent: $${spent.toFixed(2)}M, Overrun: $${overrunAmount.toFixed(2)}M. CPI: ${cpi}`,
+                  suggestedAction: severity === 'critical'
+                    ? 'URGENT: Immediate budget freeze required. Conduct emergency cost review with project sponsor and CFO. Consider project pivot or scope reduction.'
+                    : 'Schedule budget review meeting. Identify cost drivers and implement cost containment measures immediately.',
+                  projectId: project.id,
+                  projectName: project.name,
+                  agentSource: 'FinOps Agent',
+                  confidence: '0.95',
+                  isAutonomous: 'false',
+                });
+
+                // Send critical alert for overruns >30%
+                if (severity === 'critical') {
+                  await notificationMCP.sendCriticalAlert({
+                    title: `Critical Budget Overrun: ${project.name}`,
+                    message: `Project is ${overrunPercent.toFixed(1)}% over budget ($${overrunAmount.toFixed(2)}M overrun). Immediate action required to prevent further cost escalation.`,
+                    agent: 'FinOps Agent',
+                    projectName: project.name,
+                    projectId: project.id,
+                    actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                  });
+                }
+
+                interventionsCreated++;
+              }
+              // Rule 2: Poor CPI (<0.8) on high-value projects
+              else if (cpi < 0.8 && budget > 10 && interventionsCreated < 15) {
+                await this.storage.createIntervention({
+                  type: 'budget_efficiency',
+                  severity: 'high',
+                  title: `Poor Cost Performance: ${project.name}`,
+                  description: `High-value project ($${budget.toFixed(1)}M) has poor cost efficiency. CPI: ${cpi} (requires $${(1 / cpi).toFixed(2)} for every $1 of planned work). Current spending: $${spent.toFixed(2)}M.`,
+                  suggestedAction: 'Review cost management processes. Identify inefficiencies in resource allocation. Implement tighter budget controls.',
+                  projectId: project.id,
+                  projectName: project.name,
+                  agentSource: 'FinOps Agent',
+                  confidence: '0.88',
+                  isAutonomous: 'false',
+                });
+
+                interventionsCreated++;
+              }
+            }
+
             // Limit results
             const results = filtered.slice(0, limit).map(p => ({
               id: p.id,
@@ -97,6 +163,7 @@ Always query the ontology using your tools before making decisions.`;
               totalProjects: projects.length,
               filteredProjects: filtered.length,
               returned: results.length,
+              interventionsCreated,
               projects: results,
             });
           } catch (error: any) {
@@ -128,6 +195,40 @@ Always query the ontology using your tools before making decisions.`;
             const budgetAtCompletion = spent + forecastRemaining;
             const variance = budgetAtCompletion - budget;
             const variancePercent = (variance / budget) * 100;
+
+            // AUTO-CREATE INTERVENTION for critical forecast variance
+            if (variancePercent > 20 && variance > 0) {
+              const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+              const notificationMCP = getNotificationMCP();
+              const severity = variancePercent > 30 ? 'critical' : 'high';
+
+              await this.storage.createIntervention({
+                type: 'budget_forecast',
+                severity,
+                title: `Budget Forecast Alert: ${project.name}`,
+                description: `Project forecasted to exceed budget by ${variancePercent.toFixed(1)}% at completion. Original Budget: $${budget.toFixed(2)}M, Forecast at Completion: $${budgetAtCompletion.toFixed(2)}M, Projected Overrun: $${variance.toFixed(2)}M. Current CPI: ${cpi}`,
+                suggestedAction: severity === 'critical'
+                  ? 'URGENT: Immediate intervention required. Current trajectory will result in significant budget overrun. Recommend scope reduction, resource optimization, or contingency fund release.'
+                  : 'Implement cost containment measures now to prevent forecasted overrun. Review project scope and identify non-critical items for descoping.',
+                projectId,
+                projectName: project.name,
+                agentSource: 'FinOps Agent',
+                confidence: '0.92',
+                isAutonomous: 'false',
+              });
+
+              // Send critical alert for severe forecast overruns
+              if (severity === 'critical') {
+                await notificationMCP.sendCriticalAlert({
+                  title: `Critical Budget Forecast: ${project.name}`,
+                  message: `Project forecasted to exceed budget by ${variancePercent.toFixed(1)}% ($${variance.toFixed(2)}M overrun at completion). Based on current CPI of ${cpi}. Immediate cost containment required.`,
+                  agent: 'FinOps Agent',
+                  projectName: project.name,
+                  projectId,
+                  actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                });
+              }
+            }
 
             return JSON.stringify({
               projectId,

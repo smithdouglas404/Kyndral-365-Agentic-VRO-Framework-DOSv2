@@ -85,6 +85,77 @@ Always use your tools to query real data before making decisions.`;
               });
             }
 
+            // AUTO-CREATE INTERVENTIONS for significant schedule delays
+            const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+            const notificationMCP = getNotificationMCP();
+            let interventionsCreated = 0;
+
+            for (const project of projects) {
+              const spi = parseFloat(project.spiValue || '1.0');
+              const startDate = project.startDate ? new Date(project.startDate) : null;
+              const endDate = project.endDate ? new Date(project.endDate) : null;
+              const now = new Date();
+
+              // Calculate schedule slip in days
+              let scheduleSlipDays = 0;
+              if (startDate && endDate && spi < 1.0) {
+                const totalDuration = endDate.getTime() - startDate.getTime();
+                const expectedProgress = spi; // SPI is earned/planned
+                scheduleSlipDays = ((1 - expectedProgress) * totalDuration) / (1000 * 60 * 60 * 24);
+              }
+
+              // Rule 1: Schedule slip >30 days
+              if (scheduleSlipDays > 30 && interventionsCreated < 15) {
+                const severity = scheduleSlipDays > 60 ? 'critical' : 'high';
+
+                await this.storage.createIntervention({
+                  type: 'schedule_delay',
+                  severity,
+                  title: `Schedule Delay: ${project.name}`,
+                  description: `Project is ${scheduleSlipDays.toFixed(0)} days behind schedule. SPI: ${spi}. This delay may impact dependent projects and business value delivery.`,
+                  suggestedAction: severity === 'critical'
+                    ? 'URGENT: Immediate schedule recovery plan required. Consider adding resources, reducing scope, or adjusting dependencies. Notify all stakeholders of revised timeline.'
+                    : 'Develop schedule recovery plan. Identify critical path items and accelerate where possible. Review resource allocation.',
+                  projectId: project.id,
+                  projectName: project.name,
+                  agentSource: 'TMO Agent',
+                  confidence: '0.90',
+                  isAutonomous: 'false',
+                });
+
+                // Send critical alert for significant delays
+                if (severity === 'critical') {
+                  await notificationMCP.sendCriticalAlert({
+                    title: `Critical Schedule Delay: ${project.name}`,
+                    message: `Project is ${scheduleSlipDays.toFixed(0)} days behind schedule (SPI: ${spi}). Significant risk to delivery timeline and business objectives. Schedule recovery plan urgently needed.`,
+                    agent: 'TMO Agent',
+                    projectName: project.name,
+                    projectId: project.id,
+                    actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                  });
+                }
+
+                interventionsCreated++;
+              }
+              // Rule 2: Poor SPI (<0.8) on active projects
+              else if (spi < 0.8 && project.status === 'active' && interventionsCreated < 15) {
+                await this.storage.createIntervention({
+                  type: 'schedule_performance',
+                  severity: 'high',
+                  title: `Poor Schedule Performance: ${project.name}`,
+                  description: `Project has poor schedule performance (SPI: ${spi}). Earning only ${(spi * 100).toFixed(0)}% of planned value per time period. Velocity is significantly below plan.`,
+                  suggestedAction: 'Investigate root causes of schedule inefficiency. Review sprint velocity, team capacity, and blockers. Consider adjusting sprint commitments to realistic levels.',
+                  projectId: project.id,
+                  projectName: project.name,
+                  agentSource: 'TMO Agent',
+                  confidence: '0.85',
+                  isAutonomous: 'false',
+                });
+
+                interventionsCreated++;
+              }
+            }
+
             const results = projects.slice(0, limit).map(p => ({
               id: p.id,
               name: p.name,
@@ -99,6 +170,7 @@ Always use your tools to query real data before making decisions.`;
             return JSON.stringify({
               totalProjects: projects.length,
               returned: results.length,
+              interventionsCreated,
               projects: results,
             });
           } catch (error: any) {
@@ -136,6 +208,40 @@ Always use your tools to query real data before making decisions.`;
             const remainingTime = (remainingWork / (progress / elapsed)) / spi;
             const forecastCompletionDate = new Date(now.getTime() + remainingTime);
             const delayDays = Math.round((forecastCompletionDate.getTime() - targetEndDate.getTime()) / (1000 * 60 * 60 * 24));
+
+            // AUTO-CREATE INTERVENTION for significant forecasted delays
+            if (delayDays > 30) {
+              const { getNotificationMCP } = await import('../mcp/NotificationMCP.js');
+              const notificationMCP = getNotificationMCP();
+              const severity = delayDays > 60 ? 'critical' : 'high';
+
+              await this.storage.createIntervention({
+                type: 'schedule_forecast',
+                severity,
+                title: `Schedule Forecast Alert: ${project.name}`,
+                description: `Project forecasted to complete ${delayDays} days late. Target End Date: ${targetEndDate.toISOString().split('T')[0]}, Forecast Completion: ${forecastCompletionDate.toISOString().split('T')[0]}. Current SPI: ${spi}, Progress: ${progress}%.`,
+                suggestedAction: severity === 'critical'
+                  ? 'URGENT: Schedule trajectory indicates severe delay. Immediate action required: fast-track critical path, add resources, or reduce scope. Escalate to project sponsor for timeline negotiation.'
+                  : 'Implement schedule acceleration techniques. Review critical path and identify opportunities to crash or fast-track activities. Consider resource reallocation.',
+                projectId,
+                projectName: project.name,
+                agentSource: 'TMO Agent',
+                confidence: '0.88',
+                isAutonomous: 'false',
+              });
+
+              // Send critical alert for severe delays
+              if (severity === 'critical') {
+                await notificationMCP.sendCriticalAlert({
+                  title: `Critical Schedule Forecast: ${project.name}`,
+                  message: `Project forecasted to be ${delayDays} days late (completion: ${forecastCompletionDate.toISOString().split('T')[0]}). Based on current SPI of ${spi}. Major timeline intervention needed.`,
+                  agent: 'TMO Agent',
+                  projectName: project.name,
+                  projectId,
+                  actionUrl: `${process.env.APP_URL || 'http://localhost:5000'}/command-center`,
+                });
+              }
+            }
 
             return JSON.stringify({
               projectId,
