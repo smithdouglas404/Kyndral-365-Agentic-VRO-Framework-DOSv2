@@ -55,6 +55,21 @@ export async function authenticateFirebase(req: Request, res: Response, next: Ne
       });
     }
 
+    // Check token age - force refresh after 30 minutes
+    const MAX_TOKEN_AGE_MS = 30 * 60 * 1000; // 30 minutes
+    const tokenIssuedAt = decodedToken.iat * 1000; // Convert to milliseconds
+    const tokenAge = Date.now() - tokenIssuedAt;
+
+    if (tokenAge > MAX_TOKEN_AGE_MS) {
+      console.warn(`[Firebase] Token too old for user ${decodedToken.uid}: ${Math.round(tokenAge / 1000 / 60)} minutes`);
+      return res.status(401).json({
+        error: 'Token Expired',
+        message: 'Your session has expired. Please refresh your authentication token.',
+        code: 'TOKEN_REFRESH_REQUIRED',
+        tokenAge: Math.round(tokenAge / 1000), // seconds
+      });
+    }
+
     // Get or create user in local database
     const user = await firebaseService.getOrCreateUser(decodedToken);
 

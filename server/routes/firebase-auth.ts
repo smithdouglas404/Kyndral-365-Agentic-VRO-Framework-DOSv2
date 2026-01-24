@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { authenticateFirebase, getHomePageForRole } from '../auth/firebaseMiddleware.js';
 import { getFirebaseAuthService, type FirebaseUserRole } from '../auth/firebaseAdmin.js';
 import type { IStorage } from '../storage.js';
+import { authRateLimiter, adminRateLimiter } from '../auth/securityMiddleware.js';
+import { initializeAuditLogger, getAuditLogger } from '../lib/auditLog.js';
 
 const RegisterSchema = z.object({
   role: z.enum(['pm', 'vro', 'tmo', 'finops', 'risk', 'governance', 'ocm', 'executive', 'system_admin']),
@@ -25,11 +27,14 @@ const SetRoleSchema = z.object({
  * Register Firebase authentication routes
  */
 export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): void {
+  // Initialize audit logger
+  initializeAuditLogger(storage);
+
   /**
    * POST /api/auth/firebase/verify
    * Verify Firebase ID token and return user data
    */
-  app.post('/api/auth/firebase/verify', authenticateFirebase, async (req: Request, res: Response) => {
+  app.post('/api/auth/firebase/verify', authRateLimiter, authenticateFirebase, async (req: Request, res: Response) => {
     try {
       if (!req.user) {
         return res.status(401).json({
@@ -58,7 +63,7 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
    * POST /api/auth/firebase/register
    * Complete user registration after Firebase account creation
    */
-  app.post('/api/auth/firebase/register', authenticateFirebase, async (req: Request, res: Response) => {
+  app.post('/api/auth/firebase/register', authRateLimiter, authenticateFirebase, async (req: Request, res: Response) => {
     try {
       if (!req.user || !req.firebaseUid) {
         return res.status(401).json({
@@ -203,7 +208,7 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
    * POST /api/auth/firebase/set-role
    * Set user role (admin only)
    */
-  app.post('/api/auth/firebase/set-role', authenticateFirebase, async (req: Request, res: Response) => {
+  app.post('/api/auth/firebase/set-role', adminRateLimiter, authenticateFirebase, async (req: Request, res: Response) => {
     try {
       if (!req.user) {
         return res.status(401).json({
@@ -214,6 +219,16 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
 
       // Only system admins can set roles
       if (req.user.role !== 'system_admin') {
+        const auditLogger = getAuditLogger();
+        await auditLogger.logPermissionDenied({
+          userId: req.user.id,
+          userEmail: req.user.email,
+          action: 'SET_ROLE',
+          resource: 'user_role',
+          reason: 'User is not a system administrator',
+          ipAddress: req.ip,
+        });
+
         return res.status(403).json({
           error: 'Forbidden',
           message: 'Only system administrators can set user roles',
@@ -232,6 +247,55 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
         });
       }
 
+      // SECURITY: Prevent admin from modifying their own role
+      if (targetUser.id === req.user.id) {
+        const auditLogger = getAuditLogger();
+        await auditLogger.logSuspiciousActivity({
+          userId: req.user.id,
+          userEmail: req.user.email,
+          activity: 'SELF_ROLE_MODIFICATION_ATTEMPT',
+          reason: 'Admin attempted to modify their own role',
+          ipAddress: req.ip,
+          metadata: {
+            targetRole: validated.role,
+            currentRole: req.user.role,
+          },
+        });
+
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'You cannot modify your own role. Please contact another administrator.',
+          code: 'SELF_MODIFICATION_DENIED',
+        });
+      }
+
+      // SECURITY: Protect admin accounts from being demoted by other admins
+      // (In a real system, you'd have a super_admin role for this)
+      if (targetUser.role === 'system_admin' && validated.role !== 'system_admin') {
+        const auditLogger = getAuditLogger();
+        await auditLogger.logSuspiciousActivity({
+          userId: req.user.id,
+          userEmail: req.user.email,
+          activity: 'ADMIN_DEMOTION_ATTEMPT',
+          reason: 'Admin attempted to demote another admin',
+          ipAddress: req.ip,
+          metadata: {
+            targetUserId: targetUser.id,
+            targetEmail: targetUser.email,
+            oldRole: targetUser.role,
+            newRole: validated.role,
+          },
+        });
+
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Cannot modify another system administrator\'s role. This requires additional authorization.',
+          code: 'ADMIN_PROTECTION',
+        });
+      }
+
+      const oldRole = targetUser.role;
+
       const updatedUser = await storage.updateUser(validated.userId, {
         role: validated.role,
       });
@@ -242,7 +306,20 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
         await firebaseService.setUserRole(targetUser.firebaseUid, validated.role as FirebaseUserRole);
       }
 
-      console.log(`[FirebaseAuth] Role updated: ${targetUser.email} → ${validated.role} (by ${req.user.email})`);
+      // AUDIT: Log the role change
+      const auditLogger = getAuditLogger();
+      await auditLogger.logRoleChange({
+        adminUserId: req.user.id,
+        adminEmail: req.user.email,
+        targetUserId: targetUser.id,
+        targetEmail: targetUser.email,
+        oldRole,
+        newRole: validated.role,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      });
+
+      console.log(`[SECURITY AUDIT] Role updated: ${targetUser.email} (${oldRole} → ${validated.role}) by ${req.user.email}`);
 
       res.json({
         user: updatedUser,
@@ -270,7 +347,7 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
    * GET /api/auth/firebase/users
    * List all users (admin only)
    */
-  app.get('/api/auth/firebase/users', authenticateFirebase, async (req: Request, res: Response) => {
+  app.get('/api/auth/firebase/users', adminRateLimiter, authenticateFirebase, async (req: Request, res: Response) => {
     try {
       if (!req.user) {
         return res.status(401).json({
