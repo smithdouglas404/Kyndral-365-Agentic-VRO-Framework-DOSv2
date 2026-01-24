@@ -1,0 +1,28 @@
+🎯 Essential Services to Set Up:                                                                                                    
+                                                                                                                                      
+  1. Firebase Authentication ⚠️ REQUIRED                                                                                               
+                                                                                                                                      
+  This is the main one you need to set up. Without it, users cannot log in.                                                           
+                                                                                                                                      
+  Quick Setup:                                                                                                                        
+  - Create project at https://console.firebase.google.com/                                                                            
+  - Enable Email/Password authentication                                                                                              
+  - Add 6 frontend variables (prefixed with VITE_)                                                                                    
+  - Add 3 backend variables (project ID, client email, private key)                                                                   
+                                                                                                                                      
+  2. Encryption Key ⚠️ REQUIRED                                                                                                       
+                                                                                                                                      
+  For securing integration credentials.                                                                                               
+                                                                                                                                      
+  Quick Setup:                                                                                                                        
+  # Generate key                                                                                                                      
+  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"                                                            
+                                                                                                                                      
+  # Add to .env                                                                                                                       
+  ENCRYPTION_KEY=<your-64-char-hex-string>                                                                                            
+                                                                                                                                      
+  3. Application URL (Recommended)                                                                                                    
+                                                                                                                                      
+  For links in notifications:                                                                                                         
+  APP_URL=https://your-replit-app.replit.dev                                                                                          
+                                                                       

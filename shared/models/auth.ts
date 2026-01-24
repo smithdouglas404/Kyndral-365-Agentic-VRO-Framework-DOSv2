@@ -21,6 +21,8 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  // Firebase integration
+  firebaseUid: varchar("firebase_uid", { length: 128 }).unique(),
   // Authentication fields
   passwordHash: varchar("password_hash", { length: 255 }), // bcrypt hash
   role: varchar("role", { length: 50 }).default("team_member"), // system_admin, pmo_lead, project_manager, team_member, executive, guest

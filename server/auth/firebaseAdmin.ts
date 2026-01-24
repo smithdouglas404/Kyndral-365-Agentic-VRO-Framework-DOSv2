@@ -49,14 +49,31 @@ export function initializeFirebaseAdmin(): admin.app.App {
     }
   }
 
-  // Initialize from environment variables (Replit Secrets)
+  // Try FIREBASE_SERVICE_ACCOUNT_JSON first (Replit Secret format)
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  
+  if (serviceAccountJson) {
+    try {
+      const serviceAccount = JSON.parse(serviceAccountJson);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id,
+      });
+      console.log(`[Firebase] Admin SDK initialized from service account JSON for project: ${serviceAccount.project_id}`);
+      return admin.app();
+    } catch (error) {
+      console.error('[Firebase] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', error);
+    }
+  }
+
+  // Fallback to separate environment variables
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!projectId || !clientEmail || !privateKey) {
     throw new Error(
-      'Firebase credentials missing. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.'
+      'Firebase credentials missing. Set FIREBASE_SERVICE_ACCOUNT_JSON or (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY) environment variables.'
     );
   }
 
@@ -123,7 +140,7 @@ export class FirebaseAuthService {
     if (!user) {
       // Create new user in local database
       const [firstName = '', lastName = ''] = (name || '').split(' ', 2);
-      const role = (decodedToken.role as FirebaseUserRole) || 'pm'; // Default to PM role
+      const role = (decodedToken.role as string) || 'team_member'; // Default to team_member role
 
       user = await this.storage.createUser({
         email,
@@ -131,8 +148,7 @@ export class FirebaseAuthService {
         firstName: firstName || 'User',
         lastName: lastName || '',
         role,
-        isActive: true,
-        emailVerified: email_verified || false,
+        accountStatus: 'active',
         firebaseUid: uid, // Store Firebase UID for reference
       });
 
@@ -165,8 +181,12 @@ export class FirebaseAuthService {
    */
   async getUserByFirebaseUid(uid: string): Promise<any | null> {
     try {
-      const users = await this.storage.getUsers();
-      return users.find(u => u.firebaseUid === uid) || null;
+      // Use getUserByFirebaseUid from storage if available, otherwise search by verification
+      const firebaseUser = await admin.auth().getUser(uid);
+      if (firebaseUser.email) {
+        return await this.storage.getUserByEmail(firebaseUser.email);
+      }
+      return null;
     } catch (error) {
       console.error('[Firebase] Get user by UID error:', error);
       return null;
