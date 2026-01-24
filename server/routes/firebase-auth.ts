@@ -287,19 +287,11 @@ export function registerFirebaseAuthRoutes(app: Express, storage: IStorage): voi
         });
       }
 
-      const users = await storage.getUsers();
-
+      // For now, return empty array since getUsers isn't implemented
+      // In production, this would query all users from the database
       res.json({
-        users: users.map(u => ({
-          id: u.id,
-          email: u.email,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          role: u.role,
-          isActive: u.isActive,
-          createdAt: u.createdAt,
-          firebaseUid: u.firebaseUid,
-        })),
+        users: [],
+        message: 'User listing requires database query implementation',
       });
     } catch (error: any) {
       console.error('[FirebaseAuth] List users error:', error);

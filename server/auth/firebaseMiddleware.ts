@@ -58,7 +58,7 @@ export async function authenticateFirebase(req: Request, res: Response, next: Ne
     // Get or create user in local database
     const user = await firebaseService.getOrCreateUser(decodedToken);
 
-    if (!user || !user.isActive) {
+    if (!user || user.accountStatus !== 'active') {
       return res.status(403).json({
         error: 'Forbidden',
         message: 'User account is inactive or does not exist',
@@ -91,7 +91,7 @@ export function requireRole(...allowedRoles: string[]) {
       });
     }
 
-    const userRole = req.user.role;
+    const userRole = req.user.role || 'team_member';
 
     // System admins have access to everything
     if (userRole === 'system_admin') {
@@ -134,7 +134,7 @@ export async function authenticateOptional(req: Request, res: Response, next: Ne
 
     if (decodedToken) {
       const user = await firebaseService.getOrCreateUser(decodedToken);
-      if (user && user.isActive) {
+      if (user && user.accountStatus === 'active') {
         req.user = user;
         req.firebaseUid = decodedToken.uid;
       }

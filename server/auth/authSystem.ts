@@ -62,21 +62,28 @@ export enum PermissionResource {
 }
 
 /**
- * User object
+ * User object - matches database schema
  */
 export interface User {
   id: string;
   email: string;
-  passwordHash: string;
-  role: UserRole;
-  firstName: string;
-  lastName: string;
-  isActive: boolean;
-  isMfaEnabled: boolean;
-  mfaSecret?: string;
-  lastLoginAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  passwordHash: string | null;
+  role: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl?: string | null;
+  firebaseUid?: string | null;
+  phoneNumber?: string | null;
+  timezone?: string | null;
+  mfaEnabled?: string | null;
+  mfaSecret?: string | null;
+  mfaBackupCodes?: string | null;
+  accountStatus?: string | null;
+  lastLoginAt?: Date | null;
+  failedLoginAttempts?: string | null;
+  lockedUntil?: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
 
 /**
