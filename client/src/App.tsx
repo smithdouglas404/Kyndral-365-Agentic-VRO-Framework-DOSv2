@@ -69,6 +69,8 @@ import ActiveIntegrations from "@/pages/admin/ActiveIntegrations";
 import ThresholdSettings from "@/pages/admin/ThresholdSettings";
 import OKRManagement from "@/pages/admin/OKRManagement";
 import UserPermissions from "@/pages/admin/UserPermissions";
+import CamundaRulesEngine from "@/pages/admin/CamundaRulesEngine";
+import KnowledgeBaseManagement from "@/pages/admin/KnowledgeBaseManagement";
 import COPDashboard from "@/pages/COPDashboard";
 import ExecutiveWorkspace from "@/pages/workspaces/ExecutiveWorkspace";
 import PMWorkspace from "@/pages/workspaces/PMWorkspace";
@@ -148,6 +150,8 @@ function Router() {
       <Route path="/admin/thresholds" component={ThresholdSettings} />
       <Route path="/admin/okrs" component={OKRManagement} />
       <Route path="/admin/permissions" component={UserPermissions} />
+      <Route path="/admin/rules-engine" component={CamundaRulesEngine} />
+      <Route path="/admin/knowledge-base" component={KnowledgeBaseManagement} />
       <Route component={NotFound} />
     </Switch>
   );

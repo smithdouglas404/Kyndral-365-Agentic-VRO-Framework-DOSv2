@@ -10,6 +10,7 @@
  */
 
 import { AdminLayout } from '@/components/AdminLayout';
+import { ConfigurationStatus } from '@/components/ConfigurationStatus';
 import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import {
@@ -286,6 +287,9 @@ export default function AgentConfiguration() {
             View Agent Activity
           </Button>
         </div>
+
+        {/* Configuration Status */}
+        <ConfigurationStatus variant="inline" />
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

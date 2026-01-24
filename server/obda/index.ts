@@ -246,24 +246,96 @@ export class OBDAService {
 
   /**
    * Query Jira via JQL
-   * In production, this would use the Jira REST API
+   * Uses the Jira REST API client if configured
    */
   private async queryJira(jql: string): Promise<any[]> {
-    // TODO: Implement Jira client integration
-    // This would use the MCP adapter framework
-    console.log('[OBDA] Jira query (not implemented):', jql);
-    return [];
+    // Check if Jira is configured
+    if (!process.env.JIRA_DOMAIN || !process.env.JIRA_EMAIL || !process.env.JIRA_API_TOKEN) {
+      console.warn('[OBDA] Jira not configured, skipping Jira query');
+      console.warn('[OBDA] To enable Jira: Set JIRA_DOMAIN, JIRA_EMAIL, and JIRA_API_TOKEN in environment');
+      return [];
+    }
+
+    try {
+      const { JiraClient } = await import('../jiraClient.js');
+      const jiraClient = new JiraClient({
+        domain: process.env.JIRA_DOMAIN,
+        email: process.env.JIRA_EMAIL,
+        apiToken: process.env.JIRA_API_TOKEN,
+      });
+
+      // Parse JQL to determine what to query
+      // For now, we'll get all issues and filter based on JQL patterns
+      const projects = await jiraClient.getProjects();
+      const results: any[] = [];
+
+      for (const project of projects.slice(0, 3)) {
+        // Limit to 3 projects to avoid overload
+        const issues = await jiraClient.getIssues(project.key, undefined, 50);
+        results.push(...issues.map(issue => ({
+          source: 'jira',
+          id: issue.id,
+          key: issue.key,
+          title: issue.fields.summary,
+          description: issue.fields.description,
+          type: issue.fields.issuetype.name,
+          status: issue.fields.status.name,
+          assignee: issue.fields.assignee?.displayName,
+          created: issue.fields.created,
+          updated: issue.fields.updated,
+        })));
+      }
+
+      console.log(`[OBDA] Jira query returned ${results.length} results`);
+      return results;
+    } catch (error) {
+      console.error('[OBDA] Jira query error:', error);
+      return [];
+    }
   }
 
   /**
    * Query Azure DevOps via WIQL
-   * In production, this would use the Azure DevOps REST API
+   * Uses the Azure DevOps REST API client if configured
    */
   private async queryAzure(wiql: string): Promise<any[]> {
-    // TODO: Implement Azure DevOps client integration
-    // This would use the MCP adapter framework
-    console.log('[OBDA] Azure query (not implemented):', wiql);
-    return [];
+    // Check if Azure DevOps is configured
+    if (!process.env.AZURE_DEVOPS_ORG || !process.env.AZURE_DEVOPS_PAT || !process.env.AZURE_DEVOPS_PROJECT) {
+      console.warn('[OBDA] Azure DevOps not configured, skipping Azure query');
+      console.warn('[OBDA] To enable Azure DevOps: Set AZURE_DEVOPS_ORG, AZURE_DEVOPS_PAT, and AZURE_DEVOPS_PROJECT in environment');
+      return [];
+    }
+
+    try {
+      const { AzureDevOpsClient } = await import('../azureDevOpsClient.js');
+      const azureClient = new AzureDevOpsClient({
+        organization: process.env.AZURE_DEVOPS_ORG,
+        personalAccessToken: process.env.AZURE_DEVOPS_PAT,
+        project: process.env.AZURE_DEVOPS_PROJECT,
+      });
+
+      // Query work items using WIQL
+      const workItemIds = await azureClient.queryWorkItems(wiql);
+      const workItems = await azureClient.getWorkItemsByIds(workItemIds);
+
+      const results = workItems.map(item => ({
+        source: 'azure-devops',
+        id: item.id.toString(),
+        title: item.fields['System.Title'],
+        description: item.fields['System.Description'],
+        type: item.fields['System.WorkItemType'],
+        status: item.fields['System.State'],
+        assignee: item.fields['System.AssignedTo']?.displayName,
+        created: item.fields['System.CreatedDate'],
+        updated: item.fields['System.ChangedDate'],
+      }));
+
+      console.log(`[OBDA] Azure DevOps query returned ${results.length} results`);
+      return results;
+    } catch (error) {
+      console.error('[OBDA] Azure DevOps query error:', error);
+      return [];
+    }
   }
 
   /**

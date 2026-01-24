@@ -14,7 +14,7 @@ const UpdateUserSchema = z.object({
   email: z.string().email().optional(),
   firstName: z.string().min(1).max(100).optional(),
   lastName: z.string().min(1).max(100).optional(),
-  role: z.enum(['system_admin', 'pmo_lead', 'project_manager', 'team_member', 'executive', 'guest']).optional(),
+  role: z.enum(['system_admin', 'admin', 'pmo_lead', 'project_manager', 'team_member', 'executive', 'guest', 'pending_approval']).optional(),
   isActive: z.boolean().optional(),
 });
 

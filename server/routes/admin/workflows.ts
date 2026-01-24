@@ -7,6 +7,8 @@ import type { Express, Request, Response } from "express";
 import { db } from "../../db.js";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
+import { WorkflowExecutionEngine } from "../../engines/WorkflowExecutionEngine.js";
+import type { IStorage } from "../../storage.js";
 
 const WorkflowSchema = z.object({
   name: z.string().min(1).max(200),
@@ -27,10 +29,11 @@ const WorkflowSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export function registerWorkflowRoutes(app: Express) {
+export function registerWorkflowRoutes(app: Express, storage: IStorage) {
+  const workflowEngine = new WorkflowExecutionEngine(storage);
 
   // GET /api/admin/workflows - List all workflows
-  app.get("/api/admin/workflows", async (req: Request, res: Response) => {
+  app.get("/api/admin/workflows", authenticate, async (req: Request, res: Response) => {
     try {
       const { entityType, isActive } = req.query;
 
@@ -83,7 +86,7 @@ export function registerWorkflowRoutes(app: Express) {
   });
 
   // POST /api/admin/workflows - Create new workflow
-  app.post("/api/admin/workflows", async (req: Request, res: Response) => {
+  app.post("/api/admin/workflows", authenticate, async (req: Request, res: Response) => {
     try {
       const validated = WorkflowSchema.parse(req.body);
 
@@ -117,7 +120,7 @@ export function registerWorkflowRoutes(app: Express) {
   });
 
   // PUT /api/admin/workflows/:id - Update workflow
-  app.put("/api/admin/workflows/:id", async (req: Request, res: Response) => {
+  app.put("/api/admin/workflows/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const validated = WorkflowSchema.parse(req.body);
@@ -158,7 +161,7 @@ export function registerWorkflowRoutes(app: Express) {
   });
 
   // DELETE /api/admin/workflows/:id - Delete workflow
-  app.delete("/api/admin/workflows/:id", async (req: Request, res: Response) => {
+  app.delete("/api/admin/workflows/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -188,7 +191,7 @@ export function registerWorkflowRoutes(app: Express) {
   });
 
   // POST /api/admin/workflows/:id/toggle - Toggle active status
-  app.post("/api/admin/workflows/:id/toggle", async (req: Request, res: Response) => {
+  app.post("/api/admin/workflows/:id/toggle", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -222,7 +225,7 @@ export function registerWorkflowRoutes(app: Express) {
   });
 
   // GET /api/workflows/execute/:id - Execute workflow (for testing)
-  app.post("/api/workflows/execute/:id", async (req: Request, res: Response) => {
+  app.post("/api/workflows/execute/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { context } = req.body;
@@ -240,20 +243,43 @@ export function registerWorkflowRoutes(app: Express) {
 
       const workflow = result.rows[0];
 
-      // TODO: Implement actual workflow execution engine
-      // For now, return a simulated execution result
+      // Execute workflow using the execution engine
+      const workflowDefinition = {
+        id: workflow.id,
+        name: workflow.name,
+        description: workflow.description,
+        entityType: workflow.entity_type,
+        trigger: workflow.trigger,
+        steps: workflow.steps,
+        isActive: workflow.is_active,
+      };
+
+      const { entityType = 'project', entityId = 'test', triggeredBy = 'manual', initialVariables = {} } = req.body;
+
+      console.log(`[Workflow API] Executing workflow ${workflow.name} for ${entityType}:${entityId}`);
+
+      const execution = await workflowEngine.executeWorkflow(
+        workflowDefinition,
+        entityType,
+        entityId,
+        triggeredBy,
+        initialVariables
+      );
+
+      // Convert Maps to objects for JSON response
       const executionResult = {
-        workflowId: workflow.id,
-        workflowName: workflow.name,
-        status: 'completed',
-        steps: workflow.steps.map((step: any) => ({
-          stepId: step.id,
-          type: step.type,
-          status: 'completed',
-          completedAt: new Date().toISOString(),
-        })),
-        startedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
+        id: execution.id,
+        workflowId: execution.workflowId,
+        entityType: execution.entityType,
+        entityId: execution.entityId,
+        status: execution.status,
+        currentStep: execution.currentStep,
+        stepResults: Object.fromEntries(execution.stepResults),
+        variables: Object.fromEntries(execution.variables),
+        startedAt: execution.startedAt.toISOString(),
+        completedAt: execution.completedAt?.toISOString(),
+        error: execution.error,
+        triggeredBy: execution.triggeredBy,
       };
 
       res.json({

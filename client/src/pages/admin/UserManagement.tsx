@@ -80,15 +80,13 @@ interface User {
 
 const roles = [
   { value: 'system_admin', label: 'System Admin', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+  { value: 'admin', label: 'Admin', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
   { value: 'executive', label: 'Executive', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
-  { value: 'pm', label: 'Project Manager', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
-  { value: 'finops', label: 'FinOps', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  { value: 'tmo', label: 'TMO', color: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300' },
-  { value: 'planning', label: 'Planning', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' },
-  { value: 'governance', label: 'Governance', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' },
-  { value: 'ocm', label: 'OCM', color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300' },
-  { value: 'vro', label: 'VRO', color: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300' },
-  { value: 'risk', label: 'Risk', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' },
+  { value: 'pmo_lead', label: 'PMO Lead', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
+  { value: 'project_manager', label: 'Project Manager', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
+  { value: 'team_member', label: 'Team Member', color: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' },
+  { value: 'guest', label: 'Guest', color: 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300' },
+  { value: 'pending_approval', label: 'Pending Approval', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' },
 ];
 
 export default function UserManagement() {
@@ -103,20 +101,20 @@ export default function UserManagement() {
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
-      const res = await fetch('/api/auth/firebase/users');
+      const res = await fetch('/api/users');
       if (!res.ok) throw new Error('Failed to fetch users');
       const data = await res.json();
-      return data.users || [];
+      return Array.isArray(data) ? data : [];
     },
   });
 
   // Update user role mutation
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      const res = await fetch('/api/auth/firebase/set-role', {
-        method: 'POST',
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, role }),
+        body: JSON.stringify({ role }),
       });
       if (!res.ok) throw new Error('Failed to update role');
       return res.json();

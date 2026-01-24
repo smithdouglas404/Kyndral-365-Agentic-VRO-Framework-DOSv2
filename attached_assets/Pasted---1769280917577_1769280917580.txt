@@ -1,0 +1,133 @@
+  /**                                                                                                                              
+      * SEED REGULATORY DOCUMENTS SCRIPT                                                                                              
+      *                                                                                                                               
+      * Populates Enhanced Knowledge Base with pre-documented regulatory frameworks,                                                  
+      * standards, and best practices for all agents.                                                                                 
+      *                                                                                                                               
+      * Run with: npm run seed:documents                                                                                              
+      */                                                                                                                              
+     import { storage } from '../storage.js';                                                                                         
+     … +784 lines (ctrl+o to expand)                                                                                                  
+                                                                                                                                      
+❯ I assume there will be a rules engine in the admin section...  also did you add a lot of common rules that are best pracrice        
+  for OCM, Governance, Planning, PMO, VRO, TMO e.g. Depency Tracking, rules for alerts and notifications, thresholds, Metrics to      
+  capture VRO and PMO, OCM and GOV I listed some                                                                                      
+                                                                                                                                      
+❯ Do we have he ability for each agent to define their OKRs and KPIs then they can map rules to those                                 
+                                                                                                                                      
+● Great questions! Yes, we have:                                                                                                      
+                                                                                                                                      
+  1. Rules Engine: Camunda 8 DMN/BPMN (already integrated) with 21 best practice rules I created earlier                              
+  2. OKR/KPI Management: Routes exist (/api/admin/okr-kpi) for defining agent OKRs and KPIs                                           
+  3. Best Practice Rules: Already created comprehensive DMN decision table with rules for all agents                                  
+                                                                                                                                      
+  What we still need:                                                                                                                 
+  - Admin UI for the Camunda rules engine (to view/edit DMN tables visually)                                                          
+  - Integration between agent OKRs/KPIs and Camunda rules                                                                             
+  - UI to map rules to specific OKRs                                                                                                  
+                                                                                                                                      
+  Let me finish the seeding script by adding the NPM command, then we can tackle the rules engine UI.                                 
+                                                                                                                                      
+● Read(~/workspace/package.json)                                                                                                      
+  ⎿  Read 80 lines                                                                                                                    
+                                                                                                                                      
+● Update(~/workspace/package.json)                                                                                                    
+  ⎿  Added 2 lines, removed 1 line                                                                                                    
+      11      "check": "tsc",                                                                                                         
+      12      "db:push": "drizzle-kit push",                                                                                          
+      13      "seed": "tsx server/seedData.ts",                                                                                       
+      14 -    "seed:production": "tsx script/seed-production.ts"                                                                      
+      14 +    "seed:production": "tsx script/seed-production.ts",                                                                     
+      15 +    "seed:documents": "tsx server/scripts/seed-regulatory-documents.ts"                                                     
+      16    },                                                                                                                        
+      17    "dependencies": {                                                                                                         
+      18      "@anthropic-ai/claude-code": "^2.1.15",                                                                                 
+                                                                                                                                      
+● Perfect! I've successfully unified the document repository with the existing Knowledge Base system and added all the CRUD safety    
+  mechanisms. Here's what's been completed:                                                                                           
+                                                                                                                                      
+  ✅ Completed Tasks                                                                                                                  
+                                                                                                                                      
+  1. Enhanced Knowledge Base Repository                                                                                               
+                                                                                                                                      
+  File: server/lib/EnhancedKnowledgeBaseRepository.ts                                                                                 
+                                                                                                                                      
+  Added regulatory document fields:                                                                                                   
+  - countryCode (US, EU, UK, APAC, INTL)                                                                                              
+  - industry (financial, healthcare, technology, etc.)                                                                                
+  - standardName (PMBOK, ISO 31000, GDPR, SOX, NIST CSF, etc.)                                                                        
+  - isRegulatoryDoc (true for compliance documents)                                                                                   
+  - isPredocumented (true for system-seeded, false for user uploads)                                                                  
+  - applicablePhases (initiation, planning, execution, etc.)                                                                          
+                                                                                                                                      
+  2. Document Usage Detection                                                                                                         
+                                                                                                                                      
+  New Methods:                                                                                                                        
+  - getDocumentUsage(id) - Checks where a document is used:                                                                           
+    - Which agents have it assigned                                                                                                   
+    - Trigger rules using it                                                                                                          
+    - Other documents referencing it                                                                                                  
+    - Total usage count                                                                                                               
+  - replaceDocument(oldId, newId) - Safely replaces one document with another                                                         
+                                                                                                                                      
+  3. Safety Check API Endpoints                                                                                                       
+                                                                                                                                      
+  File: server/routes/admin/enhanced-knowledge-base.ts                                                                                
+                                                                                                                                      
+  - GET /api/admin/knowledge-base/:id/usage - Get usage info before deletion                                                          
+  - DELETE /api/admin/knowledge-base/:id?force=true - Delete with safety check                                                        
+  - POST /api/admin/knowledge-base/:oldId/replace/:newId - Replace document                                                           
+  - GET /api/admin/knowledge-base/regulatory/browse - Browse regulatory docs by country/industry/standard                             
+                                                                                                                                      
+  4. Updated UI with Safety Modal                                                                                                     
+                                                                                                                                      
+  File: client/src/pages/admin/KnowledgeBaseManagement.tsx                                                                            
+                                                                                                                                      
+  ✅ Edit functionality - Reuses upload wizard in edit mode                                                                           
+  ✅ Delete with usage checking - Queries usage before showing delete dialog                                                          
+  ✅ Red warning modal - Shows when document is in use:                                                                               
+  - Lists all agents using the document                                                                                               
+  - Shows trigger rules                                                                                                               
+  - Shows referenced by other documents                                                                                               
+  - Displays total reference count                                                                                                    
+  - Options: Cancel, Replace, or Force Delete                                                                                         
+                                                                                                                                      
+  5. Regulatory Document Seeding Script                                                                                               
+                                                                                                                                      
+  File: server/scripts/seed-regulatory-documents.ts                                                                                   
+                                                                                                                                      
+  Pre-populated documents for all agents:                                                                                             
+  - Governance: SOX Compliance, GDPR, ISO 21500                                                                                       
+  - Risk: ISO 31000, NIST CSF 2.0                                                                                                     
+  - FinOps: GAAP, EVM Guide                                                                                                           
+  - TMO: TOGAF ADM, Prosci ADKAR                                                                                                      
+  - Planning: PMBOK 7, SAFe PI Planning                                                                                               
+  - OKR: Google OKR Playbook                                                                                                          
+                                                                                                                                      
+  Run with: npm run seed:documents                                                                                                    
+                                                                                                                                      
+  ---                                                                                                                                 
+  Regarding Your Questions                                                                                                            
+                                                                                                                                      
+  Rules Engine in Admin Section                                                                                                       
+                                                                                                                                      
+  Current State:                                                                                                                      
+  - ✅ Camunda 8 DMN/BPMN integration complete (/api/admin/camunda)                                                                   
+  - ✅ 21 best practice rules already created in docs/camunda/complete-agent-collaboration-rules.dmn                                  
+  - ✅ Rules cover: dependency tracking, alerts, thresholds, metrics for all agents                                                   
+                                                                                                                                      
+  What's Missing:                                                                                                                     
+  - ⏹ Admin UI for viewing/editing DMN tables (currently requires Camunda Modeler desktop app)                                        
+  - ⏹ Web-based rule builder interface                                                                                                
+                                                                                                                                      
+  Agent OKRs/KPIs with Rule Mapping                                                                                                   
+                                                                                                                                      
+  Current State:                                                                                                                      
+  - ✅ OKR/KPI routes exist (/api/admin/okr-kpi)                                                                                      
+  - ✅ Camunda rules can reference OKR metrics in decision logic                                                                      
+                                                                                                                                      
+  What's Missing:                                                                                                                     
+  - ⏹ UI for defining agent-specific OKRs/KPIs                                                                                        
+  - ⏹ Integration layer to map Camunda rules to specific OKRs                                                                         
+  - ⏹ Dashboard showing OKR progress with rule-triggered alerts                                                                       
+                                                                                                         

@@ -322,12 +322,29 @@ export function VoiceBriefingPlayer({
               size="sm"
               className="ml-auto"
               onClick={() => {
-                // In production, this would download the audio file
+                if (!briefing?.audioUrl) {
+                  toast({
+                    title: 'Error',
+                    description: 'No audio file available to download',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+
+                // Create temporary anchor element and trigger download
+                const link = document.createElement('a');
+                link.href = briefing.audioUrl;
+                link.download = `${projectName}-briefing-${new Date().toISOString().split('T')[0]}.mp3`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
                 toast({
-                  title: 'Download',
-                  description: 'Audio download feature coming soon!',
+                  title: 'Download Started',
+                  description: 'Your voice briefing audio is being downloaded',
                 });
               }}
+              disabled={!briefing?.audioUrl}
             >
               <Download className="h-4 w-4 mr-2" />
               Download

@@ -14,7 +14,8 @@ export type MCPServerCategory =
   | 'development' // Software Development & DevOps
   | 'documentation' // Documentation & Knowledge Management
   | 'finance' // Financial & ERP Systems
-  | 'notification'; // Notification & Alerting
+  | 'notification' // Notification & Alerting
+  | 'orchestration'; // Workflow & Agent Orchestration
 
 export type MCPServerStatus = 'available' | 'coming_soon' | 'community' | 'enterprise_only';
 
@@ -889,6 +890,74 @@ export const MCP_SERVER_REGISTRY: Record<string, MCPServerDefinition> = {
     documentation: 'https://airtable.com/developers/web/api/introduction',
   },
 
+  ragie: {
+    id: 'ragie',
+    name: 'Ragie',
+    displayName: 'Ragie RAG Platform',
+    category: 'documentation',
+    status: 'available',
+    officialMCP: true,
+    description: 'Enterprise RAG platform for intelligent document retrieval and knowledge management. Replaces Weaviate/Pinecone with managed solution.',
+    capabilities: [
+      'Document Ingestion (PDF, DOCX, TXT, MD)',
+      'Intelligent Chunking & Embedding',
+      'Semantic Search & Retrieval',
+      'Multi-Source Data Connectors',
+      'Auto-Sync from Google Drive, SharePoint, Confluence, etc.',
+      'Production-Ready RAG Pipeline',
+      'Query Analytics & Monitoring',
+      'Enterprise Security & Access Control',
+    ],
+    usedBy: ['All Agents', 'Knowledge Base', 'Document Intelligence', 'Governance', 'Risk', 'Compliance'],
+    configFields: [
+      {
+        name: 'apiKey',
+        label: 'Ragie API Key',
+        type: 'password',
+        required: true,
+        description: 'Your Ragie API Key from dashboard',
+        placeholder: 'Get from: https://app.ragie.ai/settings/api-keys',
+        sensitive: true,
+      },
+      {
+        name: 'partition',
+        label: 'Partition Name (Optional)',
+        type: 'text',
+        required: false,
+        description: 'Partition to organize documents by tenant/project',
+        placeholder: 'e.g., project-123, tenant-acme',
+      },
+      {
+        name: 'mode',
+        label: 'Retrieval Mode',
+        type: 'select',
+        required: false,
+        description: 'How Ragie retrieves documents',
+        options: [
+          { label: 'Hybrid (Default)', value: 'hybrid' },
+          { label: 'Semantic Only', value: 'semantic' },
+          { label: 'Keyword Only', value: 'keyword' },
+        ],
+      },
+    ],
+    documentation: 'https://docs.ragie.ai',
+    setupInstructions: `
+1. Sign up at https://ragie.ai
+2. Go to Settings > API Keys and create a new key
+3. (Optional) Set up data connectors for auto-sync:
+   - Google Drive, SharePoint, Confluence, Notion, etc.
+   - See: https://www.ragie.ai/connectors
+4. (Optional) Create a partition for multi-tenancy
+5. Paste API key here to connect
+
+Ragie will automatically:
+- Process and chunk uploaded documents
+- Generate embeddings
+- Enable semantic search across your knowledge base
+- Sync changes from connected sources
+    `,
+  },
+
   // ============================================================================
   // COMMUNICATION & NOTIFICATIONS
   // ============================================================================
@@ -1149,6 +1218,161 @@ export const MCP_SERVER_REGISTRY: Record<string, MCPServerDefinition> = {
     ],
     documentation: 'https://rally1.rallydev.com/slm/doc/webservice/',
   },
+
+  // ============================================================================
+  // WORKFLOW & AGENT ORCHESTRATION
+  // ============================================================================
+
+  flowise: {
+    id: 'flowise',
+    name: 'Flowise',
+    displayName: 'Flowise AI Workflow Builder',
+    category: 'orchestration',
+    status: 'available',
+    officialMCP: true,
+    description: 'Visual AI workflow and agent orchestration platform. Build multi-agent systems with drag-and-drop interface powered by LangChain.',
+    capabilities: [
+      'Multi-Agent Orchestration',
+      'Visual Workflow Builder',
+      'LangChain Integration',
+      'Conditional Routing',
+      'Agent-to-Agent Handoffs',
+      'MCP Tool Integration',
+      'Workflow Versioning',
+      'Real-time Debugging',
+      'API Endpoints',
+    ],
+    usedBy: ['All Agents', 'Workflow Designers', 'Technical Teams'],
+    configFields: [
+      {
+        name: 'apiUrl',
+        label: 'Flowise API URL',
+        type: 'url',
+        required: true,
+        description: 'Flowise server URL',
+        placeholder: 'http://localhost:3000 or https://flowise.yourdomain.com',
+      },
+      {
+        name: 'apiKey',
+        label: 'API Key (Optional)',
+        type: 'password',
+        required: false,
+        description: 'Flowise API key if authentication is enabled',
+        placeholder: 'Your Flowise API key',
+        sensitive: true,
+      },
+      {
+        name: 'chatflowId',
+        label: 'Chatflow ID (Optional)',
+        type: 'text',
+        required: false,
+        description: 'Specific chatflow/agentflow ID to connect to',
+        placeholder: 'abc123-def456-ghi789',
+      },
+    ],
+    documentation: 'https://docs.flowiseai.com',
+    setupInstructions: `
+1. Install Flowise: npm install -g flowise
+2. Start Flowise: npx flowise start
+3. Access UI at http://localhost:3000
+4. Create an Agentflow for multi-agent orchestration
+5. Enable API and copy the endpoint URL
+6. (Optional) Enable authentication and generate API key
+7. Connect your custom agents as MCP tools in Flowise
+
+Flowise Features:
+- Agentflow: Multi-agent orchestration with workflow coordination
+- Chatflow: Single-agent systems and chatbots
+- Assistant: Chat assistants with RAG capabilities
+- 100+ integrations with LLMs, vector DBs, and tools
+- MCP support for connecting to external tools
+
+For agent integration:
+- Add "MCP Tool" node in Flowise
+- Point to your agent's MCP server URL
+- Configure tool parameters
+- Connect to workflow logic
+    `,
+  },
+
+  retool: {
+    id: 'retool',
+    name: 'Retool',
+    displayName: 'Retool Internal Tools',
+    category: 'orchestration',
+    status: 'available',
+    officialMCP: true,
+    description: 'Low-code platform for building internal tools, admin dashboards, and configuration UIs. Perfect for non-technical users to manage agent configurations and KPIs.',
+    capabilities: [
+      'Admin Dashboard Builder',
+      'Form Builder',
+      'Table/Grid Components',
+      'Data Visualization',
+      'Workflow Triggers',
+      'Database Integration',
+      'API Integration',
+      'Access Control',
+      'Audit Logging',
+      'MCP Agent Integration',
+    ],
+    usedBy: ['Governance Team', 'Business Users', 'Administrators'],
+    configFields: [
+      {
+        name: 'instanceUrl',
+        label: 'Retool Instance URL',
+        type: 'url',
+        required: true,
+        description: 'Your Retool instance URL',
+        placeholder: 'https://yourcompany.retool.com',
+      },
+      {
+        name: 'apiKey',
+        label: 'API Key',
+        type: 'password',
+        required: true,
+        description: 'Retool API key for programmatic access',
+        placeholder: 'retool_api_...',
+        sensitive: true,
+      },
+      {
+        name: 'appId',
+        label: 'App ID (Optional)',
+        type: 'text',
+        required: false,
+        description: 'Specific Retool app to connect to',
+        placeholder: 'app-collaboration-rules',
+      },
+    ],
+    documentation: 'https://docs.retool.com',
+    setupInstructions: `
+1. Sign up at https://retool.com (free for <5 users)
+2. Create new app for "Agent Configuration Dashboard"
+3. Add components:
+   - Table for listing all collaboration rules
+   - Form for editing thresholds and configurations
+   - Buttons for "Test" and "Publish" actions
+4. Connect to your PostgreSQL database
+5. Create REST API resources for:
+   - GET /api/collaboration-rules (list rules)
+   - PUT /api/collaboration-rules/:id (update rule)
+   - POST /api/collaboration-rules/test (test changes)
+6. Generate API key: Settings > API & Webhooks
+7. Enable MCP agent access (optional)
+
+Use Cases:
+- Configuration dashboards for agent collaboration rules
+- KPI threshold management
+- Workflow approval interfaces
+- Admin panels for governance teams
+- Real-time monitoring dashboards
+
+Retool MCP Integration:
+- Agents can connect to Retool MCP server
+- Query configuration data from agents
+- Trigger workflow changes from agent logic
+- See: https://docs.retool.com/agents/guides/tools/connect-to-mcp-server
+    `,
+  },
 };
 
 /**
@@ -1224,5 +1448,10 @@ export const MCP_CATEGORIES = {
     label: 'Communication & Notifications',
     description: 'Team communication and alerting',
     icon: 'Bell',
+  },
+  orchestration: {
+    label: 'Workflow & Agent Orchestration',
+    description: 'Multi-agent workflows and visual orchestration tools',
+    icon: 'GitBranch',
   },
 };

@@ -15,7 +15,7 @@ const RegisterSchema = z.object({
   password: z.string().min(12),
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
-  role: z.enum(['system_admin', 'pmo_lead', 'project_manager', 'team_member', 'executive', 'guest']).optional(),
+  role: z.enum(['system_admin', 'admin', 'pmo_lead', 'project_manager', 'team_member', 'executive', 'guest', 'pending_approval']).optional(),
 });
 
 const LoginSchema = z.object({

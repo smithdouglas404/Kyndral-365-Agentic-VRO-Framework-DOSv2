@@ -335,8 +335,14 @@ export class AuthSystem {
    * Logout user
    */
   async logout(token: string): Promise<void> {
-    // TODO: Implement session deletion when storage method is available
-    // await this.storage.deleteSession(token);
+    // Delete session from database
+    try {
+      await this.storage.db
+        .delete(this.storage.schema.sessions)
+        .where(this.storage.schema.eq(this.storage.schema.sessions.token, token));
+    } catch (error) {
+      console.error('[AuthSystem] Error deleting session:', error);
+    }
 
     // Audit log
     const decoded = this.verifyJWT(token);
@@ -472,25 +478,37 @@ export class AuthSystem {
       return null;
     }
 
-    // TODO: Implement API key verification when storage methods are available
-    // const apiKeys = await this.storage.getApiKeys();
-    // for (const apiKey of apiKeys) {
-    //   if (!apiKey.isActive) continue;
-    //   if (apiKey.expiresAt && apiKey.expiresAt < new Date()) continue;
+    // Query API keys from database
+    const apiKeys = await this.storage.db.query.apiKeys.findMany({
+      where: (fields, { eq }) => eq(fields.isActive, true),
+    });
 
-    //   const isValid = await bcrypt.compare(key, apiKey.keyHash);
-    //   if (isValid) {
-    //     // Update last used
-    //     await this.storage.updateApiKey(apiKey.id, {
-    //       lastUsedAt: new Date(),
-    //     });
+    for (const apiKey of apiKeys) {
+      // Skip expired keys
+      if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+        continue;
+      }
 
-    //     return {
-    //       userId: apiKey.userId,
-    //       permissions: apiKey.permissions,
-    //     };
-    //   }
-    // }
+      // Verify key hash
+      try {
+        const isValid = await bcrypt.compare(key, apiKey.keyHash);
+        if (isValid) {
+          // Update last used timestamp
+          await this.storage.db
+            .update(this.storage.schema.apiKeys)
+            .set({ lastUsedAt: new Date() })
+            .where(this.storage.schema.eq(this.storage.schema.apiKeys.id, apiKey.id));
+
+          return {
+            userId: apiKey.userId,
+            permissions: apiKey.permissions,
+          };
+        }
+      } catch (error) {
+        console.error('[AuthSystem] Error comparing API key:', error);
+        continue;
+      }
+    }
 
     return null;
   }
@@ -537,9 +555,57 @@ export class AuthSystem {
       throw new Error('Password must be at least 12 characters with uppercase, lowercase, number, and special character');
     }
 
-    // TODO: Implement password reset token verification when passwordResetTokens table is used
-    // For now, throw error
-    throw new Error('Password reset not implemented - use Firebase password reset flow');
+    // Query password reset tokens table
+    const resetTokens = await this.storage.db.query.passwordResetTokens.findMany({
+      where: (fields, { and, eq, gt, isNull }) =>
+        and(
+          eq(fields.token, token),
+          gt(fields.expiresAt, new Date()),
+          isNull(fields.usedAt)
+        ),
+    });
+
+    if (resetTokens.length === 0) {
+      throw new Error('Invalid or expired reset token');
+    }
+
+    const resetToken = resetTokens[0];
+
+    // Get user
+    const user = await this.storage.getUserById(resetToken.userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(newPassword, this.bcryptRounds);
+
+    // Update password
+    await this.storage.updateUser(user.id, {
+      passwordHash,
+      updatedAt: new Date(),
+    });
+
+    // Mark reset token as used
+    await this.storage.db
+      .update(this.storage.schema.passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(this.storage.schema.eq(this.storage.schema.passwordResetTokens.id, resetToken.id));
+
+    // Invalidate all sessions for this user
+    await this.storage.db
+      .delete(this.storage.schema.sessions)
+      .where(this.storage.schema.eq(this.storage.schema.sessions.userId, user.id));
+
+    // Audit log
+    await this.logAudit({
+      userId: user.id,
+      action: 'password_reset_completed',
+      resourceType: 'user',
+      resourceId: user.id,
+    });
+
+    console.log(`[AuthSystem] Password reset completed for user: ${user.email}`);
 
     // // Find user with valid reset token
     // const users = await this.storage.getUsers();

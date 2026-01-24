@@ -11,6 +11,7 @@
  */
 
 import type { Express } from 'express';
+import { authenticate } from '../auth/authMiddleware.js';
 import type { IStorage } from '../storage.js';
 import { CrossProjectImpactEngine } from '../engines/CrossProjectImpactEngine.js';
 
@@ -21,7 +22,7 @@ export function registerCrossProjectImpactRoutes(app: Express, storage: IStorage
    * GET /api/cross-project/dependencies
    * Map all cross-project dependencies in portfolio
    */
-  app.get('/api/cross-project/dependencies', async (req, res) => {
+  app.get('/api/cross-project/dependencies', authenticate, async (req, res) => {
     try {
       const { portfolioId } = req.query;
 
@@ -47,7 +48,7 @@ export function registerCrossProjectImpactRoutes(app: Express, storage: IStorage
    * Analyze cascade impacts of a project change
    * THIS IS THE KILLER FEATURE - PM TOOLS CAN'T DO THIS
    */
-  app.post('/api/cross-project/cascade-impact', async (req, res) => {
+  app.post('/api/cross-project/cascade-impact', authenticate, async (req, res) => {
     try {
       const { projectId, changeType, changeValue } = req.body;
 
@@ -79,7 +80,7 @@ export function registerCrossProjectImpactRoutes(app: Express, storage: IStorage
    * POST /api/cross-project/recommendations
    * Generate AI recommendations with full traceability
    */
-  app.post('/api/cross-project/recommendations', async (req, res) => {
+  app.post('/api/cross-project/recommendations', authenticate, async (req, res) => {
     try {
       const { projectId, context, createdBy } = req.body;
 
@@ -112,7 +113,7 @@ export function registerCrossProjectImpactRoutes(app: Express, storage: IStorage
    * GET /api/cross-project/resource-contention
    * Detect resource contention across projects
    */
-  app.get('/api/cross-project/resource-contention', async (req, res) => {
+  app.get('/api/cross-project/resource-contention', authenticate, async (req, res) => {
     try {
       const { portfolioId } = req.query;
 
@@ -136,7 +137,7 @@ export function registerCrossProjectImpactRoutes(app: Express, storage: IStorage
    * POST /api/cross-project/what-if-scenario
    * Run what-if scenario simulation
    */
-  app.post('/api/cross-project/what-if-scenario', async (req, res) => {
+  app.post('/api/cross-project/what-if-scenario', authenticate, async (req, res) => {
     try {
       const scenario = req.body;
 
@@ -165,7 +166,7 @@ export function registerCrossProjectImpactRoutes(app: Express, storage: IStorage
    * Get portfolio-wide dependency health dashboard
    * Used by executive dashboard
    */
-  app.get('/api/cross-project/dependency-health', async (req, res) => {
+  app.get('/api/cross-project/dependency-health', authenticate, async (req, res) => {
     try {
       const { portfolioId } = req.query;
 

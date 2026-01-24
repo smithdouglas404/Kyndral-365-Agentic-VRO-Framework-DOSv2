@@ -9,7 +9,9 @@
 
 import { IStorage } from '../storage.js';
 import { decryptFields } from '../lib/encryption.js';
-import cron from 'node-cron';
+
+// Optional dependency - node-cron is not installed by default
+let cron: any = null;
 
 interface SyncJob {
   integrationId: string;
@@ -21,7 +23,7 @@ interface SyncJob {
 
 export class MCPSyncScheduler {
   private storage: IStorage;
-  private jobs: Map<string, cron.ScheduledTask> = new Map();
+  private jobs: Map<string, any> = new Map();
   private isRunning: boolean = false;
 
   constructor(storage: IStorage) {
@@ -34,6 +36,16 @@ export class MCPSyncScheduler {
    * - Schedules sync jobs for each integration
    */
   async start(): Promise<void> {
+    // Try to load node-cron if not already loaded
+    if (!cron) {
+      try {
+        cron = await import('node-cron');
+      } catch (e) {
+        console.log('[MCPSyncScheduler] Sync scheduler disabled - node-cron not installed');
+        return;
+      }
+    }
+
     if (this.isRunning) {
       console.log('[MCPSyncScheduler] Already running');
       return;

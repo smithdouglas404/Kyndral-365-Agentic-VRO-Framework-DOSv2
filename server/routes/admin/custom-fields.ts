@@ -32,7 +32,7 @@ const CustomFieldSchema = z.object({
 export function registerCustomFieldRoutes(app: Express) {
 
   // GET /api/admin/custom-fields - List all custom fields
-  app.get("/api/admin/custom-fields", async (req: Request, res: Response) => {
+  app.get("/api/admin/custom-fields", authenticate, async (req: Request, res: Response) => {
     try {
       const { entityType, isActive } = req.query;
 
@@ -90,7 +90,7 @@ export function registerCustomFieldRoutes(app: Express) {
   });
 
   // GET /api/admin/custom-fields/:id - Get single custom field
-  app.get("/api/admin/custom-fields/:id", async (req: Request, res: Response) => {
+  app.get("/api/admin/custom-fields/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -120,7 +120,7 @@ export function registerCustomFieldRoutes(app: Express) {
   });
 
   // POST /api/admin/custom-fields - Create new custom field
-  app.post("/api/admin/custom-fields", async (req: Request, res: Response) => {
+  app.post("/api/admin/custom-fields", authenticate, async (req: Request, res: Response) => {
     try {
       const validated = CustomFieldSchema.parse(req.body);
 
@@ -160,7 +160,7 @@ export function registerCustomFieldRoutes(app: Express) {
   });
 
   // PUT /api/admin/custom-fields/:id - Update custom field
-  app.put("/api/admin/custom-fields/:id", async (req: Request, res: Response) => {
+  app.put("/api/admin/custom-fields/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const validated = CustomFieldSchema.parse(req.body);
@@ -206,7 +206,7 @@ export function registerCustomFieldRoutes(app: Express) {
   });
 
   // DELETE /api/admin/custom-fields/:id - Delete custom field
-  app.delete("/api/admin/custom-fields/:id", async (req: Request, res: Response) => {
+  app.delete("/api/admin/custom-fields/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -236,7 +236,7 @@ export function registerCustomFieldRoutes(app: Express) {
   });
 
   // POST /api/admin/custom-fields/:id/toggle - Toggle active status
-  app.post("/api/admin/custom-fields/:id/toggle", async (req: Request, res: Response) => {
+  app.post("/api/admin/custom-fields/:id/toggle", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -270,7 +270,7 @@ export function registerCustomFieldRoutes(app: Express) {
   });
 
   // GET /api/admin/custom-fields/schema/:entityType - Get field schema for entity
-  app.get("/api/admin/custom-fields/schema/:entityType", async (req: Request, res: Response) => {
+  app.get("/api/admin/custom-fields/schema/:entityType", authenticate, async (req: Request, res: Response) => {
     try {
       const { entityType } = req.params;
 

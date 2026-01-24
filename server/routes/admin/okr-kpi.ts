@@ -10,6 +10,9 @@ import { db } from '@db';
 import { okrs, keyResults, kpis, kpiHistory, type InsertOkr, type InsertKeyResult, type InsertKpi } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { authenticate } from '../../middleware/auth';
+import { seedDefaultOKRs } from '../../scripts/seed-default-okrs.js';
+import multer from 'multer';
+import { ChatOpenAI } from '@langchain/openai';
 
 interface AuthRequest extends Request {
   user?: {
@@ -178,6 +181,34 @@ async function deleteOkr(req: AuthRequest, res: Response) {
   } catch (error: any) {
     console.error('Error deleting OKR:', error);
     res.status(500).json({ error: 'Failed to delete OKR' });
+  }
+}
+
+/**
+ * POST /api/admin/okrs/seed-defaults
+ * Seed default OKRs for all agents (21 best-practice OKRs)
+ */
+async function seedDefaults(req: AuthRequest, res: Response) {
+  try {
+    if (req.user?.role !== 'system_admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    console.log('[OKR Routes] Seeding default OKRs...');
+
+    await seedDefaultOKRs();
+
+    res.json({
+      success: true,
+      message: 'Default OKRs seeded successfully',
+    });
+  } catch (error: any) {
+    console.error('Error seeding default OKRs:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to seed default OKRs',
+      message: error.message,
+    });
   }
 }
 
@@ -454,6 +485,122 @@ async function deleteKpi(req: AuthRequest, res: Response) {
 }
 
 // ============================================================================
+// AI EXTRACTION
+// ============================================================================
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['text/plain', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/markdown'];
+    if (allowedTypes.includes(file.mimetype) || file.originalname.match(/\.(txt|pdf|docx|md)$/)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, DOCX, TXT, and MD files are allowed.'));
+    }
+  },
+});
+
+/**
+ * POST /api/admin/okrs/extract-from-document
+ * Extract OKRs from uploaded strategy document using AI
+ */
+async function extractFromDocument(req: AuthRequest, res: Response) {
+  try {
+    if (req.user?.role !== 'system_admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // @ts-ignore - multer adds file to request
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Extract text content from file
+    let textContent = '';
+    if (file.mimetype === 'text/plain' || file.mimetype === 'text/markdown') {
+      textContent = file.buffer.toString('utf-8');
+    } else if (file.mimetype === 'application/pdf') {
+      // For PDF, we would need pdf-parse or similar library
+      // For now, return a helpful message
+      return res.status(400).json({
+        error: 'PDF extraction requires additional configuration',
+        message: 'Please convert your PDF to text format or use TXT/MD files for now',
+      });
+    } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      // For DOCX, we would need mammoth or similar library
+      return res.status(400).json({
+        error: 'DOCX extraction requires additional configuration',
+        message: 'Please convert your DOCX to text format or use TXT/MD files for now',
+      });
+    }
+
+    // Use AI to extract OKRs
+    const llm = new ChatOpenAI({
+      modelName: 'gpt-4',
+      temperature: 0.3,
+    });
+
+    const extractionPrompt = `You are an expert at extracting OKRs (Objectives and Key Results) from strategy documents.
+
+Analyze the following document and extract all OKRs. For each OKR, provide:
+- title: The objective statement
+- description: A brief description of the objective
+- level: One of "company", "project", or "functional"
+- functionalArea: If applicable, one of "finops", "risk", "governance", "planning", "tmo", "pmo", "okr", "ocm"
+- startDate: Start date in YYYY-MM-DD format (estimate current quarter start if not specified)
+- endDate: End date in YYYY-MM-DD format (estimate current quarter end if not specified)
+- status: "active"
+
+Return ONLY a valid JSON array of OKRs, with no additional text or explanation.
+
+Document content:
+${textContent}
+
+JSON array of OKRs:`;
+
+    const result = await llm.invoke(extractionPrompt);
+    const content = typeof result.content === 'string' ? result.content : JSON.stringify(result.content);
+
+    // Parse the AI response
+    let extractedOKRs;
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        extractedOKRs = JSON.parse(jsonMatch[0]);
+      } else {
+        extractedOKRs = JSON.parse(content);
+      }
+    } catch (parseError) {
+      console.error('[OKR Extract] Failed to parse AI response:', content);
+      return res.status(500).json({
+        error: 'Failed to parse AI extraction results',
+        message: 'The AI response was not in the expected format',
+      });
+    }
+
+    console.log(`[OKR Extract] Extracted ${extractedOKRs.length} OKRs from ${file.originalname}`);
+
+    res.json({
+      success: true,
+      okrs: extractedOKRs,
+      filename: file.originalname,
+    });
+  } catch (error: any) {
+    console.error('Error extracting OKRs from document:', error);
+    res.status(500).json({
+      error: 'Failed to extract OKRs',
+      message: error.message,
+    });
+  }
+}
+
+// ============================================================================
 // REGISTER ROUTES
 // ============================================================================
 
@@ -464,6 +611,8 @@ export function registerOkrKpiRoutes(app: Express): void {
   app.get('/api/admin/okrs/:id', authenticate, getOkrById);
   app.patch('/api/admin/okrs/:id', authenticate, updateOkr);
   app.delete('/api/admin/okrs/:id', authenticate, deleteOkr);
+  app.post('/api/admin/okrs/seed-defaults', authenticate, seedDefaults);
+  app.post('/api/admin/okrs/extract-from-document', authenticate, upload.single('file'), extractFromDocument);
 
   // Key result routes
   app.post('/api/admin/okrs/:okrId/key-results', authenticate, createKeyResult);

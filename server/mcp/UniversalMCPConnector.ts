@@ -1060,6 +1060,11 @@ export const MCP_PRESETS: Record<string, Partial<MCPConnectionConfig>> = {
     authType: 'oauth2',
     endpoints: {
       projects: '/v3/company/{realmId}/query?query=select * from Customer',
+      invoices: '/v3/company/{realmId}/query?query=select * from Invoice',
+      expenses: '/v3/company/{realmId}/query?query=select * from Purchase',
+      bills: '/v3/company/{realmId}/query?query=select * from Bill',
+      budgets: '/v3/company/{realmId}/query?query=select * from Budget',
+      payments: '/v3/company/{realmId}/query?query=select * from Payment',
     },
     fieldMappings: {
       project: {
@@ -1068,6 +1073,292 @@ export const MCP_PRESETS: Record<string, Partial<MCPConnectionConfig>> = {
         description: 'Notes',
         status: 'Active',
       },
+      invoice: {
+        id: 'Id',
+        amount: 'TotalAmt',
+        date: 'TxnDate',
+        dueDate: 'DueDate',
+        status: 'Balance',
+        customer: 'CustomerRef.name',
+      },
+      expense: {
+        id: 'Id',
+        amount: 'TotalAmt',
+        date: 'TxnDate',
+        vendor: 'EntityRef.name',
+        category: 'Line[0].AccountBasedExpenseLineDetail.AccountRef.name',
+      },
+    },
+  },
+
+  // SAP ERP (S/4HANA) - Enterprise Resource Planning
+  sap_erp: {
+    apiType: 'odata',
+    authType: 'basic',
+    endpoints: {
+      projects: '/sap/opu/odata/sap/API_PROJECT/A_Project',
+      invoices: '/sap/opu/odata/sap/API_SALES_INVOICE_SRV/A_SalesInvoice',
+      expenses: '/sap/opu/odata/sap/API_COSTCENTER_SRV/A_CostCenter',
+      budgets: '/sap/opu/odata/sap/API_BUDGET_SRV/A_Budget',
+    },
+    fieldMappings: {
+      project: {
+        id: 'ProjectInternalID',
+        name: 'ProjectDescription',
+        description: 'ProjectLongDescription',
+        status: 'ProjectLifeCycleStatus',
+        budget: 'PlannedTotalCost',
+      },
+      invoice: {
+        id: 'SalesInvoice',
+        amount: 'TotalNetAmount',
+        date: 'BillingDocumentDate',
+        customer: 'SoldToParty',
+      },
+      expense: {
+        id: 'CostCenter',
+        amount: 'ActualCost',
+        category: 'CostCenterDescription',
+      },
+    },
+    statusMappings: {
+      'PLAN': 'planning',
+      'EXEC': 'active',
+      'COMP': 'completed',
+      'CANC': 'cancelled',
+    },
+    pagination: {
+      type: 'offset',
+      limitParam: '$top',
+      offsetParam: '$skip',
+      defaultLimit: 100,
+    },
+  },
+
+  // Oracle ERP Cloud - Financials
+  oracle_erp: {
+    apiType: 'rest',
+    authType: 'basic',
+    endpoints: {
+      projects: '/fscmRestApi/resources/11.13.18.05/projects',
+      invoices: '/fscmRestApi/resources/11.13.18.05/invoices',
+      expenses: '/fscmRestApi/resources/11.13.18.05/expenses',
+      budgets: '/fscmRestApi/resources/11.13.18.05/budgets',
+    },
+    fieldMappings: {
+      project: {
+        id: 'ProjectId',
+        name: 'ProjectName',
+        description: 'Description',
+        status: 'ProjectStatusCode',
+        startDate: 'StartDate',
+        endDate: 'CompletionDate',
+        budget: 'BudgetedCost',
+      },
+      invoice: {
+        id: 'InvoiceId',
+        amount: 'InvoiceAmount',
+        date: 'InvoiceDate',
+        customer: 'CustomerName',
+      },
+      expense: {
+        id: 'ExpenseId',
+        amount: 'Amount',
+        date: 'ExpenseDate',
+        category: 'ExpenseType',
+      },
+    },
+    statusMappings: {
+      'ACTIVE': 'active',
+      'APPROVED': 'active',
+      'CLOSED': 'completed',
+      'CANCELLED': 'cancelled',
+    },
+    pagination: {
+      type: 'offset',
+      limitParam: 'limit',
+      offsetParam: 'offset',
+      defaultLimit: 100,
+    },
+  },
+
+  // NetSuite ERP - Financial Management
+  netsuite: {
+    apiType: 'rest',
+    authType: 'oauth',
+    endpoints: {
+      projects: '/services/rest/record/v1/job',
+      invoices: '/services/rest/record/v1/invoice',
+      expenses: '/services/rest/record/v1/expense',
+      budgets: '/services/rest/record/v1/budget',
+      vendors: '/services/rest/record/v1/vendor',
+    },
+    fieldMappings: {
+      project: {
+        id: 'id',
+        name: 'companyname',
+        description: 'comments',
+        status: 'entitystatus',
+        budget: 'estimatedcost',
+      },
+      invoice: {
+        id: 'id',
+        amount: 'total',
+        date: 'trandate',
+        customer: 'entity.refName',
+        status: 'status.refName',
+      },
+      expense: {
+        id: 'id',
+        amount: 'amount',
+        date: 'trandate',
+        category: 'category.refName',
+      },
+    },
+    statusMappings: {
+      'In Progress': 'active',
+      'Not Started': 'planning',
+      'Completed': 'completed',
+      'On Hold': 'on_hold',
+    },
+    pagination: {
+      type: 'offset',
+      limitParam: 'limit',
+      offsetParam: 'offset',
+      defaultLimit: 100,
+    },
+  },
+
+  // Microsoft Dynamics 365 Finance
+  dynamics_365: {
+    apiType: 'odata',
+    authType: 'oauth2',
+    endpoints: {
+      projects: '/data/Projects',
+      invoices: '/data/CustInvoiceJour',
+      expenses: '/data/PurchaseOrders',
+      budgets: '/data/BudgetTransactionHeaders',
+    },
+    fieldMappings: {
+      project: {
+        id: 'ProjectId',
+        name: 'ProjectName',
+        description: 'ProjectDescription',
+        status: 'ProjectStatus',
+        budget: 'TotalBudget',
+      },
+      invoice: {
+        id: 'InvoiceId',
+        amount: 'InvoiceAmount',
+        date: 'InvoiceDate',
+        customer: 'InvoiceAccount',
+      },
+      expense: {
+        id: 'PurchaseOrderNumber',
+        amount: 'TotalAmount',
+        date: 'OrderDate',
+        vendor: 'OrderVendorAccountNumber',
+      },
+    },
+    statusMappings: {
+      'InProcess': 'active',
+      'Created': 'planning',
+      'Finished': 'completed',
+      'Eliminated': 'cancelled',
+    },
+    pagination: {
+      type: 'offset',
+      limitParam: '$top',
+      offsetParam: '$skip',
+      defaultLimit: 100,
+    },
+  },
+
+  // Workday Financials
+  workday: {
+    apiType: 'rest',
+    authType: 'basic',
+    endpoints: {
+      projects: '/ccx/api/v1/company/projects',
+      invoices: '/ccx/api/v1/company/customerInvoices',
+      expenses: '/ccx/api/v1/company/expenseReports',
+      budgets: '/ccx/api/v1/company/budgets',
+    },
+    fieldMappings: {
+      project: {
+        id: 'id',
+        name: 'projectName',
+        description: 'projectDescription',
+        status: 'projectStatus',
+        budget: 'totalBudget',
+      },
+      invoice: {
+        id: 'invoiceNumber',
+        amount: 'totalAmount',
+        date: 'invoiceDate',
+        customer: 'customer.descriptor',
+      },
+      expense: {
+        id: 'expenseReportID',
+        amount: 'totalAmount',
+        date: 'reportDate',
+        category: 'expenseType.descriptor',
+      },
+    },
+    statusMappings: {
+      'Active': 'active',
+      'Planned': 'planning',
+      'Closed': 'completed',
+      'Cancelled': 'cancelled',
+    },
+    pagination: {
+      type: 'offset',
+      limitParam: 'limit',
+      offsetParam: 'offset',
+      defaultLimit: 100,
+    },
+  },
+
+  // Sage Intacct
+  sage_intacct: {
+    apiType: 'rest',
+    authType: 'api_key',
+    endpoints: {
+      projects: '/ia/api/v1/projects',
+      invoices: '/ia/api/v1/invoices',
+      expenses: '/ia/api/v1/expenses',
+      budgets: '/ia/api/v1/budgets',
+    },
+    fieldMappings: {
+      project: {
+        id: 'PROJECTID',
+        name: 'NAME',
+        description: 'DESCRIPTION',
+        status: 'STATUS',
+        budget: 'BUDGETAMOUNT',
+      },
+      invoice: {
+        id: 'RECORDNO',
+        amount: 'TOTALAMOUNT',
+        date: 'WHENCREATED',
+        customer: 'CUSTOMERNAME',
+      },
+      expense: {
+        id: 'RECORDNO',
+        amount: 'TOTALAMOUNT',
+        date: 'WHENCREATED',
+        category: 'EXPENSETYPE',
+      },
+    },
+    statusMappings: {
+      'active': 'active',
+      'inactive': 'completed',
+    },
+    pagination: {
+      type: 'offset',
+      limitParam: 'pagesize',
+      offsetParam: 'offset',
+      defaultLimit: 100,
     },
   },
 

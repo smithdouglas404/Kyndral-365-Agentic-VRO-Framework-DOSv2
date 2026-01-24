@@ -220,8 +220,8 @@ export class GraphService {
 
     const analysis = result.records[0].get('analysis');
 
-    // TODO: Implement critical path using PageRank or similar
-    const criticalPath: string[] = [];
+    // Calculate critical path using PageRank
+    const criticalPath = await this.calculateCriticalPath(projectId);
 
     return {
       directDependencies: analysis.direct || [],

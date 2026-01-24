@@ -5,6 +5,7 @@
  */
 
 import type { Express, Request, Response } from 'express';
+import { authenticate } from '../auth/authMiddleware.js';
 import type { IStorage } from '../storage.js';
 import { AgentOrchestrationBootstrap } from '../agents/AgentOrchestrationBootstrap.js';
 
@@ -21,7 +22,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/status
    * Get orchestration engine status (enhanced with health and metrics)
    */
-  app.get('/api/orchestration/status', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/status', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -40,7 +41,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/health
    * Get system health status
    */
-  app.get('/api/orchestration/health', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/health', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -59,7 +60,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/health/:agentId
    * Get specific agent health
    */
-  app.get('/api/orchestration/health/:agentId', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/health/:agentId', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -84,7 +85,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/metrics
    * Get performance metrics
    */
-  app.get('/api/orchestration/metrics', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/metrics', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -103,7 +104,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * POST /api/orchestration/circuit-breaker/:agentId/reset
    * Reset circuit breaker for an agent
    */
-  app.post('/api/orchestration/circuit-breaker/:agentId/reset', async (req: Request, res: Response) => {
+  app.post('/api/orchestration/circuit-breaker/:agentId/reset', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -128,7 +129,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * POST /api/orchestration/scan
    * Trigger coordinated multi-agent scan
    */
-  app.post('/api/orchestration/scan', async (req: Request, res: Response) => {
+  app.post('/api/orchestration/scan', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -152,7 +153,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/insights
    * Get unified intelligence insights for all projects
    */
-  app.get('/api/orchestration/insights', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/insights', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -175,7 +176,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/insights/:projectId
    * Get unified insights for a specific project
    */
-  app.get('/api/orchestration/insights/:projectId', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/insights/:projectId', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -196,7 +197,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * POST /api/orchestration/message
    * Send message between agents
    */
-  app.post('/api/orchestration/message', async (req: Request, res: Response) => {
+  app.post('/api/orchestration/message', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -227,7 +228,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * POST /api/orchestration/broadcast
    * Broadcast message to multiple agents
    */
-  app.post('/api/orchestration/broadcast', async (req: Request, res: Response) => {
+  app.post('/api/orchestration/broadcast', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -264,7 +265,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/workflows
    * Get all workflow rules
    */
-  app.get('/api/orchestration/workflows', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/workflows', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -287,7 +288,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * POST /api/orchestration/trigger-workflow
    * Manually trigger a workflow
    */
-  app.post('/api/orchestration/trigger-workflow', async (req: Request, res: Response) => {
+  app.post('/api/orchestration/trigger-workflow', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });
@@ -320,7 +321,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
    * GET /api/orchestration/agents
    * Get all registered agents
    */
-  app.get('/api/orchestration/agents', async (req: Request, res: Response) => {
+  app.get('/api/orchestration/agents', authenticate, async (req: Request, res: Response) => {
     try {
       if (!bootstrapInstance) {
         return res.status(503).json({ error: 'Orchestration not initialized' });

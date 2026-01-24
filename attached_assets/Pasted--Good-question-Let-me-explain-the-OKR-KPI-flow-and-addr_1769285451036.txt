@@ -1,0 +1,179 @@
+ Good question! Let me explain the OKR/KPI flow and address your financial data source question first with a visual summary:         
+                                                                                                                                      
+  Summary: FinOps Data Architecture                                                                                                   
+                                                                                                                                      
+  ┌─────────────────────────────────────────────────────────┐                                                                         
+  │                     FinOps Agent                         │                                                                        
+  ├─────────────────────────────────────────────────────────┤                                                                         
+  │                                                          │                                                                        
+  │  Data Source 1: PROJECT MANAGEMENT SYSTEM                │                                                                        
+  │  ├─ Jira, Azure DevOps, ServiceNow, etc.                │                                                                         
+  │  ├─ Real-time data                                       │                                                                        
+  │  └─ Tasks, milestones, status, progress                 │                                                                         
+  │                                                          │                                                                        
+  │  Data Source 2: FINANCIAL/ERP SYSTEM                     │                                                                        
+  │  ├─ QuickBooks, SAP, Oracle, NetSuite, etc.             │                                                                         
+  │  ├─ Reconciled data (daily/weekly/monthly)              │                                                                         
+  │  └─ Invoices, expenses, budgets, actuals                │                                                                         
+  │                                                          │                                                                        
+  │  Configuration Status:                                   │                                                                        
+  │  ● Red circle = Not configured (no financial system)    │                                                                         
+  │  ● Green = Fully configured                             │                                                                         
+  └─────────────────────────────────────────────────────────┘                                                                         
+                                                                                                                                      
+  Wizard Flow:                                                                                                                        
+  - Step 3: Connect PM system (required)                                                                                              
+  - Step 3: Financial system → "Configure Later" button                                                                               
+  - Result: FinOps shows 🔴 red indicator until financial system selected                                                             
+                                                                                                                                      
+  ---                                                                                                                                 
+  OKR/KPI Initial Setup & Mapping Flow                                                                                                
+                                                                                                                                      
+  Now for your OKR/KPI question - here's the complete flow:                                                                           
+                                                                                                                                      
+  1. Initial OKR/KPI Creation (Three Options)                                                                                         
+                                                                                                                                      
+  Option A: Pre-seeded Defaults (During Wizard)                                                                                       
+  Setup Wizard Step 2 (Agent Selection)                                                                                               
+    └─ For each enabled agent → Load default OKRs/KPIs                                                                                
+                                                                                                                                      
+  Example for FinOps Agent:                                                                                                           
+    OKR 1: "Maintain project profitability above 15%"                                                                                 
+      └─ KPI: Cost Performance Index (CPI)                                                                                            
+         └─ Metric: Budget / Actual Cost                                                                                              
+         └─ Target: CPI ≥ 1.0                                                                                                         
+         └─ Warning: CPI < 0.9                                                                                                        
+         └─ Critical: CPI < 0.85                                                                                                      
+                                                                                                                                      
+    OKR 2: "Deliver projects within budget variance of 10%"                                                                           
+      └─ KPI: Budget Variance %                                                                                                       
+         └─ Metric: (Actual - Budget) / Budget * 100                                                                                  
+         └─ Target: ≤ 10%                                                                                                             
+         └─ Warning: > 10%                                                                                                            
+         └─ Critical: > 20%                                                                                                           
+                                                                                                                                      
+  Option B: Manual Entry (After Wizard)                                                                                               
+  Admin Dashboard → OKR Management                                                                                                    
+    └─ Click "Add OKR"                                                                                                                
+    └─ Select agent (FinOps, Risk, Governance, etc.)                                                                                  
+    └─ Enter objective, key results, KPI metrics                                                                                      
+    └─ Set thresholds (target, warning, critical)                                                                                     
+    └─ Save                                                                                                                           
+                                                                                                                                      
+  Option C: Import from Strategy Document                                                                                             
+  Admin Dashboard → OKR Management → Import                                                                                           
+    └─ Upload strategic plan (CSV, Excel, PDF)                                                                                        
+    └─ AI extracts objectives and key results                                                                                         
+    └─ Maps to agents automatically                                                                                                   
+    └─ Admin reviews and confirms                                                                                                     
+                                                                                                                                      
+  2. OKR-to-Agent Mapping                                                                                                             
+                                                                                                                                      
+  ┌──────────────────────────────────────────────────────┐                                                                            
+  │              OKR Management Page                      │                                                                           
+  ├──────────────────────────────────────────────────────┤                                                                            
+  │                                                       │                                                                           
+  │  OKR: "Maintain project profitability above 15%"     │                                                                            
+  │  ├─ Owner: FinOps Agent                              │                                                                            
+  │  ├─ Supporting Agents: Risk, PMO, Governance         │                                                                            
+  │  │                                                    │                                                                           
+  │  └─ Key Results:                                     │                                                                            
+  │      ├─ KR1: CPI ≥ 1.0 for all projects              │                                                                            
+  │      │   └─ Metric: cost_performance_index           │                                                                            
+  │      │   └─ Threshold: < 0.85 (Critical)             │                                                                            
+  │      │   └─ Rule: budget-overrun-critical            │                                                                            
+  │      │                                                │                                                                           
+  │      ├─ KR2: Monthly burn rate within 10%            │                                                                            
+  │      │   └─ Metric: burn_rate_variance               │                                                                            
+  │      │   └─ Threshold: > 0.10 (Warning)              │                                                                            
+  │      │   └─ Rule: burn-rate-warning                  │                                                                            
+  │      │                                                │                                                                           
+  │      └─ KR3: Invoice accuracy > 98%                  │                                                                            
+  │          └─ Metric: invoice_accuracy                 │                                                                            
+  │          └─ Threshold: < 0.98 (Warning)              │                                                                            
+  └──────────────────────────────────────────────────────┘                                                                            
+                                                                                                                                      
+  3. Threshold-to-Rule Mapping (Camunda Integration)                                                                                  
+                                                                                                                                      
+  ┌─────────────────────────────────────────────────────────┐                                                                         
+  │            Rule-to-OKR Mapper Component                  │                                                                        
+  ├─────────────────────────────────────────────────────────┤                                                                         
+  │                                                          │                                                                        
+  │  OKR: "Maintain profitability"                          │                                                                         
+  │    └─ KR: CPI ≥ 1.0                                     │                                                                         
+  │       └─ Threshold: CPI < 0.85 (Critical)               │                                                                         
+  │          └─ Camunda Rule: "budget-overrun-critical"     │                                                                         
+  │             └─ Actions:                                  │                                                                        
+  │                ├─ Notify: FinOps, Risk, PMO             │                                                                         
+  │                ├─ Email: CFO, Project Leads             │                                                                         
+  │                ├─ Escalate: Executive Dashboard         │                                                                         
+  │                └─ Attach Doc: "Budget Recovery Plan"    │                                                                         
+  │                                                          │                                                                        
+  │  Flow: OKR → KPI → Threshold → Rule → Actions           │                                                                         
+  └─────────────────────────────────────────────────────────┘                                                                         
+                                                                                                                                      
+  4. Complete Data Flow Example                                                                                                       
+                                                                                                                                      
+  1. SETUP (Wizard):                                                                                                                  
+     ├─ Enable FinOps Agent                                                                                                           
+     ├─ Load default OKRs: "Maintain profitability", "Budget control"                                                                 
+     └─ Load default KPIs: CPI, SPI, Burn Rate                                                                                        
+                                                                                                                                      
+  2. DATA COLLECTION (Runtime):                                                                                                       
+     ├─ Project Data (from Jira): Tasks, progress, team hours                                                                         
+     ├─ Financial Data (from QuickBooks): Invoices, expenses, budgets                                                                 
+     └─ FinOps calculates: CPI = Budget / Actual                                                                                      
+                                                                                                                                      
+  3. THRESHOLD MONITORING (Every 5 minutes):                                                                                          
+     ├─ Check CPI: Current = 0.82                                                                                                     
+     ├─ Compare to threshold: 0.82 < 0.85 (Critical!)                                                                                 
+     └─ Trigger Camunda rule: "budget-overrun-critical"                                                                               
+                                                                                                                                      
+  4. CAMUNDA RULE EXECUTION:                                                                                                          
+     ├─ Evaluate DMN table: "agent-collaboration.dmn"                                                                                 
+     ├─ Decision: shouldCollaborate = true                                                                                            
+     ├─ Target Agents: Risk, PMO, Governance                                                                                          
+     └─ Actions: notify, email, escalate, attach_document                                                                             
+                                                                                                                                      
+  5. COLLABORATION:                                                                                                                   
+     ├─ FinOps: Calculates recovery options                                                                                           
+     ├─ Risk: Assesses financial risk impact                                                                                          
+     ├─ Governance: Checks policy compliance                                                                                          
+     └─ PMO: Prioritizes corrective actions                                                                                           
+                                                                                                                                      
+  6. NOTIFICATION:                                                                                                                    
+     ├─ In-app alerts: All agents, executives                                                                                         
+     ├─ Email: CFO, Project Leads                                                                                                     
+     ├─ Dashboard: Red indicator on Executive Workspace                                                                               
+     └─ Attached: "Budget Recovery Plan" from Knowledge Base                                                                          
+                                                                                                                                      
+  5. Pre-Seeded OKRs for Each Agent                                                                                                   
+                                                                                                                                      
+  Would you like me to create a seeding script that loads default OKRs/KPIs for all agents during the wizard? Here's what I'd include:
+                                                                                                                                      
+  FinOps Agent:                                                                                                                       
+  - Maintain project profitability > 15%                                                                                              
+  - Budget variance < 10%                                                                                                             
+  - Invoice accuracy > 98%                                                                                                            
+                                                                                                                                      
+  Risk Agent:                                                                                                                         
+  - Keep risk score < 7/10                                                                                                            
+  - Resolve critical risks within 48hrs                                                                                               
+  - Risk mitigation success > 90%                                                                                                     
+                                                                                                                                      
+  Governance Agent:                                                                                                                   
+  - Policy compliance > 95%                                                                                                           
+  - Zero critical violations                                                                                                          
+  - Audit findings resolved < 30 days                                                                                                 
+                                                                                                                                      
+  Planning Agent:                                                                                                                     
+  - Sprint completion > 85%                                                                                                           
+  - Resource utilization 80-90%                                                                                                       
+  - Dependency blocking < 5%                                                                                                          
+                                                                                                                                      
+  TMO Agent:                                                                                                                          
+  - Tech debt ratio < 20%                                                                                                             
+  - Architecture compliance > 90%                                                                                                     
+  - System availability > 99.5%                                                                                                       
+                                                                                                                                      
+  Should I implement the OKR seeding system now?       

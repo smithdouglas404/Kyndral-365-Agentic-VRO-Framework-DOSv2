@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="complete-agent-rules" name="Complete Agent Collaboration Rules - Best Practices" namespace="http://camunda.org/schema/1.0/dmn">
+
+  <!-- COMPREHENSIVE DECISION TABLE WITH ALL AGENT RULES -->
+  <decision id="agent-collaboration-decision-complete" name="Agent Collaboration Decision (Complete)">
+    <decisionTable id="DecisionTable_Complete" hitPolicy="COLLECT">
+
+      <!-- INPUTS -->
+      <input id="Input_SourceAgent" label="Source Agent">
+        <inputExpression typeRef="string">
+          <text>sourceAgent</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_CPI" label="CPI (Cost Performance Index)">
+        <inputExpression typeRef="number">
+          <text>cpi</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_SPI" label="SPI (Schedule Performance Index)">
+        <inputExpression typeRef="number">
+          <text>spi</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_RiskScore" label="Risk Score (0-10)">
+        <inputExpression typeRef="number">
+          <text>riskScore</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_ComplianceViolations" label="Compliance Violations">
+        <inputExpression typeRef="number">
+          <text>complianceViolations</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_ValueRealization" label="Value Realization %">
+        <inputExpression typeRef="number">
+          <text>valueRealization</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_StakeholderImpact" label="Stakeholder Impact">
+        <inputExpression typeRef="string">
+          <text>stakeholderImpact</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_ProjectPhase" label="Project Phase">
+        <inputExpression typeRef="string">
+          <text>projectPhase</text>
+        </inputExpression>
+      </input>
+
+      <input id="Input_Severity" label="Severity">
+        <inputExpression typeRef="string">
+          <text>severity</text>
+        </inputExpression>
+      </input>
+
+      <!-- OUTPUTS -->
+      <output id="Output_ShouldCollaborate" label="Collaborate?" name="shouldCollaborate" typeRef="boolean" />
+      <output id="Output_TargetAgents" label="Target Agents" name="targetAgents" typeRef="string" />
+      <output id="Output_Priority" label="Priority" name="priority" typeRef="string" />
+      <output id="Output_Actions" label="Actions" name="actions" typeRef="string" />
+      <output id="Output_Framework" label="Framework/Standard" name="framework" typeRef="string" />
+      <output id="Output_Documents" label="Required Documents" name="requiredDocuments" typeRef="string" />
+
+      <!-- ================================================================ -->
+      <!-- GOVERNANCE AGENT RULES (PMI, PRINCE2, PMBOK, SAFe)             -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 1: Governance - Critical Compliance Violation (PMBOK, ISO, SOX) -->
+      <rule id="Rule_Gov_1">
+        <inputEntry><text>"governance"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&gt;= 3</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"risk,finops,tmo"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:exec,email:legal,notify:risk,notify:finops,attach_document:compliance_checklist"</text></outputEntry>
+        <outputEntry><text>"PMBOK Section 4.1, ISO 21500, SOX Compliance"</text></outputEntry>
+        <outputEntry><text>"docs://governance/SOX_Compliance_Checklist.pdf,docs://governance/ISO21500_Standard.pdf,docs://governance/PMBOK_4_1_Charter.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 2: Governance - Project Charter Missing (PMI Standard) -->
+      <rule id="Rule_Gov_2">
+        <inputEntry><text>"governance"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"initiation","planning"</text></inputEntry>
+        <inputEntry><text>"medium"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"planning,pmo"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:planning,notify:pmo,attach_document:charter_template"</text></outputEntry>
+        <outputEntry><text>"PMI Standard 4.1 - Project Charter"</text></outputEntry>
+        <outputEntry><text>"docs://governance/PMI_Project_Charter_Template.docx,docs://governance/PMBOK_Charter_Guide.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 3: Governance - SAFe Framework Violation -->
+      <rule id="Rule_Gov_3">
+        <inputEntry><text>"governance"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 0.85</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"tmo,planning"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:tmo,notify:planning,attach_document:safe_pi_planning"</text></outputEntry>
+        <outputEntry><text>"SAFe 6.0 - PI Planning"</text></outputEntry>
+        <outputEntry><text>"docs://governance/SAFe_6_PI_Planning_Guide.pdf,docs://governance/SAFe_ART_Sync.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- RISK AGENT RULES (NIST, ISO 31000, COSO, RiskIt Framework)      -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 4: Risk - Critical Risk Score (ISO 31000) -->
+      <rule id="Rule_Risk_1">
+        <inputEntry><text>"risk"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&gt;= 9</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"critical"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"governance,tmo,finops"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:governance,escalate:exec,email:board,notify:tmo,notify:finops,attach_document:risk_response_plan"</text></outputEntry>
+        <outputEntry><text>"ISO 31000:2018 Risk Management"</text></outputEntry>
+        <outputEntry><text>"docs://risk/ISO_31000_Risk_Guidelines.pdf,docs://risk/NIST_RMF_Framework.pdf,docs://risk/Risk_Response_Plan_Template.docx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 5: Risk - High Risk Score (NIST, COSO) -->
+      <rule id="Rule_Risk_2">
+        <inputEntry><text>"risk"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&gt;= 7, &lt; 9</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"tmo,finops"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:tmo,notify:finops,attach_document:risk_register"</text></outputEntry>
+        <outputEntry><text>"NIST SP 800-30, COSO ERM Framework"</text></outputEntry>
+        <outputEntry><text>"docs://risk/NIST_800_30_Risk_Assessment.pdf,docs://risk/COSO_ERM_Framework.pdf,docs://risk/Risk_Register_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 6: Risk - Cybersecurity Risk (NIST CSF, CIS Controls) -->
+      <rule id="Rule_Risk_3">
+        <inputEntry><text>"risk"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&gt;= 6</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"governance,tmo"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:ciso,notify:governance,attach_document:nist_csf_checklist"</text></outputEntry>
+        <outputEntry><text>"NIST CSF 2.0, CIS Controls v8"</text></outputEntry>
+        <outputEntry><text>"docs://risk/NIST_CSF_2_Framework.pdf,docs://risk/CIS_Controls_v8.pdf,docs://risk/Cybersecurity_Incident_Response.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- FINOPS AGENT RULES (GAAP, IFRS, FASB, OMB Circular A-11)       -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 7: FinOps - Critical Budget Overrun (OMB A-11, GAAP) -->
+      <rule id="Rule_FinOps_1">
+        <inputEntry><text>"finops"</text></inputEntry>
+        <inputEntry><text>&lt; 0.70</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"tmo,risk,governance,vro"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:cfo,escalate:governance,email:exec,notify:tmo,notify:risk,notify:vro,attach_document:evm_analysis"</text></outputEntry>
+        <outputEntry><text>"OMB Circular A-11, GAAP Cost Accounting, FASB Conceptual Framework"</text></outputEntry>
+        <outputEntry><text>"docs://finops/OMB_A11_Budget_Execution.pdf,docs://finops/GAAP_Cost_Accounting_Standards.pdf,docs://finops/EVM_Analysis_Guide.pdf,docs://finops/Budget_Remediation_Plan_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 8: FinOps - Moderate Overrun (GAAP, PMI EVM) -->
+      <rule id="Rule_FinOps_2">
+        <inputEntry><text>"finops"</text></inputEntry>
+        <inputEntry><text>&lt; 0.85</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"medium"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"tmo,vro"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:tmo,notify:vro,attach_document:evm_forecast"</text></outputEntry>
+        <outputEntry><text>"PMI PMBOK EVM, GAAP ASC 606"</text></outputEntry>
+        <outputEntry><text>"docs://finops/PMBOK_EVM_Chapter.pdf,docs://finops/GAAP_ASC_606_Revenue.pdf,docs://finops/EVM_Forecast_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 9: FinOps - IFRS Compliance Issue -->
+      <rule id="Rule_FinOps_3">
+        <inputEntry><text>"finops"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&gt;= 1</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"governance,risk"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"escalate:cfo,notify:governance,attach_document:ifrs_compliance"</text></outputEntry>
+        <outputEntry><text>"IFRS 15, IAS 2 Inventories"</text></outputEntry>
+        <outputEntry><text>"docs://finops/IFRS_15_Revenue_Standard.pdf,docs://finops/IAS_2_Inventories.pdf,docs://finops/IFRS_Compliance_Checklist.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- TMO AGENT RULES (TOGAF, Prosci ADKAR, Kotter 8-Step, McKinsey 7S) -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 10: TMO - Critical Schedule Slippage (PRINCE2, PMBOK) -->
+      <rule id="Rule_TMO_1">
+        <inputEntry><text>"tmo"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 0.75</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"critical"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"risk,planning,ocm,governance"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:exec,notify:risk,notify:planning,notify:ocm,email:stakeholders,attach_document:recovery_plan"</text></outputEntry>
+        <outputEntry><text>"PRINCE2 Managing Successful Programmes, PMBOK Schedule Management"</text></outputEntry>
+        <outputEntry><text>"docs://tmo/PRINCE2_MSP_Recovery.pdf,docs://tmo/PMBOK_Schedule_Mgmt.pdf,docs://tmo/Recovery_Plan_Template.docx,docs://tmo/Stakeholder_Communication_Plan.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 11: TMO - TOGAF Architecture Decision Required -->
+      <rule id="Rule_TMO_2">
+        <inputEntry><text>"tmo"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"planning","design"</text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"governance,planning,risk"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:governance,notify:planning,attach_document:togaf_adr"</text></outputEntry>
+        <outputEntry><text>"TOGAF 9.2 ADM, Architecture Decision Records"</text></outputEntry>
+        <outputEntry><text>"docs://tmo/TOGAF_9_2_ADM_Guide.pdf,docs://tmo/ADR_Template.md,docs://tmo/Enterprise_Architecture_Standards.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 12: TMO - Kotter Change Management -->
+      <rule id="Rule_TMO_3">
+        <inputEntry><text>"tmo"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"ocm,planning"</text></outputEntry>
+        <outputEntry><text>"medium"</text></outputEntry>
+        <outputEntry><text>"notify:ocm,attach_document:kotter_8step"</text></outputEntry>
+        <outputEntry><text>"Kotter 8-Step Change Model, Prosci ADKAR"</text></outputEntry>
+        <outputEntry><text>"docs://tmo/Kotter_8_Step_Guide.pdf,docs://tmo/Prosci_ADKAR_Model.pdf,docs://tmo/Change_Impact_Assessment.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- VRO AGENT RULES (Benefits Realization, ROI, TCO, NPV)          -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 13: VRO - Severe Value Leakage -->
+      <rule id="Rule_VRO_1">
+        <inputEntry><text>"vro"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 50</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"execution","closing"</text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"finops,tmo,governance"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:exec,notify:finops,notify:tmo,email:stakeholders,attach_document:value_leakage_analysis"</text></outputEntry>
+        <outputEntry><text>"MSP Benefits Realization, PMI Business Case"</text></outputEntry>
+        <outputEntry><text>"docs://vro/MSP_Benefits_Realization.pdf,docs://vro/PMI_Business_Case_Guide.pdf,docs://vro/Value_Leakage_Analysis_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 14: VRO - ROI Below Threshold -->
+      <rule id="Rule_VRO_2">
+        <inputEntry><text>"vro"</text></inputEntry>
+        <inputEntry><text>&lt; 0.90</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 80</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"medium"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"finops,tmo"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:finops,notify:tmo,attach_document:roi_analysis"</text></outputEntry>
+        <outputEntry><text>"TCO Analysis, NPV Calculation"</text></outputEntry>
+        <outputEntry><text>"docs://vro/TCO_Analysis_Guide.pdf,docs://vro/NPV_Calculator.xlsx,docs://vro/ROI_Optimization_Strategies.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- PLANNING AGENT RULES (PMBOK, PRINCE2, Agile, Scrum, Kanban)   -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 15: Planning - Critical Path Risk -->
+      <rule id="Rule_Planning_1">
+        <inputEntry><text>"planning"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 0.80</text></inputEntry>
+        <inputEntry><text>&gt;= 7</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"risk,tmo,pmo"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:risk,notify:tmo,notify:pmo,attach_document:cpm_analysis"</text></outputEntry>
+        <outputEntry><text>"PMBOK CPM/PERT, PRINCE2 Product-Based Planning"</text></outputEntry>
+        <outputEntry><text>"docs://planning/PMBOK_CPM_PERT_Chapter.pdf,docs://planning/PRINCE2_Product_Based_Planning.pdf,docs://planning/Critical_Path_Analysis_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 16: Planning - Agile/Scrum Sprint Issues -->
+      <rule id="Rule_Planning_2">
+        <inputEntry><text>"planning"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 0.85</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"execution"</text></inputEntry>
+        <inputEntry><text>"medium"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"tmo,pmo"</text></outputEntry>
+        <outputEntry><text>"medium"</text></outputEntry>
+        <outputEntry><text>"notify:tmo,attach_document:scrum_retrospective"</text></outputEntry>
+        <outputEntry><text>"Scrum Guide 2020, SAFe 6.0 PI Planning"</text></outputEntry>
+        <outputEntry><text>"docs://planning/Scrum_Guide_2020.pdf,docs://planning/SAFe_PI_Planning.pdf,docs://planning/Sprint_Retrospective_Template.docx"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- OCM AGENT RULES (Prosci, ADKAR, Kotter, Lewin's Change Model)  -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 17: OCM - High Stakeholder Resistance -->
+      <rule id="Rule_OCM_1">
+        <inputEntry><text>"ocm"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high","critical"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"tmo,governance,planning"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:tmo,notify:governance,email:sponsors,attach_document:stakeholder_engagement"</text></outputEntry>
+        <outputEntry><text>"Prosci ADKAR, Stakeholder Engagement Assessment"</text></outputEntry>
+        <outputEntry><text>"docs://ocm/Prosci_ADKAR_Guide.pdf,docs://ocm/Stakeholder_Engagement_Matrix.xlsx,docs://ocm/Change_Readiness_Assessment.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 18: OCM - Training Gaps -->
+      <rule id="Rule_OCM_2">
+        <inputEntry><text>"ocm"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"execution"</text></inputEntry>
+        <inputEntry><text>"medium"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"planning,tmo"</text></outputEntry>
+        <outputEntry><text>"medium"</text></outputEntry>
+        <outputEntry><text>"notify:planning,attach_document:training_plan"</text></outputEntry>
+        <outputEntry><text>"Prosci Change Management, ADDIE Training Model"</text></outputEntry>
+        <outputEntry><text>"docs://ocm/Prosci_Training_Framework.pdf,docs://ocm/ADDIE_Model_Guide.pdf,docs://ocm/Training_Needs_Analysis_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- PMO AGENT RULES (PMI Portfolio Mgmt, OPM3, CMMI)               -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 19: PMO - Portfolio Health Critical -->
+      <rule id="Rule_PMO_1">
+        <inputEntry><text>"pmo"</text></inputEntry>
+        <inputEntry><text>&lt; 0.75</text></inputEntry>
+        <inputEntry><text>&lt; 0.75</text></inputEntry>
+        <inputEntry><text>&gt;= 7</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"critical"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"governance,finops,tmo,vro"</text></outputEntry>
+        <outputEntry><text>"urgent"</text></outputEntry>
+        <outputEntry><text>"escalate:exec,notify:governance,notify:finops,notify:tmo,email:board,attach_document:portfolio_health"</text></outputEntry>
+        <outputEntry><text>"PMI Portfolio Management Standard, OPM3"</text></outputEntry>
+        <outputEntry><text>"docs://pmo/PMI_Portfolio_Mgmt_Standard.pdf,docs://pmo/OPM3_Maturity_Model.pdf,docs://pmo/Portfolio_Health_Dashboard_Template.xlsx"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 20: PMO - CMMI Maturity Gap -->
+      <rule id="Rule_PMO_2">
+        <inputEntry><text>"pmo"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"medium"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"governance,planning"</text></outputEntry>
+        <outputEntry><text>"medium"</text></outputEntry>
+        <outputEntry><text>"notify:governance,attach_document:cmmi_assessment"</text></outputEntry>
+        <outputEntry><text>"CMMI v2.0, PMI OPM3"</text></outputEntry>
+        <outputEntry><text>"docs://pmo/CMMI_v2_Framework.pdf,docs://pmo/Process_Maturity_Assessment.pdf,docs://pmo/PMO_Best_Practices.pdf"</text></outputEntry>
+      </rule>
+
+      <!-- ================================================================ -->
+      <!-- OKR AGENT RULES (Google OKR, Measure What Matters, KPI)        -->
+      <!-- ================================================================ -->
+
+      <!-- Rule 21: OKR - Severe KR Miss Rate -->
+      <rule id="Rule_OKR_1">
+        <inputEntry><text>"okr"</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>&lt; 50</text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text></text></inputEntry>
+        <inputEntry><text>"high"</text></inputEntry>
+        <outputEntry><text>true</text></outputEntry>
+        <outputEntry><text>"vro,tmo,planning"</text></outputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+        <outputEntry><text>"notify:vro,notify:tmo,email:leadership,attach_document:okr_analysis"</text></outputEntry>
+        <outputEntry><text>"Google OKR Framework, Measure What Matters"</text></outputEntry>
+        <outputEntry><text>"docs://okr/Google_OKR_Playbook.pdf,docs://okr/Measure_What_Matters_Guide.pdf,docs://okr/OKR_Grading_Rubric.xlsx"</text></outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+</definitions>

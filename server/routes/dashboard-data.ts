@@ -24,7 +24,7 @@ export function registerDashboardDataRoutes(app: Express, storage: IStorage) {
   app.get("/api/dashboard/overview", async (req, res) => {
     try {
       // Get all active projects with calculations
-      const allProjects = await storage.getAllProjects();
+      const allProjects = await storage.getProjects();
       const activeProjects = allProjects.filter(p => p.status === 'active');
 
       // Calculate portfolio-wide metrics
@@ -61,11 +61,11 @@ export function registerDashboardDataRoutes(app: Express, storage: IStorage) {
       }).length;
 
       // Get active risks and issues
-      const allRisks = await storage.getAllRisks();
+      const allRisks = await storage.getRisks();
       const activeRisks = allRisks.filter(r => r.status === 'active');
       const highRisks = activeRisks.filter(r => r.probability === 'high' && r.impact === 'high');
 
-      const allIssues = await storage.getAllIssues();
+      const allIssues = await storage.getIssues();
       const openIssues = allIssues.filter(i => i.status === 'open' || i.status === 'in-progress');
       const criticalIssues = openIssues.filter(i => i.priority === 'critical' || i.priority === 'high');
 
@@ -166,7 +166,7 @@ export function registerDashboardDataRoutes(app: Express, storage: IStorage) {
    */
   app.get("/api/dashboard/portfolios", async (req, res) => {
     try {
-      const allPortfolios = await storage.getAllPortfolios();
+      const allPortfolios = await storage.getPortfolios();
 
       const portfolioData = await Promise.all(allPortfolios.map(async (portfolio) => {
         // Get all projects in this portfolio
@@ -277,10 +277,10 @@ export function registerDashboardDataRoutes(app: Express, storage: IStorage) {
    */
   app.get("/api/dashboard/okrs", async (req, res) => {
     try {
-      const allOkrs = await storage.getAllOkrs();
+      const allOkrs = await storage.getOkrs();
 
       const okrData = await Promise.all(allOkrs.map(async (okr) => {
-        const okrKeyResults = await storage.getKeyResultsByOkr(okr.id);
+        const okrKeyResults = await storage.getKeyResults(okr.id);
 
         // Calculate OKR progress
         const avgProgress = okrKeyResults.length > 0
@@ -323,11 +323,11 @@ export function registerDashboardDataRoutes(app: Express, storage: IStorage) {
    */
   app.get("/api/dashboard/kpis", async (req, res) => {
     try {
-      const allKpis = await storage.getAllKpis();
+      const allKpis = await storage.getKpis();
 
       const kpiData = allKpis.map(kpi => {
-        const target = parseFloat(kpi.target || '0');
-        const actual = parseFloat(kpi.actual || '0');
+        const target = kpi.targetValue || 0;
+        const actual = kpi.currentValue || 0;
         const variance = target > 0 ? ((actual - target) / target) * 100 : 0;
 
         return {

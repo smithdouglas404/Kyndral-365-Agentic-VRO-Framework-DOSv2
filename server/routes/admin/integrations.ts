@@ -8,8 +8,10 @@ import type { Express, Request, Response } from "express";
 import { db } from "../../db.js";
 import {
   integrations,
+  integrationSyncHistory,
   insertIntegrationSchema,
-  type Integration
+  type Integration,
+  type InsertIntegrationSyncHistory
 } from "../../../shared/schema.js";
 import { eq, desc } from "drizzle-orm";
 import { encryptFields, decryptFields } from "../../lib/encryption.js";
@@ -20,7 +22,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   const syncService = new IntegrationSyncService(storage);
 
   // GET /api/integrations - List all integrations
-  app.get("/api/integrations", async (req: Request, res: Response) => {
+  app.get("/api/integrations", authenticate, async (req: Request, res: Response) => {
     try {
       const allIntegrations = await db
         .select()
@@ -60,7 +62,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // GET /api/integrations/:id - Get single integration
-  app.get("/api/integrations/:id", async (req: Request, res: Response) => {
+  app.get("/api/integrations/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -95,7 +97,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // POST /api/integrations - Create new integration
-  app.post("/api/integrations", async (req: Request, res: Response) => {
+  app.post("/api/integrations", authenticate, async (req: Request, res: Response) => {
     try {
       const integrationData = req.body;
 
@@ -145,7 +147,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // PUT /api/integrations/:id - Update integration
-  app.put("/api/integrations/:id", async (req: Request, res: Response) => {
+  app.put("/api/integrations/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -203,7 +205,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // DELETE /api/integrations/:id - Delete integration
-  app.delete("/api/integrations/:id", async (req: Request, res: Response) => {
+  app.delete("/api/integrations/:id", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -240,7 +242,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // POST /api/integrations/:id/test - Test connection
-  app.post("/api/integrations/:id/test", async (req: Request, res: Response) => {
+  app.post("/api/integrations/:id/test", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -257,19 +259,40 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
         });
       }
 
+      const startTime = new Date();
+
       // Test connection using sync service
       const testResult = await syncService.testConnection(integration[0]);
+
+      const endTime = new Date();
 
       // Update integration status
       await db
         .update(integrations)
         .set({
           status: testResult.success ? 'connected' : 'error',
-          lastSyncAt: new Date(),
+          lastSyncAt: endTime,
           lastSyncStatus: testResult.success ? 'success' : 'failed',
           errorMessage: testResult.success ? null : testResult.message,
         })
         .where(eq(integrations.id, id));
+
+      // Save test history
+      await db
+        .insert(integrationSyncHistory)
+        .values({
+          integrationId: id,
+          integrationName: integration[0].name,
+          startTime,
+          endTime,
+          status: testResult.success ? 'success' : 'failed',
+          recordsImported: 0,
+          recordsUpdated: 0,
+          recordsDeleted: 0,
+          errors: testResult.success ? 0 : 1,
+          errorMessage: testResult.message,
+          metadata: JSON.stringify({ type: 'connection_test' }),
+        });
 
       res.json(testResult);
     } catch (error: any) {
@@ -283,7 +306,7 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // POST /api/integrations/:id/sync - Trigger manual sync
-  app.post("/api/integrations/:id/sync", async (req: Request, res: Response) => {
+  app.post("/api/integrations/:id/sync", authenticate, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -300,18 +323,39 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
         });
       }
 
+      const startTime = new Date();
+
       // Sync data using sync service
       const syncResult = await syncService.syncIntegration(integration[0]);
+
+      const endTime = new Date();
 
       // Update last sync info
       await db
         .update(integrations)
         .set({
-          lastSyncAt: new Date(),
+          lastSyncAt: endTime,
           lastSyncStatus: syncResult.success ? 'success' : 'failed',
           errorMessage: syncResult.success ? null : syncResult.message,
         })
         .where(eq(integrations.id, id));
+
+      // Save sync history
+      await db
+        .insert(integrationSyncHistory)
+        .values({
+          integrationId: id,
+          integrationName: integration[0].name,
+          startTime,
+          endTime,
+          status: syncResult.success ? 'success' : 'failed',
+          recordsImported: syncResult.recordsImported || 0,
+          recordsUpdated: syncResult.recordsUpdated || 0,
+          recordsDeleted: syncResult.recordsDeleted || 0,
+          errors: syncResult.success ? 0 : 1,
+          errorMessage: syncResult.message,
+          metadata: JSON.stringify(syncResult.metadata || {}),
+        });
 
       res.json(syncResult);
     } catch (error: any) {
@@ -325,29 +369,22 @@ export function registerIntegrationRoutes(app: Express, storage: IStorage) {
   });
 
   // GET /api/integrations/sync-history - Get sync history
-  app.get("/api/integrations/sync-history", async (req: Request, res: Response) => {
+  app.get("/api/integrations/sync-history", authenticate, async (req: Request, res: Response) => {
     try {
-      // TODO: Implement proper sync history tracking
-      // For now, return mock data based on integrations
-      const allIntegrations = await db
-        .select()
-        .from(integrations)
-        .orderBy(desc(integrations.lastSyncAt));
+      const { integrationId, limit = 50 } = req.query;
 
-      const history = allIntegrations
-        .filter(i => i.lastSyncAt !== null)
-        .map(i => ({
-          id: `${i.id}-sync-${Date.now()}`,
-          integrationId: i.id,
-          integrationName: i.name,
-          startTime: i.lastSyncAt,
-          endTime: i.lastSyncAt,
-          status: i.lastSyncStatus,
-          recordsImported: Math.floor(Math.random() * 100),
-          recordsUpdated: Math.floor(Math.random() * 50),
-          errors: i.lastSyncStatus === 'failed' ? 1 : 0,
-          errorMessage: i.errorMessage,
-        }));
+      let query = db
+        .select()
+        .from(integrationSyncHistory)
+        .orderBy(desc(integrationSyncHistory.startTime));
+
+      // Filter by integration if specified
+      if (integrationId) {
+        query = query.where(eq(integrationSyncHistory.integrationId, integrationId as string));
+      }
+
+      // Apply limit
+      const history = await query.limit(Number(limit));
 
       res.json({
         success: true,

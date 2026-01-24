@@ -38,6 +38,7 @@ import { registerAgentInsightsRoutes } from "./routes/agent-insights.js";
 import { registerVoiceBriefingRoutes } from "./routes/voice-briefings.js";
 import { createLLMConfigRoutes } from "./routes/llm-config.js";
 import { createKnowledgeBaseRoutes } from "./routes/knowledge-base.js";
+import { createEnhancedKnowledgeBaseRoutes } from "./routes/admin/enhanced-knowledge-base.js";
 import { createBattleRhythmRoutes } from "./routes/battle-rhythm.js";
 import { createCommandersIntentRoutes } from "./routes/commanders-intent.js";
 import { createCOPRoutes } from "./routes/cop.js";
@@ -181,7 +182,7 @@ export async function registerRoutes(
   registerCustomFieldRoutes(app);
 
   // Register Workflow Management routes (ADMIN - Workflow & approval definitions)
-  registerWorkflowRoutes(app);
+  registerWorkflowRoutes(app, storage);
 
   // Register White-Label & Theming routes (TIER 3 - Customization)
   registerWhiteLabelRoutes(app);
@@ -212,6 +213,9 @@ export async function registerRoutes(
 
   // Register Knowledge Base routes (PMBOK, Prince2, PMI, SAFe, SOPs)
   app.use("/api/knowledge-base", createKnowledgeBaseRoutes(storage));
+
+  // Register Enhanced Knowledge Base routes (ADMIN - Agent-tagged docs with regulatory support)
+  app.use("/api/admin/knowledge-base", createEnhancedKnowledgeBaseRoutes(storage));
 
   // Register Battle Rhythm routes (Military-inspired cadence-aware scheduling)
   app.use("/api/battle-rhythm", createBattleRhythmRoutes(storage));

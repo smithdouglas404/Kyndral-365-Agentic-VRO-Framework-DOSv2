@@ -34,6 +34,7 @@ import {
   DollarSign,
   Shield,
   FileText,
+  Info,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -139,15 +140,15 @@ const AVAILABLE_AGENTS: Agent[] = [
 ];
 
 const RECOMMENDED_MCP_MAPPINGS: Record<string, string[]> = {
-  governance: ['project-knowledge-graph', 'sequential-thinking', 'filesystem', 'semgrep'],
-  risk: ['weaviate', 'sequential-thinking', 'filesystem', 'sentry'],
-  finops: ['quickbooks', 'dynamics-365-erp', 'clickhouse', 'filesystem'],
-  tmo: ['project-knowledge-graph', 'sequential-thinking', 'weaviate', 'clickhouse', 'filesystem'],
-  vro: ['dynamics-365-erp', 'greptimedb', 'clickhouse', 'financial-datasets'],
-  planning: ['project-knowledge-graph', 'sequential-thinking', 'filesystem', 'microsoft-project-server'],
-  ocm: ['weaviate', 'filesystem', 'slack', 'microsoft-teams'],
-  pmo: ['clickhouse', 'filesystem', 'jira_cloud', 'asana'],
-  okr: ['clickhouse', 'filesystem'],
+  governance: ['ragie', 'project-knowledge-graph', 'sequential-thinking', 'filesystem', 'semgrep'],
+  risk: ['ragie', 'sequential-thinking', 'filesystem', 'sentry'],
+  finops: ['ragie', 'quickbooks', 'dynamics-365-erp', 'clickhouse', 'filesystem'],
+  tmo: ['ragie', 'project-knowledge-graph', 'sequential-thinking', 'clickhouse', 'filesystem'],
+  vro: ['ragie', 'dynamics-365-erp', 'greptimedb', 'clickhouse', 'financial-datasets'],
+  planning: ['ragie', 'project-knowledge-graph', 'sequential-thinking', 'filesystem', 'microsoft-project-server'],
+  ocm: ['ragie', 'filesystem', 'slack', 'microsoft-teams'],
+  pmo: ['ragie', 'clickhouse', 'filesystem', 'jira_cloud', 'asana'],
+  okr: ['ragie', 'clickhouse', 'filesystem'],
 };
 
 const DEFAULT_LLM_STRATEGIES: Record<string, LLMPreference[]> = {
@@ -184,12 +185,26 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 7; // Added admin creation + required integrations
 
-  // Step 1: Agent Selection
+  // Step 1: Admin Account Creation
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
+  const [adminFirstName, setAdminFirstName] = useState('');
+  const [adminLastName, setAdminLastName] = useState('');
+
+  // Step 7: Required Integrations
+  const [emailProvider, setEmailProvider] = useState<string>('');
+  const [emailApiKey, setEmailApiKey] = useState<string>('');
+  const [seedDocuments, setSeedDocuments] = useState(true);
+  const [setupCamunda, setSetupCamunda] = useState(true);
+  const [seedOKRs, setSeedOKRs] = useState(true);
+
+  // Step 2: Agent Selection (was Step 1)
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>(AVAILABLE_AGENTS);
 
-  // Step 2: MCP Assignments
+  // Step 3: MCP Assignments (was Step 2)
   const [mcpMappings, setMcpMappings] = useState<AgentMCPMapping[]>(
     AVAILABLE_AGENTS.map((agent) => ({
       agentId: agent.id,
@@ -197,7 +212,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     }))
   );
 
-  // Step 3: LLM Strategy
+  // Step 4: LLM Strategy (was Step 3)
   const [llmStrategies, setLlmStrategies] = useState<AgentLLMStrategy[]>(
     AVAILABLE_AGENTS.map((agent) => ({
       agentId: agent.id,
@@ -205,7 +220,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     }))
   );
 
-  // Step 4: Cost Settings
+  // Step 5: Cost Settings (was Step 4)
   const [costSettings, setCostSettings] = useState<CostSettings>({
     dailyBudget: 50,
     monthlyBudget: 1000,
@@ -228,7 +243,25 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
   // Save configuration mutation
   const saveConfigMutation = useMutation({
     mutationFn: async () => {
-      // Save agent configurations
+      // Step 1: Create system admin account
+      const adminResponse = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: adminEmail,
+          password: adminPassword,
+          firstName: adminFirstName,
+          lastName: adminLastName,
+          role: 'system_admin',
+        }),
+      });
+
+      if (!adminResponse.ok) {
+        const error = await adminResponse.json();
+        throw new Error(error.message || 'Failed to create admin account');
+      }
+
+      // Step 2: Save agent configurations
       const saveResponse = await fetch('/api/admin/agent-setup/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -241,10 +274,78 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
       });
 
       if (!saveResponse.ok) {
-        throw new Error('Failed to save configuration');
+        throw new Error('Failed to save agent configuration');
       }
 
-      // Automatically reload agent orchestrator to activate changes
+      // Step 3: Configure email provider if provided
+      if (emailProvider && emailApiKey) {
+        const emailResponse = await fetch('/api/admin/integrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: emailProvider,
+            type: 'email',
+            config: {
+              apiKey: emailApiKey,
+            },
+            status: 'active',
+          }),
+        });
+
+        if (!emailResponse.ok) {
+          console.warn('Failed to configure email, but agent setup was saved');
+        }
+      }
+
+      // Step 4: Seed regulatory documents (if enabled)
+      if (seedDocuments) {
+        try {
+          const seedResponse = await fetch('/api/admin/knowledge-base/seed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (!seedResponse.ok) {
+            console.warn('Failed to seed documents, but agent setup was saved');
+          }
+        } catch (error) {
+          console.warn('Document seeding skipped:', error);
+        }
+      }
+
+      // Step 5: Setup Camunda (if enabled)
+      if (setupCamunda) {
+        try {
+          const camundaResponse = await fetch('/api/admin/camunda/setup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (!camundaResponse.ok) {
+            console.warn('Failed to setup Camunda, but agent setup was saved');
+          }
+        } catch (error) {
+          console.warn('Camunda setup skipped:', error);
+        }
+      }
+
+      // Step 6: Seed OKRs (if enabled)
+      if (seedOKRs) {
+        try {
+          const okrResponse = await fetch('/api/admin/okrs/seed-defaults', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (!okrResponse.ok) {
+            console.warn('Failed to seed OKRs, but agent setup was saved');
+          }
+        } catch (error) {
+          console.warn('OKR seeding skipped:', error);
+        }
+      }
+
+      // Step 7: Reload agent orchestrator to activate changes
       const reloadResponse = await fetch('/api/agents/reload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,6 +396,43 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
   };
 
   const nextStep = () => {
+    // Validate Step 1 (Admin Creation) before proceeding
+    if (currentStep === 1) {
+      if (!adminEmail || !adminPassword || !adminConfirmPassword || !adminFirstName || !adminLastName) {
+        toast({
+          title: 'Missing Information',
+          description: 'Please fill in all required fields',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (adminPassword.length < 12) {
+        toast({
+          title: 'Weak Password',
+          description: 'Password must be at least 12 characters long',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (adminPassword !== adminConfirmPassword) {
+        toast({
+          title: 'Password Mismatch',
+          description: 'Passwords do not match',
+          variant: 'destructive',
+        });
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(adminEmail)) {
+        toast({
+          title: 'Invalid Email',
+          description: 'Please enter a valid email address',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -313,7 +451,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
   const renderStepIndicator = () => {
     return (
       <div className="flex items-center justify-center mb-8">
-        {[1, 2, 3, 4, 5].map((step) => (
+        {[1, 2, 3, 4, 5, 6, 7].map((step) => (
           <div key={step} className="flex items-center">
             <div
               className={cn(
@@ -342,6 +480,93 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
   };
 
   const renderStep1 = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-2">Create System Administrator Account</h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          Create the initial administrator account. This user will have full access to manage the system,
+          users, agents, and all configurations.
+        </p>
+      </div>
+
+      <Alert>
+        <Shield className="w-4 h-4" />
+        <AlertDescription className="text-xs">
+          <strong>Security:</strong> Use a strong password (minimum 12 characters) for the admin account.
+          You can add more users and assign roles later from the User Management page.
+        </AlertDescription>
+      </Alert>
+
+      <div className="grid gap-4 max-w-2xl">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="admin-first-name">First Name</Label>
+            <Input
+              id="admin-first-name"
+              placeholder="John"
+              value={adminFirstName}
+              onChange={(e) => setAdminFirstName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="admin-last-name">Last Name</Label>
+            <Input
+              id="admin-last-name"
+              placeholder="Doe"
+              value={adminLastName}
+              onChange={(e) => setAdminLastName(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="admin-email">Email Address</Label>
+          <Input
+            id="admin-email"
+            type="email"
+            placeholder="admin@company.com"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="admin-password">Password</Label>
+          <Input
+            id="admin-password"
+            type="password"
+            placeholder="Minimum 12 characters"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            required
+          />
+          {adminPassword && adminPassword.length < 12 && (
+            <p className="text-xs text-yellow-600">Password must be at least 12 characters</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="admin-confirm-password">Confirm Password</Label>
+          <Input
+            id="admin-confirm-password"
+            type="password"
+            placeholder="Re-enter password"
+            value={adminConfirmPassword}
+            onChange={(e) => setAdminConfirmPassword(e.target.value)}
+            required
+          />
+          {adminConfirmPassword && adminPassword !== adminConfirmPassword && (
+            <p className="text-xs text-red-600">Passwords do not match</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-2">Select Agents to Enable</h3>
@@ -386,7 +611,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     </div>
   );
 
-  const renderStep2 = () => {
+  const renderStep3 = () => {
     const enabledAgents = selectedAgents.filter((a) => a.enabled);
 
     return (
@@ -456,7 +681,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     );
   };
 
-  const renderStep3 = () => (
+  const renderStep4 = () => (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-2">Configure LLM Strategy</h3>
@@ -509,7 +734,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     </div>
   );
 
-  const renderStep4 = () => (
+  const renderStep5 = () => (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-2">Cost & Failover Settings</h3>
@@ -607,7 +832,7 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     </div>
   );
 
-  const renderStep5 = () => {
+  const renderStep6 = () => {
     const enabledAgents = selectedAgents.filter((a) => a.enabled);
     const totalMCPs = mcpMappings.reduce((sum, m) => sum + m.mcpServers.length, 0);
 
@@ -691,6 +916,146 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
     );
   };
 
+  const renderStep7 = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-2">Required Integrations</h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          Configure essential integrations for email notifications, knowledge base, and workflow automation.
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Email Provider (Optional)</CardTitle>
+          <CardDescription>
+            Configure email provider for system notifications and alerts
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Provider</Label>
+            <Select value={emailProvider} onValueChange={setEmailProvider}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select email provider" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sendgrid">SendGrid</SelectItem>
+                <SelectItem value="mailgun">Mailgun</SelectItem>
+                <SelectItem value="aws-ses">AWS SES</SelectItem>
+                <SelectItem value="smtp">Custom SMTP</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {emailProvider && (
+            <div className="space-y-2">
+              <Label>API Key</Label>
+              <Input
+                type="password"
+                placeholder="Enter API key"
+                value={emailApiKey}
+                onChange={(e) => setEmailApiKey(e.target.value)}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Knowledge Base Setup</CardTitle>
+          <CardDescription>
+            Pre-populate knowledge base with regulatory frameworks and best practices
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="seed-documents"
+                checked={seedDocuments}
+                onCheckedChange={(checked) => setSeedDocuments(checked as boolean)}
+              />
+              <Label htmlFor="seed-documents" className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Seed Regulatory Documents</p>
+                  <p className="text-xs text-muted-foreground">
+                    Includes 20+ frameworks (GDPR, SOX, ISO 31000, PMBOK, etc.)
+                  </p>
+                </div>
+              </Label>
+            </div>
+            <Badge variant="outline">Recommended</Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Workflow Automation</CardTitle>
+          <CardDescription>
+            Setup Camunda 8 for agent collaboration rules and workflows
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="setup-camunda"
+                checked={setupCamunda}
+                onCheckedChange={(checked) => setSetupCamunda(checked as boolean)}
+              />
+              <Label htmlFor="setup-camunda" className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Deploy Camunda Rules</p>
+                  <p className="text-xs text-muted-foreground">
+                    Deploys 21 pre-configured collaboration rules
+                  </p>
+                </div>
+              </Label>
+            </div>
+            <Badge variant="outline">Recommended</Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">OKR & KPI Setup</CardTitle>
+          <CardDescription>
+            Pre-populate with 21 best-practice OKRs for all agents
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="seed-okrs"
+                checked={seedOKRs}
+                onCheckedChange={(checked) => setSeedOKRs(checked as boolean)}
+              />
+              <Label htmlFor="seed-okrs" className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Seed Default OKRs</p>
+                  <p className="text-xs text-muted-foreground">
+                    Includes FinOps profitability, Risk mitigation, Planning velocity, and more
+                  </p>
+                </div>
+              </Label>
+            </div>
+            <Badge variant="outline">Recommended</Badge>
+          </div>
+          <Alert className="mt-4">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              You can customize these OKRs later in Admin {">"} OKR Management or import from strategy documents
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -709,6 +1074,8 @@ export function AgentSetupWizard({ open, onOpenChange, onComplete }: AgentSetupW
           {currentStep === 3 && renderStep3()}
           {currentStep === 4 && renderStep4()}
           {currentStep === 5 && renderStep5()}
+          {currentStep === 6 && renderStep6()}
+          {currentStep === 7 && renderStep7()}
         </div>
 
         <DialogFooter className="flex justify-between">

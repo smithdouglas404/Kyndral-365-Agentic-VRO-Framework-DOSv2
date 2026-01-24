@@ -367,31 +367,164 @@ export class EmbeddingsService {
    * Store vector in configured vector DB
    */
   private async storeVector(document: EmbeddingDocument): Promise<void> {
-    switch (this.config.vectorDB?.type) {
+    const vectorDBType = this.config.vectorDB?.type || 'memory';
+
+    switch (vectorDBType) {
       case 'memory':
         this.vectorStore.set(document.id, document);
         break;
 
       case 'pinecone':
-        // TODO: Implement Pinecone storage
-        console.warn('[Embeddings] Pinecone storage not yet implemented, using memory');
-        this.vectorStore.set(document.id, document);
+        await this.storeToPinecone(document);
         break;
 
       case 'qdrant':
-        // TODO: Implement Qdrant storage
-        console.warn('[Embeddings] Qdrant storage not yet implemented, using memory');
-        this.vectorStore.set(document.id, document);
+        await this.storeToQdrant(document);
         break;
 
       case 'weaviate':
-        // TODO: Implement Weaviate storage
-        console.warn('[Embeddings] Weaviate storage not yet implemented, using memory');
-        this.vectorStore.set(document.id, document);
+        await this.storeToWeaviate(document);
         break;
 
       default:
+        console.warn(`[Embeddings] Unknown vector DB type: ${vectorDBType}, using memory`);
         this.vectorStore.set(document.id, document);
+    }
+  }
+
+  /**
+   * Store to Pinecone vector database
+   */
+  private async storeToPinecone(document: EmbeddingDocument): Promise<void> {
+    // Check if Pinecone is configured
+    if (!this.config.vectorDB?.url || !this.config.vectorDB?.apiKey || !this.config.vectorDB?.index) {
+      console.warn('[Embeddings] Pinecone not configured (missing url/apiKey/index), using memory fallback');
+      console.warn('[Embeddings] To enable Pinecone: Set PINECONE_URL, PINECONE_API_KEY, and PINECONE_INDEX in environment');
+      this.vectorStore.set(document.id, document);
+      return;
+    }
+
+    try {
+      // Pinecone REST API implementation
+      const response = await fetch(`${this.config.vectorDB.url}/vectors/upsert`, {
+        method: 'POST',
+        headers: {
+          'Api-Key': this.config.vectorDB.apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          namespace: this.config.vectorDB.index,
+          vectors: [
+            {
+              id: document.id,
+              values: document.embedding || [],
+              metadata: {
+                content: document.content,
+                ...document.metadata,
+              },
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Pinecone API error: ${response.statusText}`);
+      }
+
+      console.log(`[Embeddings] Stored document ${document.id} to Pinecone`);
+    } catch (error) {
+      console.error('[Embeddings] Pinecone storage failed, falling back to memory:', error);
+      this.vectorStore.set(document.id, document);
+    }
+  }
+
+  /**
+   * Store to Qdrant vector database
+   */
+  private async storeToQdrant(document: EmbeddingDocument): Promise<void> {
+    // Check if Qdrant is configured
+    if (!this.config.vectorDB?.url || !this.config.vectorDB?.index) {
+      console.warn('[Embeddings] Qdrant not configured (missing url/index), using memory fallback');
+      console.warn('[Embeddings] To enable Qdrant: Set QDRANT_URL and QDRANT_COLLECTION in environment');
+      this.vectorStore.set(document.id, document);
+      return;
+    }
+
+    try {
+      // Qdrant REST API implementation
+      const response = await fetch(
+        `${this.config.vectorDB.url}/collections/${this.config.vectorDB.index}/points`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(this.config.vectorDB.apiKey && { 'api-key': this.config.vectorDB.apiKey }),
+          },
+          body: JSON.stringify({
+            points: [
+              {
+                id: document.id,
+                vector: document.embedding || [],
+                payload: {
+                  content: document.content,
+                  ...document.metadata,
+                },
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Qdrant API error: ${response.statusText}`);
+      }
+
+      console.log(`[Embeddings] Stored document ${document.id} to Qdrant`);
+    } catch (error) {
+      console.error('[Embeddings] Qdrant storage failed, falling back to memory:', error);
+      this.vectorStore.set(document.id, document);
+    }
+  }
+
+  /**
+   * Store to Weaviate vector database
+   */
+  private async storeToWeaviate(document: EmbeddingDocument): Promise<void> {
+    // Check if Weaviate is configured
+    if (!this.config.vectorDB?.url || !this.config.vectorDB?.index) {
+      console.warn('[Embeddings] Weaviate not configured (missing url/index), using memory fallback');
+      console.warn('[Embeddings] To enable Weaviate: Set WEAVIATE_URL and WEAVIATE_CLASS in environment');
+      this.vectorStore.set(document.id, document);
+      return;
+    }
+
+    try {
+      // Weaviate REST API implementation
+      const response = await fetch(`${this.config.vectorDB.url}/v1/objects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.config.vectorDB.apiKey && { Authorization: `Bearer ${this.config.vectorDB.apiKey}` }),
+        },
+        body: JSON.stringify({
+          class: this.config.vectorDB.index,
+          id: document.id,
+          properties: {
+            content: document.content,
+            ...document.metadata,
+          },
+          vector: document.embedding || [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Weaviate API error: ${response.statusText}`);
+      }
+
+      console.log(`[Embeddings] Stored document ${document.id} to Weaviate`);
+    } catch (error) {
+      console.error('[Embeddings] Weaviate storage failed, falling back to memory:', error);
+      this.vectorStore.set(document.id, document);
     }
   }
 

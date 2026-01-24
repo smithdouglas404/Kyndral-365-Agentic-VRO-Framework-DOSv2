@@ -84,7 +84,11 @@ export default function KnowledgeBaseManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
+  const [deleteUsageInfo, setDeleteUsageInfo] = useState<any>(null);
 
   // Form state
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -104,7 +108,7 @@ export default function KnowledgeBaseManagement() {
   const { data: documentsData, isLoading } = useQuery({
     queryKey: ['knowledge-base', searchQuery, selectedType],
     queryFn: async () => {
-      let url = '/api/knowledge-base?';
+      let url = '/api/admin/knowledge-base?';
       if (searchQuery) url += `query=${searchQuery}&`;
       if (selectedType !== 'all') url += `documentType=${selectedType}&`;
 
@@ -119,7 +123,7 @@ export default function KnowledgeBaseManagement() {
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/knowledge-base', {
+      const res = await fetch('/api/admin/knowledge-base', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -150,14 +154,75 @@ export default function KnowledgeBaseManagement() {
     },
   });
 
-  // Delete mutation
-  const deleteMutation = useMutation({
+  // Edit mutation
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedDocument) throw new Error('No document selected');
+
+      const res = await fetch(`/api/admin/knowledge-base/${selectedDocument.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to update document');
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Document updated successfully!',
+      });
+      queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
+      setShowEditDialog(false);
+      setSelectedDocument(null);
+      resetForm();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Check document usage before deletion
+  const checkUsageMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/knowledge-base/${id}`, {
+      const res = await fetch(`/api/admin/knowledge-base/${id}/usage`);
+      if (!res.ok) throw new Error('Failed to check document usage');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setDeleteUsageInfo(data.usage);
+      setShowDeleteDialog(true);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Delete mutation (with force option)
+  const deleteMutation = useMutation({
+    mutationFn: async ({ id, force }: { id: string; force: boolean }) => {
+      const res = await fetch(`/api/admin/knowledge-base/${id}?force=${force}`, {
         method: 'DELETE',
       });
 
-      if (!res.ok) throw new Error('Failed to delete document');
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to delete document');
+      }
+
       return res.json();
     },
     onSuccess: () => {
@@ -166,6 +231,16 @@ export default function KnowledgeBaseManagement() {
         description: 'Document deleted successfully!',
       });
       queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
+      setShowDeleteDialog(false);
+      setSelectedDocument(null);
+      setDeleteUsageInfo(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -213,14 +288,47 @@ export default function KnowledgeBaseManagement() {
     }));
   };
 
+  const handleEditClick = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    setFormData({
+      title: doc.title,
+      documentType: doc.documentType,
+      category: doc.category,
+      summary: doc.summary || '',
+      content: doc.content,
+      tags: doc.tags,
+      relevantAgents: doc.relevantAgents,
+      triggerConditions: [],
+      status: doc.status,
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleDeleteClick = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    checkUsageMutation.mutate(doc.id);
+  };
+
+  const confirmDelete = (force: boolean) => {
+    if (selectedDocument) {
+      deleteMutation.mutate({ id: selectedDocument.id, force });
+    }
+  };
+
   const renderUploadWizard = () => {
+    const isEditMode = showEditDialog;
+    const isOpen = showUploadDialog || showEditDialog;
+    const setIsOpen = isEditMode ? setShowEditDialog : setShowUploadDialog;
+
     return (
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Upload Knowledge Document</DialogTitle>
+            <DialogTitle>{isEditMode ? 'Edit' : 'Upload'} Knowledge Document</DialogTitle>
             <DialogDescription>
-              Upload SOPs, guidelines, forms, or other documents for agents to use
+              {isEditMode
+                ? 'Update document information and agent assignments'
+                : 'Upload SOPs, guidelines, forms, or other documents for agents to use'}
             </DialogDescription>
           </DialogHeader>
 
@@ -448,7 +556,7 @@ export default function KnowledgeBaseManagement() {
           </Tabs>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
             {currentStep > 1 && (
@@ -460,10 +568,20 @@ export default function KnowledgeBaseManagement() {
               <Button onClick={() => setCurrentStep(currentStep + 1)}>Next</Button>
             ) : (
               <Button
-                onClick={() => uploadMutation.mutate()}
-                disabled={!formData.title || formData.relevantAgents.length === 0 || uploadMutation.isPending}
+                onClick={() => isEditMode ? editMutation.mutate() : uploadMutation.mutate()}
+                disabled={
+                  !formData.title ||
+                  formData.relevantAgents.length === 0 ||
+                  (isEditMode ? editMutation.isPending : uploadMutation.isPending)
+                }
               >
-                {uploadMutation.isPending ? 'Uploading...' : 'Upload Document'}
+                {isEditMode
+                  ? editMutation.isPending
+                    ? 'Updating...'
+                    : 'Update Document'
+                  : uploadMutation.isPending
+                  ? 'Uploading...'
+                  : 'Upload Document'}
               </Button>
             )}
           </DialogFooter>
@@ -573,13 +691,13 @@ export default function KnowledgeBaseManagement() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(doc)}>
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteMutation.mutate(doc.id)}
+                      onClick={() => handleDeleteClick(doc)}
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </Button>
@@ -621,6 +739,107 @@ export default function KnowledgeBaseManagement() {
       </div>
 
       {renderUploadWizard()}
+
+      {/* Delete Confirmation Dialog with Safety Check */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {deleteUsageInfo?.isInUse && (
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              )}
+              Delete Document
+            </DialogTitle>
+            <DialogDescription>
+              {selectedDocument?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteUsageInfo?.isInUse ? (
+            <Alert variant="destructive" className="border-red-600">
+              <AlertTriangle className="w-4 h-4" />
+              <AlertDescription>
+                <div className="space-y-3">
+                  <div className="font-semibold">
+                    This document is currently in use and cannot be safely deleted!
+                  </div>
+                  <div className="text-sm">
+                    <strong>Usage Summary:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      {deleteUsageInfo.usageDetails.agentCount > 0 && (
+                        <li>
+                          Assigned to <strong>{deleteUsageInfo.usageDetails.agentCount}</strong> agent(s):
+                          <div className="ml-4 mt-1 flex flex-wrap gap-1">
+                            {deleteUsageInfo.usageDetails.agents.map((agent: any) => (
+                              <Badge key={agent.agentId} variant="outline" className="text-xs">
+                                {agent.agentName}
+                              </Badge>
+                            ))}
+                          </div>
+                        </li>
+                      )}
+                      {deleteUsageInfo.usageDetails.triggerRules.length > 0 && (
+                        <li>
+                          Used in <strong>{deleteUsageInfo.usageDetails.triggerRules.length}</strong> trigger rule(s)
+                        </li>
+                      )}
+                      {deleteUsageInfo.usageDetails.relatedArticles.length > 0 && (
+                        <li>
+                          Referenced by <strong>{deleteUsageInfo.usageDetails.relatedArticles.length}</strong> other document(s)
+                        </li>
+                      )}
+                      <li className="font-medium mt-2">
+                        Total References: <strong>{deleteUsageInfo.usageDetails.totalReferences}</strong>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert>
+              <CheckCircle2 className="w-4 h-4" />
+              <AlertDescription>
+                This document is not currently in use and can be safely deleted.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setSelectedDocument(null);
+                setDeleteUsageInfo(null);
+              }}
+            >
+              Cancel
+            </Button>
+            {deleteUsageInfo?.isInUse && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // TODO: Implement document replacement flow
+                  toast({
+                    title: 'Feature Not Available',
+                    description: 'Document replacement is not yet implemented. Please delete the document and upload a new one.',
+                  });
+                }}
+              >
+                Replace with Another Document
+              </Button>
+            )}
+            <Button
+              variant="destructive"
+              onClick={() => confirmDelete(deleteUsageInfo?.isInUse)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : deleteUsageInfo?.isInUse ? 'Force Delete Anyway' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

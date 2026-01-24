@@ -25,7 +25,7 @@ export const users = pgTable("users", {
   firebaseUid: varchar("firebase_uid", { length: 128 }).unique(),
   // Authentication fields
   passwordHash: varchar("password_hash", { length: 255 }), // bcrypt hash
-  role: varchar("role", { length: 50 }).notNull().default("team_member"), // system_admin, pmo_lead, project_manager, team_member, executive, guest
+  role: varchar("role", { length: 50 }).notNull().default("pending_approval"), // system_admin, admin, pmo_lead, project_manager, team_member, executive, guest, pending_approval
   phoneNumber: varchar("phone_number", { length: 20 }),
   timezone: varchar("timezone", { length: 100 }),
   // MFA fields

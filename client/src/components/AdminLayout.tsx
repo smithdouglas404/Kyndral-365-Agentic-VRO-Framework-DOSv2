@@ -20,6 +20,8 @@ import {
   Store,
   CheckCircle,
 } from 'lucide-react';
+import { ErrorBoundary } from './ErrorBoundary';
+import { ConfigurationStatus } from './ConfigurationStatus';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -94,11 +96,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               );
             })}
           </nav>
+
+          {/* Configuration Status */}
+          <div className="p-4 mt-auto border-t border-slate-200 dark:border-slate-700">
+            <ConfigurationStatus variant="compact" />
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1 p-8">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

@@ -219,11 +219,9 @@ async function generateAudioFromScript(script: string, briefingId: string): Prom
   } catch (error: any) {
     console.error('Error generating audio:', error);
 
-    // Fallback: return mock data if TTS fails
-    return {
-      audioUrl: '/api/voice-briefings/audio/mock-briefing.mp3',
-      duration: 180,
-    };
+    // Re-throw the error so the caller can handle it properly
+    // Don't return mock data - let the frontend show a proper error message
+    throw new Error(`Failed to generate voice briefing audio: ${error.message}`);
   }
 }
 

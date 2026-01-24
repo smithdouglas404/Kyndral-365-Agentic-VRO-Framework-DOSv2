@@ -46,7 +46,7 @@ export function registerWhiteLabelRoutes(app: Express) {
   ensureWhiteLabelTable();
 
   // GET /api/admin/white-label - Get white-label configuration
-  app.get("/api/admin/white-label", async (req: Request, res: Response) => {
+  app.get("/api/admin/white-label", authenticate, async (req: Request, res: Response) => {
     try {
       const result = await db.execute(sql`
         SELECT * FROM white_label_config WHERE id = 'default' LIMIT 1
@@ -67,7 +67,7 @@ export function registerWhiteLabelRoutes(app: Express) {
   });
 
   // PUT /api/admin/white-label - Update white-label configuration
-  app.put("/api/admin/white-label", async (req: Request, res: Response) => {
+  app.put("/api/admin/white-label", authenticate, async (req: Request, res: Response) => {
     try {
       const {
         companyName,
@@ -127,7 +127,7 @@ export function registerWhiteLabelRoutes(app: Express) {
   });
 
   // GET /api/white-label/theme - Public endpoint for theme (no auth required)
-  app.get("/api/white-label/theme", async (req: Request, res: Response) => {
+  app.get("/api/white-label/theme", authenticate, async (req: Request, res: Response) => {
     try {
       const result = await db.execute(sql`
         SELECT

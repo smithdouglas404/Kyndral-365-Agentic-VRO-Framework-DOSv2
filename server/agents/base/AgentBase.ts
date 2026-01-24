@@ -78,17 +78,76 @@ export abstract class AgentBase {
       outputKey: "output",
     });
 
+    // Override saveContext to prevent malformed messages from being saved
+    const originalSaveContext = this.memory.saveContext.bind(this.memory);
+    this.memory.saveContext = async (inputValues: any, outputValues: any) => {
+      try {
+        // Validate output before saving
+        if (outputValues && outputValues.output) {
+          const output = outputValues.output;
+
+          // Check if output is a malformed message object
+          if (typeof output === 'object' && output.type === 'not_implemented') {
+            console.warn(`[${this.config.agentName}] Blocked not_implemented message from being saved to memory`);
+            return;
+          }
+        }
+
+        // Save the context normally if validation passes
+        await originalSaveContext(inputValues, outputValues);
+      } catch (error) {
+        console.error(`[${this.config.agentName}] Error in saveContext:`, error);
+        // Don't rethrow - failing to save to memory shouldn't crash the agent
+      }
+    };
+
     // Override loadMemoryVariables to filter out malformed "not_implemented" messages
+    // and ensure chat_history is always a valid array
     const originalLoadMemoryVariables = this.memory.loadMemoryVariables.bind(this.memory);
     this.memory.loadMemoryVariables = async (values: any) => {
-      const result = await originalLoadMemoryVariables(values);
-      if (result.chat_history && Array.isArray(result.chat_history)) {
-        // Filter out malformed messages with type "not_implemented"
+      try {
+        const result = await originalLoadMemoryVariables(values);
+
+        // Ensure chat_history exists and is an array
+        if (!result.chat_history) {
+          result.chat_history = [];
+          return result;
+        }
+
+        if (!Array.isArray(result.chat_history)) {
+          console.warn(`[${this.config.agentName}] chat_history is not an array, converting to empty array`);
+          result.chat_history = [];
+          return result;
+        }
+
+        // Filter out malformed messages
         result.chat_history = result.chat_history.filter((msg: any) => {
-          return msg && typeof msg === 'object' && msg.type !== 'not_implemented';
+          // Remove messages that are null, undefined, or not objects
+          if (!msg || typeof msg !== 'object') {
+            console.warn(`[${this.config.agentName}] Filtered out invalid message:`, msg);
+            return false;
+          }
+
+          // Remove messages with type "not_implemented"
+          if (msg.type === 'not_implemented') {
+            console.warn(`[${this.config.agentName}] Filtered out not_implemented message`);
+            return false;
+          }
+
+          // Remove messages without required content
+          if (!msg.content && !msg.text) {
+            console.warn(`[${this.config.agentName}] Filtered out message without content`);
+            return false;
+          }
+
+          return true;
         });
+
+        return result;
+      } catch (error) {
+        console.error(`[${this.config.agentName}] Error in loadMemoryVariables, returning empty history:`, error);
+        return { chat_history: [] };
       }
-      return result;
     };
 
     // Initialize tools (to be defined by subclasses)
@@ -156,6 +215,10 @@ export abstract class AgentBase {
     await this.logActivity('agent_execution', `Executing ${this.config.agentName}: ${input}`);
 
     try {
+      // Clear memory before execution to ensure clean state
+      // This prevents any lingering malformed messages from previous executions
+      await this.clearMemory();
+
       // Execute with LangSmith tracer callback if enabled
       const callbacks = this.tracer ? [this.tracer] : [];
 
@@ -186,10 +249,15 @@ export abstract class AgentBase {
         interventions,
       };
     } catch (error: any) {
-      // If agent hit max_iterations, clear memory to prevent history corruption
+      // Clear memory on ANY error to prevent corruption propagation
+      console.warn(`[${this.config.agentName}] Error during execution, clearing memory to prevent corruption`);
+      await this.clearMemory();
+
+      // Log specific error types for debugging
       if (error.message?.includes('max_iterations') || error.message?.includes('Agent stopped')) {
-        console.warn(`[${this.config.agentName}] Max iterations reached, clearing memory to prevent corruption`);
-        await this.clearMemory();
+        console.warn(`[${this.config.agentName}] Max iterations reached`);
+      } else if (error.message?.includes("Cannot read properties of undefined (reading 'map')")) {
+        console.error(`[${this.config.agentName}] Message formatting error detected - malformed message in history`);
       }
 
       await this.logActivity('agent_error', `Error: ${error.message}`);

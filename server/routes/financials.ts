@@ -11,8 +11,7 @@
 import type { Express } from 'express';
 import type { IStorage } from '../storage.js';
 import { FinancialCalculationEngine } from '../engines/FinancialCalculationEngine.js';
-// import { authenticate, requirePermission } from '../auth/authMiddleware.js';
-// import { PermissionResource, PermissionAction } from '../auth/authSystem.js';
+import { authenticate } from '../auth/authMiddleware.js';
 
 export function registerFinancialRoutes(app: Express, storage: IStorage): void {
   const financialEngine = new FinancialCalculationEngine(storage);
@@ -21,7 +20,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * GET /api/financials/projects/:projectId/evm
    * Get comprehensive EVM metrics for a project
    */
-  app.get('/api/financials/projects/:projectId/evm', async (req, res) => {
+  app.get('/api/financials/projects/:projectId/evm', authenticate, async (req, res) => {
     try {
       const { projectId } = req.params;
 
@@ -44,7 +43,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * GET /api/financials/projects/:projectId/forecast
    * Get budget forecast with confidence scoring
    */
-  app.get('/api/financials/projects/:projectId/forecast', async (req, res) => {
+  app.get('/api/financials/projects/:projectId/forecast', authenticate, async (req, res) => {
     try {
       const { projectId } = req.params;
 
@@ -67,7 +66,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * GET /api/financials/projects/:projectId/value-realization
    * Get value realization metrics (ROI tracking)
    */
-  app.get('/api/financials/projects/:projectId/value-realization', async (req, res) => {
+  app.get('/api/financials/projects/:projectId/value-realization', authenticate, async (req, res) => {
     try {
       const { projectId } = req.params;
 
@@ -90,7 +89,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * GET /api/financials/projects/:projectId/cost-attribution
    * Get detailed cost attribution across resources, phases, categories
    */
-  app.get('/api/financials/projects/:projectId/cost-attribution', async (req, res) => {
+  app.get('/api/financials/projects/:projectId/cost-attribution', authenticate, async (req, res) => {
     try {
       const { projectId } = req.params;
 
@@ -113,7 +112,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * GET /api/financials/portfolios/:portfolioId/analysis
    * Get portfolio-level budget analysis
    */
-  app.get('/api/financials/portfolios/:portfolioId/analysis', async (req, res) => {
+  app.get('/api/financials/portfolios/:portfolioId/analysis', authenticate, async (req, res) => {
     try {
       const { portfolioId } = req.params;
 
@@ -137,7 +136,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * Batch calculate EVM for multiple projects
    * Used by agents for portfolio-wide analysis
    */
-  app.post('/api/financials/batch/evm', async (req, res) => {
+  app.post('/api/financials/batch/evm', authenticate, async (req, res) => {
     try {
       const { projectIds } = req.body;
 
@@ -187,7 +186,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * Batch calculate value realization for multiple projects
    * Used by VRO Agent for portfolio-wide value tracking
    */
-  app.post('/api/financials/batch/value-realization', async (req, res) => {
+  app.post('/api/financials/batch/value-realization', authenticate, async (req, res) => {
     try {
       const { projectIds } = req.body;
 
@@ -237,7 +236,7 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
    * Get financial overview across all portfolios
    * Used by executive dashboard
    */
-  app.get('/api/financials/portfolio-overview', async (req, res) => {
+  app.get('/api/financials/portfolio-overview', authenticate, async (req, res) => {
     try {
       const portfolios = await storage.getPortfolios();
 
