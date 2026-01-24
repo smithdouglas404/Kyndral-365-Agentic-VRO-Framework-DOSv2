@@ -1,0 +1,256 @@
+I'll explore your codebase to understand the current page structure and   
+  document upload functionality.                                            
+                                                                            
+● Explore(Explore current UI structure)                                     
+  ⎿  Done (33 tool uses · 56.8k tokens · 58s)                               
+                                                                            
+● Analysis: Current State → Proposed Consolidation                          
+                                                                            
+  Key Findings                                                              
+                                                                            
+  Current State:                                                            
+  - ✅ 44 pages, 49 routes (matches your ~43/50 estimate)                   
+  - ✅ 9 roles already defined with full RBAC (Firebase + local DB)         
+  - ✅ Role-based home pages already working                                
+  - ⚠️ Document upload designed but NOT implemented (schemas exist, no      
+  upload endpoints)                                                         
+  - ⚠️ 9 separate dashboards adding to the fragmentation                    
+                                                                            
+  ---                                                                       
+  Consolidation Mapping: 44 Pages → 8 Workspaces                            
+                                                                            
+  Here's how your current pages map to the proposed workspaces:             
+                                                                            
+  1. Executive/VRO Workspace (15 pages consolidated)                        
+                                                                            
+  Route: /workspace/executive                                               
+  Tabs: [Portfolio] [Value] [OKRs] [Sustainability] [Analytics]             
+                                                                            
+  Consolidates:                                                             
+  - dashboard.tsx (PMO)                                                     
+  - dashboard-okr.tsx                                                       
+  - COPDashboard.tsx                                                        
+  - vro-framework.tsx                                                       
+  - value-proposition.tsx                                                   
+  - SegmentPage.tsx                                                         
+  - SustainabilityPage.tsx                                                  
+  - AdvancedAnalytics.tsx                                                   
+  - ReportingAnalytics.tsx                                                  
+  - CustomReportBuilder.tsx                                                 
+  - LiquidIntelligencePage.tsx                                              
+  - OrchestrationMonitoringPage.tsx                                         
+  - DeepAgentMonitoring.tsx                                                 
+  - DataQualityPage.tsx                                                     
+  - AgentCommandCenterPage.tsx                                              
+                                                                            
+  ---                                                                       
+  2. PM/Operator Workspace (6 pages consolidated)                           
+                                                                            
+  Route: /workspace/pm                                                      
+  Tabs: [My Projects] [Tasks] [Issues] [Change Requests] [Risk] [Calendar]  
+                                                                            
+  Consolidates:                                                             
+  - ProjectDetailPage.tsx                                                   
+  - ProjectIngestionPage.tsx                                                
+  - IssueManagement.tsx                                                     
+  - ChangeRequestManagement.tsx                                             
+  - RiskManagement.tsx                                                      
+  - CollaborationHub.tsx                                                    
+                                                                            
+  ---                                                                       
+  3. FinOps Workspace (5 pages consolidated)                                
+                                                                            
+  Route: /workspace/finops                                                  
+  Tabs: [Budget Tracking] [Forecasts] [Cost Optimization] [ROI Analysis]    
+  [Reports]                                                                 
+                                                                            
+  Consolidates:                                                             
+  - dashboard-finops.tsx                                                    
+  - FinancialManagement.tsx                                                 
+  - AdvancedFinancialManagement.tsx                                         
+  - ReportingAnalytics.tsx (filtered to financial)                          
+  - CustomReportBuilder.tsx (filtered to financial)                         
+                                                                            
+  ---                                                                       
+  4. TMO Workspace (4 pages consolidated)                                   
+                                                                            
+  Route: /workspace/tmo                                                     
+  Tabs: [Roadmap] [Change Initiatives] [Milestones] [Resources]             
+                                                                            
+  Consolidates:                                                             
+  - dashboard-tmo.tsx                                                       
+  - ProgramManagement.tsx                                                   
+  - ResourceManagement.tsx / ResourceManagementNew.tsx                      
+                                                                            
+  ---                                                                       
+  5. Planning Workspace (3 pages consolidated)                              
+                                                                            
+  Route: /workspace/planning                                                
+  Tabs: [Resource Allocation] [Capacity] [Schedule] [Dependencies]          
+                                                                            
+  Consolidates:                                                             
+  - dashboard-planning.tsx                                                  
+  - ResourceManagement.tsx                                                  
+  - ProgramManagement.tsx (dependencies view)                               
+                                                                            
+  ---                                                                       
+  6. Governance Workspace (4 pages consolidated)                            
+                                                                            
+  Route: /workspace/governance                                              
+  Tabs: [Approvals] [Compliance] [Audit Trail] [Workflows]                  
+                                                                            
+  Consolidates:                                                             
+  - dashboard-governance.tsx                                                
+  - WorkflowBuilder.tsx                                                     
+  - CustomFieldManagement.tsx                                               
+  - RiskCenter.tsx (compliance view)                                        
+                                                                            
+  ---                                                                       
+  7. OCM Workspace (3 pages consolidated)                                   
+                                                                            
+  Route: /workspace/ocm                                                     
+  Tabs: [Stakeholder Engagement] [Communications] [Training] [Collaboration]
+                                                                            
+  Consolidates:                                                             
+  - dashboard-ocm.tsx                                                       
+  - CollaborationHub.tsx                                                    
+  - policy-generator.tsx (communications)                                   
+                                                                            
+  ---                                                                       
+  8. Admin Workspace (8 pages consolidated)                                 
+                                                                            
+  Route: /workspace/admin                                                   
+  Tabs: [Users] [Roles] [Integrations] [System] [Agents] [Documents]        
+                                                                            
+  Consolidates:                                                             
+  - AdminDashboard.tsx                                                      
+  - UserManagement.tsx                                                      
+  - IntegrationManagement.tsx                                               
+  - SystemConfiguration.tsx                                                 
+  - SystemSettings.tsx                                                      
+  - AgentConfiguration.tsx                                                  
+  - MCPConfigPage.tsx                                                       
+  - SettingsPage.tsx                                                        
+                                                                            
+  ---                                                                       
+  Document Upload: Critical Decision Needed                                 
+                                                                            
+  Current Status:                                                           
+  - ✅ Database schemas created (documents, documentVersions,               
+  documentApprovals)                                                        
+  - ✅ Frontend UI built (DocumentManagement.tsx with upload button)        
+  - ❌ No server endpoint for file uploads                                  
+  - ❌ No file storage configured (local disk? S3? Firebase Storage?)       
+                                                                            
+  Recommendation: Hybrid Approach                                           
+                                                                            
+  Option A: Distributed (Recommended)                                       
+  - Each workspace has its own "Documents" tab                              
+  - PMs upload project docs, FinOps upload budgets, Governance upload       
+  policies                                                                  
+  - Documents are tagged by workspace/role in the database                  
+  - Admin workspace shows ALL documents with bulk management                
+                                                                            
+  Option B: Centralized                                                     
+  - Single "Documents" workspace (#9) accessible to all roles               
+  - Admin manages all uploads                                               
+  - Other users have read-only access filtered by project/role              
+                                                                            
+  My Recommendation: Option A (Distributed) because:                        
+  1. Documents are context-specific (project docs belong with projects)     
+  2. Users want to upload in their workflow, not leave their workspace      
+  3. Admin still sees everything in Admin workspace                         
+  4. Better permissions model (PMs can't see FinOps confidential budgets)   
+                                                                            
+  ---                                                                       
+  What Needs to Change                                                      
+                                                                            
+  1. App.tsx - Replace 49 routes with ~15 routes                            
+                                                                            
+  // NEW ROUTES                                                             
+  <Route path="/workspace/executive" component={ExecutiveWorkspace} />      
+  <Route path="/workspace/pm" component={PMWorkspace} />                    
+  <Route path="/workspace/finops" component={FinOpsWorkspace} />            
+  <Route path="/workspace/tmo" component={TMOWorkspace} />                  
+  <Route path="/workspace/planning" component={PlanningWorkspace} />        
+  <Route path="/workspace/governance" component={GovernanceWorkspace} />    
+  <Route path="/workspace/ocm" component={OCMWorkspace} />                  
+  <Route path="/workspace/admin" component={AdminWorkspace} />              
+                                                                            
+  // KEEP AUTH ROUTES                                                       
+  <Route path="/login" component={LoginPage} />                             
+  <Route path="/register" component={RegisterPage} />                       
+  <Route path="/password-reset" component={PasswordResetPage} />            
+                                                                            
+  // REDIRECT OLD ROUTES TO WORKSPACES                                      
+  <Route path="/" component={RoleBasedRedirect} /> // Uses                  
+  useRoleBasedAccess                                                        
+  <Route path="/dashboard*" component={RedirectToWorkspace} />              
+                                                                            
+  2. Sidebar.tsx - Simplify to 8 items                                      
+                                                                            
+  // NEW SIDEBAR (Role-filtered)                                            
+  - Executive (if role === 'executive' or 'vro')                            
+  - Projects (if role === 'pm')                                             
+  - Finance (if role === 'finops')                                          
+  - TMO (if role === 'tmo')                                                 
+  - Planning (if role === 'planning')                                       
+  - Governance (if role === 'governance')                                   
+  - OCM (if role === 'ocm')                                                 
+  - Admin (if role === 'system_admin')                                      
+                                                                            
+  3. Workspace Pages - Create 8 new components                              
+                                                                            
+  Each workspace page structure:                                            
+  // Example: PMWorkspace.tsx                                               
+  <WorkspaceLayout title="PM Workspace">                                    
+    <Tabs>                                                                  
+      <Tab label="My Projects"><ProjectsList /></Tab>                       
+      <Tab label="Tasks"><TasksView /></Tab>                                
+      <Tab label="Issues"><IssueManagement /></Tab>                         
+      <Tab label="Risks"><RiskManagement /></Tab>                           
+      <Tab label="Documents"><DocumentManagement filtered="pm" /></Tab>     
+    </Tabs>                                                                 
+  </WorkspaceLayout>                                                        
+                                                                            
+  4. Update useRoleBasedAccess.ts                                           
+                                                                            
+  Update ROLE_WORKSPACE_MAP to map roles to new workspace routes:           
+  pm: {                                                                     
+    homePage: '/workspace/pm',                                              
+    allowedPages: ['/workspace/pm', '/workspace/executive']                 
+  }                                                                         
+                                                                            
+  5. Implement Document Upload                                              
+                                                                            
+  Need to build:                                                            
+  - POST /api/documents/upload - Multer middleware for file uploads         
+  - File storage (recommend Firebase Storage for consistency)               
+  - Update DocumentManagement.tsx to call upload endpoint                   
+  - Add "Documents" tab to each workspace                                   
+                                                                            
+  ---                                                                       
+  Questions for You                                                         
+                                                                            
+  1. Document Upload Strategy: Do you want distributed (each workspace      
+  uploads) or centralized (admin-only uploads)?                             
+  2. File Storage: Should we use Firebase Storage (since you're already     
+  using Firebase Auth) or local disk storage?                               
+  3. Multi-Role Users: Your RBAC currently assigns ONE role per user. Do you
+   need users to switch between multiple roles (e.g., someone who's both PM 
+  and FinOps)?                                                              
+  4. Migration Strategy: Should I:                                          
+    - Create the 8 new workspace pages                                      
+    - Update App.tsx routing                                                
+    - Keep old routes as redirects for a transition period                  
+    - Or hard cutover (remove old routes immediately)?                      
+                                                                            
+  Would you like me to start implementing the consolidation? I can begin    
+  with creating the workspace structure and updating the routing.           
+                                                                            
+✻ Sautéed for 1m 52s                                                        
+                                                                            
+* Considering… (esc to interrupt · 1m 52s · ↓ 0 tokens)                     
+  ⎿ Tip: Send messages to Claude while it works to steer Claude in real-time
+                                                                            
+                                                               
