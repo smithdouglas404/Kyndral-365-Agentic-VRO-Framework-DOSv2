@@ -65,11 +65,31 @@ import AgentConfiguration from "@/pages/admin/AgentConfiguration";
 import CustomFieldManagement from "@/pages/admin/CustomFieldManagement";
 import WorkflowBuilder from "@/pages/admin/WorkflowBuilder";
 import COPDashboard from "@/pages/COPDashboard";
+import ExecutiveWorkspace from "@/pages/workspaces/ExecutiveWorkspace";
+import PMWorkspace from "@/pages/workspaces/PMWorkspace";
+import FinOpsWorkspace from "@/pages/workspaces/FinOpsWorkspace";
+import TMOWorkspace from "@/pages/workspaces/TMOWorkspace";
+import PlanningWorkspace from "@/pages/workspaces/PlanningWorkspace";
+import GovernanceWorkspace from "@/pages/workspaces/GovernanceWorkspace";
+import OCMWorkspace from "@/pages/workspaces/OCMWorkspace";
+import AdminWorkspace from "@/pages/workspaces/AdminWorkspace";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+
+      {/* New Workspace Routes */}
+      <Route path="/workspace/executive" component={ExecutiveWorkspace} />
+      <Route path="/workspace/pm" component={PMWorkspace} />
+      <Route path="/workspace/finops" component={FinOpsWorkspace} />
+      <Route path="/workspace/tmo" component={TMOWorkspace} />
+      <Route path="/workspace/planning" component={PlanningWorkspace} />
+      <Route path="/workspace/governance" component={GovernanceWorkspace} />
+      <Route path="/workspace/ocm" component={OCMWorkspace} />
+      <Route path="/workspace/admin" component={AdminWorkspace} />
+
+      {/* Legacy Routes (kept for backwards compatibility) */}
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/pmo" component={Dashboard} />
       <Route path="/cop" component={COPDashboard} />
@@ -136,8 +156,9 @@ function GlobalAIOverlay() {
   
   // Check if we should show on this route
   const shouldShowOverlay = location && (
-    location === '/dashboard' || 
-    location.startsWith('/dashboard/') || 
+    location === '/dashboard' ||
+    location.startsWith('/dashboard/') ||
+    location.startsWith('/workspace/') ||
     location.startsWith('/segment/') ||
     location.startsWith('/division/') ||
     location.startsWith('/project/')

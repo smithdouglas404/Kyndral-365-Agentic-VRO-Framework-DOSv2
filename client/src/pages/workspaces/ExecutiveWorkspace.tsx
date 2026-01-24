@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { TrendingUp, Target, BarChart3, Leaf, BookOpen, Activity } from "lucide-react";
 import { CommonOperationalPicture } from "@/components/CommonOperationalPicture";
@@ -19,7 +20,7 @@ export default function ExecutiveWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'executive-workspace',
+      pageType: 'other',
       pageTitle: 'Executive Workspace',
     });
   }, [setPageContext]);
@@ -69,7 +70,7 @@ export default function ExecutiveWorkspace() {
   ];
 
   return (
-    <>
+    <WorkspacePageLayout>
       <WorkspaceLayout
         title="Executive Workspace"
         description="Portfolio health, value realization, and strategic alignment"
@@ -84,6 +85,6 @@ export default function ExecutiveWorkspace() {
         entityType={drillDownEntity?.type || ''}
         entityId={drillDownEntity?.id || ''}
       />
-    </>
+    </WorkspacePageLayout>
   );
 }

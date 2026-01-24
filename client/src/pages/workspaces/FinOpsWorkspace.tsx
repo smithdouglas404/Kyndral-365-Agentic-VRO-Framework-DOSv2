@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { DollarSign, TrendingUp, PieChart, Target, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,7 +86,7 @@ export default function FinOpsWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'finops-workspace',
+      pageType: 'other',
       pageTitle: 'FinOps Workspace',
     });
   }, [setPageContext]);
@@ -124,12 +125,14 @@ export default function FinOpsWorkspace() {
   ];
 
   return (
-    <WorkspaceLayout
-      title="FinOps Workspace"
-      description="Financial operations, budget tracking, and cost optimization"
-      icon={<DollarSign className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="budget"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="FinOps Workspace"
+        description="Financial operations, budget tracking, and cost optimization"
+        icon={<DollarSign className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="budget"
+      />
+    </WorkspacePageLayout>
   );
 }

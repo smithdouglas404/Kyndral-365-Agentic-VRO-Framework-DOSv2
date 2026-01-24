@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { RefreshCw, Map, Target, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ export default function TMOWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'tmo-workspace',
+      pageType: 'other',
       pageTitle: 'TMO Workspace',
     });
   }, [setPageContext]);
@@ -62,12 +63,14 @@ export default function TMOWorkspace() {
   ];
 
   return (
-    <WorkspaceLayout
-      title="TMO Workspace"
-      description="Transformation management, roadmaps, and change initiatives"
-      icon={<RefreshCw className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="roadmap"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="TMO Workspace"
+        description="Transformation management, roadmaps, and change initiatives"
+        icon={<RefreshCw className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="roadmap"
+      />
+    </WorkspacePageLayout>
   );
 }

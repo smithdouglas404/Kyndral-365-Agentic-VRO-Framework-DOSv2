@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { Users, MessageSquare, BookOpen, UserCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ export default function OCMWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'ocm-workspace',
+      pageType: 'other',
       pageTitle: 'OCM Workspace',
     });
   }, [setPageContext]);
@@ -62,12 +63,14 @@ export default function OCMWorkspace() {
   ];
 
   return (
-    <WorkspaceLayout
-      title="OCM Workspace"
-      description="Organizational change management, stakeholder engagement, and training"
-      icon={<Users className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="stakeholders"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="OCM Workspace"
+        description="Organizational change management, stakeholder engagement, and training"
+        icon={<Users className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="stakeholders"
+      />
+    </WorkspacePageLayout>
   );
 }

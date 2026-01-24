@@ -33,6 +33,7 @@ import { createCommandersIntentRoutes } from "./routes/commanders-intent.js";
 import { createCOPRoutes } from "./routes/cop.js";
 import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
 import { createComplianceRoutes } from "./routes/compliance.js";
+import documentsRouter from "./routes/documents.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -186,6 +187,9 @@ export async function registerRoutes(
 
   // Register Compliance Validation routes (Regulatory framework checking)
   app.use("/api/compliance", createComplianceRoutes(storage));
+
+  // Register Document Management routes (Upload, versioning, approvals)
+  app.use("/api/documents", documentsRouter);
 
   // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
   registerOrchestrationRoutes(app, storage);

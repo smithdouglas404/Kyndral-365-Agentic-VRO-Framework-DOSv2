@@ -1,15 +1,17 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { Settings, Users, Plug, Bot, FileText, Sliders } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DocumentList } from "@/components/DocumentList";
 
 export default function AdminWorkspace() {
   const { setPageContext } = usePageContext();
 
   useEffect(() => {
     setPageContext({
-      pageType: 'admin-workspace',
+      pageType: 'other',
       pageTitle: 'Admin Workspace',
     });
   }, [setPageContext]);
@@ -63,12 +65,7 @@ export default function AdminWorkspace() {
       id: "documents",
       label: "Documents",
       icon: <FileText className="h-4 w-4" />,
-      content: (
-        <Card>
-          <CardHeader><CardTitle>Document Management</CardTitle></CardHeader>
-          <CardContent><p className="text-sm text-gray-600">Global document repository and management will be displayed here.</p></CardContent>
-        </Card>
-      ),
+      content: <DocumentList />,
     },
     {
       id: "system",
@@ -84,12 +81,14 @@ export default function AdminWorkspace() {
   ];
 
   return (
-    <WorkspaceLayout
-      title="Admin Workspace"
-      description="System administration, user management, and configuration"
-      icon={<Settings className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="users"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="Admin Workspace"
+        description="System administration, user management, and configuration"
+        icon={<Settings className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="users"
+      />
+    </WorkspacePageLayout>
   );
 }

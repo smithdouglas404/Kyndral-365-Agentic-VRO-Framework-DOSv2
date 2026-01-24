@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { Shield, CheckCircle, FileText, Workflow } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ export default function GovernanceWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'governance-workspace',
+      pageType: 'other',
       pageTitle: 'Governance Workspace',
     });
   }, [setPageContext]);
@@ -62,12 +63,14 @@ export default function GovernanceWorkspace() {
   ];
 
   return (
-    <WorkspaceLayout
-      title="Governance Workspace"
-      description="Governance, compliance, and approval workflows"
-      icon={<Shield className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="approvals"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="Governance Workspace"
+        description="Governance, compliance, and approval workflows"
+        icon={<Shield className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="approvals"
+      />
+    </WorkspacePageLayout>
   );
 }

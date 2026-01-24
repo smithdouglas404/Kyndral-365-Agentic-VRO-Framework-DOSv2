@@ -1,8 +1,12 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
-import { FolderKanban, CheckSquare, AlertCircle, FileEdit, Shield, Users } from "lucide-react";
+import { FolderKanban, CheckSquare, AlertCircle, FileEdit, Shield, Users, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DocumentList } from "@/components/DocumentList";
+import IssueManagement from "../IssueManagement";
+import ChangeRequestManagement from "../ChangeRequestManagement";
 
 // Placeholder tab content components
 function ProjectsTab() {
@@ -36,33 +40,15 @@ function TasksTab() {
 }
 
 function IssuesTab() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Issues</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-600">
-          Issue tracking and resolution will be displayed here.
-        </p>
-      </CardContent>
-    </Card>
-  );
+  return <IssueManagement />;
 }
 
 function ChangeRequestsTab() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Change Requests</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-600">
-          Change request management will be displayed here.
-        </p>
-      </CardContent>
-    </Card>
-  );
+  return <ChangeRequestManagement />;
+}
+
+function DocumentsTab() {
+  return <DocumentList />;
 }
 
 function RiskTab() {
@@ -100,7 +86,7 @@ export default function PMWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'pm-workspace',
+      pageType: 'other',
       pageTitle: 'PM Workspace',
     });
   }, [setPageContext]);
@@ -142,15 +128,23 @@ export default function PMWorkspace() {
       icon: <Users className="h-4 w-4" />,
       content: <CollaborationTab />,
     },
+    {
+      id: "documents",
+      label: "Documents",
+      icon: <FileText className="h-4 w-4" />,
+      content: <DocumentsTab />,
+    },
   ];
 
   return (
-    <WorkspaceLayout
-      title="PM Workspace"
-      description="Project management, tasks, issues, and risk tracking"
-      icon={<FolderKanban className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="projects"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="PM Workspace"
+        description="Project management, tasks, issues, and risk tracking"
+        icon={<FolderKanban className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="projects"
+      />
+    </WorkspacePageLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { WorkspaceLayout, WorkspaceTab } from "@/components/WorkspaceLayout";
+import { WorkspacePageLayout } from "@/components/WorkspacePageLayout";
 import { usePageContext } from "@/contexts/PageContext";
 import { Calendar, Users, GanttChart, Network } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ export default function PlanningWorkspace() {
 
   useEffect(() => {
     setPageContext({
-      pageType: 'planning-workspace',
+      pageType: 'other',
       pageTitle: 'Planning Workspace',
     });
   }, [setPageContext]);
@@ -62,12 +63,14 @@ export default function PlanningWorkspace() {
   ];
 
   return (
-    <WorkspaceLayout
-      title="Planning Workspace"
-      description="Strategic planning, resource allocation, and capacity management"
-      icon={<Calendar className="h-6 w-6" />}
-      tabs={tabs}
-      defaultTab="allocation"
-    />
+    <WorkspacePageLayout>
+      <WorkspaceLayout
+        title="Planning Workspace"
+        description="Strategic planning, resource allocation, and capacity management"
+        icon={<Calendar className="h-6 w-6" />}
+        tabs={tabs}
+        defaultTab="allocation"
+      />
+    </WorkspacePageLayout>
   );
 }
