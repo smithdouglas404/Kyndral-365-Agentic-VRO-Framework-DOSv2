@@ -43,7 +43,8 @@
       "Bash(npx tsx:*)",
       "Bash(npm run db:migrate:*)",
       "Bash(npm run:*)",
-      "Bash(tsx:*)"
+      "Bash(tsx:*)",
+      "Bash(node -c:*)"
     ]
   }
 }

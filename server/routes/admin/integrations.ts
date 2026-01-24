@@ -13,8 +13,11 @@ import {
 } from "../../../shared/schema.js";
 import { eq, desc } from "drizzle-orm";
 import { encryptFields, decryptFields } from "../../lib/encryption.js";
+import { IntegrationSyncService } from "../../services/IntegrationSyncService.js";
+import type { IStorage } from "../../storage.js";
 
-export function registerIntegrationRoutes(app: Express) {
+export function registerIntegrationRoutes(app: Express, storage: IStorage) {
+  const syncService = new IntegrationSyncService(storage);
 
   // GET /api/integrations - List all integrations
   app.get("/api/integrations", async (req: Request, res: Response) => {
@@ -254,17 +257,8 @@ export function registerIntegrationRoutes(app: Express) {
         });
       }
 
-      // TODO: Implement actual connection testing logic per integration type
-      // For now, simulate a test
-      const testResult = {
-        success: true,
-        message: "Connection test successful (simulated)",
-        details: {
-          type: integration[0].type,
-          latency: Math.floor(Math.random() * 200) + 50,
-          timestamp: new Date().toISOString(),
-        }
-      };
+      // Test connection using sync service
+      const testResult = await syncService.testConnection(integration[0]);
 
       // Update integration status
       await db
@@ -306,19 +300,8 @@ export function registerIntegrationRoutes(app: Express) {
         });
       }
 
-      // TODO: Implement actual sync logic per integration type
-      // For now, simulate a sync
-      const syncResult = {
-        success: true,
-        message: "Sync triggered successfully (simulated)",
-        details: {
-          recordsImported: Math.floor(Math.random() * 100) + 10,
-          recordsUpdated: Math.floor(Math.random() * 50),
-          errors: 0,
-          duration: Math.floor(Math.random() * 5000) + 1000,
-          timestamp: new Date().toISOString(),
-        }
-      };
+      // Sync data using sync service
+      const syncResult = await syncService.syncIntegration(integration[0]);
 
       // Update last sync info
       await db

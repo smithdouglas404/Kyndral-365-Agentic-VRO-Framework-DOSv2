@@ -25,20 +25,20 @@ export const users = pgTable("users", {
   firebaseUid: varchar("firebase_uid", { length: 128 }).unique(),
   // Authentication fields
   passwordHash: varchar("password_hash", { length: 255 }), // bcrypt hash
-  role: varchar("role", { length: 50 }).default("team_member"), // system_admin, pmo_lead, project_manager, team_member, executive, guest
+  role: varchar("role", { length: 50 }).notNull().default("team_member"), // system_admin, pmo_lead, project_manager, team_member, executive, guest
   phoneNumber: varchar("phone_number", { length: 20 }),
   timezone: varchar("timezone", { length: 100 }),
   // MFA fields
-  mfaEnabled: varchar("mfa_enabled", { length: 10 }).default("false"),
+  mfaEnabled: varchar("mfa_enabled", { length: 10 }).notNull().default("false"),
   mfaSecret: varchar("mfa_secret", { length: 255 }), // TOTP secret
   mfaBackupCodes: varchar("mfa_backup_codes", { length: 1000 }), // JSON array
   // Account status
-  accountStatus: varchar("account_status", { length: 20 }).default("active"), // active, disabled, locked
+  accountStatus: varchar("account_status", { length: 20 }).notNull().default("active"), // active, disabled, locked
   lastLoginAt: timestamp("last_login_at"),
-  failedLoginAttempts: varchar("failed_login_attempts", { length: 10 }).default("0"),
+  failedLoginAttempts: varchar("failed_login_attempts", { length: 10 }).notNull().default("0"),
   lockedUntil: timestamp("locked_until"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export type UpsertUser = typeof users.$inferInsert;
@@ -87,3 +87,45 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+// ============================================================================
+// USER PERMISSIONS - Granular access control beyond roles
+// ============================================================================
+
+export const userPermissions = pgTable("user_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+
+  // Workspace Access
+  canAccessExecutiveDashboard: varchar("can_access_executive_dashboard", { length: 5 }).notNull().default("false"),
+  canAccessPMWorkspace: varchar("can_access_pm_workspace", { length: 5 }).notNull().default("false"),
+  canAccessFinOpsWorkspace: varchar("can_access_finops_workspace", { length: 5 }).notNull().default("false"),
+  canAccessTMOWorkspace: varchar("can_access_tmo_workspace", { length: 5 }).notNull().default("false"),
+  canAccessPlanningWorkspace: varchar("can_access_planning_workspace", { length: 5 }).notNull().default("false"),
+  canAccessGovernanceWorkspace: varchar("can_access_governance_workspace", { length: 5 }).notNull().default("false"),
+  canAccessOCMWorkspace: varchar("can_access_ocm_workspace", { length: 5 }).notNull().default("false"),
+  canAccessAdminWorkspace: varchar("can_access_admin_workspace", { length: 5 }).notNull().default("false"),
+
+  // Feature Permissions
+  canEditProjects: varchar("can_edit_projects", { length: 5 }).notNull().default("false"),
+  canDeleteProjects: varchar("can_delete_projects", { length: 5 }).notNull().default("false"),
+  canApproveChanges: varchar("can_approve_changes", { length: 5 }).notNull().default("false"),
+  canManageUsers: varchar("can_manage_users", { length: 5 }).notNull().default("false"),
+  canManageIntegrations: varchar("can_manage_integrations", { length: 5 }).notNull().default("false"),
+
+  // Agent Controls
+  canTriggerAgents: varchar("can_trigger_agents", { length: 5 }).notNull().default("false"),
+  canConfigureAgents: varchar("can_configure_agents", { length: 5 }).notNull().default("false"),
+  canViewAgentLogs: varchar("can_view_agent_logs", { length: 5 }).notNull().default("true"),
+
+  // Reports & Exports
+  canExportData: varchar("can_export_data", { length: 5 }).notNull().default("false"),
+  canViewFinancialReports: varchar("can_view_financial_reports", { length: 5 }).notNull().default("false"),
+  canViewExecutiveReports: varchar("can_view_executive_reports", { length: 5 }).notNull().default("false"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type UserPermissions = typeof userPermissions.$inferSelect;
+export type InsertUserPermissions = typeof userPermissions.$inferInsert;

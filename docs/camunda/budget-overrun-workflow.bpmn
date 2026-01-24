@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="budget-overrun-workflow" name="Budget Overrun Workflow" isExecutable="true">
+
+    <!-- Start Event -->
+    <bpmn:startEvent id="StartEvent_1" name="Budget Overrun Detected">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Service Task: Notify TMO Agent -->
+    <bpmn:serviceTask id="Task_NotifyTMO" name="Notify TMO Agent">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notify-agent" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="targetAgent" value="tmo" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Parallel Gateway -->
+    <bpmn:parallelGateway id="Gateway_Parallel" name="Parallel Actions">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- Service Task: Notify Risk Agent -->
+    <bpmn:serviceTask id="Task_NotifyRisk" name="Notify Risk Agent">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notify-agent" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="targetAgent" value="risk" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Service Task: Send Email -->
+    <bpmn:serviceTask id="Task_SendEmail" name="Send Email to Exec">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="send-email" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="recipient" value="exec@company.com" />
+          <zeebe:header key="subject" value="Critical Budget Overrun" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Business Rule Task: Evaluate Decision -->
+    <bpmn:businessRuleTask id="Task_EvaluateDecision" name="Evaluate Escalation">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="evaluate-dmn" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="decisionId" value="agent-collaboration-decision" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+
+    <!-- Converging Parallel Gateway -->
+    <bpmn:parallelGateway id="Gateway_Converge" name="Wait for All">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- User Task: Approve Remediation -->
+    <bpmn:userTask id="Task_ApproveRemediation" name="Approve Remediation Plan">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formKey="approve-remediation" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- Exclusive Gateway: Check Approval -->
+    <bpmn:exclusiveGateway id="Gateway_CheckApproval" name="Approved?">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- Service Task: Execute Remediation -->
+    <bpmn:serviceTask id="Task_ExecuteRemediation" name="Execute Remediation">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="execute-remediation" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Service Task: Escalate to Governance -->
+    <bpmn:serviceTask id="Task_Escalate" name="Escalate to Governance">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="escalate-agent" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="targetAgent" value="governance" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- End Events -->
+    <bpmn:endEvent id="EndEvent_Success" name="Remediation Complete">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_Escalated" name="Escalated">
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_NotifyTMO" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_NotifyTMO" targetRef="Gateway_Parallel" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Gateway_Parallel" targetRef="Task_NotifyRisk" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Gateway_Parallel" targetRef="Task_SendEmail" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Gateway_Parallel" targetRef="Task_EvaluateDecision" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_NotifyRisk" targetRef="Gateway_Converge" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_SendEmail" targetRef="Gateway_Converge" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_EvaluateDecision" targetRef="Gateway_Converge" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Gateway_Converge" targetRef="Task_ApproveRemediation" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_ApproveRemediation" targetRef="Gateway_CheckApproval" />
+    <bpmn:sequenceFlow id="Flow_Approved" name="Yes" sourceRef="Gateway_CheckApproval" targetRef="Task_ExecuteRemediation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approved = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Rejected" name="No" sourceRef="Gateway_CheckApproval" targetRef="Task_Escalate">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approved = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Task_ExecuteRemediation" targetRef="EndEvent_Success" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_Escalate" targetRef="EndEvent_Escalated" />
+  </bpmn:process>
+</bpmn:definitions>

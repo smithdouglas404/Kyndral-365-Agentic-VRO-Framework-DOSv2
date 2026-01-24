@@ -64,6 +64,11 @@ import SystemSettings from "@/pages/admin/SystemSettings";
 import AgentConfiguration from "@/pages/admin/AgentConfiguration";
 import CustomFieldManagement from "@/pages/admin/CustomFieldManagement";
 import WorkflowBuilder from "@/pages/admin/WorkflowBuilder";
+import MCPMarketplace from "@/pages/admin/MCPMarketplace";
+import ActiveIntegrations from "@/pages/admin/ActiveIntegrations";
+import ThresholdSettings from "@/pages/admin/ThresholdSettings";
+import OKRManagement from "@/pages/admin/OKRManagement";
+import UserPermissions from "@/pages/admin/UserPermissions";
 import COPDashboard from "@/pages/COPDashboard";
 import ExecutiveWorkspace from "@/pages/workspaces/ExecutiveWorkspace";
 import PMWorkspace from "@/pages/workspaces/PMWorkspace";
@@ -138,6 +143,11 @@ function Router() {
       <Route path="/admin/system-config" component={SystemConfiguration} />
       <Route path="/admin/custom-fields" component={CustomFieldManagement} />
       <Route path="/admin/workflows" component={WorkflowBuilder} />
+      <Route path="/admin/mcp-marketplace" component={MCPMarketplace} />
+      <Route path="/admin/active-integrations" component={ActiveIntegrations} />
+      <Route path="/admin/thresholds" component={ThresholdSettings} />
+      <Route path="/admin/okrs" component={OKRManagement} />
+      <Route path="/admin/permissions" component={UserPermissions} />
       <Route component={NotFound} />
     </Switch>
   );

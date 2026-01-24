@@ -186,6 +186,12 @@ app.use((req, res, next) => {
       } else {
         console.log("[Server] Automatic data sync scheduler disabled (no credentials configured)");
       }
+
+      // Start MCP Marketplace sync scheduler for all activated integrations
+      const { createMCPSyncScheduler } = await import("./mcp/MCPSyncScheduler.js");
+      const mcpSyncScheduler = createMCPSyncScheduler(storage);
+      await mcpSyncScheduler.start();
+      log("✅ MCP Marketplace sync scheduler started - Monitoring active integrations");
     },
   );
 })();

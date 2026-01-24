@@ -1,0 +1,30 @@
+  1. MCP Marketplace (Complete)                                                                                                       
+                                                                                                                                      
+  - 30+ integrations                                                                                                                  
+  - Professional UI with search/filter                                                                                                
+  - Real connection testing                                                                                                           
+  - Automated sync schedulers                                                                                                         
+                                                                                                                                      
+  2. Agent Configuration Panel (Just Completed!)                                                                                      
+                                                                                                                                      
+  - Professional cards for all 9 agents:                                                                                              
+    - FinOps, TMO, Risk, VRO, Governance, Planning, OCM, Integrated Mgmt, OKR                                                         
+  - Toggles to enable/disable each agent                                                                                              
+  - Dropdowns for scan intervals (15min, 30min, 1hr, 2hr, 4hr)                                                                        
+  - Autonomy level selector (Full Autonomy vs Supervised)                                                                             
+  - Status indicators (Active, Disabled, Running)                                                                                     
+  - Last run timestamps                                                                                                               
+  - Configure Thresholds button opens modal with:                                                                                     
+    - Agent-specific sliders                                                                                                          
+    - Number inputs with validation                                                                                                   
+    - Real-time preview                                                                                                               
+    - Reset to defaults                                                                                                               
+                                                                                                                                      
+  Backend Complete:                                                                                                                   
+                                                                                                                                      
+  - API routes at /api/admin/agent-config                                                                                             
+  - Database schema with agent_configs table                                                                                          
+  - PATCH endpoint to update settings                                                                                                 
+  - POST endpoint to manually trigger agents                                                                                          
+                                                                                                                                      
+  📍 Access:                                       

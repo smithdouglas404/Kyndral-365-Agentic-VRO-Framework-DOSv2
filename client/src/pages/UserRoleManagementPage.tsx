@@ -13,12 +13,12 @@ import { getIdToken } from '@/lib/firebase';
 interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: string | null;
   isActive: boolean;
   createdAt: string;
-  firebaseUid?: string;
+  firebaseUid?: string | null;
 }
 
 export default function UserRoleManagementPage() {
@@ -178,11 +178,11 @@ export default function UserRoleManagementPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {user.firstName[0]}{user.lastName[0]}
+                        {(user.firstName?.[0] || '?')}{(user.lastName?.[0] || '?')}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium">
-                          {user.firstName} {user.lastName}
+                          {user.firstName || ''} {user.lastName || ''}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
                           ID: {user.id.substring(0, 8)}...

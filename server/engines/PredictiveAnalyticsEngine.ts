@@ -147,6 +147,54 @@ export interface ResourceUtilizationForecast {
   recommendations: string[];
 }
 
+export interface CPMTask {
+  id: string;
+  name: string;
+  duration: number; // hours
+  earlyStart: number;
+  earlyFinish: number;
+  lateStart: number;
+  lateFinish: number;
+  totalFloat: number; // slack
+  isCritical: boolean;
+  predecessors: string[];
+  successors: string[];
+  status: string;
+  assignee?: string;
+  dueDate?: Date;
+}
+
+export interface CriticalPathAnalysis {
+  projectId: string;
+  projectName: string;
+
+  // Critical path
+  criticalPath: CPMTask[];
+  criticalPathDuration: number; // hours
+  criticalPathTasks: string[]; // task IDs
+
+  // Overall project metrics
+  totalTasks: number;
+  completedTasks: number;
+  criticalTasks: number;
+
+  // Risk assessment
+  criticalPathRisk: 'low' | 'medium' | 'high' | 'critical';
+  riskFactors: string[];
+
+  // Delays and slack
+  totalFloat: number; // total slack in project
+  averageFloat: number;
+  tasksWithNoFloat: number;
+
+  // Completion estimates
+  estimatedCompletionDate: Date;
+  estimatedDuration: number; // hours
+
+  // Recommendations
+  recommendations: string[];
+}
+
 export class PredictiveAnalyticsEngine {
   private financialEngine: FinancialCalculationEngine;
 
@@ -758,5 +806,292 @@ export class PredictiveAnalyticsEngine {
     const start = new Date(project.startDate);
     const end = new Date(project.endDate);
     return this.calculateDaysDifference(start, end);
+  }
+
+  /**
+   * Calculate Critical Path using CPM (Critical Path Method) algorithm
+   *
+   * CPM Algorithm Steps:
+   * 1. Forward Pass: Calculate Early Start (ES) and Early Finish (EF)
+   * 2. Backward Pass: Calculate Late Start (LS) and Late Finish (LF)
+   * 3. Calculate Float: Total Float = LS - ES (or LF - EF)
+   * 4. Identify Critical Path: Tasks with zero float
+   */
+  async calculateCriticalPath(projectId: string): Promise<CriticalPathAnalysis> {
+    const project = await this.storage.getProject(projectId);
+    if (!project) {
+      throw new Error(`Project ${projectId} not found`);
+    }
+
+    // Get all tasks for the project
+    const tasks = await this.storage.getTasks(projectId);
+
+    if (!tasks || tasks.length === 0) {
+      // No tasks, return empty analysis
+      return {
+        projectId,
+        projectName: project.name,
+        criticalPath: [],
+        criticalPathDuration: 0,
+        criticalPathTasks: [],
+        totalTasks: 0,
+        completedTasks: 0,
+        criticalTasks: 0,
+        criticalPathRisk: 'low',
+        riskFactors: ['No tasks defined in project'],
+        totalFloat: 0,
+        averageFloat: 0,
+        tasksWithNoFloat: 0,
+        estimatedCompletionDate: project.endDate ? new Date(project.endDate) : new Date(),
+        estimatedDuration: 0,
+        recommendations: ['Add tasks to the project to enable critical path analysis'],
+      };
+    }
+
+    // Build task dependency graph
+    const taskMap = new Map<string, CPMTask>();
+    const completedTasks = tasks.filter(t => t.status === 'done' || t.status === 'completed').length;
+
+    // Initialize CPM tasks
+    for (const task of tasks) {
+      const duration = task.effortHours ? parseFloat(task.effortHours) : 8; // default 8 hours
+
+      taskMap.set(task.id, {
+        id: task.id,
+        name: task.name,
+        duration,
+        earlyStart: 0,
+        earlyFinish: 0,
+        lateStart: 0,
+        lateFinish: 0,
+        totalFloat: 0,
+        isCritical: false,
+        predecessors: [],
+        successors: [],
+        status: task.status || 'todo',
+        assignee: task.assignee || undefined,
+        dueDate: task.dueDate || undefined,
+      });
+    }
+
+    // Infer dependencies from due dates and priorities
+    // (In a real system, we'd have explicit task dependencies)
+    const sortedTasks = Array.from(taskMap.values()).sort((a, b) => {
+      // Sort by due date if available
+      if (a.dueDate && b.dueDate) {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      return 0;
+    });
+
+    // Create sequential dependencies based on sorted order
+    for (let i = 1; i < sortedTasks.length; i++) {
+      const currentTask = sortedTasks[i];
+      const previousTask = sortedTasks[i - 1];
+
+      currentTask.predecessors.push(previousTask.id);
+      previousTask.successors.push(currentTask.id);
+    }
+
+    // FORWARD PASS: Calculate Early Start and Early Finish
+    const processedTasks = new Set<string>();
+    const queue = sortedTasks.filter(t => t.predecessors.length === 0);
+
+    queue.forEach(task => {
+      task.earlyStart = 0;
+      task.earlyFinish = task.duration;
+    });
+
+    while (queue.length > 0) {
+      const currentTask = queue.shift()!;
+      if (processedTasks.has(currentTask.id)) continue;
+
+      processedTasks.add(currentTask.id);
+
+      // Process successors
+      for (const successorId of currentTask.successors) {
+        const successor = taskMap.get(successorId);
+        if (!successor) continue;
+
+        // Early Start of successor = max(Early Finish of all predecessors)
+        const maxEarlyFinish = Math.max(
+          currentTask.earlyFinish,
+          successor.earlyStart
+        );
+
+        successor.earlyStart = maxEarlyFinish;
+        successor.earlyFinish = successor.earlyStart + successor.duration;
+
+        // Add to queue if all predecessors are processed
+        const allPredecessorsProcessed = successor.predecessors.every(
+          predId => processedTasks.has(predId)
+        );
+
+        if (allPredecessorsProcessed && !queue.includes(successor)) {
+          queue.push(successor);
+        }
+      }
+    }
+
+    // Find project end time (maximum EF)
+    const projectEndTime = Math.max(...Array.from(taskMap.values()).map(t => t.earlyFinish));
+
+    // BACKWARD PASS: Calculate Late Start and Late Finish
+    const backwardQueue = sortedTasks.filter(t => t.successors.length === 0);
+    const backwardProcessed = new Set<string>();
+
+    backwardQueue.forEach(task => {
+      task.lateFinish = projectEndTime;
+      task.lateStart = task.lateFinish - task.duration;
+    });
+
+    while (backwardQueue.length > 0) {
+      const currentTask = backwardQueue.shift()!;
+      if (backwardProcessed.has(currentTask.id)) continue;
+
+      backwardProcessed.add(currentTask.id);
+
+      // Process predecessors
+      for (const predecessorId of currentTask.predecessors) {
+        const predecessor = taskMap.get(predecessorId);
+        if (!predecessor) continue;
+
+        // Late Finish of predecessor = min(Late Start of all successors)
+        const minLateStart = Math.min(
+          currentTask.lateStart,
+          predecessor.lateFinish || projectEndTime
+        );
+
+        predecessor.lateFinish = minLateStart;
+        predecessor.lateStart = predecessor.lateFinish - predecessor.duration;
+
+        // Add to queue if all successors are processed
+        const allSuccessorsProcessed = predecessor.successors.every(
+          succId => backwardProcessed.has(succId)
+        );
+
+        if (allSuccessorsProcessed && !backwardQueue.includes(predecessor)) {
+          backwardQueue.push(predecessor);
+        }
+      }
+    }
+
+    // Calculate Float and identify Critical Path
+    const criticalPathTasks: CPMTask[] = [];
+    let totalFloat = 0;
+
+    for (const task of taskMap.values()) {
+      task.totalFloat = task.lateStart - task.earlyStart;
+
+      // Tasks with zero (or near-zero) float are on the critical path
+      if (Math.abs(task.totalFloat) < 0.01) {
+        task.isCritical = true;
+        criticalPathTasks.push(task);
+      }
+
+      totalFloat += task.totalFloat;
+    }
+
+    // Sort critical path by early start
+    criticalPathTasks.sort((a, b) => a.earlyStart - b.earlyStart);
+
+    const averageFloat = taskMap.size > 0 ? totalFloat / taskMap.size : 0;
+    const tasksWithNoFloat = Array.from(taskMap.values()).filter(t => t.totalFloat === 0).length;
+
+    // Assess risk
+    const riskFactors: string[] = [];
+    let criticalPathRisk: 'low' | 'medium' | 'high' | 'critical' = 'low';
+
+    const criticalPathCompletionRatio = criticalPathTasks.filter(t =>
+      t.status === 'done' || t.status === 'completed'
+    ).length / Math.max(criticalPathTasks.length, 1);
+
+    if (averageFloat < 5) {
+      riskFactors.push('Very low schedule slack - any delay will impact project completion');
+      criticalPathRisk = 'high';
+    }
+
+    if (criticalPathCompletionRatio < 0.5 && criticalPathTasks.length > 5) {
+      riskFactors.push('More than 50% of critical path tasks are incomplete');
+      criticalPathRisk = 'high';
+    }
+
+    if (criticalPathTasks.length > tasks.length * 0.7) {
+      riskFactors.push('Over 70% of tasks are on critical path - limited flexibility');
+      criticalPathRisk = criticalPathRisk === 'high' ? 'critical' : 'high';
+    }
+
+    const blockedCriticalTasks = criticalPathTasks.filter(t =>
+      t.status === 'blocked' || t.status === 'at_risk'
+    );
+
+    if (blockedCriticalTasks.length > 0) {
+      riskFactors.push(`${blockedCriticalTasks.length} critical path tasks are blocked or at risk`);
+      criticalPathRisk = 'critical';
+    }
+
+    if (riskFactors.length === 0) {
+      if (averageFloat > 20) {
+        criticalPathRisk = 'low';
+      } else if (averageFloat > 10) {
+        criticalPathRisk = 'medium';
+      }
+    }
+
+    // Generate recommendations
+    const recommendations: string[] = [];
+
+    if (criticalPathRisk === 'critical' || criticalPathRisk === 'high') {
+      recommendations.push('Focus resources on critical path tasks immediately');
+    }
+
+    if (blockedCriticalTasks.length > 0) {
+      recommendations.push(`Unblock ${blockedCriticalTasks.length} critical tasks: ${blockedCriticalTasks.map(t => t.name).slice(0, 3).join(', ')}`);
+    }
+
+    if (averageFloat < 10) {
+      recommendations.push('Consider adding buffer time or reducing scope to increase schedule flexibility');
+    }
+
+    if (criticalPathTasks.some(t => !t.assignee)) {
+      recommendations.push('Assign resources to all critical path tasks');
+    }
+
+    const upcomingCriticalTasks = criticalPathTasks.filter(t =>
+      t.status === 'todo' || t.status === 'in_progress'
+    ).slice(0, 5);
+
+    if (upcomingCriticalTasks.length > 0) {
+      recommendations.push(`Monitor these upcoming critical tasks: ${upcomingCriticalTasks.map(t => t.name).join(', ')}`);
+    }
+
+    // Calculate estimated completion date
+    const now = new Date();
+    const remainingHours = criticalPathTasks
+      .filter(t => t.status !== 'done' && t.status !== 'completed')
+      .reduce((sum, t) => sum + t.duration, 0);
+
+    const workDays = Math.ceil(remainingHours / 8); // Assume 8 hours per day
+    const estimatedCompletionDate = new Date(now);
+    estimatedCompletionDate.setDate(estimatedCompletionDate.getDate() + workDays);
+
+    return {
+      projectId,
+      projectName: project.name,
+      criticalPath: criticalPathTasks,
+      criticalPathDuration: projectEndTime,
+      criticalPathTasks: criticalPathTasks.map(t => t.id),
+      totalTasks: tasks.length,
+      completedTasks,
+      criticalTasks: criticalPathTasks.length,
+      criticalPathRisk,
+      riskFactors,
+      totalFloat,
+      averageFloat,
+      tasksWithNoFloat,
+      estimatedCompletionDate,
+      estimatedDuration: projectEndTime,
+      recommendations,
+    };
   }
 }

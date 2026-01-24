@@ -17,6 +17,8 @@ import {
   Activity,
   Sliders,
   GitBranch,
+  Store,
+  CheckCircle,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -36,6 +38,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/users', icon: Users, label: 'Users' },
     { path: '/admin/integrations', icon: Database, label: 'Integrations' },
+    { path: '/admin/mcp-marketplace', icon: Store, label: 'MCP Marketplace' },
+    { path: '/admin/active-integrations', icon: CheckCircle, label: 'Active Integrations' },
     { path: '/admin/custom-fields', icon: Sliders, label: 'Custom Fields' },
     { path: '/admin/workflows', icon: GitBranch, label: 'Workflows' },
     { path: '/admin/agents', icon: Activity, label: 'Agents' },

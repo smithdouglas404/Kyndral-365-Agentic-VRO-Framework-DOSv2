@@ -266,5 +266,88 @@ export function registerPredictiveRoutes(app: Express, storage: IStorage): void 
     }
   });
 
+  /**
+   * GET /api/predictive/projects/:projectId/critical-path
+   * Calculate critical path using CPM (Critical Path Method)
+   */
+  app.get('/api/predictive/projects/:projectId/critical-path', async (req, res) => {
+    try {
+      const { projectId } = req.params;
+
+      const analysis = await predictiveEngine.calculateCriticalPath(projectId);
+
+      res.json({
+        success: true,
+        projectId,
+        analysis,
+      });
+    } catch (error: any) {
+      console.error('[Predictive] Critical path calculation error:', error);
+      res.status(error.message?.includes('not found') ? 404 : 500).json({
+        error: error.message || 'Failed to calculate critical path',
+      });
+    }
+  });
+
+  /**
+   * POST /api/predictive/batch/critical-path
+   * Batch critical path analysis for multiple projects
+   * Used by Planning Agent and TMO Agent
+   */
+  app.post('/api/predictive/batch/critical-path', async (req, res) => {
+    try {
+      const { projectIds } = req.body;
+
+      if (!Array.isArray(projectIds) || projectIds.length === 0) {
+        return res.status(400).json({
+          error: 'projectIds must be a non-empty array',
+        });
+      }
+
+      if (projectIds.length > 50) {
+        return res.status(400).json({
+          error: 'Maximum 50 projects per batch request',
+        });
+      }
+
+      const results = await Promise.allSettled(
+        projectIds.map(id => predictiveEngine.calculateCriticalPath(id))
+      );
+
+      const successResults = results.map((result, index) => ({
+        projectId: projectIds[index],
+        success: result.status === 'fulfilled',
+        analysis: result.status === 'fulfilled' ? result.value : null,
+        error: result.status === 'rejected' ? result.reason.message : null,
+      }));
+
+      const successCount = successResults.filter(r => r.success).length;
+
+      // Aggregate critical risks
+      const criticalRiskProjects = successResults.filter(r =>
+        r.success && r.analysis?.criticalPathRisk === 'critical'
+      );
+
+      const highRiskProjects = successResults.filter(r =>
+        r.success && r.analysis?.criticalPathRisk === 'high'
+      );
+
+      res.json({
+        success: true,
+        totalRequested: projectIds.length,
+        successCount,
+        failureCount: projectIds.length - successCount,
+        criticalRiskCount: criticalRiskProjects.length,
+        highRiskCount: highRiskProjects.length,
+        results: successResults,
+      });
+    } catch (error: any) {
+      console.error('[Predictive] Batch critical path error:', error);
+      res.status(500).json({
+        error: error.message || 'Failed to calculate batch critical paths',
+      });
+    }
+  });
+
   console.log('[Predictive] Predictive analytics routes registered');
 }

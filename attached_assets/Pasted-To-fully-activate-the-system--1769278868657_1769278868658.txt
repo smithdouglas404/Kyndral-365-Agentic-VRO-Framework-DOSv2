@@ -1,0 +1,26 @@
+To fully activate the system:                                                                                                       
+                                                                                                                                      
+  1. Set Environment Variables (optional, defaults to console logging):                                                               
+  NOTIFICATION_PROVIDER=smtp                                                                                                          
+  SMTP_HOST=smtp.gmail.com                                                                                                            
+  SMTP_PORT=587                                                                                                                       
+  SMTP_USER=your-email@example.com                                                                                                    
+  SMTP_PASSWORD=your-app-password                                                                                                     
+  2. Run Database Migrations:                                                                                                         
+  npm run db:push                                                                                                                     
+  3. Install Dependencies:                                                                                                            
+  npm install                                                                                                                         
+  4. Configure Agents via Agent Setup Wizard:                                                                                         
+    - Enable desired agents                                                                                                           
+    - Assign MCP tools (ClickHouse, Weaviate, Neo4j, etc.)                                                                            
+    - Set LLM strategies                                                                                                              
+    - Save configuration                                                                                                              
+  5. Call Reload Endpoint (after wizard changes):                                                                                     
+  POST /api/agents/reload                                                                                                             
+  6. Execute Agent Requests:                                                                                                          
+  POST /api/agents/execute                                                                                                            
+  {                                                                                                                                   
+    "agentId": "pmo",                                                                                                                 
+    "taskType": "portfolio_analysis",                                                                                                 
+    "prompt": "Show me all projects over budget",                                                                                     
+    "projectId": "optional-project-id"                            

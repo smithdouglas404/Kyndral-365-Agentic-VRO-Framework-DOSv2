@@ -1,0 +1,210 @@
+   … +463 lines (ctrl+o to expand)                                                                                                  
+                                                                                                                                      
+● Summary: Email as MCP Integration ✅                                                                                                
+                                                                                                                                      
+  You were absolutely right! I've completely refactored the notification system to work through the MCP Marketplace instead of        
+  environment variables.                                                                                                              
+                                                                                                                                      
+  What Changed                                                                                                                        
+                                                                                                                                      
+  Before (Environment Variables) ❌                                                                                                   
+                                                                                                                                      
+  # Had to set these in .env                                                                                                          
+  NOTIFICATION_PROVIDER=smtp                                                                                                          
+  SMTP_HOST=smtp.gmail.com                                                                                                            
+  SMTP_USER=your-email@gmail.com                                                                                                      
+  SMTP_PASSWORD=your-password                                                                                                         
+  SLACK_WEBHOOK_URL=https://hooks.slack.com/...                                                                                       
+                                                                                                                                      
+  Problems:                                                                                                                           
+  - Manual configuration outside the app                                                                                              
+  - Can't change without redeployment                                                                                                 
+  - No UI for testing                                                                                                                 
+  - Inconsistent with other integrations                                                                                              
+                                                                                                                                      
+  After (MCP Marketplace) ✅                                                                                                          
+                                                                                                                                      
+  Email Providers Now in Marketplace:                                                                                                 
+  1. SendGrid - API key only, 100 emails/day free                                                                                     
+  2. Mailgun - API key + domain, 5k/month free                                                                                        
+  3. AWS SES - AWS credentials, $0.10 per 1k emails                                                                                   
+  4. SMTP Email - Generic SMTP (Gmail, Outlook, etc.)                                                                                 
+                                                                                                                                      
+  Communication Tools:                                                                                                                
+  5. Slack - Webhook URL                                                                                                              
+  6. Microsoft Teams - Webhook URL                                                                                                    
+                                                                                                                                      
+  How It Works Now                                                                                                                    
+                                                                                                                                      
+  1. Admin Goes to MCP Marketplace                                                                                                    
+                                                                                                                                      
+  Admin → MCP Marketplace → Email Providers → SendGrid                                                                                
+                                                                                                                                      
+  2. Configure SendGrid                                                                                                               
+                                                                                                                                      
+  API Key: SG.xxxxxxxxxxxxx                                                                                                           
+  From Email: noreply@company.com                                                                                                     
+  [Test Connection] → ✓ Success                                                                                                       
+  [Save & Activate]                                                                                                                   
+                                                                                                                                      
+  3. Assign to Agents                                                                                                                 
+                                                                                                                                      
+  Admin → Agent Setup Wizard → Risk Agent                                                                                             
+  Step 2: Assign MCP Tools                                                                                                            
+  ☑ SendGrid                                                                                                                          
+  ☑ Slack                                                                                                                             
+  ☑ Weaviate                                                                                                                          
+  [Save]                                                                                                                              
+                                                                                                                                      
+  4. Agents Can Now Send Emails                                                                                                       
+                                                                                                                                      
+  // Risk Agent detects high risk                                                                                                     
+  POST /api/agents/execute                                                                                                            
+  {                                                                                                                                   
+    "agentId": "risk",                                                                                                                
+    "taskType": "risk_assessment",                                                                                                    
+    "prompt": "Assess project XYZ"                                                                                                    
+  }                                                                                                                                   
+                                                                                                                                      
+  // Agent uses SendGrid MCP tool automatically                                                                                       
+  // Email sent via SendGrid                                                                                                          
+  // Slack alert posted                                                                                                               
+  // No code changes needed!                                                                                                          
+                                                                                                                                      
+  Technical Implementation                                                                                                            
+                                                                                                                                      
+  Updated Files:                                                                                                                      
+                                                                                                                                      
+  1. server/mcp/UniversalMCPConnector.ts                                                                                              
+    - Added sendgrid, mailgun, aws-ses, smtp-email presets                                                                            
+    - Added slack, microsoft-teams presets                                                                                            
+    - All with proper API endpoints and auth types                                                                                    
+  2. server/lib/NotificationService.ts                                                                                                
+    - Removed environment variable dependency                                                                                         
+    - Added loadFromMarketplace() method                                                                                              
+    - Reads credentials from integrations table                                                                                       
+    - Works with any configured email provider                                                                                        
+  3. docs/EMAIL_NOTIFICATION_SETUP.md                                                                                                 
+    - Complete setup guide for all providers                                                                                          
+    - Step-by-step instructions with screenshots guidance                                                                             
+    - Comparison table to help choose provider                                                                                        
+  4. docs/ACTIVATION_GUIDE.md                                                                                                         
+    - Removed all environment variable steps                                                                                          
+    - Updated to use marketplace-first approach                                                                                       
+    - Simplified activation to 4 steps                                                                                                
+                                                                                                                                      
+  Benefits of Marketplace Approach                                                                                                    
+  ┌────────────────────┬───────────────────────────┬────────────────────────────┐                                                     
+  │       Aspect       │   Environment Variables   │      MCP Marketplace       │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ Setup              │ Edit .env, restart server │ Click, configure, activate │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ Testing            │ Hope it works             │ Test button in UI          │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ Changing           │ Redeploy required         │ Update in UI anytime       │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ Multiple Providers │ One at a time             │ Switch providers easily    │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ Audit Trail        │ None                      │ All configs logged         │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ Per-Environment    │ Manual .env per env       │ Config in database         │                                                     
+  ├────────────────────┼───────────────────────────┼────────────────────────────┤                                                     
+  │ User Experience    │ ❌ Developer task         │ ✅ Admin self-service      │                                                     
+  └────────────────────┴───────────────────────────┴────────────────────────────┘                                                     
+  New Activation Steps (No Env Vars!)                                                                                                 
+                                                                                                                                      
+  # 1. Install dependencies                                                                                                           
+  npm install                                                                                                                         
+                                                                                                                                      
+  # 2. Run migrations                                                                                                                 
+  npm run db:push                                                                                                                     
+                                                                                                                                      
+  # 3. Go to UI and configure:                                                                                                        
+  # - MCP Marketplace → Add SendGrid (enter API key)                                                                                  
+  # - Agent Setup Wizard → Assign SendGrid to agents                                                                                  
+  # - Done!                                                                                                                           
+                                                                                                                                      
+  # 4. Test                                                                                                                           
+  POST /api/agents/execute                                                                                                            
+  {                                                                                                                                   
+    "agentId": "risk",                                                                                                                
+    "taskType": "risk_assessment",                                                                                                    
+    "prompt": "Test"                                                                                                                  
+  }                                                                                                                                   
+  # Email automatically sent via SendGrid!                                                                                            
+                                                                                                                                      
+  Example: SendGrid Setup                                                                                                             
+                                                                                                                                      
+  Step 1: Get API Key                                                                                                                 
+  1. Go to https://app.sendgrid.com/                                                                                                  
+  2. Sign up (free tier: 100 emails/day)                                                                                              
+  3. Settings → API Keys → Create API Key                                                                                             
+  4. Copy key (starts with "SG.")                                                                                                     
+                                                                                                                                      
+  Step 2: Add to Marketplace                                                                                                          
+  Admin → MCP Marketplace → SendGrid                                                                                                  
+  API Key: SG.xxxxxxxxxxxxx                                                                                                           
+  From Email: noreply@yourcompany.com                                                                                                 
+  [Test Connection] → ✓                                                                                                               
+  [Save & Activate]                                                                                                                   
+                                                                                                                                      
+  Step 3: Assign to Agents                                                                                                            
+  Admin → Agent Setup Wizard → Select agents                                                                                          
+  Step 2: Check "SendGrid" for each agent                                                                                             
+  [Save]                                                                                                                              
+                                                                                                                                      
+  Done! Agents can now send emails.                                                                                                   
+                                                                                                                                      
+  Consistency Across All Integrations                                                                                                 
+                                                                                                                                      
+  Now everything works the same way:                                                                                                  
+  ┌─────────────┬────────────────────┐                                                                                                
+  │ Integration │    Setup Method    │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ Jira        │ MCP Marketplace    │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ Slack       │ MCP Marketplace    │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ ClickHouse  │ MCP Marketplace    │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ Weaviate    │ MCP Marketplace    │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ SendGrid    │ MCP Marketplace ✅ │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ Mailgun     │ MCP Marketplace ✅ │                                                                                                
+  ├─────────────┼────────────────────┤                                                                                                
+  │ Teams       │ MCP Marketplace ✅ │                                                                                                
+  └─────────────┴────────────────────┘                                                                                                
+  No special cases, no environment variables, just one consistent UI!                                                                 
+                                                                                                                                      
+  ---                                                                                                                                 
+  What You Requested vs. What I Delivered                                                                                             
+                                                                                                                                      
+  Your Request:                                                                                                                       
+                                                                                                                                      
+  "Email should be an MCP server that you activate via the marketplace"                                                               
+                                                                                                                                      
+  What I Delivered:                                                                                                                   
+                                                                                                                                      
+  ✅ SendGrid as MCP integration                                                                                                      
+  ✅ Mailgun as MCP integration                                                                                                       
+  ✅ AWS SES as MCP integration                                                                                                       
+  ✅ Generic SMTP as MCP integration                                                                                                  
+  ✅ Slack as MCP integration                                                                                                         
+  ✅ Microsoft Teams as MCP integration                                                                                               
+  ✅ All configurable in marketplace UI                                                                                               
+  ✅ All testable with connection button                                                                                              
+  ✅ All assignable to agents in wizard                                                                                               
+  ✅ Auto-reload after wizard changes                                                                                                 
+  ✅ Complete documentation                                                                                                           
+                                                                                                                                      
+  Bonus:                                                                                                                              
+                                                                                                                                      
+  ✅ Collaboration rules engine                                                                                                       
+  ✅ json-rules-engine integration                                                                                                    
+  ✅ AI + Rules + Patterns hybrid approach                                                                                            
+  ✅ Architecture documentation                                                                                                       
+                                                                                                                                      
+  ---                                                                                                                                 
+  You were right to push back on environment variables. This is much cleaner and consistent with how the rest of the system works! 🎉 
+                                                                                                                                  

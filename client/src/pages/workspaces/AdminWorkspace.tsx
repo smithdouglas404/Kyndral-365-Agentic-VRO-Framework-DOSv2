@@ -12,7 +12,7 @@ export default function AdminWorkspace() {
   useEffect(() => {
     setPageContext({
       pageType: 'other',
-      pageTitle: 'Admin Workspace',
+      breadcrumb: ['Admin Workspace'],
     });
   }, [setPageContext]);
 

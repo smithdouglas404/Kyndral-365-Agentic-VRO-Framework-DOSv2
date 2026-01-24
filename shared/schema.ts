@@ -2748,6 +2748,143 @@ export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
 export type Integration = typeof integrations.$inferSelect;
 
 // ============================================================================
+// AGENT CONFIGURATIONS - AI Agent settings and thresholds
+// ============================================================================
+
+export const agentConfigs = pgTable("agent_configs", {
+  id: varchar("id").primaryKey(), // finops, tmo, risk, vro, governance, planning, ocm, integrated, okr
+  name: text("name").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  scanInterval: integer("scan_interval").default(60).notNull(), // in minutes
+  autonomyLevel: text("autonomy_level").default('supervised').notNull(), // 'full' or 'supervised'
+  config: text("config"), // JSON: Agent-specific threshold settings
+  status: text("status").default('idle'), // idle, running, error
+  lastRun: timestamp("last_run"),
+  lastRunDuration: integer("last_run_duration"), // in milliseconds
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAgentConfigSchema = createInsertSchema(agentConfigs).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAgentConfig = z.infer<typeof insertAgentConfigSchema>;
+export type AgentConfig = typeof agentConfigs.$inferSelect;
+
+// ============================================================================
+// OKR/KPI MANAGEMENT - Objectives and Key Results tracking
+// ============================================================================
+
+export const okrs = pgTable("okrs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  level: text("level").notNull(), // company, project, functional
+  levelId: varchar("level_id"), // FK to companies, projects, or null for functional
+  functionalArea: text("functional_area"), // vro, tmo, pmo, finops, governance, planning, ocm, risk
+  owner: varchar("owner"), // User ID
+  parentOkrId: varchar("parent_okr_id"), // For hierarchical alignment
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  status: text("status").default('active').notNull(), // active, completed, cancelled, at_risk
+  progress: integer("progress").default(0), // 0-100
+  weight: integer("weight").default(100), // Relative importance (0-100)
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOkrSchema = createInsertSchema(okrs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertOkr = z.infer<typeof insertOkrSchema>;
+export type Okr = typeof okrs.$inferSelect;
+
+export const keyResults = pgTable("key_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  okrId: varchar("okr_id").notNull().references(() => okrs.id, { onDelete: 'cascade' }),
+  title: text("title").notNull(),
+  description: text("description"),
+  targetValue: real("target_value").notNull(),
+  currentValue: real("current_value").default(0).notNull(),
+  unit: text("unit"), // %, $, hours, count, etc.
+  startValue: real("start_value").default(0),
+  status: text("status").default('on_track').notNull(), // on_track, at_risk, behind, completed
+  progress: integer("progress").default(0), // 0-100
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertKeyResultSchema = createInsertSchema(keyResults).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertKeyResult = z.infer<typeof insertKeyResultSchema>;
+export type KeyResult = typeof keyResults.$inferSelect;
+
+export const kpis = pgTable("kpis", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  level: text("level").notNull(), // company, project, functional
+  levelId: varchar("level_id"), // FK to companies, projects, or null for functional
+  functionalArea: text("functional_area"), // vro, tmo, pmo, finops, governance, planning, ocm, risk
+  category: text("category"), // financial, schedule, quality, risk, resource, custom
+  metric: text("metric").notNull(), // e.g., CPI, SPI, Budget Variance
+  currentValue: real("current_value"),
+  targetValue: real("target_value"),
+  thresholdWarning: real("threshold_warning"),
+  thresholdCritical: real("threshold_critical"),
+  unit: text("unit"), // %, $, hours, count, etc.
+  frequency: text("frequency").default('weekly'), // daily, weekly, monthly, quarterly
+  dataSource: text("data_source"), // Manual, Jira, Azure DevOps, Excel, etc.
+  calculationMethod: text("calculation_method"), // JSON formula or description
+  owner: varchar("owner"), // User ID
+  status: text("status").default('green').notNull(), // green, yellow, red
+  trend: text("trend").default('stable'), // improving, stable, declining
+  isActive: boolean("is_active").default(true),
+  lastCalculated: timestamp("last_calculated"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertKpiSchema = createInsertSchema(kpis).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertKpi = z.infer<typeof insertKpiSchema>;
+export type Kpi = typeof kpis.$inferSelect;
+
+export const kpiHistory = pgTable("kpi_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  kpiId: varchar("kpi_id").notNull().references(() => kpis.id, { onDelete: 'cascade' }),
+  value: real("value").notNull(),
+  status: text("status").notNull(), // green, yellow, red
+  notes: text("notes"),
+  recordedAt: timestamp("recorded_at").defaultNow(),
+});
+
+export const insertKpiHistorySchema = createInsertSchema(kpiHistory).omit({
+  id: true,
+  recordedAt: true,
+});
+
+export type InsertKpiHistory = z.infer<typeof insertKpiHistorySchema>;
+export type KpiHistory = typeof kpiHistory.$inferSelect;
+
+export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
+export type Integration = typeof integrations.$inferSelect;
+
+// ============================================================================
 // ONTOLOGY MAPPINGS - Track how data sources map to ontology
 // ============================================================================
 

@@ -17,6 +17,16 @@ import { registerDeepAgentRoutes } from "./routes/deep-agents.js";
 import { registerDashboardDataRoutes } from "./routes/dashboard-data.js";
 import { registerIntegrationRoutes } from "./routes/admin/integrations.js";
 import { registerUserManagementRoutes } from "./routes/admin/users.js";
+import { registerMCPServerRoutes } from "./routes/admin/mcp-servers.js";
+import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets.js";
+import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
+import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
+import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
+import { registerCamundaRoutes } from "./routes/admin/camunda.js";
+import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
+import { registerPermissionRoutes } from "./routes/admin/permissions.js";
+import { registerNotificationRoutes } from "./routes/notifications.js";
+import { registerAgentExecutionRoutes } from "./routes/agents.js";
 import { registerAnalyticsRoutes } from "./routes/analytics.js";
 import { registerCustomFieldRoutes } from "./routes/admin/custom-fields.js";
 import { registerWorkflowRoutes } from "./routes/admin/workflows.js";
@@ -132,7 +142,37 @@ export async function registerRoutes(
   registerFirebaseAuthRoutes(app, storage);
 
   // Register Integration Management routes (ADMIN - External data source configuration)
-  registerIntegrationRoutes(app);
+  registerIntegrationRoutes(app, storage);
+
+  // Register MCP Server Management routes (ADMIN - MCP server activation & configuration)
+  registerMCPServerRoutes(app);
+
+  // Register Custom MCP Preset Management routes (ADMIN - Custom integration builder)
+  registerCustomMCPPresetRoutes(app);
+
+  // Register Agent Configuration routes (ADMIN - AI agent settings and thresholds)
+  registerAgentConfigRoutes(app);
+
+  // Register Agent Setup routes (ADMIN - Agent wizard and MCP/LLM configuration)
+  registerAgentSetupRoutes(app);
+
+  // Register Notification routes (Email, Slack, Teams, In-App notifications)
+  registerNotificationRoutes(app);
+
+  // Register Agent Execution routes (Execute agent requests with configured tools)
+  registerAgentExecutionRoutes(app);
+
+  // Register Collaboration Rules routes (ADMIN - Inter-agent collaboration rule builder)
+  registerCollaborationRulesRoutes(app);
+
+  // Register Camunda 8 routes (ADMIN - DMN decisions and BPMN workflows)
+  registerCamundaRoutes(app);
+
+  // Register OKR/KPI Management routes (ADMIN - Objectives, Key Results, and KPIs)
+  registerOkrKpiRoutes(app);
+
+  // Register Permission Management routes (ADMIN - Granular user permissions)
+  registerPermissionRoutes(app);
 
   // Register User Management routes (ADMIN - User account management)
   registerUserManagementRoutes(app);

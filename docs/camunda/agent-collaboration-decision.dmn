@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="agent-collaboration-decisions" name="Agent Collaboration Decisions" namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="agent-collaboration-decision" name="Agent Collaboration Decision">
+    <informationRequirement id="InformationRequirement_1">
+      <requiredInput href="#InputData_sourceAgent" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_2">
+      <requiredInput href="#InputData_cpi" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_3">
+      <requiredInput href="#InputData_riskScore" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_4">
+      <requiredInput href="#InputData_severity" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_1" hitPolicy="COLLECT">
+      <input id="Input_1" label="Source Agent" camunda:inputVariable="sourceAgent">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>sourceAgent</text>
+        </inputExpression>
+      </input>
+      <input id="Input_2" label="CPI" camunda:inputVariable="cpi">
+        <inputExpression id="InputExpression_2" typeRef="number">
+          <text>cpi</text>
+        </inputExpression>
+      </input>
+      <input id="Input_3" label="Risk Score" camunda:inputVariable="riskScore">
+        <inputExpression id="InputExpression_3" typeRef="number">
+          <text>riskScore</text>
+        </inputExpression>
+      </input>
+      <input id="Input_4" label="Severity" camunda:inputVariable="severity">
+        <inputExpression id="InputExpression_4" typeRef="string">
+          <text>severity</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Should Collaborate" name="shouldCollaborate" typeRef="boolean" />
+      <output id="Output_2" label="Target Agents" name="targetAgents" typeRef="string" biodi:width="192" />
+      <output id="Output_3" label="Priority" name="priority" typeRef="string" />
+      <output id="Output_4" label="Actions" name="actions" typeRef="string" />
+
+      <!-- Rule 1: Critical Budget Overrun -->
+      <rule id="DecisionRule_1">
+        <inputEntry id="UnaryTests_1">
+          <text>"finops"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_2">
+          <text>&lt; 0.70</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_4">
+          <text>"high", "critical"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_2">
+          <text>"tmo,risk,governance"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_3">
+          <text>"urgent"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_4">
+          <text>"notify:tmo,notify:risk,escalate:governance,email:exec"</text>
+        </outputEntry>
+      </rule>
+
+      <!-- Rule 2: Moderate Budget Overrun -->
+      <rule id="DecisionRule_2">
+        <inputEntry id="UnaryTests_5">
+          <text>"finops"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_6">
+          <text>&lt; 0.85</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_8">
+          <text>"medium"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_5">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_6">
+          <text>"tmo,vro"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_7">
+          <text>"high"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_8">
+          <text>"notify:tmo,notify:vro"</text>
+        </outputEntry>
+      </rule>
+
+      <!-- Rule 3: High Risk Detected -->
+      <rule id="DecisionRule_3">
+        <inputEntry id="UnaryTests_9">
+          <text>"risk"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11">
+          <text>&gt; 8</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12">
+          <text>"high", "critical"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_9">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10">
+          <text>"governance,tmo"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_11">
+          <text>"urgent"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_12">
+          <text>"escalate:governance,notify:tmo,email:vp-eng"</text>
+        </outputEntry>
+      </rule>
+
+      <!-- Rule 4: Moderate Risk -->
+      <rule id="DecisionRule_4">
+        <inputEntry id="UnaryTests_13">
+          <text>"risk"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15">
+          <text>&gt; 5</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16">
+          <text>"medium"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_13">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14">
+          <text>"finops,tmo"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_15">
+          <text>"medium"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_16">
+          <text>"notify:finops,notify:tmo"</text>
+        </outputEntry>
+      </rule>
+
+      <!-- Rule 5: TMO Schedule Slippage -->
+      <rule id="DecisionRule_5">
+        <inputEntry id="UnaryTests_17">
+          <text>"tmo"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_20">
+          <text>"high", "critical"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_17">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_18">
+          <text>"risk,finops,planning"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_19">
+          <text>"high"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_20">
+          <text>"notify:risk,notify:finops,notify:planning"</text>
+        </outputEntry>
+      </rule>
+
+      <!-- Rule 6: VRO Value Leakage -->
+      <rule id="DecisionRule_6">
+        <inputEntry id="UnaryTests_21">
+          <text>"vro"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_22">
+          <text>&lt; 0.90</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_23">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_24">
+          <text>"high"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_21">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_22">
+          <text>"finops,tmo"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_23">
+          <text>"high"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_24">
+          <text>"notify:finops,notify:tmo,email:stakeholders"</text>
+        </outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+
+  <inputData id="InputData_sourceAgent" name="Source Agent" />
+  <inputData id="InputData_cpi" name="CPI" />
+  <inputData id="InputData_riskScore" name="Risk Score" />
+  <inputData id="InputData_severity" name="Severity" />
+</definitions>
