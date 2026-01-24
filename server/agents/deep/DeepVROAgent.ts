@@ -451,11 +451,20 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
 
             // Calculate current value velocity
             const currentValue = project.actualCost * (1 + project.progress * 0.5);
-            const projectAgeMonths = Math.max(
-              1,
-              (new Date().getTime() - new Date(project.startDate).getTime()) /
-                (1000 * 60 * 60 * 24 * 30)
-            );
+
+            // Calculate project age with validation
+            let projectAgeMonths = 1; // Default to 1 month
+            if (project.startDate) {
+              const startDate = new Date(project.startDate);
+              if (!isNaN(startDate.getTime())) {
+                projectAgeMonths = Math.max(
+                  1,
+                  (new Date().getTime() - startDate.getTime()) /
+                    (1000 * 60 * 60 * 24 * 30)
+                );
+              }
+            }
+
             const monthlyValueVelocity = currentValue / projectAgeMonths;
 
             // Forecast trajectory

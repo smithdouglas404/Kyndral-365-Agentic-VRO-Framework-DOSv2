@@ -84,10 +84,28 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           const budget = parseFloat(project.budget || '0');
           const actualCost = parseFloat(project.actualCost || '0');
 
+          // Validate inputs to prevent division by zero
+          if (actualCost <= 0) {
+            return {
+              error: "Cannot calculate EVM metrics - no costs incurred yet",
+              projectId,
+              projectName: project.name,
+              earnedValue: '0.00',
+              cpi: '1.000',
+              spi: '1.000',
+              eac: budget.toFixed(2),
+              etc: budget.toFixed(2),
+              health: 'unknown',
+            };
+          }
+
           const earnedValue = (progress / 100) * budget;
           const cpi = earnedValue / actualCost;
-          const spi = earnedValue / (budget * (progress / 100));
-          const eac = budget / cpi;
+          const plannedValue = budget * (progress / 100);
+          const spi = plannedValue > 0 ? earnedValue / plannedValue : 1.0;
+
+          // Prevent division by zero for EAC calculation
+          const eac = cpi > 0 ? budget / cpi : budget;
           const etc = eac - actualCost;
 
           return {
@@ -126,7 +144,10 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           const dailyBurnRate = elapsedDays > 0 ? actualCost / elapsedDays : 0;
           const projectedCost = actualCost + (dailyBurnRate * timeframeDays);
           const remaining = budget - actualCost;
-          const runway = remaining / dailyBurnRate;
+
+          // Prevent division by zero for runway calculation
+          const runway = dailyBurnRate > 0 ? remaining / dailyBurnRate : Infinity;
+          const runwayDays = runway === Infinity ? 999999 : Math.floor(runway);
 
           return {
             projectId,
@@ -134,7 +155,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
             currentBurn: dailyBurnRate.toFixed(2),
             projectedCost: projectedCost.toFixed(2),
             remaining: remaining.toFixed(2),
-            runwayDays: Math.floor(runway),
+            runwayDays: runwayDays > 999999 ? 'Infinite (no burn)' : runwayDays,
             alert: projectedCost > budget ? 'Budget overrun projected' : 'On track',
           };
         },

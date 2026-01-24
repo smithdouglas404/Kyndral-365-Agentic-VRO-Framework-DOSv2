@@ -12,6 +12,7 @@ import {
   type Integration
 } from "../../../shared/schema.js";
 import { eq, desc } from "drizzle-orm";
+import { encryptFields, decryptFields } from "../../lib/encryption.js";
 
 export function registerIntegrationRoutes(app: Express) {
 
@@ -23,9 +24,27 @@ export function registerIntegrationRoutes(app: Express) {
         .from(integrations)
         .orderBy(desc(integrations.createdAt));
 
+      // Decrypt credentials for response (but mask sensitive parts)
+      const integrationsWithMaskedCreds = allIntegrations.map(integration => {
+        const decrypted = decryptFields(integration, ['credentials']);
+        // Mask credentials - only show last 4 chars for security
+        if (decrypted.credentials && typeof decrypted.credentials === 'object') {
+          const masked: Record<string, any> = {};
+          for (const [key, value] of Object.entries(decrypted.credentials)) {
+            if (typeof value === 'string' && value.length > 4) {
+              masked[key] = '****' + value.slice(-4);
+            } else {
+              masked[key] = '****';
+            }
+          }
+          decrypted.credentials = masked;
+        }
+        return decrypted;
+      });
+
       res.json({
         success: true,
-        integrations: allIntegrations
+        integrations: integrationsWithMaskedCreds
       });
     } catch (error: any) {
       console.error("Error fetching integrations:", error);
@@ -55,9 +74,12 @@ export function registerIntegrationRoutes(app: Express) {
         });
       }
 
+      // Decrypt credentials for response
+      const decrypted = decryptFields(integration[0], ['credentials']);
+
       res.json({
         success: true,
-        integration: integration[0]
+        integration: decrypted
       });
     } catch (error: any) {
       console.error("Error fetching integration:", error);
@@ -82,26 +104,26 @@ export function registerIntegrationRoutes(app: Express) {
         });
       }
 
-      // Encrypt credentials before storing (TODO: Implement proper encryption)
-      // For now, just store as-is with a warning
-      if (integrationData.credentials) {
-        console.warn("⚠️  Credentials stored without encryption. TODO: Implement encryption.");
-      }
+      // Encrypt credentials before storing
+      const dataToStore = {
+        name: integrationData.name,
+        type: integrationData.type,
+        status: integrationData.status || 'disconnected',
+        connectionDetails: integrationData.connectionDetails || {},
+        credentials: integrationData.credentials || {},
+        syncSchedule: integrationData.syncSchedule || 'manual',
+        fieldMappings: integrationData.fieldMappings || {},
+        lastSyncAt: null,
+        lastSyncStatus: null,
+        errorMessage: null,
+      };
+
+      // Encrypt credentials field
+      const encrypted = encryptFields(dataToStore, ['credentials']);
 
       const newIntegration = await db
         .insert(integrations)
-        .values({
-          name: integrationData.name,
-          type: integrationData.type,
-          status: integrationData.status || 'disconnected',
-          connectionDetails: integrationData.connectionDetails || {},
-          credentials: integrationData.credentials || {},
-          syncSchedule: integrationData.syncSchedule || 'manual',
-          fieldMappings: integrationData.fieldMappings || {},
-          lastSyncAt: null,
-          lastSyncStatus: null,
-          errorMessage: null,
-        })
+        .values(encrypted)
         .returning();
 
       res.status(201).json({
@@ -139,19 +161,26 @@ export function registerIntegrationRoutes(app: Express) {
         });
       }
 
-      // Update integration
+      // Encrypt credentials before updating
+      const dataToUpdate = {
+        name: updateData.name,
+        type: updateData.type,
+        status: updateData.status,
+        connectionDetails: updateData.connectionDetails,
+        credentials: updateData.credentials,
+        syncSchedule: updateData.syncSchedule,
+        fieldMappings: updateData.fieldMappings,
+        updatedAt: new Date(),
+      };
+
+      // Encrypt credentials field if present
+      const encrypted = updateData.credentials
+        ? encryptFields(dataToUpdate, ['credentials'])
+        : dataToUpdate;
+
       const updated = await db
         .update(integrations)
-        .set({
-          name: updateData.name,
-          type: updateData.type,
-          status: updateData.status,
-          connectionDetails: updateData.connectionDetails,
-          credentials: updateData.credentials,
-          syncSchedule: updateData.syncSchedule,
-          fieldMappings: updateData.fieldMappings,
-          updatedAt: new Date(),
-        })
+        .set(encrypted)
         .where(eq(integrations.id, id))
         .returning();
 

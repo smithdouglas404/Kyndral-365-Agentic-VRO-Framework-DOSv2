@@ -195,17 +195,89 @@ Always use your tools to query real data before making decisions.`;
             const spi = parseFloat(String(project.spiValue || '1.0'));
             const progress = parseFloat(String(project.progressPercentage || '0'));
 
+            // Validate dates
+            if (!project.startDate || !project.endDate) {
+              return JSON.stringify({
+                error: "Project missing start or end date",
+                projectId,
+                projectName: project.name
+              });
+            }
+
             // Calculate forecasted completion
-            const startDate = project.startDate ? new Date(project.startDate) : new Date();
-            const targetEndDate = project.endDate ? new Date(project.endDate) : new Date();
+            const startDate = new Date(project.startDate);
+            const targetEndDate = new Date(project.endDate);
             const now = new Date();
+
+            // Validate date values
+            if (isNaN(startDate.getTime()) || isNaN(targetEndDate.getTime())) {
+              return JSON.stringify({
+                error: "Invalid date values",
+                projectId,
+                projectName: project.name
+              });
+            }
+
+            // Handle edge cases
+            if (progress >= 100) {
+              return JSON.stringify({
+                projectId,
+                projectName: project.name,
+                currentProgress: '100%',
+                spi,
+                targetEndDate: targetEndDate.toISOString().split('T')[0],
+                forecastCompletionDate: now.toISOString().split('T')[0],
+                delayDays: 0,
+                status: 'COMPLETED',
+              });
+            }
+
+            if (progress <= 0) {
+              return JSON.stringify({
+                projectId,
+                projectName: project.name,
+                currentProgress: '0%',
+                spi,
+                targetEndDate: targetEndDate.toISOString().split('T')[0],
+                forecastCompletionDate: 'Cannot calculate - no progress yet',
+                delayDays: 0,
+                status: 'NOT_STARTED',
+              });
+            }
 
             const totalDuration = targetEndDate.getTime() - startDate.getTime();
             const elapsed = now.getTime() - startDate.getTime();
+
+            // Ensure elapsed time is positive
+            if (elapsed <= 0) {
+              return JSON.stringify({
+                projectId,
+                projectName: project.name,
+                currentProgress: progress + '%',
+                spi,
+                targetEndDate: targetEndDate.toISOString().split('T')[0],
+                forecastCompletionDate: 'Project not yet started',
+                delayDays: 0,
+                status: 'NOT_STARTED',
+              });
+            }
+
             const remainingWork = 100 - progress;
 
+            // Calculate remaining time with safety checks
+            const velocityPerMs = progress / elapsed;
+            if (velocityPerMs <= 0 || spi <= 0) {
+              return JSON.stringify({
+                error: "Invalid velocity or SPI - cannot calculate forecast",
+                projectId,
+                projectName: project.name,
+                currentProgress: progress + '%',
+                spi,
+              });
+            }
+
             // Forecast completion based on SPI
-            const remainingTime = (remainingWork / (progress / elapsed)) / spi;
+            const remainingTime = (remainingWork / velocityPerMs) / spi;
             const forecastCompletionDate = new Date(now.getTime() + remainingTime);
             const delayDays = Math.round((forecastCompletionDate.getTime() - targetEndDate.getTime()) / (1000 * 60 * 60 * 24));
 

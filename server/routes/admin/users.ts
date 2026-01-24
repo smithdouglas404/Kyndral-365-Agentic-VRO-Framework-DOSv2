@@ -23,10 +23,13 @@ export function registerUserManagementRoutes(app: Express) {
   // GET /api/users - List all users (admin only)
   app.get("/api/users", authenticate, async (req: Request, res: Response) => {
     try {
-      // TODO: Add admin role check
-      // if (req.user?.role !== 'system_admin') {
-      //   return res.status(403).json({ error: "Forbidden" });
-      // }
+      // Admin role check
+      if (req.user?.role !== 'system_admin') {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Only system administrators can access user management"
+        });
+      }
 
       const allUsers = await db
         .select({
@@ -54,6 +57,14 @@ export function registerUserManagementRoutes(app: Express) {
   // GET /api/users/:id - Get single user (admin only)
   app.get("/api/users/:id", authenticate, async (req: Request, res: Response) => {
     try {
+      // Admin role check
+      if (req.user?.role !== 'system_admin') {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Only system administrators can access user management"
+        });
+      }
+
       const { id } = req.params;
 
       const user = await db
@@ -88,6 +99,14 @@ export function registerUserManagementRoutes(app: Express) {
   // PUT /api/users/:id - Update user (admin only)
   app.put("/api/users/:id", authenticate, async (req: Request, res: Response) => {
     try {
+      // Admin role check
+      if (req.user?.role !== 'system_admin') {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Only system administrators can modify users"
+        });
+      }
+
       const { id } = req.params;
       const validated = UpdateUserSchema.parse(req.body);
 
@@ -142,6 +161,14 @@ export function registerUserManagementRoutes(app: Express) {
   // DELETE /api/users/:id - Delete user (admin only)
   app.delete("/api/users/:id", authenticate, async (req: Request, res: Response) => {
     try {
+      // Admin role check
+      if (req.user?.role !== 'system_admin') {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Only system administrators can delete users"
+        });
+      }
+
       const { id } = req.params;
 
       // Check if user exists

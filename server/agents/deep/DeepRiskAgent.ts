@@ -182,11 +182,25 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
 
             switch (riskType) {
               case "schedule_delay":
-                scheduleImpactDays = Math.ceil(
-                  ((new Date(project.endDate).getTime() - new Date(project.startDate).getTime()) /
-                    (1000 * 60 * 60 * 24)) *
-                    multiplier
-                );
+                // Validate dates before calculation
+                if (project.endDate && project.startDate) {
+                  const endDate = new Date(project.endDate);
+                  const startDate = new Date(project.startDate);
+
+                  if (!isNaN(endDate.getTime()) && !isNaN(startDate.getTime())) {
+                    scheduleImpactDays = Math.ceil(
+                      ((endDate.getTime() - startDate.getTime()) /
+                        (1000 * 60 * 60 * 24)) *
+                        multiplier
+                    );
+                  } else {
+                    // Default to 30 days if dates are invalid
+                    scheduleImpactDays = 30 * multiplier;
+                  }
+                } else {
+                  // Default to 30 days if dates are missing
+                  scheduleImpactDays = 30 * multiplier;
+                }
                 costImpact = (project.budget * 0.01) * scheduleImpactDays; // 1% budget per day
                 qualityImpact = "Potential quality compromise due to rushing";
                 break;

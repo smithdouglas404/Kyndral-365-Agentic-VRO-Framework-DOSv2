@@ -189,6 +189,26 @@ Always query the ontology using your tools before making decisions.`;
             const spent = parseFloat(project.budgetSpent || '0');
             const cpi = parseFloat(String(project.cpiValue || '1.0'));
 
+            // Validate inputs to prevent division by zero
+            if (budget <= 0) {
+              return JSON.stringify({
+                error: "Invalid budget value",
+                projectId,
+                projectName: project.name
+              });
+            }
+
+            if (cpi <= 0) {
+              return JSON.stringify({
+                error: "Invalid CPI value - cannot calculate forecast",
+                projectId,
+                projectName: project.name,
+                budget,
+                spent,
+                cpi
+              });
+            }
+
             // Calculate Estimate at Completion (EAC)
             const remainingWork = budget - spent;
             const forecastRemaining = remainingWork / cpi;
@@ -263,6 +283,17 @@ Always query the ontology using your tools before making decisions.`;
             }
 
             const budget = parseFloat(project.budgetTotal || '0');
+
+            // Validate budget to prevent division by zero
+            if (budget <= 0) {
+              return JSON.stringify({
+                error: "Invalid budget value - cannot calculate percentage",
+                projectId,
+                projectName: project.name,
+                budget
+              });
+            }
+
             const percentChange = (amount / budget) * 100;
 
             // Policy thresholds
@@ -336,6 +367,9 @@ Always query the ontology using your tools before making decisions.`;
               }
 
               const avgCPI = totalBudget > 0 ? totalSpent / totalBudget : 1.0;
+              const utilizationPercent = totalBudget > 0
+                ? ((totalSpent / totalBudget) * 100).toFixed(1) + '%'
+                : '0.0%';
 
               results.push({
                 portfolioId: portfolio.id,
@@ -345,7 +379,7 @@ Always query the ontology using your tools before making decisions.`;
                 totalSpent,
                 remaining: totalBudget - totalSpent,
                 avgCPI: avgCPI.toFixed(2),
-                utilizationPercent: ((totalSpent / totalBudget) * 100).toFixed(1) + '%',
+                utilizationPercent,
               });
             }
 

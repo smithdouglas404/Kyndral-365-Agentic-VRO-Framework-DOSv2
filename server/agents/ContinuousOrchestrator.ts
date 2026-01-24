@@ -599,13 +599,18 @@ export class ContinuousOrchestrator {
       if (!toAgent || !toConfig) continue;
 
       // Create A2A request message
+      // Ensure content is properly serialized (finding.issue might be an object)
+      const issueContent = typeof finding.issue === 'string'
+        ? finding.issue
+        : JSON.stringify(finding.issue);
+
       const message: AgentMessage = {
         from: fromAgentId,
         to: toAgentId,
         type: 'request',
-        content: `${fromConfig.agentName} requests input on: ${finding.issue}`,
+        content: `${fromConfig.agentName} requests input on: ${issueContent}`,
         projectId: finding.projectId,
-        severity: finding.severity,
+        severity: finding.severity || 'medium', // Default to medium if not specified
       };
 
       // Send via A2A message bus
@@ -638,10 +643,17 @@ export class ContinuousOrchestrator {
         const fromConfig = fromAgent?.getConfig();
 
         // Agent analyzes the request using its domain expertise
-        const prompt = `Another agent (${fromConfig?.agentName}) is requesting your input on a ${request.severity} issue:
+        // Ensure content is properly formatted (might be object)
+        const issueContent = typeof request.content === 'string'
+          ? request.content
+          : JSON.stringify(request.content, null, 2);
 
-Project: ${request.projectId}
-Issue: ${request.content}
+        const severityLabel = request.severity || 'medium';
+
+        const prompt = `Another agent (${fromConfig?.agentName}) is requesting your input on a ${severityLabel} severity issue:
+
+Project: ${request.projectId || 'N/A'}
+Issue: ${issueContent}
 
 From your domain expertise in ${config.focus}, provide:
 1. Your assessment of the situation

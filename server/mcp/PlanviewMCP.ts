@@ -255,6 +255,58 @@ export class PlanviewMCP {
   }
 
   /**
+   * Update full project details in Planview
+   * Called by agents for bidirectional sync
+   */
+  async updateProject(projectId: string, updates: {
+    name?: string;
+    description?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    budget?: number;
+    percentComplete?: number;
+    priority?: string;
+    owner?: string;
+  }): Promise<boolean> {
+    try {
+      const url = `${this.config.baseUrl}/api/${this.config.apiVersion}/projects/${projectId}`;
+
+      // Transform our internal data to Planview format
+      const planviewUpdates: any = {};
+
+      if (updates.name !== undefined) planviewUpdates.name = updates.name;
+      if (updates.description !== undefined) planviewUpdates.description = updates.description;
+      if (updates.status !== undefined) planviewUpdates.status = this.mapToPlanviewStatus(updates.status);
+      if (updates.startDate !== undefined) planviewUpdates.startDate = updates.startDate;
+      if (updates.endDate !== undefined) planviewUpdates.endDate = updates.endDate;
+      if (updates.budget !== undefined) planviewUpdates.totalBudget = updates.budget;
+      if (updates.percentComplete !== undefined) planviewUpdates.percentComplete = updates.percentComplete;
+      if (updates.priority !== undefined) planviewUpdates.priority = updates.priority;
+      if (updates.owner !== undefined) planviewUpdates.owner = updates.owner;
+
+      planviewUpdates.updatedBy = 'AI Agent';
+      planviewUpdates.updatedAt = new Date().toISOString();
+
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: this.baseHeaders,
+        body: JSON.stringify(planviewUpdates),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Planview API error: ${response.status} ${response.statusText}`);
+      }
+
+      console.log(`[PlanviewMCP] Updated project ${projectId} in Planview`);
+      return true;
+    } catch (error) {
+      console.error(`[PlanviewMCP] Error updating project ${projectId} in Planview:`, error);
+      return false;
+    }
+  }
+
+  /**
    * Create a comment/note in Planview
    * Used by agents to document their reasoning
    */

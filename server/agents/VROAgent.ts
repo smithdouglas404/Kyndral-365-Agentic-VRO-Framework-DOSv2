@@ -181,13 +181,15 @@ You are the VALUE GUARDIAN - PMO handles execution, YOU handle value delivery.`;
               const spent = parseFloat((project as any).budgetSpent || '0');
               const completion = parseFloat((project as any).spi || '1') * 100; // Use SPI as proxy
 
-              if (completion > 0) {
+              if (completion > 0 && budget > 0) {
                 const projectedSpend = (spent / completion) * 100;
                 const budgetVariance = ((projectedSpend - budget) / budget) * 100;
 
                 if (budgetVariance > 20) {
                   issues.push(`Budget assumption invalid: Projected to spend ${budgetVariance.toFixed(0)}% more than budgeted`);
                 }
+              } else if (completion > 0 && budget === 0) {
+                issues.push('Budget assumption invalid: Budget is zero but project has spending');
               }
 
               // Check timeline assumptions
