@@ -463,12 +463,18 @@ export class ContinuousOrchestrator {
         // - Trend detection and pattern learning
         // - Predictive intelligence through historical data
         // - Cross-domain correlation analysis
-        if (typeof agent.broadcastFact === 'function') {
+
+        // Debug: Check if broadcastFact exists
+        const hasBroadcastFact = typeof agent.broadcastFact === 'function';
+        console.log(`[ContinuousOrchestrator] ${config.agentName} has broadcastFact: ${hasBroadcastFact}, agent type: ${typeof agent}, agent constructor: ${agent?.constructor?.name}`);
+
+        if (hasBroadcastFact) {
           try {
             // Broadcast each condition that triggered the rule
             for (const condition of rule.conditions) {
               const metricValue = metrics[condition.attribute];
               if (metricValue !== undefined) {
+                console.log(`[ContinuousOrchestrator] ${config.agentName} broadcasting: ${condition.attribute} = ${metricValue}`);
                 await agent.broadcastFact(
                   `project_${project.id}`,
                   condition.attribute,
@@ -481,6 +487,8 @@ export class ContinuousOrchestrator {
           } catch (error) {
             console.error(`[ContinuousOrchestrator] Error broadcasting facts for ${config.agentName}:`, error);
           }
+        } else {
+          console.warn(`[ContinuousOrchestrator] ${config.agentName} does NOT have broadcastFact method!`);
         }
 
         // Get highest severity action
