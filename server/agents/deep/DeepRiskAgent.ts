@@ -14,12 +14,15 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import type { IStorage } from "../../storage.js";
 import { DeepAgentBase } from "./DeepAgentBase.js";
+import { RISK_DEFAULT_RULES, RISK_DEFAULT_ATTRIBUTES } from "../attributes/RiskAgentAttributes.js";
+import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
 
 /**
  * Deep Risk Agent
  * Provides intelligent risk management with planning and reflection
  */
 export class DeepRiskAgent extends DeepAgentBase {
+  private rules: RuleDefinition[] = RISK_DEFAULT_RULES;
   constructor(storage: IStorage) {
     super(
       {
@@ -703,5 +706,61 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
         },
       }),
     ];
+  }
+
+  /**
+   * Evaluate rules against current metrics
+   */
+  evaluateRules(metrics: Record<string, any>): Array<{ rule: RuleDefinition; triggered: boolean; actions: any[] }> {
+    const results = [];
+
+    for (const rule of this.rules.filter(r => r.enabled)) {
+      let triggered = true;
+
+      // Check all conditions
+      for (const condition of rule.conditions) {
+        const value = metrics[condition.attribute];
+        if (value === undefined) {
+          triggered = false;
+          break;
+        }
+
+        switch (condition.operator) {
+          case '>':
+            triggered = triggered && value > condition.threshold;
+            break;
+          case '<':
+            triggered = triggered && value < condition.threshold;
+            break;
+          case '>=':
+            triggered = triggered && value >= condition.threshold;
+            break;
+          case '<=':
+            triggered = triggered && value <= condition.threshold;
+            break;
+          case '==':
+            triggered = triggered && value === condition.threshold;
+            break;
+          case '!=':
+            triggered = triggered && value !== condition.threshold;
+            break;
+          default:
+            triggered = false;
+        }
+
+        if (!triggered) break;
+      }
+
+      if (triggered) {
+        console.log(`[DeepRisk] Rule triggered: ${rule.name}`);
+        results.push({
+          rule,
+          triggered: true,
+          actions: rule.actions,
+        });
+      }
+    }
+
+    return results;
   }
 }

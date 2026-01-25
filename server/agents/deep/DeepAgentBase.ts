@@ -14,6 +14,8 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import type { IStorage } from "../../storage.js";
+import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
+import type { VectorDocument } from "../../mcp/RetoolVectorsMCP.js";
 
 /**
  * Plan step for multi-step reasoning
@@ -79,6 +81,7 @@ export abstract class DeepAgentBase {
   protected reflectorModel: ChatAnthropic;
 
   protected tracingEnabled: boolean;
+  protected enableKnowledgeEnrichment: boolean;
 
   protected currentPlan?: AgentPlan;
   protected reflectionHistory: ActionReflection[] = [];
@@ -96,6 +99,9 @@ export abstract class DeepAgentBase {
 
     // Initialize tracing (disabled for now)
     this.tracingEnabled = false;
+
+    // Enable knowledge enrichment if Retool Vectors MCP is configured
+    this.enableKnowledgeEnrichment = !!getRetoolVectorsMCP();
 
     // Initialize models with different temperatures for different purposes
     const callbacks: any[] = [];
@@ -155,11 +161,62 @@ export abstract class DeepAgentBase {
   protected abstract getSystemPrompt(): string;
 
   /**
+   * Enrich context with knowledge from Retool Vectors (RAG)
+   */
+  protected async enrichContextWithKnowledge(goal: string, context: any): Promise<any> {
+    if (!this.enableKnowledgeEnrichment) {
+      return context;
+    }
+
+    try {
+      const vectorsMCP = getRetoolVectorsMCP();
+      if (!vectorsMCP) {
+        return context;
+      }
+
+      console.log(`[${this.config.agentName}] Enriching context with knowledge base via MCP`);
+
+      // Query relevant documents
+      const relevantDocs = await vectorsMCP.query({
+        text: goal,
+        topK: 3,
+        filter: {
+          domain: this.config.agentType, // Filter by agent domain
+        },
+      });
+
+      if (relevantDocs.length === 0) {
+        console.log(`[${this.config.agentName}] No relevant documents found`);
+        return context;
+      }
+
+      console.log(`[${this.config.agentName}] Found ${relevantDocs.length} relevant documents`);
+
+      // Add knowledge context
+      return {
+        ...context,
+        knowledgeContext: relevantDocs.map(doc => ({
+          content: doc.content,
+          source: doc.metadata.source,
+          relevance: doc.score,
+        })),
+        documentSources: relevantDocs.map(doc => doc.metadata.source),
+      };
+    } catch (error: any) {
+      console.warn(`[${this.config.agentName}] Knowledge enrichment failed:`, error.message);
+      return context;
+    }
+  }
+
+  /**
    * PHASE 1: PLANNING
    * Create a multi-step plan before executing
    */
   protected async createPlan(goal: string, context: any): Promise<AgentPlan> {
     console.log(`[${this.config.agentName}] Creating plan for goal: ${goal}`);
+
+    // Enrich context with knowledge from Retool Vectors
+    const enrichedContext = await this.enrichContextWithKnowledge(goal, context);
 
     const tools = this.defineTools();
     const toolDescriptions = tools.map(t => `- ${t.name}: ${t.description}`).join('\n');
@@ -204,7 +261,7 @@ Create a plan to achieve this goal.`],
     const chain = planningPrompt.pipe(this.plannerModel);
     const response = await chain.invoke({
       goal,
-      context: JSON.stringify(context, null, 2),
+      context: JSON.stringify(enrichedContext, null, 2),
     });
 
     // Parse the plan from response

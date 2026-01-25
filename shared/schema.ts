@@ -1558,6 +1558,34 @@ export const insertAgentActivityLogSchema = createInsertSchema(agentActivityLog)
 export type InsertAgentActivityLog = z.infer<typeof insertAgentActivityLogSchema>;
 export type AgentActivityLog = typeof agentActivityLog.$inferSelect;
 
+// Agent Collaboration Rules - Dynamic rules for inter-agent collaboration
+export const agentCollaborationRules = pgTable("agent_collaboration_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  enabled: boolean("enabled").default(true),
+  priority: integer("priority").default(5), // 1-10, higher = runs first
+  sourceAgent: text("source_agent").notNull(), // Agent that triggers the rule
+  conditions: text("conditions").notNull(), // JSON array of conditions
+  actions: text("actions").notNull(), // JSON array of actions
+  createdBy: text("created_by").notNull(),
+  executionCount: integer("execution_count").default(0),
+  lastExecuted: timestamp("last_executed"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAgentCollaborationRuleSchema = createInsertSchema(agentCollaborationRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  executionCount: true,
+  lastExecuted: true,
+});
+
+export type InsertAgentCollaborationRule = z.infer<typeof insertAgentCollaborationRuleSchema>;
+export type AgentCollaborationRule = typeof agentCollaborationRules.$inferSelect;
+
 // Alerts - System alerts and notifications from agents and integrations
 export const alerts = pgTable("alerts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

@@ -418,74 +418,106 @@ export class ContinuousOrchestrator {
 
   /**
    * Detect if project has issues in agent's domain
+   * Now uses rules from *_DEFAULT_RULES instead of hardcoded logic
    */
   private async detectIssue(agent: any, project: any): Promise<any | null> {
     const config = agent.getConfig();
 
-    // FinOps Agent: Check budget
-    if (config.agentId === 'finops') {
-      const cpi = parseFloat(project.cpiValue || '1.0');
-      if (cpi < 0.85) {
+    // Check if agent has evaluateRules method (Deep Agents)
+    if (typeof agent.evaluateRules === 'function') {
+      // Build metrics from project data
+      const metrics = this.buildMetricsFromProject(config.agentId, project);
+
+      // Evaluate rules
+      const ruleResults = agent.evaluateRules(metrics);
+
+      // If any rules triggered, return the first one (highest priority)
+      if (ruleResults.length > 0) {
+        const triggered = ruleResults[0];
+        const rule = triggered.rule;
+        const actions = triggered.actions;
+
+        // Get highest severity action
+        const highestSeverity = this.getHighestSeverity(actions.map(a => a.severity));
+
         return {
-          description: `Budget overrun detected (CPI: ${cpi.toFixed(2)})`,
-          severity: cpi < 0.75 ? 'critical' : 'high',
-          confidence: 0.92,
-          action: 'Review budget allocation and consider cost reduction measures',
+          description: rule.description,
+          severity: highestSeverity,
+          confidence: 0.90, // Rules are explicit, so high confidence
+          action: actions.map(a => a.message).join('; '),
+          ruleId: rule.id,
+          ruleName: rule.name,
+          triggeredActions: actions,
         };
       }
     }
 
-    // TMO Agent: Check schedule
-    if (config.agentId === 'tmo') {
+    // Fallback: Use old hardcoded logic for non-Deep agents
+    // This handles agents that don't have rules yet
+    return this.detectIssueLegacy(config, project);
+  }
+
+  /**
+   * Build metrics object from project data for rule evaluation
+   */
+  private buildMetricsFromProject(agentId: string, project: any): Record<string, any> {
+    const metrics: Record<string, any> = {};
+
+    // Common metrics
+    const budget = parseFloat(project.budget || '0');
+    const actualCost = parseFloat(project.actualCost || '0');
+    const progress = project.progress || 0;
+
+    if (agentId === 'finops' || agentId === 'deep-finops') {
+      // FinOps metrics
+      const variance = budget > 0 ? ((actualCost - budget) / budget) * 100 : 0;
+      const burnRate = progress > 0 ? (actualCost / budget) / (progress / 100) * 100 : 100;
+      const remainingBudget = budget - actualCost;
+
+      metrics.variance = Math.abs(variance);
+      metrics.burnRate = burnRate;
+      metrics.budgetHealth = variance > 20 ? 'critical' : variance > 15 ? 'warning' : 'healthy';
+      metrics.remainingBudget = remainingBudget;
+      metrics.totalSpend = actualCost;
+    }
+
+    if (agentId === 'tmo' || agentId === 'deep-tmo') {
+      // TMO metrics
       const spi = parseFloat(project.spiValue || '1.0');
-      if (spi < 0.85) {
-        return {
-          description: `Schedule delay detected (SPI: ${spi.toFixed(2)})`,
-          severity: spi < 0.75 ? 'critical' : 'high',
-          confidence: 0.89,
-          action: 'Analyze critical path and consider schedule recovery plan',
-        };
-      }
+      metrics.scheduleVariance = spi < 1.0 ? (1.0 - spi) * 100 : 0;
+      metrics.spi = spi;
     }
 
-    // VRO Agent: Check ROI realization
-    if (config.agentId === 'vro') {
-      const completion = parseFloat(project.completionPercentage || '0');
+    if (agentId === 'risk' || agentId === 'deep-risk') {
+      // Risk metrics (would need more project data)
+      metrics.riskScore = 50; // Placeholder
+      metrics.highPriorityRisksCount = 0; // Placeholder
+    }
+
+    if (agentId === 'vro' || agentId === 'deep-vro') {
+      // VRO metrics
       const expectedRoi = parseFloat(project.expectedRoi || '0');
-      const budget = parseFloat(project.budget || '0');
-      const spent = parseFloat(project.budgetSpent || '0');
-
-      if (completion > 50 && spent > budget * 0.7 && expectedRoi > 0) {
-        const estimatedValue = (expectedRoi * completion) / 100;
-        const variance = ((estimatedValue - expectedRoi) / expectedRoi) * 100;
-
-        if (variance < -20) {
-          return {
-            description: `Value realization at risk (${variance.toFixed(0)}% below expected)`,
-            severity: variance < -30 ? 'high' : 'medium',
-            confidence: 0.78,
-            action: 'Review business case assumptions and value delivery plan',
-          };
-        }
-      }
+      metrics.roi = expectedRoi;
+      metrics.valueRealization = progress;
     }
 
-    // Risk Agent: Check for risk indicators
-    if (config.agentId === 'risk') {
-      const allInterventions = await this.storage.getInterventions();
-      const projectInterventions = allInterventions.filter(i => i.projectId === project.id);
-      const criticalInterventions = projectInterventions.filter(i => i.severity === 'critical' || i.severity === 'high');
+    return metrics;
+  }
 
-      if (criticalInterventions.length >= 3) {
-        return {
-          description: `Multiple critical issues detected (${criticalInterventions.length} interventions)`,
-          severity: 'high',
-          confidence: 0.85,
-          action: 'Conduct comprehensive risk assessment and escalate to stakeholders',
-        };
-      }
-    }
+  /**
+   * Get highest severity from list
+   */
+  private getHighestSeverity(severities: string[]): 'critical' | 'high' | 'medium' | 'low' {
+    if (severities.includes('critical')) return 'critical';
+    if (severities.includes('high')) return 'high';
+    if (severities.includes('medium')) return 'medium';
+    return 'low';
+  }
 
+  /**
+   * Legacy detection logic for agents without rules
+   */
+  private async detectIssueLegacy(config: any, project: any): Promise<any | null> {
     // Governance Agent: Check compliance
     if (config.agentId === 'governance') {
       if (!project.portfolioId) {
@@ -500,7 +532,6 @@ export class ContinuousOrchestrator {
 
     // Planning Agent: Check dependencies
     if (config.agentId === 'planning') {
-      // For now, random chance of detecting dependency issue
       if (Math.random() < 0.15) {
         return {
           description: 'Potential dependency conflict detected',
@@ -513,7 +544,6 @@ export class ContinuousOrchestrator {
 
     // OCM Agent: Check change management
     if (config.agentId === 'ocm') {
-      // For now, random chance of detecting adoption issue
       if (Math.random() < 0.12) {
         return {
           description: 'Change adoption metrics below target',

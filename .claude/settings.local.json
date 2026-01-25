@@ -45,7 +45,15 @@
       "Bash(npm run:*)",
       "Bash(tsx:*)",
       "Bash(node -c:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git clean:*)",
+      "Bash(node --check:*)",
+      "WebFetch(domain:docs.retool.com)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git show-branch:*)",
+      "Bash(git fsck:*)"
     ]
   }
 }

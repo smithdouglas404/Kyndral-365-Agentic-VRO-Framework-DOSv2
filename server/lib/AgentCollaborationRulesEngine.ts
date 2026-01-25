@@ -123,7 +123,7 @@ export class AgentCollaborationRulesEngine {
 
     console.log('[RulesEngine] Initializing...');
 
-    await this.ensureTables();
+    // Table is created by Drizzle migrations (shared/schema.ts)
     await this.loadRules();
 
     this.initialized = true;
@@ -457,33 +457,6 @@ export class AgentCollaborationRulesEngine {
     return this.rules.get(ruleId) || null;
   }
 
-  /**
-   * Ensure tables exist
-   */
-  private async ensureTables(): Promise<void> {
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS agent_collaboration_rules (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-        name TEXT NOT NULL,
-        description TEXT,
-        enabled BOOLEAN DEFAULT true,
-        priority INTEGER DEFAULT 5,
-        source_agent TEXT NOT NULL,
-        conditions JSONB NOT NULL,
-        actions JSONB NOT NULL,
-        created_by TEXT NOT NULL,
-        execution_count INTEGER DEFAULT 0,
-        last_executed TIMESTAMP,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-
-    // Create index for faster queries
-    await db.execute(sql`
-      CREATE INDEX IF NOT EXISTS idx_collaboration_rules_source_agent ON agent_collaboration_rules(source_agent, enabled)
-    `);
-  }
 }
 
 /**

@@ -6,10 +6,10 @@
  */
 
 import type { Express, Request, Response } from 'express';
-import { db } from '@db';
+import { db } from '../../db.js';
 import { okrs, keyResults, kpis, kpiHistory, type InsertOkr, type InsertKeyResult, type InsertKpi } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { authenticate } from '../../middleware/auth';
+import { authenticate } from '../../auth/authMiddleware.js';
 import { seedDefaultOKRs } from '../../scripts/seed-default-okrs.js';
 import multer from 'multer';
 import { ChatOpenAI } from '@langchain/openai';

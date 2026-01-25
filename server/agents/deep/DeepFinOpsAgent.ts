@@ -11,8 +11,11 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
+import { FINOPS_DEFAULT_RULES, FINOPS_DEFAULT_ATTRIBUTES } from "../attributes/FinOpsAgentAttributes.js";
+import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
 
 export class DeepFinOpsAgent extends DeepAgentBase {
+  private rules: RuleDefinition[] = FINOPS_DEFAULT_RULES;
   constructor(storage: IStorage) {
     const config: DeepAgentConfig = {
       agentName: "DeepFinOps",
@@ -217,6 +220,62 @@ export class DeepFinOpsAgent extends DeepAgentBase {
         },
       }),
     ];
+  }
+
+  /**
+   * Evaluate rules against current metrics
+   */
+  evaluateRules(metrics: Record<string, any>): Array<{ rule: RuleDefinition; triggered: boolean; actions: any[] }> {
+    const results = [];
+
+    for (const rule of this.rules.filter(r => r.enabled)) {
+      let triggered = true;
+
+      // Check all conditions
+      for (const condition of rule.conditions) {
+        const value = metrics[condition.attribute];
+        if (value === undefined) {
+          triggered = false;
+          break;
+        }
+
+        switch (condition.operator) {
+          case '>':
+            triggered = triggered && value > condition.threshold;
+            break;
+          case '<':
+            triggered = triggered && value < condition.threshold;
+            break;
+          case '>=':
+            triggered = triggered && value >= condition.threshold;
+            break;
+          case '<=':
+            triggered = triggered && value <= condition.threshold;
+            break;
+          case '==':
+            triggered = triggered && value === condition.threshold;
+            break;
+          case '!=':
+            triggered = triggered && value !== condition.threshold;
+            break;
+          default:
+            triggered = false;
+        }
+
+        if (!triggered) break;
+      }
+
+      if (triggered) {
+        console.log(`[DeepFinOps] Rule triggered: ${rule.name}`);
+        results.push({
+          rule,
+          triggered: true,
+          actions: rule.actions,
+        });
+      }
+    }
+
+    return results;
   }
 
   protected getSystemPrompt(): string {
