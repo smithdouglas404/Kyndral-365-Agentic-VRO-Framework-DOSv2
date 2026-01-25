@@ -5,6 +5,7 @@
  */
 
 import type { Express, Request, Response } from "express";
+import { authenticate } from "../../auth/authMiddleware.js";
 import { db } from "../../db.js";
 import {
   integrations,

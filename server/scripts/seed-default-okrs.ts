@@ -6,7 +6,7 @@
  */
 
 import { db } from '../db.js';
-import { agentOKRs } from '../../shared/schema.js';
+import { okrs } from '../../shared/schema.js';
 
 interface OKRTemplate {
   agentId: string;

@@ -16,7 +16,7 @@ import { sql } from 'drizzle-orm';
 import type { IStorage } from '../storage.js';
 import { getEnhancedLLMRouter } from './EnhancedLLMRouter.js';
 import { UniversalMCPConnector } from '../mcp/UniversalMCPConnector.js';
-import { getEnhancedKnowledgeBaseRepository } from './EnhancedKnowledgeBaseRepository.js';
+import { getEnhancedKnowledgeBase } from './EnhancedKnowledgeBaseRepository.js';
 import { getNotificationService } from './NotificationService.js';
 
 // ============================================================================
@@ -331,7 +331,7 @@ export class AgentOrchestrator {
         return { success: true, actionsExecuted: 0, errors: [] };
       }
 
-      const kb = getEnhancedKnowledgeBaseRepository(this.storage);
+      const kb = getEnhancedKnowledgeBase(this.storage);
       let totalActionsExecuted = 0;
       const errors: string[] = [];
 

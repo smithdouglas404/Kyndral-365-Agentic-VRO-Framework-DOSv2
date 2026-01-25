@@ -14,8 +14,8 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import type { IStorage } from "../../storage.js";
-import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
-import type { VectorDocument } from "../../mcp/RetoolVectorsMCP.js";
+// import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
+// import type { VectorDocument } from "../../mcp/RetoolVectorsMCP.js";
 
 /**
  * Plan step for multi-step reasoning
@@ -101,7 +101,8 @@ export abstract class DeepAgentBase {
     this.tracingEnabled = false;
 
     // Enable knowledge enrichment if Retool Vectors MCP is configured
-    this.enableKnowledgeEnrichment = !!getRetoolVectorsMCP();
+    // TODO: Re-enable when RetoolVectorsMCP is implemented
+    this.enableKnowledgeEnrichment = false; // !!getRetoolVectorsMCP();
 
     // Initialize models with different temperatures for different purposes
     const callbacks: any[] = [];

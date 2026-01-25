@@ -12,6 +12,8 @@
 import type { IStorage } from '../storage.js';
 import { getEmbeddingsService } from '../services/EmbeddingsService.js';
 import { getNotificationService } from './NotificationService.js';
+import { db } from '../db.js';
+import { sql } from 'drizzle-orm';
 
 export type KnowledgeCategory =
   | 'pmbok'
@@ -144,7 +146,7 @@ export class EnhancedKnowledgeBaseRepository {
    * Initialize database table with enhanced schema
    */
   async initializeTable(): Promise<void> {
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE TABLE IF NOT EXISTS enhanced_knowledge_base (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -185,25 +187,25 @@ export class EnhancedKnowledgeBaseRepository {
     `);
 
     // Create indexes for performance
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_relevant_agents ON enhanced_knowledge_base USING GIN(relevant_agents)
     `);
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_document_type ON enhanced_knowledge_base(document_type)
     `);
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_tags ON enhanced_knowledge_base USING GIN(tags)
     `);
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_country_code ON enhanced_knowledge_base(country_code)
     `);
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_industry ON enhanced_knowledge_base(industry)
     `);
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_standard_name ON enhanced_knowledge_base(standard_name)
     `);
-    await this.storage.db.execute(`
+    await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_kb_is_predocumented ON enhanced_knowledge_base(is_predocumented)
     `);
 
@@ -244,43 +246,42 @@ export class EnhancedKnowledgeBaseRepository {
       updatedAt: now,
     };
 
-    await this.storage.db.execute(
-      `INSERT INTO enhanced_knowledge_base (
+    await db.execute(sql`
+      INSERT INTO enhanced_knowledge_base (
         id, title, category, subcategory, content, summary, tags, source, version, author,
         relevant_agents, document_type, trigger_conditions,
         country_code, industry, standard_name, is_regulatory_doc, is_predocumented, applicable_phases,
         form_schema, required_fields,
         metadata, embedding, status, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`,
-      [
-        fullArticle.id,
-        fullArticle.title,
-        fullArticle.category,
-        fullArticle.subcategory || null,
-        fullArticle.content,
-        fullArticle.summary || null,
-        fullArticle.tags,
-        fullArticle.source,
-        fullArticle.version,
-        fullArticle.author || null,
-        fullArticle.relevantAgents,
-        fullArticle.documentType,
-        JSON.stringify(fullArticle.triggerConditions || []),
-        fullArticle.countryCode || null,
-        fullArticle.industry || null,
-        fullArticle.standardName || null,
-        fullArticle.isRegulatoryDoc || false,
-        fullArticle.isPredocumented || false,
-        fullArticle.applicablePhases || [],
-        JSON.stringify(fullArticle.formSchema || null),
-        fullArticle.requiredFields || [],
-        JSON.stringify(fullArticle.metadata),
-        embedding.length > 0 ? `[${embedding.join(',')}]` : null,
-        fullArticle.status,
-        fullArticle.createdAt,
-        fullArticle.updatedAt,
-      ]
-    );
+      ) VALUES (
+        ${fullArticle.id},
+        ${fullArticle.title},
+        ${fullArticle.category},
+        ${fullArticle.subcategory || null},
+        ${fullArticle.content},
+        ${fullArticle.summary || null},
+        ${fullArticle.tags},
+        ${fullArticle.source},
+        ${fullArticle.version},
+        ${fullArticle.author || null},
+        ${fullArticle.relevantAgents},
+        ${fullArticle.documentType},
+        ${JSON.stringify(fullArticle.triggerConditions || [])},
+        ${fullArticle.countryCode || null},
+        ${fullArticle.industry || null},
+        ${fullArticle.standardName || null},
+        ${fullArticle.isRegulatoryDoc || false},
+        ${fullArticle.isPredocumented || false},
+        ${fullArticle.applicablePhases || []},
+        ${JSON.stringify(fullArticle.formSchema || null)},
+        ${fullArticle.requiredFields || []},
+        ${JSON.stringify(fullArticle.metadata)},
+        ${embedding.length > 0 ? `[${embedding.join(',')}]` : null},
+        ${fullArticle.status},
+        ${fullArticle.createdAt},
+        ${fullArticle.updatedAt}
+      )
+    `);
 
     console.log(`[EnhancedKB] Created article: ${fullArticle.id} (${fullArticle.documentType})`);
 
@@ -575,21 +576,20 @@ export class EnhancedKnowledgeBaseRepository {
    * Record article usage by agent
    */
   async recordUsage(articleId: string, agentId: string): Promise<void> {
-    await this.storage.db.execute(
-      `UPDATE enhanced_knowledge_base
-       SET metadata = jsonb_set(
-         jsonb_set(
-           metadata,
-           '{usageCount}',
-           (COALESCE((metadata->>'usageCount')::int, 0) + 1)::text::jsonb
-         ),
-         '{usedByAgents,${agentId}}',
-         (COALESCE((metadata->'usedByAgents'->'${agentId}')::int, 0) + 1)::text::jsonb
-       ),
-       updated_at = NOW()
-       WHERE id = $1`,
-      [articleId]
-    );
+    await db.execute(sql`
+      UPDATE enhanced_knowledge_base
+      SET metadata = jsonb_set(
+        jsonb_set(
+          metadata,
+          '{usageCount}',
+          (COALESCE((metadata->>'usageCount')::int, 0) + 1)::text::jsonb
+        ),
+        ${`{usedByAgents,${agentId}}`},
+        (COALESCE((metadata->'usedByAgents'->${agentId})::int, 0) + 1)::text::jsonb
+      ),
+      updated_at = NOW()
+      WHERE id = ${articleId}
+    `);
   }
 
   /**
@@ -766,7 +766,7 @@ export class EnhancedKnowledgeBaseRepository {
       }
     }
 
-    await this.storage.db.execute('DELETE FROM enhanced_knowledge_base WHERE id = $1', [id]);
+    await db.execute(sql`DELETE FROM enhanced_knowledge_base WHERE id = ${id}`);
     console.log(`[EnhancedKB] Deleted article: ${id} (force=${force})`);
   }
 
@@ -795,25 +795,24 @@ export class EnhancedKnowledgeBaseRepository {
     });
 
     // Update references in other documents
-    await this.storage.db.execute(
-      `UPDATE enhanced_knowledge_base
-       SET metadata = jsonb_set(
-         metadata,
-         '{relatedArticles}',
-         (
-           SELECT jsonb_agg(
-             CASE
-               WHEN value::text = $1 THEN to_jsonb($2::text)
-               ELSE value
-             END
-           )
-           FROM jsonb_array_elements(metadata->'relatedArticles')
-         ),
-         true
-       )
-       WHERE metadata->'relatedArticles' @> $3::jsonb`,
-      [`"${oldId}"`, newId, JSON.stringify([oldId])]
-    );
+    await db.execute(sql`
+      UPDATE enhanced_knowledge_base
+      SET metadata = jsonb_set(
+        metadata,
+        '{relatedArticles}',
+        (
+          SELECT jsonb_agg(
+            CASE
+              WHEN value::text = ${`"${oldId}"`} THEN to_jsonb(${newId}::text)
+              ELSE value
+            END
+          )
+          FROM jsonb_array_elements(metadata->'relatedArticles')
+        ),
+        true
+      )
+      WHERE metadata->'relatedArticles' @> ${JSON.stringify([oldId])}::jsonb
+    `);
 
     console.log(`[EnhancedKB] Replaced document ${oldId} with ${newId}`);
   }
@@ -845,44 +844,34 @@ export class EnhancedKnowledgeBaseRepository {
       }
     }
 
-    await this.storage.db.execute(
-      `UPDATE enhanced_knowledge_base SET
-        title = $2, category = $3, subcategory = $4, content = $5, summary = $6,
-        tags = $7, source = $8, version = $9, author = $10,
-        relevant_agents = $11, document_type = $12, trigger_conditions = $13,
-        country_code = $14, industry = $15, standard_name = $16,
-        is_regulatory_doc = $17, is_predocumented = $18, applicable_phases = $19,
-        form_schema = $20, required_fields = $21, metadata = $22,
-        embedding = $23, status = $24, updated_at = $25
-       WHERE id = $1`,
-      [
-        updated.id,
-        updated.title,
-        updated.category,
-        updated.subcategory || null,
-        updated.content,
-        updated.summary || null,
-        updated.tags,
-        updated.source,
-        updated.version,
-        updated.author || null,
-        updated.relevantAgents,
-        updated.documentType,
-        JSON.stringify(updated.triggerConditions || []),
-        updated.countryCode || null,
-        updated.industry || null,
-        updated.standardName || null,
-        updated.isRegulatoryDoc || false,
-        updated.isPredocumented || false,
-        updated.applicablePhases || [],
-        JSON.stringify(updated.formSchema || null),
-        updated.requiredFields || [],
-        JSON.stringify(updated.metadata),
-        updated.embedding ? `[${updated.embedding.join(',')}]` : null,
-        updated.status,
-        updated.updatedAt,
-      ]
-    );
+    await db.execute(sql`
+      UPDATE enhanced_knowledge_base SET
+        title = ${updated.title},
+        category = ${updated.category},
+        subcategory = ${updated.subcategory || null},
+        content = ${updated.content},
+        summary = ${updated.summary || null},
+        tags = ${updated.tags},
+        source = ${updated.source},
+        version = ${updated.version},
+        author = ${updated.author || null},
+        relevant_agents = ${updated.relevantAgents},
+        document_type = ${updated.documentType},
+        trigger_conditions = ${JSON.stringify(updated.triggerConditions || [])},
+        country_code = ${updated.countryCode || null},
+        industry = ${updated.industry || null},
+        standard_name = ${updated.standardName || null},
+        is_regulatory_doc = ${updated.isRegulatoryDoc || false},
+        is_predocumented = ${updated.isPredocumented || false},
+        applicable_phases = ${updated.applicablePhases || []},
+        form_schema = ${JSON.stringify(updated.formSchema || null)},
+        required_fields = ${updated.requiredFields || []},
+        metadata = ${JSON.stringify(updated.metadata)},
+        embedding = ${updated.embedding ? `[${updated.embedding.join(',')}]` : null},
+        status = ${updated.status},
+        updated_at = ${updated.updatedAt}
+      WHERE id = ${updated.id}
+    `);
 
     console.log(`[EnhancedKB] Updated article: ${id}`);
     return updated;
