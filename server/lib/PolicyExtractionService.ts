@@ -30,6 +30,7 @@ import {
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
+import { parseDocument } from './DocumentParsingService.js';
 
 // ============================================================================
 // TYPES
@@ -495,10 +496,21 @@ export class PolicyExtractionService {
     };
   }
 
+  /**
+   * Read document content with JIT (Just-In-Time) parsing.
+   * Supports PDF, Word, and text files.
+   * Option 2: Parse at extraction time for lower storage footprint.
+   */
   private async readDocument(filePath: string): Promise<string> {
-    // TODO: Add support for PDF, Word, Excel parsing
-    // For now, assume text files
-    return fs.readFileSync(filePath, 'utf-8');
+    try {
+      // Use DocumentParsingService for PDF/Word/Text parsing
+      const parsed = await parseDocument(filePath);
+      return parsed.text;
+    } catch (error: any) {
+      // Fallback to raw text read if parsing fails
+      console.warn(`[PolicyExtraction] Parsing failed for ${filePath}, falling back to raw text: ${error.message}`);
+      return fs.readFileSync(filePath, 'utf-8');
+    }
   }
 
   private calculateCost(tokens: number, model: string): number {

@@ -357,7 +357,7 @@ export class ContinuousOrchestrator {
             await this.initiateCollaboration(agentId, collaborationNeeded.agents, finding);
           } else {
             // Agent handles independently
-            await this.handleFindingIndependently(agent, finding);
+            await this.handleFindingIndependently(agent, agentId, finding);
           }
         }
       }
@@ -795,7 +795,7 @@ Keep response brief and actionable.`;
    */
   async broadcastAlert(fromAgentId: string, recipientIds: string[], alert: any): Promise<void> {
     const fromAgent = this.agents.get(fromAgentId);
-    const fromConfig = this.getAgentConfig(fromAgent, request.from);
+    const fromConfig = this.getAgentConfig(fromAgent, fromAgentId);
 
     const message: Omit<AgentMessage, 'to'> = {
       from: fromAgentId,
@@ -821,8 +821,7 @@ Keep response brief and actionable.`;
   /**
    * Agent handles finding independently (no collaboration needed)
    */
-  private async handleFindingIndependently(agent: any, finding: any): Promise<void> {
-    const agentId = agent.id || agent.agentId;
+  private async handleFindingIndependently(agent: any, agentId: string, finding: any): Promise<void> {
     const config = this.getAgentConfig(agent, agentId);
 
     // Broadcast agent insight for real-time notifications

@@ -64,7 +64,8 @@
       "Bash(do if [ -f \"docs/$file\" ])",
       "Bash(then echo \"❌ Still exists: $file\")",
       "Bash(else echo \"✅ Deleted: $file\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(wc:*)"
     ]
   }
 }
