@@ -18,7 +18,10 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import type { IStorage } from '../storage.js';
-import type { User } from '../../shared/models/auth.js';
+import type { User, InsertPasswordResetToken } from '../../shared/models/auth.js';
+import { db } from '../db.js';
+import { passwordResetTokens, authSessions, apiKeys } from '../../shared/models/auth.js';
+import { eq, and, gt } from 'drizzle-orm';
 export type { User } from '../../shared/models/auth.js';
 
 /**
@@ -366,11 +369,26 @@ export class AuthSystem {
         return null;
       }
 
-      // TODO: Check session validity when storage method is available
-      // const session = await this.storage.getSession(token);
-      // if (!session || session.expiresAt < new Date()) {
-      //   return null;
-      // }
+      // Check if session exists and is valid
+      const [session] = await db
+        .select()
+        .from(authSessions)
+        .where(
+          and(
+            eq(authSessions.token, token),
+            gt(authSessions.expiresAt, new Date())
+          )
+        );
+
+      if (!session) {
+        return null;
+      }
+
+      // Update last used timestamp
+      await db
+        .update(authSessions)
+        .set({ lastUsedAt: new Date() })
+        .where(eq(authSessions.id, session.id));
 
       // Get user
       const user = await this.storage.getUser(decoded.userId);
@@ -526,12 +544,15 @@ export class AuthSystem {
 
     // Generate reset token
     const resetToken = randomBytes(32).toString('hex');
-    // TODO: Store reset token when passwordResetTokens table is used
-    // const resetTokenHash = await bcrypt.hash(resetToken, 10);
-    // await this.storage.updateUser(user.id, {
-    //   passwordResetToken: resetTokenHash,
-    //   passwordResetExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
-    // });
+    const tokenHash = await bcrypt.hash(resetToken, 10);
+
+    // Store reset token in database
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await db.insert(passwordResetTokens).values({
+      userId: user.id,
+      token: tokenHash,
+      expiresAt,
+    });
 
     // Audit log
     await this.logAudit({
@@ -555,24 +576,33 @@ export class AuthSystem {
       throw new Error('Password must be at least 12 characters with uppercase, lowercase, number, and special character');
     }
 
-    // Query password reset tokens table
-    const resetTokens = await this.storage.db.query.passwordResetTokens.findMany({
-      where: (fields, { and, eq, gt, isNull }) =>
+    // Find all non-expired, unused reset tokens
+    const validTokens = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(
         and(
-          eq(fields.token, token),
-          gt(fields.expiresAt, new Date()),
-          isNull(fields.usedAt)
-        ),
-    });
+          gt(passwordResetTokens.expiresAt, new Date()),
+          eq(passwordResetTokens.usedAt, null as any)
+        )
+      );
 
-    if (resetTokens.length === 0) {
+    // Find matching token by comparing hashes
+    let matchedToken = null;
+    for (const storedToken of validTokens) {
+      const isMatch = await bcrypt.compare(token, storedToken.token);
+      if (isMatch) {
+        matchedToken = storedToken;
+        break;
+      }
+    }
+
+    if (!matchedToken) {
       throw new Error('Invalid or expired reset token');
     }
 
-    const resetToken = resetTokens[0];
-
     // Get user
-    const user = await this.storage.getUserById(resetToken.userId);
+    const user = await this.storage.getUser(matchedToken.userId);
     if (!user) {
       throw new Error('User not found');
     }
@@ -587,15 +617,15 @@ export class AuthSystem {
     });
 
     // Mark reset token as used
-    await this.storage.db
-      .update(this.storage.schema.passwordResetTokens)
+    await db
+      .update(passwordResetTokens)
       .set({ usedAt: new Date() })
-      .where(this.storage.schema.eq(this.storage.schema.passwordResetTokens.id, resetToken.id));
+      .where(eq(passwordResetTokens.id, matchedToken.id));
 
-    // Invalidate all sessions for this user
-    await this.storage.db
-      .delete(this.storage.schema.sessions)
-      .where(this.storage.schema.eq(this.storage.schema.sessions.userId, user.id));
+    // Invalidate all JWT sessions for this user
+    await db
+      .delete(authSessions)
+      .where(eq(authSessions.userId, user.id));
 
     // Audit log
     await this.logAudit({
@@ -863,29 +893,46 @@ export class AuthSystem {
    * List API keys for user
    */
   async listAPIKeys(userId: string): Promise<any[]> {
-    // TODO: Implement when storage method is available
-    // const allKeys = await this.storage.getApiKeys();
-    // return allKeys.filter(key => key.userId === userId);
-    return [];
+    const keys = await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.userId, userId));
+
+    // Don't return the actual key hash, only metadata
+    return keys.map(key => ({
+      id: key.id,
+      name: key.name,
+      permissions: key.permissions ? JSON.parse(key.permissions) : [],
+      expiresAt: key.expiresAt,
+      lastUsedAt: key.lastUsedAt,
+      createdAt: key.createdAt,
+      revokedAt: key.revokedAt,
+    }));
   }
 
   /**
    * Revoke API key
    */
   async revokeAPIKey(keyId: string, userId: string): Promise<void> {
-    // TODO: Implement when storage methods are available
-    // const apiKey = await this.storage.getApiKey(keyId);
-    // if (!apiKey) {
-    //   throw new Error('API key not found');
-    // }
+    // Get the API key to verify ownership
+    const [apiKey] = await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.id, keyId));
 
-    // if (apiKey.userId !== userId) {
-    //   throw new Error('Unauthorized to revoke this API key');
-    // }
+    if (!apiKey) {
+      throw new Error('API key not found');
+    }
 
-    // await this.storage.updateApiKey(keyId, {
-    //   isActive: false,
-    // });
+    if (apiKey.userId !== userId) {
+      throw new Error('Unauthorized to revoke this API key');
+    }
+
+    // Mark as revoked
+    await db
+      .update(apiKeys)
+      .set({ revokedAt: new Date() })
+      .where(eq(apiKeys.id, keyId));
 
     // Audit log
     await this.logAudit({
