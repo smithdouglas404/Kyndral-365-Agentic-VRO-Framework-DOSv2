@@ -119,6 +119,35 @@ export class DeepOCMAgent extends DeepAgentBase {
           const highImpacts = Object.values(impactScores).filter(s => s === 'high').length;
           const overallImpact = highImpacts >= 3 ? 'high' : highImpacts >= 2 ? 'medium' : 'low';
 
+          // Broadcast change impact as facts
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'change_impact_level',
+            overallImpact,
+            0.82
+          );
+
+          // High impact changes need comprehensive management
+          if (overallImpact === 'high') {
+            console.log(`[DeepOCM] HIGH IMPACT: Change ${change.name} has high organizational impact`);
+
+            await this.learn(`change_${changeId}_high_impact`, {
+              changeName: change.name,
+              overallImpact,
+              highImpactCount: highImpacts,
+              detectedAt: new Date(),
+            });
+
+            await this.archiveContext(
+              `Change ${change.name} identified with high organizational impact (${highImpacts} high-impact areas) requiring comprehensive change management`,
+              {
+                changeId,
+                overallImpact,
+                severity: 'high',
+              }
+            );
+          }
+
           return {
             changeId: change.id,
             changeName: change.name,

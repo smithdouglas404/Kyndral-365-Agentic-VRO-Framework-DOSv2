@@ -57,6 +57,43 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           const actualCost = parseFloat(project.actualCost || '0');
           const variance = budget > 0 ? ((actualCost - budget) / budget) * 100 : 0;
           const isOverBudget = variance > threshold;
+          const severity = variance > 20 ? 'critical' : variance > threshold ? 'warning' : 'normal';
+
+          // Broadcast budget variance fact to other agents
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'budget_variance',
+            variance,
+            0.95 // High confidence - based on actual data
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'budget_status',
+            severity,
+            0.95
+          );
+
+          // If critical, archive context and learn pattern
+          if (variance > 20) {
+            console.log(`[DeepFinOps] CRITICAL: Project ${project.name} is ${variance.toFixed(1)}% over budget`);
+
+            await this.learn(`project_${projectId}_budget_overrun`, {
+              variance,
+              budget,
+              actualCost,
+              detectedAt: new Date(),
+            });
+
+            await this.archiveContext(
+              `Project ${project.name} detected with ${variance.toFixed(1)}% budget overrun (critical threshold exceeded)`,
+              {
+                projectId,
+                variance,
+                severity: 'critical',
+              }
+            );
+          }
 
           return {
             projectId,
@@ -66,7 +103,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
             variance: variance.toFixed(2),
             percentage: `${variance > 0 ? '+' : ''}${variance.toFixed(1)}%`,
             status: isOverBudget ? 'over_budget' : 'within_budget',
-            severity: variance > 20 ? 'critical' : variance > threshold ? 'warning' : 'normal',
+            severity,
           };
         },
       }),
@@ -110,6 +147,53 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           // Prevent division by zero for EAC calculation
           const eac = cpi > 0 ? budget / cpi : budget;
           const etc = eac - actualCost;
+
+          // Broadcast EVM metrics as facts
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'cpi',
+            cpi,
+            0.95
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'spi',
+            spi,
+            0.95
+          );
+
+          // Critical performance issue detection
+          if (cpi < 0.8) {
+            console.log(`[DeepFinOps] CRITICAL: Project ${project.name} has CPI of ${cpi.toFixed(3)} (significant cost overrun)`);
+
+            await this.learn(`project_${projectId}_cpi_critical`, {
+              cpi,
+              earnedValue,
+              actualCost,
+              detectedAt: new Date(),
+            });
+
+            await this.archiveContext(
+              `Project ${project.name} CPI dropped to ${cpi.toFixed(3)} - critical cost performance issue`,
+              {
+                projectId,
+                cpi,
+                severity: 'critical',
+              }
+            );
+          }
+
+          if (spi < 0.8) {
+            console.log(`[DeepFinOps] CRITICAL: Project ${project.name} has SPI of ${spi.toFixed(3)} (significant schedule delay)`);
+
+            await this.learn(`project_${projectId}_spi_critical`, {
+              spi,
+              earnedValue,
+              plannedValue,
+              detectedAt: new Date(),
+            });
+          }
 
           return {
             projectId,

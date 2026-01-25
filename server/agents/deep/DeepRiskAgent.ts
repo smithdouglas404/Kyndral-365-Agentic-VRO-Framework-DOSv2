@@ -247,6 +247,44 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
                     ? "medium"
                     : "low";
 
+            // Broadcast risk impact as facts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_impact',
+              Math.round(overallImpactScore),
+              0.85
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_impact_level',
+              impactLevel,
+              0.85
+            );
+
+            // Critical/high risk detection
+            if (impactLevel === "critical" || impactLevel === "high") {
+              console.log(`[DeepRisk] ${impactLevel.toUpperCase()}: Project ${project.name} has ${impactLevel} risk impact (score: ${Math.round(overallImpactScore)})`);
+
+              await this.learn(`project_${projectId}_high_impact_risk`, {
+                overallImpactScore: Math.round(overallImpactScore),
+                impactLevel,
+                riskType,
+                severity,
+                detectedAt: new Date(),
+              });
+
+              await this.archiveContext(
+                `Project ${project.name} identified with ${impactLevel} risk impact (score: ${Math.round(overallImpactScore)}) of type ${riskType}`,
+                {
+                  projectId,
+                  overallImpactScore,
+                  impactLevel,
+                  severity: 'critical',
+                }
+              );
+            }
+
             return {
               projectId,
               projectName: project.name,

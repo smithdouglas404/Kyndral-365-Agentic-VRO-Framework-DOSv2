@@ -57,6 +57,43 @@ export class DeepTMOAgent extends DeepAgentBase {
           const progress = project.progress || 0;
           const expectedProgress = 50; // Mock baseline
           const varianceDays = ((expectedProgress - progress) / 100) * 90; // Assuming 90-day project
+          const severity = Math.abs(varianceDays) > 14 ? 'critical' : Math.abs(varianceDays) > threshold ? 'warning' : 'normal';
+
+          // Broadcast schedule variance as a fact
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'schedule_variance',
+            varianceDays,
+            0.90 // Good confidence from schedule data
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'schedule_status',
+            severity,
+            0.90
+          );
+
+          // Critical delay detection
+          if (Math.abs(varianceDays) > 14) {
+            console.log(`[DeepTMO] CRITICAL: Project ${project.name} is ${Math.abs(varianceDays)} days behind schedule`);
+
+            await this.learn(`project_${projectId}_schedule_delay`, {
+              varianceDays: Math.abs(varianceDays),
+              progress,
+              expectedProgress,
+              detectedAt: new Date(),
+            });
+
+            await this.archiveContext(
+              `Project ${project.name} detected with ${Math.abs(varianceDays)} days schedule delay - critical threshold exceeded`,
+              {
+                projectId,
+                varianceDays,
+                severity: 'critical',
+              }
+            );
+          }
 
           return {
             projectId,
@@ -65,7 +102,7 @@ export class DeepTMOAgent extends DeepAgentBase {
             expectedProgress: expectedProgress,
             varianceDays: Math.round(varianceDays),
             status: Math.abs(varianceDays) > threshold ? 'delayed' : 'on_track',
-            severity: Math.abs(varianceDays) > 14 ? 'critical' : Math.abs(varianceDays) > threshold ? 'warning' : 'normal',
+            severity,
           };
         },
       }),

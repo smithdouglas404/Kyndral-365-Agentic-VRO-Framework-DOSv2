@@ -126,6 +126,46 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
                 action: "Review and adjust value realization strategy",
               }));
 
+            // Broadcast value realization as facts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'value_realization',
+              Math.round(valueRealizationPercent),
+              0.80
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'value_status',
+              overallStatus,
+              0.80
+            );
+
+            // Critical value delivery issues
+            if (overallStatus === "critical" || overallStatus === "at_risk") {
+              console.log(`[DeepVRO] ${overallStatus.toUpperCase()}: Project ${project.name} value realization at ${Math.round(valueRealizationPercent)}%`);
+
+              await this.learn(`project_${projectId}_value_at_risk`, {
+                valueRealizationPercent: Math.round(valueRealizationPercent),
+                overallStatus,
+                plannedValue,
+                actualValue,
+                detectedAt: new Date(),
+              });
+
+              if (overallStatus === "critical") {
+                await this.archiveContext(
+                  `Project ${project.name} has critical value delivery issue (${Math.round(valueRealizationPercent)}% realization)`,
+                  {
+                    projectId,
+                    valueRealizationPercent,
+                    overallStatus,
+                    severity: 'critical',
+                  }
+                );
+              }
+            }
+
             return {
               projectId,
               projectName: project.name,
