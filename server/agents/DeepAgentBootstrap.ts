@@ -258,11 +258,49 @@ export class DeepAgentBootstrap {
 
       // Insights methods
       getUnifiedInsights: async (projectId?: string) => {
-        // TODO: Implement insights aggregation from deep agents
+        // Aggregate insights from all deep agents
+        const insights: Array<{
+          agentId: string;
+          agentName: string;
+          type: string;
+          severity: string;
+          message: string;
+          data?: any;
+        }> = [];
+
+        // Query each agent for its current insights
+        for (const [agentId, agent] of this.agents.entries()) {
+          try {
+            // Deep agents have execute() method that can return insights
+            if (typeof agent.execute === 'function') {
+              const prompt = projectId
+                ? `Provide a brief status update and any insights for project ${projectId}`
+                : 'Provide a brief status update and any system-wide insights';
+
+              const result = await agent.execute(prompt, { projectId });
+
+              if (result?.insights || result?.output) {
+                insights.push({
+                  agentId,
+                  agentName: agent.constructor.name,
+                  type: 'insight',
+                  severity: result.severity || 'info',
+                  message: result.output || result.insights || 'No insights available',
+                  data: result.data,
+                });
+              }
+            }
+          } catch (error: any) {
+            console.warn(`[DeepAgentBootstrap] Failed to get insights from ${agentId}:`, error.message);
+          }
+        }
+
         return {
           projectId: projectId || 'all',
-          insights: [],
+          insights,
           timestamp: new Date(),
+          agentCount: this.agents.size,
+          insightCount: insights.length,
         };
       },
     };

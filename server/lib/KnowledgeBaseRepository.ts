@@ -21,6 +21,7 @@
 
 import type { IStorage } from "../storage.js";
 import { getLLMRouter } from "./LLMRouter.js";
+import OpenAI from "openai";
 
 export type KnowledgeCategory =
   | "pmbok"
@@ -358,14 +359,38 @@ export class KnowledgeBaseRepository {
     if (result.rows.length === 0) return null;
 
     const row = result.rows[0];
+
+    // Query successful applications from interventions
+    // An intervention is considered a successful application if:
+    // 1. It was approved (status = 'approved')
+    // 2. The agent that created it referenced this article
+    const interventionResult = await this.storage.db.query(`
+      SELECT
+        COUNT(CASE WHEN i.status = 'approved' THEN 1 END) as successful_applications,
+        COUNT(*) as total_applications
+      FROM interventions i
+      WHERE i.agent_source IN (
+        SELECT DISTINCT agent_id
+        FROM knowledge_base_usage
+        WHERE article_id = $1
+      )
+      AND i.created_at >= (
+        SELECT MIN(referenced_at)
+        FROM knowledge_base_usage
+        WHERE article_id = $1
+      )
+    `, [articleId]);
+
+    const interventionRow = interventionResult.rows[0] || { successful_applications: '0', total_applications: '0' };
+
     return {
       articleId,
       totalReferences: parseInt(row.total_references),
       referencedByAgents: row.referenced_by_agents,
       averageRelevanceScore: parseFloat(row.average_relevance_score),
       lastReferenced: row.last_referenced,
-      successfulApplications: 0, // TODO: Track from interventions
-      totalApplications: 0,
+      successfulApplications: parseInt(interventionRow.successful_applications),
+      totalApplications: parseInt(interventionRow.total_applications),
     };
   }
 
@@ -450,11 +475,28 @@ export class KnowledgeBaseRepository {
   }
 
   /**
-   * Generate embedding for text
+   * Generate embedding for text using OpenAI or fallback to simple hash
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    // Simple hash-based embedding for MVP
-    // TODO: Replace with actual embeddings (OpenAI, Cohere, etc.)
+    // Try to use OpenAI embeddings if API key is available
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const response = await openai.embeddings.create({
+          model: "text-embedding-3-small", // 1536 dimensions, cost-effective
+          input: text.substring(0, 8000), // Limit to ~8k chars to stay under token limit
+        });
+
+        return response.data[0].embedding;
+      } catch (error) {
+        console.warn('[KnowledgeBase] OpenAI embedding failed, falling back to hash-based:', error);
+      }
+    }
+
+    // Fallback: Simple hash-based embedding for MVP
     const hash = this.simpleHash(text);
     const embedding = new Array(1536).fill(0);
     for (let i = 0; i < 1536; i++) {
