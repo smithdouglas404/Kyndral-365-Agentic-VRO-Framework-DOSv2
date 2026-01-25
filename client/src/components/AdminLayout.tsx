@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ConfigurationStatus } from './ConfigurationStatus';
+import { GlobalNotificationBell } from './GlobalNotificationBell';
+import { ConnectionIndicator } from './RealTimeNotifications';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -68,13 +70,24 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Connection Status */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-50 border border-slate-200">
+              <ConnectionIndicator />
+            </div>
+
+            {/* Notification Bell */}
+            <GlobalNotificationBell />
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 

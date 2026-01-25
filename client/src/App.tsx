@@ -320,11 +320,12 @@ function App() {
             <PageContextProvider>
               <TooltipProvider>
                 <Toaster />
-                {/* Unified notification system - bell icon in headers */}
+                {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
                 {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
                 <FloatingAlertBanner />
                 <LiveEventDrawer />
-                <GlobalAIOverlay />
+                {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
+                {/* <GlobalAIOverlay /> */}
                 <AskPMChat />
                 <Router />
               </TooltipProvider>
