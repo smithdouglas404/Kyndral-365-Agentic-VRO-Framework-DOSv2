@@ -19,6 +19,9 @@ import {
   GitBranch,
   Store,
   CheckCircle,
+  Shield,
+  Brain,
+  Mic,
 } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ConfigurationStatus } from './ConfigurationStatus';
@@ -44,7 +47,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/active-integrations', icon: CheckCircle, label: 'Active Integrations' },
     { path: '/admin/custom-fields', icon: Sliders, label: 'Custom Fields' },
     { path: '/admin/workflows', icon: GitBranch, label: 'Workflows' },
+    { path: '/admin/policies', icon: Shield, label: 'Policy as Code' },
     { path: '/admin/agents', icon: Activity, label: 'Agents' },
+    { path: '/admin/agent-memory', icon: Brain, label: 'Agent Memory' },
+    { path: '/admin/voice-briefings', icon: Mic, label: 'Voice Briefings' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
   ];

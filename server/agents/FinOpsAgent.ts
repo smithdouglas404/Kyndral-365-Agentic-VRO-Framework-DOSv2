@@ -7,6 +7,18 @@ import type { IStorage } from '../storage.js';
  * FinOps Agent - Financial Operations and Budget Management
  * Autonomy: FULL (can self-approve interventions)
  * Focus: Budget tracking, CPI monitoring, cost optimization
+ *
+ * @deprecated As of 2026-01-25, use DeepFinOpsAgent instead (server/agents/deep/DeepFinOpsAgent.ts)
+ * This standard agent will be removed in v2.0
+ *
+ * DeepFinOpsAgent provides:
+ * - RAG integration (knowledge base + pattern learning)
+ * - Memory systems (Mem0 + Letta)
+ * - Rules engine integration
+ * - Custom attributes via MCP
+ * - Policy-as-Code support
+ *
+ * Migration: Replace `new FinOpsAgent(storage)` with `new DeepFinOpsAgent(storage)`
  */
 export class FinOpsAgent extends AgentBase {
   constructor(storage: IStorage) {

@@ -8,6 +8,9 @@ import type { Express, Request, Response } from 'express';
 import { authenticate } from '../../auth/authMiddleware.js';
 import { getAgentCollaborationRulesEngine } from '../../lib/AgentCollaborationRulesEngine.js';
 import type { CollaborationRule, RuleCondition, RuleAction } from '../../lib/AgentCollaborationRulesEngine.js';
+import { db } from '../../db.js';
+import { sql } from 'drizzle-orm';
+import { ruleExecutionHistory } from '../../../shared/schema.js';
 
 export function registerCollaborationRulesRoutes(app: Express): void {
   const rulesEngine = getAgentCollaborationRulesEngine();
@@ -192,6 +195,184 @@ export function registerCollaborationRulesRoutes(app: Express): void {
       });
     } catch (error: any) {
       console.error('[CollaborationRules] Reload error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * GET /api/admin/rule-execution-history
+   * Get rule execution history with filters
+   */
+  app.get('/api/admin/rule-execution-history', authenticate, async (req: Request, res: Response) => {
+    try {
+      const { agent, status, dateRange } = req.query;
+
+      // Build dynamic WHERE clause
+      let whereClause = '';
+      const conditions: string[] = [];
+
+      if (agent && agent !== 'all') {
+        conditions.push(`(from_agent = '${agent}' OR to_agent = '${agent}')`);
+      }
+
+      if (status && status !== 'all') {
+        conditions.push(`status = '${status}'`);
+      }
+
+      // Date range filtering
+      if (dateRange && dateRange !== 'all') {
+        let hoursAgo = 168; // Default to 7 days
+        switch (dateRange) {
+          case '24hours':
+            hoursAgo = 24;
+            break;
+          case '7days':
+            hoursAgo = 168;
+            break;
+          case '30days':
+            hoursAgo = 720;
+            break;
+          case '90days':
+            hoursAgo = 2160;
+            break;
+        }
+
+        conditions.push(`triggered_at >= NOW() - INTERVAL '${hoursAgo} hours'`);
+      }
+
+      if (conditions.length > 0) {
+        whereClause = 'WHERE ' + conditions.join(' AND ');
+      }
+
+      // Execute query using sql template
+      const query = sql`
+        SELECT
+          id, rule_id, rule_name, from_agent, to_agent, project_id,
+          trigger_attribute, trigger_value, threshold, actions_taken,
+          status, response_time_seconds, response_message,
+          triggered_at, acknowledged_at, resolved_at, metadata
+        FROM rule_execution_history
+        ${sql.raw(whereClause)}
+        ORDER BY triggered_at DESC
+        LIMIT 1000
+      `;
+
+      const result = await db.execute(query);
+      const executions = result.rows;
+
+      res.json(executions);
+    } catch (error: any) {
+      console.error('[RuleExecutionHistory] Query error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * GET /api/admin/agent-collaboration-matrix
+   * Get aggregated collaboration data between all agent pairs
+   */
+  app.get('/api/admin/agent-collaboration-matrix', authenticate, async (req: Request, res: Response) => {
+    try {
+      const { dateRange } = req.query;
+
+      // Build date range filter
+      let dateFilter = '';
+      if (dateRange && dateRange !== 'all') {
+        let hoursAgo = 168; // Default to 7 days
+        switch (dateRange) {
+          case '24hours':
+            hoursAgo = 24;
+            break;
+          case '7days':
+            hoursAgo = 168;
+            break;
+          case '30days':
+            hoursAgo = 720;
+            break;
+          case '90days':
+            hoursAgo = 2160;
+            break;
+        }
+
+        dateFilter = `WHERE triggered_at >= NOW() - INTERVAL '${hoursAgo} hours'`;
+      }
+
+      // Query aggregated collaboration data
+      const query = sql`
+        SELECT
+          from_agent,
+          to_agent,
+          COUNT(*) as total_executions,
+          SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as successful_executions,
+          SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_executions,
+          AVG(COALESCE(response_time_seconds, 0)) as avg_response_time_seconds,
+          MAX(triggered_at) as last_collaboration_at
+        FROM rule_execution_history
+        ${sql.raw(dateFilter)}
+        ${sql.raw(dateFilter ? 'AND' : 'WHERE')} to_agent IS NOT NULL
+        GROUP BY from_agent, to_agent
+        ORDER BY total_executions DESC
+      `;
+
+      const result = await db.execute(query);
+      const collaborationData = result.rows;
+
+      res.json(collaborationData);
+    } catch (error: any) {
+      console.error('[AgentCollaborationMatrix] Query error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+  /**
+   * GET /api/admin/agent-collaboration-details
+   * Get detailed rule-level data for a specific agent pair
+   */
+  app.get('/api/admin/agent-collaboration-details', authenticate, async (req: Request, res: Response) => {
+    try {
+      const { from, to } = req.query;
+
+      if (!from || !to) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required parameters: from, to',
+        });
+      }
+
+      // Query rule-level aggregation
+      const query = sql`
+        SELECT
+          rule_id,
+          rule_name,
+          COUNT(*) as execution_count,
+          (SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END)::float / COUNT(*) * 100) as success_rate,
+          AVG(COALESCE(response_time_seconds, 0)) as avg_response_time
+        FROM rule_execution_history
+        WHERE from_agent = ${from}
+          AND to_agent = ${to}
+        GROUP BY rule_id, rule_name
+        ORDER BY execution_count DESC
+      `;
+
+      const result = await db.execute(query);
+      const rules = result.rows;
+
+      res.json({
+        fromAgent: from,
+        toAgent: to,
+        rules,
+      });
+    } catch (error: any) {
+      console.error('[AgentCollaborationDetails] Query error:', error);
       res.status(500).json({
         success: false,
         error: error.message,

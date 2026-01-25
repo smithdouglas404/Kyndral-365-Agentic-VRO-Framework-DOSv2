@@ -19,6 +19,7 @@
 import type { IStorage } from '../storage.js';
 import type { InsertAgentActivityLog, InsertIntervention } from '@shared/schema';
 import { EventEmitter } from 'events';
+import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } from '../websocket.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -164,6 +165,24 @@ export class ContinuousOrchestrator {
   private a2aBus: A2AMessageBus;
   private mcpHandler: MCPProtocolHandler;
 
+  /**
+   * Helper to safely get agent config (handles agents without getConfig method)
+   */
+  private getAgentConfig(agent: any, fallbackId?: string): any {
+    const config = agent?.getConfig?.() || {
+      agentName: fallbackId || 'Unknown Agent',
+      autonomy: 'supervised',
+      focus: 'general'
+    };
+
+    // Ensure agentId is always present
+    if (!config.agentId && fallbackId) {
+      config.agentId = fallbackId;
+    }
+
+    return config;
+  }
+
   constructor(storage: IStorage, agents: Map<string, any>) {
     this.storage = storage;
     this.agents = agents;
@@ -242,7 +261,8 @@ export class ContinuousOrchestrator {
    */
   private setupA2AListeners(): void {
     for (const [agentId, agent] of this.agents.entries()) {
-      const config = agent.getConfig();
+      // Get agent config (handle agents that don't have getConfig)
+      const config = agent.getConfig?.() || { agentName: agentId };
 
       // Subscribe to messages for this agent
       this.a2aBus.subscribe(agentId, async (message: AgentMessage) => {
@@ -310,7 +330,7 @@ export class ContinuousOrchestrator {
         return;
       }
 
-      const config = agent.getConfig();
+      const config = this.getAgentConfig(agent, agentId);
       console.log(`[ContinuousOrchestrator] Active agent: ${config.agentName}`);
 
       // Phase 2: Check for pending requests to this agent
@@ -322,7 +342,7 @@ export class ContinuousOrchestrator {
       }
 
       // Phase 3: Agent performs autonomous scan
-      const scanResult = await this.performAgentScan(agent);
+      const scanResult = await this.performAgentScan(agent, agentId);
 
       // Phase 4: Process findings and determine collaboration needs
       if (scanResult.findings.length > 0) {
@@ -373,8 +393,8 @@ export class ContinuousOrchestrator {
   /**
    * Agent performs autonomous scan of projects
    */
-  private async performAgentScan(agent: any): Promise<{ findings: any[] }> {
-    const config = agent.getConfig();
+  private async performAgentScan(agent: any, agentId: string): Promise<{ findings: any[] }> {
+    const config = this.getAgentConfig(agent, agentId);
 
     try {
       // Get projects to scan (sample 3 random projects per cycle)
@@ -396,7 +416,7 @@ export class ContinuousOrchestrator {
       // Each agent uses its tools to analyze projects
       for (const project of projectsToScan) {
         // Check if project has issues in agent's domain
-        const issue = await this.detectIssue(agent, project);
+        const issue = await this.detectIssue(agent, agentId, project);
         if (issue) {
           findings.push({
             projectId: project.id,
@@ -420,8 +440,8 @@ export class ContinuousOrchestrator {
    * Detect if project has issues in agent's domain
    * Now uses rules from *_DEFAULT_RULES instead of hardcoded logic
    */
-  private async detectIssue(agent: any, project: any): Promise<any | null> {
-    const config = agent.getConfig();
+  private async detectIssue(agent: any, agentId: string, project: any): Promise<any | null> {
+    const config = this.getAgentConfig(agent, agentId);
 
     // Check if agent has evaluateRules method (Deep Agents)
     if (typeof agent.evaluateRules === 'function') {
@@ -620,11 +640,11 @@ export class ContinuousOrchestrator {
    */
   private async initiateCollaboration(fromAgentId: string, toAgentIds: string[], finding: any): Promise<void> {
     const fromAgent = this.agents.get(fromAgentId);
-    const fromConfig = fromAgent?.getConfig();
+    const fromConfig = this.getAgentConfig(fromAgent, fromAgentId);
 
     for (const toAgentId of toAgentIds) {
       const toAgent = this.agents.get(toAgentId);
-      const toConfig = toAgent?.getConfig();
+      const toConfig = this.getAgentConfig(toAgent, toAgentId);
 
       if (!toAgent || !toConfig) continue;
 
@@ -665,12 +685,12 @@ export class ContinuousOrchestrator {
    * Process pending requests to an agent (supports both A2A and MCP)
    */
   private async processRequests(agent: any, requests: AgentMessage[]): Promise<void> {
-    const config = agent.getConfig();
+    const config = this.getAgentConfig(agent, agentId);
 
     for (const request of requests) {
       try {
         const fromAgent = this.agents.get(request.from);
-        const fromConfig = fromAgent?.getConfig();
+        const fromConfig = this.getAgentConfig(fromAgent, request.from);
 
         // Agent analyzes the request using its domain expertise
         // Ensure content is properly formatted (might be object)
@@ -747,7 +767,7 @@ Keep response brief and actionable.`;
       throw new Error(`Agent not found: ${agentId}`);
     }
 
-    const config = agent.getConfig();
+    const config = this.getAgentConfig(agent, agentId);
 
     try {
       console.log(`[MCP] ${config.agentName} calling ${serviceName}.${action}...`);
@@ -775,7 +795,7 @@ Keep response brief and actionable.`;
    */
   async broadcastAlert(fromAgentId: string, recipientIds: string[], alert: any): Promise<void> {
     const fromAgent = this.agents.get(fromAgentId);
-    const fromConfig = fromAgent?.getConfig();
+    const fromConfig = this.getAgentConfig(fromAgent, request.from);
 
     const message: Omit<AgentMessage, 'to'> = {
       from: fromAgentId,
@@ -802,7 +822,29 @@ Keep response brief and actionable.`;
    * Agent handles finding independently (no collaboration needed)
    */
   private async handleFindingIndependently(agent: any, finding: any): Promise<void> {
-    const config = agent.getConfig();
+    const agentId = agent.id || agent.agentId;
+    const config = this.getAgentConfig(agent, agentId);
+
+    // Broadcast agent insight for real-time notifications
+    broadcastAgentInsight({
+      sourceAgent: agentId,
+      agentName: config.agentName,
+      severity: finding.severity || 'medium',
+      title: finding.issue,
+      description: finding.recommendedAction || `${config.agentName} detected this issue`,
+      rootCause: finding.rootCause ? {
+        primary: finding.rootCause,
+        confidence: finding.confidence || 0.75,
+      } : undefined,
+      recommendations: finding.recommendedAction ? [{
+        action: finding.recommendedAction,
+        priority: finding.severity === 'critical' ? 'immediate' : finding.severity === 'high' ? 'soon' : 'consider',
+        effort: 'medium',
+        confidence: finding.confidence || 0.75,
+      }] : undefined,
+      projectId: finding.projectId,
+      projectName: finding.projectName,
+    });
 
     // Full autonomy agents can self-approve and execute
     if (config.autonomy === 'full' && finding.severity !== 'critical') {
@@ -817,7 +859,8 @@ Keep response brief and actionable.`;
    * Create self-approved action for full autonomy agents
    */
   private async createSelfApprovedAction(agent: any, finding?: any): Promise<void> {
-    const config = agent.getConfig();
+    const agentId = agent.id || agent.agentId;
+    const config = this.getAgentConfig(agent, agentId);
 
     if (config.autonomy !== 'full') return;
 
@@ -866,7 +909,8 @@ Keep response brief and actionable.`;
    * Create pending intervention for supervised agents
    */
   private async createPendingIntervention(agent: any, finding: any): Promise<void> {
-    const config = agent.getConfig();
+    const agentId = agent.id || agent.agentId;
+    const config = this.getAgentConfig(agent, agentId);
 
     try {
       const intervention: InsertIntervention = {
@@ -886,7 +930,7 @@ Keep response brief and actionable.`;
         triggerSource: 'continuous_monitoring',
       };
 
-      await this.storage.createIntervention(intervention);
+      const createdIntervention = await this.storage.createIntervention(intervention);
 
       await this.storage.createAgentActivityLog({
         eventType: 'detection',
@@ -896,7 +940,30 @@ Keep response brief and actionable.`;
         details: JSON.stringify(intervention),
       });
 
-      console.log(`[ContinuousOrchestrator] ${config.agentName} created pending intervention`);
+      // Broadcast to WebSocket for real-time notifications
+      if (finding.severity === 'critical' || finding.severity === 'high') {
+        broadcastCriticalAlert({
+          id: createdIntervention.id,
+          title: finding.issue,
+          message: finding.recommendedAction || `${config.agentName} detected this issue`,
+          severity: finding.severity,
+          projectName: finding.projectName,
+          agentSource: config.agentName,
+        });
+      } else {
+        broadcastNotification({
+          id: createdIntervention.id,
+          type: 'intervention',
+          title: finding.issue,
+          message: finding.recommendedAction || `${config.agentName} detected this issue`,
+          severity: finding.severity,
+          source: config.agentName,
+          sourceId: createdIntervention.id,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      console.log(`[ContinuousOrchestrator] ${config.agentName} created pending intervention & broadcast`);
 
     } catch (error) {
       console.error(`[ContinuousOrchestrator] Error creating pending intervention:`, error);

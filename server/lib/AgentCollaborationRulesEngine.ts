@@ -18,6 +18,7 @@
 import { Engine, Rule } from 'json-rules-engine';
 import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
+import { ruleExecutionHistory } from '../../shared/schema.js';
 
 // ============================================================================
 // TYPES
@@ -141,7 +142,7 @@ export class AgentCollaborationRulesEngine {
     `);
 
     this.rules.clear();
-    this.engine.removeAllRules();
+    this.engine = new Engine();
 
     for (const row of result.rows as any[]) {
       const rule: CollaborationRule = {
@@ -174,14 +175,34 @@ export class AgentCollaborationRulesEngine {
    * Convert CollaborationRule to json-rules-engine Rule
    */
   private convertToEngineRule(rule: CollaborationRule): Rule {
+    // Map simplified operators to json-rules-engine operators
+    const operatorMap: Record<string, string> = {
+      '>': 'greaterThan',
+      '>=': 'greaterThanInclusive',
+      '<': 'lessThan',
+      '<=': 'lessThanInclusive',
+      '==': 'equal',
+      '!=': 'notEqual',
+    };
+
+    // Add agentId check as first condition to ensure rules only fire for their source agent
+    const ruleConditions = [
+      {
+        fact: 'agentId',
+        operator: 'equal',
+        value: rule.sourceAgent,
+      },
+      ...rule.conditions.map((condition: any) => ({
+        fact: condition.fact || condition.attribute, // Support both 'fact' and 'attribute'
+        operator: operatorMap[condition.operator as string] || condition.operator,
+        value: condition.value || condition.threshold, // Support both 'value' and 'threshold'
+        path: condition.path,
+      })),
+    ];
+
     return new Rule({
       conditions: {
-        all: rule.conditions.map((condition) => ({
-          fact: condition.fact,
-          operator: condition.operator,
-          value: condition.value,
-          path: condition.path,
-        })),
+        all: ruleConditions,
       },
       event: {
         type: 'collaboration-trigger',
@@ -217,6 +238,7 @@ export class AgentCollaborationRulesEngine {
         const { ruleId, ruleName, actions } = event.params as any;
 
         const actionResults = [];
+        let hasFailures = false;
 
         for (const action of actions) {
           try {
@@ -234,18 +256,34 @@ export class AgentCollaborationRulesEngine {
               executed: false,
               error: error.message,
             });
+            hasFailures = true;
           }
         }
 
+        const executionTime = Date.now() - startTime;
+
         // Update execution stats
         await this.recordExecution(ruleId);
+
+        // Log to rule execution history
+        await this.logExecutionHistory({
+          ruleId,
+          ruleName,
+          fromAgent: facts.agentId,
+          toAgent: actions.find((a: any) => a.targetAgent)?.targetAgent || null,
+          projectId: facts.projectId || null,
+          triggerFacts: facts,
+          actionResults,
+          executionTime,
+          hasFailures,
+        });
 
         results.push({
           ruleId,
           ruleName,
           triggered: true,
           actions: actionResults,
-          executionTime: Date.now() - startTime,
+          executionTime,
         });
 
         console.log(`[RulesEngine] Rule triggered: ${ruleName}`);
@@ -319,6 +357,77 @@ export class AgentCollaborationRulesEngine {
       `);
     } catch (error) {
       console.error('[RulesEngine] Failed to record execution:', error);
+    }
+  }
+
+  /**
+   * Log rule execution to history table
+   */
+  private async logExecutionHistory(params: {
+    ruleId: string;
+    ruleName: string;
+    fromAgent: string;
+    toAgent: string | null;
+    projectId: string | null;
+    triggerFacts: RuleFacts;
+    actionResults: any[];
+    executionTime: number;
+    hasFailures: boolean;
+  }): Promise<void> {
+    try {
+      // Determine trigger attribute (first fact that's not agentId/userId/projectId)
+      const triggerFact = Object.entries(params.triggerFacts).find(
+        ([key]) => !['agentId', 'userId', 'projectId', 'metadata'].includes(key)
+      );
+      const triggerAttribute = triggerFact ? triggerFact[0] : 'unknown';
+      const triggerValue = triggerFact ? String(triggerFact[1]) : 'N/A';
+
+      // Get threshold from rule conditions if available
+      const rule = this.rules.get(params.ruleId);
+      const threshold = rule?.conditions[0]?.value ? String(rule.conditions[0].value) : 'N/A';
+
+      // Format actions taken
+      const actionsTaken = params.actionResults.map((a) =>
+        a.executed ? `${a.type}${a.targetAgent ? ' → ' + a.targetAgent : ''}` : `${a.type} (failed)`
+      );
+
+      // Determine status
+      const status = params.hasFailures ? 'failed' : 'resolved';
+
+      await db.execute(sql`
+        INSERT INTO rule_execution_history (
+          rule_id,
+          rule_name,
+          from_agent,
+          to_agent,
+          project_id,
+          trigger_attribute,
+          trigger_value,
+          threshold,
+          actions_taken,
+          status,
+          response_time_seconds,
+          triggered_at,
+          resolved_at
+        ) VALUES (
+          ${params.ruleId},
+          ${params.ruleName},
+          ${params.fromAgent},
+          ${params.toAgent},
+          ${params.projectId},
+          ${triggerAttribute},
+          ${triggerValue},
+          ${threshold},
+          ${JSON.stringify(actionsTaken)},
+          ${status},
+          ${Math.round(params.executionTime / 1000)},
+          NOW(),
+          ${status === 'resolved' ? sql`NOW()` : null}
+        )
+      `);
+    } catch (error) {
+      console.error('[RulesEngine] Failed to log execution history:', error);
+      // Don't throw - execution history logging should not break rule execution
     }
   }
 

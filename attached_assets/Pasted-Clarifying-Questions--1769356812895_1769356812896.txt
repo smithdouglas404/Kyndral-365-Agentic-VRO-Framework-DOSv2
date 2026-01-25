@@ -1,0 +1,63 @@
+Clarifying Questions:                                                                                                                             
+                                                                                                                                                    
+  1. Ontology Layer Status                                                                                                                          
+                                                                                                                                                    
+  - Are the .ttl files already in server/ontology/schema/? Should I verify they exist?                                                              
+  - Is server/ontology/index.ts (ontology loader) already implemented?                                                                              
+  - Is server/obda/index.ts (OBDA mapping) already implemented?                                                                                     
+                                                                                                                                                    
+  2. Mem0 + Letta Integration Status                                                                                                                
+                                                                                                                                                    
+  - Is this the design to implement or is it already integrated?                                                                                    
+  - If not implemented, should I add it to the roadmap or build it now?                                                                             
+  - Are there existing tables (agent_facts, agent_core_memory, agent_archival_memory)?                                                              
+                                                                                                                                                    
+  3. Current vs. Future State                                                                                                                       
+                                                                                                                                                    
+  Based on what you showed me, here's what I understand:                                                                                            
+                                                                                                                                                    
+  CURRENT (What We Just Built):                                                                                                                     
+  Retool Rule Editors → PostgreSQL (collaboration_rules) → AgentCollaborationRulesEngine                                                            
+                                                                                                                                                    
+  FUTURE (What You're Describing):                                                                                                                  
+  Retool Rule Editors → PostgreSQL (collaboration_rules)                                                                                            
+                                ↓                                                                                                                   
+                      Deep Agents read rules                                                                                                        
+                                ↓                                                                                                                   
+                      Agents write to Mem0 (shared facts)                                                                                           
+                                ↓                                                                                                                   
+                      Other agents observe Mem0                                                                                                     
+                                ↓                                                                                                                   
+                      Agents remember in Letta (core memory)                                                                                        
+                                                                                                                                                    
+  Is this correct? Do I need to:                                                                                                                    
+  - Document both (current + future roadmap)?                                                                                                       
+  - Refactor AgentCollaborationRulesEngine to use Mem0/Letta?                                                                                       
+  - Build Mem0/Letta now before continuing with Phase 2?                                                                                            
+                                                                                                                                                    
+  4. Documentation Consolidation                                                                                                                    
+                                                                                                                                                    
+  You mentioned "I need 100% of this in our documents." Should I:                                                                                   
+  - Update MASTER_ARCHITECTURE.md with the ontology + Mem0/Letta architecture?                                                                      
+  - Create a new FINAL_ARCHITECTURE.md that supersedes everything?                                                                                  
+  - Add sections for:                                                                                                                               
+    - Ontology layer (RDF/OBDA)                                                                                                                     
+    - Mem0 shared facts                                                                                                                             
+    - Letta agent memory                                                                                                                            
+    - How Retool editors fit in                                                                                                                     
+    - Comparison to Stack AI/Vellum                                                                                                                 
+                                                                                                                                                    
+  5. Removing n8n/Workflow References                                                                                                               
+                                                                                                                                                    
+  Should I:                                                                                                                                         
+  - Search all docs for references to "n8n", "workflow builder", "Flowise"                                                                          
+  - Remove or clarify that "Retool Rule Editors ARE the workflow configuration"                                                                     
+  - Update any diagrams showing n8n/workflow tools                                                                                                  
+                                                                                                                                                    
+  6. Integration with What We Just Built                                                                                                            
+                                                                                                                                                    
+  The Rule Execution History and Collaboration Matrix screens we just built - do they:                                                              
+  - Stay as-is (tracking rule executions from collaboration_rules table)?                                                                           
+  - Need to be extended to show Mem0 facts and Letta memories?                                                                                      
+  - Become the monitoring layer for the Mem0/Letta architecture?                                                                                    
+                                                                           

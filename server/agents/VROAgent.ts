@@ -3,6 +3,11 @@
  *
  * Focus: Benefits realization, ROI tracking, value delivery, strategic alignment
  * This agent ensures projects deliver on their promised business value
+ *
+ * @deprecated As of 2026-01-25, use DeepVROAgent instead (server/agents/deep/DeepVROAgent.ts)
+ * This standard agent will be removed in v2.0
+ *
+ * Migration: Replace `new VROAgent(storage)` with `new DeepVROAgent(storage)`
  */
 
 import { AgentBase } from './base/AgentBase.js';

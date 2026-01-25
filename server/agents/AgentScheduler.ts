@@ -1,8 +1,11 @@
-import { FinOpsAgent } from './FinOpsAgent.js';
-import { TMOAgent } from './TMOAgent.js';
-import { RiskAgent } from './RiskAgent.js';
-import { GovernanceAgent, PlanningAgent, OCMAgent, IntegratedMgmtAgent } from './AllAgents.js';
-import { VROAgent } from './VROAgent.js';
+// 🔄 MIGRATED TO DEEP AGENTS (2026-01-25)
+import { DeepFinOpsAgent } from './deep/DeepFinOpsAgent.js';
+import { DeepTMOAgent } from './deep/DeepTMOAgent.js';
+import { DeepRiskAgent } from './deep/DeepRiskAgent.js';
+import { DeepVROAgent } from './deep/DeepVROAgent.js';
+import { DeepPMOAgent } from './deep/DeepPMOAgent.js';
+import { DeepOCMAgent } from './deep/DeepOCMAgent.js';
+import { GovernanceAgent, PlanningAgent, IntegratedMgmtAgent } from './AllAgents.js';
 import { OKRInferenceAgent } from './OKRInferenceAgent.js';
 import { ContinuousOrchestrator } from './ContinuousOrchestrator.js';
 import type { IStorage } from '../storage.js';
@@ -50,29 +53,31 @@ export class AgentScheduler {
 
   /**
    * Initialize all agents with proper configuration
+   * 🔄 NOW USING DEEP AGENTS with RAG, Mem0, Letta, Rules Engine, Policy-as-Code
    */
   private initializeAgents() {
-    console.log('[AgentScheduler] Initializing LangChain agents...');
+    console.log('[AgentScheduler] Initializing Deep LangChain agents...');
 
     try {
-      // Full autonomy agents (can self-approve interventions)
-      this.agents.set('finops', new FinOpsAgent(this.storage));
-      this.agents.set('tmo', new TMOAgent(this.storage));
-      this.agents.set('ocm', new OCMAgent(this.storage));
-      this.agents.set('integrated', new IntegratedMgmtAgent(this.storage));
+      // DEEP AGENTS - Full autonomy + advanced capabilities
+      this.agents.set('finops', new DeepFinOpsAgent(this.storage));
+      this.agents.set('tmo', new DeepTMOAgent(this.storage));
+      this.agents.set('risk', new DeepRiskAgent(this.storage));
+      this.agents.set('vro', new DeepVROAgent(this.storage));
+      this.agents.set('pmo', new DeepPMOAgent(this.storage));
+      this.agents.set('ocm', new DeepOCMAgent(this.storage));
 
-      // Supervised agents (require human approval)
-      this.agents.set('risk', new RiskAgent(this.storage));
+      // STANDARD AGENTS - To be migrated to Deep in future
       this.agents.set('governance', new GovernanceAgent(this.storage));
       this.agents.set('planning', new PlanningAgent(this.storage));
-      this.agents.set('vro', new VROAgent(this.storage)); // Value Realization Office
-      this.agents.set('okr-inference', new OKRInferenceAgent(this.storage)); // OKR Mapping & Data Quality
+      this.agents.set('integrated', new IntegratedMgmtAgent(this.storage));
+      this.agents.set('okr-inference', new OKRInferenceAgent(this.storage));
 
-      console.log(`[AgentScheduler] Initialized ${this.agents.size} agents`);
+      console.log(`[AgentScheduler] Initialized ${this.agents.size} agents (6 Deep + 4 Standard)`);
 
       // Log agent configurations
       for (const [id, agent] of Array.from(this.agents.entries())) {
-        const config = agent.getConfig();
+        const config = agent.getConfig?.() || { agentName: id, autonomy: 'supervised' };
         console.log(`  - ${config.agentName} (${config.autonomy} autonomy)`);
       }
     } catch (error) {
@@ -193,7 +198,7 @@ export class AgentScheduler {
       return;
     }
 
-    const config = agent.getConfig();
+    const config = agent.getConfig?.() || { agentName: agentId };
     console.log(`[AgentScheduler] Scheduled ${config.agentName} to run every ${intervalMs / 1000 / 60} minutes`);
 
     const job = setInterval(async () => {
@@ -220,7 +225,8 @@ export class AgentScheduler {
       const agent = this.agents.get(agentId);
       if (agent && typeof agent.runScheduledScan === 'function') {
         try {
-          console.log(`[AgentScheduler] Initial scan: ${agent.getConfig().agentName}...`);
+          const agentConfig = agent.getConfig?.() || { agentName: agentId };
+          console.log(`[AgentScheduler] Initial scan: ${agentConfig.agentName}...`);
           await agent.runScheduledScan();
         } catch (error) {
           console.error(`[AgentScheduler] Initial scan error for ${agentId}:`, error);

@@ -6,6 +6,7 @@ import { db } from "../db";
 import { documents, documentVersions, insertDocumentSchema } from "../../shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { authenticateFirebase } from "../auth/firebaseMiddleware";
+import { documentParsingService } from "../lib/DocumentParsingService";
 
 const router = Router();
 
@@ -111,7 +112,7 @@ router.post("/upload", authenticateFirebase, upload.single("file"), async (req, 
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const { projectId, name, description, tags, status } = req.body;
+    const { projectId, name, description, tags, status, documentType, complianceFramework, autoExtractPolicy } = req.body;
 
     if (!projectId) {
       // Clean up uploaded file if validation fails
@@ -127,6 +128,7 @@ router.post("/upload", authenticateFirebase, upload.single("file"), async (req, 
       filePath: req.file.path,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
+      documentType: documentType || null, // "policy_compliance", "sop", "regulation", "general"
       version: 1,
       status: status || "draft",
       uploadedBy: req.user?.id,
@@ -147,7 +149,34 @@ router.post("/upload", authenticateFirebase, upload.single("file"), async (req, 
       uploadedBy: req.user?.id,
     });
 
-    res.status(201).json(newDoc);
+    // Auto-trigger policy extraction if document is tagged as policy_compliance
+    let policyExtractionId = null;
+    if (documentType === "policy_compliance" && autoExtractPolicy !== false) {
+      try {
+        // Import policy extraction service dynamically to avoid circular deps
+        const { policyExtractionService } = await import("../lib/PolicyExtractionService.js");
+
+        // Trigger extraction asynchronously (don't block response)
+        policyExtractionService.extractPolicy(newDoc.id, {
+          model: "gpt-4",
+          complianceFramework: complianceFramework || "Unknown",
+          createdBy: req.user?.id || "system",
+        }).then((policyId) => {
+          console.log(`[DocumentUpload] Auto-triggered policy extraction: ${policyId}`);
+        }).catch((error) => {
+          console.error(`[DocumentUpload] Policy extraction failed:`, error);
+        });
+
+        policyExtractionId = "pending"; // Indicate extraction was triggered
+      } catch (error) {
+        console.error("[DocumentUpload] Failed to trigger policy extraction:", error);
+      }
+    }
+
+    res.status(201).json({
+      ...newDoc,
+      policyExtractionTriggered: !!policyExtractionId,
+    });
   } catch (error) {
     console.error("Error uploading document:", error);
 
@@ -263,6 +292,186 @@ router.get("/:id/versions", authenticateFirebase, async (req, res) => {
   } catch (error) {
     console.error("Error fetching document versions:", error);
     res.status(500).json({ error: "Failed to fetch document versions" });
+  }
+});
+
+// GET /api/documents/:id/parse - Parse document and extract text content
+router.get("/:id/parse", authenticateFirebase, async (req, res) => {
+  try {
+    const doc = await db.select()
+      .from(documents)
+      .where(eq(documents.id, req.params.id))
+      .limit(1);
+
+    if (!doc.length) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    const filePath = doc[0].filePath;
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File not found on server" });
+    }
+
+    console.log(`[DocumentParsing] Parsing document ${doc[0].id}: ${doc[0].name}`);
+
+    // Parse the document
+    const parsed = await documentParsingService.parseDocument(filePath, doc[0].mimeType);
+
+    // Extract additional metadata
+    const extractedMetadata = documentParsingService.extractMetadata(parsed.text);
+
+    // Optionally chunk the text for RAG
+    const chunks = documentParsingService.chunkText(parsed.text, {
+      chunkSize: 1000,
+      overlap: 100,
+    });
+
+    res.json({
+      documentId: doc[0].id,
+      documentName: doc[0].name,
+      parsed: {
+        text: parsed.text,
+        pageCount: parsed.pageCount,
+        metadata: parsed.metadata,
+      },
+      extracted: extractedMetadata,
+      chunks: chunks.length,
+      previewChunks: chunks.slice(0, 3), // First 3 chunks for preview
+    });
+  } catch (error: any) {
+    console.error("Error parsing document:", error);
+    res.status(500).json({
+      error: "Failed to parse document",
+      message: error.message,
+    });
+  }
+});
+
+// POST /api/documents/:id/index - Parse document and add to knowledge base for RAG
+router.post("/:id/index", authenticateFirebase, async (req, res) => {
+  try {
+    const doc = await db.select()
+      .from(documents)
+      .where(eq(documents.id, req.params.id))
+      .limit(1);
+
+    if (!doc.length) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    const filePath = doc[0].filePath;
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File not found on server" });
+    }
+
+    const { agentTypes, chunkSize = 1000, overlap = 100 } = req.body;
+
+    console.log(`[DocumentIndexing] Indexing document ${doc[0].id} for knowledge base`);
+
+    // Parse the document
+    const parsed = await documentParsingService.parseDocument(filePath, doc[0].mimeType);
+
+    // Chunk the text for RAG
+    const chunks = documentParsingService.chunkText(parsed.text, {
+      chunkSize,
+      overlap,
+    });
+
+    console.log(`[DocumentIndexing] Created ${chunks.length} chunks from ${doc[0].name}`);
+
+    // Import knowledge base service dynamically
+    try {
+      const { knowledgeBaseService } = await import("../lib/KnowledgeBaseService.js");
+
+      // Add each chunk to the knowledge base
+      const indexingResults = await Promise.all(
+        chunks.map((chunk, index) =>
+          knowledgeBaseService.addDocument({
+            content: chunk,
+            metadata: {
+              documentId: doc[0].id,
+              documentName: doc[0].name,
+              chunkIndex: index,
+              totalChunks: chunks.length,
+              projectId: doc[0].projectId,
+              documentType: doc[0].documentType,
+              ...parsed.metadata,
+            },
+            agentTypes: agentTypes || ['all'],
+          })
+        )
+      );
+
+      // Update document status to indicate it's been indexed
+      await db.update(documents)
+        .set({
+          status: 'indexed',
+          updatedAt: new Date(),
+        })
+        .where(eq(documents.id, req.params.id));
+
+      res.json({
+        success: true,
+        documentId: doc[0].id,
+        documentName: doc[0].name,
+        chunksIndexed: chunks.length,
+        indexingResults: indexingResults.map((r) => r.id),
+      });
+    } catch (error: any) {
+      console.error("[DocumentIndexing] Knowledge base service not available:", error);
+      res.status(500).json({
+        error: "Knowledge base service unavailable",
+        message: error.message,
+      });
+    }
+  } catch (error: any) {
+    console.error("Error indexing document:", error);
+    res.status(500).json({
+      error: "Failed to index document",
+      message: error.message,
+    });
+  }
+});
+
+// GET /api/documents/:id/preview - Get text preview of document
+router.get("/:id/preview", authenticateFirebase, async (req, res) => {
+  try {
+    const doc = await db.select()
+      .from(documents)
+      .where(eq(documents.id, req.params.id))
+      .limit(1);
+
+    if (!doc.length) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    const filePath = doc[0].filePath;
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File not found on server" });
+    }
+
+    // Parse the document
+    const parsed = await documentParsingService.parseDocument(filePath, doc[0].mimeType);
+
+    // Return first 500 characters as preview
+    const preview = parsed.text.substring(0, 500);
+
+    res.json({
+      documentId: doc[0].id,
+      documentName: doc[0].name,
+      preview: preview + (parsed.text.length > 500 ? '...' : ''),
+      fullLength: parsed.text.length,
+      pageCount: parsed.pageCount,
+    });
+  } catch (error: any) {
+    console.error("Error generating document preview:", error);
+    res.status(500).json({
+      error: "Failed to generate preview",
+      message: error.message,
+    });
   }
 });
 

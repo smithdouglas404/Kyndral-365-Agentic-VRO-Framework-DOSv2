@@ -1,8 +1,10 @@
-# NextEra Energy Enterprise Transformation Dashboard
+# Agentic Nexus - Multi-Agent Portfolio Management System
 
 ## Overview
 
-This is a **NextEra Energy Enterprise Transformation Dashboard** with complete SAFe PPM-ART ontology. It's a full-stack TypeScript application featuring MCP server integration for bidirectional sync with external PPM tools (Jira, Azure DevOps, ServiceNow), AI-powered data analysis via Anthropic, and comprehensive project portfolio management. All data is stored in PostgreSQL with no static content.
+Agentic Nexus is an enterprise-grade multi-agent AI system for portfolio and project management. It features 6 specialized "Deep Agents" (FinOps, TMO, Risk, VRO, PMO, OCM) that collaborate through a message bus to provide intelligent analysis, risk assessment, and value realization tracking. The system integrates semantic knowledge through RDF ontologies, persistent memory via Mem0/Letta, and a comprehensive rules engine for automated decision-making.
+
+The platform serves as a unified command center for transformation management, combining strategic planning (VRO), tactical execution (PMO), and operational coordination (TMO) with AI-powered insights and multi-channel notifications.
 
 ## User Preferences
 
@@ -12,184 +14,65 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
-- **Routing**: Wouter (lightweight client-side routing)
-- **State Management**: TanStack React Query for server state
-- **Styling**: Tailwind CSS v4 with CSS variables for theming
-- **UI Components**: shadcn/ui component library (New York style) built on Radix UI primitives
-- **Animations**: Framer Motion for smooth transitions
-- **Charts**: Recharts for data visualization
-- **Build Tool**: Vite with custom plugins for Replit integration
-
-The frontend follows a component-based architecture with pages in `client/src/pages/` and reusable components in `client/src/components/`. The UI components from shadcn are in `client/src/components/ui/`.
+- **Styling**: Tailwind CSS with shadcn/ui component library (New York style)
+- **State Management**: TanStack React Query for server state with automatic caching and refetching
+- **Routing**: Wouter for lightweight client-side routing
+- **Build Tool**: Vite with custom plugins for meta images and Replit integration
+- **UI Components**: Radix UI primitives wrapped in shadcn/ui components
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
-- **Language**: TypeScript (ESM modules)
-- **Development**: tsx for TypeScript execution
-- **Build**: esbuild for production bundling
+- **Language**: TypeScript with ESM modules
+- **API Structure**: RESTful endpoints organized by domain (admin, dashboard, agents, rules)
+- **Agent System**: 6 Deep Agents with specialized capabilities communicating via DeepAgentOrchestrator message bus
+- **LLM Integration**: Enhanced LLM Router supporting OpenRouter, Anthropic Claude, and Google Gemini with cost-tiered model selection
 
-The server uses a simple Express setup with:
-- Route registration in `server/routes.ts`
-- Static file serving for production in `server/static.ts`
-- Vite dev server integration in `server/vite.ts`
-- Storage abstraction layer in `server/storage.ts`
+### Multi-Agent System (The 7 Layers)
+1. **Presentation Layer**: React dashboard with role-based views
+2. **API Layer**: Express REST endpoints
+3. **Orchestration Layer**: DeepAgentOrchestrator for agent-to-agent messaging
+4. **Agent Layer**: 6 specialized agents (FinOps, TMO, Risk, VRO, PMO, OCM)
+5. **Memory Layer**: Mem0 for shared facts, Letta for agent-specific memory
+6. **Ontology Layer**: RDF schemas with OBDA mapping for semantic queries
+7. **Persistence Layer**: PostgreSQL with Drizzle ORM
+
+### Rules Engine
+- **Collaboration Rules**: AgentCollaborationRulesEngine for inter-agent coordination
+- **Decision Tables**: Camunda 8 DMN/BPMN integration for complex business rules
+- **Rule Editors**: 8 React components for domain-specific rule configuration (FinOps, TMO, Risk, VRO, PMO, OCM, Governance, Custom Attributes)
 
 ### Data Storage
-- **ORM**: Drizzle ORM configured for PostgreSQL
-- **Schema**: Defined in `shared/schema.ts` using Drizzle's schema definition
-- **Validation**: Zod schemas generated from Drizzle schemas via drizzle-zod
-- **Current Implementation**: In-memory storage (`MemStorage` class) as default, with PostgreSQL support ready when `DATABASE_URL` is configured
-
-The storage layer uses an interface pattern (`IStorage`) allowing easy swapping between memory and database implementations.
-
-### Project Structure
-```
-├── client/           # Frontend React application
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── lib/          # Utilities and data
-│   │   └── pages/        # Route pages
-├── server/           # Express backend
-├── shared/           # Shared types and schemas
-└── migrations/       # Drizzle database migrations
-```
-
-### Key Design Patterns
-1. **Monorepo Structure**: Client, server, and shared code in one repository with path aliases (`@/`, `@shared/`)
-2. **Storage Interface Pattern**: Abstract storage operations behind an interface for flexibility
-3. **Component Composition**: shadcn/ui components using Radix primitives with Tailwind styling
-4. **Database-First AI Insights**: All AI-powered analysis (executiveInsights, askPM, impactAnalysis) reads from PostgreSQL database via storage interface - NO static file imports
-5. **Registry-Based Drill-Down Navigation**: All clickable entities resolve through `drilldownRegistry.ts` for consistent content
-
-### AI Insights Architecture (Updated Jan 2026)
-AI-powered features now read exclusively from the database:
-- **server/executiveInsights.ts**: Fetches strategicThemes, valueStreams, epics, arts, divisions, projects from DB and sends to Claude for executive-level analysis
-- **server/askPM.ts**: Builds SAFe context from DB for the AI PM assistant chatbot
-- **server/impactAnalysis.ts**: Performs what-if analysis using project/epic/feature data from DB
-- **IMPORTANT**: Do NOT import from client/src/lib/safe6Data.ts or lgData.ts in server files - these are legacy static files
-
-### Drill-Down Navigation System
-The dashboard implements comprehensive 1-3 level drill-down navigation:
-
-- **Registry Pattern**: `client/src/lib/drilldownRegistry.ts` maps 25+ entity types to structured dossiers
-- **Content Resolution**: `getDrilldownContent()` returns registry data or null (no fabricated content)
-- **Rendering Strategy**: 
-  - `isFullDossier: true` → RegistryContentRenderer (action playbooks, metrics, teams, dependencies)
-  - SAFe entities (theme, value-stream, feature, story, task) → Legacy renderer with contextual data
-  - Unknown entities → Explicit "Content Not Available" guardrail state
-- **Supported Entity Types**: action, metric, team, dependency, agent, data-source, agent-log, resource, scope, approval, contingency, risk, alert, report, system, benefit, bottleneck, stage, timeline, impact, trend, capability, and more
+- **Primary Database**: PostgreSQL (48 tables) with Drizzle ORM
+- **Schema Location**: `shared/schema.ts`
+- **Migrations**: Drizzle Kit with migrations stored in `/migrations`
+- **Vector Storage**: Supports Pinecone, Qdrant, Weaviate with fallback to in-memory
 
 ## External Dependencies
 
-### Database
-- **PostgreSQL**: Primary database (requires `DATABASE_URL` environment variable)
-- **Drizzle Kit**: Database migrations and schema management (`npm run db:push`)
+### AI/LLM Services
+- **Anthropic Claude**: Primary LLM via `@anthropic-ai/sdk`
+- **OpenRouter**: Multi-model routing for cost optimization
+- **Google Gemini**: Alternative LLM via `@langchain/google-genai`
+- **LangChain**: Orchestration framework for LLM workflows via `@langchain/core` and `@langchain/langgraph`
 
-### UI Framework Dependencies
-- **Radix UI**: Full suite of accessible primitives (dialogs, dropdowns, tooltips, etc.)
-- **Lucide React**: Icon library
-- **Recharts**: Charting library for data visualizations
-- **Embla Carousel**: Carousel component
-- **cmdk**: Command menu component
-- **Vaul**: Drawer component
+### Database & Storage
+- **PostgreSQL**: Primary relational database (requires `DATABASE_URL` environment variable)
+- **Drizzle ORM**: Type-safe database operations
+- **Vector Stores**: Optional Pinecone, Qdrant, or Weaviate for embeddings
+
+### External Integrations (MCP Marketplace)
+- **Project Management**: Jira, Azure DevOps, Monday.com, Asana, Linear, GitHub, GitLab
+- **Enterprise PPM**: Microsoft Project Server, ServiceNow, Smartsheet, Planview
+- **Email Providers**: SendGrid, Mailgun, AWS SES, SMTP
+- **Communication**: Slack, Microsoft Teams webhooks
+- **Financial**: Stripe, QuickBooks, Dynamics ERP
+
+### Authentication & Security
+- **JWT**: Token-based authentication via `jsonwebtoken`
+- **bcrypt**: Password hashing
+- **Credential Encryption**: For stored integration credentials
 
 ### Build & Development
-- **Vite**: Frontend build tool with HMR
-- **esbuild**: Server-side bundling for production
-- **Replit Plugins**: Custom Vite plugins for Replit integration (cartographer, dev-banner, runtime-error-modal)
-
-### Form & Validation
-- **React Hook Form**: Form handling
-- **Zod**: Schema validation
-- **@hookform/resolvers**: Zod integration with React Hook Form
-
-### Session Management
-- **connect-pg-simple**: PostgreSQL session store (ready for auth implementation)
-- **express-session**: Session middleware
-
-## MCP Integration System
-
-### AI-Powered Ingestion Wizard
-The application features a comprehensive MCP (Model Context Protocol) integration with AI-powered data ingestion:
-
-- **5-Step Workflow**: Connect → Analyze → Questions → Review → Approve
-- **AI Analysis**: Anthropic Claude-powered data summarization and POV generation
-- **SAFe Mapping**: Automatic mapping recommendations to SAFe ontology entities
-- **Clarifying Questions**: AI generates context-aware questions to resolve ambiguities
-- **QA Gate**: Quality assurance reviews before data ingestion (data_quality, mapping_accuracy, schema_validation, completeness)
-
-### MCP Tools (10 tools available at /mcp-config)
-1. **AI Ingestion Wizard**: Full workflow for data import with AI analysis
-2. **Connect & Analyze**: Connect to external PPM tools
-3. **Field Mapping**: Configure source-to-SAFe field mappings
-4. **Data QA Gate**: AI-powered quality assurance
-5. **Sync Status**: Monitor sync jobs and history
-6. **AI Data Analysis**: Standalone data analysis tool
-7. **Schema Explorer**: Browse SAFe ontology hierarchy
-8. **Conflict Resolver**: Manage data conflicts during sync
-9. **Health Monitor**: MCP adapter health status
-10. **Batch Import**: CSV/Excel/JSON file import
-
-### External PPM Tool API Clients
-The application includes production-ready API clients for 9 major PPM tools:
-
-**Jira** (`server/jiraClient.ts`)
-- Authentication: Basic Auth with API Token
-- Required config: `domain`, `email`, `apiToken`, `projectKey`
-- Syncs: Projects, Epics → Features, Stories, Tasks/Sub-tasks
-
-**ServiceNow** (`server/serviceNowClient.ts`)
-- Authentication: Basic Auth (username/password)
-- Required config: `instanceUrl`, `username`, `password`
-- Syncs: Projects, Demands/Epics → Features, Stories, Tasks
-
-**Azure DevOps** (`server/azureDevOpsClient.ts`)
-- Authentication: Personal Access Token (PAT)
-- Required config: `organization`, `project`, `personalAccessToken`
-- Syncs: Projects, Epics/Features, User Stories/PBIs, Tasks
-
-**Planview** (`server/planviewClient.ts`)
-- Authentication: API Key or OAuth
-- Required config: `instanceUrl`, `apiKey`
-- Syncs: Portfolios, Programs, Projects, Work Items
-
-**Microsoft Project Online** (`server/msProjectClient.ts`)
-- Authentication: Azure AD OAuth (client credentials)
-- Required config: `tenantId`, `clientId`, `clientSecret`
-- Syncs: Projects, Buckets → Features, Tasks
-
-**Smartsheet** (`server/smartsheetClient.ts`)
-- Authentication: Access Token
-- Required config: `accessToken`
-- Syncs: Sheets → Projects, Rows → Features/Stories/Tasks (hierarchy-aware)
-
-**Rally/Broadcom** (`server/rallyClient.ts`)
-- Authentication: API Key (ZSESSIONID)
-- Required config: `apiKey`
-- Syncs: Portfolio Items (Epics/Features), User Stories, Tasks
-
-**Monday.com** (`server/mondayClient.ts`)
-- Authentication: API Key
-- Required config: `apiKey`
-- Syncs: Boards → Projects, Groups → Features, Items → Stories, Subitems → Tasks
-
-**Asana** (`server/asanaClient.ts`)
-- Authentication: Personal Access Token or OAuth
-- Required config: `accessToken`, optional `workspaceGid`
-- Syncs: Projects, Sections → Features, Tasks → Stories, Subtasks → Tasks
-
-### Sync Job Scheduling
-- **Cron-based scheduling**: Configure sync jobs with cron expressions
-- **Webhook handlers**: Receive real-time updates from external systems
-- **Conflict resolution**: Strategies for handling data conflicts (source_wins, target_wins, last_write_wins, manual)
-- **Background sync**: 60-second interval checks for due sync jobs
-
-### Database Tables for MCP
-- `sync_jobs`: Scheduled sync jobs with cron expressions
-- `sync_job_runs`: Execution history for sync jobs
-- `webhook_endpoints`: Incoming webhook handlers
-- `webhook_events`: Log of received webhook events
-- `ingestion_sessions`: AI-powered ingestion workflow state
-- `qa_reviews`: QA gate reviews with scores and recommendations
-- `clarifying_questions`: AI-generated questions and user answers
+- **Vite**: Frontend build with React plugin
+- **TSX**: TypeScript execution for server
+- **Replit Plugins**: Runtime error overlay, cartographer, dev banner

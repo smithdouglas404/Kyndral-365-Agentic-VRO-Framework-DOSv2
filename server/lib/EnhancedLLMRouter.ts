@@ -913,7 +913,7 @@ export class EnhancedLLMRouter {
    * Update model strategy (for admin UI)
    */
   updateModelStrategy(strategy: Partial<AgentTaskStrategy>): void {
-    this.modelStrategy = { ...this.modelStrategy, ...strategy };
+    this.modelStrategy = { ...this.modelStrategy, ...strategy } as AgentTaskStrategy;
     console.log('[EnhancedLLMRouter] Model strategy updated');
   }
 

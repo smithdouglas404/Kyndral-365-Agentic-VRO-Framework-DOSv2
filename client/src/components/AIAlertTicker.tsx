@@ -56,21 +56,24 @@ export function AIAlertTicker() {
   };
   
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg border-2 border-purple-500/50 shadow-lg shadow-purple-500/20 ring-1 ring-purple-400/30">
-      <div className="absolute inset-0 opacity-50" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)", backgroundSize: "20px 20px" }} />
+    <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg border border-slate-700 shadow-md">
+      <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)", backgroundSize: "20px 20px" }} />
       
       <div className="flex items-center gap-3 p-3 relative">
-        <motion.div
-          className="flex items-center gap-2 px-2 py-1 bg-purple-600 text-white rounded text-xs font-medium"
-          animate={isRunning && isLive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
-          transition={{ duration: 2, repeat: isRunning && isLive ? Infinity : 0 }}
-        >
-          <Activity size={12} />
-          AI LIVE
+        <div className="flex items-center gap-2 px-3 py-1 bg-slate-700/50 text-slate-300 rounded text-xs font-normal border border-slate-600/50">
+          <motion.div
+            animate={isRunning && isLive ? { scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] } : { scale: 1, opacity: 1 }}
+            transition={{ duration: 2, repeat: isRunning && isLive ? Infinity : 0, ease: "easeInOut" }}
+          >
+            <Activity size={11} className={isRunning && isLive ? "text-green-400" : "text-slate-400"} />
+          </motion.div>
+          <span className="text-[11px]">
+            {isRunning && isLive ? "System Active" : "System Paused"}
+          </span>
           {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] px-1.5 rounded-full">{unreadCount}</span>
+            <span className="bg-blue-500 text-white text-[10px] px-1.5 rounded-full ml-1">{unreadCount}</span>
           )}
-        </motion.div>
+        </div>
         
         <div 
           className="flex-1 min-w-0 h-6 overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
@@ -143,15 +146,15 @@ export function AIAlertTicker() {
       {isLive && (
         <motion.div
           key={animationKey}
-          className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-purple-500 via-blue-500 to-green-500"
+          className="absolute bottom-0 left-0 h-px bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500"
           initial={{ width: "0%" }}
           animate={{ width: "100%" }}
           transition={{ duration: 4, ease: "linear" }}
         />
       )}
-      
+
       {!isLive && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-600" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-700" />
       )}
     </div>
   );

@@ -1,0 +1,25 @@
+Document Management backend for PDF/Word parsing.                                                       
+                                                                                                          
+● Search(pattern: "document.*routes|registerDocumentRoutes", path: "server")                              
+  ⎿  Found 1 file (ctrl+o to expand)                                                                      
+                                                                                                          
+● Search(pattern: "**/documents.ts", path: "server/routes")                                               
+  ⎿  Found 1 file (ctrl+o to expand)                                                                      
+                                                                                                          
+● Read(server/routes/documents.ts)                                                                        
+  ⎿  Read 298 lines                                                                                       
+                                                                                                          
+● Search(pattern: "pdf-parse|mammoth|docx|pdfjs", path: "~/workspace", glob: "package.json", output_mode: 
+        "content")                                                                                        
+  ⎿  Found 1 line (ctrl+o to expand)                                                                      
+                                                                                                          
+● Search(pattern: "extractText|parseDocument|parsePDF", path: "server")                                   
+  ⎿  Found 1 file (ctrl+o to expand)                                                                      
+                                                                                                          
+● Search(pattern: "extractText|parseDocument|parsePDF", path: "server/routes.ts", output_mode: "content") 
+  ⎿  Found 0 lines                                                                                        
+                                                                                                          
+● Search(pattern: "mammoth", path: "~/workspace", glob: "package.json", output_mode: "content")           
+  ⎿  Found 0 lines                                                                                        
+                                                                                                          
+● I'll create a document parsing service to extract text from PDFs and Word documents.   

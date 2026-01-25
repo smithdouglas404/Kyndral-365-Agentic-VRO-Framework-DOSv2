@@ -14,6 +14,8 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import type { IStorage } from "../../storage.js";
+import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
+import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
 // import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
 // import type { VectorDocument } from "../../mcp/RetoolVectorsMCP.js";
 
@@ -87,6 +89,10 @@ export abstract class DeepAgentBase {
   protected reflectionHistory: ActionReflection[] = [];
   protected actionCount: number = 0;
 
+  // Memory layers
+  protected mem0: ReturnType<typeof getMem0Service>; // Shared facts with other agents
+  protected memory: LettaAgentMemory; // Private self-editing memory
+
   constructor(config: DeepAgentConfig, storage: IStorage) {
     this.config = {
       enablePlanning: true,
@@ -103,6 +109,18 @@ export abstract class DeepAgentBase {
     // Enable knowledge enrichment if Retool Vectors MCP is configured
     // TODO: Re-enable when RetoolVectorsMCP is implemented
     this.enableKnowledgeEnrichment = false; // !!getRetoolVectorsMCP();
+
+    // Initialize memory layers
+    this.mem0 = getMem0Service();
+    this.memory = createAgentMemory(config.agentName.toLowerCase());
+
+    // Initialize agent's core memory with persona
+    this.memory.initialize(`I am the ${config.agentName} agent responsible for ${config.description}`).catch((error) => {
+      console.error(`[${config.agentName}] Failed to initialize memory:`, error);
+    });
+
+    // Subscribe to relevant facts from other agents
+    this.subscribeToFacts();
 
     // Initialize models with different temperatures for different purposes
     const callbacks: any[] = [];
@@ -160,6 +178,84 @@ export abstract class DeepAgentBase {
    * Subclasses must implement this
    */
   protected abstract getSystemPrompt(): string;
+
+  /**
+   * Get fact subscription patterns for this agent
+   * Subclasses should override to specify what facts they care about
+   * Examples: ["project_*:schedule_variance", "*:risk_score"]
+   */
+  protected getFactSubscriptions(): string[] {
+    return []; // Default: no subscriptions
+  }
+
+  /**
+   * Subscribe to relevant facts from other agents
+   */
+  private subscribeToFacts(): void {
+    const patterns = this.getFactSubscriptions();
+
+    for (const pattern of patterns) {
+      this.mem0.subscribe(
+        this.config.agentName.toLowerCase(),
+        pattern,
+        (fact) => this.onFactObserved(fact)
+      );
+    }
+
+    if (patterns.length > 0) {
+      console.log(`[${this.config.agentName}] Subscribed to ${patterns.length} fact patterns`);
+    }
+  }
+
+  /**
+   * Called when another agent writes a relevant fact
+   * Subclasses can override to respond to specific facts
+   */
+  protected async onFactObserved(fact: Fact): Promise<void> {
+    // Update working memory
+    await this.memory.appendContext(
+      `Observed: ${fact.entity}.${fact.attribute} = ${JSON.stringify(fact.value)} (by ${fact.sourceAgent})`
+    );
+
+    console.log(`[${this.config.agentName}] Observed fact: ${fact.entity}.${fact.attribute}`);
+
+    // Subclasses can override to check if this triggers any rules
+    // Example: if (fact.attribute === 'schedule_variance' && fact.value < -5) { ... }
+  }
+
+  /**
+   * Agent learns and remembers a fact
+   */
+  protected async learn(key: string, value: any): Promise<void> {
+    await this.memory.learn(key, value);
+    console.log(`[${this.config.agentName}] Learned: ${key}`);
+  }
+
+  /**
+   * Agent broadcasts a fact to other agents
+   */
+  protected async broadcastFact(entity: string, attribute: string, value: any, confidence: number = 1.0): Promise<void> {
+    await this.mem0.writeFact({
+      entity,
+      attribute,
+      value,
+      sourceAgent: this.config.agentName.toLowerCase(),
+      confidence,
+    });
+
+    console.log(`[${this.config.agentName}] Broadcast fact: ${entity}.${attribute} = ${JSON.stringify(value)}`);
+  }
+
+  /**
+   * Archive important context to long-term memory
+   */
+  protected async archiveContext(content: string, metadata: Record<string, any> = {}): Promise<void> {
+    await this.memory.archive(content, {
+      ...metadata,
+      archivedAt: new Date().toISOString(),
+      source: 'deep-agent',
+    });
+  }
 
   /**
    * Enrich context with knowledge from Retool Vectors (RAG)

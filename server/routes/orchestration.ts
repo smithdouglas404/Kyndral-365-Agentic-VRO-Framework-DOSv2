@@ -2,20 +2,28 @@
  * ORCHESTRATION API ROUTES
  *
  * Endpoints for multi-agent orchestration, insights, and workflow management
+ *
+ * 🔄 MIGRATED TO DEEP AGENTS (2026-01-25)
+ * - Now using DeepAgentBootstrap with 6 deep agents
+ * - Enhanced capabilities: RAG, Mem0, Letta, Rules Engine, Policy-as-Code, A2A, MCP
+ * - Continuous 24x7 orchestration with A2A message bus
  */
 
 import type { Express, Request, Response } from 'express';
 import { authenticate } from '../auth/authMiddleware.js';
 import type { IStorage } from '../storage.js';
-import { AgentOrchestrationBootstrap } from '../agents/AgentOrchestrationBootstrap.js';
+import { DeepAgentBootstrap } from '../agents/DeepAgentBootstrap.js';
 
-let bootstrapInstance: AgentOrchestrationBootstrap | null = null;
+let bootstrapInstance: DeepAgentBootstrap | null = null;
 
 export function registerOrchestrationRoutes(app: Express, storage: IStorage): void {
-  // Initialize orchestration bootstrap
+  // Initialize deep agent bootstrap
   if (!bootstrapInstance) {
-    bootstrapInstance = new AgentOrchestrationBootstrap(storage);
-    bootstrapInstance.initialize().catch(console.error);
+    bootstrapInstance = new DeepAgentBootstrap(storage);
+    bootstrapInstance.initialize().catch((error) => {
+      console.error('[DeepAgentBootstrap] Initialization failed:', error);
+    });
+    console.log('[Orchestration] ✅ Deep agent system activated');
   }
 
   /**
@@ -347,6 +355,6 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
 /**
  * Get bootstrap instance for use elsewhere
  */
-export function getOrchestrationBootstrap(): AgentOrchestrationBootstrap | null {
+export function getOrchestrationBootstrap(): DeepAgentBootstrap | null {
   return bootstrapInstance;
 }

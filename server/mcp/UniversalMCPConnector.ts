@@ -1610,39 +1610,6 @@ export const MCP_PRESETS: Record<string, Partial<MCPConnectionConfig>> = {
     },
   },
 
-  slack: {
-    apiType: 'rest',
-    authType: 'bearer', // Slack webhook URL or OAuth token
-    endpoints: {
-      projects: '/api/chat.postMessage',
-      tasks: '/api/conversations.history',
-    },
-    fieldMappings: {
-      project: {
-        id: 'ts',
-        name: 'channel',
-        description: 'text',
-        status: 'ok',
-      },
-    },
-  },
-
-  'microsoft-teams': {
-    apiType: 'rest',
-    authType: 'bearer', // Teams webhook URL
-    endpoints: {
-      projects: '/webhook', // Incoming webhook
-    },
-    fieldMappings: {
-      project: {
-        id: 'activityId',
-        name: 'title',
-        description: 'text',
-        status: 'status',
-      },
-    },
-  },
-
   // Data & Infrastructure (PMO)
   // ============================================================================
 

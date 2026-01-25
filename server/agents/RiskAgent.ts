@@ -7,6 +7,11 @@ import type { IStorage } from '../storage.js';
  * Risk Agent - Risk Identification and Mitigation
  * Autonomy: SUPERVISED (requires human approval for interventions)
  * Focus: Risk identification, assessment, mitigation planning
+ *
+ * @deprecated As of 2026-01-25, use DeepRiskAgent instead (server/agents/deep/DeepRiskAgent.ts)
+ * This standard agent will be removed in v2.0
+ *
+ * Migration: Replace `new RiskAgent(storage)` with `new DeepRiskAgent(storage)`
  */
 export class RiskAgent extends AgentBase {
   constructor(storage: IStorage) {

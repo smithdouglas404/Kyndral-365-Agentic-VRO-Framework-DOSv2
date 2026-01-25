@@ -7,6 +7,11 @@ import type { IStorage } from '../storage.js';
  * TMO Agent - Timeline Management Office
  * Autonomy: FULL (can self-approve interventions)
  * Focus: Schedule tracking, SPI monitoring, velocity optimization
+ *
+ * @deprecated As of 2026-01-25, use DeepTMOAgent instead (server/agents/deep/DeepTMOAgent.ts)
+ * This standard agent will be removed in v2.0
+ *
+ * Migration: Replace `new TMOAgent(storage)` with `new DeepTMOAgent(storage)`
  */
 export class TMOAgent extends AgentBase {
   constructor(storage: IStorage) {

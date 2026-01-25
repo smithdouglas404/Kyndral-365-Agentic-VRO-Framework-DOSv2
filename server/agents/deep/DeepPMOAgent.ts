@@ -11,6 +11,7 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
+import type { Fact } from "../../lib/Mem0Service.js";
 import { PMO_DEFAULT_RULES, PMO_DEFAULT_ATTRIBUTES } from "../attributes/PMOAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/PMOAgentAttributes.js";
 
@@ -37,6 +38,60 @@ export class DeepPMOAgent extends DeepAgentBase {
     };
 
     super(config, storage);
+  }
+
+  /**
+   * PMO Agent subscribes to facts from other agents
+   */
+  protected getFactSubscriptions(): string[] {
+    return [
+      'project_*:health_score',       // Any project health changes
+      'project_*:schedule_variance',  // Schedule delays from TMO
+      'project_*:budget_status',      // Budget issues from FinOps
+      'project_*:risk_score',         // Risk escalations
+      '*:team_velocity',              // Team velocity changes
+    ];
+  }
+
+  /**
+   * Handle observed facts from other agents
+   */
+  protected async onFactObserved(fact: Fact): Promise<void> {
+    await super.onFactObserved(fact);
+
+    // PMO Agent responds to critical project health issues
+    if (fact.attribute === 'schedule_variance' && typeof fact.value === 'number' && fact.value < -5) {
+      console.log(`[DeepPMO] CRITICAL: ${fact.entity} is ${Math.abs(fact.value)} days behind schedule`);
+
+      // Learn about this pattern
+      await this.learn(`${fact.entity}_schedule_delay`, {
+        detected: new Date(),
+        severity: 'critical',
+        daysLate: Math.abs(fact.value),
+        sourceAgent: fact.sourceAgent,
+      });
+
+      // Archive the context
+      await this.archiveContext(
+        `Project ${fact.entity} detected with ${Math.abs(fact.value)} days schedule delay by ${fact.sourceAgent}`,
+        {
+          projectId: fact.entity,
+          attribute: 'schedule_variance',
+          severity: 'critical',
+        }
+      );
+    }
+
+    // Respond to budget issues
+    if (fact.attribute === 'budget_status' && fact.value === 'critical') {
+      console.log(`[DeepPMO] Budget alert for ${fact.entity}`);
+
+      await this.learn(`${fact.entity}_budget_alert`, {
+        detected: new Date(),
+        status: fact.value,
+        sourceAgent: fact.sourceAgent,
+      });
+    }
   }
 
   protected defineTools(): DynamicStructuredTool[] {
@@ -78,11 +133,42 @@ export class DeepPMOAgent extends DeepAgentBase {
               issueResolutionTime: 8,
             } : undefined;
 
+            const finalHealthScore = Math.max(0, healthScore);
+            const status = finalHealthScore >= 75 ? 'healthy' : finalHealthScore >= 50 ? 'at_risk' : 'critical';
+
+            // Broadcast project health as a fact to other agents
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'health_score',
+              finalHealthScore,
+              0.95 // High confidence
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'health_status',
+              status,
+              0.95
+            );
+
+            // If critical, alert other agents
+            if (finalHealthScore < 50) {
+              console.log(`[DeepPMO] ALERT: Project ${project.name} health critical (score: ${finalHealthScore})`);
+
+              // Learn about critical projects
+              await this.learn(`project_${projectId}_critical`, {
+                healthScore: finalHealthScore,
+                detectedAt: new Date(),
+                budgetVariance,
+                progress,
+              });
+            }
+
             return {
               projectId,
               projectName: project.name,
-              healthScore: Math.max(0, healthScore),
-              status: healthScore >= 75 ? 'healthy' : healthScore >= 50 ? 'at_risk' : 'critical',
+              healthScore: finalHealthScore,
+              status,
               budgetVariance: budgetVariance.toFixed(2),
               progress: progress,
               metrics,

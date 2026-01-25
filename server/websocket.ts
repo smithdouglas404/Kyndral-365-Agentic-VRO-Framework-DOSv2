@@ -91,6 +91,40 @@ export function broadcastCriticalAlert(alert: {
   log(`Broadcast critical alert: ${alert.title}`, 'websocket');
 }
 
+export function broadcastAgentInsight(insight: {
+  id?: string;
+  sourceAgent: string;
+  agentName: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  currentState?: any;
+  rootCause?: any;
+  recommendations?: any[];
+  prediction?: any;
+  relatedAgents?: any[];
+  projectId?: string;
+  projectName?: string;
+}) {
+  if (!wss) return;
+
+  const payload = JSON.stringify({
+    type: 'agent:insight',
+    data: {
+      ...insight,
+      id: insight.id || `insight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    }
+  });
+
+  clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
+    }
+  });
+
+  log(`Broadcast agent insight from ${insight.agentName}: ${insight.title}`, 'websocket');
+}
+
 export function getConnectedClientCount(): number {
   return clients.size;
 }

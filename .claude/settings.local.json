@@ -53,7 +53,18 @@
       "Bash(git diff:*)",
       "Bash(git ls-tree:*)",
       "Bash(git show-branch:*)",
-      "Bash(git fsck:*)"
+      "Bash(git fsck:*)",
+      "Bash(npm view:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx drizzle-kit push:*)",
+      "Bash(printf:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(for file in AGENT_MIGRATION_PLAN.md CURRENT_STATUS.md DEEP_AGENT_MIGRATION_COMPLETE.md MIGRATION_STEPS.md POLICY_AS_CODE_INTEGRATION.md SESSION_SUMMARY.md SYSTEM_READY.md)",
+      "Bash(do if [ -f \"docs/$file\" ])",
+      "Bash(then echo \"❌ Still exists: $file\")",
+      "Bash(else echo \"✅ Deleted: $file\")",
+      "Bash(fi)"
     ]
   }
 }

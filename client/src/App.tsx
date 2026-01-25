@@ -4,15 +4,14 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SimulationProvider } from "@/components/SimulationProvider";
 import { SimulationProvider as EventSimulationProvider } from "@/contexts/SimulationContext";
 import { PageContextProvider } from "@/contexts/PageContext";
+import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
 import { LiveEventDrawer } from "@/components/LiveEventDrawer";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
 import { AlertBubble } from "@/components/AlertBubble";
 import { AskPMChat } from "@/components/AskPMChat";
-import { RealTimeNotifications } from "@/components/RealTimeNotifications";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import { useLiveMetrics, useCrossAgentFeed } from "@/hooks/useAgentData";
 import { motion, AnimatePresence } from "framer-motion";
@@ -71,6 +70,19 @@ import OKRManagement from "@/pages/admin/OKRManagement";
 import UserPermissions from "@/pages/admin/UserPermissions";
 import CamundaRulesEngine from "@/pages/admin/CamundaRulesEngine";
 import KnowledgeBaseManagement from "@/pages/admin/KnowledgeBaseManagement";
+import RuleExecutionHistory from "@/pages/admin/RuleExecutionHistory";
+import AgentCollaborationMatrix from "@/pages/admin/AgentCollaborationMatrix";
+import FinOpsRules from "@/pages/admin/rules/FinOpsRules";
+import TMORules from "@/pages/admin/rules/TMORules";
+import RiskRules from "@/pages/admin/rules/RiskRules";
+import VRORules from "@/pages/admin/rules/VRORules";
+import PMORules from "@/pages/admin/rules/PMORules";
+import OCMRules from "@/pages/admin/rules/OCMRules";
+import GovernanceRules from "@/pages/admin/rules/GovernanceRules";
+import CustomAttributes from "@/pages/admin/CustomAttributes";
+import PolicyAsCode from "@/pages/admin/PolicyAsCode";
+import AgentMemoryViewer from "@/pages/admin/AgentMemoryViewer";
+import VoiceBriefings from "@/pages/admin/VoiceBriefings";
 import COPDashboard from "@/pages/COPDashboard";
 import ExecutiveWorkspace from "@/pages/workspaces/ExecutiveWorkspace";
 import PMWorkspace from "@/pages/workspaces/PMWorkspace";
@@ -152,6 +164,19 @@ function Router() {
       <Route path="/admin/permissions" component={UserPermissions} />
       <Route path="/admin/rules-engine" component={CamundaRulesEngine} />
       <Route path="/admin/knowledge-base" component={KnowledgeBaseManagement} />
+      <Route path="/admin/rule-execution-history" component={RuleExecutionHistory} />
+      <Route path="/admin/agent-collaboration-matrix" component={AgentCollaborationMatrix} />
+      <Route path="/admin/rules/finops" component={FinOpsRules} />
+      <Route path="/admin/rules/tmo" component={TMORules} />
+      <Route path="/admin/rules/risk" component={RiskRules} />
+      <Route path="/admin/rules/vro" component={VRORules} />
+      <Route path="/admin/rules/pmo" component={PMORules} />
+      <Route path="/admin/rules/ocm" component={OCMRules} />
+      <Route path="/admin/rules/governance" component={GovernanceRules} />
+      <Route path="/admin/custom-attributes" component={CustomAttributes} />
+      <Route path="/admin/policies" component={PolicyAsCode} />
+      <Route path="/admin/agent-memory" component={AgentMemoryViewer} />
+      <Route path="/admin/voice-briefings" component={VoiceBriefings} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -290,12 +315,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WebSocketProvider>
-        <SimulationProvider>
+        <UnifiedNotificationProvider>
           <EventSimulationProvider>
             <PageContextProvider>
               <TooltipProvider>
                 <Toaster />
-                <RealTimeNotifications />
+                {/* Unified notification system - bell icon in headers */}
+                {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
                 <FloatingAlertBanner />
                 <LiveEventDrawer />
                 <GlobalAIOverlay />
@@ -304,7 +330,7 @@ function App() {
               </TooltipProvider>
             </PageContextProvider>
           </EventSimulationProvider>
-        </SimulationProvider>
+        </UnifiedNotificationProvider>
       </WebSocketProvider>
     </QueryClientProvider>
   );

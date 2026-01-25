@@ -21,7 +21,12 @@ import { registerMCPServerRoutes } from "./routes/admin/mcp-servers.js";
 import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets.js";
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
+import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
+import { registerCustomAttributesRoutes } from "./routes/custom-attributes.js";
+import { registerAgentRulesRoutes } from "./routes/agent-rules.js";
+import { registerPolicyAsCodeRoutes } from "./routes/policy-as-code.js";
+import ruleExecutionHistoryRouter from "./routes/rule-execution-history.js";
 import { registerCamundaRoutes } from "./routes/admin/camunda.js";
 import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
 import { registerPermissionRoutes } from "./routes/admin/permissions.js";
@@ -157,6 +162,9 @@ export async function registerRoutes(
   // Register Agent Setup routes (ADMIN - Agent wizard and MCP/LLM configuration)
   registerAgentSetupRoutes(app);
 
+  // Register Agent Memory routes (ADMIN - Mem0 facts and Letta memory viewer)
+  app.use('/api/admin/agent-memory', createAgentMemoryRoutes());
+
   // Register Notification routes (Email, Slack, Teams, In-App notifications)
   registerNotificationRoutes(app);
 
@@ -165,6 +173,18 @@ export async function registerRoutes(
 
   // Register Collaboration Rules routes (ADMIN - Inter-agent collaboration rule builder)
   registerCollaborationRulesRoutes(app);
+
+  // Register Custom Attributes routes (ADMIN - Custom agent attributes exposed via MCP)
+  registerCustomAttributesRoutes(app);
+
+  // Register Agent Rules routes (CRUD - Agent-specific collaboration rules)
+  registerAgentRulesRoutes(app);
+
+  // Register Policy-as-Code routes (LLM extraction + HITL approval workflow)
+  registerPolicyAsCodeRoutes(app);
+
+  // Register Rule Execution History routes (MONITORING - Audit trail of rule executions)
+  app.use("/api/rules", ruleExecutionHistoryRouter);
 
   // Register Camunda 8 routes (ADMIN - DMN decisions and BPMN workflows)
   registerCamundaRoutes(app);

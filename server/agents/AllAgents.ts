@@ -1,6 +1,15 @@
 /**
  * Full Agent Implementations - Governance, Planning, OCM, Integrated Mgmt
  * Each agent has 4 tools for comprehensive monitoring
+ *
+ * @deprecated As of 2026-01-25, these standard agents will be migrated to Deep versions
+ * Currently, the following Deep agents are available:
+ * - DeepFinOpsAgent, DeepTMOAgent, DeepRiskAgent, DeepVROAgent, DeepPMOAgent, DeepOCMAgent
+ *
+ * Future Deep agents (to be built):
+ * - DeepGovernanceAgent, DeepPlanningAgent, DeepIntegratedMgmtAgent
+ *
+ * These standard agents will be removed in v2.0
  */
 
 import { AgentBase } from './base/AgentBase.js';

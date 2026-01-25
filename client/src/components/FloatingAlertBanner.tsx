@@ -42,6 +42,16 @@ const typeIcons: Record<string, React.ReactNode> = {
   action_required: <Zap size={16} />
 };
 
+/**
+ * @deprecated This component is deprecated in favor of UnifiedNotificationContext + GlobalNotificationBell
+ *
+ * MIGRATION PATH:
+ * 1. Use GlobalNotificationBell in headers (shows ALL notifications)
+ * 2. Remove this component from App.tsx once bell icon is added everywhere
+ * 3. This polling-based approach is replaced by WebSocket push notifications
+ *
+ * Kept temporarily for backward compatibility.
+ */
 export function FloatingAlertBanner() {
   const [location, setLocation] = useLocation();
   const [showBanner, setShowBanner] = useState(false);
@@ -50,11 +60,11 @@ export function FloatingAlertBanner() {
   const lastShownIdRef = useRef<string | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  
+
   // Show on dashboard, segment, and command center pages
   const shouldShowBanner = location && (
-    location === '/dashboard' || 
-    location.startsWith('/dashboard/') || 
+    location === '/dashboard' ||
+    location.startsWith('/dashboard/') ||
     location.startsWith('/segment/') ||
     location.startsWith('/division/') ||
     location.startsWith('/project/') ||

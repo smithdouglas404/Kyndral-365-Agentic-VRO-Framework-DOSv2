@@ -226,6 +226,96 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
   });
 
   /**
+   * GET /api/deep-agents/collaboration-matrix
+   * Get detailed collaboration matrix showing agent-to-agent interactions
+   */
+  app.get('/api/deep-agents/collaboration-matrix', authenticate, async (req: Request, res: Response) => {
+    try {
+      if (!deepOrchestrator) {
+        return res.status(500).json({ error: 'Deep orchestrator not initialized' });
+      }
+
+      const { timeframe = '7days' } = req.query;
+
+      // Calculate start date based on timeframe
+      const now = new Date();
+      let startDate = new Date();
+
+      switch (timeframe) {
+        case '24h':
+          startDate.setHours(now.getHours() - 24);
+          break;
+        case '7days':
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case '30days':
+          startDate.setDate(now.getDate() - 30);
+          break;
+        case '90days':
+          startDate.setDate(now.getDate() - 90);
+          break;
+        default:
+          startDate.setDate(now.getDate() - 7);
+      }
+
+      // Get collaboration history from orchestrator
+      const history = deepOrchestrator.getCollaborationHistory();
+
+      // Filter by timeframe
+      const filteredHistory = history.filter((item: any) => {
+        const itemDate = new Date(item.timestamp);
+        return itemDate >= startDate;
+      });
+
+      // Build collaboration matrix
+      const matrix: Record<string, number> = {};
+      const topReasons: Record<string, Record<string, number>> = {};
+
+      filteredHistory.forEach((item: any) => {
+        const key = `${item.from}->${item.to}`;
+        matrix[key] = (matrix[key] || 0) + 1;
+
+        // Track reasons
+        if (!topReasons[key]) {
+          topReasons[key] = {};
+        }
+        const reason = item.reason || 'unknown';
+        topReasons[key][reason] = (topReasons[key][reason] || 0) + 1;
+      });
+
+      // Find top collaborations
+      const topCollaborations = Object.entries(matrix)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([key, count]) => {
+          const [from, to] = key.split('->');
+          const reasons = topReasons[key];
+          const sortedReasons = Object.entries(reasons)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([reason]) => reason);
+
+          return {
+            from,
+            to,
+            count,
+            topReasons: sortedReasons,
+          };
+        });
+
+      res.json({
+        timeframe,
+        collaborationMatrix: matrix,
+        topCollaborations,
+        totalInteractions: filteredHistory.length,
+      });
+    } catch (error: any) {
+      console.error('[DeepAgents] Get collaboration matrix error:', error);
+      res.status(500).json({ error: 'Failed to get collaboration matrix' });
+    }
+  });
+
+  /**
    * POST /api/deep-agents/analyze-project
    * Quick helper: Analyze project with DeepFinOps
    */
