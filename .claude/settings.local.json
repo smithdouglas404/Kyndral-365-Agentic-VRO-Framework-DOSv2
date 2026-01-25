@@ -66,7 +66,8 @@
       "Bash(else echo \"✅ Deleted: $file\")",
       "Bash(fi)",
       "Bash(wc:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(tail:*)"
     ]
   }
 }
