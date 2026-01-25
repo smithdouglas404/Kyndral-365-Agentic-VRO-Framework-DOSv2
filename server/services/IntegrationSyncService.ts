@@ -225,9 +225,15 @@ export class IntegrationSyncService {
           );
 
           if (existingProject) {
-            // TODO: Update existing project when updateProject method is added to storage
-            // await this.storage.updateProject(existingProject.id, {...});
-            recordsSkipped++;
+            // Update existing project with latest data from Jira
+            await this.storage.updateProject(existingProject.id, {
+              name: jiraProject.name,
+              description: jiraProject.description || '',
+              status: 'active',
+              externalId: jiraProject.id,
+              externalSource: 'jira',
+            });
+            recordsUpdated++;
           } else {
             // Create new project
             await this.storage.createProject({
@@ -381,9 +387,15 @@ export class IntegrationSyncService {
           );
 
           if (existingProject) {
-            // TODO: Update existing project when updateProject method is added to storage
-            // await this.storage.updateProject(existingProject.id, {...});
-            recordsSkipped++;
+            // Update existing project with latest data from Azure DevOps
+            await this.storage.updateProject(existingProject.id, {
+              name: adoProject.name,
+              description: adoProject.description || '',
+              status: this.mapAzureStatus(adoProject.state),
+              externalId: adoProject.id,
+              externalSource: 'azure_devops',
+            });
+            recordsUpdated++;
           } else {
             await this.storage.createProject({
               name: adoProject.name,
@@ -519,9 +531,19 @@ export class IntegrationSyncService {
           );
 
           if (existingProject) {
-            // TODO: Update existing project when updateProject method is added to storage
-            // await this.storage.updateProject(existingProject.id, {...});
-            recordsSkipped++;
+            // Update existing project with latest data from ServiceNow
+            await this.storage.updateProject(existingProject.id, {
+              name: snowProject.short_description,
+              description: snowProject.description || '',
+              status: this.mapServiceNowStatus(snowProject.state),
+              startDate: snowProject.start_date ? new Date(snowProject.start_date) : undefined,
+              endDate: snowProject.end_date ? new Date(snowProject.end_date) : undefined,
+              budget: snowProject.budget || undefined,
+              percentComplete: snowProject.percent_complete || undefined,
+              externalId: snowProject.sys_id,
+              externalSource: 'servicenow',
+            });
+            recordsUpdated++;
           } else {
             await this.storage.createProject({
               name: snowProject.short_description,

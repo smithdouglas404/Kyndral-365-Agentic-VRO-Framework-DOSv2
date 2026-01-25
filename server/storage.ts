@@ -170,6 +170,7 @@ export interface IStorage {
   getProjects(): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
   createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined>;
   getProjectsByBusinessUnit(businessUnitId: string): Promise<Project[]>;
   linkPolicyToBusinessUnit(link: InsertPolicyBusinessUnitLink): Promise<PolicyBusinessUnitLink>;
   unlinkPolicyFromBusinessUnit(policyId: string, businessUnitId: string): Promise<void>;
@@ -632,6 +633,15 @@ export class DatabaseStorage implements IStorage {
 
   async createProject(proj: InsertProject): Promise<Project> {
     const result = await db.insert(projects).values(proj).returning();
+    return result[0];
+  }
+
+  async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
+    const result = await db
+      .update(projects)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
     return result[0];
   }
 
