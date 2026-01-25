@@ -40,16 +40,57 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
 
       const agents = deepOrchestrator.getDeepAgents();
 
+      const agentCapabilities: Record<string, string[]> = {
+        'deep-finops': [
+          'Budget variance analysis',
+          'EVM calculations',
+          'Burn rate forecasting',
+          'Cost optimization',
+          'Multi-step financial planning',
+        ],
+        'deep-tmo': [
+          'Schedule analysis',
+          'Timeline optimization',
+          'Milestone tracking',
+          'Critical path analysis',
+          'Multi-step timeline planning',
+        ],
+        'deep-risk': [
+          'Risk identification',
+          'Risk assessment',
+          'Mitigation strategies',
+          'Risk monitoring',
+          'Multi-step risk planning',
+        ],
+        'deep-vro': [
+          'Value realization tracking',
+          'Benefits measurement',
+          'ROI analysis',
+          'Value optimization',
+          'Multi-step value planning',
+        ],
+        'deep-pmo': [
+          'Project health analysis',
+          'Milestone tracking and prediction',
+          'Resource optimization',
+          'Governance enforcement',
+          'Status report generation',
+          'Multi-step portfolio planning',
+        ],
+        'deep-ocm': [
+          'Change impact assessment',
+          'Stakeholder mapping and analysis',
+          'Adoption metrics tracking',
+          'Intervention recommendations',
+          'Resistance forecasting',
+          'Multi-step change planning',
+        ],
+      };
+
       res.json({
         agents: agents.map(name => ({
           name,
-          capabilities: name === 'deep-finops' ? [
-            'Budget variance analysis',
-            'EVM calculations',
-            'Burn rate forecasting',
-            'Cost optimization',
-            'Multi-step financial planning',
-          ] : [],
+          capabilities: agentCapabilities[name] || [],
           features: {
             planning: true,
             reflection: true,

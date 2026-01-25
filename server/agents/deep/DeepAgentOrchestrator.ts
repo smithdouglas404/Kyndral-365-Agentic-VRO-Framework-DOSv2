@@ -13,6 +13,8 @@ import { DeepFinOpsAgent } from "./DeepFinOpsAgent.js";
 import { DeepTMOAgent } from "./DeepTMOAgent.js";
 import { DeepRiskAgent } from "./DeepRiskAgent.js";
 import { DeepVROAgent } from "./DeepVROAgent.js";
+import { DeepPMOAgent } from "./DeepPMOAgent.js";
+import { DeepOCMAgent } from "./DeepOCMAgent.js";
 
 /**
  * A2A message for deep agent collaboration
@@ -72,6 +74,14 @@ export class DeepAgentOrchestrator {
     // Register Deep VRO Agent
     const deepVRO = new DeepVROAgent(this.storage);
     this.deepAgents.set('deep-vro', deepVRO);
+
+    // Register Deep PMO Agent
+    const deepPMO = new DeepPMOAgent(this.storage);
+    this.deepAgents.set('deep-pmo', deepPMO);
+
+    // Register Deep OCM Agent
+    const deepOCM = new DeepOCMAgent(this.storage);
+    this.deepAgents.set('deep-ocm', deepOCM);
 
     console.log('[DeepAgentOrchestrator] Initialized with', this.deepAgents.size, 'deep agents');
   }
