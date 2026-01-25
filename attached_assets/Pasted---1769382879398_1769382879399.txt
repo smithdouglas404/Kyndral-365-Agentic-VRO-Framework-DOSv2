@@ -1,0 +1,114 @@
+                                                                                                                                   
+● ✅ Your Experts Are 100% Correct                                                                                                   
+                                                                                                                                     
+  I can confirm the diagnosis:                                                                                                       
+                                                                                                                                     
+  agent_facts: 0 rows                                                                                                                
+  interventions: 30,038 rows  ← Agents ARE working!                                                                                  
+                                                                                                                                     
+  🔍 The Root Cause                                                                                                                  
+                                                                                                                                     
+  The orchestration flow NEVER calls the LangChain tools:                                                                            
+                                                                                                                                     
+  // CURRENT FLOW (Continuous Orchestration)                                                                                         
+  performAgentScan()                                                                                                                 
+    ↓                                                                                                                                
+  detectIssue()                                                                                                                      
+    ↓                                                                                                                                
+  agent.evaluateRules(metrics)  ← DIRECT RULES CHECK (no LLM)                                                                        
+    ↓                                                                                                                                
+  return finding                                                                                                                     
+    ↓                                                                                                                                
+  createIntervention()  ← Interventions created ✅                                                                                   
+    ↓                                                                                                                                
+  ❌ broadcastFact() NEVER CALLED                                                                                                    
+                                                                                                                                     
+  Where broadcastFact() actually lives:                                                                                              
+                                                                                                                                     
+  // DeepFinOpsAgent.ts - Line 63                                                                                                    
+  defineTools() {                                                                                                                    
+    return [                                                                                                                         
+      new DynamicStructuredTool({                                                                                                    
+        name: "analyze_budget_variance",                                                                                             
+        func: async ({ projectId }) => {                                                                                             
+          // ... analysis logic ...                                                                                                  
+          await this.broadcastFact(...)  ← HERE!                                                                                     
+        }                                                                                                                            
+      })                                                                                                                             
+    ]                                                                                                                                
+  }                                                                                                                                  
+                                                                                                                                     
+  These tools are ONLY invoked when:                                                                                                 
+  - agent.execute() is called (LangChain agent executor)                                                                             
+  - LLM reasoning decides to use a tool                                                                                              
+  - Currently ONLY happens in processRequests() (line 721) for A2A messages                                                          
+                                                                                                                                     
+  They are NEVER invoked during performAgentScan()!                                                                                  
+                                                                                                                                     
+  📊 This Probably Never Worked                                                                                                      
+                                                                                                                                     
+  The architecture has two separate paths:                                                                                           
+  ┌──────────────────────────┬─────────────────────────┬───────────┬──────────────┬───────────────────┐                              
+  │           Path           │         Trigger         │ Uses LLM? │ Calls Tools? │ Broadcasts Facts? │                              
+  ├──────────────────────────┼─────────────────────────┼───────────┼──────────────┼───────────────────┤                              
+  │ Continuous Orchestration │ Every 15 sec            │ ❌ No     │ ❌ No        │ ❌ No             │                              
+  ├──────────────────────────┼─────────────────────────┼───────────┼──────────────┼───────────────────┤                              
+  │ A2A Message Processing   │ When agents collaborate │ ✅ Yes    │ ✅ Yes       │ ✅ Yes            │                              
+  └──────────────────────────┴─────────────────────────┴───────────┴──────────────┴───────────────────┘                              
+  🔧 The Fix                                                                                                                         
+                                                                                                                                     
+  Add broadcastFact() calls in the orchestration path. Three options:                                                                
+                                                                                                                                     
+  Option 1: Add in detectIssue() (after rules trigger)                                                                               
+                                                                                                                                     
+  private async detectIssue(agent: any, agentId: string, project: any): Promise<any | null> {                                        
+    // ... existing code ...                                                                                                         
+    if (ruleResults.length > 0) {                                                                                                    
+      const triggered = ruleResults[0];                                                                                              
+                                                                                                                                     
+      // ADD THIS: Broadcast fact when rule triggers                                                                                 
+      if (typeof agent.broadcastFact === 'function') {                                                                               
+        await agent.broadcastFact(                                                                                                   
+          `project_${project.id}`,                                                                                                   
+          triggered.rule.attribute, // e.g., 'budget_variance'                                                                       
+          metrics[triggered.rule.attribute],                                                                                         
+          0.90 // High confidence from rules                                                                                         
+        );                                                                                                                           
+      }                                                                                                                              
+                                                                                                                                     
+      return { ... };                                                                                                                
+    }                                                                                                                                
+  }                                                                                                                                  
+                                                                                                                                     
+  Option 2: Add in createPendingIntervention() (when intervention created)                                                           
+                                                                                                                                     
+  private async createPendingIntervention(agent: any, finding: any): Promise<void> {                                                 
+    // ... create intervention ...                                                                                                   
+                                                                                                                                     
+    // ADD THIS: Broadcast fact for every intervention                                                                               
+    if (typeof agent.broadcastFact === 'function') {                                                                                 
+      await agent.broadcastFact(                                                                                                     
+        `project_${finding.projectId}`,                                                                                              
+        'intervention_created',                                                                                                      
+        finding.severity,                                                                                                            
+        0.85                                                                                                                         
+      );                                                                                                                             
+    }                                                                                                                                
+  }                                                                                                                                  
+                                                                                                                                     
+  Option 3: Invoke actual tools during scan (heavyweight)                                                                            
+                                                                                                                                     
+  private async performAgentScan(agent: any, agentId: string): Promise<{ findings: any[] }> {                                        
+    // Instead of detectIssue(), call agent.execute() with tool prompts                                                              
+    const prompt = `Analyze project ${project.id} for budget issues using your tools.`;                                              
+    const result = await agent.execute(prompt, { projectId: project.id });                                                           
+    // This would invoke tools, which call broadcastFact                                                                             
+  }                                                                                                                                  
+                                                                                                                                     
+  💡 Recommended Fix                                                                                                                 
+                                                                                                                                     
+  Option 2 is cleanest - every intervention should also create a fact. This ensures:                                                 
+  - Interventions and facts stay in sync                                                                                             
+  - No duplicate logic                                                                                                               
+  - Facts are created regardless of how the intervention was triggered                                                               
+                                                                   

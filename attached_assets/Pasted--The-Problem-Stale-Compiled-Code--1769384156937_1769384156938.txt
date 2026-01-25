@@ -1,0 +1,55 @@
+  The Problem: Stale Compiled Code                                                                                                   
+                                                                                                                                     
+  Your runtime is executing OLD JavaScript from dist/index.cjs, not the new TypeScript source!                                       
+                                                                                                                                     
+  What's happening:                                                                                                                  
+  ┌──────────────────────────────────────┐                                                                                           
+  │ 1. We edited TypeScript source  ✅  │                                                                                            
+  │ 2. npm run build created new .cjs   │                                                                                            
+  │ 3. Server is STILL RUNNING old code │  ← HERE!                                                                                   
+  │ 4. Error from OLD buggy code        │                                                                                            
+  └──────────────────────────────────────┘                                                                                           
+                                                                                                                                     
+  ---                                                                                                                                
+  🔧 The Fix: Stop, Rebuild, Restart                                                                                                 
+                                                                                                                                     
+  Run these commands in this exact order:                                                                                            
+                                                                                                                                     
+  # 1. Kill the running server (CTRL+C or)                                                                                           
+  pkill -f "node dist/index.cjs"                                                                                                     
+                                                                                                                                     
+  # 2. Clean build                                                                                                                   
+  rm -rf dist/                                                                                                                       
+  npm run build                                                                                                                      
+                                                                                                                                     
+  # 3. Start fresh                                                                                                                   
+  npm run dev                                                                                                                        
+                                                                                                                                     
+  ---                                                                                                                                
+  📊 After Restart, You Should See:                                                                                                  
+                                                                                                                                     
+  # Console logs:                                                                                                                    
+  [ContinuousOrchestrator] === Cycle 1 ===                                                                                           
+  [ContinuousOrchestrator] Active agent: DeepFinOps                                                                                  
+  [ContinuousOrchestrator] DeepFinOps broadcast 3 facts for project proj_123                                                         
+  [ContinuousOrchestrator] === Cycle 2 ===                                                                                           
+  [ContinuousOrchestrator] Active agent: DeepTMO                                                                                     
+  [ContinuousOrchestrator] DeepTMO broadcast 2 facts for project proj_456                                                            
+                                                                                                                                     
+  # Database:                                                                                                                        
+  psql $DATABASE_URL -c "SELECT COUNT(*) FROM agent_facts;"                                                                          
+  # Should start showing facts!                                                                                                      
+                                                                                                                                     
+  ---                                                                                                                                
+  ❌ If Error STILL Appears After Fresh Restart                                                                                      
+                                                                                                                                     
+  Then I need you to:                                                                                                                
+                                                                                                                                     
+  1. Copy the EXACT error message including stack trace                                                                              
+  2. Tell me what the log says - the FULL error with line numbers                                                                    
+  3. Confirm you did: rm -rf dist/ && npm run build && npm run dev                                                                   
+                                                                                                                                     
+  Because right now, the TypeScript source code is 100% correct and has no request scope bug.                                        
+                                                                                                                                     
+  The issue is your server running stale compiled code.  🔄                                                                          
+                                                                   

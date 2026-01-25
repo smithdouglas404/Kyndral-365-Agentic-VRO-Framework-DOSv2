@@ -167,6 +167,22 @@ export abstract class DeepAgentBase {
   }
 
   /**
+   * Get agent configuration
+   * Required by orchestrator to access agent metadata
+   */
+  public getConfig() {
+    return {
+      agentId: this.config.agentName.toLowerCase().replace(/deep/, '').replace(/agent/, '').trim(),
+      agentName: this.config.agentName,
+      agentType: this.config.agentType,
+      description: this.config.description,
+      capabilities: this.config.capabilities,
+      autonomy: 'supervised', // Deep agents default to supervised
+      focus: this.config.description,
+    };
+  }
+
+  /**
    * Define agent-specific tools
    * Subclasses must implement this
    */

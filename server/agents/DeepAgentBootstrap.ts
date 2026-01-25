@@ -1,16 +1,21 @@
 /**
  * DEEP AGENT BOOTSTRAP
  *
- * Initializes all deep agents with advanced capabilities:
+ * Initializes all 10 deep agents with advanced capabilities:
  * - RAG integration (knowledge base + pattern learning)
  * - Memory systems (Mem0 + Letta)
+ * - Planning & Reflection (multi-step reasoning)
  * - Rules engine integration
  * - Custom attributes via MCP
  * - Policy-as-Code support
  * - A2A message bus
  * - MCP protocol support
  *
- * This replaces AgentOrchestrationBootstrap with deep agents.
+ * All agents upgraded to Deep Agent architecture:
+ * - DeepFinOpsAgent, DeepTMOAgent, DeepRiskAgent
+ * - DeepVROAgent, DeepPMOAgent, DeepOCMAgent
+ * - DeepGovernanceAgent, DeepPlanningAgent
+ * - DeepIntegratedMgmtAgent, DeepOKRInferenceAgent
  */
 
 import type { IStorage } from '../storage.js';
@@ -21,8 +26,10 @@ import { DeepRiskAgent } from './deep/DeepRiskAgent.js';
 import { DeepVROAgent } from './deep/DeepVROAgent.js';
 import { DeepPMOAgent } from './deep/DeepPMOAgent.js';
 import { DeepOCMAgent } from './deep/DeepOCMAgent.js';
-import { OKRInferenceAgent } from './OKRInferenceAgent.js';
-import { GovernanceAgent, PlanningAgent, IntegratedMgmtAgent } from './AllAgents.js';
+import { DeepGovernanceAgent } from './deep/DeepGovernanceAgent.js';
+import { DeepPlanningAgent } from './deep/DeepPlanningAgent.js';
+import { DeepIntegratedMgmtAgent } from './deep/DeepIntegratedMgmtAgent.js';
+import { DeepOKRInferenceAgent } from './deep/DeepOKRInferenceAgent.js';
 
 export class DeepAgentBootstrap {
   private storage: IStorage;
@@ -47,7 +54,7 @@ export class DeepAgentBootstrap {
     console.log('[DeepAgentBootstrap] Features: RAG, Mem0, Letta, Rules Engine, Policy-as-Code, A2A, MCP');
 
     try {
-      // Initialize 6 core deep agents with advanced capabilities
+      // Initialize all 10 deep agents with advanced capabilities
       console.log('[DeepAgentBootstrap] Loading deep agents...');
 
       const deepFinOps = new DeepFinOpsAgent(this.storage);
@@ -56,12 +63,10 @@ export class DeepAgentBootstrap {
       const deepVRO = new DeepVROAgent(this.storage);
       const deepPMO = new DeepPMOAgent(this.storage);
       const deepOCM = new DeepOCMAgent(this.storage);
-
-      // Initialize remaining agents (will be converted to Deep in future)
-      const governance = new GovernanceAgent(this.storage);
-      const planning = new PlanningAgent(this.storage);
-      const integrated = new IntegratedMgmtAgent(this.storage);
-      const okr = new OKRInferenceAgent(this.storage);
+      const deepGovernance = new DeepGovernanceAgent(this.storage);
+      const deepPlanning = new DeepPlanningAgent(this.storage);
+      const deepIntegrated = new DeepIntegratedMgmtAgent(this.storage);
+      const deepOKR = new DeepOKRInferenceAgent(this.storage);
 
       // Store all agents in registry
       this.agents.set('finops', deepFinOps);
@@ -70,14 +75,14 @@ export class DeepAgentBootstrap {
       this.agents.set('vro', deepVRO);
       this.agents.set('pmo', deepPMO);
       this.agents.set('ocm', deepOCM);
-      this.agents.set('governance', governance);
-      this.agents.set('planning', planning);
-      this.agents.set('integrated', integrated);
-      this.agents.set('okr', okr);
+      this.agents.set('governance', deepGovernance);
+      this.agents.set('planning', deepPlanning);
+      this.agents.set('integrated', deepIntegrated);
+      this.agents.set('okr', deepOKR);
 
       console.log(`[DeepAgentBootstrap] Loaded ${this.agents.size} agents:`);
-      console.log(`  - 6 Deep Agents: FinOps, TMO, Risk, VRO, PMO, OCM`);
-      console.log(`  - 4 Standard Agents: Governance, Planning, Integrated, OKR`);
+      console.log(`  - 10 Deep Agents: FinOps, TMO, Risk, VRO, PMO, OCM, Governance, Planning, Integrated, OKR`);
+      console.log(`  - ✅ All agents upgraded to Deep Agent architecture`);
 
       // Initialize continuous orchestrator with A2A message bus
       console.log('[DeepAgentBootstrap] Initializing continuous orchestrator...');
@@ -128,8 +133,8 @@ export class DeepAgentBootstrap {
       agentCount: this.agents.size,
       agents: Array.from(this.agents.keys()),
       orchestratorRunning: this.orchestrator !== null,
-      deepAgents: ['finops', 'tmo', 'risk', 'vro', 'pmo', 'ocm'],
-      standardAgents: ['governance', 'planning', 'integrated', 'okr'],
+      deepAgents: ['finops', 'tmo', 'risk', 'vro', 'pmo', 'ocm', 'governance', 'planning', 'integrated', 'okr'],
+      standardAgents: [],
     };
   }
 
@@ -187,8 +192,8 @@ export class DeepAgentBootstrap {
         isRunning: this.orchestrator !== null,
         agentCount: this.agents.size,
         agents: Array.from(this.agents.keys()),
-        deepAgents: 6,
-        standardAgents: 4,
+        deepAgents: 10,
+        standardAgents: 0,
         orchestrationType: 'continuous',
         features: ['RAG', 'Mem0', 'Letta', 'Rules Engine', 'Policy-as-Code', 'A2A', 'MCP'],
       }),
@@ -202,13 +207,13 @@ export class DeepAgentBootstrap {
       getAgentHealth: (agentId: string) => ({
         agentId,
         status: this.agents.has(agentId) ? 'healthy' : 'not_found',
-        type: ['finops', 'tmo', 'risk', 'vro', 'pmo', 'ocm'].includes(agentId) ? 'deep' : 'standard',
+        type: 'deep',
       }),
 
       getMetrics: () => ({
         totalAgents: this.agents.size,
-        deepAgents: 6,
-        standardAgents: 4,
+        deepAgents: 10,
+        standardAgents: 0,
         uptime: process.uptime(),
       }),
 
@@ -353,14 +358,12 @@ export class DeepAgentBootstrap {
         // Collect insights from each deep agent
         for (const [agentId, agent] of this.agents.entries()) {
           try {
-            // Each deep agent has analysis capabilities
-            if (['finops', 'tmo', 'risk', 'vro', 'pmo', 'ocm'].includes(agentId)) {
-              projectInsights.agents[agentId] = {
-                status: 'active',
-                type: 'deep',
-                capabilities: ['RAG', 'Memory', 'Rules'],
-              };
-            }
+            // All agents are now deep agents with full capabilities
+            projectInsights.agents[agentId] = {
+              status: 'active',
+              type: 'deep',
+              capabilities: ['RAG', 'Memory', 'Rules', 'Planning', 'Reflection'],
+            };
           } catch (error) {
             console.error(`Error getting insights from ${agentId}:`, error);
           }

@@ -457,6 +457,32 @@ export class ContinuousOrchestrator {
         const rule = triggered.rule;
         const actions = triggered.actions;
 
+        // ✅ OPTION 1: BROADCAST FACTS WHEN RULE TRIGGERS (Event-Driven Architecture)
+        // This creates the rich signal stream that enables:
+        // - Real-time agent observation and collaboration
+        // - Trend detection and pattern learning
+        // - Predictive intelligence through historical data
+        // - Cross-domain correlation analysis
+        if (typeof agent.broadcastFact === 'function') {
+          try {
+            // Broadcast each condition that triggered the rule
+            for (const condition of rule.conditions) {
+              const metricValue = metrics[condition.attribute];
+              if (metricValue !== undefined) {
+                await agent.broadcastFact(
+                  `project_${project.id}`,
+                  condition.attribute,
+                  metricValue,
+                  0.90 // High confidence - based on actual data via rules
+                );
+              }
+            }
+            console.log(`[ContinuousOrchestrator] ${config.agentName} broadcast ${rule.conditions.length} facts for project ${project.id}`);
+          } catch (error) {
+            console.error(`[ContinuousOrchestrator] Error broadcasting facts for ${config.agentName}:`, error);
+          }
+        }
+
         // Get highest severity action
         const highestSeverity = this.getHighestSeverity(actions.map(a => a.severity));
 
@@ -685,6 +711,7 @@ export class ContinuousOrchestrator {
    * Process pending requests to an agent (supports both A2A and MCP)
    */
   private async processRequests(agent: any, requests: AgentMessage[]): Promise<void> {
+    const agentId = agent.id || agent.agentId || agent.config?.agentId || 'unknown';
     const config = this.getAgentConfig(agent, agentId);
 
     for (const request of requests) {
@@ -858,7 +885,7 @@ Keep response brief and actionable.`;
    * Create self-approved action for full autonomy agents
    */
   private async createSelfApprovedAction(agent: any, finding?: any): Promise<void> {
-    const agentId = agent.id || agent.agentId;
+    const agentId = agent.id || agent.agentId || agent.config?.agentId || agent.getConfig?.().agentId || 'unknown';
     const config = this.getAgentConfig(agent, agentId);
 
     if (config.autonomy !== 'full') return;
