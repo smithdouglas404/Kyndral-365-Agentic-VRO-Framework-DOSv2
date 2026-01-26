@@ -437,12 +437,12 @@ export async function runMasterSeed() {
     console.log('');
 
     // Summary
-    const [ontologyCount] = await db.select().from(ontologyClasses);
-    const [industryCount] = await db.select().from(ontologyIndustryProfiles);
+    const ontologyCount = await db.select().from(ontologyClasses);
+    const industryCount = await db.select().from(ontologyIndustryProfiles);
 
     console.log('📊 System Status:');
-    console.log(`   • ${ontologyCount.length || 22} Ontology Classes`);
-    console.log(`   • ${industryCount.length || 20} Industry Profiles`);
+    console.log(`   • ${ontologyCount?.length || 22} Ontology Classes`);
+    console.log(`   • ${industryCount?.length || 20} Industry Profiles`);
     console.log('   • Everything installed ✓');
     console.log('   • Access driven by company setup ✓');
     console.log('');
