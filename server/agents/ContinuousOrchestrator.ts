@@ -20,6 +20,7 @@ import type { IStorage } from '../storage.js';
 import type { InsertAgentActivityLog, InsertIntervention } from '@shared/schema';
 import { EventEmitter } from 'events';
 import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } from '../websocket.js';
+import { MCP_SERVER_REGISTRY } from '../mcp/MCPServerRegistry.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -264,8 +265,6 @@ export class ContinuousOrchestrator {
    * Registers ALL 31+ available MCP services from the complete registry
    */
   private registerMCPServicesSync(): void {
-    // Use synchronous require for immediate loading
-    const { MCP_SERVER_REGISTRY } = require('../mcp/MCPServerRegistry.js');
     const services: MCPService[] = [];
 
     // Convert all available MCP servers to service definitions
@@ -296,7 +295,8 @@ export class ContinuousOrchestrator {
       this.mcpHandler.registerService(service);
     }
 
-    console.log(`[ContinuousOrchestrator] ✅ Registered ${services.length} MCP services from registry (${services.map(s => s.name).join(', ')})`);
+    console.log(`[ContinuousOrchestrator] ✅ Registered ${services.length} MCP services from registry`);
+    console.log(`[ContinuousOrchestrator] Services: ${services.map(s => s.name).slice(0, 10).join(', ')}...`);
   }
 
   /**
