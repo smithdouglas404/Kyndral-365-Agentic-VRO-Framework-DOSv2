@@ -18,9 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { 
-  Scenario, 
-  StageId, 
+import {
+  Scenario,
+  StageId,
   stages,
   generateScenarioChartData,
   generateScenarioBenefitsData,
@@ -30,6 +30,7 @@ import {
 } from "@/lib/scenarios";
 import { Info } from "lucide-react";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCompanyName } from "@/contexts/CompanyProfileContext";
 
 interface ScenarioChartProps {
   scenario: Scenario;
@@ -56,6 +57,7 @@ function SourceBadge({ source }: { source: string }) {
 }
 
 export function ScenarioCycleTimeChart({ scenario, stage, refreshKey }: ScenarioChartProps) {
+  const companyName = useCompanyName();
   const [data, setData] = useState(() => generateScenarioChartData(scenario, stage));
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export function ScenarioCycleTimeChart({ scenario, stage, refreshKey }: Scenario
         </div>
         <CardDescription className="flex items-center gap-2">
           Projected days from intake to approval
-          <SourceBadge source="NextEra Energy Annual Report 2024, Strategic Objectives" />
+          <SourceBadge source={`${companyName} Annual Report 2024, Strategic Objectives`} />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -139,6 +141,7 @@ export function ScenarioCycleTimeChart({ scenario, stage, refreshKey }: Scenario
 }
 
 export function ScenarioBenefitsChart({ scenario, stage, refreshKey }: ScenarioChartProps) {
+  const companyName = useCompanyName();
   const [data, setData] = useState(() => generateScenarioBenefitsData(scenario, stage));
 
   useEffect(() => {
@@ -161,7 +164,7 @@ export function ScenarioBenefitsChart({ scenario, stage, refreshKey }: ScenarioC
         </div>
         <CardDescription className="flex items-center gap-2">
           Forecasted vs. realized value (%)
-          <SourceBadge source="NextEra Energy Annual Report 2024, p.52" />
+          <SourceBadge source={`${companyName} Annual Report 2024, p.52`} />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -197,6 +200,7 @@ export function ScenarioBenefitsChart({ scenario, stage, refreshKey }: ScenarioC
 }
 
 export function ScenarioRiskChart({ scenario, stage, refreshKey }: ScenarioChartProps) {
+  const companyName = useCompanyName();
   const [data, setData] = useState(() => generateScenarioRiskData(scenario, stage));
 
   useEffect(() => {
@@ -217,7 +221,7 @@ export function ScenarioRiskChart({ scenario, stage, refreshKey }: ScenarioChart
         </div>
         <CardDescription className="flex items-center gap-2">
           Portfolio risk distribution
-          <SourceBadge source="NextEra Energy Annual Report 2024, Risk Section p.78" />
+          <SourceBadge source={`${companyName} Annual Report 2024, Risk Section p.78`} />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -262,6 +266,7 @@ export function ScenarioRiskChart({ scenario, stage, refreshKey }: ScenarioChart
 }
 
 export function ScenarioEfficiencyChart({ scenario, stage, refreshKey }: ScenarioChartProps) {
+  const companyName = useCompanyName();
   const [data, setData] = useState(() => generateScenarioEfficiencyData(scenario, stage));
 
   useEffect(() => {
@@ -284,7 +289,7 @@ export function ScenarioEfficiencyChart({ scenario, stage, refreshKey }: Scenari
         </div>
         <CardDescription className="flex items-center gap-2">
           Manual vs. automated processing
-          <SourceBadge source="NextEra Energy Annual Report 2024, p.23" />
+          <SourceBadge source={`${companyName} Annual Report 2024, p.23`} />
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -318,6 +323,7 @@ export function ScenarioEfficiencyChart({ scenario, stage, refreshKey }: Scenari
 }
 
 export function ScenarioGovernanceChart({ scenario, stage, refreshKey }: ScenarioChartProps) {
+  const companyName = useCompanyName();
   const [data, setData] = useState(() => generateScenarioGovernanceData(scenario, stage));
 
   useEffect(() => {
@@ -338,7 +344,7 @@ export function ScenarioGovernanceChart({ scenario, stage, refreshKey }: Scenari
         </div>
         <CardDescription className="flex items-center gap-2">
           Compliance across control gates
-          <SourceBadge source="NextEra Energy Annual Report 2024, Governance Section" />
+          <SourceBadge source={`${companyName} Annual Report 2024, Governance Section`} />
         </CardDescription>
       </CardHeader>
       <CardContent>

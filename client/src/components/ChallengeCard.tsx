@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCompanyName } from "@/contexts/CompanyProfileContext";
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -15,6 +16,7 @@ interface ChallengeCardProps {
 }
 
 export function ChallengeCard({ challenge, index, onDrillDown }: ChallengeCardProps) {
+  const companyName = useCompanyName();
   const Icon = challenge.icon;
   const [isOpen, setIsOpen] = useState(false);
 
@@ -268,7 +270,7 @@ export function ChallengeCard({ challenge, index, onDrillDown }: ChallengeCardPr
 
                   <div className="pt-4 border-t flex items-center gap-2 text-xs text-muted-foreground">
                     <Info size={12} />
-                    Data sourced from NextEra Energy Annual Report 2024
+                    Data sourced from {companyName} Annual Report 2024
                   </div>
                 </div>
               </ScrollArea>

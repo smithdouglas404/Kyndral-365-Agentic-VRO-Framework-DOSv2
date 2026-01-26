@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
+import {
   pmoProjects, vroPrograms, riskIssues,
   pmoSummary, vroSummary, riskSummary,
   PMOProject, VROProgram, RiskIssue, ProactiveAction, AISignal,
@@ -16,6 +16,7 @@ import {
 import { challenges, VROMetric } from "@/lib/data";
 import { type ProjectDependency } from "@/lib/projects";
 import { useEnrichedProjects } from "@/hooks/useProjects";
+import { useCompanyName } from "@/contexts/CompanyProfileContext";
 import { 
   Building2, TrendingUp, AlertTriangle, CheckCircle, Clock, 
   DollarSign, Brain, Users, Target, Sparkles, Shield,
@@ -94,21 +95,22 @@ function ViewFullDetailsButton({ projectId, onClose }: { projectId: string; onCl
 // ============================================================================
 // PROJECT DETAIL MODAL - Full AI Briefing with SAFe 6.0 Metrics
 // ============================================================================
-function ProjectDetailModal({ 
-  project, 
+function ProjectDetailModal({
+  project,
   program,
-  open, 
+  open,
   onClose,
   mode,
   onDrillDown
-}: { 
-  project?: PMOProject; 
+}: {
+  project?: PMOProject;
   program?: VROProgram;
-  open: boolean; 
+  open: boolean;
   onClose: () => void;
   mode: DataMode;
   onDrillDown?: (type: string, id: string) => void;
 }) {
+  const companyName = useCompanyName();
   const [actionsTaken, setActionsTaken] = useState<string[]>([]);
   
   // Escape key handler - must be before any conditional returns
@@ -199,7 +201,7 @@ function ProjectDetailModal({
                 <h2 className="text-xl font-bold">{item.name}</h2>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <FileText size={12} />
-                  Source: NextEra Energy Annual Report 2024, Climate & Nature Report 2024
+                  Source: {companyName} Annual Report 2024, Climate & Nature Report 2024
                 </p>
               </div>
               <ViewFullDetailsButton projectId={item.id} onClose={onClose} />

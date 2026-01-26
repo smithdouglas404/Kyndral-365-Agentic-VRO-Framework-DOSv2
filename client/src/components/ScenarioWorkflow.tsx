@@ -18,6 +18,7 @@ const scenarios: Scenario[] = [];
 const stages: Array<{ id: StageId; name: string }> = [];
 const getKPIValueForStage = (_k: string, _s: StageId) => "";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useCompanyName } from "@/contexts/CompanyProfileContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -32,6 +33,7 @@ interface ScenarioWorkflowProps {
 }
 
 export function ScenarioWorkflow({ onScenarioChange, initialScenario, initialStage }: ScenarioWorkflowProps) {
+  const companyName = useCompanyName();
   const [selectedScenario, setSelectedScenario] = useState<Scenario>(initialScenario || scenarios[0]);
   const [activeStage, setActiveStage] = useState<StageId>(initialStage || "design");
 
@@ -240,7 +242,7 @@ export function ScenarioWorkflow({ onScenarioChange, initialScenario, initialSta
                 {selectedScenario.name} — {stages.find(s => s.id === activeStage)?.name} Phase
               </CardTitle>
               <CardDescription>
-                Key Performance Indicators with NextEra Energy Annual Report benchmarks
+                Key Performance Indicators with {companyName} Annual Report benchmarks
               </CardDescription>
             </div>
             <Badge 
