@@ -76,7 +76,7 @@ export default function RiskCenter() {
                 <Shield className="h-8 w-8" />
                 <h1 className="text-3xl font-bold" data-testid="text-page-title">Risk Command Center</h1>
               </div>
-              <p className="text-slate-300 mt-1">NextEra Risk Management Supplement 2024 | CRO: {riskData.overview.cro}</p>
+              <p className="text-slate-300 mt-1">Enterprise Risk Management Supplement 2024 | CRO: {riskData.overview.cro}</p>
             </div>
             <div className="text-right">
               <p className="text-slate-300 text-sm">Largest Exposures</p>
@@ -308,7 +308,7 @@ export default function RiskCenter() {
                   <p className="text-gray-700 italic">
                     "The deterioration of the health of ecosystems on which we and all other species depend is the biggest challenge our generation faces. The potential physical impacts resulting from the changing climate, along with the necessary mitigating actions, have wide-ranging impacts."
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">— NextEra Risk Management Supplement 2024</p>
+                  <p className="text-sm text-gray-500 mt-2">— Enterprise Risk Management Supplement 2024</p>
                 </div>
               </CardContent>
             </Card>

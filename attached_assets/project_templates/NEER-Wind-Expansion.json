@@ -1,9 +1,9 @@
 {
   "id": "nee-neer-001",
-  "name": "NEER Wind Portfolio Expansion 2024-2027",
-  "bu": "NextEra Energy Resources",
+  "name": "Renewables Division Wind Portfolio Expansion 2024-2027",
+  "bu": "Renewable Energy Division",
   "division": "Wind Development",
-  "description": "Expansion of NEER's wind generation portfolio as part of the 36.5-46.5 GW renewable buildout plan 2024-2027. Focus on Texas ERCOT, SPP, and MISO markets with repowering of existing assets.",
+  "description": "Expansion of Renewables Division's wind generation portfolio as part of the 36.5-46.5 GW renewable buildout plan 2024-2027. Focus on Texas ERCOT, SPP, and MISO markets with repowering of existing assets.",
   "expectedROI": "$890M projected EBITDA contribution",
   "roiValue": 890,
   "priority": "critical",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 12,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-101",
+    "epicId": "EPIC-Renewables Division-101",
     "epicName": "Wind Growth Initiative",
     "epicProgress": 35,
     "epicWsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 7, "jobSize": 10, "score": 25 },
@@ -85,7 +85,7 @@
     { "id": "dep-wind-002", "name": "NEET Transmission", "type": "related", "status": "yellow", "description": "New transmission lines for delivery" }
   ],
   "stakeholders": [
-    { "id": "sh-wind-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-wind-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-wind-002", "name": "Major Utility Offtakers", "role": "PPA Counterparties", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-wind-003", "name": "Mark Hickson", "role": "EVP Development", "department": "Development", "influence": "high", "interest": "high" },
     { "id": "sh-wind-004", "name": "Institutional Investors", "role": "Tax Equity Partners", "department": "External", "influence": "medium", "interest": "high" }

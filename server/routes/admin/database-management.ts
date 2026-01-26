@@ -247,7 +247,7 @@ async function seedKPIs(storage: IStorage) {
 export function registerDatabaseManagementRoutes(app: Express, storage: IStorage): void {
   /**
    * POST /api/admin/seed-database
-   * Seeds the database with NextEra Energy test data
+   * Seeds the database with Enterprise test data
    */
   app.post('/api/admin/seed-database', async (req, res) => {
     try {

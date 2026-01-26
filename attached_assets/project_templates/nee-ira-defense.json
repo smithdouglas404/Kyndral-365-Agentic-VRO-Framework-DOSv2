@@ -2,7 +2,7 @@
   "project": {
     "id": "nee-policy-001",
     "name": "IRA Tax Credit Defense & Policy Strategy",
-    "description": "With the Trump administration and congressional Republicans targeting IRA repeal to offset TCJA extension costs, NextEra has committed to defending clean energy tax incentives. IRA green energy tax credits are projected to be worth $1.16 trillion (2025-2034) across the industry, and tax credits can represent 30-50% of project economics for renewable developments. On January 20, 2025, a Trump executive order halted new wind energy permits. While business-facing credits like 45Q carbon capture and 45V hydrogen have bipartisan support and are likely safe, consumer credits are more vulnerable. NextEra's strategy includes demonstrating that renewables remain competitive even without subsidies in most regions, while diversifying to natural gas partnerships and nuclear to hedge policy risk. Full repeal is unlikely, but partial rollback is possible via budget reconciliation.",
+    "description": "With the Trump administration and congressional Republicans targeting IRA repeal to offset TCJA extension costs, Enterprise has committed to defending clean energy tax incentives. IRA green energy tax credits are projected to be worth $1.16 trillion (2025-2034) across the industry, and tax credits can represent 30-50% of project economics for renewable developments. On January 20, 2025, a Trump executive order halted new wind energy permits. While business-facing credits like 45Q carbon capture and 45V hydrogen have bipartisan support and are likely safe, consumer credits are more vulnerable. Enterprise's strategy includes demonstrating that renewables remain competitive even without subsidies in most regions, while diversifying to natural gas partnerships and nuclear to hedge policy risk. Full repeal is unlikely, but partial rollback is possible via budget reconciliation.",
     "status": "amber",
     "businessUnitId": "Corporate & Other",
     "startDate": "2025-01-20",
@@ -29,7 +29,7 @@
     {
       "id": "feat-policy-001",
       "name": "Congressional Advocacy Campaign",
-      "description": "Coordinated advocacy with Republican lawmakers in districts benefiting from NextEra renewable investments and manufacturing jobs",
+      "description": "Coordinated advocacy with Republican lawmakers in districts benefiting from Enterprise renewable investments and manufacturing jobs",
       "status": "implementing",
       "storyPoints": "89",
       "completedPoints": "28",

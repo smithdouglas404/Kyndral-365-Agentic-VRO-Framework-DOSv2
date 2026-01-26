@@ -247,9 +247,9 @@ Focus on energy industry issues: grid reliability, renewable development, storm 
     console.error('Failed to generate executive insights:', error);
     
     return {
-      headline: "NextEra portfolio on track with grid modernization and renewable expansion initiatives",
+      headline: "Enterprise portfolio on track with grid modernization and renewable expansion initiatives",
       portfolioHealth: 'amber',
-      healthSummary: "The enterprise transformation portfolio is progressing with FPL storm hardening and NEER solar expansion as priority initiatives. Some areas require executive attention to maintain momentum ahead of hurricane season.",
+      healthSummary: "The enterprise transformation portfolio is progressing with Regional Utility storm hardening and Renewables Division solar expansion as priority initiatives. Some areas require executive attention to maintain momentum ahead of hurricane season.",
       keyRisks: [
         {
           title: "Storm Hardening Timeline Risk",

@@ -17,7 +17,7 @@ function NavBar() {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" data-testid="link-home" />
+          <img src={nexteraLogo} alt="Enterprise" className="h-10 cursor-pointer" data-testid="link-home" />
         </Link>
       </div>
       <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function COPDashboard() {
       <footer className="mt-12 py-8 border-t border-border bg-white px-8">
         <div className="container mx-auto">
           <div className="flex justify-between items-center text-sm text-muted-foreground">
-            <p>© 2026 NextEra Energy. Internal Use Only.</p>
+            <p>© 2026 Enterprise. Internal Use Only.</p>
             <p className="text-xs">
               COP updates in real-time from Battle Rhythm events
             </p>

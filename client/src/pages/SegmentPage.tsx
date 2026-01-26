@@ -53,12 +53,12 @@ function formatKpiValue(value: string | number | null, unit: string | null): str
   return `${numValue}${unitStr}`;
 }
 
-// Segment name mapping for filtering enriched projects (NextEra SEC segment names)
+// Segment name mapping for filtering enriched projects (Enterprise SEC segment names)
 const segmentNameMapping: Record<string, string[]> = {
-  'fpl': ['FPL', 'Florida Power & Light'],
-  'neer': ['NEER', 'NextEra Energy Resources'],
+  'fpl': ['Regional Utility', 'Regional Utility'],
+  'neer': ['Renewables Division', 'Renewable Energy Division'],
   'corporate-other': ['Corporate and Other', 'Corporate & Other'],
-  'default': ['FPL', 'NEER', 'Corporate and Other']
+  'default': ['Regional Utility', 'Renewables Division', 'Corporate and Other']
 };
 
 // Segment ID to Portfolio ID mapping for VRO/PMO metrics

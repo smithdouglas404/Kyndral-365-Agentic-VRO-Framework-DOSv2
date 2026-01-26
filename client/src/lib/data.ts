@@ -89,7 +89,7 @@ export const challenges: Challenge[] = [
     icon: Target,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["certainty", "prioritization"],
-    strategicAlignment: ["Simplification", "NextEra Energy Resources"]
+    strategicAlignment: ["Simplification", "Renewable Energy Division"]
   },
   {
     id: "agility",
@@ -140,7 +140,7 @@ export const challenges: Challenge[] = [
     icon: ShieldCheck,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["planning", "visibility"],
-    strategicAlignment: ["Portfolio Optimization", "NextEra Energy Resources"]
+    strategicAlignment: ["Portfolio Optimization", "Renewable Energy Division"]
   },
   {
     id: "visibility",

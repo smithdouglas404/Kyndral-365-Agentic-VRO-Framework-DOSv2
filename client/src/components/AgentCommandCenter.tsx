@@ -103,7 +103,7 @@ const initialInterventions: RiskIntervention[] = [
     title: 'Regulatory Deadline Risk',
     description: 'NERC CIP compliance may miss Q1 2025 deadline based on current velocity.',
     projectId: 'nee-corp-001',
-    projectName: 'NextEra Cybersecurity Enhancement',
+    projectName: 'Enterprise Cybersecurity Enhancement',
     confidence: 82,
     suggestedAction: 'Add 2 contractors for TCFD feature, parallel track with Net-Zero Tracker',
     impact: 'Regulatory compliance maintained',
@@ -118,7 +118,7 @@ const initialInterventions: RiskIntervention[] = [
     title: 'Key Resource Allocation Conflict',
     description: 'Lead grid engineer assigned to 3 overlapping projects with 150% allocation.',
     projectId: 'nee-fpl-001',
-    projectName: 'FPL Grid Modernization & Automation',
+    projectName: 'Regional Utility Grid Modernization & Automation',
     confidence: 78,
     suggestedAction: 'Reassign secondary architect from Client Portal; defer non-critical design reviews',
     impact: 'Prevents burnout, maintains quality',
@@ -131,9 +131,9 @@ const initialInterventions: RiskIntervention[] = [
     type: 'quality',
     severity: 'high',
     title: 'Technical Debt Threshold Exceeded',
-    description: 'FPL Smart Meter Data Analytics has 23 critical code quality issues blocking deployment.',
+    description: 'Regional Utility Smart Meter Data Analytics has 23 critical code quality issues blocking deployment.',
     projectId: 'nee-fpl-002',
-    projectName: 'FPL Advanced Metering Infrastructure',
+    projectName: 'Regional Utility Advanced Metering Infrastructure',
     confidence: 91,
     suggestedAction: 'Allocate 1 sprint for tech debt remediation before next feature release',
     impact: 'Reduces production incident risk by 65%',
@@ -154,13 +154,13 @@ const agentDiscussion: AgentMessage[] = [
 ];
 
 const projects = [
-  { id: 'nee-fpl-001', name: 'FPL Grid Modernization & Automation', status: 'amber' },
-  { id: 'nee-fpl-002', name: 'FPL Advanced Metering Infrastructure', status: 'green' },
-  { id: 'nee-fpl-003', name: 'FPL SolarTogether Phase III', status: 'green' },
-  { id: 'nee-fpl-004', name: 'FPL Storm Protection Plan', status: 'amber' },
-  { id: 'nee-neer-001', name: 'NEER Wind Portfolio Expansion', status: 'green' },
-  { id: 'nee-neer-002', name: 'NEER Battery Energy Storage Systems', status: 'green' },
-  { id: 'nee-corp-001', name: 'NextEra Cybersecurity Enhancement', status: 'green' },
+  { id: 'nee-fpl-001', name: 'Regional Utility Grid Modernization & Automation', status: 'amber' },
+  { id: 'nee-fpl-002', name: 'Regional Utility Advanced Metering Infrastructure', status: 'green' },
+  { id: 'nee-fpl-003', name: 'Regional Utility SolarTogether Phase III', status: 'green' },
+  { id: 'nee-fpl-004', name: 'Regional Utility Storm Protection Plan', status: 'amber' },
+  { id: 'nee-neer-001', name: 'Renewables Division Wind Portfolio Expansion', status: 'green' },
+  { id: 'nee-neer-002', name: 'Renewables Division Battery Energy Storage Systems', status: 'green' },
+  { id: 'nee-corp-001', name: 'Enterprise Cybersecurity Enhancement', status: 'green' },
   { id: 'nee-corp-002', name: 'Google Data Center Partnership', status: 'green' }
 ];
 

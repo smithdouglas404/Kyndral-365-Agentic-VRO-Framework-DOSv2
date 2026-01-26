@@ -2,9 +2,9 @@
   "project": {
     "id": "nee-meta-001",
     "name": "Meta Clean Energy Partnership",
-    "description": "Announced December 8, 2025, NextEra Energy signed a significant clean energy partnership with Meta for approximately 2.5 GW of capacity. The deal includes 11 power purchase agreements (PPAs) and 2 energy storage agreements (ESAs) deployed across ERCOT, SPP, MISO, and New Mexico markets. Four integrated solar and battery storage projects are being developed in New Mexico specifically for Meta data centers. Projects are scheduled to come online between 2026 and 2028, adding to nearly 500 MW of projects Meta previously contracted with NextEra. This partnership supports Meta's 100% renewable energy commitment for its data center operations and represents one of the largest corporate renewable energy deals in the industry.",
+    "description": "Announced December 8, 2025, Enterprise signed a significant clean energy partnership with Meta for approximately 2.5 GW of capacity. The deal includes 11 power purchase agreements (PPAs) and 2 energy storage agreements (ESAs) deployed across ERCOT, SPP, MISO, and New Mexico markets. Four integrated solar and battery storage projects are being developed in New Mexico specifically for Meta data centers. Projects are scheduled to come online between 2026 and 2028, adding to nearly 500 MW of projects Meta previously contracted with Enterprise. This partnership supports Meta's 100% renewable energy commitment for its data center operations and represents one of the largest corporate renewable energy deals in the industry.",
     "status": "amber",
-    "businessUnitId": "NextEra Energy Resources",
+    "businessUnitId": "Renewable Energy Division",
     "startDate": "2025-12-08",
     "endDate": "2028-12-31",
     "priority": "critical",
@@ -110,7 +110,7 @@
       "name": "Marcus Williams",
       "role": "Project Director",
       "allocation": "100",
-      "team": "NEER Development",
+      "team": "Renewables Division Development",
       "skills": ["Project Management", "Solar Development", "Commercial Operations"],
       "costRate": "1400"
     },
@@ -185,7 +185,7 @@
     "paybackMonths": "60"
   },
   "stakeholders": [
-    { "id": "sh-meta-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-meta-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-meta-002", "name": "Meta", "role": "Strategic Partner & Offtaker", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-meta-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
     { "id": "sh-meta-004", "name": "PNM", "role": "Transmission Provider", "department": "External", "influence": "medium", "interest": "medium" }

@@ -2,7 +2,7 @@
 // NEXTERA ENERGY COMPREHENSIVE DATA - FROM OFFICIAL FILINGS
 // Primary Sources:
 //   - Form 10-K 2024 (SEC Filing, filed January 2025)
-//   - NextEra Energy Annual Report 2024
+//   - Enterprise Annual Report 2024
 //   - Investor Presentations Q4 2024
 // SEC CIK: 0000753308
 // ============================================================================
@@ -23,7 +23,7 @@ export const lgCompanyOverview = {
   cfo: "Kirk Crews",
   cro: "Rebecca Kujawa",
   climateDirector: "Eric Silagy",
-  source: "NextEra Energy Form 10-K 2024 (SEC Filing)",
+  source: "Enterprise Form 10-K 2024 (SEC Filing)",
   sourceUrl: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000753308"
 };
 
@@ -96,18 +96,18 @@ export interface SegmentRisk {
 // Legacy alias for backward compatibility
 export type DivisionRisk = SegmentRisk;
 
-// NextEra Energy Reportable Segments (per SEC 10-K filings)
+// Enterprise Reportable Segments (per SEC 10-K filings)
 export const segments: SegmentData[] = [
   {
     id: "fpl",
-    name: "FPL",
-    abbreviation: "FPL",
+    name: "Regional Utility",
+    abbreviation: "Regional Utility",
     ceo: "Armando Pimentel",
     profit2023: 4850,
     profit2024: 5200,
     changePercent: 7,
-    description: "Florida Power & Light Company - Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
-    color: "#0072CE", // NextEra Blue
+    description: "Regional Utility Company - Rate-regulated electric utility serving Florida. One of the largest electric utilities in the U.S. with 35,052 MW net generating capacity.",
+    color: "#0072CE", // Enterprise Blue
     kpis: [
       { name: "Operating Revenue", value2023: 17200, value2024: 18500, target2025: 19500, unit: "$m", trend: "up", status: "on-track" },
       { name: "Net Generating Capacity", value2023: 33500, value2024: 35052, target2025: 37000, unit: "MW", trend: "up", status: "on-track" },
@@ -146,7 +146,7 @@ export const segments: SegmentData[] = [
         expectedROI: "$120m annual efficiency",
         priority: "high",
         status: "proposed",
-        aiRecommendation: "High probability of success based on similar implementations in NEER",
+        aiRecommendation: "High probability of success based on similar implementations in Renewables Division",
         dependencies: [
           { projectId: "fpl-smart-meters", projectName: "Advanced Metering Infrastructure", type: "related", health: "green", description: "Shares data pipeline for grid analytics" }
         ]
@@ -160,7 +160,7 @@ export const segments: SegmentData[] = [
         status: "in-progress",
         aiRecommendation: "Current deployment showing 15% faster outage detection - recommend expansion",
         dependencies: [
-          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocked-by", health: "yellow", description: "Requires data infrastructure from NEER" }
+          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocked-by", health: "yellow", description: "Requires data infrastructure from Renewables Division" }
         ]
       }
     ],
@@ -171,14 +171,14 @@ export const segments: SegmentData[] = [
   },
   {
     id: "neer",
-    name: "NEER",
-    abbreviation: "NEER",
+    name: "Renewables Division",
+    abbreviation: "Renewables Division",
     ceo: "Rebecca Kujawa",
     profit2023: 2100,
     profit2024: 2350,
     changePercent: 12,
-    description: "NextEra Energy Resources, LLC - World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
-    color: "#00A651", // NextEra Green
+    description: "Renewable Energy Division, LLC - World's largest generator of renewable energy from wind and solar. Leading battery storage provider with 33,410 MW net generating capacity.",
+    color: "#00A651", // Enterprise Green
     kpis: [
       { name: "Operating Revenue", value2023: 6200, value2024: 6800, target2025: 7500, unit: "$m", trend: "up", status: "on-track" },
       { name: "Wind Capacity", value2023: 21000, value2024: 22500, target2025: 25000, unit: "MW", trend: "up", status: "on-track" },
@@ -247,7 +247,7 @@ export const segments: SegmentData[] = [
     profit2023: 450,
     profit2024: 520,
     changePercent: 16,
-    description: "Corporate functions, NextEra Energy Transmission (NEET), and strategic investments supporting NextEra's growth.",
+    description: "Corporate functions, Enterprise Transmission (NEET), and strategic investments supporting Enterprise's growth.",
     color: "#424242", // Grey-700
     kpis: [
       { name: "NEET Rate Base", value2023: 2.4, value2024: 2.7, target2025: 3.2, unit: "$bn", trend: "up", status: "on-track" },
@@ -278,7 +278,7 @@ export const segments: SegmentData[] = [
         status: "in-progress",
         aiRecommendation: "Digital initiatives showing 25% cost reduction - expand program",
         dependencies: [
-          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocked-by", health: "green", description: "Leverages data infrastructure from NEER" }
+          { projectId: "neer-data-platform", projectName: "Enterprise Data Platform", type: "blocked-by", health: "green", description: "Leverages data infrastructure from Renewables Division" }
         ]
       }
     ],
@@ -293,7 +293,7 @@ export const segments: SegmentData[] = [
 export const divisions = segments;
 
 // ============================================================================
-// CLIMATE & SUSTAINABILITY DATA - From NextEra Energy Reports 2024
+// CLIMATE & SUSTAINABILITY DATA - From Enterprise Reports 2024
 // ============================================================================
 
 export const climateData = {
@@ -306,7 +306,7 @@ export const climateData = {
     transitionFinance: { value: 12, description: "Clean energy investment annually" },
     netZeroTargetYear: 2045,
     sbtiValidated: true,
-    source: "NextEra Energy SASB Data Appendix 2024"
+    source: "Enterprise SASB Data Appendix 2024"
   },
   
   // SASB Emissions Data 2024
@@ -317,7 +317,7 @@ export const climateData = {
     co2IntensityRate: { value: 366, unit: "lbs/MWh", description: "CO2 intensity for owned generation" },
     methaneEmissions: { value: 123000, unit: "metric tons CO2e", description: "Methane emissions from operations" },
     totalGHG: { value: 112160000, unit: "metric tons CO2e", description: "Total Scope 1+2+3" },
-    source: "NextEra Energy SASB Data Appendix 2024"
+    source: "Enterprise SASB Data Appendix 2024"
   },
   
   // Operational emissions
@@ -332,7 +332,7 @@ export const climateData = {
     viztaPlatformAssets: { value: 35855, description: "MW of renewable capacity managed" },
     iesProjects: { count: 127, description: "Integrated energy solutions projects" },
     substationAutomation: { value: 99, unit: "%", description: "Substations with advanced automation" },
-    source: "NextEra Energy SASB Data Appendix 2024"
+    source: "Enterprise SASB Data Appendix 2024"
   },
   
   // Grid reliability metrics
@@ -341,7 +341,7 @@ export const climateData = {
     saifi: { value: 0.68, unit: "interruptions", description: "System Average Interruption Frequency Index" },
     transmissionReliability: { value: 99.98, unit: "%", description: "Transmission system reliability" },
     restorationTime: { value: 2.1, unit: "hours", description: "Average restoration time after outages" },
-    source: "NextEra Energy SASB Data Appendix 2024"
+    source: "Enterprise SASB Data Appendix 2024"
   },
   
   // Targets and commitments
@@ -352,7 +352,7 @@ export const climateData = {
     portfolioTemperature: { current: 1.8, target: 1.5, unit: "°C", description: "Implied portfolio temperature alignment" },
     scope3OccupierReduction: { progress: 45, target: 70, by: 2030, baseYear: 2019 },
     supplierEngagement: { progress: 62, target: 100, by: 2026, description: "Suppliers with science-based targets" },
-    source: "NextEra Energy Sustainability Report 2024"
+    source: "Enterprise Sustainability Report 2024"
   },
   
   // Clean energy portfolio - SASB 2024
@@ -364,7 +364,7 @@ export const climateData = {
     floridaSolar: { description: "One of the largest utility solar programs in U.S.", installed: "4,500 MW" },
     hydrogenProjects: { projects: 5, description: "Green hydrogen pilot initiatives" },
     renewablePercentage: { value: 52, unit: "%", description: "Renewable share of total capacity" },
-    source: "NextEra Energy SASB Data Appendix 2024"
+    source: "Enterprise SASB Data Appendix 2024"
   },
   
   // Workforce metrics - SASB 2024
@@ -376,7 +376,7 @@ export const climateData = {
     ltir: { value: 0.08, description: "Lost Time Incident Rate" },
     fatalities: { value: 0, description: "Workplace fatalities in 2024" },
     trainingHours: { value: 42, unit: "hours/employee", description: "Average training hours per employee" },
-    source: "NextEra Energy SASB Data Appendix 2024"
+    source: "Enterprise SASB Data Appendix 2024"
   },
   
   // Climate context
@@ -395,7 +395,7 @@ export const climateData = {
     manateeProtection: { projects: 12, description: "Manatee habitat protection initiatives" },
     waterRecycled: { value: 78, unit: "%", description: "Water recycled/reused in operations" },
     hazardousWasteRecycled: { value: 92, unit: "%", description: "Hazardous waste recycled or treated" },
-    source: "NextEra Energy Environmental Report 2024"
+    source: "Enterprise Environmental Report 2024"
   },
   
   // Grid infrastructure
@@ -417,7 +417,7 @@ export const riskData = {
     measurementBasis: "Enterprise risk capital",
     cro: "Rebecca Kujawa",
     philosophy: "Our risk management approach supports strategic growth while protecting stakeholder value",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   
   // Enterprise Risk Governance Framework
@@ -426,7 +426,7 @@ export const riskData = {
       line: 1, 
       name: "Reportable Segments", 
       role: "Operational risk ownership within business units",
-      accountable: "Managing day-to-day risks per enterprise risk policies (FPL, NEER, Corporate)"
+      accountable: "Managing day-to-day risks per enterprise risk policies (Regional Utility, Renewables Division, Corporate)"
     },
     { 
       line: 2, 
@@ -442,7 +442,7 @@ export const riskData = {
     }
   ],
   
-  // Risk Categories with full descriptions - Based on NextEra Energy 10-K 2024 Risk Factors
+  // Risk Categories with full descriptions - Based on Enterprise 10-K 2024 Risk Factors
   categories: [
     {
       id: "operational",
@@ -453,13 +453,13 @@ export const riskData = {
       subRisks: [
         {
           name: "Hurricane and severe weather exposure",
-          description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event. 2024 storms Milton and Helene required significant recovery efforts.",
+          description: "Regional Utility service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event. 2024 storms Milton and Helene required significant recovery efforts.",
           severity: "high",
           trend: "worsening"
         },
         {
           name: "Project execution and development",
-          description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
+          description: "Renewables Division's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
           severity: "high",
           trend: "stable"
         },
@@ -486,13 +486,13 @@ export const riskData = {
       subRisks: [
         {
           name: "Rate case outcomes",
-          description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE and capital recovery. Current ROE range 10.15-11.15%.",
+          description: "Regional Utility rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE and capital recovery. Current ROE range 10.15-11.15%.",
           severity: "high",
           trend: "stable"
         },
         {
           name: "Federal energy policy changes",
-          description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact NEER economics. Policy changes or repeal could affect project returns.",
+          description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact Renewables Division economics. Policy changes or repeal could affect project returns.",
           severity: "high",
           trend: "volatile"
         },
@@ -519,19 +519,19 @@ export const riskData = {
       subRisks: [
         {
           name: "Interest rate exposure",
-          description: "Significant capital investment program ($8.2B annual at FPL) requires debt financing. Rising rates increase borrowing costs and reduce project economics.",
+          description: "Significant capital investment program ($8.2B annual at Regional Utility) requires debt financing. Rising rates increase borrowing costs and reduce project economics.",
           severity: "high",
           trend: "volatile"
         },
         {
           name: "Natural gas price volatility",
-          description: "FPL generating fleet includes significant natural gas capacity. Fuel cost pass-through mechanism provides some protection but timing differences create exposure.",
+          description: "Regional Utility generating fleet includes significant natural gas capacity. Fuel cost pass-through mechanism provides some protection but timing differences create exposure.",
           severity: "medium",
           trend: "improving"
         },
         {
           name: "Power market prices",
-          description: "NEER merchant exposure in deregulated markets. Wholesale power prices affect contracted renewables economics and battery storage dispatch value.",
+          description: "Renewables Division merchant exposure in deregulated markets. Wholesale power prices affect contracted renewables economics and battery storage dispatch value.",
           severity: "medium",
           trend: "stable"
         },
@@ -608,7 +608,7 @@ export const riskData = {
   // Emerging risks dashboard
   emergingRisks: {
     dashboard: true,
-    description: "Captures views and inputs from across NextEra Energy to monitor likelihood of emerging risks on enterprise strategy",
+    description: "Captures views and inputs from across Enterprise to monitor likelihood of emerging risks on enterprise strategy",
     keyEmergingRisks: [
       { name: "AI and Automation", impact: "high", probability: "high", horizon: "1-3 years" },
       { name: "Geopolitical Instability", impact: "high", probability: "medium", horizon: "1-2 years" },
@@ -616,7 +616,7 @@ export const riskData = {
       { name: "Grid Reliability", impact: "high", probability: "medium", horizon: "2-5 years" },
       { name: "Regulatory Divergence", impact: "medium", probability: "medium", horizon: "2-5 years" }
     ],
-    source: "NextEra Energy Risk Management Report 2024, p.2"
+    source: "Enterprise Risk Management Report 2024, p.2"
   },
   
   // Climate risk breakdown
@@ -638,7 +638,7 @@ export const riskData = {
     }
   ],
   
-  source: "NextEra Energy Risk Management Report 2024"
+  source: "Enterprise Risk Management Report 2024"
 };
 
 // ============================================================================
@@ -677,7 +677,7 @@ export const aiAlerts: AIAlert[] = [
     value: "85%",
     recommendation: "Pre-position additional contractor crews and mobile substations in South Florida. Consider expanding mutual aid agreements.",
     targetPersona: "COO - Eric Silagy",
-    division: "Florida Power & Light",
+    division: "Regional Utility",
     timestamp: new Date(),
     confidence: 82,
     source: "AI Weather Model + NOAA Hurricane Outlook 2025",
@@ -692,8 +692,8 @@ export const aiAlerts: AIAlert[] = [
     metric: "Project Execution",
     value: "520 MW at risk",
     recommendation: "Escalate with ERCOT, consider alternative interconnection points, or adjust 2025 capacity guidance.",
-    targetPersona: "NEER President",
-    division: "NextEra Energy Resources",
+    targetPersona: "Renewables Division President",
+    division: "Renewable Energy Division",
     timestamp: new Date(Date.now() - 3600000),
     confidence: 99,
     source: "ERCOT Interconnection Queue Monitoring",
@@ -709,7 +709,7 @@ export const aiAlerts: AIAlert[] = [
     value: "$4.2M/month potential",
     recommendation: "Review battery dispatch algorithms. Consider implementing real-time pricing optimization across 3,379 MW storage fleet.",
     targetPersona: "VP Trading Operations",
-    division: "NextEra Energy Resources",
+    division: "Renewable Energy Division",
     timestamp: new Date(Date.now() - 7200000),
     confidence: 78,
     source: "AI Market Price Analysis + CAISO Data",
@@ -724,8 +724,8 @@ export const aiAlerts: AIAlert[] = [
     metric: "Pipeline Value",
     value: "$1.8B potential",
     recommendation: "Prioritize SoBRA filing preparation. Strong rate base growth and customer demand metrics support expedited approval.",
-    targetPersona: "FPL President - Eric Silagy",
-    division: "Florida Power & Light",
+    targetPersona: "Regional Utility President - Eric Silagy",
+    division: "Regional Utility",
     timestamp: new Date(Date.now() - 1800000),
     confidence: 86,
     source: "AI Regulatory Analysis + Florida PSC Filings",
@@ -741,7 +741,7 @@ export const aiAlerts: AIAlert[] = [
     value: "+8% YoY",
     recommendation: "Continue grid modernization communications. Proactive outage notification reducing complaint volume.",
     targetPersona: "VP Customer Experience",
-    division: "Florida Power & Light",
+    division: "Regional Utility",
     timestamp: new Date(Date.now() - 5400000),
     confidence: 91,
     source: "Voice of Customer NLP Analysis + JD Power Survey",
@@ -752,10 +752,10 @@ export const aiAlerts: AIAlert[] = [
     type: "collaboration",
     severity: "warning",
     title: "Cross-Segment Coordination Required",
-    description: "NEET transmission projects dependent on FPL substation upgrades showing schedule misalignment",
+    description: "NEET transmission projects dependent on Regional Utility substation upgrades showing schedule misalignment",
     metric: "Project Alignment",
     value: "3 projects affected",
-    recommendation: "Schedule cross-segment sync between FPL, NEET, and NEER engineering leadership.",
+    recommendation: "Schedule cross-segment sync between Regional Utility, NEET, and Renewables Division engineering leadership.",
     targetPersona: "CEO - John Ketchum",
     division: "Corporate & Other",
     timestamp: new Date(Date.now() - 10800000),
@@ -774,7 +774,7 @@ export const industryBenchmarks = {
     totalCapacity: 304, // GW
     totalProjects: 245,
     competitors: [
-      { name: "NextEra Energy", volume: 68.5, transactions: 42, share: 22.5, color: "#0072CE" },
+      { name: "Enterprise", volume: 68.5, transactions: 42, share: 22.5, color: "#0072CE" },
       { name: "Duke Energy", volume: 52.4, transactions: 35, share: 17.2, color: "#334155" },
       { name: "Southern Company", volume: 46.2, transactions: 38, share: 15.2, color: "#f59e0b" },
       { name: "Dominion Energy", volume: 30.8, transactions: 28, share: 10.1, color: "#6366f1" },
@@ -786,7 +786,7 @@ export const industryBenchmarks = {
   
   renewableCapacity2024: {
     competitors: [
-      { name: "NextEra Energy", capacity: 68.5, esgRating: "AAA", sustainalytics: 92 },
+      { name: "Enterprise", capacity: 68.5, esgRating: "AAA", sustainalytics: 92 },
       { name: "Duke Energy", capacity: 52.4, esgRating: "AA", sustainalytics: 78 },
       { name: "Southern Company", capacity: 46.2, esgRating: "AA", sustainalytics: 75 },
       { name: "Dominion Energy", capacity: 30.8, esgRating: "A", sustainalytics: 72 },
@@ -797,7 +797,7 @@ export const industryBenchmarks = {
   
   financialStrength2024: {
     competitors: [
-      { name: "NextEra Energy", ratio: 185, color: "#0072CE" },
+      { name: "Enterprise", ratio: 185, color: "#0072CE" },
       { name: "Duke Energy", ratio: 165, color: "#f59e0b" },
       { name: "Southern Company", ratio: 158, color: "#6366f1" },
       { name: "Dominion Energy", ratio: 142, color: "#10b981" }

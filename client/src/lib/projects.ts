@@ -81,14 +81,14 @@ export interface EnrichedProject {
 
 export const enrichedProjects: EnrichedProject[] = [
   // ============================================================================
-  // FLORIDA POWER & LIGHT (FPL) - 4 Projects
-  // Source: NextEra Energy Annual Report 2024, 10-K Filing
+  // FLORIDA POWER & LIGHT (Regional Utility) - 4 Projects
+  // Source: Enterprise Annual Report 2024, 10-K Filing
   // ============================================================================
   {
     id: "pmo-fpl-001",
     name: "Grid Modernization & Automation",
-    bu: "Florida Power & Light",
-    description: "Deploying AI-powered grid management system with automated switching, real-time load balancing, and predictive outage prevention. Target: reduce outage duration from 30 to 5 minutes. Part of $8.2bn FPL capital investment program.",
+    bu: "Regional Utility",
+    description: "Deploying AI-powered grid management system with automated switching, real-time load balancing, and predictive outage prevention. Target: reduce outage duration from 30 to 5 minutes. Part of $8.2bn Regional Utility capital investment program.",
     expectedROI: "$120m annual efficiency",
     roiValue: 120,
     priority: "critical",
@@ -104,7 +104,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 82,
       flowEfficiency: 68,
       currentPI: "PI 24.4",
-      epicId: "EPIC-FPL-101",
+      epicId: "EPIC-Regional Utility-101",
       epicName: "Grid Resilience Initiative",
       epicProgress: 55,
       okr: { objective: "Reduce outage duration by 80%", keyResult: "Achieve 5-minute average restoration", progress: 45 },
@@ -129,8 +129,8 @@ export const enrichedProjects: EnrichedProject[] = [
   {
     id: "pmo-fpl-002",
     name: "Advanced Metering Infrastructure Expansion",
-    bu: "Florida Power & Light",
-    description: "Deploying next-generation smart meters with real-time analytics across 6M+ customer accounts. Enables demand response, outage detection, and energy efficiency programs. Supports FPL's 99.98% reliability target.",
+    bu: "Regional Utility",
+    description: "Deploying next-generation smart meters with real-time analytics across 6M+ customer accounts. Enables demand response, outage detection, and energy efficiency programs. Supports Regional Utility's 99.98% reliability target.",
     expectedROI: "$85m operational savings",
     roiValue: 85,
     priority: "high",
@@ -146,7 +146,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 91,
       flowEfficiency: 78,
       currentPI: "PI 25.1",
-      epicId: "EPIC-FPL-102",
+      epicId: "EPIC-Regional Utility-102",
       epicName: "Customer Experience Modernization",
       epicProgress: 85,
       okr: { objective: "Achieve 100% smart meter coverage", keyResult: "Deploy to remaining 1.2M accounts", progress: 82 },
@@ -168,7 +168,7 @@ export const enrichedProjects: EnrichedProject[] = [
   {
     id: "pmo-fpl-003",
     name: "Solar Expansion Program - SoBRA",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     description: "Adding 4,800 MW of new solar capacity through the Solar Base Rate Adjustment mechanism. Largest utility-operated solar program in the U.S. Includes 894 MW approved for January 2025 deployment.",
     expectedROI: "$340m annual revenue",
     roiValue: 340,
@@ -185,7 +185,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 88,
       flowEfficiency: 75,
       currentPI: "PI 25.1",
-      epicId: "EPIC-FPL-103",
+      epicId: "EPIC-Regional Utility-103",
       epicName: "Clean Energy Transition",
       epicProgress: 67,
       okr: { objective: "Add 4,800 MW solar capacity", keyResult: "Complete 18 solar facilities", progress: 67 },
@@ -208,7 +208,7 @@ export const enrichedProjects: EnrichedProject[] = [
   {
     id: "pmo-fpl-004",
     name: "Hurricane Hardening Phase 4",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     description: "Continuation of storm hardening program to strengthen transmission and distribution infrastructure. Undergrounding critical feeders, upgrading poles, and installing breakaway components in high-risk areas.",
     expectedROI: "$95m avoided storm restoration costs",
     roiValue: 95,
@@ -225,7 +225,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 78,
       flowEfficiency: 65,
       currentPI: "PI 24.4",
-      epicId: "EPIC-FPL-104",
+      epicId: "EPIC-Regional Utility-104",
       epicName: "Infrastructure Resilience",
       epicProgress: 72,
       okr: { objective: "Harden 1,500 miles of critical infrastructure", keyResult: "Complete before 2025 hurricane season", progress: 72 },
@@ -246,14 +246,14 @@ export const enrichedProjects: EnrichedProject[] = [
   },
 
   // ============================================================================
-  // NEXTERA ENERGY RESOURCES (NEER) - 4 Projects
-  // Source: NextEra Energy Annual Report 2024, 10-K Filing
+  // NEXTERA ENERGY RESOURCES (Renewables Division) - 4 Projects
+  // Source: Enterprise Annual Report 2024, 10-K Filing
   // ============================================================================
   {
     id: "pmo-neer-001",
     name: "Wind Portfolio Expansion - Texas",
-    bu: "NextEra Energy Resources",
-    description: "Developing 2,500 MW of new wind capacity across 5 Texas sites. Part of NEER's record 12+ GW origination year. Long-term PPAs secured with Fortune 500 customers including Microsoft and Amazon.",
+    bu: "Renewable Energy Division",
+    description: "Developing 2,500 MW of new wind capacity across 5 Texas sites. Part of Renewables Division's record 12+ GW origination year. Long-term PPAs secured with Fortune 500 customers including Microsoft and Amazon.",
     expectedROI: "$180m annual revenue",
     roiValue: 180,
     priority: "critical",
@@ -269,7 +269,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 72,
       flowEfficiency: 65,
       currentPI: "PI 24.4",
-      epicId: "EPIC-NEER-101",
+      epicId: "EPIC-Renewables Division-101",
       epicName: "Wind Expansion 2024-2027",
       epicProgress: 55,
       okr: { objective: "Add 2,500 MW wind capacity", keyResult: "Complete 5 Texas wind farms", progress: 55 },
@@ -294,8 +294,8 @@ export const enrichedProjects: EnrichedProject[] = [
   {
     id: "pmo-neer-002",
     name: "Battery Storage Network",
-    bu: "NextEra Energy Resources",
-    description: "Deploying 3,500 MW of grid-scale battery storage across NEER portfolio. World-leading battery storage capacity supporting renewable intermittency management and grid services revenue.",
+    bu: "Renewable Energy Division",
+    description: "Deploying 3,500 MW of grid-scale battery storage across Renewables Division portfolio. World-leading battery storage capacity supporting renewable intermittency management and grid services revenue.",
     expectedROI: "$145m annual grid services revenue",
     roiValue: 145,
     priority: "critical",
@@ -311,7 +311,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 88,
       flowEfficiency: 78,
       currentPI: "PI 25.1",
-      epicId: "EPIC-NEER-102",
+      epicId: "EPIC-Renewables Division-102",
       epicName: "Battery Storage Leadership",
       epicProgress: 70,
       okr: { objective: "Deploy 3,500 MW battery storage", keyResult: "Achieve world-leading storage capacity", progress: 70 },
@@ -334,7 +334,7 @@ export const enrichedProjects: EnrichedProject[] = [
   {
     id: "pmo-neer-003",
     name: "Green Hydrogen Hub Development",
-    bu: "NextEra Energy Resources",
+    bu: "Renewable Energy Division",
     description: "Developing large-scale green hydrogen production facility powered by dedicated renewable energy. Targeting 200 tons/day production capacity. Strategic investment in emerging clean fuel market.",
     expectedROI: "$2.5bn revenue opportunity",
     roiValue: 250,
@@ -351,7 +351,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 75,
       flowEfficiency: 68,
       currentPI: "PI 24.3",
-      epicId: "EPIC-NEER-103",
+      epicId: "EPIC-Renewables Division-103",
       epicName: "Clean Hydrogen Initiative",
       epicProgress: 33,
       okr: { objective: "Establish green hydrogen production", keyResult: "Achieve 200 tons/day capacity", progress: 33 },
@@ -373,7 +373,7 @@ export const enrichedProjects: EnrichedProject[] = [
   {
     id: "pmo-neer-004",
     name: "Duane Arnold Nuclear Restart",
-    bu: "NextEra Energy Resources",
+    bu: "Renewable Energy Division",
     description: "Evaluating recommissioning of Duane Arnold Energy Center in Iowa. Potential restart by end of 2028 pending NRC approvals. 600 MW carbon-free baseload generation.",
     expectedROI: "$85m annual revenue",
     roiValue: 85,
@@ -390,7 +390,7 @@ export const enrichedProjects: EnrichedProject[] = [
       predictability: 80,
       flowEfficiency: 70,
       currentPI: "PI 24.2",
-      epicId: "EPIC-NEER-104",
+      epicId: "EPIC-Renewables Division-104",
       epicName: "Nuclear Revival Program",
       epicProgress: 25,
       okr: { objective: "Restart Duane Arnold by 2028", keyResult: "Obtain NRC approval for recommissioning", progress: 25 },
@@ -410,13 +410,13 @@ export const enrichedProjects: EnrichedProject[] = [
 
   // ============================================================================
   // CORPORATE & OTHER - 4 Projects
-  // Source: NextEra Energy Annual Report 2024, 10-K Filing
+  // Source: Enterprise Annual Report 2024, 10-K Filing
   // ============================================================================
   {
     id: "pmo-corp-001",
     name: "Enterprise Data Platform",
     bu: "Corporate & Other",
-    description: "Unified data platform for renewable asset optimization, predictive maintenance, and enterprise analytics. Foundation for AI-driven operations across FPL and NEER.",
+    description: "Unified data platform for renewable asset optimization, predictive maintenance, and enterprise analytics. Foundation for AI-driven operations across Regional Utility and Renewables Division.",
     expectedROI: "$180m efficiency gains",
     roiValue: 180,
     priority: "critical",
@@ -455,7 +455,7 @@ export const enrichedProjects: EnrichedProject[] = [
     id: "pmo-corp-002",
     name: "NEET Transmission Expansion",
     bu: "Corporate & Other",
-    description: "Expanding rate-regulated transmission infrastructure through NextEra Energy Transmission (NEET). Adding 800 miles of new transmission lines to support renewable integration.",
+    description: "Expanding rate-regulated transmission infrastructure through Enterprise Transmission (NEET). Adding 800 miles of new transmission lines to support renewable integration.",
     expectedROI: "$95m annual revenue",
     roiValue: 95,
     priority: "high",
@@ -494,7 +494,7 @@ export const enrichedProjects: EnrichedProject[] = [
     id: "pmo-corp-003",
     name: "ESG Reporting Automation",
     bu: "Corporate & Other",
-    description: "Automating sustainability reporting for TCFD, TNFD, and CDP disclosures. Centralizing ESG data collection across FPL and NEER for AAA sustainability ratings.",
+    description: "Automating sustainability reporting for TCFD, TNFD, and CDP disclosures. Centralizing ESG data collection across Regional Utility and Renewables Division for AAA sustainability ratings.",
     expectedROI: "$15m efficiency + rating improvement",
     roiValue: 15,
     priority: "medium",
@@ -575,14 +575,14 @@ export const enrichedProjects: EnrichedProject[] = [
 // LEGACY PROJECT MAPPINGS - For backward compatibility
 // ============================================================================
 
-// Map old L&G business units to new NextEra segments
+// Map old L&G business units to new Enterprise segments
 export const buMapping: Record<string, string> = {
-  'Florida Power & Light': 'Florida Power & Light',
-  'NextEra Energy Resources': 'NextEra Energy Resources',
+  'Regional Utility': 'Regional Utility',
+  'Renewable Energy Division': 'Renewable Energy Division',
   'Corporate & Other': 'Corporate & Other'
 };
 
-// Get projects by NextEra business unit
+// Get projects by Enterprise business unit
 export function getProjectsByBU(bu: string): EnrichedProject[] {
   const mappedBU = buMapping[bu] || bu;
   return enrichedProjects.filter(p => p.bu === mappedBU);
@@ -702,12 +702,12 @@ export const projectSummary = {
 
 // Mapping from enrichedProject IDs to safeProject IDs (matching safeProjectData.ts exactly)
 const projectLinkMapping: Record<string, string> = {
-  // Florida Power & Light → Maps to grid/utility-tagged projects
+  // Regional Utility → Maps to grid/utility-tagged projects
   "pmo-fpl-001": "proj-data-foundation",       // Grid Modernization
   "pmo-fpl-002": "proj-digital-onboarding",    // Advanced Metering Infrastructure  
   "pmo-fpl-003": "proj-cloud-migration",       // Solar Expansion Program
   "pmo-fpl-004": "proj-storm-hardening",       // Hurricane Hardening
-  // NextEra Energy Resources → Maps to renewable-tagged projects
+  // Renewable Energy Division → Maps to renewable-tagged projects
   "pmo-neer-001": "proj-trading-platform",     // Wind Portfolio Expansion
   "pmo-neer-002": "proj-risk-engine",          // Battery Storage Network
   "pmo-neer-003": "proj-alt-investments",      // Green Hydrogen Hub

@@ -1,9 +1,9 @@
 {
   "id": "nee-neer-007",
-  "name": "NEER PPA Portfolio Analytics Platform",
-  "bu": "NextEra Energy Resources",
+  "name": "Renewables Division PPA Portfolio Analytics Platform",
+  "bu": "Renewable Energy Division",
   "division": "Commercial Operations",
-  "description": "Advanced analytics platform for managing NEER's $20B+ PPA portfolio. Real-time pricing, contract optimization, and risk management with AI-powered insights.",
+  "description": "Advanced analytics platform for managing Renewables Division's $20B+ PPA portfolio. Real-time pricing, contract optimization, and risk management with AI-powered insights.",
   "expectedROI": "$55M annual optimization value",
   "roiValue": 55,
   "priority": "high",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 5,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-107",
+    "epicId": "EPIC-Renewables Division-107",
     "epicName": "Commercial Excellence Program",
     "epicProgress": 45,
     "epicWsjf": { "businessValue": 8, "timeCriticality": 6, "riskReduction": 7, "jobSize": 5, "score": 25 },
@@ -72,7 +72,7 @@
     { "id": "dep-ppa-002", "name": "Market Data Feeds", "type": "related", "status": "green", "description": "Real-time forward curve data" }
   ],
   "stakeholders": [
-    { "id": "sh-ppa-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ppa-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-ppa-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
     { "id": "sh-ppa-003", "name": "Commercial Operations Team", "role": "Primary Users", "department": "Commercial", "influence": "high", "interest": "high" },
     { "id": "sh-ppa-004", "name": "Risk Management", "role": "Risk Oversight", "department": "Finance", "influence": "medium", "interest": "high" }

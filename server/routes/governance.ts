@@ -8,14 +8,14 @@ import type { IStorage } from '../storage.js';
 import { eq } from 'drizzle-orm';
 
 // Risk framework data - centralized source of truth
-// Source: NextEra Energy Form 10-K 2024, Risk Management Report 2024
+// Source: Enterprise Form 10-K 2024, Risk Management Report 2024
 const riskFramework = {
   overview: {
     largestExposures: ["Operational", "Regulatory", "Market"],
     measurementBasis: "Enterprise risk capital",
     cro: "Rebecca Kujawa",
     philosophy: "Our risk management approach supports strategic growth while protecting stakeholder value",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
 
   threeLines: [
@@ -23,7 +23,7 @@ const riskFramework = {
       line: 1,
       name: "Reportable Segments",
       role: "Operational risk ownership within business units",
-      accountable: "Managing day-to-day risks per enterprise risk policies (FPL, NEER, Corporate)"
+      accountable: "Managing day-to-day risks per enterprise risk policies (Regional Utility, Renewables Division, Corporate)"
     },
     {
       line: 2,
@@ -49,13 +49,13 @@ const riskFramework = {
       subRisks: [
         {
           name: "Hurricane and severe weather exposure",
-          description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event. 2024 storms Milton and Helene required significant recovery efforts.",
+          description: "Regional Utility service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event. 2024 storms Milton and Helene required significant recovery efforts.",
           severity: "high",
           trend: "worsening"
         },
         {
           name: "Project execution and development",
-          description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
+          description: "Renewables Division's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
           severity: "high",
           trend: "stable"
         },
@@ -82,13 +82,13 @@ const riskFramework = {
       subRisks: [
         {
           name: "Rate case outcomes",
-          description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE and capital recovery. Current ROE range 10.15-11.15%.",
+          description: "Regional Utility rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE and capital recovery. Current ROE range 10.15-11.15%.",
           severity: "high",
           trend: "stable"
         },
         {
           name: "Federal energy policy changes",
-          description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact NEER economics. Policy changes or repeal could affect project returns.",
+          description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact Renewables Division economics. Policy changes or repeal could affect project returns.",
           severity: "high",
           trend: "volatile"
         },
@@ -115,19 +115,19 @@ const riskFramework = {
       subRisks: [
         {
           name: "Interest rate exposure",
-          description: "Significant capital investment program ($8.2B annual at FPL) requires debt financing. Rising rates increase borrowing costs and reduce project economics.",
+          description: "Significant capital investment program ($8.2B annual at Regional Utility) requires debt financing. Rising rates increase borrowing costs and reduce project economics.",
           severity: "high",
           trend: "volatile"
         },
         {
           name: "Natural gas price volatility",
-          description: "FPL generating fleet includes significant natural gas capacity. Fuel cost pass-through mechanism provides some protection but timing differences create exposure.",
+          description: "Regional Utility generating fleet includes significant natural gas capacity. Fuel cost pass-through mechanism provides some protection but timing differences create exposure.",
           severity: "medium",
           trend: "improving"
         },
         {
           name: "Power market prices",
-          description: "NEER merchant exposure in deregulated markets. Wholesale power prices affect contracted renewables economics and battery storage dispatch value.",
+          description: "Renewables Division merchant exposure in deregulated markets. Wholesale power prices affect contracted renewables economics and battery storage dispatch value.",
           severity: "medium",
           trend: "stable"
         },
@@ -203,7 +203,7 @@ const riskFramework = {
 
   emergingRisks: {
     dashboard: true,
-    description: "Captures views and inputs from across NextEra Energy to monitor likelihood of emerging risks on enterprise strategy",
+    description: "Captures views and inputs from across Enterprise to monitor likelihood of emerging risks on enterprise strategy",
     keyEmergingRisks: [
       { name: "AI and Automation", impact: "high", probability: "high", horizon: "1-3 years" },
       { name: "Geopolitical Instability", impact: "high", probability: "medium", horizon: "1-2 years" },
@@ -211,7 +211,7 @@ const riskFramework = {
       { name: "Grid Reliability", impact: "high", probability: "medium", horizon: "2-5 years" },
       { name: "Regulatory Divergence", impact: "medium", probability: "medium", horizon: "2-5 years" }
     ],
-    source: "NextEra Energy Risk Management Report 2024, p.2"
+    source: "Enterprise Risk Management Report 2024, p.2"
   },
 
   climateRiskCategories: [
@@ -232,7 +232,7 @@ const riskFramework = {
     }
   ],
 
-  source: "NextEra Energy Risk Management Report 2024"
+  source: "Enterprise Risk Management Report 2024"
 };
 
 export function registerGovernanceRoutes(app: Express, storage: IStorage): void {

@@ -552,7 +552,7 @@ export default function MCPConfigPage() {
       <header className="fixed top-0 left-0 right-0 h-16 border-b border-gray-200 bg-white flex items-center px-8 justify-between z-50">
         <div className="flex items-center gap-4">
           <Link href="/">
-            <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" />
+            <img src={nexteraLogo} alt="Enterprise" className="h-10 cursor-pointer" />
           </Link>
           <div className="h-8 w-px bg-gray-200" />
           <div className="flex items-center gap-2">

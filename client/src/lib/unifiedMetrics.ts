@@ -44,8 +44,8 @@ export interface VROAggregatedMetric {
 }
 
 export const GROUP_FUNCTIONS = [
-  'FPL',
-  'NEER',
+  'Regional Utility',
+  'Renewables Division',
   'Corporate & Other'
 ] as const;
 
@@ -73,8 +73,8 @@ export const EXPANDED_PMO_PROJECTS = [
   ...pmoProjects,
   {
     id: "pmo-fpl-001",
-    name: "FPL Grid Modernization & Automation",
-    bu: "FPL",
+    name: "Regional Utility Grid Modernization & Automation",
+    bu: "Regional Utility",
     status: "green" as const,
     budget: { spent: 320, total: 450, unit: "$M" },
     timeline: { elapsed: 10, total: 18, unit: "months" },
@@ -86,7 +86,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 85,
       flowEfficiency: 72,
       currentPI: "PI 24.4",
-      epicId: "EPIC-FPL-001",
+      epicId: "EPIC-Regional Utility-001",
       epicName: "Enterprise Grid Transformation",
       epicProgress: 58,
       okr: { objective: "Modernize 80% of grid infrastructure", keyResult: "Reduce outage duration 40%", progress: 62 },
@@ -103,8 +103,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "pmo-neer-001",
-    name: "NEER Wind Portfolio Expansion 2024-2027",
-    bu: "NEER",
+    name: "Renewables Division Wind Portfolio Expansion 2024-2027",
+    bu: "Renewables Division",
     status: "amber" as const,
     budget: { spent: 1100, total: 1800, unit: "$M" },
     timeline: { elapsed: 4, total: 8, unit: "months" },
@@ -116,7 +116,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 75,
       flowEfficiency: 65,
       currentPI: "PI 25.1",
-      epicId: "EPIC-NEER-001",
+      epicId: "EPIC-Renewables Division-001",
       epicName: "Renewable Generation Expansion",
       epicProgress: 42,
       okr: { objective: "Add 2,400 MW wind capacity", keyResult: "100% PPA coverage", progress: 48 },
@@ -133,8 +133,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "pmo-fpl-002",
-    name: "FPL SolarTogether Phase III",
-    bu: "FPL",
+    name: "Regional Utility SolarTogether Phase III",
+    bu: "Regional Utility",
     status: "green" as const,
     budget: { spent: 80, total: 120, unit: "$M" },
     timeline: { elapsed: 5, total: 7, unit: "months" },
@@ -146,7 +146,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 88,
       flowEfficiency: 78,
       currentPI: "PI 24.3",
-      epicId: "EPIC-FPL-002",
+      epicId: "EPIC-Regional Utility-002",
       epicName: "Community Solar Expansion",
       epicProgress: 72,
       okr: { objective: "Add 1,000 MW community solar", keyResult: "Enroll 200K subscribers", progress: 65 },
@@ -163,8 +163,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "pmo-neer-002",
-    name: "NEER Battery Energy Storage Systems",
-    bu: "NEER",
+    name: "Renewables Division Battery Energy Storage Systems",
+    bu: "Renewables Division",
     status: "amber" as const,
     budget: { spent: 400, total: 600, unit: "$M" },
     timeline: { elapsed: 3, total: 5, unit: "months" },
@@ -176,7 +176,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 78,
       flowEfficiency: 68,
       currentPI: "PI 25.2",
-      epicId: "EPIC-NEER-002",
+      epicId: "EPIC-Renewables Division-002",
       epicName: "Grid-Scale Storage Deployment",
       epicProgress: 52,
       okr: { objective: "Deploy 2,800 MW storage capacity", keyResult: "95% availability SLA", progress: 45 },
@@ -193,8 +193,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-fpl-003",
-    name: "FPL Storm Protection Plan",
-    bu: "FPL",
+    name: "Regional Utility Storm Protection Plan",
+    bu: "Regional Utility",
     status: "green" as const,
     budget: { spent: 150, total: 200, unit: "$M" },
     timeline: { elapsed: 8, total: 10, unit: "months" },
@@ -206,7 +206,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 88,
       flowEfficiency: 75,
       currentPI: "PI 24.3",
-      epicId: "EPIC-FPL-003",
+      epicId: "EPIC-Regional Utility-003",
       epicName: "Storm Resilience Infrastructure",
       epicProgress: 82,
       okr: { objective: "Harden 70% of coastal substations", keyResult: "Reduce hurricane restoration time by 50%", progress: 78 },
@@ -223,7 +223,7 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-corp-001",
-    name: "NextEra NERC CIP Compliance",
+    name: "Enterprise NERC CIP Compliance",
     bu: "Corporate & Other",
     status: "amber" as const,
     budget: { spent: 60, total: 90, unit: "$M" },
@@ -253,7 +253,7 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-corp-002",
-    name: "NextEra Enterprise Finance Platform",
+    name: "Enterprise Enterprise Finance Platform",
     bu: "Corporate & Other",
     status: "green" as const,
     budget: { spent: 22, total: 30, unit: "$M" },
@@ -283,8 +283,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-neer-003",
-    name: "NEER Offshore Wind Development",
-    bu: "NEER",
+    name: "Renewables Division Offshore Wind Development",
+    bu: "Renewables Division",
     status: "amber" as const,
     budget: { spent: 900, total: 1400, unit: "$M" },
     timeline: { elapsed: 5, total: 8, unit: "months" },
@@ -296,7 +296,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 78,
       flowEfficiency: 68,
       currentPI: "PI 24.3",
-      epicId: "EPIC-NEER-003",
+      epicId: "EPIC-Renewables Division-003",
       epicName: "Atlantic Offshore Wind",
       epicProgress: 52,
       okr: { objective: "Develop 1,200 MW offshore capacity", keyResult: "Federal permits secured", progress: 48 },
@@ -313,8 +313,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-neer-004",
-    name: "NEER Hydrogen Production Pilot",
-    bu: "NEER",
+    name: "Renewables Division Hydrogen Production Pilot",
+    bu: "Renewables Division",
     status: "green" as const,
     budget: { spent: 180, total: 250, unit: "$M" },
     timeline: { elapsed: 7, total: 10, unit: "months" },
@@ -326,7 +326,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 88,
       flowEfficiency: 78,
       currentPI: "PI 25.1",
-      epicId: "EPIC-NEER-004",
+      epicId: "EPIC-Renewables Division-004",
       epicName: "Green Hydrogen Initiative",
       epicProgress: 70,
       okr: { objective: "Produce 10,000 kg/day green hydrogen", keyResult: "Industrial customer contracts", progress: 68 },
@@ -343,8 +343,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-neer-005",
-    name: "NEER Real Zero Carbon Credits",
-    bu: "NEER",
+    name: "Renewables Division Real Zero Carbon Credits",
+    bu: "Renewables Division",
     status: "green" as const,
     budget: { spent: 50, total: 80, unit: "$M" },
     timeline: { elapsed: 4, total: 6, unit: "months" },
@@ -356,7 +356,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 90,
       flowEfficiency: 82,
       currentPI: "PI 25.2",
-      epicId: "EPIC-NEER-005",
+      epicId: "EPIC-Renewables Division-005",
       epicName: "Carbon Credit Platform",
       epicProgress: 72,
       okr: { objective: "Launch Real Zero carbon credit marketplace", keyResult: "10 corporate customers enrolled", progress: 78 },
@@ -374,7 +374,7 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-rt-funnel-001",
     name: "Customer Journey Reimagination",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     status: "green" as const,
     budget: { spent: 0.1, total: 0.5, unit: "$m" },
     timeline: { elapsed: 1, total: 8, unit: "months" },
@@ -404,7 +404,7 @@ export const EXPANDED_PMO_PROJECTS = [
   {
     id: "pmo-am-funnel-001",
     name: "Alternative Assets Expansion",
-    bu: "NextEra Energy Resources",
+    bu: "Renewable Energy Division",
     status: "amber" as const,
     budget: { spent: 0.2, total: 1.2, unit: "$m" },
     timeline: { elapsed: 2, total: 14, unit: "months" },
@@ -433,8 +433,8 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "pmo-fpl-reviewing-001",
-    name: "FPL Advanced Metering Infrastructure 2.0",
-    bu: "FPL",
+    name: "Regional Utility Advanced Metering Infrastructure 2.0",
+    bu: "Regional Utility",
     status: "green" as const,
     budget: { spent: 30, total: 280, unit: "$M" },
     timeline: { elapsed: 2, total: 16, unit: "months" },
@@ -446,7 +446,7 @@ export const EXPANDED_PMO_PROJECTS = [
       predictability: 72,
       flowEfficiency: 58,
       currentPI: "PI 25.2",
-      epicId: "EPIC-FPL-AMI",
+      epicId: "EPIC-Regional Utility-AMI",
       epicName: "Next Gen Smart Metering",
       epicProgress: 15,
       okr: { objective: "Deploy 5M smart meters", keyResult: "Process 100M daily readings", progress: 12 },
@@ -493,7 +493,7 @@ export const EXPANDED_PMO_PROJECTS = [
   },
   {
     id: "nee-corp-003",
-    name: "NextEra Operational Resilience Framework",
+    name: "Enterprise Operational Resilience Framework",
     bu: "Corporate & Other",
     status: "green" as const,
     budget: { spent: 50, total: 180, unit: "$M" },
@@ -562,7 +562,7 @@ export const OKRS: OKR[] = [
     overallProgress: 78,
     strategicPriority: "critical",
     owner: "Armando Pimentel",
-    buAlignment: ["Florida Power & Light"]
+    buAlignment: ["Regional Utility"]
   },
   {
     id: "okr-002",
@@ -575,7 +575,7 @@ export const OKRS: OKR[] = [
     overallProgress: 67,
     strategicPriority: "high",
     owner: "Eric Adler",
-    buAlignment: ["NextEra Energy Resources"]
+    buAlignment: ["Renewable Energy Division"]
   },
   {
     id: "okr-003",
@@ -588,7 +588,7 @@ export const OKRS: OKR[] = [
     overallProgress: 63,
     strategicPriority: "high",
     owner: "Bernie Hickman",
-    buAlignment: ["Florida Power & Light"]
+    buAlignment: ["Regional Utility"]
   },
   {
     id: "okr-004",
@@ -600,8 +600,8 @@ export const OKRS: OKR[] = [
     ],
     overallProgress: 65,
     strategicPriority: "critical",
-    owner: "NextEra CTO",
-    buAlignment: ["FPL"]
+    owner: "Enterprise CTO",
+    buAlignment: ["Regional Utility"]
   }
 ];
 

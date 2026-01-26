@@ -47,7 +47,7 @@ import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleComm
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { HelpMenu } from "@/components/HelpMenu";
 
-// NextEra Design System Colors (Enterprise Transformation Team 2026)
+// Enterprise Design System Colors (Enterprise Transformation Team 2026)
 const NEE = {
   blue: colors.brand.blue,      // #0072CE - Primary actions, links, navigation
   teal: colors.brand.teal,      // #00A651 - Positive trends, success states
@@ -679,11 +679,11 @@ function DashboardContent() {
                   </>
                 ) : (
                   <>
-                    <p>† Revenue target ($28bn): NextEra Energy Annual Report 2024</p>
-                    <p>† Clean Energy Capacity (75GW): NextEra Energy 10-K 2024</p>
-                    <p>† Cost efficiency target: NextEra Energy Annual Report 2024</p>
-                    <p>† Operational risk: NextEra Energy Annual Report 2024, Risk Factors</p>
-                    <p>† Capital investment: NextEra Energy Annual Report 2024</p>
+                    <p>† Revenue target ($28bn): Enterprise Annual Report 2024</p>
+                    <p>† Clean Energy Capacity (75GW): Enterprise 10-K 2024</p>
+                    <p>† Cost efficiency target: Enterprise Annual Report 2024</p>
+                    <p>† Operational risk: Enterprise Annual Report 2024, Risk Factors</p>
+                    <p>† Capital investment: Enterprise Annual Report 2024</p>
                   </>
                 )}
               </div>

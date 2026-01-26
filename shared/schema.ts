@@ -68,7 +68,7 @@ export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companies.$inferSelect;
 
 // ============================================================================
-// DIVISIONS - NextEra Energy Business Segments (from official filings)
+// DIVISIONS - Business Segments
 // ============================================================================
 
 export const divisions = pgTable("divisions", {
@@ -203,12 +203,12 @@ export type InsertDivisionRisk = z.infer<typeof insertDivisionRiskSchema>;
 export type DivisionRisk = typeof divisionRisks.$inferSelect;
 
 // ============================================================================
-// COMPANY OVERVIEW - NextEra Energy Corporate Info (from official filings)
+// COMPANY OVERVIEW - Corporate Info
 // ============================================================================
 
 export const companyOverview = pgTable("company_overview", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  companyName: text("company_name").notNull().default("NextEra Energy"),
+  companyName: text("company_name").notNull().default("Enterprise"),
   yearsOfHistory: integer("years_of_history"),
   employees: integer("employees"),
   adjustedOperatingProfitValue: real("adjusted_operating_profit_value"), // in millions
@@ -372,11 +372,11 @@ export type Project = typeof projects.$inferSelect;
 export const projectTemplates = pgTable("project_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(), // URL-friendly identifier (e.g., "FPL-Grid-Modernization")
+  slug: text("slug").notNull().unique(), // URL-friendly identifier (e.g., "Grid-Modernization")
   bu: text("bu"), // Business unit
   division: text("division"),
   description: text("description"),
-  category: text("category"), // FPL, NEER, Corporate
+  category: text("category"), // Division A, Division B, Corporate
   templateData: text("template_data").notNull(), // Full JSON template
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),

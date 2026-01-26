@@ -1,9 +1,9 @@
 {
   "id": "nee-neer-008",
-  "name": "NEER Development Pipeline Management System",
-  "bu": "NextEra Energy Resources",
+  "name": "Renewables Division Development Pipeline Management System",
+  "bu": "Renewable Energy Division",
   "division": "Development",
-  "description": "Digital platform for managing NEER's 300+ GW renewable development pipeline from origination through construction. Integrates land, permitting, interconnection, and offtake tracking.",
+  "description": "Digital platform for managing Renewables Division's 300+ GW renewable development pipeline from origination through construction. Integrates land, permitting, interconnection, and offtake tracking.",
   "expectedROI": "$28M development efficiency gains",
   "roiValue": 28,
   "priority": "high",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 4,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-108",
+    "epicId": "EPIC-Renewables Division-108",
     "epicName": "Development Excellence Program",
     "epicProgress": 42,
     "epicWsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 6, "jobSize": 4, "score": 27 },
@@ -72,7 +72,7 @@
     { "id": "dep-dev-002", "name": "GIS & Land Systems", "type": "related", "status": "green", "description": "Site and land data integration" }
   ],
   "stakeholders": [
-    { "id": "sh-dev-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-dev-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-dev-002", "name": "Mark Hickson", "role": "EVP Development", "department": "Development", "influence": "high", "interest": "high" },
     { "id": "sh-dev-003", "name": "Regional Development Directors", "role": "Primary Users", "department": "Development", "influence": "high", "interest": "high" },
     { "id": "sh-dev-004", "name": "Land & Permitting Teams", "role": "Key Contributors", "department": "Development", "influence": "medium", "interest": "high" }

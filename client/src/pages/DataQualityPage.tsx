@@ -12,7 +12,7 @@ function NavBar() {
       <div className="flex items-center gap-8">
         <Link href="/">
           <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">
-            NextEra Energy
+            Enterprise
           </div>
         </Link>
         <nav className="hidden md:flex gap-6">

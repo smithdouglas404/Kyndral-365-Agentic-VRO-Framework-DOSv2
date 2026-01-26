@@ -1,7 +1,7 @@
 {
   "id": "nee-fpl-005",
-  "name": "FPL Customer Digital Experience Platform",
-  "bu": "Florida Power & Light",
+  "name": "Regional Utility Customer Digital Experience Platform",
+  "bu": "Regional Utility",
   "division": "Customer Operations",
   "description": "Next-generation customer portal and mobile app with AI-powered support, real-time outage tracking, and self-service capabilities. Target: 90% digital adoption and 50% reduction in call center volume.",
   "expectedROI": "$45M annual savings in customer operations",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 5,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-FPL-105",
+    "epicId": "EPIC-Regional Utility-105",
     "epicName": "Digital Customer Platform",
     "epicProgress": 52,
     "epicWsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 5, "jobSize": 5, "score": 24 },
@@ -84,7 +84,7 @@
     { "id": "dep-cust-002", "name": "Grid Modernization", "type": "related", "status": "green", "description": "Real-time outage data for customer notifications" }
   ],
   "stakeholders": [
-    { "id": "sh-cust-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-cust-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-cust-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
     { "id": "sh-cust-003", "name": "Marlene Santos", "role": "VP Customer Service", "department": "Customer Operations", "influence": "high", "interest": "high" },
     { "id": "sh-cust-004", "name": "JD Power", "role": "Industry Benchmark", "department": "External", "influence": "medium", "interest": "medium" }

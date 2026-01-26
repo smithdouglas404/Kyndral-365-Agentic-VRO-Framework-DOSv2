@@ -430,7 +430,7 @@ function TacticalLayer({ onDrillDown }: { onDrillDown?: (type: string, id: strin
           </h4>
           <div className="space-y-2">
             {[
-              { name: "Clean Energy Portal - Sprint 12", team: "FPL Digital", progress: 78, status: "on-track", blockers: 0 },
+              { name: "Clean Energy Portal - Sprint 12", team: "Regional Utility Digital", progress: 78, status: "on-track", blockers: 0 },
               { name: "Grid Analytics Dashboard", team: "Energy Resources", progress: 45, status: "at-risk", blockers: 2 },
               { name: "Customer Self-Service v2.1", team: "CX Platform", progress: 92, status: "accelerating", blockers: 0 },
               { name: "Operations Automation Phase 2", team: "Corporate IT", progress: 34, status: "blocked", blockers: 3 },

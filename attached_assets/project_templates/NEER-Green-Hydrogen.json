@@ -1,7 +1,7 @@
 {
   "id": "nee-neer-004",
-  "name": "NEER Green Hydrogen Pilot Program",
-  "bu": "NextEra Energy Resources",
+  "name": "Renewables Division Green Hydrogen Pilot Program",
+  "bu": "Renewable Energy Division",
   "division": "New Technology",
   "description": "Pilot-scale green hydrogen production using dedicated renewable energy. Targeting industrial customers and exploring hydrogen hub opportunities under DOE programs.",
   "expectedROI": "$35M strategic value (pilot phase)",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 8,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-104",
+    "epicId": "EPIC-Renewables Division-104",
     "epicName": "Green Hydrogen Initiative",
     "epicProgress": 28,
     "epicWsjf": { "businessValue": 7, "timeCriticality": 5, "riskReduction": 8, "jobSize": 7, "score": 20 },
@@ -73,7 +73,7 @@
     { "id": "dep-h2-002", "name": "DOE Hydrogen Hub Funding", "type": "related", "status": "yellow", "description": "Federal funding for scale-up" }
   ],
   "stakeholders": [
-    { "id": "sh-h2-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-h2-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-h2-002", "name": "Department of Energy", "role": "Federal Funding Agency", "department": "External", "influence": "high", "interest": "medium" },
     { "id": "sh-h2-003", "name": "Industrial Hydrogen Customers", "role": "Offtakers", "department": "External", "influence": "medium", "interest": "high" },
     { "id": "sh-h2-004", "name": "Dr. James Park", "role": "VP New Technology", "department": "R&D", "influence": "high", "interest": "high" }

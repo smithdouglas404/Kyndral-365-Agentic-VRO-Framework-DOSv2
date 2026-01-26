@@ -226,12 +226,12 @@ APPROACH:
    - Technical conflicts: Architecture board decision
 
 SUCCESSFUL CASES:
-1. FPL Grid Modernization + Customer Portal (2024)
+1. Grid Modernization + Customer Portal (2024)
    - Shared: Auth API, Data Platform
    - Coordination: Weekly PM sync
    - Outcome: Both delivered on time, 0 conflicts
 
-2. NEER Wind Project + Battery Storage (2025)
+2. Wind Project + Battery Storage (2025)
    - Shared: Grid interconnection, permitting
    - Coordination: Joint planning sessions
    - Outcome: 3 weeks ahead of schedule

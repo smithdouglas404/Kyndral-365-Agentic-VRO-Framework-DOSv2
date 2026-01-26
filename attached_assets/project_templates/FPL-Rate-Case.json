@@ -1,9 +1,9 @@
 {
   "id": "nee-fpl-006",
-  "name": "FPL 2025 Rate Case Support System",
-  "bu": "Florida Power & Light",
+  "name": "Regional Utility 2025 Rate Case Support System",
+  "bu": "Regional Utility",
   "division": "Regulatory Affairs",
-  "description": "Comprehensive analytics and documentation platform supporting FPL's rate case filing with Florida PSC. Automates cost-of-service studies, rate design modeling, and regulatory reporting.",
+  "description": "Comprehensive analytics and documentation platform supporting Regional Utility's rate case filing with Florida PSC. Automates cost-of-service studies, rate design modeling, and regulatory reporting.",
   "expectedROI": "$15M regulatory efficiency savings",
   "roiValue": 15,
   "priority": "high",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 4,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-FPL-106",
+    "epicId": "EPIC-Regional Utility-106",
     "epicName": "Regulatory Analytics Platform",
     "epicProgress": 48,
     "epicWsjf": { "businessValue": 7, "timeCriticality": 8, "riskReduction": 6, "jobSize": 4, "score": 26 },
@@ -72,7 +72,7 @@
     { "id": "dep-rate-002", "name": "Financial Systems", "type": "related", "status": "green", "description": "Integration with SAP for cost data" }
   ],
   "stakeholders": [
-    { "id": "sh-rate-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-rate-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-rate-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-rate-003", "name": "Robert Escoto", "role": "VP Regulatory Affairs", "department": "Regulatory", "influence": "high", "interest": "high" },
     { "id": "sh-rate-004", "name": "Office of Public Counsel", "role": "Consumer Advocate", "department": "External", "influence": "high", "interest": "high" }

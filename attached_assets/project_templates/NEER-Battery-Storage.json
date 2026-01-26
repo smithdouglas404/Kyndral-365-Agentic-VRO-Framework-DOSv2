@@ -1,7 +1,7 @@
 {
   "id": "nee-neer-003",
-  "name": "NEER Battery Energy Storage Systems",
-  "bu": "NextEra Energy Resources",
+  "name": "Renewables Division Battery Energy Storage Systems",
+  "bu": "Renewable Energy Division",
   "division": "Energy Storage",
   "description": "Large-scale battery storage deployment for grid services, renewable firming, and energy arbitrage. Target 3 GWh deployment by 2026 across key markets.",
   "expectedROI": "$245M projected EBITDA contribution",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 9,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-103",
+    "epicId": "EPIC-Renewables Division-103",
     "epicName": "Energy Storage Initiative",
     "epicProgress": 32,
     "epicWsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 8, "jobSize": 8, "score": 27 },
@@ -84,7 +84,7 @@
     { "id": "dep-bess-002", "name": "Solar Development", "type": "related", "status": "green", "description": "Hybrid solar+storage projects" }
   ],
   "stakeholders": [
-    { "id": "sh-bess-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-bess-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-bess-002", "name": "ERCOT/CAISO Grid Operators", "role": "Market Operators", "department": "External", "influence": "high", "interest": "medium" },
     { "id": "sh-bess-003", "name": "Armando Pimentel", "role": "EVP Power Generation", "department": "Operations", "influence": "high", "interest": "high" },
     { "id": "sh-bess-004", "name": "Battery Cell Suppliers", "role": "Strategic Vendors", "department": "External", "influence": "medium", "interest": "high" }

@@ -1,11 +1,11 @@
-// NextEra Energy Design System - Enterprise Transformation Team 2026 Edition
+// Enterprise Design System - Enterprise Transformation Team 2026 Edition
 // All designs MUST use these tokens - no deviations without approval
 
 export const colors = {
   // Brand Colors - Primary Palette
   brand: {
     blue: "#0072CE",      // Primary actions, links, focus states, navigation accents
-    teal: "#00A651",      // Positive trends, success states (NextEra Green)
+    teal: "#00A651",      // Positive trends, success states (Enterprise Green)
     red: "#D50032",       // Alerts, errors, negative trends
     yellow: "#FFD700",    // Subtle highlights, secondary CTAs (use sparingly)
   },
@@ -22,10 +22,10 @@ export const colors = {
   
   // Semantic Colors (mapped from brand)
   semantic: {
-    success: "#00A651",   // NextEra Green
+    success: "#00A651",   // Enterprise Green
     warning: "#FFC107",   // Amber
     error: "#D50032",     // Brand Red
-    info: "#0072CE",      // NextEra Blue
+    info: "#0072CE",      // Enterprise Blue
   },
   
   // Mobile Prototype ONLY (Art of the Possible section)

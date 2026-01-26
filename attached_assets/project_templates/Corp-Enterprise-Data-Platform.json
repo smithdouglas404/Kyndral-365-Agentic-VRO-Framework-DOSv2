@@ -1,9 +1,9 @@
 {
   "id": "nee-corp-001",
-  "name": "NextEra Enterprise Data Platform",
+  "name": "Enterprise Enterprise Data Platform",
   "bu": "Corporate & Other",
   "division": "Information Technology",
-  "description": "Unified enterprise data platform consolidating data from FPL, NEER, and corporate systems. Enables AI/ML capabilities, advanced analytics, and regulatory reporting across NextEra.",
+  "description": "Unified enterprise data platform consolidating data from Regional Utility, Renewables Division, and corporate systems. Enables AI/ML capabilities, advanced analytics, and regulatory reporting across Enterprise.",
   "expectedROI": "$75M annual value from analytics enablement",
   "roiValue": 75,
   "priority": "critical",
@@ -41,8 +41,8 @@
       "stories": [
         {
           "id": "story-data-001",
-          "name": "FPL operational data ingestion",
-          "description": "Ingest SCADA, AMI, and customer data from FPL systems",
+          "name": "Regional Utility operational data ingestion",
+          "description": "Ingest SCADA, AMI, and customer data from Regional Utility systems",
           "storyPoints": 21,
           "status": "done",
           "acceptanceCriteria": ["Real-time SCADA data", "15-minute AMI intervals", "Customer data daily sync"],
@@ -53,7 +53,7 @@
         },
         {
           "id": "story-data-002",
-          "name": "NEER asset data integration",
+          "name": "Renewables Division asset data integration",
           "description": "Integrate wind, solar, and storage asset performance data",
           "storyPoints": 13,
           "status": "in-progress",
@@ -99,7 +99,7 @@
     { "id": "sh-data-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
     { "id": "sh-data-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
     { "id": "sh-data-003", "name": "Charles Pastrana", "role": "CIO", "department": "Information Technology", "influence": "high", "interest": "high" },
-    { "id": "sh-data-004", "name": "Business Unit Data Owners", "role": "Data Stewards", "department": "FPL/NEER", "influence": "medium", "interest": "high" }
+    { "id": "sh-data-004", "name": "Business Unit Data Owners", "role": "Data Stewards", "department": "Regional Utility/Renewables Division", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 52, "opex": 13, "contingency": 6.5, "npv": 195, "irr": 32, "paybackMonths": 18 },
   "qualityMetrics": { "defectDensity": 0.4, "testCoverage": 88, "technicalDebtDays": 12, "codeReviewCoverage": 100, "documentationScore": 85 }

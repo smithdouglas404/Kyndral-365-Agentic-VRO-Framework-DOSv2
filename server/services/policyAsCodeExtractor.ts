@@ -209,7 +209,7 @@ TASK:
 Extract all organizational segments, business units, or divisions. For each unit, provide:
 
 1. Unit name (official name)
-2. Unit code (abbreviation, e.g., "FPL", "NEER")
+2. Unit code (abbreviation, e.g., "Regional Utility", "Renewables Division")
 3. Unit type: segment|division|business_unit|geography|department
 4. Description of primary activities
 5. Geographic scope (regions, countries, states)
@@ -299,7 +299,7 @@ TASK:
 Extract all key metrics. For each metric:
 
 1. Metric name (official terminology)
-2. Metric code (short code, e.g., "ADJ_EPS", "OPERATING_MARGIN_FPL")
+2. Metric code (short code, e.g., "ADJ_EPS", "OPERATING_MARGIN_Regional Utility")
 3. Category: financial|operational|strategic|customer|environmental
 4. Subcategory (e.g., profitability, efficiency, growth)
 5. Description/definition

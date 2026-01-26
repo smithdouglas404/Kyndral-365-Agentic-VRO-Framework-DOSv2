@@ -32,7 +32,7 @@ function NavBar() {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">NextEra Energy</div>
+          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">Enterprise</div>
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]">Dashboard</Link>
@@ -378,7 +378,7 @@ export default function GovernanceDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Risk Categories</span>
-                  <Badge variant="outline" className="text-xs">From NextEra Risk Framework</Badge>
+                  <Badge variant="outline" className="text-xs">From Enterprise Risk Framework</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

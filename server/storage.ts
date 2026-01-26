@@ -738,7 +738,7 @@ export class DatabaseStorage implements IStorage {
 
     await db.insert(businessUnits).values([
       { id: 'bu-renewables', name: 'Clean Energy Division', description: 'Clean energy generation and battery storage', department: 'Renewables Division', owner: 'Rebecca Kujawa' },
-      { id: 'bu-fpl', name: 'Florida Power & Light', description: 'Electric utility serving Florida customers', department: 'Utility Division', owner: 'Armando Pimentel' },
+      { id: 'bu-fpl', name: 'Regional Utility', description: 'Electric utility serving Florida customers', department: 'Utility Division', owner: 'Armando Pimentel' },
       { id: 'bu-transmission', name: 'Infrastructure Division', description: 'Grid modernization and transmission assets', department: 'Infrastructure Division', owner: 'John Ketchum' },
     ]);
 
@@ -1033,7 +1033,7 @@ export class DatabaseStorage implements IStorage {
     const divisionData: InsertDivision[] = [
       {
         id: "fpl",
-        name: "Florida Power & Light",
+        name: "Regional Utility",
         ceo: "Armando Pimentel",
         profit2023: 4850,
         profit2024: 5200,
@@ -2196,7 +2196,7 @@ export class DatabaseStorage implements IStorage {
     const divisionData: InsertDivision[] = [
       {
         id: "fpl",
-        name: "Florida Power & Light",
+        name: "Regional Utility",
         ceo: "Armando Pimentel",
         profit2023: 4850,
         profit2024: 5200,

@@ -3,7 +3,7 @@
  *
  * Provides the active company profile to all components
  * - Loads active company on app startup
- * - Falls back to NextEra demo data if no active company
+ * - Falls back to Enterprise demo data if no active company
  * - Makes the system truly white-label
  */
 

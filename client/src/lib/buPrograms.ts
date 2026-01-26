@@ -1,6 +1,6 @@
 // ============================================================================
 // NEXTERA ENERGY BUSINESS UNIT PROGRAMS - PMO vs VRO DIFFERENTIATION
-// Source: NextEra Energy Annual Report 2024, Risk Management Supplement, Climate Report
+// Source: Enterprise Annual Report 2024, Risk Management Supplement, Climate Report
 // ============================================================================
 
 // PMO = Traditional Project Management: timelines, budgets, deliverables
@@ -143,7 +143,7 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-ir-001",
     name: "Grid Modernization System Upgrade",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     status: "amber",
     budget: { spent: 2.4, total: 3.5, unit: "$m" },
     timeline: { elapsed: 8, total: 12, unit: "months" },
@@ -175,7 +175,7 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-ir-002",
     name: "Demand Forecasting Enhancement",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     status: "green",
     budget: { spent: 0.8, total: 1.2, unit: "$m" },
     timeline: { elapsed: 5, total: 6, unit: "months" },
@@ -207,7 +207,7 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-am-001",
     name: "Private Markets Platform Build",
-    bu: "NextEra Energy Resources",
+    bu: "Renewable Energy Division",
     status: "red",
     budget: { spent: 4.2, total: 4.0, unit: "$m" },
     timeline: { elapsed: 14, total: 18, unit: "months" },
@@ -241,7 +241,7 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-am-002",
     name: "ESG Analytics Dashboard",
-    bu: "NextEra Energy Resources",
+    bu: "Renewable Energy Division",
     status: "green",
     budget: { spent: 0.6, total: 0.9, unit: "$m" },
     timeline: { elapsed: 4, total: 8, unit: "months" },
@@ -273,7 +273,7 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-rt-001",
     name: "Digital Onboarding Redesign",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     status: "amber",
     budget: { spent: 1.8, total: 2.5, unit: "$m" },
     timeline: { elapsed: 6, total: 10, unit: "months" },
@@ -305,7 +305,7 @@ export const pmoProjects: PMOProject[] = [
   {
     id: "pmo-rt-002",
     name: "AI Chatbot Implementation",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     status: "green",
     budget: { spent: 0.4, total: 0.7, unit: "$m" },
     timeline: { elapsed: 3, total: 5, unit: "months" },
@@ -442,7 +442,7 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-ir-001",
     name: "AI-Powered Deal Acceleration",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     valueStatus: "accelerating",
     expectedROI: "$85m annual efficiency",
     roiValue: 85,
@@ -481,7 +481,7 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-ir-002",
     name: "Longevity Risk Intelligence",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     valueStatus: "on-track",
     expectedROI: "$42m risk mitigation",
     roiValue: 42,
@@ -521,8 +521,8 @@ export const vroPrograms: VROProgram[] = [
   // Wind Portfolio - Rebecca Kujawa
   {
     id: "vro-am-001",
-    name: "NEER Wind Repowering Initiative",
-    bu: "NextEra Energy Resources",
+    name: "Renewables Division Wind Repowering Initiative",
+    bu: "Renewable Energy Division",
     valueStatus: "accelerating",
     expectedROI: "$450M annual revenue increase",
     roiValue: 450,
@@ -561,7 +561,7 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-am-002",
     name: "Stewardship Leadership",
-    bu: "NextEra Energy Resources",
+    bu: "Renewable Energy Division",
     valueStatus: "on-track",
     expectedROI: "Industry-leading ESG positioning",
     roiValue: 0,
@@ -602,7 +602,7 @@ export const vroPrograms: VROProgram[] = [
   {
     id: "vro-rt-001",
     name: "Digital Customer Experience",
-    bu: "Florida Power & Light",
+    bu: "Regional Utility",
     valueStatus: "accelerating",
     expectedROI: "$28m efficiency + NPS lift",
     roiValue: 28,
@@ -640,8 +640,8 @@ export const vroPrograms: VROProgram[] = [
   },
   {
     id: "vro-rt-002",
-    name: "FPL Solar Expansion Program",
-    bu: "Florida Power & Light",
+    name: "Regional Utility Solar Expansion Program",
+    bu: "Regional Utility",
     valueStatus: "on-track",
     expectedROI: "$320M annual cost savings",
     roiValue: 320,
@@ -827,13 +827,13 @@ export const riskIssues: RiskIssue[] = [
     name: "Hurricane & Severe Weather Exposure",
     severity: "high",
     trend: "stable",
-    description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event.",
+    description: "Regional Utility service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event.",
     exposure: "35,052 MW generation capacity",
     mitigation: "Storm hardening, vegetation management, restoration crews, mutual aid agreements",
     owner: "Armando Pimentel",
     aiAlert: "2024 storm season: Milton and Helene required $1.2B restoration - within reserves",
     lastReview: "2024-12-15",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   // Project Execution Risk
   {
@@ -842,13 +842,13 @@ export const riskIssues: RiskIssue[] = [
     name: "Renewable Project Execution Risk",
     severity: "high",
     trend: "stable",
-    description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
+    description: "Renewables Division's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays, interconnection queue backlogs, and construction labor shortages.",
     exposure: "68 GW development pipeline",
     mitigation: "Diversified project portfolio, early procurement, multiple vendor relationships",
     owner: "Rebecca Kujawa",
     aiAlert: "3 projects experiencing interconnection delays - replanning in progress",
     lastReview: "2024-12-10",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   // Cyber Risk - Critical Infrastructure
   {
@@ -863,7 +863,7 @@ export const riskIssues: RiskIssue[] = [
     owner: "Kirk Crews",
     aiAlert: "42% increase in energy-sector attacks detected - enhanced monitoring activated",
     lastReview: "2024-12-18",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   // Environmental & Climate Risk
   {
@@ -878,7 +878,7 @@ export const riskIssues: RiskIssue[] = [
     owner: "Eric Silagy",
     aiAlert: "2024 warmest year on record - storm frequency models updated",
     lastReview: "2024-12-12",
-    source: "NextEra Energy Sustainability Report 2024"
+    source: "Enterprise Sustainability Report 2024"
   },
   // Market Risk - Commodity Prices
   {
@@ -887,12 +887,12 @@ export const riskIssues: RiskIssue[] = [
     name: "Energy Commodity & PPA Pricing",
     severity: "medium",
     trend: "improving",
-    description: "Exposure to natural gas, power prices, and long-term PPA pricing dynamics affecting NEER merchant and contracted revenues.",
+    description: "Exposure to natural gas, power prices, and long-term PPA pricing dynamics affecting Renewables Division merchant and contracted revenues.",
     exposure: "$18.5B operating revenue",
     mitigation: "Hedging programs, PPA diversification, fuel cost recovery clauses",
     owner: "Kirk Crews (CFO)",
     lastReview: "2024-12-08",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   // Technology Risk - Grid Systems
   {
@@ -906,7 +906,7 @@ export const riskIssues: RiskIssue[] = [
     mitigation: "System redundancy, grid modernization, AMI deployment, DR/BCP testing",
     owner: "CIO",
     lastReview: "2024-12-05",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   // Supply Chain Risk
   {
@@ -921,7 +921,7 @@ export const riskIssues: RiskIssue[] = [
     owner: "Procurement",
     aiAlert: "2 solar panel suppliers showing delivery delays - contingency sourcing activated",
     lastReview: "2024-12-14",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   },
   // Regulatory Risk
   {
@@ -930,12 +930,12 @@ export const riskIssues: RiskIssue[] = [
     name: "Rate Case & FERC Regulatory Outcomes",
     severity: "medium",
     trend: "stable",
-    description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings and FERC transmission tariffs affect revenue recovery.",
+    description: "Regional Utility rate-regulated earnings depend on Florida PSC approval. Rate case filings and FERC transmission tariffs affect revenue recovery.",
     exposure: "Current ROE 10.15-11.15%",
     mitigation: "Regulatory engagement, rate case preparation, prudent capital deployment",
     owner: "Regulatory Affairs",
     lastReview: "2024-12-11",
-    source: "NextEra Energy 10-K 2024, Risk Factors"
+    source: "Enterprise 10-K 2024, Risk Factors"
   }
 ];
 
@@ -981,14 +981,14 @@ const getBUPrograms = (bu: string) => vroPrograms.filter(p => p.bu === bu);
 export const buPortfolios: BUPortfolio[] = [
   {
     id: "portfolio-ir",
-    name: "Florida Power & Light",
+    name: "Regional Utility",
     description: "Rate-regulated electric utility serving 5.9M customer accounts in Florida - 35,052 MW capacity",
-    projectCount: getBUProjects("Florida Power & Light").length,
-    programCount: getBUPrograms("Florida Power & Light").length,
-    totalBudget: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.roiValue, 0),
+    projectCount: getBUProjects("Regional Utility").length,
+    programCount: getBUPrograms("Regional Utility").length,
+    totalBudget: getBUProjects("Regional Utility").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Regional Utility").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Regional Utility").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Regional Utility").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 78,
     strategicAlignment: 92,
     activeEpics: 8,
@@ -1006,14 +1006,14 @@ export const buPortfolios: BUPortfolio[] = [
   },
   {
     id: "portfolio-am",
-    name: "NextEra Energy Resources",
+    name: "Renewable Energy Division",
     description: "Clean energy generation, renewable power solutions, and grid modernization - $68B in assets",
-    projectCount: getBUProjects("NextEra Energy Resources").length,
-    programCount: getBUPrograms("NextEra Energy Resources").length,
-    totalBudget: getBUProjects("NextEra Energy Resources").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("NextEra Energy Resources").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("NextEra Energy Resources").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("NextEra Energy Resources").reduce((s, p) => s + p.roiValue, 0),
+    projectCount: getBUProjects("Renewable Energy Division").length,
+    programCount: getBUPrograms("Renewable Energy Division").length,
+    totalBudget: getBUProjects("Renewable Energy Division").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Renewable Energy Division").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Renewable Energy Division").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Renewable Energy Division").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 65,
     strategicAlignment: 88,
     activeEpics: 12,
@@ -1031,14 +1031,14 @@ export const buPortfolios: BUPortfolio[] = [
   },
   {
     id: "portfolio-retail",
-    name: "Florida Power & Light",
+    name: "Regional Utility",
     description: "Customer operations, digital services, and direct-to-customer energy solutions",
-    projectCount: getBUProjects("Florida Power & Light").length,
-    programCount: getBUPrograms("Florida Power & Light").length,
-    totalBudget: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.total, 0),
-    budgetSpent: getBUProjects("Florida Power & Light").reduce((s, p) => s + p.budget.spent, 0),
-    valueRealized: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.valueRealized, 0),
-    expectedValue: getBUPrograms("Florida Power & Light").reduce((s, p) => s + p.roiValue, 0),
+    projectCount: getBUProjects("Regional Utility").length,
+    programCount: getBUPrograms("Regional Utility").length,
+    totalBudget: getBUProjects("Regional Utility").reduce((s, p) => s + p.budget.total, 0),
+    budgetSpent: getBUProjects("Regional Utility").reduce((s, p) => s + p.budget.spent, 0),
+    valueRealized: getBUPrograms("Regional Utility").reduce((s, p) => s + p.valueRealized, 0),
+    expectedValue: getBUPrograms("Regional Utility").reduce((s, p) => s + p.roiValue, 0),
     healthScore: 82,
     strategicAlignment: 85,
     activeEpics: 6,

@@ -2,9 +2,9 @@
   "project": {
     "id": "nee-ccus-001",
     "name": "ExxonMobil Natural Gas + CCUS Partnership",
-    "description": "NextEra announced a partnership with ExxonMobil to develop a 1.2 GW natural gas plant with integrated carbon capture, utilization and storage (CCUS) technology. The project addresses the critical need for 24/7 'firm' power for AI data centers while maintaining decarbonization commitments required by hyperscaler customers like Google and Meta. The facility will use combined-cycle gas technology with ExxonMobil's proven CCUS capturing 90%+ of CO2 emissions for permanent sequestration. The project qualifies for 45Q carbon capture tax credits which have bipartisan support and are expected to survive potential IRA modifications. This represents NextEra's 'all-of-the-above' energy strategy, combining renewables, storage, natural gas with carbon capture, and nuclear to meet growing AI infrastructure power demands.",
+    "description": "Enterprise announced a partnership with ExxonMobil to develop a 1.2 GW natural gas plant with integrated carbon capture, utilization and storage (CCUS) technology. The project addresses the critical need for 24/7 'firm' power for AI data centers while maintaining decarbonization commitments required by hyperscaler customers like Google and Meta. The facility will use combined-cycle gas technology with ExxonMobil's proven CCUS capturing 90%+ of CO2 emissions for permanent sequestration. The project qualifies for 45Q carbon capture tax credits which have bipartisan support and are expected to survive potential IRA modifications. This represents Enterprise's 'all-of-the-above' energy strategy, combining renewables, storage, natural gas with carbon capture, and nuclear to meet growing AI infrastructure power demands.",
     "status": "amber",
-    "businessUnitId": "NextEra Energy Resources",
+    "businessUnitId": "Renewable Energy Division",
     "startDate": "2025-06-01",
     "endDate": "2029-12-31",
     "priority": "high",
@@ -172,7 +172,7 @@
     "paybackMonths": "108"
   },
   "stakeholders": [
-    { "id": "sh-ccus-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ccus-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-ccus-002", "name": "ExxonMobil", "role": "Technology Partner", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-ccus-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
     { "id": "sh-ccus-004", "name": "EPA", "role": "Environmental Regulator", "department": "External", "influence": "high", "interest": "medium" }

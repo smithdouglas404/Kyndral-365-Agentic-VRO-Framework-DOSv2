@@ -1,7 +1,7 @@
 {
   "id": "nee-fpl-004",
-  "name": "FPL Storm Protection Plan - Hurricane Hardening",
-  "bu": "Florida Power & Light",
+  "name": "Regional Utility Storm Protection Plan - Hurricane Hardening",
+  "bu": "Regional Utility",
   "division": "Transmission & Distribution",
   "description": "10-year storm protection plan accelerating undergrounding of distribution lines, hardening poles, and installing smart switches. Response to Hurricane Milton and Helene impacts in 2024.",
   "expectedROI": "$180M avoided outage costs annually",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 8,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-FPL-104",
+    "epicId": "EPIC-Regional Utility-104",
     "epicName": "Storm Protection Initiative",
     "epicProgress": 28,
     "epicWsjf": { "businessValue": 10, "timeCriticality": 9, "riskReduction": 10, "jobSize": 9, "score": 29 },
@@ -85,7 +85,7 @@
     { "id": "dep-storm-002", "name": "Municipal Permitting", "type": "blocked-by", "status": "yellow", "description": "Requires coordination with local governments for right-of-way" }
   ],
   "stakeholders": [
-    { "id": "sh-storm-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-storm-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-storm-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
     { "id": "sh-storm-003", "name": "Manny Miranda", "role": "VP Transmission & Distribution", "department": "T&D Operations", "influence": "high", "interest": "high" },
     { "id": "sh-storm-004", "name": "Florida Emergency Management", "role": "Emergency Coordinator", "department": "External", "influence": "medium", "interest": "high" }

@@ -34,7 +34,7 @@ function NavBar() {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">NextEra Energy</div>
+          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">Enterprise</div>
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]">Dashboard</Link>
@@ -382,7 +382,7 @@ export default function OCMDashboard() {
                   </div>
                   <Building2 className="h-8 w-8 text-purple-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">NextEra employees</p>
+                <p className="text-xs text-gray-500 mt-2">Enterprise employees</p>
               </CardContent>
             </Card>
           </div>
@@ -416,7 +416,7 @@ export default function OCMDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Segment Stakeholders</span>
-                  <Badge variant="outline" className="text-xs">From NextEra Business Units</Badge>
+                  <Badge variant="outline" className="text-xs">From Enterprise Business Units</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

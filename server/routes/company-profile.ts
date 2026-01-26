@@ -554,7 +554,7 @@ export function registerCompanyProfileRoutes(app: Router) {
   /**
    * GET /api/company-profile/active
    * Get the active company profile with all related data
-   * This replaces hardcoded NextEra references with dynamic company data
+   * This replaces hardcoded Enterprise references with dynamic company data
    */
   router.get('/active', async (req: Request, res: Response) => {
     try {

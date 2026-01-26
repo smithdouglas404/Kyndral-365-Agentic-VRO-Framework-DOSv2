@@ -20,7 +20,7 @@ export default function SystemSettings() {
   });
 
   const [formData, setFormData] = useState({
-    organizationName: settings?.organizationName || 'NextEra Energy',
+    organizationName: settings?.organizationName || 'Enterprise',
     fiscalYearStart: settings?.fiscalYearStart || 'January',
     defaultCurrency: settings?.defaultCurrency || 'USD',
     defaultTimezone: settings?.defaultTimezone || 'America/New_York',

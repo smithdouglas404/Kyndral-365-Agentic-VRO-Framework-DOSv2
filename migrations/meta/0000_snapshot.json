@@ -1388,7 +1388,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'NextEra Energy'"
+          "default": "'Enterprise'"
         },
         "years_of_history": {
           "name": "years_of_history",

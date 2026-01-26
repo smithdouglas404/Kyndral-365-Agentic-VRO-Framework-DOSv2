@@ -2,9 +2,9 @@
   "project": {
     "id": "nee-crisis-001",
     "name": "2024 Hurricane Season Recovery & Resilience",
-    "description": "Florida Power & Light faced an unprecedented 2024 hurricane season with four major hurricanes causing over 3 million customer outages. FPL filed for $1.2 billion in cost recovery from the Florida Public Service Commission, which was approved via temporary rate increases of approximately $12/month per customer. The storm reserve fund was completely depleted, requiring a $150 million replenishment request. FPL accounts for over 50% of NextEra's earnings, making hurricane exposure a material risk to the company. This program accelerates infrastructure hardening including pole replacement, undergrounding critical feeders, and installation of smart switches for faster restoration. The 2024 season demonstrated the ongoing climate risk to Florida operations and the need for continued resilience investments ahead of future hurricane seasons.",
+    "description": "Regional Utility faced an unprecedented 2024 hurricane season with four major hurricanes causing over 3 million customer outages. Regional Utility filed for $1.2 billion in cost recovery from the Florida Public Service Commission, which was approved via temporary rate increases of approximately $12/month per customer. The storm reserve fund was completely depleted, requiring a $150 million replenishment request. Regional Utility accounts for over 50% of Enterprise's earnings, making hurricane exposure a material risk to the company. This program accelerates infrastructure hardening including pole replacement, undergrounding critical feeders, and installation of smart switches for faster restoration. The 2024 season demonstrated the ongoing climate risk to Florida operations and the need for continued resilience investments ahead of future hurricane seasons.",
     "status": "red",
-    "businessUnitId": "Florida Power & Light",
+    "businessUnitId": "Regional Utility",
     "startDate": "2024-09-01",
     "endDate": "2025-12-31",
     "priority": "critical",
@@ -214,10 +214,10 @@
     "paybackMonths": "0"
   },
   "stakeholders": [
-    { "id": "sh-crisis-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-crisis-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-crisis-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-crisis-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
-    { "id": "sh-crisis-004", "name": "FPL Customers", "role": "Ratepayers", "department": "External", "influence": "medium", "interest": "high" }
+    { "id": "sh-crisis-004", "name": "Regional Utility Customers", "role": "Ratepayers", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "qualityMetrics": {
     "defectDensity": "0.1",

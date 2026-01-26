@@ -1,7 +1,7 @@
 {
   "id": "nee-neer-005",
   "name": "Duane Arnold Nuclear Restart Assessment",
-  "bu": "NextEra Energy Resources",
+  "bu": "Renewable Energy Division",
   "division": "Nuclear Development",
   "description": "Feasibility study and preliminary engineering for potential restart of Duane Arnold Energy Center in Iowa. Exploring commercial arrangements and regulatory pathway.",
   "expectedROI": "$15M study investment; $2B+ potential asset value",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 6,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-105",
+    "epicId": "EPIC-Renewables Division-105",
     "epicName": "Nuclear Restart Initiative",
     "epicProgress": 25,
     "epicWsjf": { "businessValue": 8, "timeCriticality": 5, "riskReduction": 7, "jobSize": 6, "score": 22 },
@@ -84,7 +84,7 @@
     { "id": "dep-nuc-002", "name": "Data Center Customer Agreement", "type": "related", "status": "green", "description": "Commercial arrangement with large customer" }
   ],
   "stakeholders": [
-    { "id": "sh-nuc-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-nuc-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-nuc-002", "name": "Nuclear Regulatory Commission", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-nuc-003", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
     { "id": "sh-nuc-004", "name": "Potential Data Center Customers", "role": "Offtakers", "department": "External", "influence": "high", "interest": "high" }

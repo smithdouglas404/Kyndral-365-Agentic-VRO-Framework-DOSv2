@@ -241,10 +241,10 @@ const ACTIONS_BY_TYPE: Record<SimulationEventType, { id: string; label: string; 
 };
 
 const CITATIONS = [
-  'NextEra Energy Annual Report 2024, p.42',
+  'Enterprise Annual Report 2024, p.42',
   'Climate & Nature Report 2024, p.18',
   'Risk Management Supplement 2024, p.8',
-  'NextEra Energy Annual Report 2024, p.67',
+  'Enterprise Annual Report 2024, p.67',
   'SAFe 6.0 Framework, Flow Metrics',
   'Portfolio Analytics Dashboard',
   'Real-time Monitoring System'

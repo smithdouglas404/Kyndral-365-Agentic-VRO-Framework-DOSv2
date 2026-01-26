@@ -34,7 +34,7 @@ function NavBar() {
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">NextEra Energy</div>
+          <div className="font-bold text-2xl text-[#005EB8] tracking-tight cursor-pointer whitespace-nowrap">Enterprise</div>
         </Link>
         <nav className="hidden md:flex gap-6">
           <Link href="/dashboard" className="text-sm font-medium text-[#005EB8]">Dashboard</Link>
@@ -371,7 +371,7 @@ export default function OKRDashboard() {
 
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Strategic Objectives from NextEra Segments</h2>
+              <h2 className="text-lg font-semibold">Strategic Objectives from Enterprise Segments</h2>
               <Badge variant="outline" className="text-xs">Click to expand for initiative details</Badge>
             </div>
             {objectives.map((objective) => (

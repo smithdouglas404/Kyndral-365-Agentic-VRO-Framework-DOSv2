@@ -1,6 +1,6 @@
 /**
  * DATABASE MANAGEMENT PAGE
- * Admin page for database operations including seeding with NextEra test data
+ * Admin page for database operations including seeding with Enterprise test data
  */
 
 import { AdminLayout } from '@/components/AdminLayout';
@@ -97,10 +97,10 @@ export default function DatabaseManagement() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Database className="w-5 h-5" />
-                  Seed Database with NextEra Test Data
+                  Seed Database with Enterprise Test Data
                 </CardTitle>
                 <CardDescription className="mt-2">
-                  Load production-ready test data including NextEra Energy projects, tasks, risks, and more.
+                  Load production-ready test data including Enterprise projects, tasks, risks, and more.
                   This will clear existing data and load fresh test data.
                 </CardDescription>
               </div>
@@ -111,7 +111,7 @@ export default function DatabaseManagement() {
               <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg">
                 <div className="text-sm text-muted-foreground mb-1">Projects</div>
                 <div className="text-2xl font-bold">74</div>
-                <div className="text-xs text-muted-foreground">36 NextEra + 38 Generic IT</div>
+                <div className="text-xs text-muted-foreground">36 Enterprise + 38 Generic IT</div>
               </div>
               <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg">
                 <div className="text-sm text-muted-foreground mb-1">Tasks</div>
@@ -133,9 +133,9 @@ export default function DatabaseManagement() {
                 What gets loaded:
               </h4>
               <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1 ml-6 list-disc">
-                <li>3 Divisions (FPL, NextEra Energy Resources, Corporate & Other)</li>
+                <li>3 Divisions (Regional Utility, Renewable Energy Division, Corporate & Other)</li>
                 <li>8 Teams with leads and members</li>
-                <li>74 Projects (real NextEra + generic business projects)</li>
+                <li>74 Projects (real Enterprise + generic business projects)</li>
                 <li>180 Tasks with assignees and due dates</li>
                 <li>53 Risks with severity and mitigation plans</li>
                 <li>6 OKRs (Objectives & Key Results)</li>
@@ -264,7 +264,7 @@ export default function DatabaseManagement() {
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p className="font-semibold text-foreground">
-                This will clear ALL existing data and load fresh NextEra test data.
+                This will clear ALL existing data and load fresh Enterprise test data.
               </p>
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded p-3">
                 <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">

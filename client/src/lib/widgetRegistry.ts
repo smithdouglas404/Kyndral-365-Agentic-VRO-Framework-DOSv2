@@ -79,7 +79,7 @@ export const widgetDefinitions: WidgetDefinition[] = [
   {
     id: 'segment-cards',
     name: 'Segment Performance',
-    description: 'Reportable segments overview (FPL, NEER, Corporate)',
+    description: 'Reportable segments overview (Regional Utility, Renewables Division, Corporate)',
     defaultSize: 'full',
     allowedSizes: ['large', 'full'],
     category: 'segments',

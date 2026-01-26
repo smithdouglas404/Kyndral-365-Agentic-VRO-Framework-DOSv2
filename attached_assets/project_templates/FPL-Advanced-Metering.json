@@ -1,7 +1,7 @@
 {
   "id": "nee-fpl-002",
-  "name": "FPL Advanced Metering Infrastructure 2.0",
-  "bu": "Florida Power & Light",
+  "name": "Regional Utility Advanced Metering Infrastructure 2.0",
+  "bu": "Regional Utility",
   "division": "Customer Operations",
   "description": "Next-generation smart meter deployment with enhanced two-way communication, real-time usage analytics, and integration with grid automation. Upgrading 5.8 million customer endpoints.",
   "expectedROI": "$85M annual operational savings",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 5,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-FPL-102",
+    "epicId": "EPIC-Regional Utility-102",
     "epicName": "Smart Grid Customer Platform",
     "epicProgress": 62,
     "epicWsjf": { "businessValue": 8, "timeCriticality": 7, "riskReduction": 6, "jobSize": 5, "score": 24 },
@@ -84,10 +84,10 @@
     { "id": "dep-ami-002", "name": "Customer Digital Platform", "type": "related", "status": "green", "description": "Provides data for customer portal" }
   ],
   "stakeholders": [
-    { "id": "sh-ami-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-ami-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-ami-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
     { "id": "sh-ami-003", "name": "Marlene Santos", "role": "VP Customer Service", "department": "Customer Operations", "influence": "high", "interest": "high" },
-    { "id": "sh-ami-004", "name": "FPL Residential Customers", "role": "End User", "department": "External", "influence": "medium", "interest": "high" }
+    { "id": "sh-ami-004", "name": "Regional Utility Residential Customers", "role": "End User", "department": "External", "influence": "medium", "interest": "high" }
   ],
   "financials": { "capitalex": 28, "opex": 7, "contingency": 3.5, "npv": 180, "irr": 32, "paybackMonths": 18 },
   "qualityMetrics": { "defectDensity": 0.5, "testCoverage": 92, "technicalDebtDays": 8, "codeReviewCoverage": 100, "documentationScore": 90 }

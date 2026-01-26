@@ -36,8 +36,8 @@ interface BUProgramsSectionProps {
 }
 
 const BU_COLORS: Record<string, string> = {
-  "Florida Power & Light": "#005EB8",
-  "NextEra Energy Resources": "#00843D",
+  "Regional Utility": "#005EB8",
+  "Renewable Energy Division": "#00843D",
   "Corporate & Other": "#424242"
 };
 
@@ -575,8 +575,8 @@ export function PortfolioCard({ portfolio, onDrillDown }: { portfolio: BUPortfol
   const healthColor = portfolio.healthScore >= 80 ? "#00843D" : portfolio.healthScore >= 60 ? "#f59e0b" : "#D50032";
   
   const BU_COLORS: Record<string, string> = {
-    "Florida Power & Light": "#005EB8",
-    "NextEra Energy Resources": "#00843D",
+    "Regional Utility": "#005EB8",
+    "Renewable Energy Division": "#00843D",
     "Corporate & Other": "#424242"
   };
 

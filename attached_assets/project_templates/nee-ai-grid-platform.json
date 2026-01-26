@@ -2,7 +2,7 @@
   "project": {
     "id": "nee-ai-001",
     "name": "AI Grid Management Platform",
-    "description": "As part of the December 2025 Google Cloud partnership, NextEra gained access to Google's advanced AI models including TimesFM 2.5 for time-series forecasting, WeatherNext 2 for weather prediction, and security-constrained power flow modeling. The first commercial AI grid management product is expected to launch via Google Cloud Marketplace by mid-2026. The platform enables AI-powered field operations including predictive maintenance 30+ days in advance, supply chain optimization, and weather response automation. For FPL hurricane operations, integration with WeatherNext 2 enables improved storm preparation, resource positioning, and restoration optimization. This product represents a potential new revenue stream by licensing NextEra's operational expertise combined with Google AI to other utilities facing similar grid management challenges.",
+    "description": "As part of the December 2025 Google Cloud partnership, Enterprise gained access to Google's advanced AI models including TimesFM 2.5 for time-series forecasting, WeatherNext 2 for weather prediction, and security-constrained power flow modeling. The first commercial AI grid management product is expected to launch via Google Cloud Marketplace by mid-2026. The platform enables AI-powered field operations including predictive maintenance 30+ days in advance, supply chain optimization, and weather response automation. For Regional Utility hurricane operations, integration with WeatherNext 2 enables improved storm preparation, resource positioning, and restoration optimization. This product represents a potential new revenue stream by licensing Enterprise's operational expertise combined with Google AI to other utilities facing similar grid management challenges.",
     "status": "amber",
     "businessUnitId": "Corporate & Other",
     "startDate": "2025-12-08",
@@ -34,7 +34,7 @@
       "storyPoints": "144",
       "completedPoints": "35",
       "priority": "critical",
-      "acceptanceCriteria": ["Model training on NextEra data complete", "80% prediction accuracy achieved", "Integration with work management system", "Field pilot successful"],
+      "acceptanceCriteria": ["Model training on Enterprise data complete", "80% prediction accuracy achieved", "Integration with work management system", "Field pilot successful"],
       "wsjfScore": "42"
     },
     {
@@ -74,7 +74,7 @@
       "id": "story-ai-002",
       "featureId": "feat-ai-002",
       "name": "Hurricane Path Impact Prediction",
-      "description": "Integrate WeatherNext hurricane forecasts with FPL infrastructure data to predict outage impacts",
+      "description": "Integrate WeatherNext hurricane forecasts with Regional Utility infrastructure data to predict outage impacts",
       "status": "in-progress",
       "storyPoints": "21",
       "acceptanceCriteria": ["Weather data pipeline established", "Infrastructure impact model trained", "Real-time predictions operational"]
@@ -157,7 +157,7 @@
       "name": "Internal AI Platform MVP",
       "targetDate": "2026-03-31",
       "status": "on-track",
-      "deliverables": ["Predictive maintenance live at FPL", "Weather optimization pilot complete", "ROI metrics validated"]
+      "deliverables": ["Predictive maintenance live at Regional Utility", "Weather optimization pilot complete", "ROI metrics validated"]
     },
     {
       "id": "ms-ai-003",
@@ -180,7 +180,7 @@
       "name": "Internal Data Platform",
       "dependencyType": "related",
       "status": "amber",
-      "description": "Requires NextEra Enterprise Data Platform for ML training data access"
+      "description": "Requires Enterprise Enterprise Data Platform for ML training data access"
     }
   ],
   "risks": [

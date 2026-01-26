@@ -39,7 +39,7 @@ interface AttributionAnalysis {
 
 const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
   {
-    initiative: 'FPL Solar Expansion',
+    initiative: 'Regional Utility Solar Expansion',
     kpiImpact: [
       { kpi: 'Revenue Growth', contribution: '+$580M', confidence: 92 },
       { kpi: 'Renewable Capacity', contribution: '+1,200 MW', confidence: 95 },
@@ -49,7 +49,7 @@ const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
     evidenceStrength: 'strong'
   },
   {
-    initiative: 'NEER Wind Repowering',
+    initiative: 'Renewables Division Wind Repowering',
     kpiImpact: [
       { kpi: 'Revenue Growth', contribution: '+$690M', confidence: 88 },
       { kpi: 'Renewable Capacity', contribution: '+2,100 MW', confidence: 92 }

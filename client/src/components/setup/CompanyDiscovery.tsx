@@ -78,7 +78,7 @@ export function CompanyDiscovery({ onCandidateSelected }: CompanyDiscoveryProps)
             <Input
               id="search"
               type="text"
-              placeholder="e.g., NextEra Energy, Apple Inc., Microsoft"
+              placeholder="e.g., Enterprise, Apple Inc., Microsoft"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}

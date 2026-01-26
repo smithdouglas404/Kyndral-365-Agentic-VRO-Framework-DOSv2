@@ -865,9 +865,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       },
       projectBreakdown: [
         { name: 'Enterprise Technology', value: '62 pts', budget: 'High' },
-        { name: 'FPL', value: '51 pts', budget: 'Medium' },
+        { name: 'Regional Utility', value: '51 pts', budget: 'Medium' },
         { name: 'Corporate', value: '48 pts', budget: 'Medium' },
-        { name: 'NEER', value: '45 pts', budget: 'Medium' }
+        { name: 'Renewables Division', value: '45 pts', budget: 'Medium' }
       ],
       insight: 'Portfolio velocity at 53 points is near target. Group Technology leads with highest velocity. Planning agent recommends cross-team knowledge sharing to improve velocity across business units.',
       summary: 'Velocity trending positive with 26% improvement from baseline. Sprint commitment at 96% indicates healthy capacity planning.'
@@ -1022,14 +1022,14 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Projected Completion': 'Q3 2026'
       },
       projectBreakdown: [
-        { name: 'FPL Projects', value: '72%', budget: 'Ahead' },
-        { name: 'NEER Projects', value: '65%', budget: 'On Track' },
+        { name: 'Regional Utility Projects', value: '72%', budget: 'Ahead' },
+        { name: 'Renewables Division Projects', value: '65%', budget: 'On Track' },
         { name: 'Corporate Projects', value: '61%', budget: 'Slight Delay' }
       ],
       pendingAlerts: [
         { id: 'prog-1', title: 'Corporate Projects Delay', severity: 'warning', description: '3 projects showing 5% schedule variance', dueDate: 'Q2 review', actionLabel: 'Review Recovery Plan', agent: 'Planning Agent' }
       ],
-      insight: 'Portfolio progress at 67% with FPL leading. Corporate projects showing slight delay requiring attention.',
+      insight: 'Portfolio progress at 67% with Regional Utility leading. Corporate projects showing slight delay requiring attention.',
       summary: 'Overall program on track for Q3 2026 completion. VRO Agent validates $42M value delivered.'
     },
     'planning-budget': {
@@ -1110,16 +1110,16 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Capital vs OpEx': '65% / 35%'
       },
       projectBreakdown: [
-        { name: 'FPL Operations', value: '$1.2B', budget: '50% of total' },
-        { name: 'NEER Investments', value: '$780M', budget: '33% of total' },
+        { name: 'Regional Utility Operations', value: '$1.2B', budget: '50% of total' },
+        { name: 'Renewables Division Investments', value: '$780M', budget: '33% of total' },
         { name: 'Corporate & Other', value: '$420M', budget: '17% of total' }
       ],
       pendingAlerts: [
-        { id: 'fin-1', title: 'Budget Reallocation Request', severity: 'warning', description: 'NEER requesting $45M from contingency', dueDate: '10 days', actionLabel: 'Review Request', agent: 'FinOps Agent' },
+        { id: 'fin-1', title: 'Budget Reallocation Request', severity: 'warning', description: 'Renewables Division requesting $45M from contingency', dueDate: '10 days', actionLabel: 'Review Request', agent: 'FinOps Agent' },
         { id: 'fin-2', title: 'Quarterly Budget Review', severity: 'info', description: 'Q1 close-out variance analysis pending', dueDate: '5 days', actionLabel: 'Schedule Review', agent: 'FinOps Agent' }
       ],
       insight: '$2.4B total portfolio budget with strong allocation discipline. Contingency reserves healthy at $180M.',
-      summary: 'Budget allocation on track. FinOps Agent monitoring reallocation request from NEER segment.'
+      summary: 'Budget allocation on track. FinOps Agent monitoring reallocation request from Renewables Division segment.'
     },
     'finops-spend': {
       label: 'YTD Spend',
@@ -1188,20 +1188,20 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
       category: 'VRO',
       metrics: {
         'Total Profit': '$8.2B',
-        'FPL Contribution': '$4.8B',
-        'NEER Contribution': '$2.9B',
+        'Regional Utility Contribution': '$4.8B',
+        'Renewables Division Contribution': '$2.9B',
         'YoY Growth': '+12%',
         'Margin': '18.5%'
       },
       projectBreakdown: [
-        { name: 'FPL Regulated', value: '$4.8B', budget: '59% of profit' },
-        { name: 'NEER Clean Energy', value: '$2.9B', budget: '35% of profit' },
+        { name: 'Regional Utility Regulated', value: '$4.8B', budget: '59% of profit' },
+        { name: 'Renewables Division Clean Energy', value: '$2.9B', budget: '35% of profit' },
         { name: 'Corporate & Other', value: '$500M', budget: '6% of profit' }
       ],
       pendingAlerts: [
         { id: 'profit-1', title: 'Q1 Earnings Prep', severity: 'info', description: 'Board presentation materials due for review', dueDate: '12 days', actionLabel: 'Review Materials', agent: 'FinOps Agent' }
       ],
-      insight: '$8.2B group profit with strong 12% YoY growth. FPL regulated segment leading contribution.',
+      insight: '$8.2B group profit with strong 12% YoY growth. Regional Utility regulated segment leading contribution.',
       summary: 'Profitability on track. VRO Agent monitoring value creation across all segments.'
     },
     'ocm-readiness': {
@@ -1304,8 +1304,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Support Ratio': '1:85'
       },
       projectBreakdown: [
-        { name: 'FPL Operations', value: '9,200', budget: '56% of total' },
-        { name: 'NEER Staff', value: '4,100', budget: '25% of total' },
+        { name: 'Regional Utility Operations', value: '9,200', budget: '56% of total' },
+        { name: 'Renewables Division Staff', value: '4,100', budget: '25% of total' },
         { name: 'Corporate', value: '3,200', budget: '19% of total' }
       ],
       pendingAlerts: [
@@ -1348,8 +1348,8 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'New This Month': '420'
       },
       projectBreakdown: [
-        { name: 'FPL Users', value: '8,100', budget: '57% of total' },
-        { name: 'NEER Users', value: '3,800', budget: '27% of total' },
+        { name: 'Regional Utility Users', value: '8,100', budget: '57% of total' },
+        { name: 'Renewables Division Users', value: '3,800', budget: '27% of total' },
         { name: 'Corporate Users', value: '2,300', budget: '16% of total' }
       ],
       pendingAlerts: [

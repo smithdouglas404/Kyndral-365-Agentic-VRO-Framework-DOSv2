@@ -67,13 +67,13 @@ export const strategicThemes: StrategicTheme[] = [
 ];
 
 // ===================== VALUE STREAMS =====================
-// NextEra Energy Value Streams aligned to SEC Reportable Segments
+// Enterprise Value Streams aligned to SEC Reportable Segments
 
 export const valueStreams: ValueStream[] = [
   {
     id: 'vs-grid-operations',
     name: 'Grid Operations & Reliability',
-    description: 'FPL transmission and distribution network operations, storm hardening, and reliability improvements',
+    description: 'Regional Utility transmission and distribution network operations, storm hardening, and reliability improvements',
     type: 'operational',
     owner: 'Eric Silagy',
     linkedARTs: ['art-grid'],
@@ -83,7 +83,7 @@ export const valueStreams: ValueStream[] = [
   {
     id: 'vs-renewable-development',
     name: 'Clean Energy Development',
-    description: 'NEER solar, wind, and battery storage project development and construction',
+    description: 'Renewables Division solar, wind, and battery storage project development and construction',
     type: 'development',
     owner: 'Rebecca Kujawa',
     linkedARTs: ['art-renewables'],
@@ -93,7 +93,7 @@ export const valueStreams: ValueStream[] = [
   {
     id: 'vs-customer-operations',
     name: 'Customer Operations',
-    description: 'FPL customer service, billing, smart meter deployment, and demand-side management',
+    description: 'Regional Utility customer service, billing, smart meter deployment, and demand-side management',
     type: 'operational',
     owner: 'Mark Hickson',
     linkedARTs: ['art-customer'],
@@ -113,7 +113,7 @@ export const valueStreams: ValueStream[] = [
 ];
 
 // ===================== PORTFOLIO OKRs =====================
-// NextEra Energy Strategic OKRs - Source: Investor Presentations 2024
+// Enterprise Strategic OKRs - Source: Investor Presentations 2024
 
 export const portfolioOKRs: PortfolioOKR[] = [
   {
@@ -124,7 +124,7 @@ export const portfolioOKRs: PortfolioOKR[] = [
     quarter: '2025-Q4',
     status: 'on-track',
     keyResults: [
-      { id: 'kr-dig-1', description: 'Deploy smart meters to 100% of FPL service territory', targetValue: 100, currentValue: 94, unit: '%', confidence: 90, status: 'on-track' },
+      { id: 'kr-dig-1', description: 'Deploy smart meters to 100% of Regional Utility service territory', targetValue: 100, currentValue: 94, unit: '%', confidence: 90, status: 'on-track' },
       { id: 'kr-dig-2', description: 'Achieve 75% customer digital engagement rate', targetValue: 75, currentValue: 62, unit: '%', confidence: 75, status: 'on-track' },
       { id: 'kr-dig-3', description: 'Reduce outage restoration time by 40% through automation', targetValue: 40, currentValue: 28, unit: '%', confidence: 80, status: 'on-track' }
     ],
@@ -135,7 +135,7 @@ export const portfolioOKRs: PortfolioOKR[] = [
     id: 'okr-portfolio-ops',
     level: 'portfolio',
     objective: 'Achieve industry-leading grid reliability and storm resilience',
-    owner: 'COO - FPL Operations',
+    owner: 'COO - Regional Utility Operations',
     quarter: '2025-Q4',
     status: 'at-risk',
     keyResults: [
@@ -149,7 +149,7 @@ export const portfolioOKRs: PortfolioOKR[] = [
 ];
 
 // ===================== PORTFOLIO KPIs =====================
-// NextEra Energy Key Performance Indicators - Source: 10-K 2024, Investor Presentations
+// Enterprise Key Performance Indicators - Source: 10-K 2024, Investor Presentations
 
 export const portfolioKPIs: PortfolioKPI[] = [
   {
@@ -187,7 +187,7 @@ export const portfolioKPIs: PortfolioKPI[] = [
   {
     id: 'kpi-customer-satisfaction',
     name: 'Customer Satisfaction (J.D. Power)',
-    description: 'FPL customer satisfaction ranking among large utilities',
+    description: 'Regional Utility customer satisfaction ranking among large utilities',
     category: 'customer',
     targetValue: 1,
     currentValue: 2,
@@ -201,19 +201,19 @@ export const portfolioKPIs: PortfolioKPI[] = [
 ];
 
 // ===================== PORTFOLIO EPICS =====================
-// NextEra Energy Strategic Initiatives - Source: Investor Presentations 2024
+// Enterprise Strategic Initiatives - Source: Investor Presentations 2024
 
 export const portfolioEpics: PortfolioEpic[] = [
   {
     id: 'epic-storm-hardening',
-    name: 'FPL Storm Hardening Program',
+    name: 'Regional Utility Storm Hardening Program',
     description: 'Comprehensive grid hardening initiative including undergrounding, pole strengthening, and vegetation management',
     epicHypothesis: 'By completing storm hardening before hurricane season, we reduce outage duration by 50% and customer impact by $1.2B',
     businessOutcome: 'Reduce storm restoration costs by $400M and improve customer satisfaction by 15 points',
     leadingIndicators: ['Miles hardened', 'Poles replaced', 'Underground conversion rate'],
     mvp: 'Complete hardening of critical feeders serving hospitals and emergency services',
     status: 'implementing',
-    owner: 'Eric Silagy - FPL CEO',
+    owner: 'Eric Silagy - Regional Utility CEO',
     strategicThemeId: 'theme-operational-excellence',
     valueStreamId: 'vs-grid-operations',
     wsjfScore: 35,
@@ -228,14 +228,14 @@ export const portfolioEpics: PortfolioEpic[] = [
   },
   {
     id: 'epic-solar-expansion',
-    name: 'NEER Solar Capacity Expansion',
+    name: 'Renewables Division Solar Capacity Expansion',
     description: 'Development and construction of 5GW new solar generation capacity across 15 states',
     epicHypothesis: 'Expanding solar capacity will generate $2.1B in annual revenue and support decarbonization goals',
     businessOutcome: 'Add 5GW solar capacity, secure $8B in long-term PPAs, achieve 15% IRR on new projects',
     leadingIndicators: ['MW under construction', 'PPA execution rate', 'Permitting cycle time'],
     mvp: 'Complete first 1GW tranche with executed PPAs and interconnection agreements',
     status: 'implementing',
-    owner: 'Rebecca Kujawa - NEER President',
+    owner: 'Rebecca Kujawa - Renewables Division President',
     strategicThemeId: 'theme-customer-growth',
     valueStreamId: 'vs-renewable-development',
     wsjfScore: 32,
@@ -273,13 +273,13 @@ export const portfolioEpics: PortfolioEpic[] = [
 ];
 
 // ===================== AGILE RELEASE TRAINS =====================
-// NextEra Energy Agile Release Trains - aligned to Value Streams
+// Enterprise Agile Release Trains - aligned to Value Streams
 
 export const arts: AgileReleaseTrain[] = [
   {
     id: 'art-grid',
     name: 'Grid Operations ART',
-    description: 'Agile Release Train for FPL transmission, distribution, and grid modernization',
+    description: 'Agile Release Train for Regional Utility transmission, distribution, and grid modernization',
     valueStreamId: 'vs-grid-operations',
     releaseTrainEngineer: 'Maria Santos',
     productManager: 'David Thompson',
@@ -297,7 +297,7 @@ export const arts: AgileReleaseTrain[] = [
   {
     id: 'art-renewables',
     name: 'Clean Energy Development ART',
-    description: 'Agile Release Train for NEER solar, wind, and battery storage projects',
+    description: 'Agile Release Train for Renewables Division solar, wind, and battery storage projects',
     valueStreamId: 'vs-renewable-development',
     releaseTrainEngineer: 'Jennifer Walsh',
     productManager: 'Chris Martinez',
@@ -315,7 +315,7 @@ export const arts: AgileReleaseTrain[] = [
   {
     id: 'art-customer',
     name: 'Customer Operations ART',
-    description: 'FPL customer service, billing, smart meters, and digital experience',
+    description: 'Regional Utility customer service, billing, smart meters, and digital experience',
     valueStreamId: 'vs-customer-operations',
     releaseTrainEngineer: 'Lisa Anderson',
     productManager: 'Tom Harris',
@@ -963,7 +963,7 @@ export const financialSnapshots: FinancialSnapshot[] = [
     id: 'fin-portfolio-jan',
     entityType: 'portfolio',
     entityId: 'portfolio-lg',
-    entityName: 'NextEra Energy Enterprise Portfolio',
+    entityName: 'Enterprise Enterprise Portfolio',
     snapshotDate: '2025-01-31',
     period: 'monthly',
     totalBudget: 95000000,

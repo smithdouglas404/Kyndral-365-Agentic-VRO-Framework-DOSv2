@@ -2,7 +2,7 @@
   "project": {
     "id": "nee-google-001",
     "name": "Google Cloud Data Center Partnership",
-    "description": "On December 8, 2025, NextEra Energy and Google Cloud announced a landmark strategic energy and technology partnership. Google has already contracted roughly 3.5 GW of energy capacity from NextEra, with plans to develop 15 GW of new power generation for data center hubs by 2035. The partnership includes joint development of multiple GW-scale data center campuses across the U.S., with three campuses currently in development. Each campus integrates dedicated power generation including solar, battery storage, and natural gas. The technology collaboration gives NextEra access to Google's AI models including TimesFM 2.5 for time-series forecasting and WeatherNext 2 for weather prediction. NextEra has secured 4 GW of combined-cycle gas turbine slots from GE Vernova to support this initiative. The partnership addresses data center power demand projected to represent 43% of U.S. power demand growth through 2032.",
+    "description": "On December 8, 2025, Enterprise and Google Cloud announced a landmark strategic energy and technology partnership. Google has already contracted roughly 3.5 GW of energy capacity from Enterprise, with plans to develop 15 GW of new power generation for data center hubs by 2035. The partnership includes joint development of multiple GW-scale data center campuses across the U.S., with three campuses currently in development. Each campus integrates dedicated power generation including solar, battery storage, and natural gas. The technology collaboration gives Enterprise access to Google's AI models including TimesFM 2.5 for time-series forecasting and WeatherNext 2 for weather prediction. Enterprise has secured 4 GW of combined-cycle gas turbine slots from GE Vernova to support this initiative. The partnership addresses data center power demand projected to represent 43% of U.S. power demand growth through 2032.",
     "status": "amber",
     "businessUnitId": "Corporate & Other",
     "startDate": "2025-12-08",
@@ -204,7 +204,7 @@
     { "id": "sh-google-001", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" },
     { "id": "sh-google-002", "name": "Kirk Crews", "role": "CFO", "department": "Finance", "influence": "high", "interest": "high" },
     { "id": "sh-google-003", "name": "Google Cloud", "role": "Strategic Partner", "department": "External", "influence": "high", "interest": "high" },
-    { "id": "sh-google-004", "name": "Rebecca Kujawa", "role": "President & CEO NEER", "department": "NEER Executive", "influence": "high", "interest": "high" }
+    { "id": "sh-google-004", "name": "Rebecca Kujawa", "role": "President & CEO Renewables Division", "department": "Renewables Division Executive", "influence": "high", "interest": "high" }
   ],
   "qualityMetrics": {
     "defectDensity": "0.2",

@@ -331,8 +331,8 @@ export default function ProjectDetailPage() {
               size="icon" 
               onClick={() => {
                 const segmentMap: Record<string, string> = {
-                  'Florida Power & Light': 'fpl',
-                  'NextEra Energy Resources': 'neer',
+                  'Regional Utility': 'fpl',
+                  'Renewable Energy Division': 'neer',
                   'Corporate & Other': 'corporate-other'
                 };
                 const segmentId = segmentMap[project.bu] || 'fpl';

@@ -1,9 +1,9 @@
 {
   "id": "nee-fpl-001",
-  "name": "FPL Grid Modernization & Automation",
-  "bu": "Florida Power & Light",
+  "name": "Regional Utility Grid Modernization & Automation",
+  "bu": "Regional Utility",
   "division": "Distribution Operations",
-  "description": "AI-powered grid management system with automated switching, real-time load balancing, and predictive outage prevention. Part of FPL's $8.2B capital investment program targeting 99.98% reliability.",
+  "description": "AI-powered grid management system with automated switching, real-time load balancing, and predictive outage prevention. Part of Regional Utility's $8.2B capital investment program targeting 99.98% reliability.",
   "expectedROI": "$120M annual efficiency gains",
   "roiValue": 120,
   "priority": "critical",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 6,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-FPL-101",
+    "epicId": "EPIC-Regional Utility-101",
     "epicName": "Grid Resilience Initiative",
     "epicProgress": 55,
     "epicWsjf": { "businessValue": 9, "timeCriticality": 8, "riskReduction": 9, "jobSize": 8, "score": 28 },
@@ -112,7 +112,7 @@
     { "id": "dep-002", "name": "AMI Infrastructure", "type": "related", "status": "green", "description": "Shares communication backbone for grid sensors" }
   ],
   "stakeholders": [
-    { "id": "sh-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "medium" },
     { "id": "sh-003", "name": "Armando Pimentel", "role": "VP Distribution Operations", "department": "Operations", "influence": "high", "interest": "high" },
     { "id": "sh-004", "name": "Customer Advisory Council", "role": "Customer Representative", "department": "External", "influence": "medium", "interest": "high" }

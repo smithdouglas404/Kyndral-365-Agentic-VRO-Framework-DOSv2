@@ -333,19 +333,19 @@ export function triggerDemoScenario(scenarioId: string): void {
 }
 
 async function triggerBudgetBreachScenario(): Promise<void> {
-  executeAction('finops', 'investigate', 'project', 'nee-fpl-001', 'FPL Grid Modernization',
+  executeAction('finops', 'investigate', 'project', 'nee-fpl-001', 'Regional Utility Grid Modernization',
     'Budget variance detected: 23% over allocated spend. Analyzing cost drivers.', 92);
-  notifyAction('finops', 'investigate', 'FPL Grid Modernization');
+  notifyAction('finops', 'investigate', 'Regional Utility Grid Modernization');
   
   // Persist intervention to database
   await createAgentIntervention(
     'finops',
     'budget',
     'high',
-    'FPL Grid Modernization Budget Overrun',
+    'Regional Utility Grid Modernization Budget Overrun',
     'Budget variance detected: 23% over allocated spend due to unexpected SCADA integration costs.',
     'nee-fpl-001',
-    'FPL Grid Modernization',
+    'Regional Utility Grid Modernization',
     'Conduct scope review and reallocate $2M from contingency reserve.',
     'Without intervention, project NPV decreases by $8M.',
     92
@@ -353,9 +353,9 @@ async function triggerBudgetBreachScenario(): Promise<void> {
   
   // Start agent discussion
   const discussionResult = await startAgentDiscussion(
-    'FPL Grid Modernization Budget Breach Analysis',
+    'Regional Utility Grid Modernization Budget Breach Analysis',
     'nee-fpl-001',
-    'FPL Grid Modernization',
+    'Regional Utility Grid Modernization',
     'high',
     'finops',
     'Budget variance detected: 23% over allocated spend. SCADA integration costs exceeded estimates. Recommend immediate scope review.'
@@ -363,7 +363,7 @@ async function triggerBudgetBreachScenario(): Promise<void> {
   
   setTimeout(() => {
     sendAgentMessage('finops', ['integrated-management', 'governance'], 'alert',
-      'Budget Breach: FPL Grid Modernization',
+      'Budget Breach: Regional Utility Grid Modernization',
       'Project is 23% over budget due to unexpected SCADA costs. Recommend scope review.',
       'high', 'nee-fpl-001');
     
@@ -375,10 +375,10 @@ async function triggerBudgetBreachScenario(): Promise<void> {
   }, 1500);
   
   setTimeout(() => {
-    executeAction('integrated-management', 'escalate', 'project', 'nee-fpl-001', 'FPL Grid Modernization',
+    executeAction('integrated-management', 'escalate', 'project', 'nee-fpl-001', 'Regional Utility Grid Modernization',
       'Escalating to steering committee. Budget breach exceeds tolerance threshold.', 88,
       'finops');
-    notifyAction('integrated-management', 'escalate', 'FPL Grid Modernization');
+    notifyAction('integrated-management', 'escalate', 'Regional Utility Grid Modernization');
     
     if (discussionResult) {
       continueDiscussion(discussionResult.discussion.id, 'integrated-management', 
@@ -388,27 +388,27 @@ async function triggerBudgetBreachScenario(): Promise<void> {
   }, 3000);
   
   setTimeout(() => {
-    executeAction('governance', 'investigate', 'project', 'nee-fpl-001', 'FPL Grid Modernization',
+    executeAction('governance', 'investigate', 'project', 'nee-fpl-001', 'Regional Utility Grid Modernization',
       'Initiating governance review. Checking approval chain and variance authorization.', 85,
       'integrated-management');
-    notifyAction('governance', 'investigate', 'FPL Grid Modernization');
+    notifyAction('governance', 'investigate', 'Regional Utility Grid Modernization');
   }, 4500);
 }
 
 async function triggerCriticalProjectScenario(): Promise<void> {
-  executeAction('integrated-management', 'update-status', 'project', 'nee-fpl-004', 'FPL Storm Hardening',
+  executeAction('integrated-management', 'update-status', 'project', 'nee-fpl-004', 'Regional Utility Storm Hardening',
     'Status changed to CRITICAL. Three consecutive milestones missed.', 95);
-  notifyAction('integrated-management', 'update-status', 'FPL Storm Hardening');
+  notifyAction('integrated-management', 'update-status', 'Regional Utility Storm Hardening');
   
   // Persist critical intervention
   await createAgentIntervention(
     'integrated-management',
     'timeline',
     'critical',
-    'FPL Storm Hardening Critical Status',
+    'Regional Utility Storm Hardening Critical Status',
     'Project has entered critical status. Three consecutive milestones missed before hurricane season. Immediate intervention required.',
     'nee-fpl-004',
-    'FPL Storm Hardening',
+    'Regional Utility Storm Hardening',
     'Deploy recovery task force and add weekend construction crews. Schedule emergency steering committee review.',
     'Hurricane season deadline at risk if not addressed within 2 weeks.',
     95
@@ -416,30 +416,30 @@ async function triggerCriticalProjectScenario(): Promise<void> {
   
   setTimeout(() => {
     sendAgentMessage('integrated-management', ['integrated-management', 'governance', 'tmo'], 'alert',
-      'Critical Project Alert: FPL Storm Hardening',
+      'Critical Project Alert: Regional Utility Storm Hardening',
       'Project has entered critical status. Immediate intervention required before hurricane season.',
       'critical', 'nee-fpl-004');
   }, 1000);
   
   setTimeout(() => {
-    executeAction('integrated-management', 'investigate', 'project', 'nee-fpl-004', 'FPL Storm Hardening',
+    executeAction('integrated-management', 'investigate', 'project', 'nee-fpl-004', 'Regional Utility Storm Hardening',
       'Assessing impact. Hurricane season deadline at risk.', 90,
       'integrated-management');
-    notifyAction('integrated-management', 'investigate', 'FPL Storm Hardening');
+    notifyAction('integrated-management', 'investigate', 'Regional Utility Storm Hardening');
   }, 2500);
   
   setTimeout(() => {
-    executeAction('tmo', 'create-task', 'project', 'nee-fpl-004', 'FPL Storm Hardening',
+    executeAction('tmo', 'create-task', 'project', 'nee-fpl-004', 'Regional Utility Storm Hardening',
       'Creating recovery task force. Adding weekend construction crews.', 87,
       'integrated-management');
-    notifyAction('tmo', 'create-task', 'FPL Storm Hardening');
+    notifyAction('tmo', 'create-task', 'Regional Utility Storm Hardening');
   }, 4000);
   
   setTimeout(() => {
-    executeAction('governance', 'notify', 'project', 'nee-fpl-004', 'FPL Storm Hardening',
+    executeAction('governance', 'notify', 'project', 'nee-fpl-004', 'Regional Utility Storm Hardening',
       'Executive stakeholders notified. Scheduling emergency review for tomorrow.', 82,
       'integrated-management');
-    notifyAction('governance', 'notify', 'FPL Storm Hardening');
+    notifyAction('governance', 'notify', 'Regional Utility Storm Hardening');
   }, 5500);
 }
 
@@ -469,13 +469,13 @@ async function triggerValueAtRiskScenario(): Promise<void> {
     'Q4 Portfolio Performance',
     'high',
     'integrated-management',
-    'Value realization trending 18% below forecast. Three key projects underperforming: NEER Wind Portfolio (-12%), FPL Grid Modernization (-8%), Google Data Center (-6%). Combined impact: $42M value gap.'
+    'Value realization trending 18% below forecast. Three key projects underperforming: Renewables Division Wind Portfolio (-12%), Regional Utility Grid Modernization (-8%), Google Data Center (-6%). Combined impact: $42M value gap.'
   );
   
   setTimeout(() => {
     sendAgentMessage('integrated-management', ['integrated-management', 'finops'], 'insight',
       'Value Realization Gap Analysis',
-      'Three key projects underperforming: NEER Wind Portfolio (-12%), FPL Grid Modernization (-8%), Google Data Center (-6%). Combined impact: $42M value gap.',
+      'Three key projects underperforming: Renewables Division Wind Portfolio (-12%), Regional Utility Grid Modernization (-8%), Google Data Center (-6%). Combined impact: $42M value gap.',
       'high');
     
     if (discussionResult) {
@@ -486,14 +486,14 @@ async function triggerValueAtRiskScenario(): Promise<void> {
   }, 1500);
   
   setTimeout(() => {
-    executeAction('integrated-management', 'investigate', 'project', 'nee-neer-001', 'NEER Wind Portfolio',
+    executeAction('integrated-management', 'investigate', 'project', 'nee-neer-001', 'Renewables Division Wind Portfolio',
       'Investigating delivery blockers. Vestas turbine delivery delays identified as primary factor.', 85,
       'integrated-management');
-    notifyAction('integrated-management', 'investigate', 'NEER Wind Portfolio');
+    notifyAction('integrated-management', 'investigate', 'Renewables Division Wind Portfolio');
     
     if (discussionResult) {
       continueDiscussion(discussionResult.discussion.id, 'tmo', 
-        'Supply chain constraints confirmed. NEER Wind team needs alternative turbine vendor evaluation.', 
+        'Supply chain constraints confirmed. Renewables Division Wind team needs alternative turbine vendor evaluation.', 
         'analysis');
     }
   }, 3000);
@@ -506,16 +506,16 @@ async function triggerValueAtRiskScenario(): Promise<void> {
     
     if (discussionResult) {
       continueDiscussion(discussionResult.discussion.id, 'finops', 
-        'Recommending immediate reallocation of $8M to accelerate NEER Wind Portfolio. ROI analysis supports this investment.', 
+        'Recommending immediate reallocation of $8M to accelerate Renewables Division Wind Portfolio. ROI analysis supports this investment.', 
         'recommendation');
     }
   }, 4500);
   
   setTimeout(() => {
-    executeAction('integrated-management', 'accelerate', 'project', 'nee-neer-001', 'NEER Wind Portfolio',
+    executeAction('integrated-management', 'accelerate', 'project', 'nee-neer-001', 'Renewables Division Wind Portfolio',
       'Recommending fast-track approval for additional resources. ROI analysis supports investment.', 90,
       'finops');
-    notifyAction('integrated-management', 'accelerate', 'NEER Wind Portfolio');
+    notifyAction('integrated-management', 'accelerate', 'Renewables Division Wind Portfolio');
     
     if (discussionResult) {
       continueDiscussion(discussionResult.discussion.id, 'integrated-management', 

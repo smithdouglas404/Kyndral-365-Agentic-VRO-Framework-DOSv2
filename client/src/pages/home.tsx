@@ -14,7 +14,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 h-16 border-b border-border bg-white flex items-center px-8 justify-between z-50">
         <div className="flex items-center gap-8">
           <Link href="/">
-            <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" />
+            <img src={nexteraLogo} alt="Enterprise" className="h-10 cursor-pointer" />
           </Link>
         </div>
       </header>

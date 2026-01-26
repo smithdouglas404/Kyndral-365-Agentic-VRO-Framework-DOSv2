@@ -100,7 +100,7 @@ export interface SAFeProject {
   id: string;
   name: string;
   description: string;
-  bu: 'Florida Power & Light' | 'NextEra Energy Resources' | 'Corporate & Other';
+  bu: 'Regional Utility' | 'Renewable Energy Division' | 'Corporate & Other';
   portfolioTheme: string;
   artName: string; // Agile Release Train name
   

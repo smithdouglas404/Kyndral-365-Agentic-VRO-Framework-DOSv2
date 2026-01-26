@@ -74,7 +74,7 @@ export function CommandersIntentForm({
   const handleGenerateAISuggestions = () => {
     // Simulate AI generation - in production, this would call an API
     setAiSuggestions({
-      purpose: "Deliver measurable customer value by reducing energy costs by 15% and improving grid reliability by 20%, enabling NextEra to maintain competitive advantage in the clean energy transition.",
+      purpose: "Deliver measurable customer value by reducing energy costs by 15% and improving grid reliability by 20%, enabling Enterprise to maintain competitive advantage in the clean energy transition.",
       keyTasks: "1. Deploy smart grid sensors across 50k nodes\n2. Integrate predictive analytics platform\n3. Train operations team on new systems\n4. Achieve 99.9% uptime during transition",
       endState: "By Q4 2026: Operational grid with real-time optimization, 15% cost reduction validated through independent audit, customer satisfaction score >85%, and zero critical incidents during deployment."
     });
@@ -145,7 +145,7 @@ export function CommandersIntentForm({
             </CardHeader>
             <CardContent className="space-y-3">
               <Textarea
-                placeholder="Example: Reduce customer energy costs by 15% while improving grid reliability, positioning NextEra as the clean energy leader..."
+                placeholder="Example: Reduce customer energy costs by 15% while improving grid reliability, positioning Enterprise as the clean energy leader..."
                 value={intent.purpose}
                 onChange={(e) => setIntent(prev => ({ ...prev, purpose: e.target.value }))}
                 rows={4}

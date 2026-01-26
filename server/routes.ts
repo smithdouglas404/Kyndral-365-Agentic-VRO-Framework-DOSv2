@@ -865,7 +865,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/templates/:name", async (req, res) => {
     try {
-      // Support both "FPL-Grid-Modernization.json" and "FPL-Grid-Modernization"
+      // Support both "Regional Utility-Grid-Modernization.json" and "Regional Utility-Grid-Modernization"
       const slug = req.params.name.replace('.json', '');
       const template = await storage.getProjectTemplateBySlug(slug);
       
@@ -2837,7 +2837,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
       // Value Streams
       const valueStreamsData = [
-        { portfolioId: portfolio.id, name: 'FPL Customer Operations', description: 'End-to-end customer service delivery from metering to billing and support', type: 'operational', owner: 'Eric Silagy', status: 'active', leadTime: '2.5', throughput: '125' },
+        { portfolioId: portfolio.id, name: 'Regional Utility Customer Operations', description: 'End-to-end customer service delivery from metering to billing and support', type: 'operational', owner: 'Eric Silagy', status: 'active', leadTime: '2.5', throughput: '125' },
         { portfolioId: portfolio.id, name: 'Clean Energy Development', description: 'Solar, wind, and battery storage project development pipeline', type: 'development', owner: 'Rebecca Kujawa', status: 'active', leadTime: '365', throughput: '45' },
         { portfolioId: portfolio.id, name: 'Grid Infrastructure', description: 'Transmission and distribution network modernization and maintenance', type: 'operational', owner: 'Mark Hickson', status: 'active', leadTime: '30', throughput: '85' },
         { portfolioId: portfolio.id, name: 'Digital & Technology', description: 'Enterprise technology platforms, data analytics, and digital customer experience', type: 'development', owner: 'Charles Farrar', status: 'active', leadTime: '14', throughput: '210' }
@@ -2893,7 +2893,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const epicsData = [
         { portfolioId: portfolio.id, valueStreamId: createdValueStreams[0].id, name: 'Mobile App 3.0 Platform', description: 'Complete redesign of customer mobile application with enhanced self-service', type: 'business', status: 'implementing', owner: 'Maria Santos', hypothesis: 'Redesigning mobile app will increase digital adoption by 25% and reduce call center volume', expectedOutcome: 'Increase digital transactions to 75% of all customer interactions', estimatedCost: '4500000', estimatedBenefit: '12000000', wsjfScore: '28' },
         { portfolioId: portfolio.id, valueStreamId: createdValueStreams[1].id, name: 'Solar Project Automation', description: 'Automate solar project development lifecycle from site selection to commissioning', type: 'business', status: 'implementing', owner: 'James Wilson', hypothesis: 'Automating project development will reduce time-to-COD by 20%', expectedOutcome: 'Reduce average project timeline from 18 to 14 months', estimatedCost: '8000000', estimatedBenefit: '25000000', wsjfScore: '32' },
-        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[2].id, name: 'Advanced Distribution Management', description: 'Deploy ADMS across FPL service territory for enhanced grid reliability', type: 'enabler', status: 'implementing', owner: 'Lisa Anderson', hypothesis: 'ADMS will reduce outage duration by 30% through automated fault detection', expectedOutcome: 'Achieve industry-leading SAIDI and SAIFI metrics', estimatedCost: '15000000', estimatedBenefit: '35000000', wsjfScore: '35' },
+        { portfolioId: portfolio.id, valueStreamId: createdValueStreams[2].id, name: 'Advanced Distribution Management', description: 'Deploy ADMS across Regional Utility service territory for enhanced grid reliability', type: 'enabler', status: 'implementing', owner: 'Lisa Anderson', hypothesis: 'ADMS will reduce outage duration by 30% through automated fault detection', expectedOutcome: 'Achieve industry-leading SAIDI and SAIFI metrics', estimatedCost: '15000000', estimatedBenefit: '35000000', wsjfScore: '35' },
         { portfolioId: portfolio.id, valueStreamId: createdValueStreams[3].id, name: 'Enterprise Data Lake', description: 'Build unified data platform for analytics and AI/ML initiatives', type: 'enabler', status: 'implementing', owner: 'Robert Chen', hypothesis: 'Unified data platform will enable advanced analytics and reduce data reconciliation by 80%', expectedOutcome: 'Single source of truth for all enterprise data', estimatedCost: '12000000', estimatedBenefit: '28000000', wsjfScore: '30' }
       ];
 
@@ -2921,7 +2921,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // ============================================================================
-  // DIVISIONS API - NextEra Business Segments (DB-backed)
+  // DIVISIONS API - Enterprise Business Segments (DB-backed)
   // ============================================================================
   
   app.get("/api/divisions", async (_req, res) => {
@@ -3068,11 +3068,18 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/tmo/adoption-metrics", async (_req, res) => {
     try {
       const divisions = await storage.getDivisions();
-      const adoptionMetrics = divisions.map((div: any) => ({
-        division: div.name || 'Unknown',
-        adoption: Math.floor(Math.random() * 30) + 60, // 60-90%
-        training: Math.floor(Math.random() * 20) + 70, // 70-90%
-        satisfaction: Math.floor(Math.random() * 25) + 65 // 65-90%
+      const adoptionMetrics = await Promise.all(divisions.map(async (div: any) => {
+        const kpis = await storage.getDivisionKpis(div.id);
+        const adoptionKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('adoption'));
+        const trainingKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('training'));
+        const satisfactionKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('satisfaction'));
+
+        return {
+          division: div.name || 'Unknown',
+          adoption: adoptionKpi ? parseFloat(adoptionKpi.value2024 || '0') || 0 : 0,
+          training: trainingKpi ? parseFloat(trainingKpi.value2024 || '0') || 0 : 0,
+          satisfaction: satisfactionKpi ? parseFloat(satisfactionKpi.value2024 || '0') || 0 : 0
+        };
       }));
       res.json(adoptionMetrics);
     } catch (error: any) {
@@ -3087,8 +3094,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const initiatives = projects.slice(0, 8).map((p: any) => ({
         name: p.name || 'Unknown',
         status: p.status || 'planning',
-        completion: Math.floor(Math.random() * 40) + 50,
-        impact: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]
+        completion: Math.floor(parseFloat(p.progressPercentage || p.progress || '0') || 0),
+        impact: p.priority === 'high' ? 'High' : p.priority === 'low' ? 'Low' : 'Medium'
       }));
       res.json(initiatives);
     } catch (error: any) {
@@ -3113,14 +3120,14 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
 
   app.get("/api/okr/key-results", async (_req, res) => {
     try {
-      const okrs = await storage.getOkrs();
-      const keyResults = okrs.flatMap((okr: any) =>
-        (okr.keyResults || []).map((kr: string, i: number) => ({
-          id: `${okr.id}-kr-${i}`,
-          objective: okr.objective,
-          keyResult: kr,
-          progress: Math.floor(Math.random() * 40) + 50,
-          target: 100
+      const okrsWithKrs = await storage.getOkrsWithKeyResults();
+      const keyResults = okrsWithKrs.flatMap((okr: any) =>
+        (okr.keyResults || []).map((kr: any) => ({
+          id: kr.id || `${okr.id}-kr-${kr.title}`,
+          objective: okr.title || okr.objective,
+          keyResult: kr.title || kr.keyResult,
+          progress: parseInt(kr.progress || '0', 10) || 0,
+          target: parseFloat(kr.targetValue || '100') || 100
         }))
       );
       res.json(keyResults);
@@ -3137,12 +3144,18 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/planning/milestones", async (_req, res) => {
     try {
       const projects = await storage.getProjects();
-      const milestones = projects.slice(0, 10).map((p: any, i: number) => ({
-        project: p.name || 'Unknown',
-        milestone: `Phase ${(i % 3) + 1} Complete`,
-        dueDate: new Date(Date.now() + (i * 7 * 24 * 60 * 60 * 1000)).toISOString(),
-        status: ['on-track', 'at-risk', 'completed'][i % 3]
-      }));
+      const allMilestones = await Promise.all(
+        projects.slice(0, 10).map(async (p: any) => {
+          const projectMilestones = await storage.getMilestones(p.id);
+          return projectMilestones.map((m: any) => ({
+            project: p.name || 'Unknown',
+            milestone: m.name || 'Milestone',
+            dueDate: m.targetDate || new Date().toISOString(),
+            status: m.status || 'pending'
+          }));
+        })
+      );
+      const milestones = allMilestones.flat();
       res.json(milestones);
     } catch (error: any) {
       console.error("Get milestones error:", error);
@@ -3173,11 +3186,22 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/ocm/readiness", async (_req, res) => {
     try {
       const divisions = await storage.getDivisions();
-      const readiness = divisions.map((div: any) => ({
-        division: div.name || 'Unknown',
-        readiness: Math.floor(Math.random() * 30) + 60,
-        engagement: Math.floor(Math.random() * 25) + 65,
-        riskLevel: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+      const readiness = await Promise.all(divisions.map(async (div: any) => {
+        const kpis = await storage.getDivisionKpis(div.id);
+        const risks = await storage.getDivisionRisks(div.id);
+
+        const readinessKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('readiness') || k.name?.toLowerCase().includes('change'));
+        const engagementKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('engagement'));
+
+        const highRisks = risks.filter((r: any) => r.level === 'high').length;
+        const riskLevel = highRisks >= 3 ? 'High' : highRisks >= 1 ? 'Medium' : 'Low';
+
+        return {
+          division: div.name || 'Unknown',
+          readiness: readinessKpi ? parseFloat(readinessKpi.value2024 || '0') || 0 : 0,
+          engagement: engagementKpi ? parseFloat(engagementKpi.value2024 || '0') || 0 : 0,
+          riskLevel
+        };
       }));
       res.json(readiness);
     } catch (error: any) {
@@ -3189,10 +3213,17 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/ocm/stakeholders", async (_req, res) => {
     try {
       const divisions = await storage.getDivisions();
-      const stakeholders = divisions.map((div: any) => ({
-        group: div.name || 'Unknown',
-        count: Math.floor(Math.random() * 50) + 20,
-        engagement: Math.floor(Math.random() * 30) + 60
+      const stakeholders = await Promise.all(divisions.map(async (div: any) => {
+        const projects = await storage.getProjects();
+        const divisionProjects = projects.filter((p: any) => p.divisionId === div.id);
+        const kpis = await storage.getDivisionKpis(div.id);
+        const engagementKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('engagement') || k.name?.toLowerCase().includes('stakeholder'));
+
+        return {
+          group: div.name || 'Unknown',
+          count: divisionProjects.length * 5, // Estimate: ~5 stakeholders per project
+          engagement: engagementKpi ? parseFloat(engagementKpi.value2024 || '0') || 0 : 0
+        };
       }));
       res.json(stakeholders);
     } catch (error: any) {
@@ -3208,12 +3239,30 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/governance/items", async (_req, res) => {
     try {
       const projects = await storage.getProjects();
-      const items = projects.slice(0, 12).map((p: any) => ({
-        project: p.name || 'Unknown',
-        requirement: 'Compliance Review',
-        status: ['compliant', 'review', 'non-compliant'][Math.floor(Math.random() * 3)],
-        dueDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-      }));
+      const allItems = await Promise.all(
+        projects.slice(0, 12).map(async (p: any) => {
+          const changeRequests = await storage.getChangeRequests({ projectId: p.id });
+          const issues = await storage.getIssues({ projectId: p.id, category: 'compliance' });
+
+          const items = [
+            ...changeRequests.map((cr: any) => ({
+              project: p.name || 'Unknown',
+              requirement: cr.title || 'Change Request',
+              status: cr.status === 'approved' ? 'compliant' : cr.status === 'rejected' ? 'non-compliant' : 'review',
+              dueDate: cr.createdAt || new Date().toISOString()
+            })),
+            ...issues.map((issue: any) => ({
+              project: p.name || 'Unknown',
+              requirement: issue.title || 'Compliance Issue',
+              status: issue.status === 'resolved' ? 'compliant' : 'review',
+              dueDate: issue.createdAt || new Date().toISOString()
+            }))
+          ];
+
+          return items;
+        })
+      );
+      const items = allItems.flat();
       res.json(items);
     } catch (error: any) {
       console.error("Get governance items error:", error);
@@ -3224,11 +3273,28 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/governance/risk-metrics", async (_req, res) => {
     try {
       const divisions = await storage.getDivisions();
-      const metrics = divisions.map((div: any) => ({
-        division: div.name || 'Unknown',
-        riskScore: Math.floor(Math.random() * 40) + 20,
-        compliance: Math.floor(Math.random() * 20) + 75,
-        issues: Math.floor(Math.random() * 5)
+      const metrics = await Promise.all(divisions.map(async (div: any) => {
+        const risks = await storage.getDivisionRisks(div.id);
+        const kpis = await storage.getDivisionKpis(div.id);
+        const complianceKpi = kpis.find((k: any) => k.name?.toLowerCase().includes('compliance'));
+
+        const highRisks = risks.filter((r: any) => r.level === 'high').length;
+        const mediumRisks = risks.filter((r: any) => r.level === 'medium').length;
+        const riskScore = (highRisks * 10) + (mediumRisks * 5);
+
+        const projects = await storage.getProjects();
+        const divisionProjects = projects.filter((p: any) => p.divisionId === div.id);
+        const allIssues = await Promise.all(
+          divisionProjects.map((p: any) => storage.getIssues({ projectId: p.id }))
+        );
+        const openIssues = allIssues.flat().filter((i: any) => i.status !== 'resolved').length;
+
+        return {
+          division: div.name || 'Unknown',
+          riskScore: Math.min(riskScore, 100),
+          compliance: complianceKpi ? parseFloat(complianceKpi.value2024 || '85') || 85 : 85,
+          issues: openIssues
+        };
       }));
       res.json(metrics);
     } catch (error: any) {

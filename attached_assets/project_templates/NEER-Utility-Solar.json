@@ -1,9 +1,9 @@
 {
   "id": "nee-neer-002",
-  "name": "NEER Utility-Scale Solar Development",
-  "bu": "NextEra Energy Resources",
+  "name": "Renewables Division Utility-Scale Solar Development",
+  "bu": "Renewable Energy Division",
   "division": "Solar Development",
-  "description": "Development of utility-scale solar projects across ERCOT, CAISO, and PJM markets. Part of NEER's industry-leading renewable development pipeline with 2.5 GW annual deployment target.",
+  "description": "Development of utility-scale solar projects across ERCOT, CAISO, and PJM markets. Part of Renewables Division's industry-leading renewable development pipeline with 2.5 GW annual deployment target.",
   "expectedROI": "$650M projected EBITDA contribution",
   "roiValue": 650,
   "priority": "critical",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.4",
     "totalPIs": 10,
     "piCadence": "10 weeks",
-    "epicId": "EPIC-NEER-102",
+    "epicId": "EPIC-Renewables Division-102",
     "epicName": "Solar Growth Program",
     "epicProgress": 38,
     "epicWsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 6, "jobSize": 9, "score": 26 },
@@ -72,7 +72,7 @@
     { "id": "dep-solar-neer-002", "name": "Transmission Access", "type": "related", "status": "green", "description": "Grid interconnection capacity" }
   ],
   "stakeholders": [
-    { "id": "sh-solar-neer-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-neer-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-solar-neer-002", "name": "Investment-Grade Utilities", "role": "PPA Offtakers", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-solar-neer-003", "name": "Mark Hickson", "role": "EVP Development", "department": "Development", "influence": "high", "interest": "high" },
     { "id": "sh-solar-neer-004", "name": "Panel Manufacturers", "role": "Strategic Suppliers", "department": "External", "influence": "medium", "interest": "high" }

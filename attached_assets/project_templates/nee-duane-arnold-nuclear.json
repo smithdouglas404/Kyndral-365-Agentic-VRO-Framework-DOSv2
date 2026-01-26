@@ -2,9 +2,9 @@
   "project": {
     "id": "nee-nuclear-001",
     "name": "Duane Arnold Nuclear Restart",
-    "description": "NextEra is evaluating the restart of the 615 MW Duane Arnold Energy Center in Iowa, which was prematurely shut down in 2020. Google has signed a 25-year power purchase agreement to buy power from the plant if NextEra proceeds with the restart. The nuclear facility would provide zero-carbon baseload power essential for AI data center operations that require 24/7 reliable electricity. Expected return to service by 2029 pending NRC regulatory approval. This follows a broader industry trend including the Palisades restart in Michigan and Constellation's Three Mile Island Unit 1 restart for Microsoft. The project addresses growing demand for 'firm' carbon-free power that renewables alone cannot provide, with nuclear operating at 90%+ capacity factors compared to 25-35% for solar and wind.",
+    "description": "Enterprise is evaluating the restart of the 615 MW Duane Arnold Energy Center in Iowa, which was prematurely shut down in 2020. Google has signed a 25-year power purchase agreement to buy power from the plant if Enterprise proceeds with the restart. The nuclear facility would provide zero-carbon baseload power essential for AI data center operations that require 24/7 reliable electricity. Expected return to service by 2029 pending NRC regulatory approval. This follows a broader industry trend including the Palisades restart in Michigan and Constellation's Three Mile Island Unit 1 restart for Microsoft. The project addresses growing demand for 'firm' carbon-free power that renewables alone cannot provide, with nuclear operating at 90%+ capacity factors compared to 25-35% for solar and wind.",
     "status": "amber",
-    "businessUnitId": "NextEra Energy Resources",
+    "businessUnitId": "Renewable Energy Division",
     "startDate": "2024-06-01",
     "endDate": "2029-12-31",
     "priority": "critical",
@@ -199,7 +199,7 @@
     "paybackMonths": "96"
   },
   "stakeholders": [
-    { "id": "sh-nuclear-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "NEER Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-nuclear-001", "name": "Rebecca Kujawa", "role": "President & CEO", "department": "Renewables Division Executive", "influence": "high", "interest": "high" },
     { "id": "sh-nuclear-002", "name": "Google", "role": "PPA Offtaker", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-nuclear-003", "name": "Nuclear Regulatory Commission", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-nuclear-004", "name": "John Ketchum", "role": "Chairman & CEO", "department": "NEE Executive", "influence": "high", "interest": "high" }

@@ -108,16 +108,16 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
   // All 8 agents: VRO, PMO, TMO, FinOps, OKR, Governance, Planning, OCM
   const messageTemplates: Omit<CrossAgentMessage, 'id' | 'timestamp'>[] = [
     // PMO ↔ VRO: Project-Value Integration
-    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'FPL Advanced Metering Infrastructure', message: 'Milestone delay impacts Strategic ROI - meter deployment KPI down 8%', priority: 'critical' },
-    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'FPL Grid Modernization', message: 'Project on track - KPI "Substations Upgraded" at 52%, contributing to OKR progress', priority: 'medium' },
-    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'recommendation', entity: 'NextEra Cybersecurity Enhancement', message: 'OKR "NERC CIP Compliance" at 63% - accelerate project to boost KR completion', priority: 'high' },
-    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'action_request', entity: 'NEER Wind Portfolio', message: 'Strategic priority shift - reallocate resources to high-ROI initiatives', priority: 'high' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Regional Utility Advanced Metering Infrastructure', message: 'Milestone delay impacts Strategic ROI - meter deployment KPI down 8%', priority: 'critical' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'Regional Utility Grid Modernization', message: 'Project on track - KPI "Substations Upgraded" at 52%, contributing to OKR progress', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'recommendation', entity: 'Enterprise Cybersecurity Enhancement', message: 'OKR "NERC CIP Compliance" at 63% - accelerate project to boost KR completion', priority: 'high' },
+    { fromAgent: 'integrated-management', toAgent: 'integrated-management', messageType: 'action_request', entity: 'Renewables Division Wind Portfolio', message: 'Strategic priority shift - reallocate resources to high-ROI initiatives', priority: 'high' },
     
     // TMO ↔ OCM: Transformation-Change Integration
-    { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'action_request', entity: 'FPL Smart Grid Dashboard', message: 'Phase 2 launch imminent - stakeholder readiness assessment needed', priority: 'high' },
-    { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'data_sync', entity: 'NEER Operations Automation', message: 'Adoption rate at 67% - below 80% target, intervention recommended', priority: 'critical' },
-    { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'status_update', entity: 'FPL Smart Grid Dashboard', message: 'Training completion at 85% - readiness score improved to 78%', priority: 'medium' },
-    { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'alert_forward', entity: 'NEER Asset Management', message: 'Stakeholder resistance detected in Operations division - change plan adjustment needed', priority: 'high' },
+    { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'action_request', entity: 'Regional Utility Smart Grid Dashboard', message: 'Phase 2 launch imminent - stakeholder readiness assessment needed', priority: 'high' },
+    { fromAgent: 'tmo', toAgent: 'ocm', messageType: 'data_sync', entity: 'Renewables Division Operations Automation', message: 'Adoption rate at 67% - below 80% target, intervention recommended', priority: 'critical' },
+    { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'status_update', entity: 'Regional Utility Smart Grid Dashboard', message: 'Training completion at 85% - readiness score improved to 78%', priority: 'medium' },
+    { fromAgent: 'ocm', toAgent: 'tmo', messageType: 'alert_forward', entity: 'Renewables Division Asset Management', message: 'Stakeholder resistance detected in Operations division - change plan adjustment needed', priority: 'high' },
     
     // FinOps ↔ VRO: Financial-Value Integration
     { fromAgent: 'finops', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'AI Deal Acceleration', message: 'Budget variance analysis complete - $2.1m under forecast, ROI improving', priority: 'low' },
@@ -127,15 +127,15 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
     
     // OKR ↔ Multiple Agents: Strategy Alignment
     { fromAgent: 'okr', toAgent: 'integrated-management', messageType: 'data_sync', entity: 'OKR-001', message: 'Key Result "Reduce interconnection cycle time" progress calculated at 68% from project KPIs', priority: 'medium' },
-    { fromAgent: 'okr', toAgent: 'tmo', messageType: 'recommendation', entity: 'NEER Portfolio Expansion', message: 'OKR alignment at 94% - recommend accelerating Q4 objectives', priority: 'medium' },
+    { fromAgent: 'okr', toAgent: 'tmo', messageType: 'recommendation', entity: 'Renewables Division Portfolio Expansion', message: 'OKR alignment at 94% - recommend accelerating Q4 objectives', priority: 'medium' },
     { fromAgent: 'okr', toAgent: 'governance', messageType: 'alert_forward', entity: 'NERC CIP Compliance OKR', message: 'Regulatory readiness KR at 45% - escalation threshold breached', priority: 'critical' },
     { fromAgent: 'integrated-management', toAgent: 'okr', messageType: 'data_sync', entity: 'Strategic ROI', message: 'Value realization feeding OKR progress - 5 Key Results updated', priority: 'medium' },
     
     // Governance ↔ Multiple Agents: Risk & Compliance
-    { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'NEER Battery Storage Program', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
+    { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'alert_forward', entity: 'Renewables Division Battery Storage Program', message: 'Compliance checkpoint pending - requires sign-off before Phase 3', priority: 'high' },
     { fromAgent: 'governance', toAgent: 'integrated-management', messageType: 'action_request', entity: 'Risk Assessment', message: 'High-value program requires governance review - $250M threshold exceeded', priority: 'high' },
     { fromAgent: 'governance', toAgent: 'finops', messageType: 'recommendation', entity: 'Audit Findings', message: 'Cost allocation audit complete - 3 remediation items identified', priority: 'medium' },
-    { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'data_sync', entity: 'FPL Reliability Analytics', message: 'Value realization at $150M - governance review triggered', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'data_sync', entity: 'Regional Utility Reliability Analytics', message: 'Value realization at $150M - governance review triggered', priority: 'medium' },
     { fromAgent: 'integrated-management', toAgent: 'governance', messageType: 'status_update', entity: 'NERC CIP Compliance Project', message: 'Milestone achieved - ready for compliance validation', priority: 'medium' },
     
     // Planning ↔ Multiple Agents: Capacity & Resources
@@ -146,13 +146,13 @@ export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgen
     { fromAgent: 'tmo', toAgent: 'planning', messageType: 'action_request', entity: 'Initiative Pipeline', message: 'New transformation wave requires capacity assessment', priority: 'medium' },
     
     // OCM ↔ Multiple Agents: Change Readiness
-    { fromAgent: 'ocm', toAgent: 'integrated-management', messageType: 'status_update', entity: 'FPL Advanced Metering Infrastructure', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
+    { fromAgent: 'ocm', toAgent: 'integrated-management', messageType: 'status_update', entity: 'Regional Utility Advanced Metering Infrastructure', message: 'Readiness score updated to 78% - training completion on track', priority: 'medium' },
     { fromAgent: 'ocm', toAgent: 'governance', messageType: 'alert_forward', entity: 'Change Impact', message: 'High-impact change requires stakeholder sign-off - 500+ field technicians affected', priority: 'high' },
-    { fromAgent: 'integrated-management', toAgent: 'ocm', messageType: 'status_update', entity: 'NextEra Cybersecurity Enhancement', message: 'UAT phase starting - change communication required', priority: 'medium' },
+    { fromAgent: 'integrated-management', toAgent: 'ocm', messageType: 'status_update', entity: 'Enterprise Cybersecurity Enhancement', message: 'UAT phase starting - change communication required', priority: 'medium' },
     { fromAgent: 'governance', toAgent: 'ocm', messageType: 'action_request', entity: 'NERC CIP Policy Update', message: 'New compliance policy requires organization-wide communication plan', priority: 'high' },
     
     // TMO ↔ FinOps/Governance: Benefits & Compliance
-    { fromAgent: 'tmo', toAgent: 'finops', messageType: 'recommendation', entity: 'NEER Sustainability Analytics', message: 'Transformation benefits exceeding forecast by 18%', priority: 'low' },
+    { fromAgent: 'tmo', toAgent: 'finops', messageType: 'recommendation', entity: 'Renewables Division Sustainability Analytics', message: 'Transformation benefits exceeding forecast by 18%', priority: 'low' },
     { fromAgent: 'tmo', toAgent: 'governance', messageType: 'data_sync', entity: 'Grid Resilience Transformation', message: 'Major milestone achieved - governance checkpoint required', priority: 'medium' }
   ];
   
@@ -356,7 +356,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Weighted average ROI across all active projects based on investment size';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'On Track' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '72%', contribution: '35%', status: 'On Track' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '72%', contribution: '35%', status: 'On Track' },
         { project: 'Customer', bu: 'Corporate & Other', value: '45%', contribution: '22%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '61%', contribution: '15%', status: 'On Track' }
       ];
@@ -377,7 +377,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Sum of discounted cash flows across all projects (8% discount rate, 5-year horizon)';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '$12.5M', contribution: '34%', status: 'On Track' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '$14.2M', contribution: '39%', status: 'On Track' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '$14.2M', contribution: '39%', status: 'On Track' },
         { project: 'Customer', bu: 'Corporate & Other', value: '$5.8M', contribution: '16%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '$3.75M', contribution: '11%', status: 'On Track' }
       ];
@@ -399,7 +399,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Average completion percentage across all projects weighted by strategic priority';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '82%', contribution: '30%', status: 'Phase 3' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '75%', contribution: '28%', status: 'Phase 3' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '75%', contribution: '28%', status: 'Phase 3' },
         { project: 'Customer', bu: 'Corporate & Other', value: '48%', contribution: '25%', status: 'Phase 2' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '65%', contribution: '17%', status: 'Phase 2' }
       ];
@@ -421,7 +421,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Total spend across all projects as percentage of allocated budget';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '$10.8M / $11.2M', contribution: '26%', status: '96%' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '$15.4M / $16.5M', contribution: '37%', status: '93%' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '$15.4M / $16.5M', contribution: '37%', status: '93%' },
         { project: 'Customer', bu: 'Corporate & Other', value: '$9.2M / $10.0M', contribution: '22%', status: '92%' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '$5.8M / $6.1M', contribution: '14%', status: '95%' }
       ];
@@ -444,7 +444,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Average time from work item start to completion across all project teams';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '14 days', contribution: '25%', status: 'On Track' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '22 days', contribution: '30%', status: 'At Risk' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '22 days', contribution: '30%', status: 'At Risk' },
         { project: 'Customer', bu: 'Corporate & Other', value: '24 days', contribution: '28%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '16 days', contribution: '17%', status: 'On Track' }
       ];
@@ -465,7 +465,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Active work time as percentage of total elapsed time (higher is better)';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'Exceeds' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '65%', contribution: '26%', status: 'On Track' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '65%', contribution: '26%', status: 'On Track' },
         { project: 'Customer', bu: 'Corporate & Other', value: '58%', contribution: '24%', status: 'On Track' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '72%', contribution: '22%', status: 'Exceeds' }
       ];
@@ -486,7 +486,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Total work items completed per week across all project teams';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '4 items/week', contribution: '36%', status: 'On Track' },
-        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '3 items/week', contribution: '27%', status: 'At Risk' },
+        { project: 'Grid Modernization', bu: 'Regional Utility', value: '3 items/week', contribution: '27%', status: 'At Risk' },
         { project: 'Customer', bu: 'Corporate & Other', value: '2 items/week', contribution: '18%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '2 items/week', contribution: '18%', status: 'On Track' }
       ];
@@ -1076,9 +1076,9 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
       title: 'Early Stakeholder Alignment',
       type: 'best-practice',
       aiInsight: 'AI Analysis: Projects with Sprint 0 alignment sessions show 40% faster value delivery. Based on current portfolio, 3 projects would benefit from implementing this pattern immediately.',
-      relatedProjects: ['FPL Grid Modernization', 'NextEra Cybersecurity Enhancement', 'NEER Wind Portfolio'],
+      relatedProjects: ['Regional Utility Grid Modernization', 'Enterprise Cybersecurity Enhancement', 'Renewables Division Wind Portfolio'],
       nextSteps: [
-        'Schedule alignment workshop for NextEra Cybersecurity Enhancement (recommended: next week)',
+        'Schedule alignment workshop for Enterprise Cybersecurity Enhancement (recommended: next week)',
         'Create stakeholder mapping template from Grid Modernization success',
         'Notify OCM Agent to prepare change readiness assessment'
       ],
@@ -1088,10 +1088,10 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
       title: 'Vendor Risk Mitigation',
       type: 'lesson-learned',
       aiInsight: 'AI Analysis: Single-vendor dependencies caused 34% of project delays in 2024. Current portfolio shows 4 projects with similar risk patterns. Governance Agent flagged 2 for immediate review.',
-      relatedProjects: ['NEER Battery Storage', 'FPL Storm Hardening', 'Google Data Center Partnership'],
+      relatedProjects: ['Renewables Division Battery Storage', 'Regional Utility Storm Hardening', 'Google Data Center Partnership'],
       nextSteps: [
-        'Review vendor contracts for NEER Battery Storage (Tesla/BYD suppliers)',
-        'Identify backup turbine vendors for NEER Wind Portfolio',
+        'Review vendor contracts for Renewables Division Battery Storage (Tesla/BYD suppliers)',
+        'Identify backup turbine vendors for Renewables Division Wind Portfolio',
         'Update risk register with Governance Agent findings'
       ],
       metrics: { 'Risk Reduction': '67%', 'Cost Avoided': '$23M', 'Vendor Alternatives': '3 identified', 'Review Status': 'In Progress' }
@@ -1099,11 +1099,11 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
     'gd-003': {
       title: 'Cross-Group Knowledge Share',
       type: 'collaboration',
-      aiInsight: 'AI Analysis: FPL team playbook achieved 92% adoption - highest across all divisions. Pattern analysis suggests this approach could accelerate 5 current NEER rollouts by 4-6 weeks each.',
-      relatedProjects: ['NERC CIP Compliance', 'NEER Sustainability Reporting', 'FPL Reliability Programs'],
+      aiInsight: 'AI Analysis: Regional Utility team playbook achieved 92% adoption - highest across all divisions. Pattern analysis suggests this approach could accelerate 5 current Renewables Division rollouts by 4-6 weeks each.',
+      relatedProjects: ['NERC CIP Compliance', 'Renewables Division Sustainability Reporting', 'Regional Utility Reliability Programs'],
       nextSteps: [
-        'Adapt FPL playbook for NEER division rollout',
-        'Schedule knowledge transfer session with FPL Program Director',
+        'Adapt Regional Utility playbook for Renewables Division division rollout',
+        'Schedule knowledge transfer session with Regional Utility Program Director',
         'OCM Agent to assess readiness for playbook adoption'
       ],
       metrics: { 'Adoption Rate': '92%', 'Time Saved': '4-6 weeks', 'Reusability Score': '87%', 'Teams Benefited': '8' }
@@ -1111,11 +1111,11 @@ function getGuidanceDrilldown(guidanceId: string, events: SimulationEvent[]): En
     'gd-004': {
       title: 'NERC CIP Compliance Pattern',
       type: 'insight',
-      aiInsight: 'AI Analysis: NERC CIP gaps detected in 6 active projects. Early specialist engagement prevents 2-3 week delays. Governance Agent recommends immediate compliance audit for NextEra Cybersecurity Enhancement.',
-      relatedProjects: ['NextEra Cybersecurity Enhancement', 'FPL SCADA Security', 'NEER Control Center Upgrade'],
+      aiInsight: 'AI Analysis: NERC CIP gaps detected in 6 active projects. Early specialist engagement prevents 2-3 week delays. Governance Agent recommends immediate compliance audit for Enterprise Cybersecurity Enhancement.',
+      relatedProjects: ['Enterprise Cybersecurity Enhancement', 'Regional Utility SCADA Security', 'Renewables Division Control Center Upgrade'],
       nextSteps: [
-        'Engage NERC CIP specialist for NextEra Cybersecurity Enhancement',
-        'Run automated compliance audit on FPL SCADA Security',
+        'Engage NERC CIP specialist for Enterprise Cybersecurity Enhancement',
+        'Run automated compliance audit on Regional Utility SCADA Security',
         'Add NERC CIP checkpoint to project templates'
       ],
       metrics: { 'Compliance Gap': '23%', 'Delay Risk': '2-3 weeks', 'Projects Affected': '6', 'Remediation Cost': '$450K' }
@@ -1229,7 +1229,7 @@ function getCollaboratorDrilldown(collaboratorId: string, events: SimulationEven
       role: 'Senior PM - Grid Operations',
       contributions: ['SCADA integration insights', 'Sprint velocity templates', 'Risk mitigation playbook'],
       sharedInsights: ['Automation reduced manual processing by 65%', 'Team velocity improved 23% after capacity planning adjustment'],
-      projects: ['FPL Grid Modernization', 'FPL Storm Hardening', 'NEER Wind Portfolio']
+      projects: ['Regional Utility Grid Modernization', 'Regional Utility Storm Hardening', 'Renewables Division Wind Portfolio']
     },
     'collab-pl': {
       name: 'Sarah Martinez',
@@ -1237,7 +1237,7 @@ function getCollaboratorDrilldown(collaboratorId: string, events: SimulationEven
       role: 'NERC CIP Compliance Lead',
       contributions: ['NERC CIP checklist', 'Cybersecurity compliance guide', 'Vulnerability testing protocol'],
       sharedInsights: ['Early compliance review saves 2-3 weeks', 'Automated testing catches 70% of issues'],
-      projects: ['NextEra Cybersecurity Enhancement', 'FPL SCADA Security', 'NEER Control Center']
+      projects: ['Enterprise Cybersecurity Enhancement', 'Regional Utility SCADA Security', 'Renewables Division Control Center']
     }
   };
   
@@ -1268,21 +1268,21 @@ function getBlockerDrilldown(blockerId: string, events: SimulationEvent[]): Enti
       title: 'Legacy SCADA Integration Delays',
       description: 'Integration with legacy SCADA systems causing 2-4 week delays due to limited API availability and batch processing constraints.',
       impact: '4 projects affected, $12M cost impact',
-      affectedProjects: ['FPL Grid Modernization', 'FPL Storm Hardening', 'NEER Control Center'],
+      affectedProjects: ['Regional Utility Grid Modernization', 'Regional Utility Storm Hardening', 'Renewables Division Control Center'],
       mitigations: ['Implement API gateway layer', 'Parallel processing queues', 'SCADA modernization roadmap']
     },
     'blocker-resources': {
       title: 'Resource Constraints in Q3',
       description: 'Key technical resources overallocated across multiple high-priority initiatives, causing bottlenecks in delivery.',
       impact: '6 projects at risk, velocity reduced 30%',
-      affectedProjects: ['FPL Grid Modernization', 'NEER Wind Portfolio', 'NextEra Cybersecurity Enhancement', 'Google Data Center Partnership'],
+      affectedProjects: ['Regional Utility Grid Modernization', 'Renewables Division Wind Portfolio', 'Enterprise Cybersecurity Enhancement', 'Google Data Center Partnership'],
       mitigations: ['Cross-train adjacent team members', 'Prioritize and defer lower-value work', 'Contract specialist support']
     },
     'blocker-data': {
       title: 'Third-Party Data Quality Issues',
       description: 'External weather and grid data feeds showing inconsistent quality, requiring additional validation and cleansing effort.',
       impact: '3 projects delayed, data accuracy at 78%',
-      affectedProjects: ['NEER Sustainability Analytics', 'FPL Reliability Analytics', 'Grid Performance Dashboard'],
+      affectedProjects: ['Renewables Division Sustainability Analytics', 'Regional Utility Reliability Analytics', 'Grid Performance Dashboard'],
       mitigations: ['Implement data quality monitoring', 'Establish SLAs with data providers', 'Build validation layer']
     }
   };

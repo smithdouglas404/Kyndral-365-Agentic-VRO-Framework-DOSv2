@@ -1,9 +1,9 @@
 {
   "id": "nee-fpl-003",
-  "name": "FPL Solar Base Rate Adjustment (SoBRA) Expansion",
-  "bu": "Florida Power & Light",
+  "name": "Regional Utility Solar Base Rate Adjustment (SoBRA) Expansion",
+  "bu": "Regional Utility",
   "division": "Generation",
-  "description": "Expansion of FPL's solar generation capacity under the SoBRA mechanism approved by Florida PSC. Adding 1.8 GW of solar capacity across Florida with battery storage co-location.",
+  "description": "Expansion of Regional Utility's solar generation capacity under the SoBRA mechanism approved by Florida PSC. Adding 1.8 GW of solar capacity across Florida with battery storage co-location.",
   "expectedROI": "$340M net fuel savings over 30 years",
   "roiValue": 340,
   "priority": "critical",
@@ -20,7 +20,7 @@
     "currentPI": "PI 24.3",
     "totalPIs": 8,
     "piCadence": "12 weeks",
-    "epicId": "EPIC-FPL-103",
+    "epicId": "EPIC-Regional Utility-103",
     "epicName": "SoBRA Generation Program",
     "epicProgress": 49,
     "epicWsjf": { "businessValue": 10, "timeCriticality": 8, "riskReduction": 7, "jobSize": 10, "score": 25 },
@@ -84,7 +84,7 @@
     { "id": "dep-solar-002", "name": "Battery Storage Program", "type": "related", "status": "green", "description": "Co-located storage for grid stabilization" }
   ],
   "stakeholders": [
-    { "id": "sh-solar-001", "name": "Eric Silagy", "role": "President & CEO", "department": "FPL Executive", "influence": "high", "interest": "high" },
+    { "id": "sh-solar-001", "name": "Eric Silagy", "role": "President & CEO", "department": "Regional Utility Executive", "influence": "high", "interest": "high" },
     { "id": "sh-solar-002", "name": "Florida PSC", "role": "Regulator", "department": "External", "influence": "high", "interest": "high" },
     { "id": "sh-solar-003", "name": "Matt Valle", "role": "VP Generation", "department": "Power Generation", "influence": "high", "interest": "high" },
     { "id": "sh-solar-004", "name": "Environmental Groups", "role": "Community Stakeholder", "department": "External", "influence": "medium", "interest": "high" }

@@ -1088,7 +1088,7 @@ const allStoryCriteria: Record<string, string[]> = {
   ],
   'Retirement Income Drawdown': [
     'Given customer in drawdown, When income requested, Then tax-free cash and taxable income calculated per LTA and crystallization',
-    'Given UFPLS withdrawal requested, When processed, Then 25% tax-free and 75% taxable portions calculated with RTI submission',
+    'Given UFPS withdrawal requested, When processed, Then 25% tax-free and 75% taxable portions calculated with RTI submission',
     'Given death benefit claim made, When processed, Then beneficiary options presented based on member age and nomination'
   ],
 

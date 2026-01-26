@@ -77,7 +77,7 @@ export default function SustainabilityPage() {
                 <Leaf className="h-8 w-8" />
                 <h1 className="text-3xl font-bold" data-testid="text-page-title">Sustainability & ESG</h1>
               </div>
-              <p className="text-green-100 mt-1">NextEra Energy SASB Report 2024 | TCFD Aligned</p>
+              <p className="text-green-100 mt-1">Enterprise SASB Report 2024 | TCFD Aligned</p>
             </div>
             <div className="text-right">
               <p className="text-green-100 text-sm">Net Zero Target</p>
@@ -479,7 +479,7 @@ export default function SustainabilityPage() {
                 </div>
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" onClick={(e) => { e.stopPropagation(); handleDrillDown('lg-response', 'response-001'); }} data-testid="metric-lg-response">
-                  <h4 className="font-semibold mb-2">NextEra Response</h4>
+                  <h4 className="font-semibold mb-2">Enterprise Response</h4>
                   <p className="text-sm text-gray-700">
                     "Climate risk is increasingly financially material to understanding a company's future success and must be an integral part of our investment analysis. While we continue to do what is within our control to decarbonise our business, as a financial organisation the success of our transition is dependent on the companies we invest in delivering on their decarbonisation targets."
                   </p>

@@ -1,10 +1,10 @@
 /**
  * DATABASE SEEDING SCRIPT
  *
- * Seeds the database with NextEra Energy test data including:
- * - 3 divisions (FPL, NEER, Corporate & Other)
+ * Seeds the database with Enterprise test data including:
+ * - 3 divisions (Regional Utility, Renewables Division, Corporate & Other)
  * - 8 teams
- * - 74 projects (NextEra + generic IT projects)
+ * - 74 projects (Enterprise + generic IT projects)
  * - 180 tasks
  * - 53 risks
  * - 6 OKRs
@@ -271,9 +271,9 @@ async function main() {
 
     console.log('\n✅ Database seeding completed successfully!');
     console.log('\n📊 Summary:');
-    console.log('  - 3 divisions (FPL, NEER, Corporate & Other)');
+    console.log('  - 3 divisions (Regional Utility, Renewables Division, Corporate & Other)');
     console.log('  - 8 teams');
-    console.log('  - 74 projects (NextEra + generic IT)');
+    console.log('  - 74 projects (Enterprise + generic IT)');
     console.log('  - 180 tasks');
     console.log('  - 53 risks');
     console.log('  - 6 OKRs');
