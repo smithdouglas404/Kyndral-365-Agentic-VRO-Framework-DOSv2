@@ -124,6 +124,28 @@ export class MCPConnectionTester {
         case 'rally':
           result = await this.testRally(credentials);
           break;
+        case 'anaplan':
+          result = await this.testAnaplan(credentials);
+          break;
+
+        // Data Platforms
+        case 'celonis':
+          result = await this.testCelonis(credentials);
+          break;
+        case 'palantir':
+          result = await this.testPalantir(credentials);
+          break;
+
+        // Orchestration
+        case 'flowise':
+          result = await this.testFlowise(credentials);
+          break;
+        case 'retool':
+          result = await this.testRetool(credentials);
+          break;
+        case 'ragie':
+          result = await this.testRagie(credentials);
+          break;
 
         default:
           // Fallback for unsupported server types
@@ -851,6 +873,224 @@ export class MCPConnectionTester {
       };
     } catch (error: any) {
       throw new Error(`Rally connection failed: ${error.message}`);
+    }
+  }
+
+  private static async testAnaplan(credentials: Record<string, any>): Promise<ConnectionTestResult> {
+    try {
+      const apiUrl = credentials.apiUrl || 'https://api.anaplan.com';
+      const response = await fetch(`${apiUrl}/2/0/workspaces/${credentials.workspaceId}/models`, {
+        headers: {
+          'Authorization': `Bearer ${credentials.authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.statusText}`);
+      }
+
+      const data: any = await response.json();
+
+      return {
+        success: true,
+        message: 'Successfully connected to Anaplan',
+        details: {
+          server: 'Anaplan',
+          latency: 0,
+          accountInfo: {
+            workspaceId: credentials.workspaceId,
+            models: data.models?.length || 0,
+          },
+        },
+      };
+    } catch (error: any) {
+      throw new Error(`Anaplan connection failed: ${error.message}`);
+    }
+  }
+
+  private static async testCelonis(credentials: Record<string, any>): Promise<ConnectionTestResult> {
+    try {
+      const response = await fetch(`${credentials.teamUrl}/integration/api/v1/datamodels`, {
+        headers: {
+          'Authorization': `AppKey ${credentials.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.statusText}`);
+      }
+
+      const data: any = await response.json();
+
+      return {
+        success: true,
+        message: 'Successfully connected to Celonis',
+        details: {
+          server: 'Celonis',
+          latency: 0,
+          accountInfo: {
+            dataModels: data.length || 0,
+            teamUrl: credentials.teamUrl,
+          },
+        },
+      };
+    } catch (error: any) {
+      throw new Error(`Celonis connection failed: ${error.message}`);
+    }
+  }
+
+  private static async testPalantir(credentials: Record<string, any>): Promise<ConnectionTestResult> {
+    try {
+      // OAuth2 token exchange for Palantir Foundry
+      const tokenResponse = await fetch(`${credentials.foundryUrl}/multipass/api/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: credentials.clientId,
+          client_secret: credentials.clientSecret,
+        }).toString(),
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error(`OAuth authentication failed: ${tokenResponse.statusText}`);
+      }
+
+      const tokenData: any = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+
+      // Test API access with the token
+      const apiResponse = await fetch(`${credentials.foundryUrl}/api/v1/ontologies`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`API access failed: ${apiResponse.statusText}`);
+      }
+
+      const data: any = await apiResponse.json();
+
+      return {
+        success: true,
+        message: 'Successfully connected to Palantir Foundry',
+        details: {
+          server: 'Palantir Foundry',
+          latency: 0,
+          accountInfo: {
+            foundryUrl: credentials.foundryUrl,
+            ontologies: data.data?.length || 0,
+          },
+        },
+      };
+    } catch (error: any) {
+      throw new Error(`Palantir connection failed: ${error.message}`);
+    }
+  }
+
+  private static async testFlowise(credentials: Record<string, any>): Promise<ConnectionTestResult> {
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (credentials.apiKey) {
+        headers['Authorization'] = `Bearer ${credentials.apiKey}`;
+      }
+
+      const response = await fetch(`${credentials.apiUrl}/api/v1/flows`, {
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Connection failed: ${response.statusText}`);
+      }
+
+      const data: any = await response.json();
+
+      return {
+        success: true,
+        message: 'Successfully connected to Flowise',
+        details: {
+          server: 'Flowise',
+          latency: 0,
+          accountInfo: {
+            flows: Array.isArray(data) ? data.length : 0,
+            apiUrl: credentials.apiUrl,
+          },
+        },
+      };
+    } catch (error: any) {
+      throw new Error(`Flowise connection failed: ${error.message}`);
+    }
+  }
+
+  private static async testRetool(credentials: Record<string, any>): Promise<ConnectionTestResult> {
+    try {
+      const response = await fetch(`${credentials.instanceUrl}/api/v2/folders`, {
+        headers: {
+          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.statusText}`);
+      }
+
+      const data: any = await response.json();
+
+      return {
+        success: true,
+        message: 'Successfully connected to Retool',
+        details: {
+          server: 'Retool',
+          latency: 0,
+          accountInfo: {
+            instanceUrl: credentials.instanceUrl,
+            folders: data.data?.length || 0,
+          },
+        },
+      };
+    } catch (error: any) {
+      throw new Error(`Retool connection failed: ${error.message}`);
+    }
+  }
+
+  private static async testRagie(credentials: Record<string, any>): Promise<ConnectionTestResult> {
+    try {
+      const response = await fetch('https://api.ragie.ai/documents', {
+        headers: {
+          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.statusText}`);
+      }
+
+      const data: any = await response.json();
+
+      return {
+        success: true,
+        message: 'Successfully connected to Ragie',
+        details: {
+          server: 'Ragie',
+          latency: 0,
+          accountInfo: {
+            documents: data.documents?.length || 0,
+          },
+        },
+      };
+    } catch (error: any) {
+      throw new Error(`Ragie connection failed: ${error.message}`);
     }
   }
 }

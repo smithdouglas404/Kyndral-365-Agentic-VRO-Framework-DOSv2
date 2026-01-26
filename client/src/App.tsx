@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimulationProvider as EventSimulationProvider } from "@/contexts/SimulationContext";
 import { PageContextProvider } from "@/contexts/PageContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
+import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
+import { DemoModeBanner } from "@/components/DemoModeBanner";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
 import { AlertBubble } from "@/components/AlertBubble";
@@ -83,6 +85,10 @@ import CustomAttributes from "@/pages/admin/CustomAttributes";
 import PolicyAsCode from "@/pages/admin/PolicyAsCode";
 import AgentMemoryViewer from "@/pages/admin/AgentMemoryViewer";
 import VoiceBriefings from "@/pages/admin/VoiceBriefings";
+import CompanyProfile from "@/pages/admin/CompanyProfile";
+import ApprovalCenter from "@/pages/admin/ApprovalCenter";
+import ApprovalRequests from "@/pages/admin/ApprovalRequests";
+import SetupWizard from "@/pages/SetupWizard";
 import COPDashboard from "@/pages/COPDashboard";
 import AgentCollaboration from "@/pages/AgentCollaboration";
 import ExecutiveWorkspace from "@/pages/workspaces/ExecutiveWorkspace";
@@ -98,6 +104,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/setup" component={SetupWizard} />
 
       {/* New Workspace Routes */}
       <Route path="/workspace/executive" component={ExecutiveWorkspace} />
@@ -152,6 +159,9 @@ function Router() {
       <Route path="/password-reset" component={PasswordResetPage} />
       <Route path="/password-reset/confirm" component={PasswordResetConfirmPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/company-profile" component={CompanyProfile} />
+      <Route path="/admin/approval-center" component={ApprovalCenter} />
+      <Route path="/admin/approval-requests" component={ApprovalRequests} />
       <Route path="/admin/users" component={UserManagement} />
       <Route path="/admin/integrations" component={IntegrationManagement} />
       <Route path="/admin/settings" component={SystemSettings} />
@@ -318,22 +328,25 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WebSocketProvider>
-        <UnifiedNotificationProvider>
-          <EventSimulationProvider>
-            <PageContextProvider>
-              <TooltipProvider>
-                <Toaster />
-                {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
-                {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
-                <FloatingAlertBanner />
-                {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
-                {/* <GlobalAIOverlay /> */}
-                <AskPMChat />
-                <Router />
-              </TooltipProvider>
-            </PageContextProvider>
-          </EventSimulationProvider>
-        </UnifiedNotificationProvider>
+        <CompanyProfileProvider>
+          <UnifiedNotificationProvider>
+            <EventSimulationProvider>
+              <PageContextProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <DemoModeBanner />
+                  {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
+                  {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
+                  <FloatingAlertBanner />
+                  {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
+                  {/* <GlobalAIOverlay /> */}
+                  <AskPMChat />
+                  <Router />
+                </TooltipProvider>
+              </PageContextProvider>
+            </EventSimulationProvider>
+          </UnifiedNotificationProvider>
+        </CompanyProfileProvider>
       </WebSocketProvider>
     </QueryClientProvider>
   );

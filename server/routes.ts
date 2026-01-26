@@ -43,6 +43,9 @@ import { registerCollaborationRoutes } from "./routes/collaboration.js";
 import { registerWhiteLabelRoutes } from "./routes/admin/white-label.js";
 import { registerAgentInsightsRoutes } from "./routes/agent-insights.js";
 import { registerAgentActivityRoutes } from "./routes/agent-activity.js";
+import { registerCompanyProfileRoutes } from "./routes/company-profile.js";
+import { registerApprovalCenterRoutes } from "./routes/approval-center.js";
+import { registerGovernanceEnforcementRoutes } from "./routes/governance-enforcement.js";
 import { registerGovernanceRoutes } from "./routes/governance.js";
 import { registerVoiceBriefingRoutes } from "./routes/voice-briefings.js";
 import { registerRecommendationsRoutes } from "./routes/recommendations.js";
@@ -241,6 +244,15 @@ export async function registerRoutes(
 
   // Register Governance routes (Risk framework and compliance data)
   registerGovernanceRoutes(app, storage);
+
+  // Register Company Profile routes (Policy-as-Code, Setup Wizard)
+  registerCompanyProfileRoutes(app);
+
+  // Register Approval Center routes (HITL review for AI-generated content)
+  registerApprovalCenterRoutes(app);
+
+  // Register Governance Enforcement routes (Rules engine, approval requests)
+  registerGovernanceEnforcementRoutes(app);
 
   // Register Voice Briefing routes (NotebookLM-style podcast summaries)
   registerVoiceBriefingRoutes(app, storage);

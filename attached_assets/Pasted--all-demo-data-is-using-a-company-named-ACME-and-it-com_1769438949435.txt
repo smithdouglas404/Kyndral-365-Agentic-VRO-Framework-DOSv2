@@ -1,0 +1,197 @@
+ all demo data is using a company named ACME and it comes with the projects we have in     
+  the seed data.  Can we come up with 10 projects by industry that are in the seed          
+  data and those projects have a mixture of late engagements, metrics out of range, on      
+  track and under budget, task details caused by multiple engagements, governance           
+  issues, and the rules engines have started data, and the dashbaords use the ontology      
+  language for that industry and we have a uniform dashbaord layout like we have today.     
+  this will allow the demos to be real and loaded, alos they can see the agents             
+  learning and doing.   please add any other conditions you feel need to be added to        
+  demonstrate the agents, notifactions, alarms, rules, etc...  if they change rules I       
+  want it to be real changes and updates.. what do you think..  create a to do list for     
+  this                                                                                      
+                                                                                            
+● Absolutely BRILLIANT idea! This will make demos feel like a real, living system. Let me   
+  create a comprehensive todo list.                                                         
+                                                                                            
+● Write(ACME_DEMO_SYSTEM.md)                                                                
+  ⎿  Wrote 792 lines to ACME_DEMO_SYSTEM.md                                                 
+     # ACME DEMO DATA SYSTEM                                                                
+     **Version:** 1.0                                                                       
+     **Created:** January 26, 2026                                                          
+     **Status:** Design Specification                                                       
+     ---                                                                                    
+     ## Overview                                                                            
+     … +782 lines (ctrl+o to expand)                                                        
+                                                                                            
+● Perfect! I've created a comprehensive specification for the ACME Demo Data System. Here's 
+  what I designed:                                                                          
+                                                                                            
+  🎯 What I Created                                                                         
+                                                                                            
+  1. ACME_DEMO_SYSTEM.md - Complete Specification (600+ lines)                              
+                                                                                            
+  Contains:                                                                                 
+  - ✅ Architecture for 20 ACME industry variants                                           
+  - ✅ 10 project templates per industry (200 total projects)                               
+  - ✅ Health state distribution (2 critical, 2 warning, 2 healthy, 2 risk, 2 governance)   
+  - ✅ Detailed intervention patterns for each agent                                        
+  - ✅ Agent observation templates (pattern detection, fact broadcasting)                   
+  - ✅ Rules engine pre-fired state                                                         
+  - ✅ Battle Rhythm event templates (Sunday recon, Monday briefing, etc.)                  
+  - ✅ Industry selector UI design                                                          
+  - ✅ Rule change detection system                                                         
+  - ✅ Dashboard layouts with industry ontology                                             
+  - ✅ 3-week implementation plan                                                           
+                                                                                            
+  2. 16-Item Todo List - Ready to Execute                                                   
+                                                                                            
+  The todo list tracks all major work items from design through documentation.              
+                                                                                            
+  💡 Key Design Decisions                                                                   
+                                                                                            
+  Multiple ACME Variants (Better than Single ACME)                                          
+                                                                                            
+  Why 20 ACME variants?                                                                     
+  - Users can experience different industries                                               
+  - Each demo fully realistic for that domain                                               
+  - Showcases industry ontology system                                                      
+  - Can compare industries side-by-side                                                     
+                                                                                            
+  Examples:                                                                                 
+  - ACME Energy & Utilities                                                                 
+  - ACME Healthcare                                                                         
+  - ACME Technology                                                                         
+  - ACME Retail & E-commerce                                                                
+  - ... (16 more)                                                                           
+                                                                                            
+  Realistic Project Distribution                                                            
+                                                                                            
+  10 Projects Per Industry:                                                                 
+  2 projects 🔴 CRITICAL (Late & over budget)                                               
+    - CPI: 0.75-0.85, SPI: 0.70-0.80                                                        
+    - Triggers: FinOps, TMO, Risk alerts                                                    
+    - Root causes documented                                                                
+                                                                                            
+  2 projects 🟡 WARNING (Metrics out of range)                                              
+    - CPI: 0.88-0.92, SPI: 0.90-0.95                                                        
+    - Triggers: Rules engine warnings                                                       
+                                                                                            
+  2 projects 🟢 HEALTHY (On track & under budget)                                           
+    - CPI: 1.05-1.15, SPI: 1.00-1.10                                                        
+    - Triggers: Value realization opportunities                                             
+                                                                                            
+  2 projects ⚠️ RISK (High risk exposure)                                                   
+    - Multiple unmitigated critical risks                                                   
+    - Triggers: Risk pattern detection                                                      
+                                                                                            
+  2 projects ⚙️ GOVERNANCE (Compliance issues)                                              
+    - Missing approvals, documentation gaps                                                 
+    - Triggers: Governance violations                                                       
+                                                                                            
+  Living Demo Environment                                                                   
+                                                                                            
+  What Makes It "Real":                                                                     
+  - ✅ Agents have already fired (interventions exist)                                      
+  - ✅ Rules have already triggered (rule state saved)                                      
+  - ✅ Battle Rhythm has run (event history)                                                
+  - ✅ Observations logged (pattern detection evidence)                                     
+  - ✅ Task-level root causes (why projects are late)                                       
+  - ✅ Agent collaboration visible (FinOps + TMO working together)                          
+                                                                                            
+  Real-Time Updates:                                                                        
+  - User changes rule threshold from 0.85 → 0.80                                            
+  - System immediately re-evaluates all 10 projects                                         
+  - New interventions created for newly triggered projects                                  
+  - Old interventions dismissed if no longer triggered                                      
+  - Notification: "Rule updated: 1 project now triggered, 2 no longer triggered"            
+                                                                                            
+  📊 Example: ACME Energy Project                                                           
+                                                                                            
+  Project: Grid Modernization - Smart Meter Rollout 🔴                                      
+                                                                                            
+  Status: CRITICAL - Late & Over Budget                                                     
+  - Budget: $15M → $20M forecast (CPI: 0.81)                                                
+  - Schedule: 4 weeks late (SPI: 0.76)                                                      
+  - Risk Exposure: $3.2M                                                                    
+                                                                                            
+  Active Interventions (5):                                                                 
+  1. DeepFinOps: "Budget overrun - recommend reforecast +$2M or descope"                    
+  2. DeepTMO: "4 weeks behind - recommend weekend shifts, expedite vendor"                  
+  3. DeepRisk: "Triple threat pattern - budget + schedule + quality"                        
+  4. DeepOCM: "Change adoption at 30% vs 60% target - need training"                        
+  5. DeepGovernance: "Stage gate approval overdue - security assessment missing"            
+                                                                                            
+  Agent Observations (8):                                                                   
+  - "Pattern: Vendor dependencies delay 40% more on average"                                
+  - "Fact: Integration testing 3x expected defects"                                         
+  - "Collaboration Request: FinOps + TMO + OCM joint plan needed"                           
+                                                                                            
+  Fired Rules (3):                                                                          
+  - "Budget Overrun Critical" (triggered 2 weeks ago)                                       
+  - "Schedule Delay High" (triggered 3 weeks ago)                                           
+  - "Governance Gate Violation" (triggered 1 week ago)                                      
+                                                                                            
+  Battle Rhythm Context:                                                                    
+  - Sunday Recon: "Flagged as top portfolio risk"                                           
+  - Monday Briefing: "Finance approved $2M contingency"                                     
+  - Wednesday Checkpoint: "Vendor committed to Feb 15 delivery"                             
+                                                                                            
+  🎨 Industry Selector in Demo Mode                                                         
+                                                                                            
+  UI Enhancement:                                                                           
+  ┌────────────────────────────────────────────────────────┐                                
+  │ ⚠ You're viewing demo data (ACME Energy & Utilities)  │                                 
+  │ Try different industries: [Energy ▼] [🔄 Switch]      │                                 
+  │ [View Setup Status]  [✨ Complete Setup]             │                                  
+  └────────────────────────────────────────────────────────┘                                
+                                                                                            
+  Dropdown:                                                                                 
+  - ACME Energy & Utilities (Current)                                                       
+  - ACME Healthcare ✨                                                                      
+  - ACME Technology ✨                                                                      
+  - ACME Financial Services ✨                                                              
+  - ... (16 more)                                                                           
+                                                                                            
+  When Switching:                                                                           
+  1. Loading: "Loading ACME Healthcare demo data..."                                        
+  2. Terminology updates: "Clinical Services" vs "Generation"                               
+  3. Projects reload: "EHR Implementation" vs "Grid Modernization"                          
+  4. Interventions reload: HIPAA compliance vs NERC CIP                                     
+  5. Notification: "Now viewing ACME Healthcare - 10 projects, 18 interventions"            
+                                                                                            
+  🚀 Implementation Timeline                                                                
+                                                                                            
+  Week 1: Data Structures                                                                   
+  - Create project templates (200 projects)                                                 
+  - Create intervention templates                                                           
+  - Create observation templates                                                            
+  - Create Battle Rhythm templates                                                          
+                                                                                            
+  Week 2: Seed Script + Rule Detection                                                      
+  - Build seed-acme-demo.ts                                                                 
+  - Implement rule change detection                                                         
+  - Auto-create/dismiss interventions                                                       
+                                                                                            
+  Week 3: UI + Testing                                                                      
+  - Add industry selector to banner                                                         
+  - Update dashboards with ontology terminology                                             
+  - End-to-end testing                                                                      
+  - Documentation                                                                           
+                                                                                            
+  🎯 Success Criteria                                                                       
+                                                                                            
+  Demo Feels Real When:                                                                     
+  - ✅ Projects have believable issues (not fake data)                                      
+  - ✅ Agents actively working (interventions updating)                                     
+  - ✅ Rules firing on real conditions                                                      
+  - ✅ Battle Rhythm shows weekly cadence                                                   
+  - ✅ Industry terminology matches domain                                                  
+  - ✅ Rule changes have immediate effect                                                   
+  - ✅ Agent collaboration evident                                                          
+  - ✅ Learning demonstrated                                                                
+                                                                                            
+  User Reactions We Want:                                                                   
+  - "Wow, this is actually working on real problems!"                                       
+  - "I can see the agents thinking"                                                         
+  - "The terminology is perfect for our industry"                                           
+  - "When I changed that rule, it immediately updated!"            

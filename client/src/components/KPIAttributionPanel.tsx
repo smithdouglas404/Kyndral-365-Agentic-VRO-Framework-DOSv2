@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
+import { useCompanyName } from '@/contexts/CompanyProfileContext';
 
 interface KPI {
   id: string;
@@ -67,16 +68,17 @@ const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
   }
 ];
 
-const AI_SUGGESTED_KPIS = [
-  { name: 'Battery Storage Capacity', rationale: 'Critical metric for grid reliability and renewable integration', confidence: 94 },
-  { name: 'Customer Self-Service Rate', rationale: 'Leading indicator for digital transformation success', confidence: 82 },
-  { name: 'Grid Resilience Score', rationale: 'Measures storm hardening effectiveness for Florida operations', confidence: 88 },
-  { name: 'Clean Energy Generation %', rationale: 'Aligns with NextEra Real Zero carbon goals and ESG commitments', confidence: 96 }
-];
-
 export function KPIAttributionPanel() {
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('tracking');
+  const companyName = useCompanyName();
+
+  const AI_SUGGESTED_KPIS = [
+    { name: 'Battery Storage Capacity', rationale: 'Critical metric for grid reliability and renewable integration', confidence: 94 },
+    { name: 'Customer Self-Service Rate', rationale: 'Leading indicator for digital transformation success', confidence: 82 },
+    { name: 'Grid Resilience Score', rationale: 'Measures operational resilience and infrastructure effectiveness', confidence: 88 },
+    { name: 'Clean Energy Generation %', rationale: `Aligns with ${companyName} sustainability goals and ESG commitments`, confidence: 96 }
+  ];
   const [addedKpis, setAddedKpis] = useState<Set<string>>(new Set());
 
   // ✅ Fetch KPIs from API instead of using hardcoded data
@@ -348,7 +350,7 @@ export function KPIAttributionPanel() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Based on NextEra's strategic objectives and industry benchmarks, consider adding these KPIs:
+                Based on {companyName}'s strategic objectives and industry benchmarks, consider adding these KPIs:
               </p>
               <div className="space-y-3">
                 {AI_SUGGESTED_KPIS.map((suggestion, idx) => {

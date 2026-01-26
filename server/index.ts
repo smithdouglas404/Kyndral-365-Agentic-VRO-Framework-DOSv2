@@ -103,6 +103,15 @@ app.use((req, res, next) => {
     log(`Strategic themes backfill skipped: ${e.message}`);
   }
 
+  // Run master seed (ontology + industries + rules + agents)
+  try {
+    const { runMasterSeed } = await import('./scripts/seed-master.js');
+    await runMasterSeed();
+    log('[Seed] ✅ Master seed completed - System fully initialized');
+  } catch (e: any) {
+    log(`[Seed] Master seed skipped: ${e.message}`);
+  }
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

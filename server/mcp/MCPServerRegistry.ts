@@ -15,7 +15,8 @@ export type MCPServerCategory =
   | 'documentation' // Documentation & Knowledge Management
   | 'finance' // Financial & ERP Systems
   | 'notification' // Notification & Alerting
-  | 'orchestration'; // Workflow & Agent Orchestration
+  | 'orchestration' // Workflow & Agent Orchestration
+  | 'data_platform'; // Enterprise Data Platforms & Process Mining
 
 export type MCPServerStatus = 'available' | 'coming_soon' | 'community' | 'enterprise_only';
 
@@ -1373,6 +1374,286 @@ Retool MCP Integration:
 - See: https://docs.retool.com/agents/guides/tools/connect-to-mcp-server
     `,
   },
+
+  // ============================================================================
+  // DATA PLATFORMS & PROCESS INTELLIGENCE
+  // ============================================================================
+
+  celonis: {
+    id: 'celonis',
+    name: 'Celonis',
+    displayName: 'Celonis Process Mining',
+    category: 'data_platform',
+    status: 'available',
+    officialMCP: true,
+    description: 'Enterprise process mining and execution management platform. Real-time process intelligence, bottleneck analysis, and process optimization powered by object-centric process mining (OCPM).',
+    capabilities: [
+      'Process Mining & Discovery',
+      'Process Variant Analysis',
+      'Bottleneck Detection',
+      'Cycle Time Analytics',
+      'Conformance Checking',
+      'Root Cause Analysis',
+      'Process Simulation',
+      'Action Engine (Automation)',
+      'Real-time Process Monitoring',
+      'Executive Dashboards',
+    ],
+    usedBy: ['PMO', 'VRO', 'TMO', 'Process Excellence', 'Operations'],
+    configFields: [
+      {
+        name: 'teamUrl',
+        label: 'Celonis Team URL',
+        type: 'url',
+        required: true,
+        description: 'Your Celonis team instance URL',
+        placeholder: 'https://your-team.celonis.cloud',
+      },
+      {
+        name: 'apiKey',
+        label: 'API Key',
+        type: 'password',
+        required: true,
+        description: 'Celonis API key from App Keys management',
+        placeholder: 'Your Celonis API key',
+        sensitive: true,
+      },
+      {
+        name: 'dataModelId',
+        label: 'Data Model ID (Optional)',
+        type: 'text',
+        required: false,
+        description: 'Specific data model to query',
+        placeholder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+      },
+      {
+        name: 'workspaceId',
+        label: 'Workspace ID (Optional)',
+        type: 'text',
+        required: false,
+        description: 'Workspace containing your analyses',
+        placeholder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+      },
+    ],
+    documentation: 'https://docs.celonis.com/en/introduction.html',
+    setupInstructions: `
+1. Login to your Celonis instance
+2. Navigate to: Profile > App Keys > Create App Key
+3. Grant permissions:
+   - Read access to data models
+   - Read access to analyses
+   - Execute action flows (optional)
+4. Copy the API key and team URL
+5. (Optional) Find your Data Model ID:
+   - Open Studio > Data Models
+   - Click on your data model
+   - Copy ID from URL
+6. Configure data connection to your source systems
+
+What Your Agents Can Do:
+- Query process mining data (variants, bottlenecks, cycle times)
+- Analyze conformance violations (processes deviating from standards)
+- Detect automation opportunities in workflows
+- Track KPIs from real process execution data
+- Identify process inefficiencies and recommend optimizations
+- Compare actual vs. planned process execution
+
+Integration Benefits:
+- PMO agents can see real execution data from Jira/ServiceNow
+- VRO agents can measure actual value delivery cycle times
+- TMO agents can optimize change management processes
+- Governance agents can enforce process compliance
+    `,
+  },
+
+  palantir: {
+    id: 'palantir',
+    name: 'Palantir',
+    displayName: 'Palantir Foundry',
+    category: 'data_platform',
+    status: 'available',
+    officialMCP: true,
+    description: 'Enterprise data platform with ontology-driven analytics. Unify siloed enterprise data, query across systems, and leverage Palantir\'s knowledge graph for AI-powered insights.',
+    capabilities: [
+      'Ontology-Based Data Model',
+      'Cross-System Data Integration',
+      'SQL Query Interface',
+      'Knowledge Graph',
+      'Data Lineage Tracking',
+      'Object Explorer',
+      'Workshop Analytics',
+      'Pipeline Builder',
+      'Multipass (Fine-grained permissions)',
+      'AIP (AI-Powered Analysis)',
+    ],
+    usedBy: ['All Agents', 'Data Teams', 'Executive', 'Analytics'],
+    configFields: [
+      {
+        name: 'foundryUrl',
+        label: 'Foundry Instance URL',
+        type: 'url',
+        required: true,
+        description: 'Your Palantir Foundry instance URL',
+        placeholder: 'https://your-org.palantirfoundry.com',
+      },
+      {
+        name: 'clientId',
+        label: 'OAuth Client ID',
+        type: 'text',
+        required: true,
+        description: 'OAuth2 client ID from Foundry',
+        placeholder: 'Your client ID',
+      },
+      {
+        name: 'clientSecret',
+        label: 'OAuth Client Secret',
+        type: 'password',
+        required: true,
+        description: 'OAuth2 client secret',
+        placeholder: 'Your client secret',
+        sensitive: true,
+      },
+      {
+        name: 'ontologyRid',
+        label: 'Ontology RID (Optional)',
+        type: 'text',
+        required: false,
+        description: 'Resource Identifier for your ontology',
+        placeholder: 'ri.ontology.main.ontology.00000000-0000-0000-0000-000000000000',
+      },
+    ],
+    documentation: 'https://www.palantir.com/docs/foundry/',
+    setupInstructions: `
+1. Access your Palantir Foundry instance
+2. Navigate to: Workspace Settings > Third-Party Applications
+3. Create new OAuth2 application:
+   - Name: "PMO/VRO Integration"
+   - Scopes: api:read-data, api:write-data, ontology:read
+4. Copy Client ID and Client Secret
+5. (Optional) Get your Ontology RID:
+   - Open Ontology Manager
+   - Click on your ontology
+   - Copy RID from URL or info panel
+6. Whitelist your application's redirect URI
+
+What Your Agents Can Do:
+- Query unified enterprise data across all systems
+- Access Palantir's knowledge graph for relationship analysis
+- Run SQL queries on integrated datasets
+- Leverage Palantir AIP for AI-powered data analysis
+- Track data lineage from source to insight
+- Execute saved Workshop analyses programmatically
+
+Integration Benefits:
+- Unify data from Jira, SAP, Workday, Salesforce, etc.
+- Single source of truth for enterprise metrics
+- AI agents can query across siloed systems without custom connectors
+- Leverage Palantir's data quality and governance
+- Use Palantir's ontology as your system of record
+- Combine process mining (Celonis) with data platform (Palantir)
+
+Positioning:
+Your platform becomes the AI orchestration layer on top of Palantir's data layer. Palantir provides unified data, your agents provide intelligence and automation.
+    `,
+  },
+
+  anaplan: {
+    id: 'anaplan',
+    name: 'Anaplan',
+    displayName: 'Anaplan Connected Planning',
+    category: 'finance',
+    status: 'available',
+    officialMCP: true,
+    description: 'Enterprise planning and financial modeling platform. Real-time budgets, forecasts, scenarios, and workforce planning data integrated into your FinOps and PMO workflows.',
+    capabilities: [
+      'Financial Planning & Budgeting',
+      'Scenario Modeling',
+      'Workforce Planning',
+      'Sales & Operations Planning',
+      'Demand Planning',
+      'Capital Planning',
+      'Real-time What-If Analysis',
+      'Multi-dimensional Models',
+      'Connected Planning',
+      'Custom Dashboards',
+    ],
+    usedBy: ['FinOps', 'PMO', 'Resource Planning', 'Executive', 'CFO Office'],
+    configFields: [
+      {
+        name: 'workspaceId',
+        label: 'Workspace ID',
+        type: 'text',
+        required: true,
+        description: 'Your Anaplan workspace ID',
+        placeholder: '8a81b09a7XXXXXXXXXXXXXXXXX',
+      },
+      {
+        name: 'modelId',
+        label: 'Model ID',
+        type: 'text',
+        required: true,
+        description: 'Anaplan model ID containing your planning data',
+        placeholder: '7B2C4D5E6F7G8H9I',
+      },
+      {
+        name: 'authToken',
+        label: 'Authentication Token',
+        type: 'password',
+        required: true,
+        description: 'Anaplan API authentication token (Basic or Certificate)',
+        placeholder: 'Your auth token or certificate',
+        sensitive: true,
+      },
+      {
+        name: 'apiUrl',
+        label: 'API Base URL',
+        type: 'url',
+        required: false,
+        description: 'Anaplan API endpoint (leave default for cloud)',
+        placeholder: 'https://api.anaplan.com',
+      },
+    ],
+    documentation: 'https://help.anaplan.com/anapedia/Content/APIs/Introduction-to-the-Anaplan-API.html',
+    setupInstructions: `
+1. Login to Anaplan at https://anaplan.com
+2. Navigate to: Administration > Integrations
+3. Create API authentication:
+   Option A - Basic Auth:
+   - Use your email + password
+   - Generate auth token via API
+
+   Option B - Certificate Auth (Recommended):
+   - Generate certificate in Anaplan
+   - Download private key
+   - Use certificate-based authentication
+4. Find your Workspace ID:
+   - URL when viewing workspace: ...workspace/[WORKSPACE_ID]
+5. Find your Model ID:
+   - Open model
+   - URL: ...model/[MODEL_ID]
+6. Test connection with: GET /workspaces/{workspaceId}/models
+
+What Your Agents Can Do:
+- Query budget and forecast data in real-time
+- Access approved vs. actual spending
+- Pull workforce capacity plans
+- Retrieve scenario analysis results
+- Check project funding availability
+- Validate budget requests against approved plans
+- Track capital expenditure allocations
+
+Integration Benefits:
+- FinOps agents can validate project costs against approved budgets
+- PMO agents can check resource capacity from workforce plans
+- Governance agents can enforce spend policies from Anaplan rules
+- Real-time budget updates instead of static spreadsheets
+- Scenario planning integration (what-if analysis for projects)
+- Connected planning across finance and operations
+
+Positioning:
+Anaplan is the planning layer, your platform is the execution layer. Anaplan provides budgets and forecasts, your agents ensure projects stay aligned with financial plans.
+    `,
+  },
 };
 
 /**
@@ -1453,5 +1734,10 @@ export const MCP_CATEGORIES = {
     label: 'Workflow & Agent Orchestration',
     description: 'Multi-agent workflows and visual orchestration tools',
     icon: 'GitBranch',
+  },
+  data_platform: {
+    label: 'Enterprise Data Platforms',
+    description: 'Process mining, data integration, and enterprise analytics platforms',
+    icon: 'Database',
   },
 };

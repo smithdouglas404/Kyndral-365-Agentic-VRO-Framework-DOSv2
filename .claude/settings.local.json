@@ -70,7 +70,9 @@
       "Bash(tail:*)",
       "Bash(git restore:*)",
       "Bash(chmod:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(timeout 10 npm start)",
+      "Bash(comm -23:*)"
     ]
   }
 }

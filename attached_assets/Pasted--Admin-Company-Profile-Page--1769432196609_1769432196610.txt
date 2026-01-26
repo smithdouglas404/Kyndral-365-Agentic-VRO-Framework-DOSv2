@@ -1,0 +1,71 @@
+  Admin > Company Profile Page                                                                       
+                                                                                                     
+  Created a comprehensive management interface at /admin/company-profile with 6 tabs:                
+                                                                                                     
+  1. Basic Info Tab                                                                                  
+                                                                                                     
+  - Displays company legal name, trade names, headquarters                                           
+  - Shows GICS industry classification and NAICS code                                                
+  - Business summary display                                                                         
+  - Organizational terminology preference                                                            
+  - Edit button for updating company information                                                     
+                                                                                                     
+  2. Org Units Tab                                                                                   
+                                                                                                     
+  - Table view of organizational units (business units, segments, divisions)                         
+  - Shows unit type, description, and source (AI-extracted vs manual)                                
+  - Add/Edit/Delete functionality                                                                    
+  - Extraction confidence badges for AI-discovered units                                             
+                                                                                                     
+  3. Metrics Tab                                                                                     
+                                                                                                     
+  - Card grid of KPIs and performance metrics                                                        
+  - Displays metric type, target values, and calculation formulas                                    
+  - Shows extraction confidence scores                                                               
+  - Color-coded badges for AI-extracted metrics                                                      
+  - Add new metrics capability                                                                       
+                                                                                                     
+  4. OKRs Tab                                                                                        
+                                                                                                     
+  - Strategic objectives with key results display                                                    
+  - Shows target dates and progress                                                                  
+  - Extraction source indicators                                                                     
+  - Expandable key results list                                                                      
+  - Add new objectives capability                                                                    
+                                                                                                     
+  5. Rules Tab                                                                                       
+                                                                                                     
+  - Table of governance rules extracted from annual reports                                          
+  - Shows rule category, active/inactive status, and source                                          
+  - Links to full Policy-as-Code management page                                                     
+  - Displays which rules were AI-extracted vs manually created                                       
+                                                                                                     
+  6. Documents Tab                                                                                   
+                                                                                                     
+  - Annual report display with filing date                                                           
+  - View/download links to source documents                                                          
+  - Re-run Policy-as-Code Extraction button                                                          
+  - Shows what gets extracted (org structure, metrics, OKRs, rules, risks)                           
+  - Upload capability for new documents                                                              
+  - Live extraction progress indicator                                                               
+                                                                                                     
+  Key Features                                                                                       
+                                                                                                     
+  ✅ Re-Extraction Dialog - Allows users to re-run AI extraction on their annual reports at any time 
+  ✅ Source Tracking - All items tagged with whether they were AI-extracted or manually created      
+  ✅ Confidence Scores - Shows extraction confidence percentages for AI-discovered items             
+  ✅ Empty States - Helpful prompts when no data exists in each tab                                  
+  ✅ Live Progress - Banner showing extraction progress when running                                 
+  ✅ Toast Notifications - Success/error feedback for all actions                                    
+                                                                                                     
+  Routing                                                                                            
+                                                                                                     
+  Also registered both new pages in the application:                                                 
+  - /setup - Setup Wizard for initial onboarding                                                     
+  - /admin/company-profile - Company Profile management                                              
+                                                                                                     
+  The Admin section now provides a complete interface for managing all the strategic information     
+  extracted during the setup wizard, with the ability to manually add items or re-extract from       
+  updated documents at any time.                                                                     
+                                                                                                     
+✻ Sautéed for 9m 10s                                   

@@ -688,7 +688,7 @@ export const vroPrograms: VROProgram[] = [
     roiValue: 180,
     valueRealized: 45,
     strategicAlignment: 98,
-    aiInsight: "Millfield Green (UK's first net zero retirement community) achieving 40% energy cost reduction - scale to 5 sites",
+    aiInsight: "Net zero pilot community achieving 40% energy cost reduction - scale to 5 sites",
     prediction: "Planning approval sentiment analysis: 85% positive in target councils - recommend accelerated land acquisition",
     keyOutcomes: [
       { outcome: "Gas-free homes (LGAH)", progress: 61, target: 100, unit: "%" },
@@ -709,11 +709,11 @@ export const vroPrograms: VROProgram[] = [
       piTrend: [{ pi: "PI 24.1", velocity: 42, predictability: 85 }, { pi: "PI 24.2", velocity: 44, predictability: 88 }, { pi: "PI 24.3", velocity: 46, predictability: 90 }, { pi: "PI 24.3", velocity: 48, predictability: 92 }]
     },
     aiSignals: [
-      { type: "insight", message: "Millfield Green: 40% energy savings - scale model proven", confidence: 95, dataSource: "IoT monitoring" },
+      { type: "insight", message: "Net zero pilot: 40% energy savings - scale model proven", confidence: 95, dataSource: "IoT monitoring" },
       { type: "opportunity", message: "85% planning approval sentiment in target councils", confidence: 83, dataSource: "Sentiment analysis" }
     ],
     proactiveActions: [
-      { id: "vpa-013", action: "Replicate Millfield Green model at 5 new sites", impact: "$90m additional value", urgency: "this-week", type: "accelerate" },
+      { id: "vpa-013", action: "Replicate net zero model at 5 new sites", impact: "$90m additional value", urgency: "this-week", type: "accelerate" },
       { id: "vpa-014", action: "Accelerate land acquisition in favorable councils", impact: "First-mover on sites", urgency: "immediate", type: "accelerate" }
     ],
     trendData: [{ week: "W28", value: 35 }, { week: "W29", value: 38 }, { week: "W30", value: 40 }, { week: "W31", value: 43 }, { week: "W32", value: 45 }]
@@ -730,7 +730,7 @@ export const vroPrograms: VROProgram[] = [
     valueRealized: 22,
     strategicAlignment: 95,
     aiInsight: "Credit portfolio showing 0.3% deterioration in BBB cohort - recommending sector rotation before downgrade cycle",
-    prediction: "Cyber threat landscape analysis: 23% increase in insurance-sector attacks expected - recommend enhanced SOC coverage",
+    prediction: "Cyber threat landscape analysis: 23% increase in energy-sector attacks expected - recommend enhanced SOC coverage",
     keyOutcomes: [
       { outcome: "Early warning accuracy", progress: 87, target: 95, unit: "%" },
       { outcome: "Risk incidents", progress: 8, target: 3, unit: "/quarter" },
@@ -751,7 +751,7 @@ export const vroPrograms: VROProgram[] = [
     },
     aiSignals: [
       { type: "warning", message: "BBB cohort showing 0.3% deterioration - act before downgrades", confidence: 91, dataSource: "Credit AI" },
-      { type: "prediction", message: "23% increase in insurance-sector cyber attacks expected", confidence: 84, dataSource: "Threat intelligence" }
+      { type: "prediction", message: "23% increase in energy-sector cyber attacks expected", confidence: 84, dataSource: "Threat intelligence" }
     ],
     proactiveActions: [
       { id: "vpa-015", action: "Execute sector rotation from at-risk BBB issuers", impact: "Avoid $15m credit losses", urgency: "immediate", type: "mitigate" },
@@ -1057,7 +1057,7 @@ export const buPortfolios: BUPortfolio[] = [
   {
     id: "portfolio-ci",
     name: "Corporate & Other",
-    description: "Alternative investments, real estate, infrastructure, and clean energy projects - Millfield Green",
+    description: "Alternative investments, real estate, infrastructure, and clean energy projects",
     projectCount: getBUProjects("Corporate & Other").length,
     programCount: getBUPrograms("Corporate & Other").length,
     totalBudget: getBUProjects("Corporate & Other").reduce((s, p) => s + p.budget.total, 0),
@@ -1073,7 +1073,7 @@ export const buPortfolios: BUPortfolio[] = [
     predictability: 89,
     flowEfficiency: 75,
     topAISignal: { type: "prediction", message: "Net Zero Housing scheme on track for early completion - case study value high", confidence: 92, dataSource: "Project analytics" },
-    topAction: { id: "port-ci-001", action: "Prepare Millfield Green case study for COP presentation", impact: "Brand value +$5m", urgency: "this-month", type: "accelerate" },
+    topAction: { id: "port-ci-001", action: "Prepare net zero housing case study for COP presentation", impact: "Brand value +$5m", urgency: "this-month", type: "accelerate" },
     okrs: [
       { objective: "Deploy $500m in clean energy infrastructure", progress: 78, status: "on-track" },
       { objective: "Achieve carbon neutral portfolio by 2030", progress: 45, status: "on-track" }

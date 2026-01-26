@@ -1,0 +1,1632 @@
+/**
+ * INDUSTRY-SPECIFIC ONTOLOGY PROFILES
+ *
+ * Defines standard metrics, org structures, terminology, and frameworks
+ * for different industries. Applied during company discovery based on GICS/NAICS.
+ */
+
+{
+  "industries": [
+    {
+      "id": "energy-utilities",
+      "name": "Energy & Utilities",
+      "codes": {
+        "gics": ["55", "5510"],
+        "naics": ["2211", "221", "486"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "generation": "Power Generation",
+          "transmission": "Transmission & Distribution",
+          "retail": "Retail Energy Services",
+          "renewables": "Renewable Energy"
+        },
+        "projectTypes": ["Grid Modernization", "Generation Project", "Renewable Installation", "Infrastructure Upgrade", "Compliance Initiative"],
+        "safeMapping": {
+          "valueStreams": ["Customer Operations", "Grid Operations", "Generation Operations"],
+          "arts": ["Digital Transformation", "Grid Enhancement", "Renewable Integration"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Renewable Capacity",
+          "category": "operational",
+          "unit": "GW",
+          "description": "Total renewable generation capacity",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Grid Reliability Index",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "System uptime and reliability",
+          "typical_target": 99.95,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Carbon Intensity",
+          "category": "sustainability",
+          "unit": "kg CO2/MWh",
+          "description": "Carbon emissions per megawatt-hour",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Customer Minutes Interrupted",
+          "category": "operational",
+          "unit": "minutes",
+          "description": "SAIDI - System Average Interruption Duration Index",
+          "typical_target": "minimization",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Capacity Factor",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Actual output vs theoretical maximum",
+          "typical_target": 90,
+          "frequency": "monthly"
+        },
+        {
+          "name": "O&M Cost per MWh",
+          "category": "financial",
+          "unit": "$/MWh",
+          "description": "Operating and maintenance cost efficiency",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["NERC CIP", "FERC", "EPA", "ISO 55000", "SOX"],
+      "commonOKRCategories": ["Clean Energy Transition", "Grid Modernization", "Customer Experience", "Operational Excellence", "Regulatory Compliance"]
+    },
+    {
+      "id": "technology-saas",
+      "name": "Technology & SaaS",
+      "codes": {
+        "gics": ["45", "4510", "4520"],
+        "naics": ["5112", "5415", "518"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "engineering": "Engineering",
+          "product": "Product Management",
+          "sales": "Sales & GTM",
+          "customer_success": "Customer Success",
+          "platform": "Platform Engineering"
+        },
+        "projectTypes": ["Product Launch", "Feature Development", "Platform Migration", "Technical Debt", "Security Enhancement"],
+        "safeMapping": {
+          "valueStreams": ["Product Development", "Customer Journey", "Platform Services"],
+          "arts": ["Core Product ART", "Platform ART", "Mobile ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Annual Recurring Revenue (ARR)",
+          "category": "financial",
+          "unit": "$",
+          "description": "Predictable annual revenue from subscriptions",
+          "typical_target": "growth",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Net Revenue Retention (NRR)",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Revenue retention from existing customers",
+          "typical_target": 110,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Daily Active Users (DAU)",
+          "category": "product",
+          "unit": "count",
+          "description": "Number of daily active users",
+          "typical_target": "growth",
+          "frequency": "daily"
+        },
+        {
+          "name": "Customer Acquisition Cost (CAC)",
+          "category": "financial",
+          "unit": "$",
+          "description": "Cost to acquire new customer",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "LTV:CAC Ratio",
+          "category": "financial",
+          "unit": "ratio",
+          "description": "Lifetime value to customer acquisition cost",
+          "typical_target": 3.0,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Deployment Frequency",
+          "category": "engineering",
+          "unit": "deploys/week",
+          "description": "How often code is deployed to production",
+          "typical_target": "increase",
+          "frequency": "weekly"
+        },
+        {
+          "name": "System Uptime",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Platform availability SLA",
+          "typical_target": 99.9,
+          "frequency": "monthly"
+        },
+        {
+          "name": "MTTR",
+          "category": "engineering",
+          "unit": "hours",
+          "description": "Mean time to recovery from incidents",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        }
+      ],
+      "complianceFrameworks": ["SOC 2", "ISO 27001", "GDPR", "CCPA", "PCI-DSS"],
+      "commonOKRCategories": ["Product Innovation", "Customer Growth", "Platform Reliability", "Developer Velocity", "Go-to-Market"]
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare & Life Sciences",
+      "codes": {
+        "gics": ["35", "3510", "3520"],
+        "naics": ["622", "6211", "6215", "3254"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "clinical": "Clinical Services",
+          "operations": "Hospital Operations",
+          "research": "Research & Development",
+          "administration": "Administrative Services"
+        },
+        "projectTypes": ["EHR Implementation", "Clinical Program", "Facility Expansion", "Regulatory Compliance", "Research Study"],
+        "safeMapping": {
+          "valueStreams": ["Patient Care", "Clinical Research", "Administrative Operations"],
+          "arts": ["Digital Health ART", "Clinical Systems ART", "Operations ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Patient Satisfaction Score",
+          "category": "quality",
+          "unit": "score",
+          "description": "HCAHPS or similar patient satisfaction measurement",
+          "typical_target": 90,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Bed Utilization Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of available beds occupied",
+          "typical_target": 85,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Length of Stay (LOS)",
+          "category": "operational",
+          "unit": "days",
+          "description": "Average patient length of stay",
+          "typical_target": "optimization",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Readmission Rate",
+          "category": "quality",
+          "unit": "percentage",
+          "description": "30-day readmission rate",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Operating Margin",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Operating income / net revenue",
+          "typical_target": 5,
+          "frequency": "monthly"
+        },
+        {
+          "name": "EHR Adoption Rate",
+          "category": "digital",
+          "unit": "percentage",
+          "description": "Clinician adoption of EHR features",
+          "typical_target": 95,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Clinical Quality Measures",
+          "category": "quality",
+          "unit": "composite",
+          "description": "CMS quality measure performance",
+          "typical_target": "excellence",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["HIPAA", "FDA 21 CFR Part 11", "Joint Commission", "CMS", "ISO 13485"],
+      "commonOKRCategories": ["Patient Outcomes", "Operational Efficiency", "Clinical Excellence", "Digital Health", "Regulatory Compliance"]
+    },
+    {
+      "id": "financial-services",
+      "name": "Financial Services & Banking",
+      "codes": {
+        "gics": ["40", "4010", "4020", "4030"],
+        "naics": ["52", "5221", "5231", "5242"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "retail": "Retail Banking",
+          "commercial": "Commercial Banking",
+          "wealth": "Wealth Management",
+          "operations": "Operations & Technology"
+        },
+        "projectTypes": ["Digital Banking", "Compliance Program", "Core System Migration", "Product Launch", "Risk Management"],
+        "safeMapping": {
+          "valueStreams": ["Customer Banking", "Risk & Compliance", "Digital Services"],
+          "arts": ["Digital Banking ART", "Core Systems ART", "Data & Analytics ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Net Interest Margin (NIM)",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Net interest income / earning assets",
+          "typical_target": 3.5,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Non-Performing Loan Ratio",
+          "category": "risk",
+          "unit": "percentage",
+          "description": "NPLs as percentage of total loans",
+          "typical_target": "minimization",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Cost-to-Income Ratio",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Operating expenses / operating income",
+          "typical_target": 60,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Digital Banking Adoption",
+          "category": "digital",
+          "unit": "percentage",
+          "description": "Active digital banking users",
+          "typical_target": 75,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Customer Acquisition Cost",
+          "category": "financial",
+          "unit": "$",
+          "description": "Cost to acquire new customer",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Regulatory Capital Ratio",
+          "category": "compliance",
+          "unit": "percentage",
+          "description": "Tier 1 capital ratio",
+          "typical_target": 12,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Fraud Detection Rate",
+          "category": "risk",
+          "unit": "percentage",
+          "description": "Fraudulent transactions detected",
+          "typical_target": 95,
+          "frequency": "monthly"
+        }
+      ],
+      "complianceFrameworks": ["SOX", "Basel III", "Dodd-Frank", "PCI-DSS", "GLBA", "KYC/AML"],
+      "commonOKRCategories": ["Digital Transformation", "Risk Management", "Customer Experience", "Operational Efficiency", "Regulatory Compliance"]
+    },
+    {
+      "id": "manufacturing",
+      "name": "Manufacturing & Industrial",
+      "codes": {
+        "gics": ["20", "2010", "2020"],
+        "naics": ["31", "32", "33", "336"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "production": "Production Operations",
+          "quality": "Quality Assurance",
+          "supply_chain": "Supply Chain",
+          "engineering": "Process Engineering"
+        },
+        "projectTypes": ["Production Line", "Quality Initiative", "Lean Six Sigma", "Supply Chain Optimization", "Automation Project"],
+        "safeMapping": {
+          "valueStreams": ["Product Manufacturing", "Supply Chain", "Quality Management"],
+          "arts": ["Production ART", "Automation ART", "Supply Chain ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Overall Equipment Effectiveness (OEE)",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Availability × Performance × Quality",
+          "typical_target": 85,
+          "frequency": "daily"
+        },
+        {
+          "name": "First Pass Yield (FPY)",
+          "category": "quality",
+          "unit": "percentage",
+          "description": "Products passing quality first time",
+          "typical_target": 98,
+          "frequency": "daily"
+        },
+        {
+          "name": "Cycle Time",
+          "category": "operational",
+          "unit": "hours",
+          "description": "Time from start to finish of production",
+          "typical_target": "reduction",
+          "frequency": "weekly"
+        },
+        {
+          "name": "Defect Rate",
+          "category": "quality",
+          "unit": "PPM",
+          "description": "Defects per million opportunities",
+          "typical_target": "minimization",
+          "frequency": "daily"
+        },
+        {
+          "name": "Inventory Turnover",
+          "category": "operational",
+          "unit": "ratio",
+          "description": "Cost of goods sold / average inventory",
+          "typical_target": 8,
+          "frequency": "monthly"
+        },
+        {
+          "name": "On-Time Delivery",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Orders delivered on time",
+          "typical_target": 95,
+          "frequency": "weekly"
+        },
+        {
+          "name": "Manufacturing Cost per Unit",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total manufacturing cost per unit produced",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        }
+      ],
+      "complianceFrameworks": ["ISO 9001", "ISO 14001", "Six Sigma", "Lean Manufacturing", "OSHA", "EPA"],
+      "commonOKRCategories": ["Operational Excellence", "Quality Improvement", "Cost Reduction", "Supply Chain Resilience", "Automation & Innovation"]
+    },
+    {
+      "id": "retail-ecommerce",
+      "name": "Retail & E-commerce",
+      "codes": {
+        "gics": ["25", "2550"],
+        "naics": ["44", "45", "454"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "stores": "Store Operations",
+          "digital": "Digital Commerce",
+          "supply_chain": "Supply Chain & Logistics",
+          "merchandising": "Merchandising"
+        },
+        "projectTypes": ["Store Opening", "Digital Platform", "Supply Chain Optimization", "Omnichannel Initiative", "Customer Experience"],
+        "safeMapping": {
+          "valueStreams": ["Customer Experience", "Supply Chain", "Digital Commerce"],
+          "arts": ["Store Systems ART", "E-commerce ART", "Logistics ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Same-Store Sales Growth",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Year-over-year sales growth at existing stores",
+          "typical_target": 3,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Inventory Turnover",
+          "category": "operational",
+          "unit": "ratio",
+          "description": "Cost of goods sold divided by average inventory",
+          "typical_target": 8,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Conversion Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of visitors who make a purchase",
+          "typical_target": 2.5,
+          "frequency": "weekly"
+        },
+        {
+          "name": "Average Transaction Value",
+          "category": "financial",
+          "unit": "$",
+          "description": "Average dollar amount per transaction",
+          "typical_target": "growth",
+          "frequency": "daily"
+        },
+        {
+          "name": "Online Sales Percentage",
+          "category": "digital",
+          "unit": "percentage",
+          "description": "Percentage of total sales from online channels",
+          "typical_target": "growth",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Customer Satisfaction Score",
+          "category": "quality",
+          "unit": "score",
+          "description": "CSAT or NPS score from customer surveys",
+          "typical_target": 85,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Return Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of merchandise returned",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        }
+      ],
+      "complianceFrameworks": ["PCI-DSS", "GDPR", "CCPA", "FTC", "Consumer Protection Laws"],
+      "commonOKRCategories": ["Customer Experience", "Digital Transformation", "Supply Chain Efficiency", "Omnichannel Integration", "Store Performance"]
+    },
+    {
+      "id": "transportation-logistics",
+      "name": "Transportation & Logistics",
+      "codes": {
+        "gics": ["20", "2030"],
+        "naics": ["48", "49", "481", "484", "492"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "operations": "Fleet Operations",
+          "network": "Network Planning",
+          "warehousing": "Warehousing & Distribution",
+          "last_mile": "Last Mile Delivery"
+        },
+        "projectTypes": ["Route Optimization", "Fleet Expansion", "Warehouse Automation", "TMS Implementation", "Sustainability Initiative"],
+        "safeMapping": {
+          "valueStreams": ["Transportation Operations", "Warehousing", "Customer Service"],
+          "arts": ["Fleet Management ART", "Network Optimization ART", "Technology ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "On-Time Delivery Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of shipments delivered on time",
+          "typical_target": 95,
+          "frequency": "daily"
+        },
+        {
+          "name": "Cost per Mile",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total operating cost divided by miles driven",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Fleet Utilization Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of time fleet vehicles are in use",
+          "typical_target": 85,
+          "frequency": "daily"
+        },
+        {
+          "name": "Damage Rate",
+          "category": "quality",
+          "unit": "percentage",
+          "description": "Percentage of shipments damaged in transit",
+          "typical_target": "minimization",
+          "frequency": "weekly"
+        },
+        {
+          "name": "Average Delivery Time",
+          "category": "operational",
+          "unit": "hours",
+          "description": "Average time from pickup to delivery",
+          "typical_target": "reduction",
+          "frequency": "daily"
+        },
+        {
+          "name": "Fuel Efficiency",
+          "category": "sustainability",
+          "unit": "MPG",
+          "description": "Miles per gallon across fleet",
+          "typical_target": "improvement",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Warehouse Throughput",
+          "category": "operational",
+          "unit": "units/hour",
+          "description": "Number of units processed per hour",
+          "typical_target": "growth",
+          "frequency": "daily"
+        }
+      ],
+      "complianceFrameworks": ["DOT", "FMCSA", "OSHA", "EPA", "ISO 9001", "C-TPAT"],
+      "commonOKRCategories": ["Operational Excellence", "Cost Efficiency", "Customer Satisfaction", "Sustainability", "Safety & Compliance"]
+    },
+    {
+      "id": "telecommunications",
+      "name": "Telecommunications",
+      "codes": {
+        "gics": ["50", "5010"],
+        "naics": ["517", "5171", "5172"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "network": "Network Operations",
+          "consumer": "Consumer Services",
+          "enterprise": "Enterprise Solutions",
+          "infrastructure": "Infrastructure Engineering"
+        },
+        "projectTypes": ["Network Expansion", "5G Rollout", "Infrastructure Upgrade", "Service Launch", "Customer Experience"],
+        "safeMapping": {
+          "valueStreams": ["Network Operations", "Customer Services", "Enterprise Solutions"],
+          "arts": ["Network Engineering ART", "Consumer Products ART", "Enterprise ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Network Availability",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of time network is operational",
+          "typical_target": 99.99,
+          "frequency": "daily"
+        },
+        {
+          "name": "Average Revenue Per User (ARPU)",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total revenue divided by active subscribers",
+          "typical_target": "growth",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Churn Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of customers who cancel service",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Network Latency",
+          "category": "operational",
+          "unit": "ms",
+          "description": "Average network latency in milliseconds",
+          "typical_target": "reduction",
+          "frequency": "daily"
+        },
+        {
+          "name": "Customer Satisfaction (NPS)",
+          "category": "quality",
+          "unit": "score",
+          "description": "Net Promoter Score from customer surveys",
+          "typical_target": 40,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Data Traffic Growth",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Year-over-year growth in data traffic",
+          "typical_target": "monitoring",
+          "frequency": "monthly"
+        },
+        {
+          "name": "CAPEX per Subscriber",
+          "category": "financial",
+          "unit": "$",
+          "description": "Capital expenditure per subscriber",
+          "typical_target": "optimization",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["FCC", "GDPR", "TCPA", "CALEA", "CPNI", "ISO 27001"],
+      "commonOKRCategories": ["Network Expansion", "Customer Experience", "Innovation", "Revenue Growth", "Operational Excellence"]
+    },
+    {
+      "id": "real-estate-construction",
+      "name": "Real Estate & Construction",
+      "codes": {
+        "gics": ["60", "6010"],
+        "naics": ["23", "531", "236", "237"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "development": "Property Development",
+          "construction": "Construction Operations",
+          "property_mgmt": "Property Management",
+          "leasing": "Leasing & Sales"
+        },
+        "projectTypes": ["Development Project", "Construction Project", "Renovation", "Tenant Improvement", "Portfolio Acquisition"],
+        "safeMapping": {
+          "valueStreams": ["Development", "Construction", "Property Operations"],
+          "arts": ["Development ART", "Construction ART", "Operations ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Occupancy Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of leasable space occupied",
+          "typical_target": 95,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Net Operating Income (NOI)",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total revenue minus operating expenses",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Construction Delay Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of projects completed late",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Cost per Square Foot",
+          "category": "financial",
+          "unit": "$/sqft",
+          "description": "Construction or renovation cost per square foot",
+          "typical_target": "optimization",
+          "frequency": "per project"
+        },
+        {
+          "name": "Safety Incident Rate",
+          "category": "safety",
+          "unit": "incidents/100 workers",
+          "description": "OSHA recordable incident rate",
+          "typical_target": "minimization",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Tenant Retention Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of tenants renewing leases",
+          "typical_target": 85,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Cap Rate",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Net operating income / property value",
+          "typical_target": "monitoring",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["OSHA", "Building Codes", "ADA", "Fair Housing Act", "EPA", "LEED"],
+      "commonOKRCategories": ["Project Delivery", "Portfolio Performance", "Tenant Satisfaction", "Safety Excellence", "Sustainability"]
+    },
+    {
+      "id": "pharmaceuticals-biotech",
+      "name": "Pharmaceuticals & Biotechnology",
+      "codes": {
+        "gics": ["35", "3520"],
+        "naics": ["3254", "5417", "541711"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "research": "Research & Development",
+          "clinical": "Clinical Development",
+          "manufacturing": "Drug Manufacturing",
+          "commercial": "Commercial Operations"
+        },
+        "projectTypes": ["Drug Development", "Clinical Trial", "Manufacturing Scale-Up", "Regulatory Submission", "Product Launch"],
+        "safeMapping": {
+          "valueStreams": ["Drug Development", "Clinical Operations", "Manufacturing"],
+          "arts": ["R&D ART", "Clinical ART", "Manufacturing ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Pipeline Value",
+          "category": "financial",
+          "unit": "$",
+          "description": "Net present value of drug pipeline",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Clinical Trial Success Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of trials advancing to next phase",
+          "typical_target": 60,
+          "frequency": "annual"
+        },
+        {
+          "name": "R&D Efficiency",
+          "category": "operational",
+          "unit": "$/candidate",
+          "description": "R&D spend per drug candidate",
+          "typical_target": "optimization",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Time to Market",
+          "category": "operational",
+          "unit": "years",
+          "description": "Average time from discovery to approval",
+          "typical_target": "reduction",
+          "frequency": "annual"
+        },
+        {
+          "name": "Manufacturing Yield",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of batches passing quality control",
+          "typical_target": 98,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Patent Portfolio Value",
+          "category": "financial",
+          "unit": "$",
+          "description": "Estimated value of patent portfolio",
+          "typical_target": "growth",
+          "frequency": "annual"
+        },
+        {
+          "name": "Regulatory Submission Success",
+          "category": "compliance",
+          "unit": "percentage",
+          "description": "Percentage of submissions approved first time",
+          "typical_target": 85,
+          "frequency": "annual"
+        }
+      ],
+      "complianceFrameworks": ["FDA 21 CFR", "GMP", "GCP", "ICH Guidelines", "EMA", "HIPAA"],
+      "commonOKRCategories": ["Pipeline Advancement", "Clinical Success", "Manufacturing Excellence", "Regulatory Approval", "Commercial Launch"]
+    },
+    {
+      "id": "consumer-products",
+      "name": "Consumer Products & Goods",
+      "codes": {
+        "gics": ["30", "3020"],
+        "naics": ["311", "312", "313", "314"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "manufacturing": "Manufacturing Operations",
+          "supply_chain": "Supply Chain",
+          "marketing": "Brand Marketing",
+          "innovation": "Product Innovation"
+        },
+        "projectTypes": ["Product Launch", "Manufacturing Expansion", "Supply Chain Optimization", "Brand Campaign", "Sustainability Initiative"],
+        "safeMapping": {
+          "valueStreams": ["Product Development", "Manufacturing", "Go-to-Market"],
+          "arts": ["Innovation ART", "Operations ART", "Commercial ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Market Share",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Percentage of category sales",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Brand Awareness",
+          "category": "marketing",
+          "unit": "percentage",
+          "description": "Percentage of consumers aware of brand",
+          "typical_target": 75,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Product Innovation Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Revenue from products launched in last 3 years",
+          "typical_target": 25,
+          "frequency": "annual"
+        },
+        {
+          "name": "Supply Chain Cost",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Supply chain cost as percentage of revenue",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Perfect Order Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Orders delivered complete, on-time, damage-free",
+          "typical_target": 95,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Sustainability Score",
+          "category": "sustainability",
+          "unit": "score",
+          "description": "Composite sustainability performance score",
+          "typical_target": "improvement",
+          "frequency": "annual"
+        },
+        {
+          "name": "Customer Lifetime Value",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total value of customer over their lifetime",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["FDA", "CPSC", "EPA", "FTC", "State Consumer Protection Laws"],
+      "commonOKRCategories": ["Brand Growth", "Innovation", "Supply Chain Excellence", "Sustainability", "Customer Loyalty"]
+    },
+    {
+      "id": "media-entertainment",
+      "name": "Media & Entertainment",
+      "codes": {
+        "gics": ["50", "5020"],
+        "naics": ["51", "512", "515", "711"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "content": "Content Production",
+          "distribution": "Distribution & Streaming",
+          "advertising": "Advertising Sales",
+          "studios": "Studios & Networks"
+        },
+        "projectTypes": ["Content Production", "Platform Launch", "Studio Expansion", "Technology Upgrade", "Audience Growth"],
+        "safeMapping": {
+          "valueStreams": ["Content Creation", "Distribution", "Monetization"],
+          "arts": ["Production ART", "Platform ART", "Advertising ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Subscriber Growth",
+          "category": "operational",
+          "unit": "count",
+          "description": "Net new subscribers added",
+          "typical_target": "growth",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Average Watch Time",
+          "category": "operational",
+          "unit": "hours",
+          "description": "Average hours consumed per user",
+          "typical_target": "growth",
+          "frequency": "daily"
+        },
+        {
+          "name": "Content Cost per Hour",
+          "category": "financial",
+          "unit": "$/hour",
+          "description": "Production cost per hour of content",
+          "typical_target": "optimization",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Churn Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of subscribers canceling",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Engagement Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of users actively engaging",
+          "typical_target": 70,
+          "frequency": "weekly"
+        },
+        {
+          "name": "Ad Revenue per User",
+          "category": "financial",
+          "unit": "$",
+          "description": "Advertising revenue per active user",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Content Library Hours",
+          "category": "operational",
+          "unit": "hours",
+          "description": "Total hours of content in library",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["FCC", "Copyright Law", "DMCA", "GDPR", "CCPA", "Content Rating Systems"],
+      "commonOKRCategories": ["Audience Growth", "Content Excellence", "Platform Innovation", "Monetization", "Global Expansion"]
+    },
+    {
+      "id": "hospitality-tourism",
+      "name": "Hospitality & Tourism",
+      "codes": {
+        "gics": ["25", "2530"],
+        "naics": ["72", "721", "722"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "hotels": "Hotel Operations",
+          "restaurants": "Food & Beverage",
+          "events": "Events & Conferences",
+          "resorts": "Resort Properties"
+        },
+        "projectTypes": ["Property Opening", "Renovation", "Service Enhancement", "Technology Upgrade", "Brand Expansion"],
+        "safeMapping": {
+          "valueStreams": ["Guest Experience", "Property Operations", "Food & Beverage"],
+          "arts": ["Operations ART", "Guest Services ART", "Technology ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Occupancy Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of rooms occupied",
+          "typical_target": 75,
+          "frequency": "daily"
+        },
+        {
+          "name": "Average Daily Rate (ADR)",
+          "category": "financial",
+          "unit": "$",
+          "description": "Average revenue per occupied room",
+          "typical_target": "growth",
+          "frequency": "daily"
+        },
+        {
+          "name": "Revenue Per Available Room (RevPAR)",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total room revenue / available rooms",
+          "typical_target": "growth",
+          "frequency": "daily"
+        },
+        {
+          "name": "Guest Satisfaction Score",
+          "category": "quality",
+          "unit": "score",
+          "description": "Average guest satisfaction rating",
+          "typical_target": 4.5,
+          "frequency": "weekly"
+        },
+        {
+          "name": "Online Review Rating",
+          "category": "quality",
+          "unit": "stars",
+          "description": "Average rating across review platforms",
+          "typical_target": 4.2,
+          "frequency": "weekly"
+        },
+        {
+          "name": "Labor Cost Percentage",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Labor cost as percentage of revenue",
+          "typical_target": 35,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Direct Booking Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Bookings made directly vs through OTAs",
+          "typical_target": 60,
+          "frequency": "monthly"
+        }
+      ],
+      "complianceFrameworks": ["Health & Safety Codes", "ADA", "Fire Safety", "Food Safety", "OSHA"],
+      "commonOKRCategories": ["Guest Experience", "Revenue Management", "Operational Excellence", "Brand Reputation", "Digital Transformation"]
+    },
+    {
+      "id": "agriculture-food",
+      "name": "Agriculture & Food Production",
+      "codes": {
+        "gics": ["30", "3010"],
+        "naics": ["11", "111", "112", "311"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "farming": "Farming Operations",
+          "processing": "Food Processing",
+          "distribution": "Distribution & Logistics",
+          "quality": "Quality Assurance"
+        },
+        "projectTypes": ["Farm Expansion", "Processing Facility", "Sustainability Initiative", "Technology Adoption", "Supply Chain"],
+        "safeMapping": {
+          "valueStreams": ["Production", "Processing", "Distribution"],
+          "arts": ["Farming ART", "Processing ART", "Supply Chain ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Crop Yield",
+          "category": "operational",
+          "unit": "bushels/acre",
+          "description": "Production per acre of farmland",
+          "typical_target": "growth",
+          "frequency": "seasonal"
+        },
+        {
+          "name": "Food Safety Incidents",
+          "category": "quality",
+          "unit": "count",
+          "description": "Number of food safety incidents",
+          "typical_target": 0,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Water Usage Efficiency",
+          "category": "sustainability",
+          "unit": "gallons/unit",
+          "description": "Water used per unit of production",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Cost of Production",
+          "category": "financial",
+          "unit": "$/unit",
+          "description": "Total cost per unit produced",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Supply Chain Traceability",
+          "category": "quality",
+          "unit": "percentage",
+          "description": "Percentage of products fully traceable",
+          "typical_target": 100,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Organic Certification Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of production certified organic",
+          "typical_target": "growth",
+          "frequency": "annual"
+        },
+        {
+          "name": "Waste Reduction",
+          "category": "sustainability",
+          "unit": "percentage",
+          "description": "Percentage reduction in food waste",
+          "typical_target": 20,
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["FDA", "USDA", "EPA", "FSMA", "GAP", "Organic Certification"],
+      "commonOKRCategories": ["Production Efficiency", "Food Safety", "Sustainability", "Quality Excellence", "Supply Chain Resilience"]
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "codes": {
+        "gics": ["25", "2550"],
+        "naics": ["61", "611", "6111"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "academic": "Academic Programs",
+          "student_services": "Student Services",
+          "research": "Research",
+          "administration": "Administration"
+        },
+        "projectTypes": ["Program Launch", "Facility Expansion", "Technology Implementation", "Accreditation", "Research Initiative"],
+        "safeMapping": {
+          "valueStreams": ["Student Experience", "Academic Delivery", "Research Operations"],
+          "arts": ["Academic Programs ART", "Student Services ART", "Technology ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Student Enrollment",
+          "category": "operational",
+          "unit": "count",
+          "description": "Total number of enrolled students",
+          "typical_target": "growth",
+          "frequency": "semester"
+        },
+        {
+          "name": "Graduation Rate",
+          "category": "quality",
+          "unit": "percentage",
+          "description": "Percentage of students graduating on time",
+          "typical_target": 75,
+          "frequency": "annual"
+        },
+        {
+          "name": "Student Satisfaction",
+          "category": "quality",
+          "unit": "score",
+          "description": "Average student satisfaction score",
+          "typical_target": 4.2,
+          "frequency": "semester"
+        },
+        {
+          "name": "Faculty-to-Student Ratio",
+          "category": "operational",
+          "unit": "ratio",
+          "description": "Number of students per faculty member",
+          "typical_target": 15,
+          "frequency": "semester"
+        },
+        {
+          "name": "Research Funding",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total research grants and funding received",
+          "typical_target": "growth",
+          "frequency": "annual"
+        },
+        {
+          "name": "Online Course Adoption",
+          "category": "digital",
+          "unit": "percentage",
+          "description": "Percentage of courses with online components",
+          "typical_target": 60,
+          "frequency": "semester"
+        },
+        {
+          "name": "Alumni Employment Rate",
+          "category": "quality",
+          "unit": "percentage",
+          "description": "Percentage of graduates employed within 6 months",
+          "typical_target": 85,
+          "frequency": "annual"
+        }
+      ],
+      "complianceFrameworks": ["Accreditation Standards", "Title IX", "FERPA", "ADA", "Clery Act"],
+      "commonOKRCategories": ["Student Success", "Academic Excellence", "Research Impact", "Digital Transformation", "Institutional Growth"]
+    },
+    {
+      "id": "professional-services",
+      "name": "Professional Services",
+      "codes": {
+        "gics": ["20", "2020"],
+        "naics": ["54", "541", "5411"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "consulting": "Consulting Services",
+          "advisory": "Advisory Services",
+          "operations": "Service Delivery",
+          "business_dev": "Business Development"
+        },
+        "projectTypes": ["Client Engagement", "Service Line Launch", "Practice Expansion", "Technology Platform", "Capability Building"],
+        "safeMapping": {
+          "valueStreams": ["Client Delivery", "Practice Development", "Operations"],
+          "arts": ["Consulting ART", "Advisory ART", "Operations ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Utilization Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of billable hours worked",
+          "typical_target": 75,
+          "frequency": "weekly"
+        },
+        {
+          "name": "Revenue per Employee",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total revenue divided by number of employees",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Client Satisfaction",
+          "category": "quality",
+          "unit": "score",
+          "description": "CSAT or NPS from client surveys",
+          "typical_target": 85,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Project Margin",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Profit margin on client projects",
+          "typical_target": 35,
+          "frequency": "per project"
+        },
+        {
+          "name": "Win Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of proposals that win",
+          "typical_target": 40,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Client Retention Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of clients retained year-over-year",
+          "typical_target": 85,
+          "frequency": "annual"
+        },
+        {
+          "name": "Average Project Size",
+          "category": "financial",
+          "unit": "$",
+          "description": "Average revenue per engagement",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["SOX", "Professional Standards", "Data Privacy Laws", "ISO 9001"],
+      "commonOKRCategories": ["Client Satisfaction", "Revenue Growth", "Operational Excellence", "Talent Development", "Market Leadership"]
+    },
+    {
+      "id": "insurance",
+      "name": "Insurance",
+      "codes": {
+        "gics": ["40", "4030"],
+        "naics": ["524", "5241", "5242"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "underwriting": "Underwriting",
+          "claims": "Claims Processing",
+          "distribution": "Distribution & Sales",
+          "actuarial": "Actuarial Services"
+        },
+        "projectTypes": ["Product Launch", "System Modernization", "Digital Distribution", "Claims Automation", "Risk Management"],
+        "safeMapping": {
+          "valueStreams": ["Underwriting", "Claims", "Customer Service"],
+          "arts": ["Underwriting ART", "Claims ART", "Distribution ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Loss Ratio",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Claims paid / premiums earned",
+          "typical_target": 60,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Combined Ratio",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Loss ratio + expense ratio",
+          "typical_target": 95,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Policy Retention Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of policies renewed",
+          "typical_target": 85,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Claims Processing Time",
+          "category": "operational",
+          "unit": "days",
+          "description": "Average days to process claim",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "New Business Growth",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Year-over-year growth in new policies",
+          "typical_target": 10,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Customer Satisfaction",
+          "category": "quality",
+          "unit": "score",
+          "description": "NPS or CSAT from policyholder surveys",
+          "typical_target": 75,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Digital Policy Sales",
+          "category": "digital",
+          "unit": "percentage",
+          "description": "Percentage of policies sold online",
+          "typical_target": 40,
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["State Insurance Regulations", "NAIC", "SOX", "GDPR", "CCPA", "Anti-Money Laundering"],
+      "commonOKRCategories": ["Underwriting Excellence", "Claims Efficiency", "Customer Experience", "Digital Transformation", "Profitability"]
+    },
+    {
+      "id": "automotive",
+      "name": "Automotive",
+      "codes": {
+        "gics": ["25", "2510"],
+        "naics": ["336", "3361", "3362"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "manufacturing": "Vehicle Manufacturing",
+          "engineering": "Engineering & Design",
+          "supply_chain": "Supply Chain",
+          "aftermarket": "Aftermarket Services"
+        },
+        "projectTypes": ["Vehicle Platform", "Manufacturing Expansion", "Electrification", "Autonomous Driving", "Supply Chain"],
+        "safeMapping": {
+          "valueStreams": ["Product Development", "Manufacturing", "Customer Service"],
+          "arts": ["Engineering ART", "Manufacturing ART", "Connected Services ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Vehicle Production Volume",
+          "category": "operational",
+          "unit": "units",
+          "description": "Number of vehicles produced",
+          "typical_target": "growth",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Quality (Things Gone Wrong)",
+          "category": "quality",
+          "unit": "TGW/100",
+          "description": "Things gone wrong per 100 vehicles",
+          "typical_target": "reduction",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Manufacturing Cost per Vehicle",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total manufacturing cost per unit",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Time to Market",
+          "category": "operational",
+          "unit": "months",
+          "description": "Concept to production launch time",
+          "typical_target": "reduction",
+          "frequency": "per program"
+        },
+        {
+          "name": "Electric Vehicle Mix",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of production that is electric",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Warranty Cost per Vehicle",
+          "category": "financial",
+          "unit": "$",
+          "description": "Average warranty cost per vehicle sold",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Dealer Satisfaction",
+          "category": "quality",
+          "unit": "score",
+          "description": "Dealer satisfaction survey score",
+          "typical_target": 85,
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["FMVSS", "EPA", "NHTSA", "CAFE Standards", "ISO 26262", "IATF 16949"],
+      "commonOKRCategories": ["Product Innovation", "Manufacturing Excellence", "Quality Leadership", "Electrification", "Customer Experience"]
+    },
+    {
+      "id": "aerospace-defense",
+      "name": "Aerospace & Defense",
+      "codes": {
+        "gics": ["20", "2010"],
+        "naics": ["336411", "3364", "5415"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "aerospace": "Aerospace Systems",
+          "defense": "Defense Systems",
+          "engineering": "Engineering & Technology",
+          "services": "Support Services"
+        },
+        "projectTypes": ["Platform Development", "System Integration", "Modernization", "Technology Development", "Sustainment"],
+        "safeMapping": {
+          "valueStreams": ["Product Development", "Manufacturing", "Sustainment"],
+          "arts": ["Engineering ART", "Manufacturing ART", "Services ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Contract Backlog",
+          "category": "financial",
+          "unit": "$",
+          "description": "Total value of awarded contracts",
+          "typical_target": "growth",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Program Margin",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "Operating margin on defense programs",
+          "typical_target": 12,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "On-Time Delivery",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Programs delivered on schedule",
+          "typical_target": 90,
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Quality Escapes",
+          "category": "quality",
+          "unit": "count",
+          "description": "Number of defects found by customer",
+          "typical_target": "minimization",
+          "frequency": "monthly"
+        },
+        {
+          "name": "R&D Investment",
+          "category": "financial",
+          "unit": "percentage",
+          "description": "R&D as percentage of revenue",
+          "typical_target": 6,
+          "frequency": "annual"
+        },
+        {
+          "name": "Security Incidents",
+          "category": "security",
+          "unit": "count",
+          "description": "Number of security incidents",
+          "typical_target": 0,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Customer Satisfaction (CPARS)",
+          "category": "quality",
+          "unit": "rating",
+          "description": "Contractor Performance Assessment",
+          "typical_target": "Exceptional",
+          "frequency": "per contract"
+        }
+      ],
+      "complianceFrameworks": ["ITAR", "DFARS", "NIST SP 800-171", "AS9100", "CMMC", "FAR"],
+      "commonOKRCategories": ["Program Execution", "Innovation", "Security Excellence", "Customer Satisfaction", "Operational Efficiency"]
+    },
+    {
+      "id": "mining-materials",
+      "name": "Mining & Materials",
+      "codes": {
+        "gics": ["15", "1510"],
+        "naics": ["21", "212", "331"]
+      },
+      "terminology": {
+        "orgUnits": {
+          "mining": "Mining Operations",
+          "processing": "Processing & Refining",
+          "logistics": "Logistics & Distribution",
+          "sustainability": "Environmental & Sustainability"
+        },
+        "projectTypes": ["Mine Development", "Processing Expansion", "Sustainability Initiative", "Technology Upgrade", "Exploration"],
+        "safeMapping": {
+          "valueStreams": ["Extraction", "Processing", "Distribution"],
+          "arts": ["Mining Operations ART", "Processing ART", "Logistics ART"]
+        }
+      },
+      "standardMetrics": [
+        {
+          "name": "Production Volume",
+          "category": "operational",
+          "unit": "tons",
+          "description": "Total volume of material extracted",
+          "typical_target": "growth",
+          "frequency": "monthly"
+        },
+        {
+          "name": "All-In Sustaining Cost (AISC)",
+          "category": "financial",
+          "unit": "$/oz or $/ton",
+          "description": "Total cost to produce one unit",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        },
+        {
+          "name": "Safety (TRIFR)",
+          "category": "safety",
+          "unit": "rate",
+          "description": "Total Recordable Injury Frequency Rate",
+          "typical_target": "minimization",
+          "frequency": "monthly"
+        },
+        {
+          "name": "Equipment Availability",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of time equipment is operational",
+          "typical_target": 90,
+          "frequency": "daily"
+        },
+        {
+          "name": "Recovery Rate",
+          "category": "operational",
+          "unit": "percentage",
+          "description": "Percentage of mineral recovered from ore",
+          "typical_target": 85,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Water Recycling Rate",
+          "category": "sustainability",
+          "unit": "percentage",
+          "description": "Percentage of water recycled and reused",
+          "typical_target": 75,
+          "frequency": "monthly"
+        },
+        {
+          "name": "Carbon Emissions Intensity",
+          "category": "sustainability",
+          "unit": "CO2e/ton",
+          "description": "CO2 emissions per ton produced",
+          "typical_target": "reduction",
+          "frequency": "quarterly"
+        }
+      ],
+      "complianceFrameworks": ["MSHA", "EPA", "State Mining Regulations", "ISO 14001", "Conflict Minerals"],
+      "commonOKRCategories": ["Operational Excellence", "Safety Leadership", "Cost Efficiency", "Environmental Stewardship", "Reserve Growth"]
+    }
+  ]
+}

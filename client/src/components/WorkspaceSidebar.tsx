@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRoleBasedAccess, UserRole } from '@/hooks/useRoleBasedAccess';
+import { useCompanyName } from '@/contexts/CompanyProfileContext';
 import nexteraLogo from "@assets/nextera_logo.png";
 
 interface WorkspaceNavItem {
@@ -90,6 +91,7 @@ interface WorkspaceSidebarProps {
 export function WorkspaceSidebar({ userRole = 'pm' }: WorkspaceSidebarProps) {
   const [location] = useLocation();
   const { role, canAccessPage } = useRoleBasedAccess(userRole);
+  const companyName = useCompanyName();
 
   // Filter workspaces based on user role
   const visibleWorkspaces = workspaces.filter(workspace =>
@@ -101,7 +103,7 @@ export function WorkspaceSidebar({ userRole = 'pm' }: WorkspaceSidebarProps) {
       {/* Logo / Header */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200">
         <Link href="/">
-          <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" />
+          <img src={nexteraLogo} alt={companyName} className="h-10 cursor-pointer" />
         </Link>
       </div>
 

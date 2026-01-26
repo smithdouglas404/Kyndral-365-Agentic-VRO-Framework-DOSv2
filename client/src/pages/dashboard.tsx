@@ -30,6 +30,7 @@ import AgentActionQueue from "@/components/AgentActionQueue";
 import { useDivisions } from "@/hooks/useNexteraData";
 import { useVroMetrics } from "@/hooks/useVroMetrics";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
+import { useCompanyName, useCompanyProfile } from "@/contexts/CompanyProfileContext";
 import { formatMoney } from "@/lib/formatters";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
@@ -373,11 +374,13 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
 import nexteraLogo from "@assets/nextera_logo.png";
 
 function NavBar() {
+  const companyName = useCompanyName();
+
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <img src={nexteraLogo} alt="NextEra Energy" className="h-10 cursor-pointer" data-testid="link-home" />
+          <img src={nexteraLogo} alt={companyName} className="h-10 cursor-pointer" data-testid="link-home" />
         </Link>
       </div>
       <div className="flex items-center gap-2">
@@ -405,8 +408,10 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState("overview");
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
-  
+
   const { state, toggleLive, forceUpdate } = useSimulation();
+  const companyName = useCompanyName();
+  const { profile } = useCompanyProfile();
 
   // Fetch divisions from API (DB-backed)
   const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
@@ -730,11 +735,23 @@ function DashboardContent() {
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Data Sources & Citations</p>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p>† Revenue target ($28bn): NextEra Energy Annual Report 2024</p>
-                <p>† Clean Energy Capacity (75GW): NextEra Energy 10-K 2024</p>
-                <p>† Cost efficiency target: NextEra Energy Annual Report 2024</p>
-                <p>† Operational risk: NextEra Energy Annual Report 2024, Risk Factors</p>
-                <p>† Capital investment: NextEra Energy Annual Report 2024</p>
+                {profile?.company && profile.meta?.extractedAt ? (
+                  <>
+                    <p>† Data extracted from {companyName} Annual Report</p>
+                    <p>† Metrics and objectives from company strategic plan</p>
+                    <p>† Organizational structure from SEC filings</p>
+                    <p>† Governance rules from corporate policies</p>
+                    <p>† Extracted: {new Date(profile.meta.extractedAt).toLocaleDateString()}</p>
+                  </>
+                ) : (
+                  <>
+                    <p>† Revenue target ($28bn): NextEra Energy Annual Report 2024</p>
+                    <p>† Clean Energy Capacity (75GW): NextEra Energy 10-K 2024</p>
+                    <p>† Cost efficiency target: NextEra Energy Annual Report 2024</p>
+                    <p>† Operational risk: NextEra Energy Annual Report 2024, Risk Factors</p>
+                    <p>† Capital investment: NextEra Energy Annual Report 2024</p>
+                  </>
+                )}
               </div>
             </div>
             <div className="text-right">
@@ -745,7 +762,7 @@ function DashboardContent() {
             </div>
           </div>
           <div className="flex justify-between items-center text-sm text-muted-foreground border-t border-border pt-4">
-            <p>© 2026 NextEra Energy. Internal Use Only.</p>
+            <p>© 2026 {companyName}. Internal Use Only.</p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-primary">Privacy Policy</a>
             </div>
