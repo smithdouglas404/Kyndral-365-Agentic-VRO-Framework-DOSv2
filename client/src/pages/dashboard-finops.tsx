@@ -20,14 +20,11 @@ import { useDivisions } from '@/hooks/useNexteraData';
 import { formatMoney } from '@/lib/formatters';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
-import { 
-  getCostCategoriesFromDivisions, 
-  getSavingsOpportunitiesFromProjects,
+import {
   getCompanyMetrics,
-  type DataMode,
-  type TransformedCostCategory,
-  type TransformedSavingsOpportunity
+  type DataMode
 } from '@/lib/agentDataTransformers';
+import { useCostCategories, useSavingsOpportunities, type CostCategory, type SavingsOpportunity } from '@/hooks/useFinOpsData';
 import { AIRecommendations } from "@/components/AIRecommendations";
 import { useFinancialInsights } from "@/hooks/useAgentInsights";
 
@@ -46,7 +43,7 @@ function NavBar() {
   );
 }
 
-function CostCategoryCard({ category, mode }: { category: TransformedCostCategory, mode: DataMode }) {
+function CostCategoryCard({ category, mode }: { category: CostCategory, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
   const isOverBudget = category.variance > 0;
 
@@ -224,8 +221,8 @@ export default function FinOpsDashboard() {
     setDrillDownOpen(true);
   };
   
-  const costCategories = getCostCategoriesFromDivisions(dataMode);
-  const savingsOpportunities = getSavingsOpportunitiesFromProjects(dataMode);
+  const { data: costCategories = [], isLoading: costLoading } = useCostCategories();
+  const { data: savingsOpportunities = [], isLoading: savingsLoading } = useSavingsOpportunities();
   const companyMetrics = getCompanyMetrics();
 
   // Use agent-calculated insights if available, fallback to static data
