@@ -317,7 +317,7 @@ export interface IStorage {
     epics: Epic[];
   } | undefined>;
   
-  // Division Methods (NextEra Business Segments)
+  // Division Methods (Business Segments)
   getDivisions(): Promise<Division[]>;
   getDivision(id: string): Promise<Division | undefined>;
   createDivision(division: InsertDivision): Promise<Division>;
@@ -335,7 +335,7 @@ export interface IStorage {
   } | undefined>;
   seedDivisions(): Promise<void>;
   
-  // Company Overview Methods (NextEra Corporate Info)
+  // Company Overview Methods (Corporate Info)
   getCompanyOverview(): Promise<CompanyOverview | undefined>;
   createCompanyOverview(overview: InsertCompanyOverview): Promise<CompanyOverview>;
   
@@ -737,9 +737,9 @@ export class DatabaseStorage implements IStorage {
     if (existingBUs.length > 0) return;
 
     await db.insert(businessUnits).values([
-      { id: 'bu-renewables', name: 'NextEra Energy Resources', description: 'Clean energy generation and battery storage', department: 'Renewables Division', owner: 'Rebecca Kujawa' },
+      { id: 'bu-renewables', name: 'Clean Energy Division', description: 'Clean energy generation and battery storage', department: 'Renewables Division', owner: 'Rebecca Kujawa' },
       { id: 'bu-fpl', name: 'Florida Power & Light', description: 'Electric utility serving Florida customers', department: 'Utility Division', owner: 'Armando Pimentel' },
-      { id: 'bu-transmission', name: 'NextEra Energy Transmission', description: 'Grid modernization and transmission assets', department: 'Infrastructure Division', owner: 'John Ketchum' },
+      { id: 'bu-transmission', name: 'Infrastructure Division', description: 'Grid modernization and transmission assets', department: 'Infrastructure Division', owner: 'John Ketchum' },
     ]);
 
     await db.insert(projects).values([
@@ -759,11 +759,11 @@ export class DatabaseStorage implements IStorage {
     if (existingMetrics.length > 0) return;
     
     const portfolioMetrics = [
-      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'renewable_gw', metricName: 'Renewable Capacity (GW)', currentValue: '45.2', threshold: '40.0', criticalThreshold: '35.0', direction: 'higher_is_better', agentOwner: 'planning' },
-      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'grid_uptime', metricName: 'Grid Reliability Index', currentValue: '99.98', threshold: '99.95', criticalThreshold: '99.90', direction: 'higher_is_better', agentOwner: 'finops' },
-      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'decarbonization', metricName: 'Carbon Intensity Reduction', currentValue: '12.5', threshold: '10.0', criticalThreshold: '5.0', direction: 'higher_is_better', agentOwner: 'okr' },
-      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'change_adoption', metricName: 'Change Adoption Rate', currentValue: '0.78', threshold: '0.75', criticalThreshold: '0.60', direction: 'higher_is_better', agentOwner: 'ocm' },
-      { projectId: 'portfolio-nextera', projectName: 'NextEra Portfolio', metricKey: 'sprint_velocity', metricName: 'Sprint Velocity Variance', currentValue: '0.08', threshold: '0.15', criticalThreshold: '0.25', direction: 'lower_is_better', agentOwner: 'planning' },
+      { projectId: 'portfolio-nextera', projectName: 'Enterprise Portfolio', metricKey: 'renewable_gw', metricName: 'Renewable Capacity (GW)', currentValue: '45.2', threshold: '40.0', criticalThreshold: '35.0', direction: 'higher_is_better', agentOwner: 'planning' },
+      { projectId: 'portfolio-nextera', projectName: 'Enterprise Portfolio', metricKey: 'grid_uptime', metricName: 'Grid Reliability Index', currentValue: '99.98', threshold: '99.95', criticalThreshold: '99.90', direction: 'higher_is_better', agentOwner: 'finops' },
+      { projectId: 'portfolio-nextera', projectName: 'Enterprise Portfolio', metricKey: 'decarbonization', metricName: 'Carbon Intensity Reduction', currentValue: '12.5', threshold: '10.0', criticalThreshold: '5.0', direction: 'higher_is_better', agentOwner: 'okr' },
+      { projectId: 'portfolio-nextera', projectName: 'Enterprise Portfolio', metricKey: 'change_adoption', metricName: 'Change Adoption Rate', currentValue: '0.78', threshold: '0.75', criticalThreshold: '0.60', direction: 'higher_is_better', agentOwner: 'ocm' },
+      { projectId: 'portfolio-nextera', projectName: 'Enterprise Portfolio', metricKey: 'sprint_velocity', metricName: 'Sprint Velocity Variance', currentValue: '0.08', threshold: '0.15', criticalThreshold: '0.25', direction: 'lower_is_better', agentOwner: 'planning' },
       { projectId: 'proj-solar-expansion', projectName: 'Solar Array Expansion Phase 4', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.94', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },
       { projectId: 'proj-solar-expansion', projectName: 'Solar Array Expansion Phase 4', metricKey: 'cpi', metricName: 'Cost Performance Index', currentValue: '0.88', threshold: '0.92', criticalThreshold: '0.80', direction: 'higher_is_better', agentOwner: 'finops' },
       { projectId: 'proj-smart-grid', projectName: 'Smart Grid Modernization', metricKey: 'spi', metricName: 'Schedule Performance Index', currentValue: '0.91', threshold: '0.95', criticalThreshold: '0.85', direction: 'higher_is_better', agentOwner: 'planning' },
@@ -1043,7 +1043,7 @@ export class DatabaseStorage implements IStorage {
       },
       {
         id: "neer",
-        name: "NextEra Energy Resources",
+        name: "Clean Energy Division",
         ceo: "Rebecca Kujawa",
         profit2023: 2100,
         profit2024: 2350,
@@ -1058,7 +1058,7 @@ export class DatabaseStorage implements IStorage {
         profit2023: 450,
         profit2024: 480,
         changePercent: 7,
-        description: "Corporate functions including finance, legal, IT, human resources, and other shared services supporting NextEra Energy operations.",
+        description: "Corporate functions including finance, legal, IT, human resources, and other shared services supporting Enterprise Organization operations.",
         color: "#8B5CF6"
       }
     ];
@@ -1067,7 +1067,7 @@ export class DatabaseStorage implements IStorage {
       await db.insert(divisions).values(div);
     }
 
-    // Seed KPIs for FPL
+    // Seed KPIs for Utility Division
     const fplKpis: InsertDivisionKpi[] = [
       { divisionId: "fpl", name: "Operating Revenue", value2023: "17200", value2024: "18500", target2025: "19500", unit: "$m", trend: "up", status: "on-track" },
       { divisionId: "fpl", name: "Net Generating Capacity", value2023: "33500", value2024: "35052", target2025: "37000", unit: "MW", trend: "up", status: "on-track" },
@@ -1079,7 +1079,7 @@ export class DatabaseStorage implements IStorage {
       await db.insert(divisionKpis).values(kpi);
     }
 
-    // Seed KPIs for NEER
+    // Seed KPIs for Renewables Division
     const neerKpis: InsertDivisionKpi[] = [
       { divisionId: "neer", name: "Operating Revenue", value2023: "6200", value2024: "6800", target2025: "7500", unit: "$m", trend: "up", status: "on-track" },
       { divisionId: "neer", name: "Wind Capacity", value2023: "21000", value2024: "22500", target2025: "25000", unit: "MW", trend: "up", status: "on-track" },
@@ -1144,7 +1144,7 @@ export class DatabaseStorage implements IStorage {
         title: '[AUTONOMOUS] Budget Overrun Detected',
         description: 'FinOps Agent detected CPI dropped below 0.85 threshold on grid modernization. Automatic cost analysis triggered.',
         projectId: 'nee-fpl-001',
-        projectName: 'FPL Grid Modernization & Automation',
+        projectName: 'Grid Modernization & Automation',
         confidence: '0.95',
         suggestedAction: 'Reallocate $2M from contingency reserve and renegotiate smart meter procurement contracts.',
         impact: 'Without intervention, project will exceed budget by $8M by Q2.',
@@ -1159,7 +1159,7 @@ export class DatabaseStorage implements IStorage {
         title: '[AUTONOMOUS] Hurricane Season Schedule Risk',
         description: 'TMO Agent detected SPI at 0.78 - storm hardening must complete before June 1 hurricane season.',
         projectId: 'fpl-storm-hardening',
-        projectName: 'FPL Storm Secure Underground Program',
+        projectName: 'Storm Hardening Underground Program',
         confidence: '0.92',
         suggestedAction: 'Fast-track critical path activities and add parallel construction crews in Miami-Dade.',
         impact: 'Current trajectory shows 4-week delay to hurricane season deadline.',
@@ -1174,7 +1174,7 @@ export class DatabaseStorage implements IStorage {
         title: '[AGENT→AGENT] Cross-ART Dependency Risk',
         description: 'Planning Agent escalated to Governance Agent: SCADA integration blocking 3 downstream solar projects.',
         projectId: 'nee-fpl-001',
-        projectName: 'FPL Grid Modernization & Automation',
+        projectName: 'Grid Modernization & Automation',
         confidence: '0.88',
         suggestedAction: 'Convene emergency dependency resolution meeting with Grid Resilience and Renewable Generation ARTs.',
         impact: 'Blocking 18 story points across Solar and Battery Storage teams.',
@@ -1190,7 +1190,7 @@ export class DatabaseStorage implements IStorage {
         title: '[AUTONOMOUS] Quality Gate Failure - NERC CIP',
         description: 'Integrated Management Agent detected cybersecurity test coverage dropped to 62%, below NERC CIP 80% threshold.',
         projectId: 'nee-corp-002',
-        projectName: 'NextEra Cybersecurity Enhancement Program',
+        projectName: 'Cybersecurity Enhancement Program',
         confidence: '0.91',
         suggestedAction: 'Pause feature development and allocate sprint capacity to security test coverage for NERC audit.',
         impact: 'Risk of NERC CIP audit findings increased by 40%.',
@@ -1205,7 +1205,7 @@ export class DatabaseStorage implements IStorage {
         title: '[AUTONOMOUS] Solar Development Team Utilization Warning',
         description: 'OCM Agent detected Solar Development Team velocity declining 15% over last 3 sprints.',
         projectId: 'fpl-solar-expansion',
-        projectName: 'FPL SolarTogether Phase III',
+        projectName: 'Solar Program Phase III',
         confidence: '0.85',
         suggestedAction: 'Review team capacity and address permitting delay fatigue.',
         impact: 'Continued decline will delay 200MW commissioning by 2 sprints.',
@@ -1221,7 +1221,7 @@ export class DatabaseStorage implements IStorage {
         title: '[Agent Self Approved] Cloud Infrastructure Optimization',
         description: 'FinOps Agent autonomously renegotiated AWS reserved instances for grid analytics, saving $120K/quarter.',
         projectId: 'nee-corp-001',
-        projectName: 'NextEra Enterprise Data Platform',
+        projectName: 'Enterprise Data Platform',
         confidence: '0.96',
         suggestedAction: 'Applied 3-year reserved instance commitment for SCADA data processing workloads.',
         impact: 'Annual savings of $480K with no service impact.',
@@ -1238,7 +1238,7 @@ export class DatabaseStorage implements IStorage {
         title: '[Agent Self Approved] Sprint Rebalancing - Battery Storage',
         description: 'TMO Agent automatically redistributed 8 story points from overloaded Storage Solutions Team to Grid Modernization Team.',
         projectId: 'fpl-battery-storage',
-        projectName: 'FPL Manatee Battery Storage',
+        projectName: 'Energy Storage Battery Storage',
         confidence: '0.93',
         suggestedAction: 'Moved non-critical commissioning stories to available capacity.',
         impact: 'Prevented 2-day delay on critical path items.',
@@ -1255,7 +1255,7 @@ export class DatabaseStorage implements IStorage {
         title: '[Agent Self Approved] Automated Test Suite Expansion',
         description: 'Integrated Management Agent added 23 unit tests to critical SCADA integration module.',
         projectId: 'nee-fpl-001',
-        projectName: 'FPL Grid Modernization & Automation',
+        projectName: 'Grid Modernization & Automation',
         confidence: '0.97',
         suggestedAction: 'Generated test cases for uncovered edge cases in substation communication.',
         impact: 'Test coverage increased from 62% to 78%.',
@@ -1272,7 +1272,7 @@ export class DatabaseStorage implements IStorage {
         title: '[Agent Self Approved] Team Communication Optimization',
         description: 'OCM Agent consolidated 3 redundant daily standups into one cross-team sync for wind development.',
         projectId: 'nee-neer-001',
-        projectName: 'NEER Wind Portfolio Expansion 2024-2027',
+        projectName: 'Wind Portfolio Expansion 2024-2027',
         confidence: '0.89',
         suggestedAction: 'Merged overlapping ceremonies to reduce meeting fatigue.',
         impact: 'Recovered 4.5 hours/week of developer time across teams.',
@@ -1456,7 +1456,7 @@ export class DatabaseStorage implements IStorage {
         id: 'disc-003',
         topic: 'Hurricane Season Preparedness - Resource Allocation',
         projectId: 'nee-storm-001',
-        projectName: 'FPL Storm Hardening Phase III',
+        projectName: 'Storm Hardening Phase III',
         priority: 'high',
         status: 'resolved',
         consensusReached: 'true',
@@ -1578,7 +1578,7 @@ export class DatabaseStorage implements IStorage {
         status: 'completed',
         targetType: 'portfolio',
         targetId: 'portfolio-nee-001',
-        targetName: 'NextEra Energy Enterprise Transformation',
+        targetName: 'Enterprise Organization Enterprise Transformation',
         description: 'Escalate contractor augmentation request to Portfolio Steering Committee',
         reasoning: 'Emergency resource need with clear ROI justification',
         delegatedBy: 'FinOps Agent'
@@ -2206,7 +2206,7 @@ export class DatabaseStorage implements IStorage {
       },
       {
         id: "neer",
-        name: "NextEra Energy Resources",
+        name: "Clean Energy Division",
         ceo: "Rebecca Kujawa",
         profit2023: 2100,
         profit2024: 2350,
@@ -2221,7 +2221,7 @@ export class DatabaseStorage implements IStorage {
         profit2023: 450,
         profit2024: 480,
         changePercent: 7,
-        description: "Corporate functions including finance, legal, IT, human resources, and other shared services supporting NextEra Energy operations.",
+        description: "Corporate functions including finance, legal, IT, human resources, and other shared services supporting Enterprise Organization operations.",
         color: "#8B5CF6"
       }
     ];
@@ -2230,7 +2230,7 @@ export class DatabaseStorage implements IStorage {
       await db.insert(divisions).values(div);
     }
 
-    // Seed KPIs for FPL
+    // Seed KPIs for Utility Division
     const fplKpis: InsertDivisionKpi[] = [
       { divisionId: "fpl", name: "Operating Revenue", value2023: "17200", value2024: "18500", target2025: "19500", unit: "$m", trend: "up", status: "on-track" },
       { divisionId: "fpl", name: "Net Generating Capacity", value2023: "33500", value2024: "35052", target2025: "37000", unit: "MW", trend: "up", status: "on-track" },
@@ -2242,7 +2242,7 @@ export class DatabaseStorage implements IStorage {
       await db.insert(divisionKpis).values(kpi);
     }
 
-    // Seed KPIs for NEER
+    // Seed KPIs for Renewables Division
     const neerKpis: InsertDivisionKpi[] = [
       { divisionId: "neer", name: "Operating Revenue", value2023: "6200", value2024: "6800", target2025: "7500", unit: "$m", trend: "up", status: "on-track" },
       { divisionId: "neer", name: "Wind Capacity", value2023: "21000", value2024: "22500", target2025: "25000", unit: "MW", trend: "up", status: "on-track" },
@@ -2382,7 +2382,7 @@ export class DatabaseStorage implements IStorage {
 
     // Seed company overview
     await db.insert(companyOverview).values({
-      companyName: "NextEra Energy",
+      companyName: "Enterprise Organization",
       yearsOfHistory: 100,
       employees: 16800,
       adjustedOperatingProfitValue: 24753,
@@ -2397,7 +2397,7 @@ export class DatabaseStorage implements IStorage {
       cfo: "Kirk Crews",
       cro: "Rebecca Kujawa",
       climateDirector: "Eric Silagy",
-      source: "NextEra Energy Annual Report 2024",
+      source: "Enterprise Organization Annual Report 2024",
       sustainalyticsPercentile: 85,
       sustainalyticsRating: "Low Risk",
       msciRating: "A"
@@ -2448,16 +2448,16 @@ export class DatabaseStorage implements IStorage {
     // Seed enterprise risks
     const riskItems: InsertEnterpriseRisk[] = [
       // Operational risks
-      { categoryId: "operational", name: "Hurricane and severe weather exposure", description: "FPL service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event.", severity: "high", trend: "worsening" },
-      { categoryId: "operational", name: "Project execution and development", description: "NEER's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays and interconnection queue backlogs.", severity: "high", trend: "stable" },
+      { categoryId: "operational", name: "Hurricane and severe weather exposure", description: "service territory in Florida exposed to hurricanes, tropical storms, and severe weather. Storm damage restoration costs can exceed $1B per major event.", severity: "high", trend: "worsening" },
+      { categoryId: "operational", name: "Project execution and development", description: "Renewables's 36.5-46.5 GW renewable buildout through 2027 faces execution risks including permitting delays and interconnection queue backlogs.", severity: "high", trend: "stable" },
       { categoryId: "operational", name: "Equipment and infrastructure reliability", description: "Critical dependence on generation, transmission, and distribution infrastructure. Equipment failures or extended maintenance periods impact reliability.", severity: "high", trend: "improving" },
       { categoryId: "operational", name: "Nuclear operations", description: "Point Beach and other nuclear facilities require NRC compliance, safe operations, and extended license renewals.", severity: "medium", trend: "stable" },
       // Regulatory risks
-      { categoryId: "regulatory", name: "Rate case outcomes", description: "FPL rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE. Current ROE range 10.15-11.15%.", severity: "high", trend: "stable" },
-      { categoryId: "regulatory", name: "Federal energy policy changes", description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact NEER economics.", severity: "high", trend: "worsening" },
+      { categoryId: "regulatory", name: "Rate case outcomes", description: "Utility rate-regulated earnings depend on Florida PSC approval. Rate case filings every 4 years determine allowed ROE. Current ROE range 10.15-11.15%.", severity: "high", trend: "stable" },
+      { categoryId: "regulatory", name: "Federal energy policy changes", description: "IRA tax credits, PTC/ITC provisions, and federal renewable energy policy significantly impact Renewables economics.", severity: "high", trend: "worsening" },
       { categoryId: "regulatory", name: "Environmental compliance", description: "EPA regulations on emissions, water usage, and waste disposal. Coal combustion residuals management at legacy sites.", severity: "medium", trend: "stable" },
       // Market risks  
-      { categoryId: "market", name: "Power price volatility", description: "NEER merchant power exposure to wholesale electricity price fluctuations. Basis risk between contracted prices and delivery points.", severity: "high", trend: "stable" },
+      { categoryId: "market", name: "Power price volatility", description: "Renewables merchant power exposure to wholesale electricity price fluctuations. Basis risk between contracted prices and delivery points.", severity: "high", trend: "stable" },
       { categoryId: "market", name: "Interest rate exposure", description: "Rate increases impact cost of capital and refinancing. Significant impact on $35B+ development capital program.", severity: "medium", trend: "worsening" },
       { categoryId: "market", name: "Supply chain constraints", description: "Solar panel, battery, and transformer availability. Global competition for clean energy equipment.", severity: "high", trend: "improving" },
       // Credit risks
@@ -3237,8 +3237,8 @@ async function seedProjectTemplates() {
       
       const slug = file.replace('.json', '');
       let category = 'Other';
-      if (slug.startsWith('FPL-') || slug.startsWith('fpl-')) category = 'FPL';
-      else if (slug.startsWith('NEER-') || slug.startsWith('neer-')) category = 'NEER';
+      if (slug.startsWith('Utility-') || slug.startsWith('fpl-')) category = 'Utility';
+      else if (slug.startsWith('Renewables-') || slug.startsWith('neer-')) category = 'Renewables';
       else if (slug.startsWith('Corp-') || slug.startsWith('corp-') || slug.startsWith('nee-')) category = 'Corporate';
       
       await storage.createProjectTemplate({

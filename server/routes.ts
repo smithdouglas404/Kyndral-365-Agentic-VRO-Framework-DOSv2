@@ -1908,7 +1908,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const demoAlerts = [
         {
           title: 'Budget Threshold Exceeded',
-          message: 'FPL Grid Modernization has exceeded 90% of allocated budget with only 65% completion. Immediate review required.',
+          message: 'Grid Modernization has exceeded 90% of allocated budget with only 65% completion. Immediate review required.',
           severity: 'critical',
           category: 'budget',
           status: 'active',
@@ -1919,7 +1919,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Sync Conflict Detected',
-          message: 'Azure DevOps sync detected 3 conflicting field updates in NEER Solar stories. Manual resolution required.',
+          message: 'Azure DevOps sync detected 3 conflicting field updates in Solar Program stories. Manual resolution required.',
           severity: 'high',
           category: 'sync',
           status: 'active',
@@ -1929,7 +1929,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Schedule Variance Warning',
-          message: 'FPL Storm Hardening SPI dropped to 0.82, below 0.85 threshold. 3-week delay projected without intervention.',
+          message: 'Storm Hardening SPI dropped to 0.82, below 0.85 threshold. 3-week delay projected without intervention.',
           severity: 'high',
           category: 'schedule',
           status: 'acknowledged',
@@ -1951,7 +1951,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Quality Gate Failed',
-          message: 'NextEra Cybersecurity feature "Access Control" failed QA gate with 78% test coverage (minimum 80% required for NERC CIP).',
+          message: 'Cybersecurity Program feature "Access Control" failed QA gate with 78% test coverage (minimum 80% required for NERC CIP).',
           severity: 'medium',
           category: 'quality',
           status: 'active',
@@ -1982,7 +1982,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Risk Score Increased',
-          message: 'NEER Wind Portfolio risk score increased from 3.2 to 5.8 due to Vestas turbine delivery delays.',
+          message: 'Wind Portfolio risk score increased from 3.2 to 5.8 due to Vestas turbine delivery delays.',
           severity: 'high',
           category: 'risk',
           status: 'active',
@@ -1993,7 +1993,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         },
         {
           title: 'Resource Overallocation',
-          message: 'Senior Grid Engineer allocated at 145% across FPL Grid Modernization, Storm Hardening, and AMI projects. Rebalancing recommended.',
+          message: 'Senior Grid Engineer allocated at 145% across Grid Modernization, Storm Hardening, and AMI projects. Rebalancing recommended.',
           severity: 'medium',
           category: 'resource',
           status: 'active',
@@ -2798,7 +2798,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Seed SAFe Hierarchy Data - NextEra Energy specific
+  // Seed SAFe Hierarchy Data - Enterprise specific
   app.post("/api/safe/seed", async (_req, res) => {
     try {
       // Check if already seeded
@@ -2810,10 +2810,10 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       // Define theme IDs for portfolio reference
       const themeIds = ['theme-clean-energy', 'theme-grid-modernization', 'theme-customer-innovation', 'theme-operational-excellence'];
 
-      // Portfolio - NextEra Energy Enterprise Portfolio (create first for FK linkage)
+      // Portfolio - Enterprise Enterprise Portfolio (create first for FK linkage)
       const portfolio = await storage.createPortfolio({
-        name: 'NextEra Energy Enterprise Portfolio',
-        description: 'Enterprise transformation portfolio managing all strategic initiatives across FPL, NEER, and Corporate',
+        name: 'Enterprise Enterprise Portfolio',
+        description: 'Enterprise transformation portfolio managing all strategic initiatives across business units, and Corporate',
         vision: 'To be the world leader in clean energy, delivering affordable, reliable, and sustainable power to our customers while maximizing shareholder value',
         strategicThemes: JSON.stringify(themeIds),
         owner: 'John Ketchum - Chairman & CEO',
