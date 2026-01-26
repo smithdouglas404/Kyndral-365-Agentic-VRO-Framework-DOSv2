@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useOKRObjectives } from "@/hooks/useDashboardData";
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -222,7 +223,7 @@ export default function OKRDashboard() {
     setDrillDownOpen(true);
   };
   
-  const objectives = getObjectivesFromDivisions(dataMode);
+  const { data: objectives = [], isLoading: okrLoading } = useOKRObjectives();
 
   const avgProgress = Math.round(objectives.reduce((sum, o) => sum + o.progress, 0) / objectives.length);
   const totalValue = objectives.reduce((sum, o) => sum + o.totalValueImpact.costSavings + o.totalValueImpact.revenueImpact, 0);

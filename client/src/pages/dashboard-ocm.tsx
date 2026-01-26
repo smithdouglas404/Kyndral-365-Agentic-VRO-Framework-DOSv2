@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useOCMReadiness, useOCMStakeholders } from "@/hooks/useDashboardData";
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,8 +19,6 @@ import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
-  getChangeReadinessFromDivisions,
-  getStakeholderGroupsFromDivisions,
   getTrainingProgramsFromOKRs,
   getCompanyMetrics,
   type DataMode,
@@ -263,8 +262,6 @@ export default function OCMDashboard() {
     setDrillDownOpen(true);
   };
   
-  const readinessMetrics = getChangeReadinessFromDivisions(dataMode);
-  const stakeholderGroups = getStakeholderGroupsFromDivisions(dataMode);
   const trainingPrograms = getTrainingProgramsFromOKRs(dataMode);
   const companyMetrics = getCompanyMetrics();
   

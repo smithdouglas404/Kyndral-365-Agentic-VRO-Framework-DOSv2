@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useGovernanceItems, useGovernanceRiskMetrics } from "@/hooks/useDashboardData";
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,8 +20,6 @@ import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { useQuery } from '@tanstack/react-query';
 import {
-  getGovernanceItemsFromRiskData,
-  getRiskMetricsFromDivisions,
   getCompanyMetrics,
   type DataMode,
   type TransformedGovernanceItem
@@ -230,8 +229,6 @@ export default function GovernanceDashboard() {
     setDrillDownOpen(true);
   };
   
-  const governanceItems = getGovernanceItemsFromRiskData(dataMode);
-  const riskMetrics = getRiskMetricsFromDivisions(dataMode);
   const companyMetrics = getCompanyMetrics();
   
   const completedCount = governanceItems.filter(i => i.status === 'complete').length;

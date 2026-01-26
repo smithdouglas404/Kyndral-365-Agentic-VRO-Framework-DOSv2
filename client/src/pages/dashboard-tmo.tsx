@@ -18,14 +18,11 @@ import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useDivisions } from '@/hooks/useNexteraData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
-import { 
-  getAdoptionMetricsFromDivisions,
-  getInitiativesFromDivisions,
+import {
   getCompanyMetrics,
-  type DataMode,
-  type TransformedAdoptionMetric,
-  type TransformedInitiative
+  type DataMode
 } from '@/lib/agentDataTransformers';
+import { useTMOAdoptionMetrics, useTMOInitiatives } from '@/hooks/useDashboardData';
 import { AIRecommendations } from "@/components/AIRecommendations";
 import { formatValueInMillions } from "@/lib/formatters";
 import AgentActionQueue from "@/components/AgentActionQueue";
@@ -45,7 +42,7 @@ function NavBar() {
   );
 }
 
-function AdoptionMetricCard({ metric, mode }: { metric: TransformedAdoptionMetric, mode: DataMode }) {
+function AdoptionMetricCard({ metric, mode }: { metric: any, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
   const progressPercent = (metric.adoption / metric.target) * 100;
 
@@ -99,7 +96,7 @@ function AdoptionMetricCard({ metric, mode }: { metric: TransformedAdoptionMetri
   );
 }
 
-function InitiativeCard({ initiative, mode }: { initiative: TransformedInitiative, mode: DataMode }) {
+function InitiativeCard({ initiative, mode }: { initiative: any, mode: DataMode }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -312,8 +309,8 @@ export default function TMODashboard() {
     setDrillDownOpen(true);
   };
   
-  const adoptionMetrics = getAdoptionMetricsFromDivisions(dataMode);
-  const initiatives = getInitiativesFromDivisions(dataMode);
+  const { data: adoptionMetrics = [], isLoading: adoptionLoading } = useTMOAdoptionMetrics();
+  const { data: initiatives = [], isLoading: initiativesLoading } = useTMOInitiatives();
   const companyMetrics = getCompanyMetrics();
   
   const avgAdoption = Math.round(adoptionMetrics.reduce((sum, m) => sum + m.adoption, 0) / adoptionMetrics.length);

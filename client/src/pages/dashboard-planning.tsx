@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePlanningMilestones, usePlanningRoadmap } from "@/hooks/useDashboardData";
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,8 +21,6 @@ import { useProjects } from '@/hooks/useDashboardData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
-  getMilestonesFromProjects,
-  getDeadlinesFromProjects,
   getCompanyMetrics,
   type DataMode,
   type TransformedMilestone,
@@ -232,8 +231,6 @@ export default function PlanningDashboard() {
     setDrillDownOpen(true);
   };
   
-  const milestones = getMilestonesFromProjects(dataMode);
-  const deadlines = getDeadlinesFromProjects(dataMode);
   
   const completedPhases = milestones.filter(m => m.status === 'complete').length;
   const currentPhase = milestones.find(m => m.status === 'in-progress');

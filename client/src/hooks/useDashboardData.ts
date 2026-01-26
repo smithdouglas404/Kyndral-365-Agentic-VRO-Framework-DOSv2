@@ -1,167 +1,176 @@
-/**
- * DASHBOARD DATA HOOKS
- * Replace ALL static data imports with API calls
- * NO MORE HARDCODED DATA
- */
+import { useQuery } from "@tanstack/react-query";
 
-import { useQuery } from '@tanstack/react-query';
-
-const API_BASE = '/api';
-
-// Dashboard Overview
-export function useDashboardOverview() {
+// TMO Data
+export function useTMOAdoptionMetrics() {
   return useQuery({
-    queryKey: ['dashboard', 'overview'],
+    queryKey: ["tmo-adoption-metrics"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/overview`);
-      if (!res.ok) throw new Error('Failed to fetch dashboard overview');
+      const res = await fetch("/api/tmo/adoption-metrics");
+      if (!res.ok) throw new Error("Failed to fetch adoption metrics");
       return res.json();
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 30000,
   });
 }
 
-// Business Units
-export function useBusinessUnits() {
+export function useTMOInitiatives() {
   return useQuery({
-    queryKey: ['dashboard', 'business-units'],
+    queryKey: ["tmo-initiatives"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/business-units`);
-      if (!res.ok) throw new Error('Failed to fetch business units');
+      const res = await fetch("/api/tmo/initiatives");
+      if (!res.ok) throw new Error("Failed to fetch initiatives");
       return res.json();
     },
-    refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000,
   });
 }
 
-// Portfolios
-export function usePortfolios() {
+// OKR Data
+export function useOKRObjectives() {
   return useQuery({
-    queryKey: ['dashboard', 'portfolios'],
+    queryKey: ["okr-objectives"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/portfolios`);
-      if (!res.ok) throw new Error('Failed to fetch portfolios');
+      const res = await fetch("/api/okr/objectives");
+      if (!res.ok) throw new Error("Failed to fetch objectives");
       return res.json();
     },
-    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }
 
-// SAFe Data (Features, Stories, Tasks)
-export function useSafeData() {
+export function useOKRKeyResults() {
   return useQuery({
-    queryKey: ['dashboard', 'safe-data'],
+    queryKey: ["okr-key-results"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/safe-data`);
-      if (!res.ok) throw new Error('Failed to fetch SAFe data');
+      const res = await fetch("/api/okr/key-results");
+      if (!res.ok) throw new Error("Failed to fetch key results");
       return res.json();
     },
-    refetchInterval: 30000,
+    staleTime: 30000,
   });
 }
 
-// OKRs
-export function useOKRs() {
+// Planning Data
+export function usePlanningMilestones() {
   return useQuery({
-    queryKey: ['dashboard', 'okrs'],
+    queryKey: ["planning-milestones"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/okrs`);
-      if (!res.ok) throw new Error('Failed to fetch OKRs');
+      const res = await fetch("/api/planning/milestones");
+      if (!res.ok) throw new Error("Failed to fetch milestones");
       return res.json();
     },
-    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }
 
-// KPIs
-export function useKPIs() {
+export function usePlanningRoadmap() {
   return useQuery({
-    queryKey: ['dashboard', 'kpis'],
+    queryKey: ["planning-roadmap"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/kpis`);
-      if (!res.ok) throw new Error('Failed to fetch KPIs');
+      const res = await fetch("/api/planning/roadmap");
+      if (!res.ok) throw new Error("Failed to fetch roadmap");
       return res.json();
     },
-    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }
 
-// Value Streams
-export function useValueStreams() {
+// OCM Data
+export function useOCMReadiness() {
   return useQuery({
-    queryKey: ['dashboard', 'value-streams'],
+    queryKey: ["ocm-readiness"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/value-streams`);
-      if (!res.ok) throw new Error('Failed to fetch value streams');
+      const res = await fetch("/api/ocm/readiness");
+      if (!res.ok) throw new Error("Failed to fetch readiness");
       return res.json();
     },
-    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }
 
-// Resources
-export function useResources() {
+export function useOCMStakeholders() {
   return useQuery({
-    queryKey: ['dashboard', 'resources'],
+    queryKey: ["ocm-stakeholders"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/dashboard/resources`);
-      if (!res.ok) throw new Error('Failed to fetch resources');
+      const res = await fetch("/api/ocm/stakeholders");
+      if (!res.ok) throw new Error("Failed to fetch stakeholders");
       return res.json();
     },
-    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }
 
-// Projects (from existing API)
-export function useProjects() {
+// Governance Data
+export function useGovernanceItems() {
   return useQuery({
-    queryKey: ['projects'],
+    queryKey: ["governance-items"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/projects`);
-      if (!res.ok) throw new Error('Failed to fetch projects');
+      const res = await fetch("/api/governance/items");
+      if (!res.ok) throw new Error("Failed to fetch governance items");
       return res.json();
     },
-    refetchInterval: 30000,
+    staleTime: 30000,
   });
 }
 
-// Single Project
-export function useProject(projectId: string | undefined) {
+export function useGovernanceRiskMetrics() {
   return useQuery({
-    queryKey: ['projects', projectId],
+    queryKey: ["governance-risk-metrics"],
     queryFn: async () => {
-      if (!projectId) throw new Error('Project ID required');
-      const res = await fetch(`${API_BASE}/projects/${projectId}`);
-      if (!res.ok) throw new Error('Failed to fetch project');
+      const res = await fetch("/api/governance/risk-metrics");
+      if (!res.ok) throw new Error("Failed to fetch risk metrics");
       return res.json();
     },
-    enabled: !!projectId,
-    refetchInterval: 30000,
+    staleTime: 30000,
   });
 }
 
-// Risks
-export function useRisks() {
+// Sustainability Data
+export function useSustainabilityEmissions() {
   return useQuery({
-    queryKey: ['risks'],
+    queryKey: ["sustainability-emissions"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/risks`);
-      if (!res.ok) throw new Error('Failed to fetch risks');
+      const res = await fetch("/api/sustainability/emissions");
+      if (!res.ok) throw new Error("Failed to fetch emissions");
       return res.json();
     },
-    refetchInterval: 60000,
+    staleTime: 30000,
   });
 }
 
-// Issues
-export function useIssues() {
+export function useSustainabilityTargets() {
   return useQuery({
-    queryKey: ['issues'],
+    queryKey: ["sustainability-targets"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/issues`);
-      if (!res.ok) throw new Error('Failed to fetch issues');
+      const res = await fetch("/api/sustainability/targets");
+      if (!res.ok) throw new Error("Failed to fetch targets");
       return res.json();
     },
-    refetchInterval: 30000,
+    staleTime: 30000,
+  });
+}
+
+// Risk Data
+export function useRiskCategories() {
+  return useQuery({
+    queryKey: ["risk-categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/risk/categories");
+      if (!res.ok) throw new Error("Failed to fetch risk categories");
+      return res.json();
+    },
+    staleTime: 30000,
+  });
+}
+
+export function useEmergingRisks() {
+  return useQuery({
+    queryKey: ["emerging-risks"],
+    queryFn: async () => {
+      const res = await fetch("/api/risk/emerging");
+      if (!res.ok) throw new Error("Failed to fetch emerging risks");
+      return res.json();
+    },
+    staleTime: 30000,
   });
 }
