@@ -1,16 +1,11 @@
 import { type ReactNode } from 'react';
-import { SimulationContext, useSimulationState } from '@/lib/liveSimulationEngine';
+import { SimulationProvider as Provider } from '@/contexts/SimulationContext';
 
 interface SimulationProviderProps {
   children: ReactNode;
 }
 
+// Re-export for backward compatibility
 export function SimulationProvider({ children }: SimulationProviderProps) {
-  const simulation = useSimulationState();
-  
-  return (
-    <SimulationContext.Provider value={simulation}>
-      {children}
-    </SimulationContext.Provider>
-  );
+  return <Provider>{children}</Provider>;
 }
