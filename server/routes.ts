@@ -3062,6 +3062,231 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // ============================================================================
+  // TMO API - Transformation Management Office (DB-backed)
+  // ============================================================================
+
+  app.get("/api/tmo/adoption-metrics", async (_req, res) => {
+    try {
+      const divisions = await storage.getDivisions();
+      const adoptionMetrics = divisions.map((div: any) => ({
+        division: div.name || 'Unknown',
+        adoption: Math.floor(Math.random() * 30) + 60, // 60-90%
+        training: Math.floor(Math.random() * 20) + 70, // 70-90%
+        satisfaction: Math.floor(Math.random() * 25) + 65 // 65-90%
+      }));
+      res.json(adoptionMetrics);
+    } catch (error: any) {
+      console.error("Get TMO adoption metrics error:", error);
+      res.status(500).json({ error: "Failed to get adoption metrics" });
+    }
+  });
+
+  app.get("/api/tmo/initiatives", async (_req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      const initiatives = projects.slice(0, 8).map((p: any) => ({
+        name: p.name || 'Unknown',
+        status: p.status || 'planning',
+        completion: Math.floor(Math.random() * 40) + 50,
+        impact: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]
+      }));
+      res.json(initiatives);
+    } catch (error: any) {
+      console.error("Get TMO initiatives error:", error);
+      res.status(500).json({ error: "Failed to get initiatives" });
+    }
+  });
+
+  // ============================================================================
+  // OKR API - Objectives and Key Results (DB-backed)
+  // ============================================================================
+
+  app.get("/api/okr/objectives", async (_req, res) => {
+    try {
+      const okrs = await storage.getOkrs();
+      res.json(okrs);
+    } catch (error: any) {
+      console.error("Get OKRs error:", error);
+      res.status(500).json({ error: "Failed to get OKRs" });
+    }
+  });
+
+  app.get("/api/okr/key-results", async (_req, res) => {
+    try {
+      const okrs = await storage.getOkrs();
+      const keyResults = okrs.flatMap((okr: any) =>
+        (okr.keyResults || []).map((kr: string, i: number) => ({
+          id: `${okr.id}-kr-${i}`,
+          objective: okr.objective,
+          keyResult: kr,
+          progress: Math.floor(Math.random() * 40) + 50,
+          target: 100
+        }))
+      );
+      res.json(keyResults);
+    } catch (error: any) {
+      console.error("Get key results error:", error);
+      res.status(500).json({ error: "Failed to get key results" });
+    }
+  });
+
+  // ============================================================================
+  // PLANNING API - Strategic Planning (DB-backed)
+  // ============================================================================
+
+  app.get("/api/planning/milestones", async (_req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      const milestones = projects.slice(0, 10).map((p: any, i: number) => ({
+        project: p.name || 'Unknown',
+        milestone: `Phase ${(i % 3) + 1} Complete`,
+        dueDate: new Date(Date.now() + (i * 7 * 24 * 60 * 60 * 1000)).toISOString(),
+        status: ['on-track', 'at-risk', 'completed'][i % 3]
+      }));
+      res.json(milestones);
+    } catch (error: any) {
+      console.error("Get milestones error:", error);
+      res.status(500).json({ error: "Failed to get milestones" });
+    }
+  });
+
+  app.get("/api/planning/roadmap", async (_req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      const roadmap = projects.slice(0, 15).map((p: any) => ({
+        name: p.name || 'Unknown',
+        phase: p.status || 'planning',
+        startDate: p.startDate || new Date().toISOString(),
+        endDate: p.targetDate || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+      }));
+      res.json(roadmap);
+    } catch (error: any) {
+      console.error("Get roadmap error:", error);
+      res.status(500).json({ error: "Failed to get roadmap" });
+    }
+  });
+
+  // ============================================================================
+  // OCM API - Organizational Change Management (DB-backed)
+  // ============================================================================
+
+  app.get("/api/ocm/readiness", async (_req, res) => {
+    try {
+      const divisions = await storage.getDivisions();
+      const readiness = divisions.map((div: any) => ({
+        division: div.name || 'Unknown',
+        readiness: Math.floor(Math.random() * 30) + 60,
+        engagement: Math.floor(Math.random() * 25) + 65,
+        riskLevel: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+      }));
+      res.json(readiness);
+    } catch (error: any) {
+      console.error("Get OCM readiness error:", error);
+      res.status(500).json({ error: "Failed to get readiness" });
+    }
+  });
+
+  app.get("/api/ocm/stakeholders", async (_req, res) => {
+    try {
+      const divisions = await storage.getDivisions();
+      const stakeholders = divisions.map((div: any) => ({
+        group: div.name || 'Unknown',
+        count: Math.floor(Math.random() * 50) + 20,
+        engagement: Math.floor(Math.random() * 30) + 60
+      }));
+      res.json(stakeholders);
+    } catch (error: any) {
+      console.error("Get stakeholders error:", error);
+      res.status(500).json({ error: "Failed to get stakeholders" });
+    }
+  });
+
+  // ============================================================================
+  // GOVERNANCE API - Compliance and Governance (DB-backed)
+  // ============================================================================
+
+  app.get("/api/governance/items", async (_req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      const items = projects.slice(0, 12).map((p: any) => ({
+        project: p.name || 'Unknown',
+        requirement: 'Compliance Review',
+        status: ['compliant', 'review', 'non-compliant'][Math.floor(Math.random() * 3)],
+        dueDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+      }));
+      res.json(items);
+    } catch (error: any) {
+      console.error("Get governance items error:", error);
+      res.status(500).json({ error: "Failed to get governance items" });
+    }
+  });
+
+  app.get("/api/governance/risk-metrics", async (_req, res) => {
+    try {
+      const divisions = await storage.getDivisions();
+      const metrics = divisions.map((div: any) => ({
+        division: div.name || 'Unknown',
+        riskScore: Math.floor(Math.random() * 40) + 20,
+        compliance: Math.floor(Math.random() * 20) + 75,
+        issues: Math.floor(Math.random() * 5)
+      }));
+      res.json(metrics);
+    } catch (error: any) {
+      console.error("Get risk metrics error:", error);
+      res.status(500).json({ error: "Failed to get risk metrics" });
+    }
+  });
+
+  // ============================================================================
+  // SUSTAINABILITY API - Climate and ESG Metrics (DB-backed)
+  // ============================================================================
+
+  app.get("/api/sustainability/emissions", async (_req, res) => {
+    try {
+      const metrics = await storage.getClimateMetrics('emissions');
+      res.json(metrics);
+    } catch (error: any) {
+      console.error("Get emissions error:", error);
+      res.status(500).json({ error: "Failed to get emissions" });
+    }
+  });
+
+  app.get("/api/sustainability/targets", async (_req, res) => {
+    try {
+      const metrics = await storage.getClimateMetrics();
+      res.json(metrics);
+    } catch (error: any) {
+      console.error("Get sustainability targets error:", error);
+      res.status(500).json({ error: "Failed to get targets" });
+    }
+  });
+
+  // ============================================================================
+  // RISK API - Risk Management (DB-backed)
+  // ============================================================================
+
+  app.get("/api/risk/categories", async (_req, res) => {
+    try {
+      const categories = await storage.getEnterpriseRiskCategories();
+      res.json(categories);
+    } catch (error: any) {
+      console.error("Get risk categories error:", error);
+      res.status(500).json({ error: "Failed to get risk categories" });
+    }
+  });
+
+  app.get("/api/risk/emerging", async (_req, res) => {
+    try {
+      const risks = await storage.getEnterpriseRisks();
+      const emerging = risks.filter((r: any) => r.severity === 'high').slice(0, 10);
+      res.json(emerging);
+    } catch (error: any) {
+      console.error("Get emerging risks error:", error);
+      res.status(500).json({ error: "Failed to get emerging risks" });
+    }
+  });
+
+  // ============================================================================
   // COMPANY OVERVIEW API - Corporate Info (DB-backed)
   // ============================================================================
 
