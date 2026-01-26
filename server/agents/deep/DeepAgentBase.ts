@@ -543,6 +543,31 @@ Provide the result of executing this step.`],
   protected async reflect(step: PlanStep, outcome: any): Promise<ActionReflection> {
     console.log(`[${this.config.agentName}] Reflecting on step ${step.step}`);
 
+    // Sanitize outcome to prevent circular JSON errors
+    const sanitizeOutcome = (obj: any, depth = 0, maxDepth = 3): any => {
+      if (depth > maxDepth) return '[Max depth reached]';
+      if (obj === null || obj === undefined) return obj;
+      if (typeof obj !== 'object') return obj;
+      if (Array.isArray(obj)) {
+        return obj.slice(0, 5).map(item => sanitizeOutcome(item, depth + 1, maxDepth));
+      }
+
+      const sanitized: any = {};
+      const keys = Object.keys(obj).slice(0, 10); // Limit keys
+      for (const key of keys) {
+        if (key === 'previousResults' || key === 'context') {
+          sanitized[key] = '[Omitted to prevent circular reference]';
+        } else {
+          try {
+            sanitized[key] = sanitizeOutcome(obj[key], depth + 1, maxDepth);
+          } catch {
+            sanitized[key] = '[Could not serialize]';
+          }
+        }
+      }
+      return sanitized;
+    };
+
     const reflectionPrompt = ChatPromptTemplate.fromMessages([
       ["system", `You are a reflection expert for ${this.config.agentName}.
 
@@ -565,10 +590,11 @@ Reflect on this action.`],
     ]);
 
     const chain = reflectionPrompt.pipe(this.reflectorModel);
+    const sanitizedOutcome = sanitizeOutcome(outcome);
     const response = await chain.invoke({
       action: step.description,
       expected: step.expectedOutcome,
-      outcome: JSON.stringify(outcome, null, 2),
+      outcome: JSON.stringify(sanitizedOutcome, null, 2),
     });
 
     let reflection;
