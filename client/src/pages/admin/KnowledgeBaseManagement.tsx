@@ -86,9 +86,11 @@ export default function KnowledgeBaseManagement() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
   const [deleteUsageInfo, setDeleteUsageInfo] = useState<any>(null);
+  const [replacementFile, setReplacementFile] = useState<File | null>(null);
 
   // Form state
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -233,6 +235,59 @@ export default function KnowledgeBaseManagement() {
       queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
       setShowDeleteDialog(false);
       setSelectedDocument(null);
+      setDeleteUsageInfo(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Replace document mutation
+  const replaceMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedDocument || !replacementFile) {
+        throw new Error('No document or replacement file selected');
+      }
+
+      // Read file content
+      const reader = new FileReader();
+      const content = await new Promise<string>((resolve, reject) => {
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsText(replacementFile);
+      });
+
+      // Replace document via API
+      const res = await fetch(`/api/admin/knowledge-base/${selectedDocument.id}/replace`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: replacementFile.name.replace(/\.[^/.]+$/, ''),
+          content: content,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to replace document');
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Document replaced successfully! All references have been maintained.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
+      setShowReplaceDialog(false);
+      setShowDeleteDialog(false);
+      setSelectedDocument(null);
+      setReplacementFile(null);
       setDeleteUsageInfo(null);
     },
     onError: (error: Error) => {
@@ -820,11 +875,7 @@ export default function KnowledgeBaseManagement() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  // TODO: Implement document replacement flow
-                  toast({
-                    title: 'Feature Not Available',
-                    description: 'Document replacement is not yet implemented. Please delete the document and upload a new one.',
-                  });
+                  setShowReplaceDialog(true);
                 }}
               >
                 Replace with Another Document

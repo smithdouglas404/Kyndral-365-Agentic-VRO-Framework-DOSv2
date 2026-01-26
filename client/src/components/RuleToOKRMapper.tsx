@@ -148,84 +148,19 @@ export function RuleToOKRMapper({ agentId, okrId }: Props) {
     isActive: true,
   });
 
-  // Fetch OKR-Rule mappings
+  // Fetch OKR-Rule mappings from database
   const { data: mappingsData, isLoading } = useQuery({
     queryKey: ['okr-rule-mappings', agentId, okrId],
     queryFn: async () => {
-      // Mock data - replace with actual API call
-      const mockMappings: OKRRuleMapping[] = [
-        {
-          id: 'map-1',
-          okrId: 'okr-finops-1',
-          okrTitle: 'Maintain project profitability above 15%',
-          kpiMetric: 'CPI',
-          agent: 'finops',
-          threshold: 0.85,
-          thresholdOperator: '<',
-          thresholdType: 'critical',
-          camundaRuleId: 'budget-overrun-critical',
-          ruleName: 'Critical Budget Overrun Collaboration',
-          actions: ['notify', 'email', 'escalate'],
-          notificationTargets: {
-            inApp: true,
-            email: ['cfo@company.com', 'project-leads@company.com'],
-            slack: ['#finance-alerts'],
-            teams: [],
-          },
-          isActive: true,
-        },
-        {
-          id: 'map-2',
-          okrId: 'okr-risk-1',
-          okrTitle: 'Keep portfolio risk score below 7',
-          kpiMetric: 'Risk Score',
-          agent: 'risk',
-          threshold: 8,
-          thresholdOperator: '>',
-          thresholdType: 'critical',
-          camundaRuleId: 'high-risk',
-          ruleName: 'High Risk Escalation',
-          actions: ['escalate', 'email', 'attach_document'],
-          notificationTargets: {
-            inApp: true,
-            email: ['risk-committee@company.com'],
-            slack: ['#risk-alerts'],
-            teams: [],
-          },
-          isActive: true,
-        },
-        {
-          id: 'map-3',
-          okrId: 'okr-vro-1',
-          okrTitle: 'Achieve 95% benefits realization',
-          kpiMetric: 'Benefits Realization',
-          agent: 'vro',
-          threshold: 0.90,
-          thresholdOperator: '<',
-          thresholdType: 'warning',
-          camundaRuleId: 'value-leakage',
-          ruleName: 'Value Leakage Intervention',
-          actions: ['notify', 'create_task'],
-          notificationTargets: {
-            inApp: true,
-            email: ['value-team@company.com'],
-            slack: [],
-            teams: [],
-          },
-          isActive: true,
-        },
-      ];
+      const params = new URLSearchParams();
+      if (agentId) params.append('agent', agentId);
+      if (okrId) params.append('okrId', okrId);
 
-      // Filter by agent or OKR if specified
-      let filtered = mockMappings;
-      if (agentId) {
-        filtered = filtered.filter((m) => m.agent === agentId);
+      const response = await fetch(`/api/okr-rule-mappings?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch OKR-rule mappings');
       }
-      if (okrId) {
-        filtered = filtered.filter((m) => m.okrId === okrId);
-      }
-
-      return { mappings: filtered };
+      return response.json();
     },
   });
 

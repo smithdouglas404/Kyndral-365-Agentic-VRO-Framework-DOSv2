@@ -153,6 +153,7 @@ export interface CoordinationState {
   pendingRequests: Map<string, AgentMessage[]>; // agentId → pending requests to them
   recentFindings: Map<string, any[]>; // projectId → recent findings from all agents
   agentContext: Map<string, any>; // agentId → current context/state
+  errorCount?: number; // Track consecutive orchestration errors for recovery
 }
 
 export class ContinuousOrchestrator {
@@ -376,8 +377,36 @@ export class ContinuousOrchestrator {
       const executionTime = Date.now() - startTime;
       console.log(`[ContinuousOrchestrator] Cycle ${this.cycleCount} completed in ${executionTime}ms\n`);
 
-    } catch (error) {
+      // Reset error counter on successful cycle
+      this.state.errorCount = 0;
+
+    } catch (error: any) {
       console.error('[ContinuousOrchestrator] Error in orchestration cycle:', error);
+
+      // Track error for monitoring
+      this.state.errorCount = (this.state.errorCount || 0) + 1;
+
+      // If too many consecutive errors, take recovery action
+      if (this.state.errorCount > 5) {
+        console.error('[ContinuousOrchestrator] Too many consecutive errors, attempting recovery...');
+
+        try {
+          // Recovery action: reset agent rotation
+          this.cycleCount = 0;
+          this.state.pendingRequests.clear();
+
+          // Clear error counter after recovery attempt
+          this.state.errorCount = 0;
+
+          console.log('[ContinuousOrchestrator] Recovery completed, resuming normal operation');
+        } catch (recoveryError: any) {
+          console.error('[ContinuousOrchestrator] Recovery failed:', recoveryError);
+
+          // If recovery fails, stop orchestration to prevent infinite error loop
+          console.error('[ContinuousOrchestrator] Stopping orchestration due to unrecoverable errors');
+          this.stop();
+        }
+      }
     }
   }
 
@@ -492,13 +521,13 @@ export class ContinuousOrchestrator {
         }
 
         // Get highest severity action
-        const highestSeverity = this.getHighestSeverity(actions.map(a => a.severity));
+        const highestSeverity = this.getHighestSeverity(actions.map((a: any) => a.severity));
 
         return {
           description: rule.description,
           severity: highestSeverity,
           confidence: 0.90, // Rules are explicit, so high confidence
-          action: actions.map(a => a.message).join('; '),
+          action: actions.map((a: any) => a.message).join('; '),
           ruleId: rule.id,
           ruleName: rule.name,
           triggeredActions: actions,

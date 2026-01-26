@@ -12,6 +12,14 @@ import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
 import { setupWebSocket } from "./websocket";
 import { log } from "./log";
+import { logger } from "./lib/logger.js";
+import {
+  setupProcessHandlers,
+  recordActivity,
+  createAgentSchedulerCleanup,
+  createOrchestratorCleanup,
+  startMemoryMonitoring,
+} from "./lib/processManager.js";
 import { registerHealthRoutes, trackRequestMetrics } from "./routes/health.js";
 import { configureSecurityHeaders } from "./auth/securityMiddleware.js";
 
@@ -57,6 +65,9 @@ app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
+
+  // Record activity for hanging process detection
+  recordActivity();
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
@@ -192,6 +203,31 @@ app.use((req, res, next) => {
       const mcpSyncScheduler = createMCPSyncScheduler(storage);
       await mcpSyncScheduler.start();
       log("✅ MCP Marketplace sync scheduler started - Monitoring active integrations");
+
+      // ===================================================================
+      // Setup Process Management & Graceful Shutdown
+      // Handles SIGTERM, SIGINT, uncaught exceptions, hanging processes
+      // ===================================================================
+      const cleanupCallbacks = [];
+
+      if (agentScheduler) {
+        cleanupCallbacks.push(createAgentSchedulerCleanup(agentScheduler));
+      }
+
+      if (battleRhythmOrchestrator) {
+        cleanupCallbacks.push(createOrchestratorCleanup(battleRhythmOrchestrator));
+      }
+
+      setupProcessHandlers(httpServer, cleanupCallbacks, {
+        gracefulShutdownTimeout: 30000, // 30 seconds
+        healthCheckInterval: 60000, // 1 minute
+        hangingProcessTimeout: 300000, // 5 minutes
+      });
+
+      // Start memory monitoring (warn if >512MB heap usage)
+      startMemoryMonitoring(512, 60000);
+
+      logger.info("🚀 Server fully initialized with process management");
     },
   );
 })();

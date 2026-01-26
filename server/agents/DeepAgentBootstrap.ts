@@ -352,7 +352,7 @@ export class DeepAgentBootstrap {
           projectId: project.id,
           projectName: project.name,
           timestamp: new Date(),
-          agents: {},
+          agents: {} as Record<string, any>,
         };
 
         // Collect insights from each deep agent

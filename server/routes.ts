@@ -29,6 +29,7 @@ import { registerPolicyAsCodeRoutes } from "./routes/policy-as-code.js";
 import ruleExecutionHistoryRouter from "./routes/rule-execution-history.js";
 import { registerCamundaRoutes } from "./routes/admin/camunda.js";
 import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
+import { registerOKRRuleMappingRoutes } from "./routes/okr-rule-mappings.js";
 import { registerPermissionRoutes } from "./routes/admin/permissions.js";
 import { registerNotificationRoutes } from "./routes/notifications.js";
 import { registerAgentExecutionRoutes } from "./routes/agents.js";
@@ -191,6 +192,9 @@ export async function registerRoutes(
 
   // Register OKR/KPI Management routes (ADMIN - Objectives, Key Results, and KPIs)
   registerOkrKpiRoutes(app);
+
+  // Register OKR-Rule Mapping routes (Link OKRs to agent collaboration rules)
+  registerOKRRuleMappingRoutes(app, storage);
 
   // Register Permission Management routes (ADMIN - Granular user permissions)
   registerPermissionRoutes(app);
