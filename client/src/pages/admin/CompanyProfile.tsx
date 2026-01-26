@@ -154,7 +154,7 @@ interface ExtractionJob {
 }
 
 export default function CompanyProfile() {
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('switcher');
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddUnitDialog, setShowAddUnitDialog] = useState(false);
   const [showAddMetricDialog, setShowAddMetricDialog] = useState(false);
@@ -164,12 +164,45 @@ export default function CompanyProfile() {
   const [extractionStatus, setExtractionStatus] = useState<ExtractionJob | null>(null);
   const queryClient = useQueryClient();
 
-  // Fetch company profile
+  // Company activation mutation
+  const activateCompanyMutation = useMutation({
+    mutationFn: async (companyId: string) => {
+      const res = await fetch(`/api/company-profile/${companyId}/activate`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error('Failed to activate company');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ['company-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to activate company');
+    },
+  });
+
+  // Fetch active company profile
   const { data: profile, isLoading: loadingProfile } = useQuery<CompanyProfile>({
-    queryKey: ['company-profile'],
+    queryKey: ['company-profile', 'active'],
     queryFn: async () => {
-      const res = await fetch('/api/company-profile');
+      const res = await fetch('/api/company-profile/active');
       if (!res.ok) throw new Error('Failed to fetch company profile');
+      const data = await res.json();
+      return data.company ? {
+        ...data.company,
+        id: data.company.id,
+      } : null;
+    },
+  });
+
+  // Fetch all companies for switcher
+  const { data: allCompanies, isLoading: loadingAllCompanies } = useQuery<CompanyProfile[]>({
+    queryKey: ['companies', 'all'],
+    queryFn: async () => {
+      const res = await fetch('/api/company-profile/all');
+      if (!res.ok) throw new Error('Failed to fetch companies');
       return res.json();
     },
   });
@@ -362,8 +395,12 @@ export default function CompanyProfile() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="basic" className="gap-2">
+            <TabsTrigger value="switcher" className="gap-2">
               <Building2 className="w-4 h-4" />
+              Company Switcher
+            </TabsTrigger>
+            <TabsTrigger value="basic" className="gap-2">
+              <FileText className="w-4 h-4" />
               Basic Info
             </TabsTrigger>
             <TabsTrigger value="org-units" className="gap-2">
@@ -387,6 +424,79 @@ export default function CompanyProfile() {
               Documents
             </TabsTrigger>
           </TabsList>
+
+          {/* Company Switcher Tab */}
+          <TabsContent value="switcher" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Switch Active Company</CardTitle>
+                <CardDescription>
+                  Select which company configuration to use across the system. Only one company can be active at a time.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingAllCompanies ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {allCompanies?.map((company) => (
+                      <Card
+                        key={company.id}
+                        className={`p-4 cursor-pointer transition-all ${
+                          company.status === 'active'
+                            ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/10'
+                            : 'hover:border-gray-400'
+                        }`}
+                        onClick={() => {
+                          if (company.status !== 'active') {
+                            activateCompanyMutation.mutate(company.id);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold text-lg">{company.legalName}</h3>
+                              {company.status === 'active' && (
+                                <Badge className="bg-green-600">
+                                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                                  Active
+                                </Badge>
+                              )}
+                            </div>
+                            {company.gicsSector && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {company.gicsSector} • {company.gicsIndustry}
+                              </p>
+                            )}
+                          </div>
+                          {company.status !== 'active' && (
+                            <Button size="sm" variant="outline">
+                              Activate
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                    {allCompanies?.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No companies configured yet.</p>
+                        <Button
+                          className="mt-4"
+                          onClick={() => (window.location.href = '/setup')}
+                        >
+                          Run Setup Wizard
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Basic Info Tab */}
           <TabsContent value="basic" className="space-y-6">

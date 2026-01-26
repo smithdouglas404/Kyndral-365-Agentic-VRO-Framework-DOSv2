@@ -690,5 +690,75 @@ export function registerCompanyProfileRoutes(app: Router) {
     }
   });
 
+  /**
+   * POST /api/company-profile/:id/activate
+   * Set company as the active company (deactivates all others)
+   * Used by admins to switch between configured companies
+   */
+  router.post('/:id/activate', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      // Verify company exists and is approved
+      const [company] = await db.select()
+        .from(companies)
+        .where(eq(companies.id, id))
+        .limit(1);
+
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found' });
+      }
+
+      // Deactivate all other companies
+      await db.update(companies)
+        .set({ status: 'inactive' })
+        .where(eq(companies.status, 'active'));
+
+      // Activate this company
+      await db.update(companies)
+        .set({ status: 'active' })
+        .where(eq(companies.id, id));
+
+      res.json({
+        success: true,
+        message: `${company.legalName} is now the active company.`,
+        company: {
+          id: company.id,
+          legalName: company.legalName,
+          status: 'active'
+        }
+      });
+    } catch (error: any) {
+      console.error('Activation error:', error);
+      res.status(500).json({ error: error.message || 'Failed to activate company' });
+    }
+  });
+
+  /**
+   * GET /api/company-profile/all
+   * List all configured companies
+   * Used by admin company switcher
+   */
+  router.get('/all', async (req: Request, res: Response) => {
+    try {
+      const allCompanies = await db.select({
+        id: companies.id,
+        legalName: companies.legalName,
+        status: companies.status,
+        gicsSector: companies.gicsSector,
+        gicsIndustry: companies.gicsIndustry,
+        createdAt: companies.createdAt,
+        updatedAt: companies.updatedAt,
+      })
+      .from(companies)
+      .orderBy(companies.createdAt);
+
+      res.json(allCompanies);
+    } catch (error: any) {
+      console.error('Error fetching companies:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch companies' });
+    }
+  });
+
   app.use('/api/company-profile', router);
 }
