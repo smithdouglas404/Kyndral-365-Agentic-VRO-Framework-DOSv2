@@ -4067,6 +4067,19 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // PMO Metrics - uses same storage but filtered by category
+  app.get("/api/pmo-metrics", async (_req, res) => {
+    try {
+      // Get all metrics and filter for PMO category
+      const allMetrics = await storage.getVroMetrics();
+      const pmoMetrics = allMetrics.filter((m: any) => m.category === 'pmo');
+      res.json(pmoMetrics);
+    } catch (error: any) {
+      console.error("Get PMO metrics error:", error);
+      res.status(500).json({ error: "Failed to get PMO metrics" });
+    }
+  });
+
   const updateVroMetricSchema = z.object({
     label: z.string().optional(),
     value: z.string().optional(),

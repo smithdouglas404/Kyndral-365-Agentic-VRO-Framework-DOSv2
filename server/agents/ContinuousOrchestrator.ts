@@ -251,7 +251,9 @@ export class ContinuousOrchestrator {
 
     // Initialize MCP protocol handler
     this.mcpHandler = new MCPProtocolHandler();
-    this.registerMCPServices();
+
+    // Register ALL MCP services synchronously from registry
+    this.registerMCPServicesSync();
 
     // Setup A2A message listeners for all agents
     this.setupA2AListeners();
@@ -259,53 +261,42 @@ export class ContinuousOrchestrator {
 
   /**
    * Register external MCP services
+   * Registers ALL 31+ available MCP services from the complete registry
    */
-  private registerMCPServices(): void {
-    // Register common external services
-    const services: MCPService[] = [
-      {
-        name: 'jira',
-        protocol: 'http',
-        endpoint: process.env.JIRA_URL || 'https://jira.nexteraenergy.com',
-        capabilities: ['query_issues', 'update_status', 'create_ticket', 'get_sprint_data'],
-      },
-      {
-        name: 'azure-devops',
-        protocol: 'http',
-        endpoint: process.env.AZURE_DEVOPS_URL || 'https://dev.azure.com/nexteraenergy',
-        capabilities: ['query_workitems', 'update_board', 'get_pipeline_status', 'create_workitem'],
-      },
-      {
-        name: 'servicenow',
-        protocol: 'http',
-        endpoint: process.env.SERVICENOW_URL || 'https://nexteraenergy.service-now.com',
-        capabilities: ['create_incident', 'update_change_request', 'query_cmdb', 'create_problem'],
-      },
-      {
-        name: 'slack',
-        protocol: 'websocket',
-        endpoint: process.env.SLACK_WEBHOOK || 'https://hooks.slack.com/services/...',
-        capabilities: ['send_notification', 'create_channel', 'post_message'],
-      },
-      {
-        name: 'teams',
-        protocol: 'http',
-        endpoint: process.env.TEAMS_WEBHOOK || 'https://outlook.office.com/webhook/...',
-        capabilities: ['send_notification', 'post_adaptive_card'],
-      },
-      {
-        name: 'smartsheet',
-        protocol: 'http',
-        endpoint: process.env.SMARTSHEET_URL || 'https://api.smartsheet.com/2.0',
-        capabilities: ['update_sheet', 'get_rows', 'create_row', 'update_cell'],
-      },
-    ];
+  private registerMCPServicesSync(): void {
+    // Use synchronous require for immediate loading
+    const { MCP_SERVER_REGISTRY } = require('../mcp/MCPServerRegistry.js');
+    const services: MCPService[] = [];
 
+    // Convert all available MCP servers to service definitions
+    for (const [id, server] of Object.entries(MCP_SERVER_REGISTRY)) {
+      // Only register services that are available (not coming_soon or enterprise_only without config)
+      if (server.status !== 'available') continue;
+
+      // Map protocol based on category
+      let protocol: 'http' | 'websocket' | 'grpc' = 'http';
+      if (id === 'slack') protocol = 'websocket';
+
+      // Get endpoint from environment or use placeholder
+      const envKey = `${id.toUpperCase().replace(/-/g, '_')}_URL`;
+      const endpoint = process.env[envKey] ||
+        server.configFields.find((f: any) => f.type === 'url')?.placeholder ||
+        `https://${id}.example.com`;
+
+      services.push({
+        name: id,
+        protocol,
+        endpoint,
+        capabilities: server.capabilities,
+      });
+    }
+
+    // Register all services
     for (const service of services) {
       this.mcpHandler.registerService(service);
     }
 
-    console.log(`[ContinuousOrchestrator] Registered ${services.length} MCP services`);
+    console.log(`[ContinuousOrchestrator] ✅ Registered ${services.length} MCP services from registry (${services.map(s => s.name).join(', ')})`);
   }
 
   /**

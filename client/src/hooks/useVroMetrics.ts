@@ -29,7 +29,7 @@ export function useVroMetrics() {
 
 export function useUpdateVroMetric() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<VroMetric> }) => {
       const response = await fetch(`/api/vro-metrics/${id}`, {
@@ -45,5 +45,20 @@ export function useUpdateVroMetric() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vro-metrics"] });
     },
+  });
+}
+
+// PMO Metrics - uses same type but different category
+export function usePmoMetrics() {
+  return useQuery<VroMetric[], Error>({
+    queryKey: ["pmo-metrics"],
+    queryFn: async () => {
+      const response = await fetch("/api/pmo-metrics");
+      if (!response.ok) {
+        throw new Error("Failed to fetch PMO metrics");
+      }
+      return response.json();
+    },
+    staleTime: 30000,
   });
 }

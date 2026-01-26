@@ -28,7 +28,7 @@ import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import AgentActionQueue from "@/components/AgentActionQueue";
 import { useDivisions } from "@/hooks/useNexteraData";
-import { useVroMetrics } from "@/hooks/useVroMetrics";
+import { useVroMetrics, usePmoMetrics } from "@/hooks/useVroMetrics";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
 import { useCompanyName, useCompanyProfile } from "@/contexts/CompanyProfileContext";
 import { formatMoney } from "@/lib/formatters";
@@ -208,119 +208,53 @@ function LiveIndicatorButton({ isLive, onToggle }: { isLive: boolean; onToggle: 
 }
 
 function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown?: (type: string, id: string) => void }) {
-  // VRO shows value-focused metrics (ROI, NPV, Benefits Realization)
-  const vroStats = [
-    { 
-      id: "current-roi",
-      label: "Current ROI", 
-      value: "64",
-      unit: "%",
-      baseline: "0%",
-      target: "85%",
-      icon: TrendingUp, 
-      color: "text-[#D50032]",
-      source: "VRO Financial Analysis",
-      progress: 75,
-      delta: "-74% vs baseline"
-    },
-    { 
-      id: "net-present-value",
-      label: "Net Present Value", 
-      value: "$36.25",
-      unit: "M",
-      baseline: "$0",
-      target: "$50M",
-      icon: Activity, 
-      color: "text-[#0072CE]",
-      source: "5-year projection",
-      progress: 73,
-      delta: "+$60K"
-    },
-    { 
-      id: "timeline-progress",
-      label: "Timeline Progress", 
-      value: "69",
-      unit: "%",
-      baseline: "Phase 1",
-      target: "Phase 4",
-      icon: Clock, 
-      color: "text-[#00A651]",
-      source: "Value Stream Mapping",
-      progress: 69,
-      delta: "Phase 2 of 4, -6%"
-    },
-    { 
-      id: "budget-utilization",
-      label: "Budget Utilization", 
-      value: "94",
-      unit: "%",
-      baseline: "$0",
-      target: "$41.2M",
-      icon: Target, 
-      color: "text-[#FFD700]",
-      source: "FinOps Tracking",
-      progress: 94,
-      delta: "$41.2M spent, +6% over"
-    },
-  ];
+  // Fetch metrics from API based on mode
+  const { data: vroMetrics, isLoading: vroLoading } = useVroMetrics();
+  const { data: pmoMetrics, isLoading: pmoLoading } = usePmoMetrics();
 
-  // PMO shows project delivery metrics (different from VRO's value metrics)
-  const pmoStats = [
-    { 
-      id: "cycle-time",
-      label: "Cycle Time", 
-      value: "19",
-      unit: "days",
-      baseline: "35 days",
-      target: "10 days",
-      icon: Clock, 
-      color: "text-[#0072CE]",
-      source: "PMO Flow Metrics",
-      progress: 64,
-      delta: "+8 days vs target"
-    },
-    { 
-      id: "flow-efficiency",
-      label: "Flow Efficiency", 
-      value: "69",
-      unit: "%",
-      baseline: "45%",
-      target: "50%",
-      icon: Activity, 
-      color: "text-[#D50032]",
-      source: "Lean/Agile Metrics",
-      progress: 138,
-      delta: "-6% vs target"
-    },
-    { 
-      id: "throughput",
-      label: "Throughput", 
-      value: "11",
-      unit: "items/week",
-      baseline: "8 items/week",
-      target: "25 items/week",
-      icon: TrendingUp, 
-      color: "text-[#00A651]",
-      source: "Sprint Analytics",
-      progress: 44,
-      delta: "+3 vs last week"
-    },
-    { 
-      id: "wip-items",
-      label: "WIP Items", 
-      value: "9",
-      unit: "/ 12",
-      baseline: "12 items",
-      target: "8 items",
-      icon: Target, 
-      color: "text-[#0072CE]",
-      source: "Kanban Board",
-      progress: 75,
-      delta: "3 slots available"
-    },
-  ];
+  const isLoading = mode === "VRO" ? vroLoading : pmoLoading;
+  const apiMetrics = mode === "VRO" ? vroMetrics : pmoMetrics;
 
-  const stats = mode === "VRO" ? vroStats : pmoStats;
+  // Map icon names to icon components
+  const iconMap: Record<string, any> = {
+    Clock,
+    Activity,
+    TrendingUp,
+    Target,
+    TrendingDown,
+  };
+
+  // Transform API metrics to component format
+  const stats = apiMetrics?.map(metric => ({
+    id: metric.metricKey,
+    label: metric.label,
+    value: metric.value,
+    unit: metric.unit || "",
+    icon: iconMap[metric.metricKey.includes('time') ? 'Clock' :
+                    metric.metricKey.includes('efficiency') ? 'Activity' :
+                    metric.metricKey.includes('throughput') || metric.metricKey.includes('roi') ? 'TrendingUp' :
+                    'Target'],
+    color: metric.color || "text-[#0072CE]",
+    source: metric.source || "",
+    progress: 75, // TODO: Calculate from actual vs target
+    baseline: "", // TODO: Add baseline to database
+    target: "", // TODO: Add target to database
+    delta: "", // TODO: Calculate delta
+  })) || [];
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
