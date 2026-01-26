@@ -98,8 +98,16 @@ async function seedSystemAdmin() {
   }
 }
 
-// Run if executed directly
-if (require.main === module) {
+export { seedSystemAdmin };
+
+// Run if executed directly (ESM version)
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+if (process.argv[1] === __filename) {
   seedSystemAdmin()
     .then(() => process.exit(0))
     .catch((error) => {
@@ -107,5 +115,3 @@ if (require.main === module) {
       process.exit(1);
     });
 }
-
-export { seedSystemAdmin };
