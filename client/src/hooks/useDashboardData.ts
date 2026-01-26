@@ -174,3 +174,16 @@ export function useEmergingRisks() {
     staleTime: 30000,
   });
 }
+
+// Projects Data
+export function useProjects() {
+  return useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error("Failed to fetch projects");
+      return res.json();
+    },
+    staleTime: 30000,
+  });
+}
