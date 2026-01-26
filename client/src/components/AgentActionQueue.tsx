@@ -28,7 +28,6 @@ import {
   Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { AgentReasoningViewer } from '@/components/AgentReasoningViewer';
 
 interface AgentIntervention {
   id: string;
@@ -71,8 +70,6 @@ export default function AgentActionQueue() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [reasoningViewerOpen, setReasoningViewerOpen] = useState(false);
-  const [selectedInterventionForReasoning, setSelectedInterventionForReasoning] = useState<AgentIntervention | null>(null);
 
   // Fetch interventions from backend
   const { data: interventions = [], isLoading } = useQuery<AgentIntervention[]>({
@@ -312,25 +309,6 @@ export default function AgentActionQueue() {
                             )}
                           </div>
 
-                          {/* Reasoning (expandable or viewer) */}
-                          {intervention.reasoning && (
-                            <div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs"
-                                onClick={() => {
-                                  setSelectedInterventionForReasoning(intervention);
-                                  setReasoningViewerOpen(true);
-                                }}
-                              >
-                                <Eye className="h-3 w-3 mr-1" />
-                                View Agent Reasoning
-                                <ChevronRight className="h-3 w-3 ml-1" />
-                              </Button>
-                            </div>
-                          )}
-
                           {/* Action Buttons */}
                           {intervention.status === 'pending' && (
                             <div className="flex items-center gap-2 pt-2">
@@ -386,17 +364,6 @@ export default function AgentActionQueue() {
           </TabsContent>
         </Tabs>
       </CardContent>
-
-      {/* Agent Reasoning Viewer Dialog */}
-      {selectedInterventionForReasoning && (
-        <AgentReasoningViewer
-          open={reasoningViewerOpen}
-          onOpenChange={setReasoningViewerOpen}
-          interventionId={selectedInterventionForReasoning.id}
-          agentName={selectedInterventionForReasoning.agentSource}
-          reasoning={selectedInterventionForReasoning.reasoning}
-        />
-      )}
     </Card>
   );
 }

@@ -344,11 +344,11 @@ export const programIncrements: ProgramIncrement[] = [
     status: 'executing',
     piObjectives: [
       { id: 'pio-ret-1', piId: 'pi-ret-2025-q1', description: 'Complete bulk pricing API for 50K+ lives', businessValue: 9, isCommitted: true, status: 'pending' },
-      { id: 'pio-ret-2', piId: 'pi-ret-2025-q1', description: 'Integrate mortality tables from CMI', businessValue: 8, isCommitted: true, status: 'achieved' },
+      { id: 'pio-ret-2', piId: 'pi-ret-2025-q1', description: 'Integrate load profiles from CMI', businessValue: 8, isCommitted: true, status: 'achieved' },
       { id: 'pio-ret-3', piId: 'pi-ret-2025-q1', teamId: 'team-actuarial', description: 'Build longevity scenario engine', businessValue: 7, isCommitted: false, status: 'pending' }
     ],
     iterations: [],
-    features: ['feat-prt-pricing'],
+    features: ['feat-grid-pricing'],
     predictability: 78,
     velocity: 142
   },
@@ -467,7 +467,7 @@ export const iterations: Iteration[] = [
     plannedCapacity: 48,
     committedPoints: 45,
     completedPoints: 42,
-    stories: ['story-prt-001'],
+    stories: ['story-grid-001'],
     goals: ['Complete CMI mortality table integration'],
     retrospectiveNotes: 'Good velocity, need more testing time'
   },
@@ -483,7 +483,7 @@ export const iterations: Iteration[] = [
     plannedCapacity: 48,
     committedPoints: 50,
     completedPoints: 48,
-    stories: ['story-prt-002'],
+    stories: ['story-grid-002'],
     goals: ['Bulk pricing API endpoint'],
     retrospectiveNotes: 'Strong delivery, dependency on data team resolved'
   },
@@ -499,7 +499,7 @@ export const iterations: Iteration[] = [
     plannedCapacity: 48,
     committedPoints: 52,
     completedPoints: 28,
-    stories: ['story-prt-003'],
+    stories: ['story-grid-003'],
     goals: ['Longevity scenario modeling'],
     retrospectiveNotes: undefined
   },
@@ -526,22 +526,22 @@ export const iterations: Iteration[] = [
 
 export const features: Feature[] = [
   {
-    id: 'feat-prt-pricing',
+    id: 'feat-grid-pricing',
     artId: 'art-retirement',
-    epicId: 'epic-prt-platform',
+    epicId: 'epic-grid-platform',
     title: 'Real-Time Pricing Engine',
-    description: 'Sub-second pricing calculations for bulk annuity quotes using actuarial models',
+    description: 'Sub-second pricing calculations for smart grid quotes using grid analytics',
     benefitHypothesis: 'Reduce quote turnaround from 5 days to 4 hours, improving win rate by 15%',
     acceptanceCriteria: ['Price 10,000 lives in <30 seconds', 'Support longevity hedging scenarios', 'Audit trail for all calculations'],
     wsjfScore: 28,
     status: 'implementing',
     targetPI: 'pi-ret-2025-q1',
     owner: 'Emily Davis',
-    stories: ['story-prt-001', 'story-prt-002', 'story-prt-003'],
+    stories: ['story-grid-001', 'story-grid-002', 'story-grid-003'],
     dependencies: [
       {
         id: 'dep-feat-1',
-        sourceFeatureId: 'feat-prt-pricing',
+        sourceFeatureId: 'feat-grid-pricing',
         targetFeatureId: 'feat-data-lake',
         type: 'data-dependency',
         health: 'yellow',
@@ -624,13 +624,13 @@ export const features: Feature[] = [
 
 export const stories: Story[] = [
   {
-    id: 'story-prt-001',
-    featureId: 'feat-prt-pricing',
+    id: 'story-grid-001',
+    featureId: 'feat-grid-pricing',
     iterationId: 'iter-act-2025-q1-1',
     teamId: 'team-actuarial',
     title: 'Mortality table integration',
     description: 'Integrate CMI mortality projections with pricing model',
-    userStory: 'As an actuary, I want to use the latest CMI mortality tables so that pricing reflects current longevity expectations',
+    userStory: 'As an actuary, I want to use the latest CMI load profiles so that pricing reflects current longevity expectations',
     acceptanceCriteria: ['Load 2024 CMI tables', 'Apply improvement factors', 'Validate against legacy system'],
     storyPoints: 8,
     status: 'done',
@@ -645,8 +645,8 @@ export const stories: Story[] = [
     blockers: []
   },
   {
-    id: 'story-prt-002',
-    featureId: 'feat-prt-pricing',
+    id: 'story-grid-002',
+    featureId: 'feat-grid-pricing',
     iterationId: 'iter-act-2025-q1-2',
     teamId: 'team-platform',
     title: 'Bulk pricing API endpoint',
@@ -658,15 +658,15 @@ export const stories: Story[] = [
     priority: 'critical',
     owner: 'Lisa Anderson',
     tasks: ['task-004', 'task-005', 'task-006', 'task-007'],
-    dependencies: [{ id: 'dep-story-1', sourceStoryId: 'story-prt-002', targetStoryId: 'story-prt-001', type: 'blocked-by', description: 'Needs mortality tables' }],
+    dependencies: [{ id: 'dep-story-1', sourceStoryId: 'story-grid-002', targetStoryId: 'story-grid-001', type: 'blocked-by', description: 'Needs load profiles' }],
     plannedStart: '2025-01-20',
     plannedEnd: '2025-02-07',
     actualStart: '2025-01-22',
     blockers: ['Waiting for data lake schema finalization']
   },
   {
-    id: 'story-prt-003',
-    featureId: 'feat-prt-pricing',
+    id: 'story-grid-003',
+    featureId: 'feat-grid-pricing',
     iterationId: 'iter-act-2025-q1-3',
     teamId: 'team-actuarial',
     title: 'Longevity scenario modeling',
@@ -689,10 +689,10 @@ export const stories: Story[] = [
 // ===================== TASKS =====================
 
 export const tasks: Task[] = [
-  // Story PRT-001 Tasks
+  // Story GRID-001 Tasks
   {
     id: 'task-001',
-    storyId: 'story-prt-001',
+    storyId: 'story-grid-001',
     title: 'Parse CMI XML format',
     description: 'Extract mortality rates from CMI data files',
     type: 'development',
@@ -711,7 +711,7 @@ export const tasks: Task[] = [
   },
   {
     id: 'task-002',
-    storyId: 'story-prt-001',
+    storyId: 'story-grid-001',
     title: 'Build rate interpolation',
     description: 'Interpolate rates for non-standard ages',
     type: 'development',
@@ -730,7 +730,7 @@ export const tasks: Task[] = [
   },
   {
     id: 'task-003',
-    storyId: 'story-prt-001',
+    storyId: 'story-grid-001',
     title: 'Validation test suite',
     description: 'Compare outputs against Excel model',
     type: 'testing',
@@ -747,10 +747,10 @@ export const tasks: Task[] = [
     blockedBy: ['task-002'],
     dailyRate: 550
   },
-  // Story PRT-002 Tasks
+  // Story GRID-002 Tasks
   {
     id: 'task-004',
-    storyId: 'story-prt-002',
+    storyId: 'story-grid-002',
     title: 'Design API schema',
     description: 'OpenAPI spec for pricing endpoint',
     type: 'design',
@@ -769,7 +769,7 @@ export const tasks: Task[] = [
   },
   {
     id: 'task-005',
-    storyId: 'story-prt-002',
+    storyId: 'story-grid-002',
     title: 'Implement file upload',
     description: 'S3 integration for CSV storage',
     type: 'development',
@@ -788,7 +788,7 @@ export const tasks: Task[] = [
   },
   {
     id: 'task-006',
-    storyId: 'story-prt-002',
+    storyId: 'story-grid-002',
     title: 'Build async queue',
     description: 'SQS-based job queue for large files',
     type: 'development',
@@ -806,7 +806,7 @@ export const tasks: Task[] = [
   },
   {
     id: 'task-007',
-    storyId: 'story-prt-002',
+    storyId: 'story-grid-002',
     title: 'Response aggregation',
     description: 'Compile member results into response',
     type: 'development',
@@ -821,10 +821,10 @@ export const tasks: Task[] = [
     blockedBy: ['task-006'],
     dailyRate: 580
   },
-  // Story PRT-003 Tasks
+  // Story GRID-003 Tasks
   {
     id: 'task-008',
-    storyId: 'story-prt-003',
+    storyId: 'story-grid-003',
     title: 'Define scenario parameters',
     description: 'CMI scenarios S1-S5 configuration',
     type: 'development',
@@ -843,7 +843,7 @@ export const tasks: Task[] = [
   },
   {
     id: 'task-009',
-    storyId: 'story-prt-003',
+    storyId: 'story-grid-003',
     title: 'Monte Carlo simulation',
     description: 'Stochastic mortality model',
     type: 'development',
@@ -868,7 +868,7 @@ export const dependencies: Dependency[] = [
   {
     id: 'dep-001',
     level: 'feature',
-    sourceId: 'feat-prt-pricing',
+    sourceId: 'feat-grid-pricing',
     sourceName: 'Real-Time Pricing Engine',
     sourceType: 'feature',
     targetId: 'feat-data-lake',
@@ -916,7 +916,7 @@ export const dependencies: Dependency[] = [
     targetType: 'task',
     type: 'blocks',
     health: 'green',
-    description: 'Interpolation needs parsed mortality tables as input',
+    description: 'Interpolation needs parsed load profiles as input',
     impactIfDelayed: 'Delays mortality model completion',
     financialImpact: 15000,
     scheduleImpactDays: 2,
@@ -930,10 +930,10 @@ export const dependencies: Dependency[] = [
 
 export const financialSnapshots: FinancialSnapshot[] = [
   {
-    id: 'fin-epic-prt-jan',
+    id: 'fin-epic-grid-jan',
     entityType: 'epic',
-    entityId: 'epic-prt-platform',
-    entityName: 'PRT Platform Modernization',
+    entityId: 'epic-grid-platform',
+    entityName: 'Grid Modernization Modernization',
     snapshotDate: '2025-01-31',
     period: 'monthly',
     totalBudget: 8500000,
@@ -997,7 +997,7 @@ export const riskRegister: RiskRegisterEntry[] = [
   {
     id: 'risk-001',
     level: 'feature',
-    entityId: 'feat-prt-pricing',
+    entityId: 'feat-grid-pricing',
     entityName: 'Real-Time Pricing Engine',
     title: 'Data Lake Dependency Delay',
     description: 'Enterprise Data Lake milestone at risk, could delay pricing engine data access',
@@ -1070,8 +1070,8 @@ export const okrAlignments: OKRAlignment[] = [
     okrId: 'okr-portfolio-digital',
     okrLevel: 'portfolio',
     linkedEntityType: 'epic',
-    linkedEntityId: 'epic-prt-platform',
-    linkedEntityName: 'PRT Platform Modernization',
+    linkedEntityId: 'epic-grid-platform',
+    linkedEntityName: 'Grid Modernization Modernization',
     contributionWeight: 35,
     lastUpdated: '2025-01-15'
   },
@@ -1100,7 +1100,7 @@ export const okrAlignments: OKRAlignment[] = [
     okrId: 'okr-portfolio-digital',
     okrLevel: 'portfolio',
     linkedEntityType: 'feature',
-    linkedEntityId: 'feat-prt-pricing',
+    linkedEntityId: 'feat-grid-pricing',
     linkedEntityName: 'Real-Time Pricing Engine',
     contributionWeight: 15,
     lastUpdated: '2025-01-20'

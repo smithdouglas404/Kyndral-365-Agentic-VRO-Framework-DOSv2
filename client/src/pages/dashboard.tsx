@@ -42,7 +42,6 @@ import { GitBranch, BookOpen, Compass } from "lucide-react";
 import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCallback } from "@/lib/backgroundAgentMonitor";
 import { startOrchestrator, stopOrchestrator } from "@/lib/agentOrchestrator";
 import { toast } from "sonner";
-import { ActionAuditTimeline } from "@/components/ActionAuditTimeline";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { HelpMenu } from "@/components/HelpMenu";
@@ -703,9 +702,6 @@ function DashboardContent() {
 
             {/* Cross-Agent Collaboration */}
             <CrossAgentCollaboration />
-
-            {/* Agent Activity & Audit Trail */}
-            <ActionAuditTimeline maxItems={12} />
 
           </TabsContent>
 

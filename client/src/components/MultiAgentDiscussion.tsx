@@ -119,33 +119,46 @@ export function MultiAgentDiscussion() {
     setCurrentIndex(0);
     setIsPlaying(true);
     setIsApproved(false);
+    // Re-initialize messages from API
+    if (apiMessages.length > 0) {
+      setTimeout(() => {
+        setMessages(apiMessages);
+        setCurrentIndex(apiMessages.length);
+      }, 100);
+    }
   };
 
   const handleApproveConsensus = async () => {
+    if (!activeTopic) return;
+
     setIsApproving(true);
-    
+
+    // Extract action from the last message if it exists
+    const lastMessage = messages[messages.length - 1];
+    const actionMessage = lastMessage?.type === 'action' ? lastMessage.message : 'Execute consensus action';
+
     const action: AgentAction = {
       actionType: 'approve',
       sourceComponent: 'Multi-Agent Discussion',
       interventionData: {
-        type: 'budget',
-        severity: 'high',
-        title: activeTopic.title,
-        description: activeTopic.context,
-        projectId: 'proj-data-foundation',
-        projectName: 'Enterprise Data Foundation',
+        type: activeTopic.type || 'budget',
+        severity: activeTopic.priority === 'high' ? 'high' : activeTopic.priority === 'critical' ? 'critical' : 'medium',
+        title: activeTopic.title || 'Agent Consensus',
+        description: activeTopic.context || activeTopic.description || '',
+        projectId: activeTopic.projectId || '',
+        projectName: activeTopic.projectName || '',
         confidence: 92,
-        suggestedAction: 'Defer MDM Phase 2, release $400K contingency, fast-track CAB approval, notify stakeholders',
-        impact: '$1.4M savings, back within 5% of original budget',
+        suggestedAction: actionMessage,
+        impact: activeTopic.impact || 'Multi-agent consensus reached',
         agentSource: 'Multi-Agent Consensus'
       }
     };
-    
+
     const result = await routeToCommandCenter(action);
-    
+
     setIsApproving(false);
     setIsApproved(true);
-    
+
     if (result.success) {
       toast.success('Consensus approved and logged to Command Center', {
         description: 'Agent actions are now executing'
@@ -167,6 +180,51 @@ export function MultiAgentDiscussion() {
       default: return 'border-l-gray-400';
     }
   };
+
+  // Loading state
+  if (isLoadingDiscussions) {
+    return (
+      <Card className="border-l-4 border-l-indigo-600 shadow-lg">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center">
+              <Users className="h-4 w-4 text-white" />
+            </div>
+            Multi-Agent Collaboration
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+            <span className="ml-3 text-gray-600">Loading discussions...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // No active discussions state
+  if (!activeTopic) {
+    return (
+      <Card className="border-l-4 border-l-indigo-600 shadow-lg">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center">
+              <Users className="h-4 w-4 text-white" />
+            </div>
+            Multi-Agent Collaboration
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-gray-600">
+            <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+            <p>No active agent discussions at this time</p>
+            <p className="text-sm text-gray-500 mt-1">Agents will collaborate here when critical issues arise</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-l-4 border-l-indigo-600 shadow-lg">
@@ -218,10 +276,10 @@ export function MultiAgentDiscussion() {
                   <div>
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-orange-500" />
-                      <span className="font-semibold text-gray-900">{activeTopic.title}</span>
-                      <Badge className="bg-orange-500 text-white text-xs">{activeTopic.priority}</Badge>
+                      <span className="font-semibold text-gray-900">{activeTopic?.title || 'Discussion Topic'}</span>
+                      <Badge className="bg-orange-500 text-white text-xs">{activeTopic?.priority || 'medium'}</Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{activeTopic.context}</p>
+                    <p className="text-sm text-gray-600 mt-1">{activeTopic?.context || activeTopic?.description || 'Agent discussion in progress'}</p>
                   </div>
                   <Sparkles className="h-5 w-5 text-purple-500" />
                 </div>

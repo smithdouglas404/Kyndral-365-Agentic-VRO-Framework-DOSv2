@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimulationProvider as EventSimulationProvider } from "@/contexts/SimulationContext";
 import { PageContextProvider } from "@/contexts/PageContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
-import { LiveEventDrawer } from "@/components/LiveEventDrawer";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
 import { AlertBubble } from "@/components/AlertBubble";
@@ -327,7 +326,6 @@ function App() {
                 {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
                 {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
                 <FloatingAlertBanner />
-                <LiveEventDrawer />
                 {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
                 {/* <GlobalAIOverlay /> */}
                 <AskPMChat />
