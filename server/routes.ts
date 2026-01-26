@@ -5148,7 +5148,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         message: `${agentId} agent executed successfully`,
         interventionsCreated: recentInterventions.length,
         recentInterventions,
-        langsmithProject: process.env.LANGCHAIN_PROJECT || "DFIN-Pipeline",
+        langsmithProject: process.env.LANGCHAIN_PROJECT || "nexus-ppm",
         langsmithUrl: "https://smith.langchain.com/",
         note: "Check LangSmith dashboard for agent traces"
       });

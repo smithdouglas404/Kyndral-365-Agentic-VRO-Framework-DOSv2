@@ -51,7 +51,7 @@ export abstract class AgentBase {
         apiUrl: process.env.LANGCHAIN_ENDPOINT || "https://api.smith.langchain.com",
       });
       this.tracer = new LangChainTracer({
-        projectName: process.env.LANGCHAIN_PROJECT || "DFIN-Pipeline",
+        projectName: process.env.LANGCHAIN_PROJECT || "nexus-ppm",
         client: this.langsmithClient,
       });
     } else {

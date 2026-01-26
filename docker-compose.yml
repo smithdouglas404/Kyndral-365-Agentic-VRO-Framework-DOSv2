@@ -66,7 +66,7 @@ services:
 
       # LangChain/LangSmith (for agent observability)
       LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
-      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-nextera-eto}
+      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-nexus-ppm}
       LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2:-true}
       LANGCHAIN_ENDPOINT: https://api.smith.langchain.com
 

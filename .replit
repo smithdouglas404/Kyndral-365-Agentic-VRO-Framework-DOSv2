@@ -49,7 +49,7 @@ integrations = ["javascript_anthropic:1.0.0", "javascript_log_in_with_replit:2.0
 [userenv]
 
 [userenv.shared]
-LANGCHAIN_PROJECT = "DFIN-Pipeline"
+LANGCHAIN_PROJECT = "nexus-ppm"
 FIREBASE_API_KEY = "AIzaSyD7-577fwwIS9bq5giu4yKeRtWSCKZi0uo"
 FIREBASE_AUTH_DOMAIN = "aippm-99f68.firebaseapp.com"
 FIREBASE_PROJECT_ID = "aippm-99f68"

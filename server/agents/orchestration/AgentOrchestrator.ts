@@ -58,7 +58,7 @@ export class AgentOrchestrator {
     const callbacks = [];
     if (process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true') {
       const tracer = new LangChainTracer({
-        projectName: process.env.LANGCHAIN_PROJECT || "DFIN-Pipeline",
+        projectName: process.env.LANGCHAIN_PROJECT || "nexus-ppm",
         client: undefined,
       });
       callbacks.push(tracer);
