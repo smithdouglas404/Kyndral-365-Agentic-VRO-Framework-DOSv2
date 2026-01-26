@@ -27,26 +27,26 @@ export const demoRequestStatusEnum = pgEnum('demo_request_status', ['requested',
 
 // Tenants (Organizations)
 export const tenants = pgTable('tenants', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   status: tenantStatusEnum('status').default('trial').notNull(),
   subscriptionTier: subscriptionTierEnum('subscription_tier').default('demo').notNull(),
-  provisionedBy: uuid('provisioned_by'),
+  provisionedBy: varchar('provisioned_by'),
   trialEndsAt: timestamp('trial_ends_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
-// Users
+// Users (extending existing users table with multi-tenant fields)
 export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+  id: varchar('id').default('gen_random_uuid()').primaryKey(),
+  tenantId: varchar('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: varchar('password_hash', { length: 255 }),
   firstName: varchar('first_name', { length: 255 }),
   lastName: varchar('last_name', { length: 255 }),
-  role: userRoleEnum('role').default('viewer').notNull(),
+  role: varchar('role', { length: 50 }).default('viewer').notNull(),
   isSystemAdmin: boolean('is_system_admin').default(false).notNull(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   lastLoginAt: timestamp('last_login_at'),
@@ -56,13 +56,13 @@ export const users = pgTable('users', {
 
 // Tenant Invitations
 export const tenantInvitations = pgTable('tenant_invitations', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
+  tenantId: varchar('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   email: varchar('email', { length: 255 }).notNull(),
-  role: userRoleEnum('role').default('viewer').notNull(),
-  invitedBy: uuid('invited_by').references(() => users.id),
+  role: varchar('role', { length: 50 }).default('viewer').notNull(),
+  invitedBy: varchar('invited_by').references(() => users.id),
   token: varchar('token', { length: 255 }).notNull().unique(),
-  status: invitationStatusEnum('status').default('pending').notNull(),
+  status: varchar('status', { length: 50 }).default('pending').notNull(),
   expiresAt: timestamp('expires_at').notNull(),
   acceptedAt: timestamp('accepted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull()
@@ -70,7 +70,7 @@ export const tenantInvitations = pgTable('tenant_invitations', {
 
 // Demo Requests (Lead Capture)
 export const demoRequests = pgTable('demo_requests', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
   email: varchar('email', { length: 255 }).notNull(),
   firstName: varchar('first_name', { length: 255 }),
   lastName: varchar('last_name', { length: 255 }),
@@ -78,7 +78,7 @@ export const demoRequests = pgTable('demo_requests', {
   phone: varchar('phone', { length: 50 }),
   demoSessionId: varchar('demo_session_id', { length: 255 }),
   demoIndustry: varchar('demo_industry', { length: 50 }),
-  status: demoRequestStatusEnum('status').default('requested').notNull(),
+  status: varchar('status', { length: 50 }).default('requested').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
@@ -86,27 +86,26 @@ export const demoRequests = pgTable('demo_requests', {
 
 // User Sessions (JWT refresh tokens)
 export const userSessions = pgTable('user_sessions', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  refreshToken: varchar('refresh_token', { length: 512 }).notNull().unique(),
-  accessTokenJti: varchar('access_token_jti', { length: 255 }),
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
+  userId: varchar('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  refreshToken: text('refresh_token').notNull(),
   ipAddress: varchar('ip_address', { length: 45 }),
   userAgent: text('user_agent'),
   expiresAt: timestamp('expires_at').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  lastUsedAt: timestamp('last_used_at').defaultNow().notNull()
+  createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
 // Audit Logs
 export const auditLogs = pgTable('audit_logs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
+  tenantId: varchar('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+  userId: varchar('user_id').references(() => users.id, { onDelete: 'set null' }),
   action: varchar('action', { length: 100 }).notNull(),
-  entityType: varchar('entity_type', { length: 100 }),
-  entityId: uuid('entity_id'),
-  metadata: jsonb('metadata'),
+  resourceType: varchar('resource_type', { length: 100 }),
+  resourceId: varchar('resource_id'),
+  details: jsonb('details'),
   ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: text('user_agent'),
   createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
