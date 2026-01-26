@@ -170,17 +170,17 @@ Generate a predictive forecast for the next 8-12 weeks showing:
 4. Financial/schedule impact forecasts
 
 Respond with JSON only:
-{
+{{
   "alertType": "budget_overrun_trajectory" | "schedule_delay_forecast" | "risk_escalation_prediction",
   "confidence": 0.85,
   "reasoning": "Why this forecast is likely based on historical patterns",
   "predictions": [
-    {"week": 2, "metric": "CPI", "predictedValue": 0.80, "confidence": 0.82},
-    {"week": 4, "metric": "CPI", "predictedValue": 0.79, "confidence": 0.78},
-    {"week": 8, "metric": "overrunAmount", "predictedValue": 420000, "confidence": 0.75}
+    {{"week": 2, "metric": "CPI", "predictedValue": 0.80, "confidence": 0.82}},
+    {{"week": 4, "metric": "CPI", "predictedValue": 0.79, "confidence": 0.78}},
+    {{"week": 8, "metric": "overrunAmount", "predictedValue": 420000, "confidence": 0.75}}
   ],
-  "criticalMilestone": {"week": 6, "event": "Budget overrun becomes visible to executives"}
-}`],
+  "criticalMilestone": {{"week": 6, "event": "Budget overrun becomes visible to executives"}}
+}}`],
     ]);
 
     const chain = prompt.pipe(this.model);

@@ -1,0 +1,5858 @@
+[
+  {
+    "ruleId": "budget_variance_warning",
+    "ruleName": "Budget Variance Warning",
+    "projectName": "Renewable Energy Integration - Solar Farm",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "financial",
+    "severity": "warning",
+    "condition": "Forecast variance > 10%",
+    "threshold": {
+      "metric": "Budget_Variance",
+      "operator": ">",
+      "value": 10
+    },
+    "actualValues": {},
+    "firedAt": "2025-12-29T16:49:29.944Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Financial analysis",
+      "Trend monitoring"
+    ],
+    "status": "active",
+    "description": "Budget forecast showing significant variance from plan",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 180000000,
+      "budgetActual": 165000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 20,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Budget_Variance > 10",
+      "evaluatedAt": "2025-12-29T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Transmission Line Upgrade - Northern Corridor",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 2
+    },
+    "firedAt": "2025-12-29T16:49:29.944Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 45000000,
+      "budgetActual": 42000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 26,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "environmental_compliance_monitoring",
+    "ruleName": "Environmental Compliance Monitoring",
+    "projectName": "Coal Plant Decommissioning",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "governance",
+    "severity": "medium",
+    "condition": "Environmental compliance review pending",
+    "threshold": {
+      "metric": "Compliance_Status",
+      "operator": "=",
+      "value": "PENDING"
+    },
+    "actualValues": {},
+    "firedAt": "2025-12-29T16:49:29.944Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Compliance monitoring",
+      "Documentation review"
+    ],
+    "status": "active",
+    "description": "Environmental compliance requires ongoing monitoring",
+    "context": {
+      "projectHealth": "risk",
+      "budgetPlanned": 35000000,
+      "budgetActual": 33000000,
+      "schedulePlanned": 20,
+      "scheduleActual": 18,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Compliance_Status = PENDING",
+      "evaluatedAt": "2025-12-29T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Cloud Platform Migration - Mainframe Modernization",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 45000000,
+      "budgetActual": 58000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 30,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Cloud Platform Migration - Mainframe Modernization",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 6
+    },
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 45000000,
+      "budgetActual": 58000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 30,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "production_impact_analysis_required",
+    "ruleName": "Production Impact Analysis Required",
+    "projectName": "API Gateway Modernization",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "risk",
+    "severity": "high",
+    "condition": "High impact to production systems",
+    "threshold": {
+      "metric": "Production_Impact",
+      "operator": ">",
+      "value": 80
+    },
+    "actualValues": {},
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Impact assessment",
+      "Rollback planning",
+      "Executive approval"
+    ],
+    "status": "active",
+    "description": "High production impact requires detailed analysis",
+    "context": {
+      "projectHealth": "risk",
+      "budgetPlanned": 15000000,
+      "budgetActual": 14200000,
+      "schedulePlanned": 12,
+      "scheduleActual": 11,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Production_Impact > 80",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "compliance_framework_gap",
+    "ruleName": "Compliance Framework Gap",
+    "projectName": "Open Source Compliance Program",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "governance",
+    "severity": "medium",
+    "condition": "Compliance framework not fully implemented",
+    "threshold": {
+      "metric": "Compliance_Coverage",
+      "operator": "<",
+      "value": 90
+    },
+    "actualValues": {},
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Gap analysis",
+      "Control implementation"
+    ],
+    "status": "active",
+    "description": "Compliance framework has gaps requiring attention",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 4500000,
+      "budgetActual": 4300000,
+      "schedulePlanned": 8,
+      "scheduleActual": 8,
+      "interventionsCreated": 1
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Compliance_Coverage < 90",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Supply Chain Digitalization",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 6
+    },
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 42000000,
+      "budgetActual": 51000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "change_adoption_below_target",
+    "ruleName": "Change Adoption Below Target",
+    "projectName": "Workforce Skills Development",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "change_management",
+    "severity": "warning",
+    "condition": "Adoption rate < target",
+    "threshold": {
+      "metric": "Adoption_Rate",
+      "operator": "<",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "OCM intervention",
+      "Enhanced training",
+      "Stakeholder engagement"
+    ],
+    "status": "active",
+    "description": "User adoption below target threshold",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 12000000,
+      "budgetActual": 11600000,
+      "schedulePlanned": 10,
+      "scheduleActual": 10,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Adoption_Rate < 65",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Transportation Management System Upgrade",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.82,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 35000000,
+      "budgetActual": 38500000,
+      "schedulePlanned": 14,
+      "scheduleActual": 17,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Fiber Backbone Expansion",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.79,
+      "weeksLate": 6
+    },
+    "firedAt": "2025-12-29T16:49:29.947Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 425000000,
+      "budgetActual": 518292682,
+      "schedulePlanned": 22,
+      "scheduleActual": 27,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Oncology Drug Pipeline - Phase 3 Trials",
+    "industryId": "pharma-biotech",
+    "companyId": "acme-pharma",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.949Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 450000000,
+      "budgetActual": 576923076,
+      "schedulePlanned": 31,
+      "scheduleActual": 41,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Manufacturing Facility Expansion",
+    "industryId": "pharma-biotech",
+    "companyId": "acme-pharma",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.949Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1036585365,
+      "schedulePlanned": 35,
+      "scheduleActual": 43,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Gene Therapy Platform Development",
+    "industryId": "pharma-biotech",
+    "companyId": "acme-pharma",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.949Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 275000000,
+      "budgetActual": 305555555,
+      "schedulePlanned": 25,
+      "scheduleActual": 29,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Smart Factory Implementation",
+    "industryId": "consumer-products",
+    "companyId": "acme-consumer",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 6
+    },
+    "firedAt": "2025-12-29T16:49:29.949Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 185000000,
+      "budgetActual": 225609756,
+      "schedulePlanned": 19,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "E-commerce Platform Launch",
+    "industryId": "consumer-products",
+    "companyId": "acme-consumer",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.949Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 75000000,
+      "budgetActual": 83333333,
+      "schedulePlanned": 16,
+      "scheduleActual": 18,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Sustainable Packaging Initiative",
+    "industryId": "consumer-products",
+    "companyId": "acme-consumer",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 2
+    },
+    "firedAt": "2025-12-29T16:49:29.949Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 95000000,
+      "budgetActual": 105555555,
+      "schedulePlanned": 14,
+      "scheduleActual": 15,
+      "interventionsCreated": 1
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Content Production - Tentpole Franchise",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.77,
+      "weeksLate": 7
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 285000000,
+      "budgetActual": 351851851,
+      "schedulePlanned": 31,
+      "scheduleActual": 40,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Property Management System Replacement",
+    "industryId": "hospitality-tourism",
+    "companyId": "acme-hospitality",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 160256410,
+      "schedulePlanned": 15,
+      "scheduleActual": 20,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Property Management System Replacement",
+    "industryId": "hospitality-tourism",
+    "companyId": "acme-hospitality",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 8
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 160256410,
+      "schedulePlanned": 15,
+      "scheduleActual": 20,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Luxury Resort Development - Maldives",
+    "industryId": "hospitality-tourism",
+    "companyId": "acme-hospitality",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 7
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 450000000,
+      "budgetActual": 548780487,
+      "schedulePlanned": 25,
+      "scheduleActual": 32,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Hotel Renovation Program - 200 Properties",
+    "industryId": "hospitality-tourism",
+    "companyId": "acme-hospitality",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 650000000,
+      "budgetActual": 722222222,
+      "schedulePlanned": 38,
+      "scheduleActual": 43,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Sustainable Farming Initiative",
+    "industryId": "agriculture-food",
+    "companyId": "acme-agriculture",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 125000000,
+      "budgetActual": 138888888,
+      "schedulePlanned": 25,
+      "scheduleActual": 29,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Online Program Expansion",
+    "industryId": "education",
+    "companyId": "acme-education",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 65000000,
+      "budgetActual": 72222222,
+      "schedulePlanned": 18,
+      "scheduleActual": 20,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Global Delivery Network Expansion",
+    "industryId": "professional-services",
+    "companyId": "acme-professional",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 8
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 285000000,
+      "budgetActual": 365384615,
+      "schedulePlanned": 31,
+      "scheduleActual": 41,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Knowledge Management Platform",
+    "industryId": "professional-services",
+    "companyId": "acme-professional",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 95000000,
+      "budgetActual": 115853658,
+      "schedulePlanned": 18,
+      "scheduleActual": 23,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Knowledge Management Platform",
+    "industryId": "professional-services",
+    "companyId": "acme-professional",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 6
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 95000000,
+      "budgetActual": 115853658,
+      "schedulePlanned": 18,
+      "scheduleActual": 23,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Industry Cloud Solutions Practice",
+    "industryId": "professional-services",
+    "companyId": "acme-professional",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 125000000,
+      "budgetActual": 138888888,
+      "schedulePlanned": 22,
+      "scheduleActual": 25,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Project Management Suite Upgrade",
+    "industryId": "professional-services",
+    "companyId": "acme-professional",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 55000000,
+      "budgetActual": 61111111,
+      "schedulePlanned": 22,
+      "scheduleActual": 25,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Core Policy Administration Replacement",
+    "industryId": "insurance",
+    "companyId": "acme-insurance",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 425000000,
+      "budgetActual": 544871794,
+      "schedulePlanned": 30,
+      "scheduleActual": 40,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Digital Customer Portal",
+    "industryId": "insurance",
+    "companyId": "acme-insurance",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 75000000,
+      "budgetActual": 83333333,
+      "schedulePlanned": 23,
+      "scheduleActual": 26,
+      "interventionsCreated": 1
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Battery Gigafactory Construction",
+    "industryId": "automotive",
+    "companyId": "acme-automotive",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 3500000000,
+      "budgetActual": 4268292682,
+      "schedulePlanned": 37,
+      "scheduleActual": 47,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Next-Gen Fighter Aircraft Development",
+    "industryId": "aerospace-defense",
+    "companyId": "acme-aerospace",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 8500000000,
+      "budgetActual": 10897435897,
+      "schedulePlanned": 41,
+      "scheduleActual": 55,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Next-Gen Fighter Aircraft Development",
+    "industryId": "aerospace-defense",
+    "companyId": "acme-aerospace",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.74,
+      "weeksLate": 12
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 8500000000,
+      "budgetActual": 10897435897,
+      "schedulePlanned": 41,
+      "scheduleActual": 55,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Commercial Aircraft Production Ramp",
+    "industryId": "aerospace-defense",
+    "companyId": "acme-aerospace",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 8
+    },
+    "firedAt": "2025-12-29T16:49:29.950Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 2500000000,
+      "budgetActual": 3048780487,
+      "schedulePlanned": 37,
+      "scheduleActual": 47,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Lithium Brine Processing Plant",
+    "industryId": "mining-materials",
+    "companyId": "acme-mining",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 7
+    },
+    "firedAt": "2025-12-29T16:49:29.951Z",
+    "weeksAgoFired": 4,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1036585365,
+      "schedulePlanned": 37,
+      "scheduleActual": 47,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2025-12-29T16:49:29.951Z"
+    }
+  },
+  {
+    "ruleId": "regulatory_approval_pending",
+    "ruleName": "Regulatory Approval Pending",
+    "projectName": "Energy Storage System Deployment",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "governance",
+    "severity": "medium",
+    "condition": "Awaiting regulatory approval",
+    "threshold": {
+      "metric": "Approval_Status",
+      "operator": "=",
+      "value": "PENDING"
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-05T16:49:29.944Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Regulatory liaison",
+      "Status tracking"
+    ],
+    "status": "active",
+    "description": "Regulatory approval pending",
+    "context": {
+      "projectHealth": "risk",
+      "budgetPlanned": 65000000,
+      "budgetActual": 62000000,
+      "schedulePlanned": 14,
+      "scheduleActual": 13,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Approval_Status = PENDING",
+      "evaluatedAt": "2026-01-05T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "stakeholder_engagement_gap",
+    "ruleName": "Stakeholder Engagement Gap",
+    "projectName": "Workforce Safety Initiative",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "change_management",
+    "severity": "warning",
+    "condition": "Stakeholder sentiment declining",
+    "threshold": {
+      "metric": "Engagement_Score",
+      "operator": "<",
+      "value": 60
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-05T16:49:29.944Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "OCM intervention",
+      "Stakeholder analysis",
+      "Communication enhancement"
+    ],
+    "status": "active",
+    "description": "Stakeholder engagement trending negative",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 5500000,
+      "budgetActual": 5200000,
+      "schedulePlanned": 10,
+      "scheduleActual": 10,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Engagement_Score < 60",
+      "evaluatedAt": "2026-01-05T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "AI Product Suite - Enterprise Copilot",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.83,
+      "variance": "17.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 35000000,
+      "budgetActual": 42000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 23,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "AI Product Suite - Enterprise Copilot",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 5
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 35000000,
+      "budgetActual": 42000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 23,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Cybersecurity Platform Upgrade",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 18000000,
+      "budgetActual": 16500000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "integration_risk",
+    "ruleName": "Integration Risk",
+    "projectName": "Cybersecurity Platform Upgrade",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Integration with legacy systems",
+    "threshold": {
+      "metric": "Integration_Risk",
+      "operator": ">",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Integration testing",
+      "Risk mitigation"
+    ],
+    "status": "active",
+    "description": "Integration complexity presents moderate risk",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 18000000,
+      "budgetActual": 16500000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Risk > 65",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Epic EMR System Upgrade",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.79,
+      "variance": "21.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 28000000,
+      "budgetActual": 35500000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Epic EMR System Upgrade",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 28000000,
+      "budgetActual": 35500000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Hospital Expansion - Cardiology Wing",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 135000000,
+      "budgetActual": 164000000,
+      "schedulePlanned": 40,
+      "scheduleActual": 48,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Hospital Expansion - Cardiology Wing",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.83,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 135000000,
+      "budgetActual": 164000000,
+      "schedulePlanned": 40,
+      "scheduleActual": 48,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "stage_gate_approval_overdue",
+    "ruleName": "Stage Gate Approval Overdue",
+    "projectName": "Clinical Research Data Platform",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "governance",
+    "severity": "warning",
+    "condition": "Gate approval past due date",
+    "threshold": {
+      "metric": "Days_Overdue",
+      "operator": ">",
+      "value": 0
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Governance escalation",
+      "Committee scheduling"
+    ],
+    "status": "active",
+    "description": "Stage gate approval overdue",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 16000000,
+      "budgetActual": 15500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 16,
+      "interventionsCreated": 1
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Days_Overdue > 0",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Core Banking System Modernization",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.79,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 158000000,
+      "schedulePlanned": 30,
+      "scheduleActual": 38,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Anti-Money Laundering AI Platform",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 45000000,
+      "budgetActual": 55000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Digital Wallet Launch",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 28000000,
+      "budgetActual": 31000000,
+      "schedulePlanned": 14,
+      "scheduleActual": 16,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "security_review_extended",
+    "ruleName": "Security Review Extended",
+    "projectName": "Digital Wallet Launch",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "governance",
+    "severity": "medium",
+    "condition": "Security review taking longer than planned",
+    "threshold": {
+      "metric": "Review_Duration",
+      "operator": ">",
+      "value": "PLANNED"
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Security team engagement",
+      "Issue resolution"
+    ],
+    "status": "active",
+    "description": "Security review timeline extended",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 28000000,
+      "budgetActual": 31000000,
+      "schedulePlanned": 14,
+      "scheduleActual": 16,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Review_Duration > PLANNED",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Smart Factory Implementation - Plant 4",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.79,
+      "variance": "21.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 85000000,
+      "budgetActual": 108000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 32,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Product Lifecycle Management (PLM) Deployment",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.84,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 32000000,
+      "budgetActual": 35500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 19,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Omnichannel Platform Implementation",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.71,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 95000000,
+      "budgetActual": 122000000,
+      "schedulePlanned": 20,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "5G Network Rollout - Phase 3",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.77,
+      "variance": "23.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.947Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1103896103,
+      "schedulePlanned": 38,
+      "scheduleActual": 52,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Network Operations Center Modernization",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.85,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-05T16:49:29.948Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 48000000,
+      "budgetActual": 52747252,
+      "schedulePlanned": 17,
+      "scheduleActual": 20,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Manufacturing Facility Expansion",
+    "industryId": "pharma-biotech",
+    "companyId": "acme-pharma",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.8,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-05T16:49:29.949Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1036585365,
+      "schedulePlanned": 35,
+      "scheduleActual": 43,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Streaming Platform Relaunch",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.74,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 250000000,
+      "budgetActual": 320512820,
+      "schedulePlanned": 31,
+      "scheduleActual": 41,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Precision Agriculture Platform",
+    "industryId": "agriculture-food",
+    "companyId": "acme-agriculture",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.79,
+      "variance": "21.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 185000000,
+      "budgetActual": 234177215,
+      "schedulePlanned": 21,
+      "scheduleActual": 27,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Processing Plant Modernization",
+    "industryId": "agriculture-food",
+    "companyId": "acme-agriculture",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 325000000,
+      "budgetActual": 396341463,
+      "schedulePlanned": 24,
+      "scheduleActual": 30,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Campus Infrastructure Modernization",
+    "industryId": "education",
+    "companyId": "acme-education",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 152439024,
+      "schedulePlanned": 14,
+      "scheduleActual": 17,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "AI-Powered Underwriting Platform",
+    "industryId": "insurance",
+    "companyId": "acme-insurance",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 185000000,
+      "budgetActual": 225609756,
+      "schedulePlanned": 17,
+      "scheduleActual": 21,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Claims Automation Platform",
+    "industryId": "insurance",
+    "companyId": "acme-insurance",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 125000000,
+      "budgetActual": 138888888,
+      "schedulePlanned": 20,
+      "scheduleActual": 23,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Electric Vehicle Platform Development",
+    "industryId": "automotive",
+    "companyId": "acme-automotive",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 2500000000,
+      "budgetActual": 3205128205,
+      "schedulePlanned": 33,
+      "scheduleActual": 44,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Autonomous Driving Software Stack",
+    "industryId": "automotive",
+    "companyId": "acme-automotive",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 850000000,
+      "budgetActual": 944444444,
+      "schedulePlanned": 36,
+      "scheduleActual": 41,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Connected Vehicle Platform",
+    "industryId": "automotive",
+    "companyId": "acme-automotive",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 425000000,
+      "budgetActual": 472222222,
+      "schedulePlanned": 26,
+      "scheduleActual": 29,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Commercial Aircraft Production Ramp",
+    "industryId": "aerospace-defense",
+    "companyId": "acme-aerospace",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 2500000000,
+      "budgetActual": 3048780487,
+      "schedulePlanned": 37,
+      "scheduleActual": 47,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Satellite Constellation Deployment",
+    "industryId": "aerospace-defense",
+    "companyId": "acme-aerospace",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 4
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 1850000000,
+      "budgetActual": 2055555555,
+      "schedulePlanned": 33,
+      "scheduleActual": 38,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Hypersonic Weapons System",
+    "industryId": "aerospace-defense",
+    "companyId": "acme-aerospace",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 3250000000,
+      "budgetActual": 3611111111,
+      "schedulePlanned": 31,
+      "scheduleActual": 35,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Copper Mine Expansion - Chile",
+    "industryId": "mining-materials",
+    "companyId": "acme-mining",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 10
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 1250000000,
+      "budgetActual": 1602564102,
+      "schedulePlanned": 32,
+      "scheduleActual": 42,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Lithium Brine Processing Plant",
+    "industryId": "mining-materials",
+    "companyId": "acme-mining",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-05T16:49:29.950Z",
+    "weeksAgoFired": 3,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1036585365,
+      "schedulePlanned": 37,
+      "scheduleActual": 47,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-05T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Grid Modernization - Smart Meter Rollout",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.81,
+      "variance": "19.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.943Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 15000000,
+      "budgetActual": 18500000,
+      "schedulePlanned": 24,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.943Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Grid Modernization - Smart Meter Rollout",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.76,
+      "weeksLate": 4
+    },
+    "firedAt": "2026-01-12T16:49:29.944Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 15000000,
+      "budgetActual": 18500000,
+      "schedulePlanned": 24,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "triple_threat_pattern",
+    "ruleName": "Triple Threat Pattern",
+    "projectName": "Grid Modernization - Smart Meter Rollout",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "risk",
+    "severity": "critical",
+    "condition": "CPI < 0.85 AND SPI < 0.85 AND Quality Issues",
+    "threshold": {
+      "metrics": [
+        "CPI",
+        "SPI",
+        "Quality"
+      ],
+      "operator": "ALL_BELOW",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.81,
+      "SPI": 0.76,
+      "qualityIssues": "Detected"
+    },
+    "firedAt": "2026-01-12T16:49:29.944Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create Risk intervention",
+      "Executive escalation",
+      "Integrated recovery plan"
+    ],
+    "status": "active",
+    "description": "Budget, schedule, and quality converging - high risk of failure",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 15000000,
+      "budgetActual": 18500000,
+      "schedulePlanned": 24,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "undefined ALL_BELOW 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Nuclear Plant Life Extension",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.79,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-12T16:49:29.944Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 85000000,
+      "budgetActual": 95000000,
+      "schedulePlanned": 36,
+      "scheduleActual": 42,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "high_risk_dependencies",
+    "ruleName": "High Risk Dependencies",
+    "projectName": "Coal Plant Decommissioning",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Critical dependencies with high risk",
+    "threshold": {
+      "metric": "Dependency_Risk_Score",
+      "operator": ">",
+      "value": 75
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-12T16:49:29.944Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Risk assessment",
+      "Mitigation planning"
+    ],
+    "status": "active",
+    "description": "High-risk dependencies identified",
+    "context": {
+      "projectHealth": "risk",
+      "budgetPlanned": 35000000,
+      "budgetActual": 33000000,
+      "schedulePlanned": 20,
+      "scheduleActual": 18,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Dependency_Risk_Score > 75",
+      "evaluatedAt": "2026-01-12T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "technical_integration_risk",
+    "ruleName": "Technical Integration Risk",
+    "projectName": "Energy Storage System Deployment",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Complex technical integration",
+    "threshold": {
+      "metric": "Integration_Complexity",
+      "operator": ">",
+      "value": 70
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-12T16:49:29.944Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Technical review",
+      "Integration testing plan"
+    ],
+    "status": "active",
+    "description": "Technical integration complexity presents risk",
+    "context": {
+      "projectHealth": "risk",
+      "budgetPlanned": 65000000,
+      "budgetActual": 62000000,
+      "schedulePlanned": 14,
+      "scheduleActual": 13,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Complexity > 70",
+      "evaluatedAt": "2026-01-12T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "change_adoption_below_target",
+    "ruleName": "Change Adoption Below Target",
+    "projectName": "Workforce Safety Initiative",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "change_management",
+    "severity": "warning",
+    "condition": "Adoption rate < target",
+    "threshold": {
+      "metric": "Adoption_Rate",
+      "operator": "<",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-12T16:49:29.944Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "OCM intervention",
+      "Enhanced training",
+      "Stakeholder engagement"
+    ],
+    "status": "active",
+    "description": "User adoption below target threshold",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 5500000,
+      "budgetActual": 5200000,
+      "schedulePlanned": 10,
+      "scheduleActual": 10,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Adoption_Rate < 65",
+      "evaluatedAt": "2026-01-12T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Global Data Center Expansion",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 850000000,
+      "budgetActual": 780000000,
+      "schedulePlanned": 36,
+      "scheduleActual": 39,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Telemedicine Platform Deployment",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 16000000,
+      "budgetActual": 17800000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "integration_risk",
+    "ruleName": "Integration Risk",
+    "projectName": "Telemedicine Platform Deployment",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Integration with legacy systems",
+    "threshold": {
+      "metric": "Integration_Risk",
+      "operator": ">",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Integration testing",
+      "Risk mitigation"
+    ],
+    "status": "active",
+    "description": "Integration complexity presents moderate risk",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 16000000,
+      "budgetActual": 17800000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Risk > 65",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "change_adoption_below_target",
+    "ruleName": "Change Adoption Below Target",
+    "projectName": "Nurse Staffing Optimization",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "change_management",
+    "severity": "warning",
+    "condition": "Adoption rate < target",
+    "threshold": {
+      "metric": "Adoption_Rate",
+      "operator": "<",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "OCM intervention",
+      "Enhanced training",
+      "Stakeholder engagement"
+    ],
+    "status": "active",
+    "description": "User adoption below target threshold",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 7500000,
+      "budgetActual": 7200000,
+      "schedulePlanned": 8,
+      "scheduleActual": 8,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Adoption_Rate < 65",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Anti-Money Laundering AI Platform",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 45000000,
+      "budgetActual": 55000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Branch Network Optimization",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.89,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 65000000,
+      "budgetActual": 72000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 27,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Smart Factory Implementation - Plant 4",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 85000000,
+      "budgetActual": 108000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 32,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Supply Chain Digitalization",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 42000000,
+      "budgetActual": 51000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "integration_risk",
+    "ruleName": "Integration Risk",
+    "projectName": "Supply Chain Digitalization",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Integration with legacy systems",
+    "threshold": {
+      "metric": "Integration_Risk",
+      "operator": ">",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Integration testing",
+      "Risk mitigation"
+    ],
+    "status": "active",
+    "description": "Integration complexity presents moderate risk",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 42000000,
+      "budgetActual": 51000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Risk > 65",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Supply Chain Visibility Platform",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.73,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 38000000,
+      "budgetActual": 46500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 22,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Personalization Engine Deployment",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 22000000,
+      "budgetActual": 24500000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Store Modernization - 200 Locations",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.89,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 145000000,
+      "budgetActual": 160000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 27,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Fleet Electrification Program",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 450000000,
+      "budgetActual": 575000000,
+      "schedulePlanned": 36,
+      "scheduleActual": 46,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Fleet Electrification Program",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 10
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 450000000,
+      "budgetActual": 575000000,
+      "schedulePlanned": 36,
+      "scheduleActual": 46,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Warehouse Automation - 15 Facilities",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.77,
+      "weeksLate": 7
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 180000000,
+      "budgetActual": 220000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 31,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Last-Mile Delivery Optimization",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 25000000,
+      "budgetActual": 27800000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "5G Network Rollout - Phase 3",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.73,
+      "weeksLate": 10
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1103896103,
+      "schedulePlanned": 38,
+      "scheduleActual": 52,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Fiber Backbone Expansion",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.947Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 425000000,
+      "budgetActual": 518292682,
+      "schedulePlanned": 22,
+      "scheduleActual": 27,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Customer Experience Platform",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.948Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 65000000,
+      "budgetActual": 72222222,
+      "schedulePlanned": 24,
+      "scheduleActual": 27,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Mixed-Use Tower - Downtown Chicago",
+    "industryId": "realestate-construction",
+    "companyId": "acme-realestate",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.79,
+      "variance": "21.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.948Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1075949367,
+      "schedulePlanned": 31,
+      "scheduleActual": 40,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Mixed-Use Tower - Downtown Chicago",
+    "industryId": "realestate-construction",
+    "companyId": "acme-realestate",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.76,
+      "weeksLate": 10
+    },
+    "firedAt": "2026-01-12T16:49:29.948Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 850000000,
+      "budgetActual": 1075949367,
+      "schedulePlanned": 31,
+      "scheduleActual": 40,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Office Campus Renovation",
+    "industryId": "realestate-construction",
+    "companyId": "acme-realestate",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-12T16:49:29.948Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 185000000,
+      "budgetActual": 205555555,
+      "schedulePlanned": 14,
+      "scheduleActual": 16,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Oncology Drug Pipeline - Phase 3 Trials",
+    "industryId": "pharma-biotech",
+    "companyId": "acme-pharma",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.74,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-12T16:49:29.949Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 450000000,
+      "budgetActual": 576923076,
+      "schedulePlanned": 31,
+      "scheduleActual": 41,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Product Line Reformulation - Natural Ingredients",
+    "industryId": "consumer-products",
+    "companyId": "acme-consumer",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 7
+    },
+    "firedAt": "2026-01-12T16:49:29.949Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 160256410,
+      "schedulePlanned": 21,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Streaming Platform Relaunch",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 250000000,
+      "budgetActual": 320512820,
+      "schedulePlanned": 31,
+      "scheduleActual": 41,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Content Production - Tentpole Franchise",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.81,
+      "variance": "19.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 285000000,
+      "budgetActual": 351851851,
+      "schedulePlanned": 31,
+      "scheduleActual": 40,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Theme Park Expansion - New Land",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 750000000,
+      "budgetActual": 833333333,
+      "schedulePlanned": 37,
+      "scheduleActual": 42,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Luxury Resort Development - Maldives",
+    "industryId": "hospitality-tourism",
+    "companyId": "acme-hospitality",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 450000000,
+      "budgetActual": 548780487,
+      "schedulePlanned": 25,
+      "scheduleActual": 32,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Guest Experience Platform",
+    "industryId": "hospitality-tourism",
+    "companyId": "acme-hospitality",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 45000000,
+      "budgetActual": 50000000,
+      "schedulePlanned": 10,
+      "scheduleActual": 11,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Precision Agriculture Platform",
+    "industryId": "agriculture-food",
+    "companyId": "acme-agriculture",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.76,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 185000000,
+      "budgetActual": 234177215,
+      "schedulePlanned": 21,
+      "scheduleActual": 27,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Cold Chain Infrastructure Upgrade",
+    "industryId": "agriculture-food",
+    "companyId": "acme-agriculture",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 95000000,
+      "budgetActual": 105555555,
+      "schedulePlanned": 22,
+      "scheduleActual": 25,
+      "interventionsCreated": 1
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Learning Management System Replacement",
+    "industryId": "education",
+    "companyId": "acme-education",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.77,
+      "variance": "23.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 85000000,
+      "budgetActual": 110389610,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Campus Infrastructure Modernization",
+    "industryId": "education",
+    "companyId": "acme-education",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.79,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 152439024,
+      "schedulePlanned": 14,
+      "scheduleActual": 17,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Student Success Platform",
+    "industryId": "education",
+    "companyId": "acme-education",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 42000000,
+      "budgetActual": 46666666,
+      "schedulePlanned": 8,
+      "scheduleActual": 9,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Global Delivery Network Expansion",
+    "industryId": "professional-services",
+    "companyId": "acme-professional",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 285000000,
+      "budgetActual": 365384615,
+      "schedulePlanned": 31,
+      "scheduleActual": 41,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Copper Mine Expansion - Chile",
+    "industryId": "mining-materials",
+    "companyId": "acme-mining",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-12T16:49:29.950Z",
+    "weeksAgoFired": 2,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 1250000000,
+      "budgetActual": 1602564102,
+      "schedulePlanned": 32,
+      "scheduleActual": 42,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-12T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Nuclear Plant Life Extension",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.83,
+      "variance": "17.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.944Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 85000000,
+      "budgetActual": 95000000,
+      "schedulePlanned": 36,
+      "scheduleActual": 42,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Renewable Energy Integration - Solar Farm",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-19T16:49:29.944Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 180000000,
+      "budgetActual": 165000000,
+      "schedulePlanned": 18,
+      "scheduleActual": 20,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "scope_change_detected",
+    "ruleName": "Scope Change Detected",
+    "projectName": "Transmission Line Upgrade - Northern Corridor",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "governance",
+    "severity": "warning",
+    "condition": "Scope changes without approval",
+    "threshold": {
+      "metric": "Unapproved_Changes",
+      "operator": ">",
+      "value": 0
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.944Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Governance review",
+      "Change control enforcement"
+    ],
+    "status": "active",
+    "description": "Scope changes detected without proper approval process",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 45000000,
+      "budgetActual": 42000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 26,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Unapproved_Changes > 0",
+      "evaluatedAt": "2026-01-19T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "stage_gate_approval_overdue",
+    "ruleName": "Stage Gate Approval Overdue",
+    "projectName": "Distribution Automation Program",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "governance",
+    "severity": "warning",
+    "condition": "Gate approval past due date",
+    "threshold": {
+      "metric": "Days_Overdue",
+      "operator": ">",
+      "value": 0
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.944Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Governance escalation",
+      "Committee scheduling"
+    ],
+    "status": "active",
+    "description": "Stage gate approval overdue",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 28000000,
+      "budgetActual": 27500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 16,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Days_Overdue > 0",
+      "evaluatedAt": "2026-01-19T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "governance_review_required",
+    "ruleName": "Governance Review Required",
+    "projectName": "Distribution Automation Program",
+    "industryId": "energy-utilities",
+    "companyId": "acme-energy",
+    "type": "governance",
+    "severity": "medium",
+    "condition": "Periodic review cycle triggered",
+    "threshold": {
+      "metric": "Days_Since_Review",
+      "operator": ">",
+      "value": 90
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.944Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Schedule governance review",
+      "Prepare materials"
+    ],
+    "status": "active",
+    "description": "Regular governance review cycle triggered",
+    "context": {
+      "projectHealth": "governance",
+      "budgetPlanned": 28000000,
+      "budgetActual": 27500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 16,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Days_Since_Review > 90",
+      "evaluatedAt": "2026-01-19T16:49:29.944Z"
+    }
+  },
+  {
+    "ruleId": "technical_debt_impact",
+    "ruleName": "Technical Debt Impact",
+    "projectName": "Cloud Platform Migration - Mainframe Modernization",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "risk",
+    "severity": "warning",
+    "condition": "Quality shortcuts detected under schedule pressure",
+    "threshold": {
+      "metric": "Technical_Debt_Score",
+      "operator": ">",
+      "value": 70
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create Risk intervention",
+      "Technical review required"
+    ],
+    "status": "active",
+    "description": "Technical debt accumulating, future maintenance risk",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 45000000,
+      "budgetActual": 58000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 30,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Technical_Debt_Score > 70",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "scope_change_detected",
+    "ruleName": "Scope Change Detected",
+    "projectName": "Global Data Center Expansion",
+    "industryId": "technology",
+    "companyId": "acme-tech",
+    "type": "governance",
+    "severity": "warning",
+    "condition": "Scope changes without approval",
+    "threshold": {
+      "metric": "Unapproved_Changes",
+      "operator": ">",
+      "value": 0
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Governance review",
+      "Change control enforcement"
+    ],
+    "status": "active",
+    "description": "Scope changes detected without proper approval process",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 850000000,
+      "budgetActual": 780000000,
+      "schedulePlanned": 36,
+      "scheduleActual": 39,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Unapproved_Changes > 0",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Clinical Decision Support System",
+    "industryId": "healthcare",
+    "companyId": "acme-healthcare",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.84,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 22000000,
+      "budgetActual": 24500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 19,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Core Banking System Modernization",
+    "industryId": "financial-services",
+    "companyId": "acme-financial",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.79,
+      "variance": "21.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 158000000,
+      "schedulePlanned": 30,
+      "scheduleActual": 38,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Quality Management System Upgrade",
+    "industryId": "manufacturing",
+    "companyId": "acme-manufacturing",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 18000000,
+      "budgetActual": 20000000,
+      "schedulePlanned": 12,
+      "scheduleActual": 14,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Omnichannel Platform Implementation",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 95000000,
+      "budgetActual": 122000000,
+      "schedulePlanned": 20,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Supply Chain Visibility Platform",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 38000000,
+      "budgetActual": 46500000,
+      "schedulePlanned": 16,
+      "scheduleActual": 22,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_variance_warning",
+    "ruleName": "Budget Variance Warning",
+    "projectName": "Store Modernization - 200 Locations",
+    "industryId": "retail-ecommerce",
+    "companyId": "acme-retail",
+    "type": "financial",
+    "severity": "warning",
+    "condition": "Forecast variance > 10%",
+    "threshold": {
+      "metric": "Budget_Variance",
+      "operator": ">",
+      "value": 10
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Financial analysis",
+      "Trend monitoring"
+    ],
+    "status": "active",
+    "description": "Budget forecast showing significant variance from plan",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 145000000,
+      "budgetActual": 160000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 27,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Budget_Variance > 10",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Warehouse Automation - 15 Facilities",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 180000000,
+      "budgetActual": 220000000,
+      "schedulePlanned": 24,
+      "scheduleActual": 31,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "integration_risk",
+    "ruleName": "Integration Risk",
+    "projectName": "Transportation Management System Upgrade",
+    "industryId": "transportation-logistics",
+    "companyId": "acme-transport",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Integration with legacy systems",
+    "threshold": {
+      "metric": "Integration_Risk",
+      "operator": ">",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.947Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Integration testing",
+      "Risk mitigation"
+    ],
+    "status": "active",
+    "description": "Integration complexity presents moderate risk",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 35000000,
+      "budgetActual": 38500000,
+      "schedulePlanned": 14,
+      "scheduleActual": 17,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Risk > 65",
+      "evaluatedAt": "2026-01-19T16:49:29.947Z"
+    }
+  },
+  {
+    "ruleId": "integration_risk",
+    "ruleName": "Integration Risk",
+    "projectName": "Customer Experience Platform",
+    "industryId": "telecommunications",
+    "companyId": "acme-telecom",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Integration with legacy systems",
+    "threshold": {
+      "metric": "Integration_Risk",
+      "operator": ">",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.948Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Integration testing",
+      "Risk mitigation"
+    ],
+    "status": "active",
+    "description": "Integration complexity presents moderate risk",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 65000000,
+      "budgetActual": 72222222,
+      "schedulePlanned": 24,
+      "scheduleActual": 27,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Risk > 65",
+      "evaluatedAt": "2026-01-19T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Multifamily Portfolio - Sunbelt Expansion",
+    "industryId": "realestate-construction",
+    "companyId": "acme-realestate",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.948Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 425000000,
+      "budgetActual": 518292682,
+      "schedulePlanned": 20,
+      "scheduleActual": 25,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Multifamily Portfolio - Sunbelt Expansion",
+    "industryId": "realestate-construction",
+    "companyId": "acme-realestate",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 7
+    },
+    "firedAt": "2026-01-19T16:49:29.948Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 425000000,
+      "budgetActual": 518292682,
+      "schedulePlanned": 20,
+      "scheduleActual": 25,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Industrial Logistics Park",
+    "industryId": "realestate-construction",
+    "companyId": "acme-realestate",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.88,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-19T16:49:29.948Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 145000000,
+      "budgetActual": 159340659,
+      "schedulePlanned": 23,
+      "scheduleActual": 26,
+      "interventionsCreated": 1
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.948Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Clinical Trial Management System",
+    "industryId": "pharma-biotech",
+    "companyId": "acme-pharma",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-19T16:49:29.949Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 55000000,
+      "budgetActual": 61111111,
+      "schedulePlanned": 22,
+      "scheduleActual": 25,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Product Line Reformulation - Natural Ingredients",
+    "industryId": "consumer-products",
+    "companyId": "acme-consumer",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.78,
+      "variance": "22.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.949Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 125000000,
+      "budgetActual": 160256410,
+      "schedulePlanned": 21,
+      "scheduleActual": 28,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "budget_overrun_critical",
+    "ruleName": "Budget Overrun Critical",
+    "projectName": "Smart Factory Implementation",
+    "industryId": "consumer-products",
+    "companyId": "acme-consumer",
+    "type": "financial",
+    "severity": "critical",
+    "condition": "CPI < 0.85",
+    "threshold": {
+      "metric": "CPI",
+      "operator": "<",
+      "value": 0.85
+    },
+    "actualValues": {
+      "CPI": 0.82,
+      "variance": "18.0%"
+    },
+    "firedAt": "2026-01-19T16:49:29.949Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create FinOps intervention",
+      "Notify project manager",
+      "Escalate to steering committee"
+    ],
+    "status": "active",
+    "description": "Project cost performance index below critical threshold",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 185000000,
+      "budgetActual": 225609756,
+      "schedulePlanned": 19,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "CPI < 0.85",
+      "evaluatedAt": "2026-01-19T16:49:29.949Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Live Sports Rights Integration",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 185000000,
+      "budgetActual": 205555555,
+      "schedulePlanned": 14,
+      "scheduleActual": 16,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "integration_risk",
+    "ruleName": "Integration Risk",
+    "projectName": "Gaming Studio Acquisition Integration",
+    "industryId": "media-entertainment",
+    "companyId": "acme-media",
+    "type": "risk",
+    "severity": "medium",
+    "condition": "Integration with legacy systems",
+    "threshold": {
+      "metric": "Integration_Risk",
+      "operator": ">",
+      "value": 65
+    },
+    "actualValues": {},
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Integration testing",
+      "Risk mitigation"
+    ],
+    "status": "active",
+    "description": "Integration complexity presents moderate risk",
+    "context": {
+      "projectHealth": "risk",
+      "budgetPlanned": 95000000,
+      "budgetActual": 91346153,
+      "schedulePlanned": 16,
+      "scheduleActual": 15,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "Integration_Risk > 65",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Processing Plant Modernization",
+    "industryId": "agriculture-food",
+    "companyId": "acme-agriculture",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.79,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 325000000,
+      "budgetActual": 396341463,
+      "schedulePlanned": 24,
+      "scheduleActual": 30,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Learning Management System Replacement",
+    "industryId": "education",
+    "companyId": "acme-education",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.74,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 85000000,
+      "budgetActual": 110389610,
+      "schedulePlanned": 18,
+      "scheduleActual": 24,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Core Policy Administration Replacement",
+    "industryId": "insurance",
+    "companyId": "acme-insurance",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.74,
+      "weeksLate": 9
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 425000000,
+      "budgetActual": 544871794,
+      "schedulePlanned": 30,
+      "scheduleActual": 40,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "AI-Powered Underwriting Platform",
+    "industryId": "insurance",
+    "companyId": "acme-insurance",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.79,
+      "weeksLate": 6
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 185000000,
+      "budgetActual": 225609756,
+      "schedulePlanned": 17,
+      "scheduleActual": 21,
+      "interventionsCreated": 4
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Electric Vehicle Platform Development",
+    "industryId": "automotive",
+    "companyId": "acme-automotive",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.75,
+      "weeksLate": 9
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 2500000000,
+      "budgetActual": 3205128205,
+      "schedulePlanned": 33,
+      "scheduleActual": 44,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_high",
+    "ruleName": "Schedule Delay High",
+    "projectName": "Battery Gigafactory Construction",
+    "industryId": "automotive",
+    "companyId": "acme-automotive",
+    "type": "schedule",
+    "severity": "critical",
+    "condition": "SPI < 0.80",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.8
+    },
+    "actualValues": {
+      "SPI": 0.78,
+      "weeksLate": 8
+    },
+    "firedAt": "2026-01-19T16:49:29.950Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Develop recovery schedule",
+      "Assess resource needs"
+    ],
+    "status": "active",
+    "description": "Project schedule performance critically behind plan",
+    "context": {
+      "projectHealth": "critical",
+      "budgetPlanned": 3500000000,
+      "budgetActual": 4268292682,
+      "schedulePlanned": 37,
+      "scheduleActual": 47,
+      "interventionsCreated": 3
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.8",
+      "evaluatedAt": "2026-01-19T16:49:29.950Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Autonomous Haul Truck Fleet",
+    "industryId": "mining-materials",
+    "companyId": "acme-mining",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.86,
+      "weeksLate": 3
+    },
+    "firedAt": "2026-01-19T16:49:29.951Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 425000000,
+      "budgetActual": 472222222,
+      "schedulePlanned": 21,
+      "scheduleActual": 24,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.951Z"
+    }
+  },
+  {
+    "ruleId": "schedule_delay_moderate",
+    "ruleName": "Schedule Delay Moderate",
+    "projectName": "Water Management System",
+    "industryId": "mining-materials",
+    "companyId": "acme-mining",
+    "type": "schedule",
+    "severity": "warning",
+    "condition": "SPI < 0.90",
+    "threshold": {
+      "metric": "SPI",
+      "operator": "<",
+      "value": 0.9
+    },
+    "actualValues": {
+      "SPI": 0.87,
+      "weeksLate": 2
+    },
+    "firedAt": "2026-01-19T16:49:29.951Z",
+    "weeksAgoFired": 1,
+    "triggeredActions": [
+      "Create TMO intervention",
+      "Review critical path"
+    ],
+    "status": "active",
+    "description": "Project schedule showing delays",
+    "context": {
+      "projectHealth": "warning",
+      "budgetPlanned": 185000000,
+      "budgetActual": 205555555,
+      "schedulePlanned": 16,
+      "scheduleActual": 18,
+      "interventionsCreated": 2
+    },
+    "evaluation": {
+      "passed": false,
+      "reason": "SPI < 0.9",
+      "evaluatedAt": "2026-01-19T16:49:29.951Z"
+    }
+  }
+]

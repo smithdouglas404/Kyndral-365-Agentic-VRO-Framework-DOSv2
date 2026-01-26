@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { LogIn, Loader2 } from 'lucide-react';
+import { LogIn, Loader2, Sparkles } from 'lucide-react';
 import { signIn, getIdToken } from '@/lib/firebase';
 
 export default function LoginPage() {
@@ -141,6 +141,19 @@ export default function LoginPage() {
           >
             Sign up
           </button>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => navigate('/demo')}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg"
+          >
+            <Sparkles className="w-5 h-5" />
+            Try Interactive Demo
+          </button>
+          <p className="text-xs text-center text-muted-foreground mt-2">
+            Explore the Deep Agent System with realistic industry data
+          </p>
         </div>
       </div>
     </div>

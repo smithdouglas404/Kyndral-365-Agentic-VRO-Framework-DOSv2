@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -7,7 +8,7 @@ import { CompanyPreview } from '@/components/setup/CompanyPreview';
 import { OntologyMapping } from '@/components/setup/OntologyMapping';
 import { ReviewExtraction } from '@/components/setup/ReviewExtraction';
 import { GeneratedKit } from '@/components/setup/GeneratedKit';
-import { Check } from 'lucide-react';
+import { Check, Sparkles } from 'lucide-react';
 
 export interface CompanyCandidate {
   legalName: string;
@@ -62,6 +63,7 @@ const STEPS = [
 ];
 
 export default function SetupWizard() {
+  const [, navigate] = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCandidate, setSelectedCandidate] = useState<CompanyCandidate | null>(null);
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
@@ -97,11 +99,21 @@ export default function SetupWizard() {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Company Profile Setup</h1>
-          <p className="text-muted-foreground">
-            Let's configure your PPM system with your company's information
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Company Profile Setup</h1>
+            <p className="text-muted-foreground">
+              Let's configure your PPM system with your company's information
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/demo')}
+            className="flex items-center gap-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+          >
+            <Sparkles className="w-4 h-4" />
+            Skip to Demo
+          </Button>
         </div>
 
         {/* Progress Steps */}

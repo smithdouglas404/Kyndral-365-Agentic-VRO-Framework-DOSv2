@@ -9,6 +9,7 @@ import { PageContextProvider } from "@/contexts/PageContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
 import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
 import { DemoModeBanner } from "@/components/DemoModeBanner";
+import { DemoModeActiveBanner } from "@/components/DemoModeActiveBanner";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
 import { CrossAgentActivityFeed } from "@/components/CrossAgentActivityFeed";
 import { AlertBubble } from "@/components/AlertBubble";
@@ -99,11 +100,15 @@ import PlanningWorkspace from "@/pages/workspaces/PlanningWorkspace";
 import GovernanceWorkspace from "@/pages/workspaces/GovernanceWorkspace";
 import OCMWorkspace from "@/pages/workspaces/OCMWorkspace";
 import AdminWorkspace from "@/pages/workspaces/AdminWorkspace";
+import DemoPage from "@/pages/DemoPage";
+import DemoShowcase from "@/pages/DemoShowcase";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/demo" component={DemoPage} />
+      <Route path="/demo/showcase" component={DemoShowcase} />
       <Route path="/setup" component={SetupWizard} />
 
       {/* New Workspace Routes */}
@@ -334,6 +339,7 @@ function App() {
               <PageContextProvider>
                 <TooltipProvider>
                   <Toaster />
+                  <DemoModeActiveBanner />
                   <DemoModeBanner />
                   {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
                   {/* FloatingAlertBanner kept temporarily for backwards compatibility */}

@@ -832,7 +832,15 @@ Keep response brief and actionable.`;
 
         console.log(`[ContinuousOrchestrator] ${config.agentName} analyzing request from ${fromConfig?.agentName}...`);
 
-        const result = await agent.run(prompt, { projectId: request.projectId });
+        // Try agent.run() for Deep Agents, fall back to agent.execute() for standard agents
+        let result;
+        if (typeof agent.run === 'function') {
+          result = await agent.run(prompt, { projectId: request.projectId });
+        } else if (typeof agent.execute === 'function') {
+          result = await agent.execute(prompt, { projectId: request.projectId });
+        } else {
+          throw new Error(`Agent ${config.agentName} has no run() or execute() method`);
+        }
 
         // Send response via A2A message bus
         const responseMessage: AgentMessage = {

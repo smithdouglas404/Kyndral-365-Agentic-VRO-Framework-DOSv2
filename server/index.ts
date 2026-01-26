@@ -2,6 +2,7 @@ import { config } from "dotenv";
 config(); // Load .env file FIRST before anything else
 
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -49,6 +50,7 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // PRODUCTION: Track request metrics for health monitoring
 app.use(trackRequestMetrics());

@@ -58,6 +58,7 @@ import { createCOPRoutes } from "./routes/cop.js";
 import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
 import { createComplianceRoutes } from "./routes/compliance.js";
 import documentsRouter from "./routes/documents.js";
+import { registerDemoRoutes } from "./routes/demo.js";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -154,6 +155,9 @@ export async function registerRoutes(
 
   // Setup Firebase authentication (alternative to JWT auth)
   registerFirebaseAuthRoutes(app, storage);
+
+  // Register Demo routes (ACME industry-specific demo data loading)
+  registerDemoRoutes(app);
 
   // Register Integration Management routes (ADMIN - External data source configuration)
   registerIntegrationRoutes(app, storage);

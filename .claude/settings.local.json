@@ -72,7 +72,8 @@
       "Bash(chmod:*)",
       "Bash(bash:*)",
       "Bash(timeout 10 npm start)",
-      "Bash(comm -23:*)"
+      "Bash(comm -23:*)",
+      "Bash(node:*)"
     ]
   }
 }

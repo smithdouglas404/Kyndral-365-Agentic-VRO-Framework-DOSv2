@@ -242,8 +242,14 @@ export function registerA2ARoutes(app: Express, storage: IStorage): void {
         });
       }
 
-      // Execute agent asynchronously
-      agent.run(message, context || {})
+      // Execute agent asynchronously (try .run() for Deep Agents, fallback to .execute() for standard agents)
+      const executePromise = typeof agent.run === 'function'
+        ? agent.run(message, context || {})
+        : typeof agent.execute === 'function'
+        ? agent.execute(message, context || {})
+        : Promise.reject(new Error(`Agent ${agentId} has no run() or execute() method`));
+
+      executePromise
         .then((result: any) => {
           task.status = 'completed';
           task.result = result;

@@ -349,20 +349,20 @@ Create a plan with these characteristics:
 5. Determine if collaboration with other agents is needed
 
 Return a JSON plan with this structure:
-{
+{{
   "reasoning": "Why this approach?",
   "estimatedComplexity": "low|medium|high",
   "requiresCollaboration": true|false,
   "steps": [
-    {
+    {{
       "step": 1,
       "description": "What to do",
       "tool": "tool_name or null",
       "expectedOutcome": "What we expect",
       "dependencies": []
-    }
+    }}
   ]
-}`],
+}}`],
       ["human", `Goal: {goal}
 
 Context: {context}

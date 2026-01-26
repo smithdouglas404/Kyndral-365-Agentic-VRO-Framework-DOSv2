@@ -1,0 +1,168 @@
+[
+{
+  "industryId": "energy-utilities",
+  "companyId": "acme-energy",
+  "projects": [
+    {
+      "name": "Grid Modernization - Smart Meter Rollout",
+      "description": "Deploy 2.5M smart meters across service territory with advanced metering infrastructure",
+      "healthStatus": "critical",
+      "budget": {"planned": 15000000, "actual": 18500000, "forecast": 20000000, "cpi": 0.81},
+      "schedule": {"plannedDuration": 24, "actualDuration": 28, "weeksLate": 4, "spi": 0.76},
+      "tasks": [
+        {"name": "Vendor Selection", "status": "complete", "delayWeeks": 2, "rootCause": "RFP delays due to requirement changes"},
+        {"name": "Meter Procurement", "status": "complete", "delayWeeks": 3, "rootCause": "Supply chain disruptions, chip shortage"},
+        {"name": "Installation Wave 1", "status": "in_progress", "delayWeeks": 4, "rootCause": "Contractor staffing shortages, weather delays"},
+        {"name": "Network Infrastructure", "status": "at_risk", "delayWeeks": 0, "rootCause": "Dependency on Wave 1 completion"}
+      ],
+      "triggeredRules": ["Budget Overrun Critical", "Schedule Delay High", "Triple Threat Pattern"],
+      "interventionTypes": ["DeepFinOps", "DeepTMO", "DeepRisk"],
+      "governanceStatus": "stage_gate_overdue"
+    },
+    {
+      "name": "Nuclear Plant Life Extension",
+      "description": "Extend operational life of Unit 2 by 20 years through systems modernization",
+      "healthStatus": "critical",
+      "budget": {"planned": 85000000, "actual": 95000000, "forecast": 102000000, "cpi": 0.83},
+      "schedule": {"plannedDuration": 36, "actualDuration": 42, "weeksLate": 6, "spi": 0.79},
+      "tasks": [
+        {"name": "NRC License Amendment", "status": "complete", "delayWeeks": 8, "rootCause": "Regulatory review delays, additional documentation requests"},
+        {"name": "Engineering Design", "status": "complete", "delayWeeks": 4, "rootCause": "Design changes requested by NRC"},
+        {"name": "Equipment Procurement", "status": "in_progress", "delayWeeks": 6, "rootCause": "Long lead times for safety-critical components"},
+        {"name": "Installation Planning", "status": "not_started", "delayWeeks": 0, "rootCause": "Waiting on equipment delivery"}
+      ],
+      "triggeredRules": ["Budget Overrun Critical", "Schedule Delay High", "Regulatory Compliance Risk"],
+      "interventionTypes": ["DeepFinOps", "DeepTMO", "DeepGovernance", "DeepRisk"],
+      "governanceStatus": "compliance_review_pending"
+    },
+    {
+      "name": "Renewable Energy Integration - Solar Farm",
+      "description": "Construct 200MW solar generation facility with battery storage",
+      "healthStatus": "warning",
+      "budget": {"planned": 180000000, "actual": 165000000, "forecast": 195000000, "cpi": 0.92},
+      "schedule": {"plannedDuration": 18, "actualDuration": 20, "weeksLate": 2, "spi": 0.87},
+      "tasks": [
+        {"name": "Site Acquisition", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Environmental Permits", "status": "complete", "delayWeeks": 2, "rootCause": "Wetlands study extended timeline"},
+        {"name": "Panel Procurement", "status": "in_progress", "delayWeeks": 1, "rootCause": "Tariff impacts on pricing"},
+        {"name": "Construction", "status": "in_progress", "delayWeeks": 2, "rootCause": "Weather delays during foundation work"}
+      ],
+      "triggeredRules": ["Schedule Delay Moderate", "Budget Variance Warning"],
+      "interventionTypes": ["DeepTMO", "DeepFinOps"],
+      "governanceStatus": "on_track"
+    },
+    {
+      "name": "Transmission Line Upgrade - Northern Corridor",
+      "description": "Upgrade 150 miles of transmission infrastructure to 500kV capacity",
+      "healthStatus": "warning",
+      "budget": {"planned": 45000000, "actual": 42000000, "forecast": 49000000, "cpi": 0.92},
+      "schedule": {"plannedDuration": 24, "actualDuration": 26, "weeksLate": 2, "spi": 0.88},
+      "tasks": [
+        {"name": "Route Survey", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Right-of-Way Acquisition", "status": "complete", "delayWeeks": 3, "rootCause": "Landowner negotiations extended"},
+        {"name": "Tower Construction", "status": "in_progress", "delayWeeks": 2, "rootCause": "Material delivery delays"},
+        {"name": "Line Installation", "status": "pending", "delayWeeks": 0, "rootCause": "Waiting on tower completion"}
+      ],
+      "triggeredRules": ["Schedule Delay Moderate", "Scope Change Detected"],
+      "interventionTypes": ["DeepTMO", "DeepOCM"],
+      "governanceStatus": "on_track"
+    },
+    {
+      "name": "Customer Portal Modernization",
+      "description": "Launch new customer self-service portal with mobile app",
+      "healthStatus": "healthy",
+      "budget": {"planned": 8000000, "actual": 6500000, "forecast": 7200000, "cpi": 1.11},
+      "schedule": {"plannedDuration": 12, "actualDuration": 10, "weeksLate": -2, "spi": 1.15},
+      "tasks": [
+        {"name": "Requirements Gathering", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "UX Design", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Development", "status": "complete", "delayWeeks": -1, "rootCause": "Agile velocity ahead of plan"},
+        {"name": "UAT", "status": "in_progress", "delayWeeks": -1, "rootCause": "Early start due to dev acceleration"}
+      ],
+      "triggeredRules": [],
+      "interventionTypes": [],
+      "governanceStatus": "on_track"
+    },
+    {
+      "name": "Cybersecurity Enhancement - OT Systems",
+      "description": "Implement zero-trust architecture for operational technology networks",
+      "healthStatus": "healthy",
+      "budget": {"planned": 12000000, "actual": 10800000, "forecast": 11200000, "cpi": 1.07},
+      "schedule": {"plannedDuration": 15, "actualDuration": 14, "weeksLate": -1, "spi": 1.05},
+      "tasks": [
+        {"name": "Security Assessment", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Architecture Design", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Implementation Phase 1", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Implementation Phase 2", "status": "in_progress", "delayWeeks": -1, "rootCause": "Efficient execution"}
+      ],
+      "triggeredRules": [],
+      "interventionTypes": [],
+      "governanceStatus": "on_track"
+    },
+    {
+      "name": "Coal Plant Decommissioning",
+      "description": "Safely retire and remediate legacy coal generation facility",
+      "healthStatus": "risk",
+      "budget": {"planned": 35000000, "actual": 33000000, "forecast": 38000000, "cpi": 1.06},
+      "schedule": {"plannedDuration": 20, "actualDuration": 18, "weeksLate": -2, "spi": 1.08},
+      "tasks": [
+        {"name": "Environmental Assessment", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Decommissioning Plan", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Asbestos Abatement", "status": "in_progress", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Structural Demolition", "status": "pending", "delayWeeks": 0, "rootCause": "High risk - specialized contractors required"}
+      ],
+      "triggeredRules": ["High Risk Dependencies", "Environmental Compliance Monitoring"],
+      "interventionTypes": ["DeepRisk", "DeepGovernance"],
+      "governanceStatus": "high_risk_monitoring"
+    },
+    {
+      "name": "Energy Storage System Deployment",
+      "description": "Install 50MW/200MWh battery energy storage system for grid stabilization",
+      "healthStatus": "risk",
+      "budget": {"planned": 65000000, "actual": 62000000, "forecast": 67000000, "cpi": 1.05},
+      "schedule": {"plannedDuration": 14, "actualDuration": 13, "weeksLate": -1, "spi": 1.06},
+      "tasks": [
+        {"name": "Site Selection", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Battery Procurement", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Installation", "status": "in_progress", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Grid Integration", "status": "pending", "delayWeeks": 0, "rootCause": "Complex ISO interconnection requirements"}
+      ],
+      "triggeredRules": ["Technical Integration Risk", "Regulatory Approval Pending"],
+      "interventionTypes": ["DeepRisk", "DeepGovernance"],
+      "governanceStatus": "regulatory_review"
+    },
+    {
+      "name": "Distribution Automation Program",
+      "description": "Deploy automated switches and sensors across distribution network",
+      "healthStatus": "governance",
+      "budget": {"planned": 28000000, "actual": 27500000, "forecast": 29000000, "cpi": 1.02},
+      "schedule": {"plannedDuration": 16, "actualDuration": 16, "weeksLate": 0, "spi": 1.00},
+      "tasks": [
+        {"name": "Network Analysis", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Equipment Selection", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Deployment Wave 1", "status": "in_progress", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Change Management", "status": "in_progress", "delayWeeks": 0, "rootCause": "None"}
+      ],
+      "triggeredRules": ["Stage Gate Approval Overdue", "Governance Review Required"],
+      "interventionTypes": ["DeepGovernance", "DeepOCM"],
+      "governanceStatus": "gate_approval_overdue"
+    },
+    {
+      "name": "Workforce Safety Initiative",
+      "description": "Implement AI-powered safety monitoring and training program",
+      "healthStatus": "governance",
+      "budget": {"planned": 5500000, "actual": 5200000, "forecast": 5800000, "cpi": 1.06},
+      "schedule": {"plannedDuration": 10, "actualDuration": 10, "weeksLate": 0, "spi": 1.00},
+      "tasks": [
+        {"name": "Needs Assessment", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Technology Selection", "status": "complete", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Pilot Program", "status": "in_progress", "delayWeeks": 0, "rootCause": "None"},
+        {"name": "Rollout Planning", "status": "pending", "delayWeeks": 0, "rootCause": "None"}
+      ],
+      "triggeredRules": ["Change Adoption Below Target", "Stakeholder Engagement Gap"],
+      "interventionTypes": ["DeepOCM", "DeepGovernance"],
+      "governanceStatus": "stakeholder_review_pending"
+    }
+  ]
+}
+]
