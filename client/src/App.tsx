@@ -84,6 +84,7 @@ import PolicyAsCode from "@/pages/admin/PolicyAsCode";
 import AgentMemoryViewer from "@/pages/admin/AgentMemoryViewer";
 import VoiceBriefings from "@/pages/admin/VoiceBriefings";
 import COPDashboard from "@/pages/COPDashboard";
+import AgentCollaboration from "@/pages/AgentCollaboration";
 import ExecutiveWorkspace from "@/pages/workspaces/ExecutiveWorkspace";
 import PMWorkspace from "@/pages/workspaces/PMWorkspace";
 import FinOpsWorkspace from "@/pages/workspaces/FinOpsWorkspace";
@@ -142,6 +143,7 @@ function Router() {
       <Route path="/reports" component={ReportingAnalytics} />
       <Route path="/risks" component={RiskManagement} />
       <Route path="/collaboration" component={CollaborationHub} />
+      <Route path="/agent-collaboration" component={AgentCollaboration} />
       <Route path="/analytics" component={AdvancedAnalytics} />
       <Route path="/financial-advanced" component={AdvancedFinancialManagement} />
       <Route path="/report-builder" component={CustomReportBuilder} />

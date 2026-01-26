@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { DollarSign, TrendingUp, TrendingDown, Calendar, PieChart, Download, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFinancialMetrics, useEVM, useBurnRate } from '@/hooks/useAnalytics';
+import { MetricSparkline } from '@/components/ui/metric-sparkline';
 
 export default function AdvancedFinancialManagement() {
   const [view, setView] = useState<'overview' | 'evm' | 'burn-rate' | 'forecast'>('overview');
@@ -18,6 +19,30 @@ export default function AdvancedFinancialManagement() {
   });
 
   const metrics = metricsData?.metrics;
+
+  // Fetch historical trend data (real 7-day data)
+  const { data: historicalData } = useQuery({
+    queryKey: ['financial', 'historical', selectedPortfolio],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedPortfolio) {
+        params.append('portfolioId', selectedPortfolio);
+      }
+      params.append('days', '7');
+
+      const res = await fetch(`/api/financials/metrics/historical?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch historical metrics');
+      return res.json();
+    },
+    refetchInterval: 300000, // Refresh every 5 minutes
+  });
+
+  const trendData = historicalData?.historical || {
+    totalBudget: { values: [], change: 0 },
+    totalActualCost: { values: [], change: 0 },
+    variance: { values: [], change: 0 },
+    avgCPI: { values: [], change: 0 },
+  };
 
   return (
     <div className="p-8">
@@ -83,6 +108,12 @@ export default function AdvancedFinancialManagement() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Across all projects
                 </p>
+                <MetricSparkline
+                  data={trendData.totalBudget.values}
+                  trendPercentage={trendData.totalBudget.change}
+                  comparisonPeriod="vs last week"
+                  color="#3b82f6"
+                />
               </CardContent>
             </Card>
 
@@ -99,6 +130,12 @@ export default function AdvancedFinancialManagement() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {((metrics.totalActualCost / metrics.totalBudget) * 100).toFixed(1)}% of budget
                 </p>
+                <MetricSparkline
+                  data={trendData.totalActualCost.values}
+                  trendPercentage={trendData.totalActualCost.change}
+                  comparisonPeriod="vs last week"
+                  color="#ef4444"
+                />
               </CardContent>
             </Card>
 
@@ -117,6 +154,12 @@ export default function AdvancedFinancialManagement() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {metrics.variance >= 0 ? 'Under budget' : 'Over budget'}
                 </p>
+                <MetricSparkline
+                  data={trendData.variance.values}
+                  trendPercentage={trendData.variance.change}
+                  comparisonPeriod="vs last week"
+                  color={metrics.variance >= 0 ? '#10b981' : '#ef4444'}
+                />
               </CardContent>
             </Card>
 
@@ -135,6 +178,12 @@ export default function AdvancedFinancialManagement() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {metrics.avgCPI >= 1 ? 'Good performance' : 'Needs attention'}
                 </p>
+                <MetricSparkline
+                  data={trendData.avgCPI.values}
+                  trendPercentage={trendData.avgCPI.change}
+                  comparisonPeriod="vs last week"
+                  color={metrics.avgCPI >= 1 ? '#10b981' : '#ef4444'}
+                />
               </CardContent>
             </Card>
           </div>

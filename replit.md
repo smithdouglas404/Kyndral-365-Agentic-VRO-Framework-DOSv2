@@ -1,10 +1,10 @@
-# Agentic Nexus - Multi-Agent Portfolio Management System
+# Agentic Nexus - Deep Agent System
 
 ## Overview
 
-Agentic Nexus is an enterprise-grade multi-agent AI system for portfolio and project management. It features 6 specialized "Deep Agents" (FinOps, TMO, Risk, VRO, PMO, OCM) that collaborate through a message bus to provide intelligent analysis, risk assessment, and value realization tracking. The system integrates semantic knowledge through RDF ontologies, persistent memory via Mem0/Letta, and a comprehensive rules engine for automated decision-making.
+Agentic Nexus is an enterprise-grade AI-powered project management and governance platform that orchestrates multiple specialized AI agents to provide continuous monitoring, risk assessment, and intelligent interventions across organizational portfolios. The system implements a sophisticated multi-agent architecture with 10 specialized agents (6 Deep Agents + 4 Standard Agents) that collaborate via an A2A (Agent-to-Agent) message bus to deliver real-time insights, predictions, and automated recommendations.
 
-The platform serves as a unified command center for transformation management, combining strategic planning (VRO), tactical execution (PMO), and operational coordination (TMO) with AI-powered insights and multi-channel notifications.
+The platform serves as a comprehensive transformation management office (TMO) solution, integrating portfolio management, risk assessment, financial operations (FinOps), value realization (VRO), organizational change management (OCM), and governance capabilities into a unified AI-driven system.
 
 ## User Preferences
 
@@ -14,65 +14,99 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS with shadcn/ui component library (New York style)
-- **State Management**: TanStack React Query for server state with automatic caching and refetching
+- **Build Tool**: Vite with custom plugins for Replit integration
+- **Styling**: TailwindCSS with shadcn/ui component library (New York style)
+- **State Management**: TanStack React Query for server state, React Context for UI state
 - **Routing**: Wouter for lightweight client-side routing
-- **Build Tool**: Vite with custom plugins for meta images and Replit integration
-- **UI Components**: Radix UI primitives wrapped in shadcn/ui components
+- **UI Components**: Radix UI primitives with custom implementations
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express
+- **Runtime**: Node.js with Express.js
 - **Language**: TypeScript with ESM modules
-- **API Structure**: RESTful endpoints organized by domain (admin, dashboard, agents, rules)
-- **Agent System**: 6 Deep Agents with specialized capabilities communicating via DeepAgentOrchestrator message bus
-- **LLM Integration**: Enhanced LLM Router supporting OpenRouter, Anthropic Claude, and Google Gemini with cost-tiered model selection
+- **AI Integration**: Multi-model architecture via LangChain with:
+  - Anthropic Claude (primary)
+  - OpenAI GPT-4
+  - Google Gemini
+  - OpenRouter for cost-optimized routing
+- **Agent Framework**: LangGraph for multi-agent orchestration
+- **Process Management**: PM2 for production deployment
 
-### Multi-Agent System (The 7 Layers)
-1. **Presentation Layer**: React dashboard with role-based views
-2. **API Layer**: Express REST endpoints
-3. **Orchestration Layer**: DeepAgentOrchestrator for agent-to-agent messaging
-4. **Agent Layer**: 6 specialized agents (FinOps, TMO, Risk, VRO, PMO, OCM)
-5. **Memory Layer**: Mem0 for shared facts, Letta for agent-specific memory
-6. **Ontology Layer**: RDF schemas with OBDA mapping for semantic queries
-7. **Persistence Layer**: PostgreSQL with Drizzle ORM
-
-### Rules Engine
-- **Collaboration Rules**: AgentCollaborationRulesEngine for inter-agent coordination
-- **Decision Tables**: Camunda 8 DMN/BPMN integration for complex business rules
-- **Rule Editors**: 8 React components for domain-specific rule configuration (FinOps, TMO, Risk, VRO, PMO, OCM, Governance, Custom Attributes)
+### Multi-Agent System
+The system implements 10 specialized agents:
+- **Deep Agents (6)**: FinOps, TMO, Risk, Governance, VRO, PMO, OCM
+- **Standard Agents (4)**: Planning, Integrated, and specialized domain agents
+- **Orchestration**: Continuous 24/7 orchestration with 15-second monitoring cycles
+- **Communication**: A2A message bus for inter-agent collaboration
+- **Protocol**: MCP (Model Context Protocol) for tool integration
 
 ### Data Storage
-- **Primary Database**: PostgreSQL (48 tables) with Drizzle ORM
+- **Primary Database**: PostgreSQL with Drizzle ORM
 - **Schema Location**: `shared/schema.ts`
-- **Migrations**: Drizzle Kit with migrations stored in `/migrations`
-- **Vector Storage**: Supports Pinecone, Qdrant, Weaviate with fallback to in-memory
+- **Migrations**: Drizzle Kit (`drizzle-kit push`)
+- **Vector Storage**: Support for Pinecone, Qdrant, Weaviate (configurable)
+- **Memory Systems**: Mem0 integration for agent memory persistence
+
+### Rules Engine
+- **Engine**: Camunda 8 with DMN decision tables
+- **Rules Storage**: PostgreSQL `collaboration_rules` table
+- **Policy-as-Code**: Automated policy extraction and enforcement
+- **Best Practices**: 21 pre-configured rules covering budget, schedule, risk, compliance
+
+### Authentication & Security
+- **Auth**: JWT-based authentication with bcrypt password hashing
+- **Credential Storage**: Encrypted credentials for integrations
+- **Admin Controls**: Role-based access with admin dashboard
+
+### Key API Patterns
+- RESTful endpoints under `/api/*`
+- WebSocket connections for real-time notifications
+- Unified notification system consolidating multiple alert sources
+- Background orchestration running independently of HTTP requests
 
 ## External Dependencies
 
-### AI/LLM Services
-- **Anthropic Claude**: Primary LLM via `@anthropic-ai/sdk`
-- **OpenRouter**: Multi-model routing for cost optimization
+### AI/ML Services
+- **Anthropic Claude**: Primary LLM via `@anthropic-ai/sdk` and `@langchain/anthropic`
+- **OpenRouter**: Cost-optimized model routing with failover chains
 - **Google Gemini**: Alternative LLM via `@langchain/google-genai`
-- **LangChain**: Orchestration framework for LLM workflows via `@langchain/core` and `@langchain/langgraph`
+- **LangChain/LangGraph**: Agent orchestration framework
 
 ### Database & Storage
-- **PostgreSQL**: Primary relational database (requires `DATABASE_URL` environment variable)
-- **Drizzle ORM**: Type-safe database operations
-- **Vector Stores**: Optional Pinecone, Qdrant, or Weaviate for embeddings
+- **PostgreSQL**: Primary relational database (via `DATABASE_URL`)
+- **Drizzle ORM**: Database schema and migrations
+- **Vector Databases**: Pinecone, Qdrant, Weaviate (optional, for embeddings)
 
-### External Integrations (MCP Marketplace)
-- **Project Management**: Jira, Azure DevOps, Monday.com, Asana, Linear, GitHub, GitLab
-- **Enterprise PPM**: Microsoft Project Server, ServiceNow, Smartsheet, Planview
-- **Email Providers**: SendGrid, Mailgun, AWS SES, SMTP
-- **Communication**: Slack, Microsoft Teams webhooks
-- **Financial**: Stripe, QuickBooks, Dynamics ERP
+### Integration Platforms
+- **MCP Servers**: 25+ pre-configured PM tool connectors including:
+  - Jira Cloud/Align
+  - Azure DevOps
+  - ServiceNow
+  - Monday, Asana, Wrike, ClickUp
+  - GitHub, GitLab
+  - Smartsheet, Planview
 
-### Authentication & Security
-- **JWT**: Token-based authentication via `jsonwebtoken`
-- **bcrypt**: Password hashing
-- **Credential Encryption**: For stored integration credentials
+### Workflow & Rules
+- **Camunda 8**: BPMN/DMN workflow and decision engine
+- **Retool**: External rule editor interfaces (8 domain-specific apps)
 
-### Build & Development
-- **Vite**: Frontend build with React plugin
-- **TSX**: TypeScript execution for server
-- **Replit Plugins**: Runtime error overlay, cartographer, dev banner
+### Notifications
+- **Email**: SendGrid, Mailgun, AWS SES, SMTP support
+- **Chat**: Slack, Microsoft Teams integrations
+- **In-App**: WebSocket-based real-time notifications
+
+### Required Environment Variables
+- `DATABASE_URL`: PostgreSQL connection string
+- `ANTHROPIC_API_KEY`: For Claude AI models
+- `OPENROUTER_API_KEY`: For model routing (optional)
+- `OPENAI_API_KEY`: For GPT models (optional)
+- `GOOGLE_API_KEY`: For Gemini models (optional)
+
+### Development Commands
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run db:push      # Push schema to database
+npm run seed         # Seed development data
+npm run seed:documents  # Seed regulatory frameworks
+npm run check        # TypeScript type checking
+```

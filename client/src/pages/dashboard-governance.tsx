@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Shield, CheckCircle2, Clock, AlertOctagon,
   Users, ChevronDown, ChevronRight, Bot,
   TrendingUp, TrendingDown, Brain
@@ -15,11 +15,10 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-// TODO: Move riskData to configuration API - contains risk categories and governance framework data
-import { riskData } from '@/lib/lgData';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
-import { 
+import { useQuery } from '@tanstack/react-query';
+import {
   getGovernanceItemsFromRiskData,
   getRiskMetricsFromDivisions,
   getCompanyMetrics,
@@ -129,7 +128,7 @@ function GovernanceItemCard({ item, mode }: { item: TransformedGovernanceItem, m
   );
 }
 
-function RiskCategoryCard({ category }: { category: typeof riskData.categories[0] }) {
+function RiskCategoryCard({ category }: { category: any }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -199,6 +198,22 @@ export default function GovernanceDashboard() {
   const liveData = useAgentData('governance');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Fetch risk framework from API (NO HARDCODED DATA)
+  const { data: riskFrameworkData } = useQuery({
+    queryKey: ['governance', 'risk-framework'],
+    queryFn: async () => {
+      const res = await fetch('/api/governance/risk-framework');
+      if (!res.ok) throw new Error('Failed to fetch risk framework');
+      return res.json();
+    },
+    refetchInterval: 300000, // Refresh every 5 minutes
+  });
+
+  const riskData = riskFrameworkData?.riskData || {
+    categories: [],
+    threeLines: [],
+  };
 
   // Update page context for Ask PM
   useEffect(() => {

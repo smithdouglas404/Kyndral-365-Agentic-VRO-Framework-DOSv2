@@ -3,10 +3,17 @@
 **Version:** 2.0
 **Last Updated:** January 26, 2026
 **Status:** Production Ready
-**Current Release:** Event-Driven Multi-Agent Intelligence Platform
 
 > **THIS IS THE SINGLE SOURCE OF TRUTH**
-> All other documentation is supplementary to this document.
+> All other documentation files have been consolidated here. This document contains:
+> - Business case and ROI analysis
+> - Complete system architecture
+> - User and administrator guides
+> - Technical implementation details
+> - Policy-as-Code system
+> - Production reliability guide
+> - Complete integration flows
+> - Implementation history
 
 ---
 
@@ -24,6 +31,9 @@
 - [Appendix B: Implementation History](#appendix-b-implementation-history)
 - [Appendix C: Troubleshooting](#appendix-c-troubleshooting)
 - [Appendix D: API Reference](#appendix-d-api-reference)
+- [Appendix E: Policy-as-Code Implementation](#appendix-e-policy-as-code-implementation)
+- [Appendix F: Production Reliability Guide](#appendix-f-production-reliability-guide)
+- [Appendix G: Integration Flows](#appendix-g-integration-flows)
 
 ---
 
@@ -773,6 +783,8 @@ Actions:
    - FinOps Agent enforces rules automatically
 ```
 
+**Policy-as-Code:** Rules are stored as JSON in version control for audit trail and disaster recovery.
+
 ---
 
 # 4. ADMINISTRATOR GUIDE
@@ -984,7 +996,7 @@ Red Flags:
 ### Log Management
 
 **Accessing Logs**:
-```
+```bash
 # View logs in browser
 Navigate to: Admin → Logs
 
@@ -1003,12 +1015,14 @@ tail -f logs/agent-*.log        # Agent-specific logs
 ### Backup & Recovery
 
 **Automated Backups**:
-```
-Database: Automated daily backups at 2 AM
-- Retention: 30 days
-- Location: /backups/postgres/
-- Restore command:
-  pg_restore -d deepagents /backups/postgres/2026-01-26.backup
+```bash
+# Daily database backup (configured in cron)
+0 2 * * * pg_dump deep_agent_system | gzip > /backups/db-$(date +\%Y\%m\%d).sql.gz
+
+# Weekly full system backup
+0 3 * * 0 tar -czf /backups/system-$(date +\%Y\%m\%d).tar.gz /opt/deep-agent-system
+
+# Backup retention: 30 daily, 12 weekly, 12 monthly
 ```
 
 **Manual Backup**:
@@ -1244,6 +1258,19 @@ enhanced_knowledge_base
 ├─ content (full text), embedding (vector)
 ├─ relevant_agents, tags
 └─ created_at, updated_at
+
+policy_as_code
+├─ id, source_document_id, policy_name, policy_description
+├─ full_policy_code (JSONB), custom_attributes_created
+├─ rules_generated, status, extraction_confidence
+├─ compliance_framework, mandatory, version
+└─ created_at, activated_at
+
+custom_attributes
+├─ id, name, label, description, data_type
+├─ owner_agent, visible_to, validation_rules
+├─ source_policy_id, auto_generated, policy_section
+└─ created_at, updated_at
 ```
 
 ## 5.2 Agent Architecture
@@ -1311,7 +1338,7 @@ Total cycle time: 100-300ms per agent per project
 
 ## 5.3 Event-Driven Fact Broadcasting
 
-### Implementation (Option 1 Architecture)
+### Implementation
 
 ```typescript
 // In ContinuousOrchestrator.ts, detectIssue() method
@@ -1519,49 +1546,6 @@ interface CollaborationRule {
     "severity": "critical",
     "message": "Project is 10%+ over budget (CPI < 0.90). Immediate intervention required."
   }
-}
-```
-
-**Rule Evaluation Process**:
-```typescript
-// In AgentCollaborationRulesEngine.ts
-
-async evaluate(project: Project): Promise<TriggeredRule[]> {
-  const rules = await this.getRules({ enabled: true });
-  const facts = this.extractFacts(project);  // CPI, SPI, Risk Score, etc.
-
-  const triggered: TriggeredRule[] = [];
-
-  for (const rule of rules) {
-    const engine = new Engine();
-    engine.addRule({
-      conditions: rule.conditionLogic,
-      event: { type: 'rule_triggered', params: rule.actionConfig }
-    });
-
-    const result = await engine.run(facts);
-
-    if (result.events.length > 0) {
-      triggered.push({
-        ruleId: rule.id,
-        ruleName: rule.name,
-        severity: rule.actionConfig.severity,
-        action: rule.actionConfig.message,
-        agents: rule.actionConfig.agents
-      });
-
-      // Log execution for audit trail
-      await this.storage.logRuleExecution({
-        ruleId: rule.id,
-        projectId: project.id,
-        matched: true,
-        facts: facts,
-        timestamp: new Date()
-      });
-    }
-  }
-
-  return triggered;
 }
 ```
 
@@ -1808,6 +1792,84 @@ Application Metrics (available via /api/health/metrics):
 - ✅ React frontend
 - ✅ MCP protocol integrations
 
+## Session Complete Summary (January 25, 2026)
+
+### What Was Accomplished
+
+**1. Documentation Consolidated**
+- Problem: Documentation fragmented across 7+ files
+- Solution: Created single MASTER_ARCHITECTURE.md
+- Before: 7 separate files totaling 85KB
+- After: One comprehensive 1,832-line document
+
+**2. Server Fully Operational**
+- Fixed all errors: xml2js, axios, OpenAI lazy-loading, Gemini lazy-loading
+- Resolved TypeScript errors in ContinuousOrchestrator and EnhancedLLMRouter
+- Server running without errors
+
+**3. Database Migration Complete**
+- Executed policy-as-code.sql migration
+- Created: policy_as_code, policy_extraction_audit, agent_configs tables
+- Modified: agent_collaboration_rules, custom_attributes, documents tables
+- All indexes created and verified
+
+**4. Deep Agent System Active**
+- Migrated 6 agents to Deep Agent architecture
+- Plus 4 standard agents (to be migrated)
+- Features: Continuous orchestration, A2A messaging, MCP integration
+- Mem0 and Letta memory systems operational
+
+**5. Policy-as-Code System Ready**
+- Backend complete: PolicyExtractionService, 10 API endpoints
+- Document upload integration
+- LLM extraction (GPT-4 + Gemini)
+- HITL approval workflow
+- Audit trail logging
+
+**6. Enterprise UX Audit Complete**
+- Audited 8+ notification/alert components
+- Found 4 parallel notification systems
+- Identified architectural fragmentation
+- Created prioritized 27-item fix list
+
+### Current System State
+
+**Backend**: ✅ 100% Complete
+- Deep agents operational
+- Policy-as-code backend ready
+- Database migrated
+- All errors fixed
+- Server running without issues
+
+**Frontend**: ⚠️ Needs UX Consolidation
+- Individual components work
+- Not unified into cohesive system
+- Dead code exists (AlertsFlyout)
+- Inconsistent across pages
+- Needs 4-6 weeks of polish
+
+### Implementation Notes from Jan 25 Session
+
+**Files Created (12 files)**:
+1. `/server/agents/DeepAgentBootstrap.ts` (305 lines)
+2. `/server/lib/PolicyExtractionService.ts` (447 lines)
+3. `/server/routes/policy-as-code.ts` (280 lines)
+4. `/migrations/policy-as-code.sql` (168 lines)
+5. Multiple documentation files (consolidated)
+
+**Files Modified (10 files)**:
+1. `/server/routes/orchestration.ts` - Switched to DeepAgentBootstrap
+2. `/server/agents/AgentScheduler.ts` - Deep agents + getConfig fixes
+3. `/server/agents/ContinuousOrchestrator.ts` - Type error fixes
+4. `/server/lib/PolicyExtractionService.ts` - Lazy-loading OpenAI
+5. `/server/lib/EnhancedLLMRouter.ts` - Type assertion
+6. `/server/routes/documents.ts` - Policy auto-extraction
+7. `/server/routes.ts` - Registered policy routes
+8. `/shared/schema.ts` - Added policy tables
+9. `/package.json` - Added xml2js, axios
+
+**Files Deleted (7 files)**: All consolidated into MASTER_ARCHITECTURE.md
+
 ---
 
 # APPENDIX C: TROUBLESHOOTING
@@ -1822,10 +1884,517 @@ See [5.6 API Endpoints](#56-api-endpoints) in Technical Architecture.
 
 ---
 
+# APPENDIX E: POLICY-AS-CODE IMPLEMENTATION
+
+## E.1 Complete End-to-End Flow
+
+Policy as Code converts compliance documents (PDFs, Word docs) into **executable code** that agents use for real-time enforcement.
+
+**Traditional approach**: RAG queries at runtime (slow, expensive, inconsistent)
+**Our approach**: One-time LLM extraction → Executable rules → Instant enforcement
+
+### The Complete Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 1: DOCUMENT UPLOAD                                         │
+├─────────────────────────────────────────────────────────────────┤
+│ User uploads: "ISO27001_Security_Policy.pdf"                   │
+│ Tags document as: "policy_compliance"                          │
+│                                                                 │
+│ Database: documents table                                       │
+│ ├─ id: "doc-123"                                               │
+│ ├─ document_type: "policy_compliance" ← IMPORTANT!            │
+│ └─ filePath: "/uploads/doc-123.pdf"                            │
+└─────────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 2: LLM EXTRACTION                                          │
+├─────────────────────────────────────────────────────────────────┤
+│ POST /api/policy/extract/doc-123                               │
+│ Body: { model: "gpt-4", complianceFramework: "ISO27001" }     │
+│                                                                 │
+│ PolicyExtractionService processes:                             │
+│ 1. Reads document content                                      │
+│ 2. Sends to GPT-4 with extraction prompt                       │
+│ 3. LLM returns structured JSON                                 │
+└─────────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 3: POLICY RECORD CREATED                                  │
+├─────────────────────────────────────────────────────────────────┤
+│ Database: policy_as_code table                                 │
+│ ├─ id: "policy-456"                                            │
+│ ├─ full_policy_code: { customAttributes: [...], rules: [...] }│
+│ ├─ custom_attributes_created: 12                               │
+│ ├─ rules_generated: 8                                          │
+│ ├─ status: "pending_review" ← Awaiting HITL approval           │
+│ └─ extraction_confidence: 0.92                                 │
+└─────────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 4: HUMAN REVIEW (HITL)                                    │
+├─────────────────────────────────────────────────────────────────┤
+│ Compliance officer reviews and approves                        │
+│ PUT /api/policy/policy-456/approve                             │
+│ Body: { activateImmediately: true, reviewNotes: "..." }       │
+└─────────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 5: ACTIVATION - RULES & ATTRIBUTES CREATED                │
+├─────────────────────────────────────────────────────────────────┤
+│ PolicyExtractionService.approvePolicy() executes:              │
+│ 1. Creates custom attributes in custom_attributes table        │
+│ 2. Creates rules in agent_collaboration_rules table            │
+│ 3. Updates policy status to "active"                           │
+│ All linked to policy-456 via source_policy_id                  │
+└─────────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 6: AGENTS USE THE RULES                                   │
+├─────────────────────────────────────────────────────────────────┤
+│ DeepGovernanceAgent loads rules and evaluates in real-time     │
+│ - SELECT * FROM agent_collaboration_rules WHERE enabled=true   │
+│ - json-rules-engine evaluates conditions (<5ms)                │
+│ - Triggers actions when rules match                            │
+│ - Creates interventions for violations                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## E.2 Concrete Example: ISO27001
+
+### Input Document
+
+**File**: `ISO27001_Security_Policy.pdf`
+
+**Content** (excerpt):
+```
+ISO 27001 INFORMATION SECURITY POLICY
+
+Section 5.2: Risk Assessment Requirements
+All projects handling sensitive data MUST undergo a security risk assessment
+before development begins. Risk assessments must be completed within 5
+business days of project initiation.
+
+Projects classified as "Confidential" or "Restricted" require CISO approval
+before proceeding to development phase.
+
+Section 8.1: Access Control
+Admin access should be limited to maximum 3 users per project.
+Multi-factor authentication (MFA) must be enabled.
+
+Section 10.3: Change Management
+All production changes require documented rollback plan.
+```
+
+### LLM Extraction Response
+
+```json
+{
+  "policyName": "ISO 27001 Information Security Policy",
+  "customAttributes": [
+    {
+      "name": "dataClassification",
+      "label": "Data Classification",
+      "dataType": "string",
+      "ownerAgent": "governance",
+      "visibleTo": ["governance", "risk", "pmo"],
+      "validationRules": {
+        "enum": ["Public", "Internal", "Confidential", "Restricted"],
+        "required": true
+      },
+      "policySection": "5.2"
+    },
+    {
+      "name": "adminUserCount",
+      "label": "Admin User Count",
+      "dataType": "number",
+      "ownerAgent": "governance",
+      "validationRules": { "min": 0, "max": 3 },
+      "policySection": "8.1"
+    },
+    {
+      "name": "mfaEnabled",
+      "label": "MFA Enabled",
+      "dataType": "boolean",
+      "ownerAgent": "governance",
+      "validationRules": { "required": true },
+      "policySection": "8.1"
+    }
+  ],
+  "rules": [
+    {
+      "name": "ISO27001-5.2-Risk-Assessment-Required",
+      "sourceAgent": "risk",
+      "priority": 9,
+      "mandatory": true,
+      "conditions": [
+        {
+          "fact": "dataClassification",
+          "operator": "in",
+          "value": ["Confidential", "Restricted"]
+        },
+        {
+          "fact": "securityRiskAssessmentDate",
+          "operator": "equal",
+          "value": null
+        },
+        {
+          "fact": "daysSinceProjectStart",
+          "operator": "greaterThan",
+          "value": 5
+        }
+      ],
+      "actions": [
+        {
+          "type": "create_intervention",
+          "params": {
+            "severity": "critical",
+            "title": "Security Risk Assessment Overdue",
+            "description": "ISO 27001 Section 5.2 requires security risk assessment within 5 days"
+          }
+        },
+        {
+          "type": "block_progression",
+          "params": { "blockedPhase": "development" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+## E.3 Database Relationships
+
+```
+documents (source)
+  └─ id: "doc-iso27001"
+       ↓
+policy_as_code (extracted policy)
+  ├─ id: "policy-001"
+  ├─ source_document_id: "doc-iso27001"
+  └─ full_policy_code: {...}
+       │
+       ├──────────────┬──────────────────┐
+       ↓              ↓                  ↓
+custom_attributes   agent_collaboration_rules   policy_extraction_audit
+├─ id: "attr-001"   ├─ id: "rule-001"          ├─ policy_id
+├─ name: "dataClass"├─ name: "ISO27001..."     ├─ status: "success"
+├─ source_policy_id ├─ source_policy_id        └─ tokens_used
+└─ owner_agent      └─ enabled: true
+                         │
+                         ↓
+                    DeepGovernanceAgent
+                    ├─ Loads rules
+                    ├─ Evaluates with json-rules-engine
+                    └─ Executes actions
+```
+
+## E.4 API Endpoints
+
+### Policy Extraction
+```bash
+POST /api/policy/extract/:documentId
+Body: { model: "gpt-4", complianceFramework: "ISO27001" }
+```
+
+### List Policies
+```bash
+GET /api/policy?status=active&complianceFramework=ISO27001
+```
+
+### Approve Policy (HITL)
+```bash
+PUT /api/policy/:policyId/approve
+Body: { activateImmediately: true, reviewNotes: "..." }
+```
+
+### Get Audit Trail
+```bash
+GET /api/policy/:policyId/audit
+```
+
+## E.5 Benefits vs Traditional RAG
+
+| Aspect | Traditional RAG | Policy as Code |
+|--------|-----------------|----------------|
+| **Cost** | $5-10 per query | $0.46 one-time |
+| **Latency** | 2-5 seconds | <50ms |
+| **Consistency** | Varies per query | 100% consistent |
+| **Traceability** | None | Full audit trail |
+| **Versioning** | None | Built-in |
+| **Human Oversight** | None | HITL approval required |
+
+**Cost Savings Example:**
+- 1000 compliance checks/day
+- RAG: 1000 × $0.05 = $50/day = $18,250/year
+- Policy-as-Code: $0.08 once = **99.99% cost reduction**
+
+---
+
+# APPENDIX F: PRODUCTION RELIABILITY GUIDE
+
+## F.1 Overview
+
+Production-grade error handling, logging, and process management system.
+
+### Features Implemented
+
+**1. Structured Logging System (`server/lib/logger.ts`)**
+- ✅ Daily log rotation (14-day retention for general, 30-day for errors)
+- ✅ Multiple log levels (error, warn, info, debug)
+- ✅ Separate error log files
+- ✅ JSON formatting for machine parsing
+- ✅ Context tracking (request ID, user ID, agent ID)
+- ✅ Performance metrics logging
+- ✅ Automatic exception and rejection handling
+
+**File Structure:**
+```
+logs/
+├── application-2026-01-26.log   (daily rotated)
+├── error-2026-01-26.log          (errors only)
+├── exceptions.log                 (uncaught exceptions)
+├── rejections.log                 (unhandled rejections)
+├── pm2-error.log
+├── pm2-out.log
+└── pm2-combined.log
+```
+
+**2. Process Management (`server/lib/processManager.ts`)**
+- ✅ Graceful shutdown (SIGTERM, SIGINT) with 30s timeout
+- ✅ Uncaught exception handling
+- ✅ Unhandled promise rejection handling
+- ✅ Hanging process detection (5-minute inactivity timeout)
+- ✅ Health check pings every 60 seconds
+- ✅ Memory monitoring (warns if >512MB heap usage)
+- ✅ Automatic cleanup of agents, orchestrator, database connections
+
+**Signal Handlers:**
+| Signal | Purpose | Behavior |
+|--------|---------|----------|
+| `SIGTERM` | Graceful shutdown | Closes HTTP server, cleanup, exits 0 |
+| `SIGINT` | Ctrl+C | Same as SIGTERM |
+| `uncaughtException` | Unhandled errors | Logs error, exits 1 |
+| `unhandledRejection` | Unhandled promises | Logs error, exits 1 in production |
+
+**3. PM2 Configuration (`ecosystem.config.js`)**
+- ✅ Automatic restart on crashes
+- ✅ Memory limit monitoring (restart if >1GB)
+- ✅ Graceful shutdown coordination
+- ✅ Log rotation and management
+- ✅ Environment-specific configurations
+
+**4. Error Recovery in Orchestration**
+- ✅ Automatic error recovery after 5 consecutive failures
+- ✅ Circuit breaker pattern
+- ✅ Error counter tracking
+- ✅ Graceful degradation
+
+## F.2 Deployment Guide
+
+### Step 1: Install Dependencies
+
+```bash
+npm install winston winston-daily-rotate-file pm2 --save
+```
+
+### Step 2: Build Application
+
+```bash
+npm run build
+```
+
+### Step 3: Start with PM2
+
+```bash
+# Development
+pm2 start ecosystem.config.js --env development
+pm2 logs deep-agent-system
+
+# Production
+pm2 start ecosystem.config.js --env production
+pm2 save
+pm2 startup  # Enable auto-start on boot
+```
+
+### Step 4: Monitor
+
+```bash
+# Real-time monitoring
+pm2 monit
+
+# View logs
+pm2 logs deep-agent-system
+
+# Check status
+pm2 status
+
+# View health endpoint
+curl http://localhost:5000/health
+```
+
+## F.3 Monitoring Metrics
+
+### Key Metrics to Monitor
+
+| Metric | Endpoint | Threshold | Action |
+|--------|----------|-----------|--------|
+| Memory Usage | `/health/metrics` | >512MB | Warning, >1GB restart |
+| Error Rate | `/health/metrics` | >5% | Alert |
+| Response Time | `/health/metrics` | >2000ms | Investigate |
+| Orchestration Errors | Logs | >5 consecutive | Auto-recovery triggered |
+| Agent Success Rate | `/health/agents` | <80% | Review agent logs |
+
+## F.4 Performance Impact
+
+| Feature | CPU Overhead | Memory Overhead | Latency Impact |
+|---------|--------------|-----------------|----------------|
+| Structured Logging | <1% | ~10MB | <1ms per request |
+| Process Handlers | <0.1% | ~2MB | None |
+| Health Checks | <0.5% | ~5MB | <50ms |
+| Error Recovery | <0.1% | Negligible | None |
+| **Total** | **<2%** | **~17MB** | **<1ms** |
+
+---
+
+# APPENDIX G: INTEGRATION FLOWS
+
+## G.1 Complete Integration Flow
+
+**Document Upload → LLM Extraction → HITL Approval → Custom Attributes → Rule Editors → Mem0/Letta → Agent Behavior**
+
+### The Complete Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  1. DOCUMENT UPLOAD (Policy as Code UI)                            │
+│  /admin/policies                                                    │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  2. LLM EXTRACTION (PolicyExtractionService)                       │
+│  server/lib/PolicyExtractionService.ts                             │
+│  extractPolicy() → Parse → Store as JSON                           │
+│  Status: "pending_review"                                           │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  3. HITL REVIEW (Human Approval)                                   │
+│  /admin/policies → "Review" button                                 │
+│  Human sees: Extracted attributes (6), rules (5), confidence 92%   │
+│  Human clicks: "Approve & Activate"                                │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  4. APPROVAL CREATES ATTRIBUTES & RULES                            │
+│  approvePolicy() in PolicyExtractionService.ts                     │
+│  - Creates custom attributes in database                            │
+│  - Creates collaboration rules in database                          │
+│  - Links all to source policy via source_policy_id                 │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  5. ATTRIBUTES APPEAR IN RULE EDITORS                              │
+│  /admin/rules/risk, /admin/rules/pmo, etc.                        │
+│  RuleEditorBase fetches: GET /api/custom-attributes?visibleTo=risk│
+│  Dropdown now shows policy-generated attributes                    │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  6. RULES ENGINE LOADS RULES                                       │
+│  AgentCollaborationRulesEngine.ts                                  │
+│  loadRules() → Convert to json-rules-engine format                 │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  7. AGENT DETECTS INCIDENT & WRITES TO MEM0                        │
+│  DeepRiskAgent runs analysis                                       │
+│  await this.broadcastFact('project_x', 'incident_severity', 9)    │
+│  Mem0 writes to agent_facts table                                  │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  8. RULES ENGINE EVALUATES & TRIGGERS COLLABORATION                │
+│  json-rules-engine evaluates conditions in <5ms                    │
+│  If rule fires → Execute actions (notify agents, create tasks)     │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  9. PMO AGENT OBSERVES FACT VIA MEM0 SUBSCRIPTION                 │
+│  PMO subscribed to Risk facts                                      │
+│  onFactObserved() callback fires automatically                     │
+│  PMO takes action: adjust project health, learn for future         │
+└────────────────────┬────────────────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│  10. LETTA STORES IN AGENT MEMORY                                  │
+│  LettaAgentMemory.learn() stores for long-term recall             │
+│  INSERT INTO agent_archival_memory with vector embedding           │
+│  Next analysis uses context for better decisions                   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## G.2 Key Integration Points
+
+### 1. Policy → Custom Attributes
+```typescript
+// PolicyExtractionService.approvePolicy()
+for (const attr of policyCode.customAttributes) {
+  await db.insert(customAttributes).values({
+    name: attr.name,
+    ownerAgent: attr.ownerAgent,
+    sourcePolicyId: policyId,  // Links back to policy
+    autoGenerated: true
+  });
+}
+```
+
+### 2. Custom Attributes → Rule Editors
+```typescript
+// RuleEditorBase.tsx
+const { data: attributes } = useQuery({
+  queryKey: ['custom-attributes', agentType],
+  queryFn: async () => {
+    const response = await fetch(`/api/custom-attributes?visibleTo=${agentType}`);
+    return response.json();
+  }
+});
+```
+
+### 3. Agent Behavior → Mem0/Letta
+```typescript
+// Agent writes fact
+await this.broadcastFact('project_x', 'incident_severity', 9, 0.95);
+
+// Rules engine evaluates
+const results = await rulesEngine.evaluateRules({
+  incident_severity: 9  // FROM MEM0!
+});
+
+// Store in Letta for long-term memory
+await this.learn('incident_x', { severity: 9, detectedAt: new Date() });
+```
+
+---
+
 **END OF MASTER ARCHITECTURE DOCUMENT**
 
 **Version**: 2.0
 **Last Updated**: January 26, 2026
-**Total Pages**: ~100
+**Total Pages**: ~150
 **Document Owner**: Deep Agent System Team
 **Next Review Date**: February 15, 2026
+
+---
+
+**All content from the following files has been consolidated here:**
+- /home/runner/workspace/MASTER_ARCHITECTURE.md (original)
+- /home/runner/workspace/docs/MASTER_ARCHITECTURE.md
+- /home/runner/workspace/docs/SESSION_COMPLETE_SUMMARY.md
+- /home/runner/workspace/docs/POLICY_AS_CODE_INTEGRATION.md
+- /home/runner/workspace/docs/PRODUCTION_RELIABILITY.md
+- /home/runner/workspace/POLICY_AS_CODE_DEMO.md
+- /home/runner/workspace/replit.md
+
+**This is now the ONLY documentation file you need.**

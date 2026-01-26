@@ -26,6 +26,14 @@ import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } 
  */
 export class A2AMessageBus extends EventEmitter {
   private messageQueue: Map<string, AgentMessage[]> = new Map();
+  private storage: IStorage | null = null;
+
+  /**
+   * Set storage instance for persisting messages
+   */
+  setStorage(storage: IStorage): void {
+    this.storage = storage;
+  }
 
   /**
    * Send message from one agent to another
@@ -40,6 +48,48 @@ export class A2AMessageBus extends EventEmitter {
     this.emit(`message:${message.to}`, message);
 
     console.log(`[A2A] ${message.from} → ${message.to}: ${message.type}`);
+
+    // Persist to database for history
+    if (this.storage) {
+      try {
+        await this.storage.createAgentActivityLog({
+          eventType: 'agent_to_agent',
+          primaryAgentId: message.from,
+          primaryAgentName: this.formatAgentName(message.from),
+          secondaryAgentId: message.to,
+          secondaryAgentName: message.to ? this.formatAgentName(message.to) : undefined,
+          summary: `${this.formatAgentName(message.from)} → ${message.to ? this.formatAgentName(message.to) : 'broadcast'}: ${message.type}`,
+          details: JSON.stringify({
+            type: message.type,
+            content: message.content,
+            projectId: message.projectId,
+            severity: message.severity,
+            requiresApproval: message.requiresApproval,
+          }),
+        });
+      } catch (error) {
+        console.error('[A2A] Failed to persist message:', error);
+      }
+    }
+  }
+
+  /**
+   * Format agent ID to friendly name
+   */
+  private formatAgentName(agentId: string): string {
+    const names: Record<string, string> = {
+      finops: 'FinOps',
+      tmo: 'TMO',
+      risk: 'Risk',
+      vro: 'VRO',
+      pmo: 'PMO',
+      ocm: 'OCM',
+      governance: 'Governance',
+      planning: 'Planning',
+      integrated: 'Integrated Management',
+      okr: 'OKR Inference',
+    };
+    return names[agentId] || agentId.toUpperCase();
   }
 
   /**
@@ -196,6 +246,7 @@ export class ContinuousOrchestrator {
 
     // Initialize A2A message bus
     this.a2aBus = new A2AMessageBus();
+    this.a2aBus.setStorage(storage);
     console.log('[ContinuousOrchestrator] A2A message bus initialized');
 
     // Initialize MCP protocol handler

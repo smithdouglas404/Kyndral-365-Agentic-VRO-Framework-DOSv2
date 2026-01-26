@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter';
 import {
   TrendingUp, FolderKanban, DollarSign, RefreshCw,
-  Calendar, Shield, Users, Settings, Bot
+  Calendar, Shield, Users, Settings, Bot, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRoleBasedAccess, UserRole } from '@/hooks/useRoleBasedAccess';
@@ -153,6 +153,16 @@ export function WorkspaceSidebar({ userRole = 'pm' }: WorkspaceSidebarProps) {
             Quick Actions
           </div>
           <ul className="space-y-1">
+            <li>
+              <Link href="/agent-collaboration">
+                <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500">
+                    <Activity className="h-4 w-4 text-white" />
+                  </div>
+                  <span>Agent Network</span>
+                </a>
+              </Link>
+            </li>
             <li>
               <Link href="/command-center">
                 <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">

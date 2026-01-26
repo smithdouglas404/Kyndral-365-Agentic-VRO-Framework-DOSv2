@@ -41,6 +41,8 @@ import { registerPortfolioOptimizationRoutes } from "./routes/portfolio-optimiza
 import { registerCollaborationRoutes } from "./routes/collaboration.js";
 import { registerWhiteLabelRoutes } from "./routes/admin/white-label.js";
 import { registerAgentInsightsRoutes } from "./routes/agent-insights.js";
+import { registerAgentActivityRoutes } from "./routes/agent-activity.js";
+import { registerGovernanceRoutes } from "./routes/governance.js";
 import { registerVoiceBriefingRoutes } from "./routes/voice-briefings.js";
 import { createLLMConfigRoutes } from "./routes/llm-config.js";
 import { createKnowledgeBaseRoutes } from "./routes/knowledge-base.js";
@@ -228,6 +230,12 @@ export async function registerRoutes(
 
   // Register Agent Insights routes (NEW - Expose agent calculations to UI)
   registerAgentInsightsRoutes(app, storage);
+
+  // Register Agent Activity routes (Real-time A2A messages and activity logs)
+  registerAgentActivityRoutes(app, storage);
+
+  // Register Governance routes (Risk framework and compliance data)
+  registerGovernanceRoutes(app, storage);
 
   // Register Voice Briefing routes (NotebookLM-style podcast summaries)
   registerVoiceBriefingRoutes(app, storage);
