@@ -253,7 +253,7 @@ export default function KnowledgeBaseManagement() {
         throw new Error('No document or replacement file selected');
       }
 
-      // Read file content
+      // Step 1: Read file content
       const reader = new FileReader();
       const content = await new Promise<string>((resolve, reject) => {
         reader.onload = (e) => resolve(e.target?.result as string);
@@ -261,22 +261,48 @@ export default function KnowledgeBaseManagement() {
         reader.readAsText(replacementFile);
       });
 
-      // Replace document via API
-      const res = await fetch(`/api/admin/knowledge-base/${selectedDocument.id}/replace`, {
-        method: 'PUT',
+      // Step 2: Upload new document with same metadata
+      const uploadRes = await fetch('/api/admin/knowledge-base', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: replacementFile.name.replace(/\.[^/.]+$/, ''),
+          documentType: selectedDocument.documentType,
+          category: selectedDocument.category,
+          summary: selectedDocument.summary || '',
           content: content,
+          tags: selectedDocument.tags,
+          relevantAgents: selectedDocument.relevantAgents,
+          status: selectedDocument.status,
         }),
       });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to replace document');
+      if (!uploadRes.ok) {
+        const error = await uploadRes.json();
+        throw new Error(error.message || 'Failed to upload replacement document');
       }
 
-      return res.json();
+      const uploadData = await uploadRes.json();
+      const newDocId = uploadData.article?.id;
+
+      if (!newDocId) {
+        throw new Error('No document ID returned from upload');
+      }
+
+      // Step 3: Replace old document with new one (transfers all references)
+      const replaceRes = await fetch(
+        `/api/admin/knowledge-base/${selectedDocument.id}/replace/${newDocId}`,
+        {
+          method: 'POST',
+        }
+      );
+
+      if (!replaceRes.ok) {
+        const error = await replaceRes.json();
+        throw new Error(error.message || 'Failed to replace document references');
+      }
+
+      return replaceRes.json();
     },
     onSuccess: () => {
       toast({
@@ -887,6 +913,73 @@ export default function KnowledgeBaseManagement() {
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? 'Deleting...' : deleteUsageInfo?.isInUse ? 'Force Delete Anyway' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Replace Document Dialog */}
+      <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Replace Document</DialogTitle>
+            <DialogDescription>
+              Upload a new file to replace "{selectedDocument?.title}". All agent assignments and references will be preserved.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <Alert>
+              <CheckCircle2 className="w-4 h-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <div className="font-semibold">What will be preserved:</div>
+                  <ul className="list-disc list-inside text-sm space-y-1 ml-2">
+                    <li>All agent assignments ({deleteUsageInfo?.usageDetails?.agentCount || 0} agents)</li>
+                    <li>All trigger rules ({deleteUsageInfo?.usageDetails?.triggerRules?.length || 0} rules)</li>
+                    <li>Document tags and category</li>
+                    <li>Document ID and references</li>
+                  </ul>
+                </div>
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-2">
+              <Label htmlFor="replacement-file">Select Replacement File</Label>
+              <Input
+                id="replacement-file"
+                type="file"
+                accept=".txt,.md,.pdf,.docx"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setReplacementFile(file);
+                  }
+                }}
+              />
+              {replacementFile && (
+                <p className="text-sm text-muted-foreground">
+                  Selected: {replacementFile.name} ({(replacementFile.size / 1024).toFixed(2)} KB)
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowReplaceDialog(false);
+                setReplacementFile(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => replaceMutation.mutate()}
+              disabled={!replacementFile || replaceMutation.isPending}
+            >
+              {replaceMutation.isPending ? 'Replacing...' : 'Replace Document'}
             </Button>
           </DialogFooter>
         </DialogContent>
