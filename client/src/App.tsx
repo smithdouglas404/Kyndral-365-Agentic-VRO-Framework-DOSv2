@@ -20,6 +20,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, ChevronUp, X } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import LandingPage from "@/pages/LandingPage";
+import DemoRequestPage from "@/pages/DemoRequestPage";
+import InvitationAcceptPage from "@/pages/InvitationAcceptPage";
+import SystemAdminPage from "@/pages/SystemAdminPage";
 import Dashboard from "@/pages/dashboard";
 import ValueProposition from "@/pages/value-proposition";
 import SegmentPage from "@/pages/SegmentPage";
@@ -106,8 +110,14 @@ import DemoShowcase from "@/pages/DemoShowcase";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/demo" component={DemoPage} />
+      {/* Multi-Tenant SaaS Routes */}
+      <Route path="/" component={LandingPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/demo" component={DemoRequestPage} />
+      <Route path="/invite/:token" component={InvitationAcceptPage} />
+      <Route path="/system-admin" component={SystemAdminPage} />
+
+      {/* Setup & Demo Showcase */}
       <Route path="/demo/showcase" component={DemoShowcase} />
       <Route path="/setup" component={SetupWizard} />
 
@@ -159,7 +169,6 @@ function Router() {
       <Route path="/analytics" component={AdvancedAnalytics} />
       <Route path="/financial-advanced" component={AdvancedFinancialManagement} />
       <Route path="/report-builder" component={CustomReportBuilder} />
-      <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/password-reset" component={PasswordResetPage} />
       <Route path="/password-reset/confirm" component={PasswordResetConfirmPage} />
