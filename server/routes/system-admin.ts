@@ -15,6 +15,8 @@ import {
 
 const router = Router();
 
+console.log('[SystemAdmin] System admin routes loading...');
+
 // All routes require system admin
 router.use(requireAuth);
 router.use(requireSystemAdmin);
@@ -434,5 +436,15 @@ router.get('/analytics', async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message || 'Failed to get analytics' });
   }
 });
+
+console.log('[SystemAdmin] ✅ System admin routes registered:');
+console.log('  - GET    /api/system-admin/tenants');
+console.log('  - POST   /api/system-admin/tenants');
+console.log('  - GET    /api/system-admin/tenants/:id');
+console.log('  - PATCH  /api/system-admin/tenants/:id');
+console.log('  - GET    /api/system-admin/demo-requests');
+console.log('  - POST   /api/system-admin/demo-requests/:id/convert');
+console.log('  - PATCH  /api/system-admin/demo-requests/:id');
+console.log('  - GET    /api/system-admin/analytics');
 
 export default router;

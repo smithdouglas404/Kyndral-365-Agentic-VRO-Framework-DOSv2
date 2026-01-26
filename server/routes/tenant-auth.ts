@@ -19,8 +19,10 @@ import {
 
 const router = Router();
 
+console.log('[TenantAuth] Multi-tenant authentication routes loading...');
+
 // ============================================================================
-// POST /api/auth/login
+// POST /api/tenant-auth/login
 // Standard login (email + password)
 // ============================================================================
 router.post('/login', async (req: Request, res: Response) => {
@@ -445,5 +447,14 @@ router.post('/logout', requireAuth, async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message || 'Logout failed' });
   }
 });
+
+console.log('[TenantAuth] ✅ Multi-tenant authentication routes registered:');
+console.log('  - POST /api/tenant-auth/login');
+console.log('  - POST /api/tenant-auth/demo-login');
+console.log('  - POST /api/tenant-auth/demo-request');
+console.log('  - GET  /api/tenant-auth/me');
+console.log('  - GET  /api/tenant-auth/invitation/:token');
+console.log('  - POST /api/tenant-auth/invitation/:token/accept');
+console.log('  - POST /api/tenant-auth/logout');
 
 export default router;
