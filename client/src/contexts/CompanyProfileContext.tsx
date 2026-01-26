@@ -145,7 +145,7 @@ export function useCompanyName(): string {
     return profile.company.legalName;
   }
 
-  return 'NextEra Energy'; // Fallback to demo company
+  return 'ACME Corporation'; // Fallback to generic demo company (white-label)
 }
 
 /**
