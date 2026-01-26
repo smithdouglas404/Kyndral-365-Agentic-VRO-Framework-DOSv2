@@ -59,6 +59,8 @@ import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
 import { createComplianceRoutes } from "./routes/compliance.js";
 import documentsRouter from "./routes/documents.js";
 import { registerDemoRoutes } from "./routes/demo.js";
+import tenantAuthRouter from "./routes/tenant-auth";
+import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
@@ -158,6 +160,12 @@ export async function registerRoutes(
 
   // Register Demo routes (ACME industry-specific demo data loading)
   registerDemoRoutes(app);
+
+  // Register Multi-Tenant Authentication routes (SaaS login, demo access, invitations)
+  app.use('/api/tenant-auth', tenantAuthRouter);
+
+  // Register System Admin routes (Tenant provisioning, demo request management)
+  app.use('/api/system-admin', systemAdminRouter);
 
   // Register Integration Management routes (ADMIN - External data source configuration)
   registerIntegrationRoutes(app, storage);

@@ -14,6 +14,102 @@ export const processingStatusEnum = pgEnum('processing_status', ['pending', 'pro
 export const itemTypeEnum = pgEnum('item_type', ['organizational_unit', 'metric', 'rule', 'objective', 'risk', 'kpi', 'strategic_theme']);
 export const approvalStatusEnum = pgEnum('approval_status', ['pending', 'approved', 'rejected', 'cancelled']);
 
+// Multi-tenant enums
+export const tenantStatusEnum = pgEnum('tenant_status', ['trial', 'active', 'suspended', 'cancelled']);
+export const subscriptionTierEnum = pgEnum('subscription_tier', ['demo', 'professional', 'enterprise']);
+export const userRoleEnum = pgEnum('user_role', ['system_admin', 'tenant_admin', 'pmo', 'finops', 'risk', 'ocm', 'tmo', 'vro', 'governance', 'viewer']);
+export const invitationStatusEnum = pgEnum('invitation_status', ['pending', 'accepted', 'expired', 'cancelled']);
+export const demoRequestStatusEnum = pgEnum('demo_request_status', ['requested', 'demo_active', 'contacted', 'converted']);
+
+// ============================================================================
+// MULTI-TENANT AUTHENTICATION & AUTHORIZATION
+// ============================================================================
+
+// Tenants (Organizations)
+export const tenants = pgTable('tenants', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  status: tenantStatusEnum('status').default('trial').notNull(),
+  subscriptionTier: subscriptionTierEnum('subscription_tier').default('demo').notNull(),
+  provisionedBy: uuid('provisioned_by'),
+  trialEndsAt: timestamp('trial_ends_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Users
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  passwordHash: varchar('password_hash', { length: 255 }),
+  firstName: varchar('first_name', { length: 255 }),
+  lastName: varchar('last_name', { length: 255 }),
+  role: userRoleEnum('role').default('viewer').notNull(),
+  isSystemAdmin: boolean('is_system_admin').default(false).notNull(),
+  emailVerified: boolean('email_verified').default(false).notNull(),
+  lastLoginAt: timestamp('last_login_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Tenant Invitations
+export const tenantInvitations = pgTable('tenant_invitations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  email: varchar('email', { length: 255 }).notNull(),
+  role: userRoleEnum('role').default('viewer').notNull(),
+  invitedBy: uuid('invited_by').references(() => users.id),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  status: invitationStatusEnum('status').default('pending').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  acceptedAt: timestamp('accepted_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// Demo Requests (Lead Capture)
+export const demoRequests = pgTable('demo_requests', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: varchar('email', { length: 255 }).notNull(),
+  firstName: varchar('first_name', { length: 255 }),
+  lastName: varchar('last_name', { length: 255 }),
+  companyName: varchar('company_name', { length: 255 }),
+  phone: varchar('phone', { length: 50 }),
+  demoSessionId: varchar('demo_session_id', { length: 255 }),
+  demoIndustry: varchar('demo_industry', { length: 50 }),
+  status: demoRequestStatusEnum('status').default('requested').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// User Sessions (JWT refresh tokens)
+export const userSessions = pgTable('user_sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  refreshToken: varchar('refresh_token', { length: 512 }).notNull().unique(),
+  accessTokenJti: varchar('access_token_jti', { length: 255 }),
+  ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: text('user_agent'),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  lastUsedAt: timestamp('last_used_at').defaultNow().notNull()
+});
+
+// Audit Logs
+export const auditLogs = pgTable('audit_logs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  action: varchar('action', { length: 100 }).notNull(),
+  entityType: varchar('entity_type', { length: 100 }),
+  entityId: uuid('entity_id'),
+  metadata: jsonb('metadata'),
+  ipAddress: varchar('ip_address', { length: 45 }),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
 // ============================================================================
 // ONTOLOGY LAYER - Universal Schema
 // ============================================================================
@@ -99,6 +195,9 @@ export const companies = pgTable('companies', {
 
   // Organizational Terminology
   orgStructureTerminology: jsonb('org_structure_terminology'),
+
+  // Multi-tenant
+  tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
 
   // System
   status: companyStatusEnum('status').default('draft').notNull(),
