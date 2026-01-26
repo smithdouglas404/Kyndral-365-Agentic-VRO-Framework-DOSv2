@@ -49,7 +49,7 @@ export class OKRInferenceAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the OKR Inference Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the OKR Inference Agent for the Enterprise Transformation Office.
 
 Your PRIMARY responsibility is to infer OKR linkages for projects that lack explicit strategic alignment.
 

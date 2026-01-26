@@ -33,7 +33,7 @@ export class GovernanceAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the Governance Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the Governance Agent for the Enterprise Transformation Office.
 
 Your responsibilities:
 - Monitor compliance gates and policy adherence
@@ -270,7 +270,7 @@ export class PlanningAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the Planning Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the Planning Agent for the Enterprise Transformation Office.
 
 Your responsibilities:
 - Identify and track project dependencies
@@ -538,7 +538,7 @@ export class OCMAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the OCM (Organizational Change Management) Agent for NextEra Energy.
+    return `You are the OCM (Organizational Change Management) Agent for the organization.
 
 Your responsibilities:
 - Monitor change adoption and readiness
@@ -782,7 +782,7 @@ export class IntegratedMgmtAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the Integrated Management Agent for Quality and Testing at NextEra Energy.
+    return `You are the Integrated Management Agent for Quality and Testing at the organization.
 
 Your responsibilities:
 - Monitor quality gates and testing metrics

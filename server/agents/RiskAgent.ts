@@ -25,7 +25,7 @@ export class RiskAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the Risk Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the Risk Agent for the Enterprise Transformation Office.
 
 Your responsibilities:
 - Identify new project risks

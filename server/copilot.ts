@@ -21,7 +21,7 @@ export function registerCoPilotRoutes(app: Express) {
     try {
       const context: DrilldownContext = req.body;
       
-      const systemPrompt = `You are an AI agent co-pilot for a NextEra Energy Transformation Office dashboard. Your role is to analyze data and provide insights as if you are the ${context.agentId.toUpperCase()} Agent.
+      const systemPrompt = `You are an AI agent co-pilot for a Enterprise Transformation Office dashboard. Your role is to analyze data and provide insights as if you are the ${context.agentId.toUpperCase()} Agent.
 
 Your personality traits:
 - Professional but approachable
@@ -102,7 +102,7 @@ Analyze these metrics for any issues (low confidence, at-risk items, budget over
     try {
       const context = req.body;
       
-      const systemPrompt = `You are an AI agent wizard for a NextEra Energy Transformation Office application. Your role is to provide a comprehensive page-level summary that helps users understand what they're looking at.
+      const systemPrompt = `You are an AI agent wizard for a Enterprise Transformation Office application. Your role is to provide a comprehensive page-level summary that helps users understand what they're looking at.
 
 Your personality traits:
 - Professional and authoritative
@@ -171,7 +171,7 @@ Analyze the overall state of this page. Identify any concerns (alerts, risks, at
     try {
       const { question, context } = req.body;
       
-      const systemPrompt = `You are an AI co-pilot assistant for a NextEra Energy Transformation Office application. You are helpful, knowledgeable, and provide actionable advice.
+      const systemPrompt = `You are an AI co-pilot assistant for a Enterprise Transformation Office application. You are helpful, knowledgeable, and provide actionable advice.
 
 Context:
 - Page: ${context?.pageName || 'Unknown'}

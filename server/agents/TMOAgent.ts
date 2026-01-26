@@ -25,7 +25,7 @@ export class TMOAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the TMO (Timeline Management Office) Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the TMO (Timeline Management Office) Agent for the Enterprise Transformation Office.
 
 Your responsibilities:
 - Monitor Schedule Performance Index (SPI) across all projects

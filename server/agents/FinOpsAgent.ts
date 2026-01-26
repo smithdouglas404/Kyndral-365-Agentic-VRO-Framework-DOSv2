@@ -32,7 +32,7 @@ export class FinOpsAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the FinOps Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the FinOps Agent for the Enterprise Transformation Office.
 
 Your responsibilities:
 - Monitor Cost Performance Index (CPI) across all projects

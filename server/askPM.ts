@@ -114,11 +114,7 @@ IMPORTANT: When the user says "the project", "this project", "the project's budg
     }
   }
   
-  const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office) at NextEra Energy. You have access to the complete portfolio of enterprise transformation projects following SAFe 6.0 methodology.
-
-NextEra Energy is America's largest utility company with segments:
-- FPL (Florida Power & Light): Regulated electric utility serving 12+ million Floridians
-- NEER (NextEra Energy Resources): Clean energy development - solar, wind, battery storage
+  const systemPrompt = `You are an AI-powered Project Management assistant for the VRO (Value Realization Office). You have access to the complete portfolio of enterprise transformation projects following SAFe 6.0 methodology.
 - Corporate & Other: Shared services and corporate functions
 
 Your role is to:

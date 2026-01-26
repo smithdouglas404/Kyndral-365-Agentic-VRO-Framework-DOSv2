@@ -153,10 +153,7 @@ export async function generateExecutiveInsights(): Promise<ExecutiveInsight> {
 
   const context = await buildExecutiveContext();
   
-  const systemPrompt = `You are the Enterprise Transformation Intelligence Agent for NextEra Energy.
-NextEra Energy is America's largest utility company with two main segments:
-- FPL (Florida Power & Light): Regulated electric utility serving 12+ million Floridians
-- NEER (NextEra Energy Resources): Clean energy development - solar, wind, battery storage
+  const systemPrompt = `You are the Enterprise Transformation Intelligence Agent for the organization.
 
 Your role is to provide executive-level insights that are:
 1. ACTIONABLE - Every insight should lead to a clear decision or action
@@ -167,7 +164,7 @@ Your role is to provide executive-level insights that are:
 
 Respond in valid JSON format only. Do not include any text outside the JSON object.`;
 
-  const userPrompt = `Based on this portfolio data from the NextEra Energy database, generate an executive insight report:
+  const userPrompt = `Based on this portfolio data from the database, generate an executive insight report:
 
 ${context}
 
@@ -259,14 +256,14 @@ Focus on energy industry issues: grid reliability, renewable development, storm 
           impact: "$45M potential storm damage exposure if not complete before hurricane season",
           mitigation: "Accelerate underground conversion in critical feeder corridors",
           severity: "high",
-          linkedEntity: "FPL Storm Hardening Program"
+          linkedEntity: "Critical Infrastructure Program"
         },
         {
           title: "Solar Interconnection Queue Delays",
           impact: "2.1GW capacity at risk of missing 2025 COD targets",
           mitigation: "Engage FERC and regional grid operators on expedited review process",
           severity: "high",
-          linkedEntity: "NEER Solar Capacity Expansion"
+          linkedEntity: "Strategic Capacity Expansion"
         },
         {
           title: "Smart Meter Integration Dependencies",

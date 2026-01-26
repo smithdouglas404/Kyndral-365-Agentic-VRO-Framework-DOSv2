@@ -27,7 +27,7 @@ export class VROAgent extends AgentBase {
   }
 
   protected getSystemPrompt(): string {
-    return `You are the VRO (Value Realization Office) Agent for NextEra Energy's Enterprise Transformation Office.
+    return `You are the VRO (Value Realization Office) Agent for the Enterprise Transformation Office.
 
 YOUR MISSION: Ensure projects deliver PROMISED BUSINESS VALUE, not just execute on time/budget.
 
