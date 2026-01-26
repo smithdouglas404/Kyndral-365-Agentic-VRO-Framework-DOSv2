@@ -15,8 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { BusinessRulesViewer } from '@/components/BusinessRulesViewer';
-import { WhatIfPanel } from '@/components/WhatIfPanel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
@@ -31,42 +29,6 @@ interface Policy {
   codeFormat: string | null;
   createdAt: string | null;
 }
-
-const EXAMPLE_POLICY = `LIFE INSURANCE AND CRITICAL ILLNESS COVER
-POLICY SUMMARY
-This policy is provided by Legal & General Assurance Society Limited.
-
-OVERVIEW
-These policies are designed for people who want to help protect against the impact of death or terminal illness or critical illness.
-
-WHAT IS COVERED?
-Life insurance
-You will be covered if before the end of the policy:
-- you die
-- you are diagnosed as being terminally ill, and in the opinion of your hospital consultant and our medical officer, the illness is expected to lead to death within 12 months.
-
-Critical illness cover
-You will be covered if before the end of the policy:
-- You are diagnosed with or undergo a medical procedure for one of the critical illnesses we cover and you survive for 14 days from diagnosis.
-
-WHAT IS NOT COVERED?
-Life insurance - We won't pay out:
-- If within the first year of the policy, your death is caused by suicide or intentional self-injury
-- If the length of the policy is less than two years for Terminal Illness claims
-
-Critical illness cover - We won't pay out:
-- If death occurs within 14 days of diagnosis
-- If you die
-
-AGE LIMITS
-- Life Insurance: Maximum age 77, policy must end before age 90
-- Critical Illness: Maximum age 67, policy must end before age 75
-- Minimum age to take out a policy is 18
-- Policy must not end before your 29th birthday
-
-PREMIUMS
-Your premiums will remain the same during the length of the policy unless you make any changes.
-If you stop paying your premiums your cover will end 60 days after the first missed premium.`;
 
 export default function PolicyGenerator() {
   const { setPageContext } = usePageContext();
@@ -90,7 +52,6 @@ export default function PolicyGenerator() {
       breadcrumb: ['Tools', 'Policy Generator']
     });
   }, [setPageContext]);
-  const [viewMode, setViewMode] = useState<'technical' | 'business'>('technical');
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<{ text: string; filename: string; pages: number } | null>(null);
@@ -189,13 +150,6 @@ export default function PolicyGenerator() {
     } catch (err) {
       console.error('Failed to delete policy:', err);
     }
-  };
-
-  const loadExample = () => {
-    setPolicyText(EXAMPLE_POLICY);
-    setPolicyName('L&G Life Insurance & Critical Illness');
-    setProvider('Legal & General Assurance Society Limited');
-    setDocumentId('QGI14786');
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,17 +310,6 @@ export default function PolicyGenerator() {
                         )}
                         Upload PDF
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                          loadExample();
-                          handleDrillDown('template', 'lg-example');
-                        }} 
-                        data-testid="button-load-example"
-                      >
-                        Load L&G Example
-                      </Button>
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -523,56 +466,21 @@ export default function PolicyGenerator() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={viewMode === 'business' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('business')}
-                      className={viewMode === 'business' ? 'bg-[#005EB8]' : ''}
-                      data-testid="button-view-business"
-                    >
-                      <Users size={14} className="mr-1" />
-                      Rules View
-                    </Button>
-                    <Button
-                      variant={viewMode === 'technical' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('technical')}
-                      className={viewMode === 'technical' ? 'bg-[#005EB8]' : ''}
-                      data-testid="button-view-technical"
-                    >
-                      <FileCode size={14} className="mr-1" />
-                      Code View
-                    </Button>
-                  </div>
                 </div>
 
-                {viewMode === 'business' ? (
-                  <div className="space-y-8">
-                    <BusinessRulesViewer 
-                      yamlCode={selectedPolicy?.generatedCode || generatedCode}
-                      policyName={selectedPolicy?.name || policyName || 'Generated Policy'}
-                    />
-                    <WhatIfPanel 
-                      yamlCode={selectedPolicy?.generatedCode || generatedCode}
-                      policyName={selectedPolicy?.name || policyName || 'Generated Policy'}
-                    />
-                  </div>
-                ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileCode size={20} />
-                        Technical YAML Code
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto max-h-[600px] text-sm font-mono">
-                        {selectedPolicy?.generatedCode || generatedCode}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                )}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileCode size={20} />
+                      Generated Policy Code
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto max-h-[600px] text-sm font-mono">
+                      {selectedPolicy?.generatedCode || generatedCode}
+                    </pre>
+                  </CardContent>
+                </Card>
               </div>
             ) : (
               <Card>

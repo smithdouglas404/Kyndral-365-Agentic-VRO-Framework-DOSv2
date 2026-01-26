@@ -12,7 +12,9 @@
     "db:push": "drizzle-kit push",
     "seed": "tsx server/seedData.ts",
     "seed:production": "tsx script/seed-production.ts",
-    "seed:documents": "tsx server/scripts/seed-regulatory-documents.ts"
+    "seed:documents": "tsx server/scripts/seed-regulatory-documents.ts",
+    "seed:export": "bash server/scripts/export-seed.sh",
+    "seed:nextera": "npm run seed:export && tsx server/scripts/seed-database.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.1.15",

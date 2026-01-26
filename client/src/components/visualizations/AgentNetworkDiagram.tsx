@@ -314,55 +314,57 @@ export function AgentNetworkDiagram({ warRoomMode = false }: AgentNetworkDiagram
               <p className="text-xs mt-2">Initializing Deep Agent system</p>
             </div>
           ) : (
-          <div className="relative">
-            <svg
-              ref={svgRef}
-              width={dimensions.width}
-              height={dimensions.height}
-              className="border rounded-lg bg-slate-50 dark:bg-slate-900"
-            />
-            <style>{`
-              @keyframes pulse {
-                0%, 100% {
-                  opacity: 0;
-                  transform: scale(1);
+          <>
+            <div className="relative">
+              <svg
+                ref={svgRef}
+                width={dimensions.width}
+                height={dimensions.height}
+                className="border rounded-lg bg-slate-50 dark:bg-slate-900"
+              />
+              <style>{`
+                @keyframes pulse {
+                  0%, 100% {
+                    opacity: 0;
+                    transform: scale(1);
+                  }
+                  50% {
+                    opacity: 0.5;
+                    transform: scale(1.2);
+                  }
                 }
-                50% {
-                  opacity: 0.5;
-                  transform: scale(1.2);
+
+                @keyframes blink {
+                  0%, 100% { opacity: 1; }
+                  50% { opacity: 0.3; }
                 }
-              }
 
-              @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.3; }
-              }
+                .agent-node:hover circle:first-of-type {
+                  stroke-width: 4;
+                }
+              `}</style>
+            </div>
 
-              .agent-node:hover circle:first-of-type {
-                stroke-width: 4;
-              }
-            `}</style>
-          </div>
-
-          {/* Legend */}
-          <div className={`flex gap-6 mt-6 text-sm ${warRoomMode ? 'text-slate-200' : ''}`}>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span>Active Collaboration</span>
+            {/* Legend */}
+            <div className={`flex gap-6 mt-6 text-sm ${warRoomMode ? 'text-slate-200' : ''}`}>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span>Active Collaboration</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-slate-300"></div>
+                <span>Idle Connection</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-0.5 bg-blue-500" style={{ borderTop: '2px dashed' }}></div>
+                <span>Rule Trigger</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+                <span>Processing</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-              <span>Idle Connection</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-0.5 bg-blue-500" style={{ borderTop: '2px dashed' }}></div>
-              <span>Rule Trigger</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-              <span>Processing</span>
-            </div>
-          </div>
+          </>
           )}
         </CardContent>
       </Card>

@@ -627,9 +627,9 @@ export function DrillDownDrawer({ isOpen, onClose, entityType, entityId, dataMod
         'Last Updated': new Date().toLocaleTimeString()
       },
       projectBreakdown: [
-        { name: 'PRT Digital Intake', value: '+$8.2M', budget: '$12.4M' },
-        { name: 'Claims Automation', value: '+$5.7M', budget: '$7.2M' },
-        { name: 'Customer Portal', value: '+$4.1M', budget: '$6.8M' }
+        { name: 'Digital Platform Modernization', value: '+$8.2M', budget: '$12.4M' },
+        { name: 'Process Automation Initiative', value: '+$5.7M', budget: '$7.2M' },
+        { name: 'Customer Self-Service Portal', value: '+$4.1M', budget: '$6.8M' }
       ],
       insight: 'ROI is trending positive at 64% against an 85% target. VRO agent analysis shows 3 initiatives exceeding expectations, with Claims Automation delivering the highest marginal return. FinOps agent recommends reallocating $2.1M from underperforming initiatives to accelerate top performers.',
       summary: 'Portfolio ROI performance is on track. The VRO agent identified strong value realization from digital transformation initiatives, while FinOps validates cost efficiency improvements across 8 projects.'

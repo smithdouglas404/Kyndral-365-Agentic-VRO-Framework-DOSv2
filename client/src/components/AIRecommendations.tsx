@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { 
-  AlertTriangle, TrendingUp, DollarSign, Sparkles, 
+import {
+  AlertTriangle, TrendingUp, DollarSign, Sparkles,
   ChevronRight, CheckCircle, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useSimulation } from '@/contexts/SimulationContext';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import { executeAction, ActionType } from '@/lib/agentActionEngine';
 import { AgentType as AgentTypeFromHub } from '@/lib/dataHub';
 import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
@@ -27,6 +28,16 @@ interface Recommendation {
 
 type DataMode = 'VRO' | 'PMO';
 type AgentType = 'integrated-management' | 'tmo' | 'finops' | 'governance' | 'okr' | 'planning' | 'ocm';
+
+/**
+ * ⚠️ DEPRECATED: Hardcoded recommendations arrays below
+ *
+ * Status: NOW USING API - /api/recommendations
+ * Date: January 26, 2026
+ *
+ * These arrays are kept for backwards compatibility only.
+ * The component now fetches recommendations from the API.
+ */
 
 const vroRecommendations: Recommendation[] = [
   {
@@ -335,11 +346,11 @@ const typeConfig = {
 
 const actionMessages: Record<string, { title: string; description: string }> = {
   'Deploy AI Model': { title: 'AI Model Deployed', description: 'Cost optimization model is now active. Monitoring for savings opportunities.' },
-  'Activate Automation': { title: 'Automation Activated', description: 'PRT processing workflow accelerated. Volume tracking enabled.' },
+  'Activate Automation': { title: 'Automation Activated', description: 'Processing workflow accelerated. Volume tracking enabled.' },
   'Review AI Actions': { title: 'AI Actions Under Review', description: 'Risk mitigation strategies are being evaluated by the system.' },
   'View Synergy Map': { title: 'Synergy Analysis Started', description: 'Cross-division synergy mapping initiated. Results in 2-3 minutes.' },
   'Schedule Review': { title: 'Review Scheduled', description: 'Cost review meeting has been added to the calendar.' },
-  'View Forecast': { title: 'Forecast Loaded', description: 'PRT volume forecast analysis is now available.' },
+  'View Forecast': { title: 'Forecast Loaded', description: 'Volume forecast analysis is now available.' },
   'Request Study': { title: 'Study Requested', description: 'Efficiency study request submitted. ETA: 6-8 weeks.' },
   'View Risks': { title: 'Risk Register Opened', description: 'Displaying 12 pending risks for review.' },
   'View Impact': { title: 'Impact Analysis', description: 'Viewing dependency impact across workstreams.' },
@@ -388,12 +399,43 @@ interface AIRecommendationsProps {
 
 export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendationsProps) {
   const effectiveAgent = agentType || 'integrated-management';
-  const recommendations = recommendationsByAgent[effectiveAgent] || vroRecommendations;
   const displayLabel = agentLabels[effectiveAgent];
   const { setSelectedEvent } = useSimulation();
   const { toast } = useToast();
   const [activeActions, setActiveActions] = useState<Set<string>>(new Set());
   const [completedActions, setCompletedActions] = useState<Set<string>>(new Set());
+
+  // ✅ Fetch recommendations from API instead of hardcoded arrays
+  const { data: recommendationsData, isLoading } = useQuery({
+    queryKey: ['recommendations', effectiveAgent],
+    queryFn: async () => {
+      const response = await fetch(`/api/recommendations?agentType=${effectiveAgent}`);
+      if (!response.ok) throw new Error('Failed to fetch recommendations');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const recommendations = recommendationsData?.recommendations || [];
+
+  // Show loading state
+  if (isLoading && recommendations.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            AI Recommendations
+            <Badge variant="default" className="text-xs ml-2">{displayLabel}</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading recommendations...</span>
+        </CardContent>
+      </Card>
+    );
+  }
   
   const handleActionClick = async (rec: Recommendation) => {
     const actionKey = `${effectiveAgent}-${rec.id}`;

@@ -386,41 +386,70 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
   const [detailModalItem, setDetailModalItem] = useState<ActivityItem | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  // Continuous agent activity simulation data - all 8 agents with project focus
-  const simulatedActivities = [
-    { agent: 'integrated-management' as AgentType, action: 'investigate' as ActionType, target: 'PRT Volume Forecast', targetType: 'metric' as const, reason: 'Analyzing Q4 volume trends against market conditions' },
-    { agent: 'integrated-management' as AgentType, action: 'update-status' as ActionType, target: 'Digital Transformation Sprint', targetType: 'project' as const, reason: 'Sprint velocity improved 12% - updating health indicators' },
-    { agent: 'finops' as AgentType, action: 'notify' as ActionType, target: 'Cloud Cost Allocation', targetType: 'metric' as const, reason: 'Detected 8% cost optimization opportunity in compute resources' },
-    { agent: 'governance' as AgentType, action: 'approve' as ActionType, target: 'Platform Migration Project', targetType: 'project' as const, reason: 'Compliance review completed - project cleared for Phase 2' },
-    { agent: 'okr' as AgentType, action: 'investigate' as ActionType, target: 'Customer NPS Objective', targetType: 'okr' as const, reason: 'Key result tracking ahead of schedule - analyzing drivers' },
-    { agent: 'tmo' as AgentType, action: 'accelerate' as ActionType, target: 'API Migration Wave 3', targetType: 'project' as const, reason: 'Dependency cleared - recommending fast-track to capture Q4 window' },
-    { agent: 'planning' as AgentType, action: 'create-task' as ActionType, target: 'Q1 Roadmap Review', targetType: 'task' as const, reason: 'Scheduling strategic alignment sessions with division leads' },
-    { agent: 'ocm' as AgentType, action: 'notify' as ActionType, target: 'Longevity Platform Rollout', targetType: 'project' as const, reason: 'Change readiness assessment complete - 92% stakeholder alignment' },
-    { agent: 'integrated-management' as AgentType, action: 'escalate' as ActionType, target: 'Value Leakage Alert', targetType: 'alert' as const, reason: 'Identified $1.2M potential value at risk in delayed integrations' },
-    { agent: 'integrated-management' as AgentType, action: 'reassign' as ActionType, target: 'Resource Optimization', targetType: 'task' as const, reason: 'Balancing workload across sprint teams' },
-    { agent: 'finops' as AgentType, action: 'mitigate' as ActionType, target: 'Budget Variance', targetType: 'risk' as const, reason: 'Implementing cost controls to address 5% overspend' },
-    { agent: 'governance' as AgentType, action: 'investigate' as ActionType, target: 'Data Privacy Compliance Project', targetType: 'project' as const, reason: 'Reviewing GDPR alignment for customer data handling' },
-    { agent: 'integrated-management' as AgentType, action: 'notify' as ActionType, target: 'ROI Achievement Update', targetType: 'metric' as const, reason: 'Portfolio ROI trending 3% above target' },
-    { agent: 'tmo' as AgentType, action: 'notify' as ActionType, target: 'Milestone Completion', targetType: 'project' as const, reason: 'Phase 2 delivery completed - initiating Phase 3 prep' },
-    { agent: 'integrated-management' as AgentType, action: 'investigate' as ActionType, target: 'Sprint Retrospective', targetType: 'project' as const, reason: 'Analyzing blockers from last iteration' },
-    { agent: 'okr' as AgentType, action: 'update-status' as ActionType, target: 'Strategic Initiative KR', targetType: 'okr' as const, reason: 'Progress updated from stakeholder inputs' },
-    { agent: 'ocm' as AgentType, action: 'create-task' as ActionType, target: 'Enterprise CRM Migration', targetType: 'project' as const, reason: 'Training program designed for 500+ end users' },
-    { agent: 'planning' as AgentType, action: 'notify' as ActionType, target: 'Capacity Planning', targetType: 'metric' as const, reason: 'Resource availability updated for next quarter' },
-    { agent: 'governance' as AgentType, action: 'escalate' as ActionType, target: 'Risk Register Update', targetType: 'project' as const, reason: 'Critical control gap identified in vendor management' },
-    { agent: 'ocm' as AgentType, action: 'accelerate' as ActionType, target: 'Digital Workplace Initiative', targetType: 'project' as const, reason: 'Early adoption metrics exceeding targets - expanding rollout' },
-    { agent: 'governance' as AgentType, action: 'notify' as ActionType, target: 'Regulatory Reporting System', targetType: 'project' as const, reason: 'Audit trail verification complete - no exceptions found' },
-    { agent: 'ocm' as AgentType, action: 'investigate' as ActionType, target: 'User Adoption Analytics', targetType: 'project' as const, reason: 'Analyzing feature usage patterns across business units' },
-    { agent: 'governance' as AgentType, action: 'mitigate' as ActionType, target: 'Third-Party Integration Project', targetType: 'project' as const, reason: 'Implementing additional security controls for external APIs' },
-    { agent: 'ocm' as AgentType, action: 'escalate' as ActionType, target: 'Resistance Management', targetType: 'project' as const, reason: 'Flagging adoption barriers in Finance department' },
-  ];
-
+  // Fetch real agent activity from API
   useEffect(() => {
-    setActions(getActionLog());
-    setMessages(getMessageLog());
+    const fetchActivity = async () => {
+      try {
+        // Fetch recent agent activity
+        const activityRes = await fetch('/api/agent-activity/recent?limit=50');
+        if (activityRes.ok) {
+          const activityData = await activityRes.json();
+          if (activityData.activities && Array.isArray(activityData.activities)) {
+            // Transform API data to AgentAction format
+            const transformedActions: AgentAction[] = activityData.activities.map((a: any) => ({
+              id: a.id || `activity-${Date.now()}-${Math.random()}`,
+              agentId: a.primaryAgentId || 'integrated-management',
+              agentName: a.primaryAgentName || 'Agent',
+              actionType: a.eventType === 'detection' ? 'investigate' :
+                         a.eventType === 'autonomous_action' ? 'notify' :
+                         a.eventType === 'escalation' ? 'escalate' : 'notify',
+              targetEntityType: 'project',
+              targetEntityId: a.interventionId || 'unknown',
+              targetEntityName: a.summary || 'Unknown Target',
+              reasoning: a.details || a.summary || '',
+              priority: a.severity === 'critical' ? 'critical' as ActionPriority :
+                       a.severity === 'high' ? 'high' as ActionPriority :
+                       'medium' as ActionPriority,
+              aiConfidence: 85,
+              timestamp: new Date(a.createdAt),
+              status: 'completed',
+              result: a.summary
+            }));
+            setActions(transformedActions);
+          }
+        }
 
+        // Fetch A2A messages
+        const messagesRes = await fetch('/api/agent-activity/a2a-messages?limit=20');
+        if (messagesRes.ok) {
+          const messagesData = await messagesRes.json();
+          if (messagesData.messages && Array.isArray(messagesData.messages)) {
+            // Transform API data to AgentMessage format
+            const transformedMessages: AgentMessage[] = messagesData.messages.map((m: any) => ({
+              id: m.id || `msg-${Date.now()}-${Math.random()}`,
+              fromAgent: m.fromAgentId || 'integrated-management',
+              toAgents: m.toAgentIds || [],
+              subject: m.title || 'Agent Communication',
+              content: m.message || '',
+              priority: 'medium' as ActionPriority,
+              timestamp: new Date(m.timestamp),
+              requiresResponse: false
+            }));
+            setMessages(transformedMessages);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch agent activity:', error);
+      }
+    };
+
+    // Initial fetch
+    fetchActivity();
+
+    // Subscribe to local action events (for any UI-triggered actions)
     const unsubActions = subscribeToActions((action) => {
       setActions(prev => [action, ...prev].slice(0, 50));
-      
+
       setThinkingAgents(prev => new Set([...Array.from(prev), action.agentId]));
       setTimeout(() => {
         setThinkingAgents(prev => {
@@ -435,37 +464,13 @@ export function AgentActivityPanel({ compact = false, maxItems = 15, filterAgent
       setMessages(prev => [message, ...prev].slice(0, 50));
     });
 
-    // Continuous simulation - fire a new agent action every 12-20 seconds (slowed down)
-    const usedIndices = new Set<number>();
-    const simulationInterval = setInterval(() => {
-      // Pick a random activity that hasn't been used recently
-      let randomIndex: number;
-      if (usedIndices.size >= simulatedActivities.length - 2) {
-        usedIndices.clear(); // Reset when most activities have been used
-      }
-      do {
-        randomIndex = Math.floor(Math.random() * simulatedActivities.length);
-      } while (usedIndices.has(randomIndex));
-      usedIndices.add(randomIndex);
-      
-      const activity = simulatedActivities[randomIndex];
-      const uniqueId = `${activity.target}-${Date.now()}`;
-      
-      executeAction(
-        activity.agent,
-        activity.action,
-        activity.targetType,
-        uniqueId,
-        activity.target,
-        activity.reason,
-        75 + Math.floor(Math.random() * 20) // 75-95% confidence
-      );
-    }, 12000 + Math.random() * 8000); // Random 12-20 second interval
+    // Poll for new activity every 5 seconds
+    const pollInterval = setInterval(fetchActivity, 5000);
 
     return () => {
       unsubActions();
       unsubMessages();
-      clearInterval(simulationInterval);
+      clearInterval(pollInterval);
     };
   }, []);
 

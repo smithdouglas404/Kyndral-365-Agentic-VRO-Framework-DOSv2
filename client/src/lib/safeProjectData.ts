@@ -146,7 +146,35 @@ export interface SAFeProject {
 }
 
 // ============ PROJECT DATA ============
-// 18 richly detailed projects (3-4 per Group Function Portfolio)
+// ⚠️ DEPRECATED: Hardcoded project data removed January 26, 2026
+//
+// This file previously contained 1,500+ lines of hardcoded SAFe project data,
+// including British insurance projects (PRT, Pension, Annuity) that have been removed.
+//
+// ✅ USE INSTEAD: Fetch projects from API endpoints:
+//    - /api/safe-projects - Get SAFe project hierarchy
+//    - /api/projects - Get enriched project data
+//    - /api/portfolio/* - Get portfolio-level data
+//
+// This file now only exports TypeScript types for backwards compatibility.
+// The types are used by:
+//   - client/src/pages/ProjectDetailPage.tsx (type imports only)
+//   - client/src/lib/projects.ts (being phased out)
+
+/**
+ * @deprecated Use /api/safe-projects instead
+ * Empty array maintained for backwards compatibility only
+ */
+export const safeProjects: SAFeProject[] = [];
+
+/*
+// REMOVED: 18 hardcoded SAFe projects (1,500 lines)
+// Previously included British insurance projects that contained:
+//   - PRT (Pension Risk Transfer) Platform
+//   - Pensioner Digital Portal
+//   - Bulk Annuity Processing Automation
+//
+// All hardcoded data has been removed. Use database-backed APIs instead.
 
 export const safeProjects: SAFeProject[] = [
   // ============ INSTITUTIONAL RETIREMENT (4 projects) ============
@@ -1498,8 +1526,11 @@ export const safeProjects: SAFeProject[] = [
     qualityScore: 0
   }
 ];
+*/
 
 // ============ HELPER FUNCTIONS ============
+// Note: These functions now operate on an empty array and return empty/zero values.
+// They are maintained for backwards compatibility only.
 
 export function getProjectById(id: string): SAFeProject | undefined {
   return safeProjects.find(p => p.id === id);

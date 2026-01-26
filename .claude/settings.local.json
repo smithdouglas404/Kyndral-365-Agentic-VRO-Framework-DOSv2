@@ -67,7 +67,10 @@
       "Bash(fi)",
       "Bash(wc:*)",
       "Bash(awk:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(git restore:*)",
+      "Bash(chmod:*)",
+      "Bash(bash:*)"
     ]
   }
 }

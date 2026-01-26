@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
-import { 
-  Shield, TrendingUp, Users, Clock, CheckCircle2, 
-  AlertTriangle, Target
+import {
+  Shield, TrendingUp, Users, Clock, CheckCircle2,
+  AlertTriangle, Target, RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
 
 interface RiskMetric {
   id: string;
@@ -25,7 +27,7 @@ const vroRiskMetrics: RiskMetric[] = [
     label: 'Market Validation',
     score: 94,
     status: 'high',
-    description: 'AI-validated demand signals from PRT market growth',
+    description: 'AI-validated demand signals from market growth analysis',
     source: 'VRO Predictive Analytics'
   },
   {
@@ -131,12 +133,23 @@ interface RiskConfidenceMetricsProps {
 }
 
 export function RiskConfidenceMetrics({ dataMode = 'VRO' }: RiskConfidenceMetricsProps) {
-  const riskMetrics = dataMode === 'VRO' ? vroRiskMetrics : pmoRiskMetrics;
-  
-  const overallConfidence = Math.round(
-    riskMetrics.reduce((sum, m) => sum + m.score, 0) / riskMetrics.length
-  );
-  
+  // Fetch real risk confidence metrics from API
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['risk-confidence-metrics'],
+    queryFn: async () => {
+      const response = await fetch('/api/governance/risk-confidence-metrics');
+      if (!response.ok) throw new Error('Failed to fetch risk metrics');
+      return response.json();
+    },
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  const riskMetrics: RiskMetric[] = data?.metrics || [];
+
+  const overallConfidence = riskMetrics.length > 0
+    ? Math.round(riskMetrics.reduce((sum, m) => sum + m.score, 0) / riskMetrics.length)
+    : 0;
+
   const overallStatus = overallConfidence >= 80 ? 'high' : overallConfidence >= 60 ? 'medium' : 'low';
 
   return (
@@ -151,24 +164,34 @@ export function RiskConfidenceMetrics({ dataMode = 'VRO' }: RiskConfidenceMetric
             </Badge>
           </CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Overall:</span>
-            <Badge 
-              variant="outline" 
-              className={cn(
-                "font-bold",
-                statusConfig[overallStatus].color,
-                statusConfig[overallStatus].bgColor
-              )}
+            {!isLoading && !error && (
+              <>
+                <span className="text-sm text-gray-500">Overall:</span>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "font-bold",
+                    statusConfig[overallStatus].color,
+                    statusConfig[overallStatus].bgColor
+                  )}
+                >
+                  {overallConfidence}%
+                </Badge>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              data-testid="refresh-risk-metrics"
             >
-              {overallConfidence}%
-            </Badge>
+              <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+            </Button>
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          {dataMode === 'VRO' 
-            ? 'AI-powered risk assessment with real-time monitoring'
-            : 'Traditional risk assessment with manual reviews'
-          }
+          Real-time risk confidence metrics from governance analysis
         </p>
       </CardHeader>
       
@@ -192,8 +215,27 @@ export function RiskConfidenceMetrics({ dataMode = 'VRO' }: RiskConfidenceMetric
           </div>
         </div>
 
-        <div className="space-y-4">
-          {riskMetrics.map((metric, index) => {
+        {isLoading ? (
+          <div className="text-center py-8 text-gray-500">
+            <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
+            <p className="text-sm">Loading risk metrics...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">
+            <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
+            <p className="text-sm">Failed to load risk metrics</p>
+            <Button variant="link" onClick={() => refetch()} className="mt-2">
+              Try Again
+            </Button>
+          </div>
+        ) : riskMetrics.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No risk metrics available</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {riskMetrics.map((metric, index) => {
             const config = statusConfig[metric.status];
             
             return (
@@ -232,7 +274,8 @@ export function RiskConfidenceMetrics({ dataMode = 'VRO' }: RiskConfidenceMetric
               </motion.div>
             );
           })}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

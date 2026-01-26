@@ -1,9 +1,39 @@
+/**
+ * ⚠️ DEPRECATED: This component has broken imports and uses hardcoded data
+ *
+ * Status: NOT IN USE (no imports found)
+ * Issue: Imports from non-existent @/lib/scenarios file
+ *
+ * TODO: Either:
+ *   1. Wire to real API endpoint (/api/proactive-alerts)
+ *   2. Remove this file if no longer needed
+ *
+ * Cleaned: January 26, 2026
+ */
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { proactiveAlerts, aiMonitoringValue, ProactiveAlert } from "@/lib/scenarios";
+// BROKEN IMPORT: @/lib/scenarios does not exist
+// import { proactiveAlerts, aiMonitoringValue, ProactiveAlert } from "@/lib/scenarios";
+
+// Temporary stub types until API is wired
+interface ProactiveAlert {
+  id: string;
+  title: string;
+  description: string;
+  severity: string;
+  type: string;
+  timeToDetect: string;
+  pmoDetectTime: string;
+  predictedImpact: string;
+}
+
+// Temporary stub data - replace with API call to /api/proactive-alerts
+const proactiveAlerts: ProactiveAlert[] = [];
+const aiMonitoringValue = { amount: 0, unit: 'M' };
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   AlertTriangle, 

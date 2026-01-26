@@ -128,13 +128,13 @@ import {
   notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail,
   ontologyEntities, ontologyMappings, obdaQueryCache, graphSyncLog
 } from "@shared/schema";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import pkg from "pg";
 const { Pool } = pkg;
 
 export interface IStorage {
-  db: typeof Pool.prototype; // Raw database connection pool for direct SQL queries
+  db: NodePgDatabase<Record<string, never>>; // Drizzle database instance for ORM queries
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
@@ -452,8 +452,12 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 
 export class DatabaseStorage implements IStorage {
-  // Expose raw database pool for direct SQL queries (needed by RAG, LLM Router, etc.)
-  db = pool;
+  // Expose Drizzle database instance for ORM queries (needed by agent-activity, RAG, etc.)
+  db: typeof db;
+
+  constructor() {
+    this.db = db;
+  }
 
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);

@@ -4,7 +4,7 @@ import {
   Target, TrendingUp, AlertTriangle, Clock, Users, Zap,
   ChevronRight, Calendar, Shield, Brain, CheckCircle2,
   XCircle, AlertOctagon, ArrowUpRight, Network, GitBranch,
-  Crosshair, Map, Radio
+  Crosshair, Map, Radio, Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 
 interface COPProps {
   onDrillDown?: (type: string, id: string) => void;
@@ -75,41 +76,41 @@ function BattleRhythmIndicator() {
 
 // Strategic Layer (VRO - 6-12 months horizon)
 function StrategicLayer({ onDrillDown }: { onDrillDown?: (type: string, id: string) => void }) {
-  const metrics = [
-    {
-      id: "portfolio-roi",
-      label: "Portfolio ROI",
-      current: 64,
-      target: 85,
-      unit: "%",
-      trend: "up",
-      status: "at-risk",
-      gap: -21,
-      impact: "$12.5M value leakage"
+  // ✅ Fetch strategic metrics from API instead of hardcoded data
+  const { data: metricsData, isLoading } = useQuery({
+    queryKey: ['strategic-metrics'],
+    queryFn: async () => {
+      const response = await fetch('/api/dashboard-data/strategic-metrics');
+      if (!response.ok) throw new Error('Failed to fetch strategic metrics');
+      return response.json();
     },
-    {
-      id: "strategic-alignment",
-      label: "Strategic Alignment",
-      current: 78,
-      target: 90,
-      unit: "%",
-      trend: "up",
-      status: "on-track",
-      gap: -12,
-      impact: "3 misaligned initiatives"
-    },
-    {
-      id: "benefits-realization",
-      label: "Benefits Realization",
-      current: 56,
-      target: 80,
-      unit: "%",
-      trend: "down",
-      status: "critical",
-      gap: -24,
-      impact: "$18.2M unrealized"
-    },
-  ];
+    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+  });
+
+  const metrics = metricsData?.metrics || [];
+
+  // Loading state
+  if (isLoading && metrics.length === 0) {
+    return (
+      <Card className="border-l-4 border-l-red-500 bg-red-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Crosshair className="h-5 w-5 text-red-600" />
+            <span className="text-red-900">Strategic Layer</span>
+            <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300">
+              VRO • 6-12 Months
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+            <span className="ml-3 text-gray-600">Loading strategic metrics...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-l-4 border-l-red-500 bg-red-50/50">

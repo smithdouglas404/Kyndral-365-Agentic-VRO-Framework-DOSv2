@@ -1,6 +1,22 @@
+/**
+ * ⚠️ DEPRECATED: Broken import to non-existent @/lib/scenarios
+ * Status: NOT IN USE (no imports found)
+ * TODO: Remove this file or wire to real API
+ * Cleaned: January 26, 2026
+ */
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { scenarios, stages, Scenario, ScenarioId, StageId, getKPIValueForStage } from "@/lib/scenarios";
+// BROKEN IMPORT - @/lib/scenarios does not exist
+// import { scenarios, stages, Scenario, ScenarioId, StageId, getKPIValueForStage } from "@/lib/scenarios";
+
+// Stub types until removed or wired to API
+type ScenarioId = "accelerate-grid" | "digitize-operations" | "governance-uplift";
+type StageId = "design" | "implement" | "measure";
+interface Scenario { id: ScenarioId; name: string; description: string; }
+const scenarios: Scenario[] = [];
+const stages: Array<{ id: StageId; name: string }> = [];
+const getKPIValueForStage = (_k: string, _s: StageId) => "";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +53,7 @@ export function ScenarioWorkflow({ onScenarioChange, initialScenario, initialSta
 
   const getScenarioIcon = (id: ScenarioId) => {
     switch (id) {
-      case "accelerate-prt": return Zap;
+      case "accelerate-grid": return Zap;
       case "digitize-operations": return TrendingUp;
       case "governance-uplift": return Shield;
     }

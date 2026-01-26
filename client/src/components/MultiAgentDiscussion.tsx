@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  MessageSquare, 
-  Bot, 
-  Users, 
-  ChevronDown, 
+import {
+  MessageSquare,
+  Bot,
+  Users,
+  ChevronDown,
   ChevronUp,
   Play,
   Pause,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { routeToCommandCenter, AgentAction } from '@/lib/commandCenterBridge';
+import { useQuery } from '@tanstack/react-query';
 
 interface AgentMessage {
   id: string;
@@ -39,96 +40,73 @@ interface DiscussionTopic {
   priority: 'high' | 'medium' | 'low';
 }
 
-const discussionTopics: DiscussionTopic[] = [
-  {
-    id: 'topic-1',
-    title: 'Enterprise Data Foundation Budget Overrun',
-    context: 'Data Foundation project $1.2M over budget, blocking 4 other initiatives',
-    status: 'active',
-    priority: 'high'
-  }
-];
-
-const simulatedDiscussion: AgentMessage[] = [
-  {
-    id: 'msg-1',
-    agent: 'FinOps Agent',
-    agentColor: 'bg-green-500',
-    message: "I've analyzed the Enterprise Data Foundation budget trajectory. Current burn rate suggests $2.3M overrun by PI 25.2 unless we intervene.",
-    timestamp: new Date(),
-    type: 'analysis',
-    referencedProject: 'proj-data-foundation'
-  },
-  {
-    id: 'msg-2',
-    agent: 'Planning Agent',
-    agentColor: 'bg-blue-500',
-    message: "Looking at the feature backlog, MDM Phase 2 and Advanced Analytics could be deferred to Phase 2 without impacting the 4 dependent projects. This would reduce scope by ~30%.",
-    timestamp: new Date(),
-    type: 'recommendation'
-  },
-  {
-    id: 'msg-3',
-    agent: 'TMO Agent',
-    agentColor: 'bg-teal-500',
-    message: "Change impact assessment: Deferring MDM Phase 2 affects 12 stakeholders in NextEra Energy Resources. I can prepare a communication plan if we proceed.",
-    timestamp: new Date(),
-    type: 'analysis'
-  },
-  {
-    id: 'msg-4',
-    agent: 'Governance Agent',
-    agentColor: 'bg-purple-500',
-    message: "Scope reduction requires steering committee approval. I can fast-track this through the Change Advisory Board if we have alignment.",
-    timestamp: new Date(),
-    type: 'question'
-  },
-  {
-    id: 'msg-5',
-    agent: 'FinOps Agent',
-    agentColor: 'bg-green-500',
-    message: "If we defer MDM Phase 2, projected savings are $1.4M. Combined with $400K contingency release, we're back within 5% of original budget.",
-    timestamp: new Date(),
-    type: 'analysis'
-  },
-  {
-    id: 'msg-6',
-    agent: 'OKR Agent',
-    agentColor: 'bg-orange-500',
-    message: "This aligns with Q4 objective 'Optimize Portfolio Delivery'. Key result KR2.3 (reduce at-risk projects) would improve from 65% to 78% achievement.",
-    timestamp: new Date(),
-    type: 'agreement'
-  },
-  {
-    id: 'msg-7',
-    agent: 'Planning Agent',
-    agentColor: 'bg-blue-500',
-    message: "Consensus reached. Proposed action: 1) Defer MDM Phase 2, 2) Release $400K contingency, 3) Fast-track CAB approval, 4) Notify stakeholders. Ready for human approval.",
-    timestamp: new Date(),
-    type: 'action'
-  }
-];
-
 export function MultiAgentDiscussion() {
   const [expanded, setExpanded] = useState(true);
   const [messages, setMessages] = useState<AgentMessage[]>([]);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false); // Default to paused until data loads
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeTopic] = useState(discussionTopics[0]);
   const [isApproving, setIsApproving] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
 
+  // ✅ Fetch active discussions from API
+  const { data: discussionsData, isLoading: isLoadingDiscussions } = useQuery({
+    queryKey: ['agent-discussions', 'active'],
+    queryFn: async () => {
+      const response = await fetch('/api/discussions?status=active');
+      if (!response.ok) throw new Error('Failed to fetch discussions');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Get the first active discussion
+  const activeTopic = discussionsData?.discussions?.[0] || null;
+
+  // ✅ Fetch messages for the active discussion
+  const { data: messagesData, isLoading: isLoadingMessages } = useQuery({
+    queryKey: ['discussion-messages', activeTopic?.id],
+    queryFn: async () => {
+      if (!activeTopic?.id) return { messages: [] };
+      const response = await fetch(`/api/discussions/${activeTopic.id}/messages`);
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      return response.json();
+    },
+    enabled: !!activeTopic?.id,
+    refetchInterval: 10000, // Refetch every 10 seconds for real-time updates
+  });
+
+  // Transform API messages to component format
+  const apiMessages: AgentMessage[] = (messagesData?.messages || []).map((msg: any) => ({
+    id: msg.id,
+    agent: msg.agentName || 'Agent',
+    agentColor: msg.agentColor || 'bg-gray-500',
+    message: msg.content,
+    timestamp: new Date(msg.createdAt || new Date()),
+    type: msg.type || 'analysis',
+    referencedProject: msg.projectId
+  }));
+
+  // Animation effect - gradually reveal messages if playing simulation mode
   useEffect(() => {
-    if (!isPlaying || currentIndex >= simulatedDiscussion.length) return;
+    if (!isPlaying || currentIndex >= apiMessages.length) return;
 
     const timer = setTimeout(() => {
-      setMessages(prev => [...prev, simulatedDiscussion[currentIndex]]);
+      setMessages(prev => [...prev, apiMessages[currentIndex]]);
       setCurrentIndex(prev => prev + 1);
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [isPlaying, currentIndex]);
+  }, [isPlaying, currentIndex, apiMessages]);
+
+  // Initialize messages when API data loads
+  useEffect(() => {
+    if (apiMessages.length > 0 && messages.length === 0) {
+      // Show all messages immediately on load (no animation)
+      setMessages(apiMessages);
+      setCurrentIndex(apiMessages.length);
+    }
+  }, [apiMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {

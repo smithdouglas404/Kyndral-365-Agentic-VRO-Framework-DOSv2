@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Target, TrendingUp, BarChart3, PieChart, CheckCircle2, 
+import {
+  Target, TrendingUp, BarChart3, PieChart, CheckCircle2,
   AlertCircle, Sparkles, ArrowRight, ChevronDown, ChevronUp,
-  DollarSign, Users, Clock, Zap, FileText
+  DollarSign, Users, Clock, Zap, FileText, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery } from '@tanstack/react-query';
 
 interface KPI {
   id: string;
@@ -34,104 +35,6 @@ interface AttributionAnalysis {
   totalValue: string;
   evidenceStrength: 'strong' | 'moderate' | 'weak';
 }
-
-const CORE_KPIS: KPI[] = [
-  {
-    id: 'kpi-001',
-    name: 'Revenue Growth',
-    category: 'financial',
-    baseline: 18200,
-    target: 21000,
-    current: 19850,
-    unit: '$m',
-    trend: 'up',
-    status: 'on-track',
-    attribution: [
-      { initiative: 'FPL Solar Expansion', contribution: 35, confidence: 92 },
-      { initiative: 'NEER Wind Repowering', contribution: 42, confidence: 88 },
-      { initiative: 'Grid Modernization', contribution: 23, confidence: 78 }
-    ]
-  },
-  {
-    id: 'kpi-002',
-    name: 'Customer Reliability Index',
-    category: 'customer',
-    baseline: 92,
-    target: 99.5,
-    current: 98.2,
-    unit: '%',
-    trend: 'up',
-    status: 'on-track',
-    attribution: [
-      { initiative: 'Grid Modernization', contribution: 55, confidence: 90 },
-      { initiative: 'Storm Hardening Program', contribution: 30, confidence: 85 },
-      { initiative: 'Smart Meter Deployment', contribution: 15, confidence: 82 }
-    ]
-  },
-  {
-    id: 'kpi-003',
-    name: 'Outage Response Time',
-    category: 'operational',
-    baseline: 120,
-    target: 45,
-    current: 68,
-    unit: 'min',
-    trend: 'down',
-    status: 'at-risk',
-    attribution: [
-      { initiative: 'Grid Modernization', contribution: 65, confidence: 90 },
-      { initiative: 'AI Predictive Maintenance', contribution: 35, confidence: 85 }
-    ]
-  },
-  {
-    id: 'kpi-004',
-    name: 'Renewable Capacity',
-    category: 'strategic',
-    baseline: 28500,
-    target: 35000,
-    current: 32400,
-    unit: 'MW',
-    trend: 'up',
-    status: 'on-track',
-    attribution: [
-      { initiative: 'NEER Wind Repowering', contribution: 45, confidence: 92 },
-      { initiative: 'FPL Solar Expansion', contribution: 40, confidence: 88 },
-      { initiative: 'Battery Storage Deployment', contribution: 15, confidence: 75 }
-    ]
-  },
-  {
-    id: 'kpi-005',
-    name: 'Carbon Reduction',
-    category: 'financial',
-    baseline: 42,
-    target: 70,
-    current: 58,
-    unit: '%',
-    trend: 'up',
-    status: 'on-track',
-    attribution: [
-      { initiative: 'Coal Plant Retirement', contribution: 50, confidence: 95 },
-      { initiative: 'NEER Wind Repowering', contribution: 30, confidence: 88 },
-      { initiative: 'FPL Solar Expansion', contribution: 20, confidence: 82 }
-    ]
-  },
-  {
-    id: 'kpi-006',
-    name: 'Safety Performance (TRIR)',
-    category: 'strategic',
-    baseline: 0.85,
-    target: 0.50,
-    current: 0.62,
-    unit: '',
-    trend: 'stable',
-    status: 'at-risk',
-    attribution: [
-      { initiative: 'Safety Excellence Program', contribution: 50, confidence: 88 },
-      { initiative: 'Field Operations Training', contribution: 30, confidence: 82 },
-      { initiative: 'Contractor Management', contribution: 20, confidence: 75 }
-    ]
-  }
-];
 
 const ATTRIBUTION_ANALYSIS: AttributionAnalysis[] = [
   {
@@ -175,6 +78,31 @@ export function KPIAttributionPanel() {
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('tracking');
   const [addedKpis, setAddedKpis] = useState<Set<string>>(new Set());
+
+  // ✅ Fetch KPIs from API instead of using hardcoded data
+  const { data: kpisData, isLoading } = useQuery({
+    queryKey: ['admin-kpis'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/kpis');
+      if (!response.ok) throw new Error('Failed to fetch KPIs');
+      return response.json();
+    },
+    refetchInterval: 60000, // Refetch every minute for real-time updates
+  });
+
+  // Transform API KPIs to component format (backwards compatibility with existing UI)
+  const CORE_KPIS: KPI[] = (kpisData?.kpis || []).map((apiKpi: any) => ({
+    id: apiKpi.id,
+    name: apiKpi.name,
+    category: apiKpi.category || 'strategic',
+    baseline: apiKpi.baseline || 0,
+    target: apiKpi.target || 100,
+    current: apiKpi.current || apiKpi.baseline || 0,
+    unit: apiKpi.unit || '%',
+    trend: apiKpi.trend || 'stable',
+    status: apiKpi.status || 'on-track',
+    attribution: apiKpi.attribution || []
+  }));
 
   const handleAddKpi = (kpiName: string) => {
     setAddedKpis(prev => new Set(Array.from(prev).concat(kpiName)));
@@ -222,6 +150,29 @@ export function KPIAttributionPanel() {
     }
     return `${value}${unit}`;
   };
+
+  // Loading state
+  if (isLoading && CORE_KPIS.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Target className="text-[#005EB8]" />
+              KPI Tracking & Attribution
+            </h2>
+            <p className="text-muted-foreground">Automated measurement and value attribution analysis</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-[#005EB8]" />
+            <span className="ml-3 text-gray-600">Loading KPIs...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

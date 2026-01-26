@@ -14,14 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
-import { BusinessPerformanceSection } from "@/components/BusinessPerformance";
 import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
 import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
 import { useValueInsights } from "@/hooks/useAgentInsights";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
-import { BusinessCaseAssessment } from "@/components/BusinessCaseAssessment";
 import { KPIAttributionPanel } from "@/components/KPIAttributionPanel";
 import { AutonomousRiskAgent } from "@/components/AutonomousRiskAgent";
 import { MultiAgentDiscussion } from "@/components/MultiAgentDiscussion";
@@ -711,11 +709,6 @@ function DashboardContent() {
 
           </TabsContent>
 
-          {/* Business Cases Tab */}
-          <TabsContent value="business-cases">
-            <BusinessCaseAssessment />
-          </TabsContent>
-
           {/* KPI Tracking Tab */}
           <TabsContent value="kpi-tracking">
             <KPIAttributionPanel />
@@ -725,12 +718,6 @@ function DashboardContent() {
           <TabsContent value="lifecycle">
             <ProjectLifecycleCommandCenter onDrillDown={handleDrillDown} />
           </TabsContent>
-
-          {/* Business Performance Tab */}
-          <TabsContent value="performance">
-            <BusinessPerformanceSection mode="VRO" />
-          </TabsContent>
-
 
           {/* Agent Command Center Tab */}
           <TabsContent value="agent-command" className="space-y-6">

@@ -53,24 +53,6 @@ function formatKpiValue(value: string | number | null, unit: string | null): str
   return `${numValue}${unitStr}`;
 }
 
-// Legacy slug mapping for backward compatibility (maps old L&G IDs to new NextEra segment IDs)
-const legacySlugs: Record<string, string> = {
-  'lgim': 'neer',
-  'lgc': 'corporate-other',
-  'lgri': 'fpl',
-  'lgr': 'fpl',
-  'lgf': 'corporate-other',
-  'lgi': 'corporate-other',
-  'asset-management': 'neer',
-  'institutional-retirement': 'fpl',
-  'retail': 'fpl',
-  'capital': 'corporate-other',
-  'insurance': 'corporate-other',
-  'fintech': 'corporate-other',
-  'florida-power-light': 'fpl',
-  'nextera-energy-resources': 'neer'
-};
-
 // Segment name mapping for filtering enriched projects (NextEra SEC segment names)
 const segmentNameMapping: Record<string, string[]> = {
   'fpl': ['FPL', 'Florida Power & Light'],
@@ -115,10 +97,10 @@ export default function SegmentPage() {
   // Get the fromTab query parameter to know where to navigate back
   const searchParams = new URLSearchParams(window.location.search);
   const fromTab = searchParams.get('fromTab') || 'portfolios';
-  
-  // Resolve legacy slugs to new IDs
-  const resolvedId = legacySlugs[params.id || ''] || params.id || '';
-  
+
+  // Get segment ID from URL params
+  const resolvedId = params.id || '';
+
   // Fetch division from database API
   const { data: fullDivisionData, isLoading: isLoadingDivision } = useFullDivision(resolvedId);
   const division = fullDivisionData?.division;

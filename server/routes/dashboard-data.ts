@@ -434,5 +434,103 @@ export function registerDashboardDataRoutes(app: Express, storage: IStorage) {
     }
   });
 
+  /**
+   * GET /api/dashboard-data/strategic-metrics
+   * Strategic layer metrics for Common Operational Picture (VRO 6-12 month horizon)
+   */
+  app.get("/api/dashboard-data/strategic-metrics", async (req, res) => {
+    try {
+      const allProjects = await storage.getProjects();
+      const activeProjects = allProjects.filter(p => p.status === 'active');
+
+      // Calculate strategic metrics
+      const totalBudget = activeProjects.reduce((sum, p) => sum + parseFloat(p.budget || '0'), 0);
+      const totalSpent = activeProjects.reduce((sum, p) => sum + parseFloat(p.actualCost || '0'), 0);
+      const totalForecasted = activeProjects.reduce((sum, p) => sum + parseFloat(p.forecastCost || p.actualCost || '0'), 0);
+
+      // Portfolio ROI calculation
+      const projectedValue = activeProjects.reduce((sum, p) => sum + parseFloat(p.expectedValue || '0'), 0);
+      const portfolioROI = totalBudget > 0 ? ((projectedValue - totalBudget) / totalBudget) * 100 : 0;
+      const targetROI = 85; // Target from enterprise strategy
+
+      // Strategic alignment score (based on project priorities)
+      const criticalProjects = activeProjects.filter(p => p.priority === 'critical').length;
+      const totalProjects = activeProjects.length;
+      const alignmentScore = totalProjects > 0 ? (criticalProjects / totalProjects) * 100 : 0;
+      const targetAlignment = 90;
+
+      // Benefits realization (based on CPI/SPI metrics)
+      const onTrackProjects = activeProjects.filter(p => {
+        const cpi = parseFloat(String(p.cpiValue || '1.0'));
+        const spi = parseFloat(String(p.spiValue || '1.0'));
+        return cpi >= 0.95 && spi >= 0.95;
+      }).length;
+      const benefitsRealization = totalProjects > 0 ? (onTrackProjects / totalProjects) * 100 : 0;
+      const targetBenefits = 80;
+
+      // Calculate trend direction
+      const portfolioTrend = portfolioROI >= targetROI ? 'up' : portfolioROI >= targetROI - 10 ? 'stable' : 'down';
+      const alignmentTrend = alignmentScore >= targetAlignment ? 'up' : alignmentScore >= targetAlignment - 10 ? 'stable' : 'down';
+      const benefitsTrend = benefitsRealization >= targetBenefits ? 'up' : benefitsRealization >= targetBenefits - 10 ? 'stable' : 'down';
+
+      // Determine status
+      const portfolioStatus = portfolioROI >= targetROI - 10 ? 'on-track' : portfolioROI >= targetROI - 20 ? 'at-risk' : 'critical';
+      const alignmentStatus = alignmentScore >= targetAlignment - 5 ? 'on-track' : alignmentScore >= targetAlignment - 10 ? 'at-risk' : 'critical';
+      const benefitsStatus = benefitsRealization >= targetBenefits - 10 ? 'on-track' : benefitsRealization >= targetBenefits - 20 ? 'at-risk' : 'critical';
+
+      const metrics = [
+        {
+          id: 'portfolio-roi',
+          label: 'Portfolio ROI',
+          current: Math.round(portfolioROI),
+          target: targetROI,
+          unit: '%',
+          trend: portfolioTrend,
+          status: portfolioStatus,
+          gap: Math.round(portfolioROI - targetROI),
+          impact: `$${(((targetROI - portfolioROI) / 100) * totalBudget / 1000000).toFixed(1)}M value leakage`,
+        },
+        {
+          id: 'strategic-alignment',
+          label: 'Strategic Alignment',
+          current: Math.round(alignmentScore),
+          target: targetAlignment,
+          unit: '%',
+          trend: alignmentTrend,
+          status: alignmentStatus,
+          gap: Math.round(alignmentScore - targetAlignment),
+          impact: `${Math.abs(Math.round((alignmentScore - targetAlignment) / 10))} misaligned initiatives`,
+        },
+        {
+          id: 'benefits-realization',
+          label: 'Benefits Realization',
+          current: Math.round(benefitsRealization),
+          target: targetBenefits,
+          unit: '%',
+          trend: benefitsTrend,
+          status: benefitsStatus,
+          gap: Math.round(benefitsRealization - targetBenefits),
+          impact: `$${(((targetBenefits - benefitsRealization) / 100) * projectedValue / 1000000).toFixed(1)}M unrealized`,
+        },
+      ];
+
+      res.json({
+        metrics,
+        summary: {
+          totalProjects: activeProjects.length,
+          totalBudget: Math.round(totalBudget),
+          totalSpent: Math.round(totalSpent),
+          portfolioHealth: portfolioStatus,
+          criticalCount: metrics.filter(m => m.status === 'critical').length,
+          atRiskCount: metrics.filter(m => m.status === 'at-risk').length,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error fetching strategic metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch strategic metrics' });
+    }
+  });
+
   console.log('✅ Dashboard data routes registered (replacing ALL static data)');
 }

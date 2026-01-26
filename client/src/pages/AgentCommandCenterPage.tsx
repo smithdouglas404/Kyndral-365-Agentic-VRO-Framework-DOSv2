@@ -232,6 +232,16 @@ export default function AgentCommandCenterPage() {
     refetchInterval: 3000
   });
 
+  const { data: agentStats } = useQuery({
+    queryKey: ['agent-activity-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/agent-activity/stats?hours=24');
+      if (!response.ok) return { activeAgents: 0 };
+      return response.json();
+    },
+    refetchInterval: 30000
+  });
+
   // Scroll to highlighted intervention (runs after data loads)
   useEffect(() => {
     if (highlightedId && interventions.length > 0) {
@@ -427,7 +437,7 @@ export default function AgentCommandCenterPage() {
             
             <Badge className="bg-green-100 text-green-800 px-3 py-1.5" data-testid="badge-agents-active">
               <Zap className="h-3 w-3 mr-1" />
-              6 Agents Active
+              {agentStats?.activeAgents || 0} Agents Active
             </Badge>
             {approvedCount > 0 && (
               <Badge className="bg-blue-100 text-blue-800 px-3 py-1.5" data-testid="badge-approved-count">
@@ -944,7 +954,7 @@ export default function AgentCommandCenterPage() {
                       <Sparkles className="h-16 w-16 text-purple-300 mx-auto mb-4" />
                       <h3 className="font-semibold text-gray-800 mb-2">Welcome to Ask PM</h3>
                       <p className="text-sm text-gray-600 mb-6">
-                        I have access to all 21 projects in your portfolio. Ask me anything!
+                        I have access to all {dbProjects.length} projects in your portfolio. Ask me anything!
                       </p>
                       <div className="space-y-2 max-w-md mx-auto">
                         {[

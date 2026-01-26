@@ -65,6 +65,7 @@ import CustomFieldManagement from "@/pages/admin/CustomFieldManagement";
 import WorkflowBuilder from "@/pages/admin/WorkflowBuilder";
 import MCPMarketplace from "@/pages/admin/MCPMarketplace";
 import ActiveIntegrations from "@/pages/admin/ActiveIntegrations";
+import DatabaseManagement from "@/pages/admin/DatabaseManagement";
 import ThresholdSettings from "@/pages/admin/ThresholdSettings";
 import OKRManagement from "@/pages/admin/OKRManagement";
 import UserPermissions from "@/pages/admin/UserPermissions";
@@ -161,6 +162,7 @@ function Router() {
       <Route path="/admin/workflows" component={WorkflowBuilder} />
       <Route path="/admin/mcp-marketplace" component={MCPMarketplace} />
       <Route path="/admin/active-integrations" component={ActiveIntegrations} />
+      <Route path="/admin/database-management" component={DatabaseManagement} />
       <Route path="/admin/thresholds" component={ThresholdSettings} />
       <Route path="/admin/okrs" component={OKRManagement} />
       <Route path="/admin/permissions" component={UserPermissions} />

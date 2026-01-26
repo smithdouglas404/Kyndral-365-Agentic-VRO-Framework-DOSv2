@@ -706,7 +706,7 @@ const projectLinkMapping: Record<string, string> = {
   "pmo-fpl-001": "proj-data-foundation",       // Grid Modernization
   "pmo-fpl-002": "proj-digital-onboarding",    // Advanced Metering Infrastructure  
   "pmo-fpl-003": "proj-cloud-migration",       // Solar Expansion Program
-  "pmo-fpl-004": "proj-prt-platform",          // Hurricane Hardening
+  "pmo-fpl-004": "proj-storm-hardening",       // Hurricane Hardening
   // NextEra Energy Resources → Maps to renewable-tagged projects
   "pmo-neer-001": "proj-trading-platform",     // Wind Portfolio Expansion
   "pmo-neer-002": "proj-risk-engine",          // Battery Storage Network

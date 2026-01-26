@@ -832,7 +832,7 @@ Keep response brief and actionable.`;
 
         console.log(`[ContinuousOrchestrator] ${config.agentName} analyzing request from ${fromConfig?.agentName}...`);
 
-        const result = await agent.execute(prompt, { projectId: request.projectId });
+        const result = await agent.run(prompt, { projectId: request.projectId });
 
         // Send response via A2A message bus
         const responseMessage: AgentMessage = {

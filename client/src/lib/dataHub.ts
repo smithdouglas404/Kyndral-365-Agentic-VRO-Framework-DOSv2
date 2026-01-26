@@ -339,14 +339,6 @@ export function getAgentDataSlice(agentId: AgentType, events: SimulationEvent[] 
   };
 }
 
-// Project-level breakdown data for full traceability
-const PROJECT_BREAKDOWNS = {
-  claims: { id: 'claims', name: 'Claims', bu: 'Insurance' },
-  workplacePensions: { id: 'workplace-pensions', name: 'Workplace Pensions', bu: 'Workplace' },
-  customer: { id: 'customer', name: 'Customer', bu: 'Corporate & Other' },
-  aiPoweredPricing: { id: 'ai-powered-pricing', name: 'AI Powered Pricing', bu: 'Insurance' }
-};
-
 // Handle top-level VRO/PMO dashboard metrics with full traceability
 function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[]): EntityDrilldown {
   let entityName = '';
@@ -364,7 +356,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Weighted average ROI across all active projects based on investment size';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'On Track' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '72%', contribution: '35%', status: 'On Track' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '72%', contribution: '35%', status: 'On Track' },
         { project: 'Customer', bu: 'Corporate & Other', value: '45%', contribution: '22%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '61%', contribution: '15%', status: 'On Track' }
       ];
@@ -376,7 +368,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Gap to Target': '21%',
         'Calculation': 'Weighted Avg by Investment'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
       
     case 'net-present-value':
@@ -385,7 +377,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Sum of discounted cash flows across all projects (8% discount rate, 5-year horizon)';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '$12.5M', contribution: '34%', status: 'On Track' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '$14.2M', contribution: '39%', status: 'On Track' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '$14.2M', contribution: '39%', status: 'On Track' },
         { project: 'Customer', bu: 'Corporate & Other', value: '$5.8M', contribution: '16%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '$3.75M', contribution: '11%', status: 'On Track' }
       ];
@@ -398,7 +390,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Time Horizon': '5 years',
         'Progress to Target': '73%'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
       
     case 'timeline-progress':
@@ -407,7 +399,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Average completion percentage across all projects weighted by strategic priority';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '82%', contribution: '30%', status: 'Phase 3' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '75%', contribution: '28%', status: 'Phase 3' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '75%', contribution: '28%', status: 'Phase 3' },
         { project: 'Customer', bu: 'Corporate & Other', value: '48%', contribution: '25%', status: 'Phase 2' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '65%', contribution: '17%', status: 'Phase 2' }
       ];
@@ -420,7 +412,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Milestones Complete': '12/18',
         'Schedule Variance': '-6%'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
       
     case 'budget-utilization':
@@ -429,7 +421,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Total spend across all projects as percentage of allocated budget';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '$10.8M / $11.2M', contribution: '26%', status: '96%' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '$15.4M / $16.5M', contribution: '37%', status: '93%' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '$15.4M / $16.5M', contribution: '37%', status: '93%' },
         { project: 'Customer', bu: 'Corporate & Other', value: '$9.2M / $10.0M', contribution: '22%', status: '92%' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '$5.8M / $6.1M', contribution: '14%', status: '95%' }
       ];
@@ -442,7 +434,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Remaining': '$2.6M',
         'Variance': '+6% efficiency gain'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
     
     // PMO Metrics
@@ -452,7 +444,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Average time from work item start to completion across all project teams';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '14 days', contribution: '25%', status: 'On Track' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '22 days', contribution: '30%', status: 'At Risk' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '22 days', contribution: '30%', status: 'At Risk' },
         { project: 'Customer', bu: 'Corporate & Other', value: '24 days', contribution: '28%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '16 days', contribution: '17%', status: 'On Track' }
       ];
@@ -464,7 +456,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Improvement': '46% from baseline',
         'Gap to Target': '+9 days'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
       
     case 'flow-efficiency':
@@ -473,7 +465,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Active work time as percentage of total elapsed time (higher is better)';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '78%', contribution: '28%', status: 'Exceeds' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '65%', contribution: '26%', status: 'On Track' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '65%', contribution: '26%', status: 'On Track' },
         { project: 'Customer', bu: 'Corporate & Other', value: '58%', contribution: '24%', status: 'On Track' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '72%', contribution: '22%', status: 'Exceeds' }
       ];
@@ -485,7 +477,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Wait Time Reduction': '24%',
         'Status': 'EXCEEDS TARGET'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
       
     case 'throughput':
@@ -494,7 +486,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
       calculationMethod = 'Total work items completed per week across all project teams';
       projectBreakdown = [
         { project: 'Claims', bu: 'Insurance', value: '4 items/week', contribution: '36%', status: 'On Track' },
-        { project: 'Workplace Pensions', bu: 'Workplace', value: '3 items/week', contribution: '27%', status: 'At Risk' },
+        { project: 'Grid Modernization', bu: 'Florida Power & Light', value: '3 items/week', contribution: '27%', status: 'At Risk' },
         { project: 'Customer', bu: 'Corporate & Other', value: '2 items/week', contribution: '18%', status: 'At Risk' },
         { project: 'AI Powered Pricing', bu: 'Insurance', value: '2 items/week', contribution: '18%', status: 'On Track' }
       ];
@@ -506,7 +498,7 @@ function getTopLevelMetricDrilldown(metricId: string, events: SimulationEvent[])
         'Weekly Change': '+3 from baseline',
         'Gap to Target': '14 items/week'
       };
-      relatedEntities = Object.values(PROJECT_BREAKDOWNS).map(p => ({ type: 'project', id: p.id, name: p.name }));
+      relatedEntities = [];
       break;
       
     case 'wip-items':

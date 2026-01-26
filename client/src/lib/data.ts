@@ -140,7 +140,7 @@ export const challenges: Challenge[] = [
     icon: ShieldCheck,
     themes: ["Value", "Data & Insights"],
     relatedIds: ["planning", "visibility"],
-    strategicAlignment: ["PRT Pipeline", "NextEra Energy Resources"]
+    strategicAlignment: ["Portfolio Optimization", "NextEra Energy Resources"]
   },
   {
     id: "visibility",

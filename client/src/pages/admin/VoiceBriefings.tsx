@@ -60,7 +60,7 @@ interface BriefingSettings {
 
 interface Briefing {
   id: string;
-  type: 'project' | 'portfolio' | 'weekly_summary';
+  type: 'project' | 'portfolio' | 'weekly_summary' | 'morning_briefing';
   projectId?: string;
   projectName?: string;
   audioUrl: string;
@@ -72,7 +72,8 @@ export default function VoiceBriefings() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('generate');
   const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [briefingType, setBriefingType] = useState<'project' | 'portfolio' | 'weekly_summary'>('project');
+  const [briefingType, setBriefingType] = useState<'project' | 'portfolio' | 'weekly_summary' | 'morning_briefing'>('morning_briefing');
+  const [selectedAgents, setSelectedAgents] = useState<string[]>(['VRO', 'PMO']);
 
   // Settings state
   const [settings, setSettings] = useState<BriefingSettings>({
@@ -242,6 +243,7 @@ export default function VoiceBriefings() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="morning_briefing">Morning Agent Briefing</SelectItem>
                         <SelectItem value="project">Project Summary</SelectItem>
                         <SelectItem value="portfolio">Portfolio Overview</SelectItem>
                         <SelectItem value="weekly_summary">Weekly Summary</SelectItem>
@@ -275,24 +277,61 @@ export default function VoiceBriefings() {
                   </div>
                   <div className="flex-1 space-y-1">
                     <h4 className="font-semibold text-sm">Your AI Podcast Hosts</h4>
-                    <div className="flex items-center gap-3 text-xs">
-                      <div className="flex items-center gap-1">
-                        <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
-                          Sarah
-                        </Badge>
-                        <span className="text-muted-foreground">PMO Analyst</span>
+                    {briefingType === 'morning_briefing' ? (
+                      <div className="flex items-center gap-3 text-xs flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
+                            Sarah
+                          </Badge>
+                          <span className="text-muted-foreground">Host</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                            VRO
+                          </Badge>
+                          <span className="text-muted-foreground">Value Agent</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300">
+                            PMO
+                          </Badge>
+                          <span className="text-muted-foreground">Delivery Agent</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+                            Marcus
+                          </Badge>
+                          <span className="text-muted-foreground">Executive</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                          Marcus
-                        </Badge>
-                        <span className="text-muted-foreground">Executive Coach</span>
+                    ) : (
+                      <div className="flex items-center gap-3 text-xs">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300">
+                            Sarah
+                          </Badge>
+                          <span className="text-muted-foreground">PMO Analyst</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+                            Marcus
+                          </Badge>
+                          <span className="text-muted-foreground">Executive Coach</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Voice Briefing Player */}
+                {briefingType === 'morning_briefing' && (
+                  <VoiceBriefingPlayer
+                    type="morning_briefing"
+                    projectName="Morning Agent Briefing"
+                    agents={selectedAgents}
+                  />
+                )}
+
                 {selectedProjectId && briefingType === 'project' && (
                   <VoiceBriefingPlayer
                     projectId={selectedProjectId}

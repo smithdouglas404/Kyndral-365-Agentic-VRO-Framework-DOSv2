@@ -164,7 +164,6 @@ export function ValueRealizationChart({ mode, refreshKey }: ChartProps) {
         </div>
         <CardDescription className="flex items-center gap-2">
           Forecasted benefits vs. actual realized value ($M)
-          <Citation citation={citations.prtVolume} />
         </CardDescription>
       </CardHeader>
       <CardContent>

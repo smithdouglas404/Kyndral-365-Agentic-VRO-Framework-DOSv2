@@ -23,6 +23,7 @@ import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
+import { registerDatabaseManagementRoutes } from "./routes/admin/database-management.js";
 import { registerCustomAttributesRoutes } from "./routes/custom-attributes.js";
 import { registerAgentRulesRoutes } from "./routes/agent-rules.js";
 import { registerPolicyAsCodeRoutes } from "./routes/policy-as-code.js";
@@ -44,6 +45,7 @@ import { registerAgentInsightsRoutes } from "./routes/agent-insights.js";
 import { registerAgentActivityRoutes } from "./routes/agent-activity.js";
 import { registerGovernanceRoutes } from "./routes/governance.js";
 import { registerVoiceBriefingRoutes } from "./routes/voice-briefings.js";
+import { registerRecommendationsRoutes } from "./routes/recommendations.js";
 import { createLLMConfigRoutes } from "./routes/llm-config.js";
 import { createKnowledgeBaseRoutes } from "./routes/knowledge-base.js";
 import { createEnhancedKnowledgeBaseRoutes } from "./routes/admin/enhanced-knowledge-base.js";
@@ -210,6 +212,9 @@ export async function registerRoutes(
   // Register Workflow Management routes (ADMIN - Workflow & approval definitions)
   registerWorkflowRoutes(app, storage);
 
+  // Register Database Management routes (ADMIN - Seeding and backups)
+  registerDatabaseManagementRoutes(app, storage);
+
   // Register White-Label & Theming routes (TIER 3 - Customization)
   registerWhiteLabelRoutes(app);
 
@@ -239,6 +244,9 @@ export async function registerRoutes(
 
   // Register Voice Briefing routes (NotebookLM-style podcast summaries)
   registerVoiceBriefingRoutes(app, storage);
+
+  // Register Recommendations routes (AI-driven recommendations from agents)
+  registerRecommendationsRoutes(app, storage);
 
   // Register LLM Configuration routes (PLUG-AND-PLAY LLM SWITCHING)
   app.use("/api/llm-config", createLLMConfigRoutes(storage));
@@ -1461,13 +1469,13 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         {
           type: 'timeline',
           severity: 'high',
-          title: 'Bulk Annuity Pricing Engine Milestone Slip',
-          description: 'Critical path analysis indicates 3-week delay risk for PRA regulatory submission milestone.',
-          projectId: 'proj-pricing-engine',
-          projectName: 'Bulk Annuity Pricing Engine',
+          title: 'Grid Modernization Milestone Slip',
+          description: 'Critical path analysis indicates 3-week delay risk for FERC regulatory submission milestone.',
+          projectId: 'proj-grid-modernization',
+          projectName: 'Grid Modernization Program',
           confidence: '0.87',
-          suggestedAction: 'Deploy additional actuarial resources and implement parallel testing tracks.',
-          impact: 'Delay may result in $1.8M penalty and reputational risk with regulator.',
+          suggestedAction: 'Deploy additional engineering resources and implement parallel testing tracks for smart grid infrastructure.',
+          impact: 'Delay may result in $1.8M penalty and regulatory compliance risk.',
           status: 'pending',
           agentSource: 'TMO Agent'
         },
