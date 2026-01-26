@@ -128,7 +128,10 @@ export function registerDemoRoutes(app: Express) {
       const seedData = loadSeedData();
 
       // Get industry data
-      const companyData = seedData.companies.find((c: any) => c.companyId === session.companyId);
+      console.log(`[Demo] Looking for company with id: ${session.companyId}`);
+      console.log(`[Demo] Available company ids: ${seedData.companies.map((c: any) => c.id).join(', ')}`);
+      const companyData = seedData.companies.find((c: any) => c.id === session.companyId);
+      console.log(`[Demo] Found company:`, companyData ? companyData.legalName : 'NOT FOUND');
       const projectsData = seedData.projects.find((p: any) => p.industryId === session.industryId);
       const interventions = seedData.interventions.filter((i: any) => i.industryId === session.industryId);
       const observations = seedData.observations.filter((o: any) => o.industryId === session.industryId);
@@ -136,6 +139,12 @@ export function registerDemoRoutes(app: Express) {
       const rulesState = seedData.rulesState.filter((r: any) => r.industryId === session.industryId);
 
       res.json({
+        _debug: {
+          sessionCompanyId: session.companyId,
+          availableCompanyIds: seedData.companies.map((c: any) => c.id).slice(0, 5),
+          companyDataFound: !!companyData,
+          companyName: companyData?.legalName || 'NOT FOUND'
+        },
         company: companyData,
         projects: projectsData?.projects || [],
         interventions,
@@ -184,7 +193,7 @@ export function registerDemoRoutes(app: Express) {
 
       const session = demoSessions.get(sessionId)!;
       const seedData = loadSeedData();
-      const companyData = seedData.companies.find((c: any) => c.companyId === session.companyId);
+      const companyData = seedData.companies.find((c: any) => c.id === session.companyId);
 
       res.json({
         active: true,

@@ -349,20 +349,20 @@ Create a plan with these characteristics:
 5. Determine if collaboration with other agents is needed
 
 Return a JSON plan with this structure:
-{{
+{{{{
   "reasoning": "Why this approach?",
   "estimatedComplexity": "low|medium|high",
   "requiresCollaboration": true|false,
   "steps": [
-    {{
+    {{{{
       "step": 1,
       "description": "What to do",
       "tool": "tool_name or null",
       "expectedOutcome": "What we expect",
       "dependencies": []
-    }}
+    }}}}
   ]
-}}`],
+}}}}`],
       ["human", `Goal: {goal}
 
 Context: {context}
@@ -552,11 +552,11 @@ Analyze the action and its outcome. Provide:
 3. What adjustments should we make?
 
 Return JSON:
-{
+{{{{
   "success": true|false,
   "learnings": ["learning 1", "learning 2"],
   "adjustments": ["adjustment 1", "adjustment 2"]
-}`],
+}}}}`],
       ["human", `Action: {action}
 Expected: {expected}
 Actual outcome: {outcome}

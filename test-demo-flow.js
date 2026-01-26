@@ -46,6 +46,13 @@ async function testDemoFlow() {
 
   if (demoData.error) {
     console.error(`   ✗ Error: ${demoData.error}`);
+    console.error(`   Session cookie sent: demo_session=${sessionCookie}`);
+    return;
+  }
+
+  if (!demoData.company) {
+    console.error(`   ✗ No company data received`);
+    console.error(`   Response keys: ${Object.keys(demoData).join(', ')}`);
     return;
   }
 
