@@ -8,6 +8,7 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
+import { initializeMCPServices } from "./mcp/MCPServiceFactory.js";
 import { initializeFirebaseAuthService } from "./auth/firebaseAdmin.js";
 import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
@@ -179,6 +180,13 @@ app.use((req, res, next) => {
       battleRhythmOrchestrator = new BattleRhythmOrchestrator(storage);
       await battleRhythmOrchestrator.start();
       log("✅ Battle Rhythm Orchestrator started - Weekly cadence active");
+
+      // ===================================================================
+      // Initialize MCP Services (Jira, ServiceNow, Monday.com, etc.)
+      // ===================================================================
+      log("🔌 Initializing MCP Services...");
+      initializeMCPServices();
+      log("✅ MCP Services initialized - Real API integrations ready");
 
       // ===================================================================
       // Start LangChain Agent Scheduler (INTEGRATED WITH BATTLE RHYTHM)

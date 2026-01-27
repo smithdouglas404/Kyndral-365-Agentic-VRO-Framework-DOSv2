@@ -151,7 +151,7 @@ export class MCPProtocolHandler {
   }
 
   /**
-   * Agent calls external MCP service
+   * Agent calls external MCP service - NOW WITH REAL API CALLS
    */
   async callService(serviceName: string, agentId: string, action: string, params: any): Promise<any> {
     const service = this.services.get(serviceName);
@@ -161,15 +161,45 @@ export class MCPProtocolHandler {
 
     console.log(`[MCP] ${agentId} → ${serviceName}: ${action}`);
 
-    // In production, this would make actual HTTP/WebSocket/gRPC calls
-    // For now, we'll simulate the response
+    // Route to real service implementations
+    try {
+      const { getMCPService } = await import('../mcp/MCPServiceFactory.js');
+      const mcpService = await getMCPService(serviceName);
+
+      if (!mcpService) {
+        console.warn(`[MCP] Service ${serviceName} not configured - returning mock response`);
+        return this.mockServiceCall(serviceName, action, params);
+      }
+
+      // Route action to appropriate service method
+      const result = await mcpService.executeAction(action, params);
+
+      return {
+        success: true,
+        service: serviceName,
+        action,
+        agentId,
+        timestamp: new Date().toISOString(),
+        data: result,
+      };
+    } catch (error: any) {
+      console.error(`[MCP] Service call failed: ${serviceName}.${action}`, error.message);
+      throw new Error(`MCP service call failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Fallback mock response for unconfigured services
+   */
+  private mockServiceCall(serviceName: string, action: string, params: any): any {
     return {
       success: true,
       service: serviceName,
       action,
-      agentId,
       timestamp: new Date().toISOString(),
       data: params,
+      _mock: true,
+      _message: 'Service not configured - this is a simulated response',
     };
   }
 
