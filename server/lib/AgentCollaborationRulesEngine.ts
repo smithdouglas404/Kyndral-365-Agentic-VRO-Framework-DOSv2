@@ -20,7 +20,7 @@ import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
 import { ruleExecutionHistory } from '../../shared/schema.js';
 import { getLangflowRuleSyncService } from './LangflowRuleSyncService.js';
-import { getMem0Service } from '../services/mem0Service.js';
+import { getMem0Service } from './Mem0Service.js';
 
 // ============================================================================
 // TYPES

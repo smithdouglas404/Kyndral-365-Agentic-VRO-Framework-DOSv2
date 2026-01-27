@@ -10,9 +10,13 @@
  *
  * Example: Instead of variance = (actual - budget) / budget
  * We ask LLM: "Calculate budget variance and explain why"
+ *
+ * IMPORTANT: All calculation results are written to Mem0
+ * This allows Langflow workflows and agents to query past calculations
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { getMem0Service } from './Mem0Service.js';
 
 export interface CalculationRequest {
   attributeName: string;
@@ -20,6 +24,8 @@ export interface CalculationRequest {
   inputData: Record<string, any>;
   context?: string; // Optional business context
   previousValue?: any; // For trend analysis
+  entity?: string; // Entity to write to Mem0 (e.g., project_123, agent_pmo)
+  sourceAgent?: string; // Agent requesting the calculation
 }
 
 export interface CalculationResult {
@@ -77,6 +83,35 @@ export class LLMCalculator {
       const result = this.parseCalculationResponse(text, request);
 
       console.log(`[LLMCalculator] ✅ ${request.attributeName} = ${result.value}`);
+
+      // Write calculation result to Mem0 (memory layer for Langflow and agents)
+      if (request.entity || request.sourceAgent) {
+        try {
+          const mem0 = getMem0Service();
+          const entity = request.entity || `agent_${request.sourceAgent}`;
+
+          await mem0.writeFact({
+            entity,
+            attribute: request.attributeName,
+            value: {
+              calculatedValue: result.value,
+              narrative: result.narrative,
+              reasoning: result.reasoning,
+              sources: result.sources,
+              confidence: result.confidence,
+              inputData: request.inputData,
+              timestamp: result.timestamp.toISOString()
+            },
+            sourceAgent: request.sourceAgent || 'llm_calculator',
+            confidence: result.confidence
+          });
+
+          console.log(`[LLMCalculator] Calculation result written to Mem0 for entity: ${entity}`);
+        } catch (error: any) {
+          console.error('[LLMCalculator] Failed to write to Mem0:', error.message);
+          // Don't throw - calculation succeeded even if Mem0 write failed
+        }
+      }
 
       return result;
     } catch (error: any) {

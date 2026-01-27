@@ -164,38 +164,108 @@ export const COMPANY_AGENT: AgentDefinition = {
 
 /**
  * PMO AGENT - Project Management Office
- * 80% common attributes for any PMO
+ * Enhanced with SAFe 6.0 Flow Metrics and PMBOK 7 Performance Domains
+ * 
+ * SAFe 6.0 Reference: framework.scaledagile.com/measure-and-grow
+ * PMBOK 7 Reference: PMI Measurement Performance Domain
  */
 export const PMO_AGENT: AgentDefinition = {
   type: 'pmo',
   displayName: 'PMO Agent',
-  description: 'Project Management Office - monitors project health, schedules, and resources across portfolio',
+  description: 'Project Management Office - monitors project health, schedules, and resources across portfolio using SAFe 6.0 Flow Metrics and PMBOK 7 Performance Domains',
   icon: 'clipboard-list',
   color: '#2563eb',
   attributes: [
-    // Dashboard Metrics (what PMO always needs)
-    { id: 'pmo_portfolio_health', name: 'portfolioHealthScore', displayName: 'Portfolio Health', category: 'dashboard', dataType: 'number', description: 'Overall portfolio health score', required: true, unit: '%', triggerSignal: true },
-    { id: 'pmo_projects_count', name: 'activeProjectsCount', displayName: 'Active Projects', category: 'dashboard', dataType: 'number', description: 'Number of active projects', required: true, triggerSignal: true },
-    { id: 'pmo_at_risk_count', name: 'atRiskProjectsCount', displayName: 'At-Risk Projects', category: 'dashboard', dataType: 'number', description: 'Projects at risk', required: true, triggerSignal: true },
-    { id: 'pmo_milestone_completion', name: 'milestoneCompletionRate', displayName: 'Milestone Completion', category: 'dashboard', dataType: 'number', description: 'On-time milestone completion rate', required: true, unit: '%', triggerSignal: true },
+    // =========================================================================
+    // CORE DASHBOARD METRICS
+    // =========================================================================
+    { id: 'pmo_portfolio_health', name: 'portfolioHealthScore', displayName: 'Portfolio Health', category: 'dashboard', dataType: 'number', description: 'Overall portfolio health score (composite of all metrics)', required: true, unit: '%', triggerSignal: true },
+    { id: 'pmo_projects_count', name: 'activeProjectsCount', displayName: 'Active Projects', category: 'dashboard', dataType: 'number', description: 'Number of active projects in portfolio', required: true, triggerSignal: true },
+    { id: 'pmo_at_risk_count', name: 'atRiskProjectsCount', displayName: 'At-Risk Projects', category: 'dashboard', dataType: 'number', description: 'Projects flagged at risk (health < 70%)', required: true, triggerSignal: true },
     
-    // Dependencies (what PMO gets from other agents)
-    { id: 'pmo_budget_status', name: 'budgetStatus', displayName: 'Budget Status', category: 'dependency', dataType: 'string', description: 'Overall budget status from FinOps', source: 'finops', required: false, triggerSignal: true },
-    { id: 'pmo_risk_score', name: 'aggregateRiskScore', displayName: 'Risk Score', category: 'dependency', dataType: 'number', description: 'Aggregate risk score from Risk agent', source: 'risk', required: false, triggerSignal: true },
-    { id: 'pmo_value_realization', name: 'valueRealizationRate', displayName: 'Value Realization', category: 'dependency', dataType: 'number', description: 'Value realization % from VRO', source: 'vro', required: false, unit: '%', triggerSignal: true },
-    { id: 'pmo_change_adoption', name: 'changeAdoptionRate', displayName: 'Change Adoption', category: 'dependency', dataType: 'number', description: 'Change adoption rate from OCM', source: 'ocm', required: false, unit: '%' },
+    // =========================================================================
+    // SAFe 6.0 FLOW METRICS (framework.scaledagile.com/measure-and-grow)
+    // =========================================================================
     
-    // Reports
-    { id: 'pmo_executive_summary', name: 'executiveSummary', displayName: 'Executive Summary', category: 'report', dataType: 'string', description: 'AI-generated executive summary', required: false },
-    { id: 'pmo_weekly_report', name: 'weeklyReportData', displayName: 'Weekly Report', category: 'report', dataType: 'json', description: 'Data for weekly status report', required: false },
+    // Flow Velocity - Rate of value delivery (epics/features completed per PI)
+    { id: 'safe_flow_velocity', name: 'flowVelocity', displayName: 'Flow Velocity', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Number of flow items (epics/features) completed per Program Increment. Higher = faster delivery.', required: true, unit: 'items/PI', triggerSignal: true },
     
-    // Meetings
+    // Flow Time - Elapsed time from start to customer delivery
+    { id: 'safe_flow_time', name: 'flowTime', displayName: 'Flow Time', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Average elapsed time from work start to customer delivery (concept-to-cash). Target: minimize.', required: true, unit: 'days', triggerSignal: true },
+    
+    // Flow Load - Total work in progress (WIP)
+    { id: 'safe_flow_load', name: 'flowLoad', displayName: 'Flow Load (WIP)', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Total number of active epics/features in progress. High WIP = bottlenecks.', required: true, unit: 'items', triggerSignal: true },
+    
+    // Flow Efficiency - Ratio of value-added time to total time
+    { id: 'safe_flow_efficiency', name: 'flowEfficiency', displayName: 'Flow Efficiency', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: (Active work time / Total elapsed time) × 100. Highlights wait times and delays.', required: true, unit: '%', triggerSignal: true },
+    
+    // Flow Predictability - Business value delivered vs planned
+    { id: 'safe_flow_predictability', name: 'flowPredictability', displayName: 'Flow Predictability', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: (Actual PI objectives achieved / Planned PI objectives) × 100. Target: 80-100%.', required: true, unit: '%', triggerSignal: true },
+    
+    // Flow Distribution - Balance across work types
+    { id: 'safe_flow_distribution', name: 'flowDistribution', displayName: 'Flow Distribution', category: 'report', dataType: 'json', description: 'SAFe 6.0: Distribution of work across types: {features: %, enablers: %, defects: %, risks: %}', required: false, triggerSignal: true },
+    
+    // =========================================================================
+    // SAFe 6.0 PORTFOLIO KPIs
+    // =========================================================================
+    { id: 'safe_art_predictability', name: 'artPredictability', displayName: 'ART Predictability', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Agile Release Train predictability score per PI (0-100)', required: false, unit: '%', triggerSignal: true },
+    { id: 'safe_pi_objectives', name: 'piObjectivesAchieved', displayName: 'PI Objectives Achieved', category: 'report', dataType: 'number', description: 'SAFe 6.0: Percentage of committed PI objectives delivered', required: false, unit: '%', triggerSignal: true },
+    { id: 'safe_wsjf_backlog', name: 'wsjfPrioritizedBacklog', displayName: 'WSJF Backlog', category: 'report', dataType: 'array', description: 'SAFe 6.0: Backlog prioritized by Weighted Shortest Job First (WSJF = value × criticality / size)', required: false },
+    { id: 'safe_epic_cycle_time', name: 'epicCycleTime', displayName: 'Epic Cycle Time', category: 'report', dataType: 'number', description: 'SAFe 6.0: Average time from epic approval to deployment (days)', required: false, unit: 'days' },
+    { id: 'safe_innovation_allocation', name: 'innovationAllocation', displayName: 'Innovation & Planning', category: 'report', dataType: 'number', description: 'SAFe 6.0: % of capacity allocated to Innovation & Planning iterations', required: false, unit: '%' },
+    
+    // =========================================================================
+    // PMBOK 7 MEASUREMENT PERFORMANCE DOMAIN
+    // =========================================================================
+    
+    // Schedule Performance
+    { id: 'pmbok_milestone_completion', name: 'milestoneCompletionRate', displayName: 'Milestone Completion', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: On-time milestone completion rate (leading indicator of project health)', required: true, unit: '%', triggerSignal: true },
+    { id: 'pmbok_schedule_quality', name: 'scheduleQualityIndex', displayName: 'Schedule Quality Index', category: 'report', dataType: 'number', description: 'PMBOK 7: DCMA 14-point schedule quality assessment score', required: false, unit: '%' },
+    
+    // Deliverable Metrics
+    { id: 'pmbok_defect_density', name: 'defectDensity', displayName: 'Defect Density', category: 'report', dataType: 'number', description: 'PMBOK 7: Defects per 1000 lines of code or per deliverable', required: false, unit: 'defects/KLOC' },
+    { id: 'pmbok_test_pass_rate', name: 'testPassRate', displayName: 'Test Pass Rate', category: 'report', dataType: 'number', description: 'PMBOK 7: Acceptance test pass rate (quality indicator)', required: false, unit: '%' },
+    { id: 'pmbok_rework_percentage', name: 'reworkPercentage', displayName: 'Rework Percentage', category: 'report', dataType: 'number', description: 'PMBOK 7: Percentage of work requiring rework (quality waste)', required: false, unit: '%' },
+    
+    // Stakeholder Metrics (PMBOK 7)
+    { id: 'pmbok_nps', name: 'netPromoterScore', displayName: 'Net Promoter Score', category: 'report', dataType: 'number', description: 'PMBOK 7: Stakeholder NPS (-100 to +100). Key satisfaction indicator.', required: false, unit: 'score' },
+    { id: 'pmbok_stakeholder_satisfaction', name: 'stakeholderSatisfaction', displayName: 'Stakeholder Satisfaction', category: 'report', dataType: 'number', description: 'PMBOK 7: Overall stakeholder satisfaction score (1-5 or 1-10)', required: false, unit: '/10' },
+    
+    // Team Metrics (PMBOK 7)
+    { id: 'pmbok_team_velocity', name: 'teamVelocity', displayName: 'Team Velocity', category: 'report', dataType: 'number', description: 'PMBOK 7: Team velocity trend (story points/sprint)', required: false, unit: 'pts/sprint' },
+    { id: 'pmbok_team_morale', name: 'teamMorale', displayName: 'Team Morale', category: 'report', dataType: 'number', description: 'PMBOK 7: Team morale/engagement score (leading indicator)', required: false, unit: '/10' },
+    { id: 'pmbok_capacity_utilization', name: 'capacityUtilization', displayName: 'Capacity Utilization', category: 'report', dataType: 'number', description: 'PMBOK 7: Resource capacity utilization rate', required: false, unit: '%' },
+    
+    // =========================================================================
+    // DEPENDENCIES (from other agents)
+    // =========================================================================
+    { id: 'pmo_budget_status', name: 'budgetStatus', displayName: 'Budget Status', category: 'dependency', dataType: 'string', description: 'Overall budget status from FinOps Agent', source: 'finops', required: false, triggerSignal: true },
+    { id: 'pmo_risk_score', name: 'aggregateRiskScore', displayName: 'Risk Score', category: 'dependency', dataType: 'number', description: 'Aggregate risk score from Risk Agent', source: 'risk', required: false, triggerSignal: true },
+    { id: 'pmo_value_realization', name: 'valueRealizationRate', displayName: 'Value Realization', category: 'dependency', dataType: 'number', description: 'Value realization % from VRO Agent', source: 'vro', required: false, unit: '%', triggerSignal: true },
+    { id: 'pmo_change_adoption', name: 'changeAdoptionRate', displayName: 'Change Adoption', category: 'dependency', dataType: 'number', description: 'Change adoption rate from OCM Agent', source: 'ocm', required: false, unit: '%' },
+    { id: 'pmo_cpi', name: 'costPerformanceIndex', displayName: 'CPI', category: 'dependency', dataType: 'number', description: 'Cost Performance Index from FinOps Agent', source: 'finops', required: false, triggerSignal: true },
+    { id: 'pmo_spi', name: 'schedulePerformanceIndex', displayName: 'SPI', category: 'dependency', dataType: 'number', description: 'Schedule Performance Index from FinOps Agent', source: 'finops', required: false, triggerSignal: true },
+    
+    // =========================================================================
+    // REPORTS
+    // =========================================================================
+    { id: 'pmo_executive_summary', name: 'executiveSummary', displayName: 'Executive Summary', category: 'report', dataType: 'string', description: 'AI-generated executive summary using all metrics', required: false },
+    { id: 'pmo_weekly_report', name: 'weeklyReportData', displayName: 'Weekly Report', category: 'report', dataType: 'json', description: 'Consolidated weekly status report data', required: false },
+    
+    // =========================================================================
+    // MEETINGS (SAFe 6.0 Events)
+    // =========================================================================
     { id: 'pmo_next_steering', name: 'nextSteeringCommittee', displayName: 'Next Steering Committee', category: 'meeting', dataType: 'date', description: 'Next steering committee meeting', required: false },
     { id: 'pmo_decisions_pending', name: 'pendingDecisions', displayName: 'Pending Decisions', category: 'meeting', dataType: 'array', description: 'Decisions awaiting approval', required: false, triggerSignal: true },
+    { id: 'safe_next_pi_planning', name: 'nextPIPlanning', displayName: 'Next PI Planning', category: 'meeting', dataType: 'date', description: 'SAFe 6.0: Next Program Increment Planning event', required: false },
+    { id: 'safe_portfolio_sync', name: 'nextPortfolioSync', displayName: 'Next Portfolio Sync', category: 'meeting', dataType: 'date', description: 'SAFe 6.0: Monthly portfolio sync meeting', required: false },
     
-    // Notifications
-    { id: 'pmo_critical_alerts', name: 'criticalAlerts', displayName: 'Critical Alerts', category: 'notification', dataType: 'array', description: 'Critical issues requiring attention', required: false, triggerSignal: true },
+    // =========================================================================
+    // NOTIFICATIONS / ALERTS
+    // =========================================================================
+    { id: 'pmo_critical_alerts', name: 'criticalAlerts', displayName: 'Critical Alerts', category: 'notification', dataType: 'array', description: 'Critical issues requiring immediate attention', required: false, triggerSignal: true },
     { id: 'pmo_upcoming_milestones', name: 'upcomingMilestones', displayName: 'Upcoming Milestones', category: 'notification', dataType: 'array', description: 'Milestones due in next 14 days', required: false },
+    { id: 'safe_impediments', name: 'artImpediments', displayName: 'ART Impediments', category: 'notification', dataType: 'array', description: 'SAFe 6.0: Impediments blocking ART flow', required: false, triggerSignal: true },
   ],
   functions: [
     { id: 'pmo_generate_report', name: 'generateStatusReport', displayName: 'Generate Status Report', description: 'Generate portfolio status report', inputs: [{ name: 'reportType', type: 'string', required: true }, { name: 'timeframe', type: 'string', required: false }], outputs: [{ name: 'report', type: 'json' }], broadcasts: ['pmo:report_generated'] },
@@ -218,29 +288,72 @@ export const PMO_AGENT: AgentDefinition = {
 
 /**
  * FINOPS AGENT - Financial Operations
+ * Enhanced with PMBOK 7 Earned Value Management (EVM) and SAFe 6.0 Lean Portfolio Budgeting
+ * 
+ * PMBOK 7 Reference: Earned Value Management Practice Standard
+ * SAFe 6.0 Reference: Lean Portfolio Management
  */
 export const FINOPS_AGENT: AgentDefinition = {
   type: 'finops',
   displayName: 'FinOps Agent',
-  description: 'Financial Operations - monitors budgets, costs, and financial performance',
+  description: 'Financial Operations - monitors budgets using PMBOK 7 Earned Value Management (EVM) and SAFe 6.0 Lean Portfolio Budgeting',
   icon: 'dollar-sign',
   color: '#059669',
   attributes: [
-    // Dashboard
-    { id: 'finops_total_budget', name: 'totalPortfolioBudget', displayName: 'Total Budget', category: 'dashboard', dataType: 'number', description: 'Total portfolio budget', required: true, unit: '$', triggerSignal: true },
-    { id: 'finops_spent', name: 'actualSpent', displayName: 'Actual Spent', category: 'dashboard', dataType: 'number', description: 'Actual amount spent', required: true, unit: '$', triggerSignal: true },
-    { id: 'finops_cpi', name: 'costPerformanceIndex', displayName: 'CPI', category: 'dashboard', dataType: 'number', description: 'Cost Performance Index', required: true, triggerSignal: true },
-    { id: 'finops_spi', name: 'schedulePerformanceIndex', displayName: 'SPI', category: 'dashboard', dataType: 'number', description: 'Schedule Performance Index', required: true, triggerSignal: true },
-    { id: 'finops_eac', name: 'estimateAtCompletion', displayName: 'EAC', category: 'dashboard', dataType: 'number', description: 'Estimate at Completion', required: true, unit: '$', triggerSignal: true },
-    { id: 'finops_variance', name: 'budgetVariance', displayName: 'Budget Variance', category: 'dashboard', dataType: 'number', description: 'Budget variance %', required: true, unit: '%', triggerSignal: true },
+    // =========================================================================
+    // CORE BUDGET METRICS
+    // =========================================================================
+    { id: 'finops_total_budget', name: 'totalPortfolioBudget', displayName: 'Total Budget', category: 'dashboard', dataType: 'number', description: 'Total portfolio budget (Budget at Completion)', required: true, unit: '$', triggerSignal: true },
+    { id: 'finops_spent', name: 'actualSpent', displayName: 'Actual Spent', category: 'dashboard', dataType: 'number', description: 'Actual amount spent to date', required: true, unit: '$', triggerSignal: true },
     
-    // Reports
-    { id: 'finops_forecast', name: 'monthlyForecast', displayName: 'Monthly Forecast', category: 'report', dataType: 'json', description: 'Monthly spending forecast', required: false },
-    { id: 'finops_burn_rate', name: 'burnRate', displayName: 'Burn Rate', category: 'report', dataType: 'number', description: 'Current burn rate per month', required: false, unit: '$/month' },
+    // =========================================================================
+    // PMBOK 7 EARNED VALUE MANAGEMENT (EVM) - Full Set
+    // Reference: PMI Practice Standard for Earned Value Management
+    // =========================================================================
     
-    // Notifications
-    { id: 'finops_overrun_alerts', name: 'budgetOverrunAlerts', displayName: 'Budget Overrun Alerts', category: 'notification', dataType: 'array', description: 'Projects exceeding budget', required: false, triggerSignal: true },
-    { id: 'finops_approval_pending', name: 'pendingApprovals', displayName: 'Pending Approvals', category: 'notification', dataType: 'array', description: 'Budget changes awaiting approval', required: false },
+    // Core EVM Values
+    { id: 'pmbok_ev', name: 'earnedValue', displayName: 'Earned Value (EV)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Measure of work performed in terms of budget authorized. EV = % Complete × BAC', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_pv', name: 'plannedValue', displayName: 'Planned Value (PV)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Authorized budget assigned to scheduled work. What should have been done by now.', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_ac', name: 'actualCost', displayName: 'Actual Cost (AC)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Realized cost incurred for work performed to date.', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_bac', name: 'budgetAtCompletion', displayName: 'Budget at Completion (BAC)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Sum of all budgets for work to be performed (original total budget).', required: true, unit: '$', triggerSignal: true },
+    
+    // Variance Metrics
+    { id: 'pmbok_cv', name: 'costVariance', displayName: 'Cost Variance (CV)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: CV = EV - AC. Positive = under budget, Negative = over budget.', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_sv', name: 'scheduleVariance', displayName: 'Schedule Variance (SV)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: SV = EV - PV. Positive = ahead of schedule, Negative = behind schedule.', required: true, unit: '$', triggerSignal: true },
+    { id: 'finops_variance', name: 'budgetVariance', displayName: 'Budget Variance %', category: 'dashboard', dataType: 'number', description: 'Budget variance as percentage of total budget', required: true, unit: '%', triggerSignal: true },
+    
+    // Performance Indices
+    { id: 'pmbok_cpi', name: 'costPerformanceIndex', displayName: 'CPI', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: CPI = EV / AC. >1 = under budget, <1 = over budget. Key efficiency metric.', required: true, triggerSignal: true },
+    { id: 'pmbok_spi', name: 'schedulePerformanceIndex', displayName: 'SPI', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: SPI = EV / PV. >1 = ahead of schedule, <1 = behind schedule.', required: true, triggerSignal: true },
+    
+    // Forecasting Metrics
+    { id: 'pmbok_eac', name: 'estimateAtCompletion', displayName: 'Estimate at Completion (EAC)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Expected total cost. EAC = BAC / CPI (if current trends continue).', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_etc', name: 'estimateToComplete', displayName: 'Estimate to Complete (ETC)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Expected cost to finish remaining work. ETC = EAC - AC', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_vac', name: 'varianceAtCompletion', displayName: 'Variance at Completion (VAC)', category: 'dashboard', dataType: 'number', description: 'PMBOK 7: Projected budget surplus/deficit. VAC = BAC - EAC', required: true, unit: '$', triggerSignal: true },
+    { id: 'pmbok_tcpi', name: 'toCompletePerformanceIndex', displayName: 'TCPI', category: 'report', dataType: 'number', description: 'PMBOK 7: Required CPI to meet budget. TCPI = (BAC - EV) / (BAC - AC). >1 = harder to achieve.', required: false, triggerSignal: true },
+    
+    // =========================================================================
+    // SAFe 6.0 LEAN PORTFOLIO MANAGEMENT BUDGETING
+    // =========================================================================
+    { id: 'safe_value_stream_budgets', name: 'valueStreamBudgets', displayName: 'Value Stream Budgets', category: 'report', dataType: 'json', description: 'SAFe 6.0: Participatory budget allocation by value stream {valueStream: budget}', required: false },
+    { id: 'safe_capex_opex_split', name: 'capexOpexSplit', displayName: 'CapEx/OpEx Split', category: 'report', dataType: 'json', description: 'SAFe 6.0: Capital vs Operating expense breakdown {capex: %, opex: %}', required: false },
+    { id: 'safe_investment_horizons', name: 'investmentHorizons', displayName: 'Investment Horizons', category: 'report', dataType: 'json', description: 'SAFe 6.0: Budget allocation across horizons {H1_current: %, H2_emerging: %, H3_future: %}', required: false },
+    { id: 'safe_epic_funding', name: 'epicFundingStatus', displayName: 'Epic Funding Status', category: 'report', dataType: 'array', description: 'SAFe 6.0: Active epics with approved lean business cases and funding', required: false },
+    
+    // =========================================================================
+    // REPORTS & FORECASTING
+    // =========================================================================
+    { id: 'finops_forecast', name: 'monthlyForecast', displayName: 'Monthly Forecast', category: 'report', dataType: 'json', description: 'Rolling 12-month spending forecast with confidence intervals', required: false },
+    { id: 'finops_burn_rate', name: 'burnRate', displayName: 'Burn Rate', category: 'report', dataType: 'number', description: 'Current monthly burn rate', required: false, unit: '$/month' },
+    { id: 'finops_runway', name: 'budgetRunway', displayName: 'Budget Runway', category: 'report', dataType: 'number', description: 'Months of budget remaining at current burn rate', required: false, unit: 'months' },
+    { id: 'finops_cost_breakdown', name: 'costBreakdown', displayName: 'Cost Breakdown', category: 'report', dataType: 'json', description: 'Cost breakdown by category: {labor: $, vendors: $, infrastructure: $, other: $}', required: false },
+    
+    // =========================================================================
+    // NOTIFICATIONS / ALERTS
+    // =========================================================================
+    { id: 'finops_overrun_alerts', name: 'budgetOverrunAlerts', displayName: 'Budget Overrun Alerts', category: 'notification', dataType: 'array', description: 'Projects exceeding budget thresholds (CPI < 0.9)', required: false, triggerSignal: true },
+    { id: 'finops_approval_pending', name: 'pendingApprovals', displayName: 'Pending Approvals', category: 'notification', dataType: 'array', description: 'Budget change requests awaiting approval', required: false },
+    { id: 'finops_cpi_alerts', name: 'cpiAlerts', displayName: 'CPI Alerts', category: 'notification', dataType: 'array', description: 'Projects with CPI < 0.9 (10%+ cost overrun)', required: false, triggerSignal: true },
   ],
   functions: [
     { id: 'finops_forecast', name: 'generateForecast', displayName: 'Generate Forecast', description: 'Generate financial forecast', inputs: [{ name: 'months', type: 'number', required: true }], outputs: [{ name: 'forecast', type: 'json' }], broadcasts: ['finops:forecast_generated'] },
@@ -257,26 +370,64 @@ export const FINOPS_AGENT: AgentDefinition = {
 
 /**
  * VRO AGENT - Value Realization Office
+ * Enhanced with SAFe 6.0 OKRs/KPIs and Benefits Realization Framework
+ * 
+ * SAFe 6.0 Reference: Value Stream KPIs, OKRs
+ * PMI Reference: Benefits Realization Management
  */
 export const VRO_AGENT: AgentDefinition = {
   type: 'vro',
   displayName: 'VRO Agent',
-  description: 'Value Realization Office - tracks benefits, outcomes, and business value',
+  description: 'Value Realization Office - tracks benefits using SAFe 6.0 OKRs/KPIs and PMI Benefits Realization Management',
   icon: 'trending-up',
   color: '#7c3aed',
   attributes: [
-    // Dashboard
-    { id: 'vro_total_benefits', name: 'totalPlannedBenefits', displayName: 'Total Planned Benefits', category: 'dashboard', dataType: 'number', description: 'Total planned benefits value', required: true, unit: '$', triggerSignal: true },
-    { id: 'vro_realized', name: 'benefitsRealized', displayName: 'Benefits Realized', category: 'dashboard', dataType: 'number', description: 'Actual benefits realized', required: true, unit: '$', triggerSignal: true },
-    { id: 'vro_realization_rate', name: 'realizationRate', displayName: 'Realization Rate', category: 'dashboard', dataType: 'number', description: 'Benefits realization %', required: true, unit: '%', triggerSignal: true },
-    { id: 'vro_value_score', name: 'valueScore', displayName: 'Value Score', category: 'dashboard', dataType: 'number', description: 'Overall value delivery score', required: true, triggerSignal: true },
+    // =========================================================================
+    // CORE VALUE METRICS
+    // =========================================================================
+    { id: 'vro_total_benefits', name: 'totalPlannedBenefits', displayName: 'Total Planned Benefits', category: 'dashboard', dataType: 'number', description: 'Total planned benefits value across portfolio', required: true, unit: '$', triggerSignal: true },
+    { id: 'vro_realized', name: 'benefitsRealized', displayName: 'Benefits Realized', category: 'dashboard', dataType: 'number', description: 'Actual benefits realized to date', required: true, unit: '$', triggerSignal: true },
+    { id: 'vro_realization_rate', name: 'realizationRate', displayName: 'Realization Rate', category: 'dashboard', dataType: 'number', description: 'Benefits realization percentage (realized/planned × 100)', required: true, unit: '%', triggerSignal: true },
+    { id: 'vro_value_score', name: 'valueScore', displayName: 'Value Score', category: 'dashboard', dataType: 'number', description: 'Composite value delivery score (0-100)', required: true, triggerSignal: true },
     
-    // Dependencies (from Company)
+    // =========================================================================
+    // SAFe 6.0 OKRs (Objectives & Key Results)
+    // Reference: scaledagile.com/connecting-okrs-kpis
+    // =========================================================================
+    { id: 'safe_okr_progress', name: 'okrProgress', displayName: 'OKR Progress', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Overall OKR achievement progress (0-100%)', required: true, unit: '%', triggerSignal: true },
+    { id: 'safe_strategic_objectives', name: 'strategicObjectives', displayName: 'Strategic Objectives', category: 'report', dataType: 'array', description: 'SAFe 6.0: Active strategic theme objectives with key results', required: false },
+    { id: 'safe_key_results', name: 'keyResultsStatus', displayName: 'Key Results Status', category: 'report', dataType: 'json', description: 'SAFe 6.0: Key results by objective with confidence scores', required: false },
+    
+    // =========================================================================
+    // SAFe 6.0 VALUE STREAM KPIs
+    // Reference: framework.scaledagile.com/value-stream-kpis
+    // =========================================================================
+    { id: 'safe_customer_satisfaction', name: 'customerSatisfaction', displayName: 'Customer Satisfaction', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Customer satisfaction score (CSAT or NPS)', required: false, unit: 'score', triggerSignal: true },
+    { id: 'safe_time_to_market', name: 'timeToMarket', displayName: 'Time to Market', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Average time from idea to production (days)', required: false, unit: 'days', triggerSignal: true },
+    { id: 'safe_roi', name: 'returnOnInvestment', displayName: 'ROI', category: 'dashboard', dataType: 'number', description: 'SAFe 6.0: Return on Investment percentage', required: false, unit: '%', triggerSignal: true },
+    { id: 'safe_customer_retention', name: 'customerRetention', displayName: 'Customer Retention', category: 'report', dataType: 'number', description: 'SAFe 6.0: Customer retention rate', required: false, unit: '%' },
+    { id: 'safe_revenue_growth', name: 'revenueGrowth', displayName: 'Revenue Growth', category: 'report', dataType: 'number', description: 'SAFe 6.0: Revenue growth attributed to portfolio', required: false, unit: '%' },
+    
+    // =========================================================================
+    // PMI BENEFITS REALIZATION MANAGEMENT
+    // =========================================================================
+    { id: 'pmi_benefits_register', name: 'benefitsRegister', displayName: 'Benefits Register', category: 'report', dataType: 'array', description: 'PMI: Complete benefits register with owners and metrics', required: false },
+    { id: 'pmi_benefits_map', name: 'benefitsMap', displayName: 'Benefits Dependency Map', category: 'report', dataType: 'json', description: 'PMI: Benefits dependency mapping showing how outputs lead to outcomes', required: false },
+    { id: 'pmi_transition_plan', name: 'transitionPlan', displayName: 'Transition Plan', category: 'report', dataType: 'json', description: 'PMI: Plan for transitioning benefits to operations', required: false },
+    { id: 'pmi_sustaining_activities', name: 'sustainingActivities', displayName: 'Sustaining Activities', category: 'report', dataType: 'array', description: 'PMI: Activities required to sustain benefits post-project', required: false },
+    
+    // =========================================================================
+    // OUTCOME MEASUREMENTS
+    // =========================================================================
+    { id: 'vro_outcomes', name: 'measuredOutcomes', displayName: 'Measured Outcomes', category: 'report', dataType: 'array', description: 'Quantified business outcomes with baseline and targets', required: false },
+    { id: 'vro_lagging_indicators', name: 'laggingIndicators', displayName: 'Lagging Indicators', category: 'report', dataType: 'json', description: 'Lagging KPIs measuring past performance', required: false },
+    { id: 'vro_leading_indicators', name: 'leadingIndicators', displayName: 'Leading Indicators', category: 'report', dataType: 'json', description: 'Leading KPIs predicting future performance', required: false },
+    
+    // =========================================================================
+    // DEPENDENCIES
+    // =========================================================================
     { id: 'vro_strategic_alignment', name: 'strategicAlignment', displayName: 'Strategic Alignment', category: 'dependency', dataType: 'json', description: 'Alignment to company strategic priorities', source: 'company', required: false },
-    
-    // Reports
-    { id: 'vro_benefits_map', name: 'benefitsMap', displayName: 'Benefits Map', category: 'report', dataType: 'json', description: 'Benefits dependency mapping', required: false },
-    { id: 'vro_outcomes', name: 'measuredOutcomes', displayName: 'Measured Outcomes', category: 'report', dataType: 'array', description: 'Quantified business outcomes', required: false },
+    { id: 'vro_financial_context', name: 'financialContext', displayName: 'Financial Context', category: 'dependency', dataType: 'json', description: 'Financial metrics from FinOps for ROI calculations', source: 'finops', required: false },
   ],
   functions: [
     { id: 'vro_measure', name: 'measureBenefits', displayName: 'Measure Benefits', description: 'Calculate realized benefits', inputs: [{ name: 'projectId', type: 'string', required: true }], outputs: [{ name: 'measurement', type: 'json' }], broadcasts: ['vro:benefits_measured'] },
