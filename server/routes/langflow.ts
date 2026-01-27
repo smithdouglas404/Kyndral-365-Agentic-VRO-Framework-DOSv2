@@ -10,7 +10,24 @@ import { initializeLangflowMCPClient, type LangflowMCPClient } from '../lib/Lang
 // MCP Client instance
 let langflowMCPClient: LangflowMCPClient | null = null;
 
+/**
+ * Initialize Langflow MCP client at startup (called during route registration)
+ */
+async function initializeAtStartup(): Promise<void> {
+  try {
+    langflowMCPClient = initializeLangflowMCPClient();
+    if (langflowMCPClient) {
+      await langflowMCPClient.connect();
+      console.log('[LangflowMCP] Client connected at startup');
+    }
+  } catch (error: any) {
+    console.warn('[LangflowMCP] Startup connection failed:', error.message);
+  }
+}
+
 export function registerLangflowRoutes(app: Express): void {
+  // Initialize client at startup
+  initializeAtStartup();
   /**
    * List all available Langflow flows
    */

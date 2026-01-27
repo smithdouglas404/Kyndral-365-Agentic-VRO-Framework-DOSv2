@@ -335,7 +335,28 @@ export class AgentCollaborationRulesEngine {
 
       case 'trigger_workflow':
         console.log(`[RulesEngine] Triggering workflow: ${action.parameters?.workflowId}`);
-        // Implementation would trigger workflow engine
+        try {
+          const { executeLangflowFlow } = await import('./LangflowMCPClient.js');
+          const result = await executeLangflowFlow(
+            action.parameters?.workflowId || 'new_flow',
+            {
+              input_value: JSON.stringify({
+                ...facts,
+                triggeredBy: 'rules_engine',
+                ruleId: action.parameters?.ruleId
+              })
+            },
+            facts.agentId
+          );
+
+          if (result.success) {
+            console.log(`[RulesEngine] ✅ Workflow executed successfully`);
+          } else {
+            console.error(`[RulesEngine] ❌ Workflow failed:`, result.error);
+          }
+        } catch (error: any) {
+          console.warn(`[RulesEngine] Workflow trigger skipped:`, error.message);
+        }
         break;
 
       default:
