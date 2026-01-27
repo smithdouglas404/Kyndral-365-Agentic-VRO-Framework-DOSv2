@@ -535,6 +535,21 @@ When you identify resistance or adoption issues, recommend collaboration with PM
             });
           }
 
+          // Broadcast intervention metrics
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'intervention_count',
+            interventions.length,
+            0.90
+          );
+
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'intervention_urgency',
+            urgency,
+            0.95
+          );
+
           return {
             changeId,
             urgency,
@@ -672,6 +687,30 @@ When you identify resistance or adoption issues, recommend collaboration with PM
             peakResistanceTime: 'Weeks 2-4 post-launch',
             expectedDuration: '8-10 weeks',
           };
+
+          // Broadcast resistance forecast
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'resistance_level',
+            overallResistanceForecast.level,
+            overallResistanceForecast.probability / 100
+          );
+
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'resistance_hotspot_count',
+            hotspots.length,
+            0.85
+          );
+
+          // Broadcast high-probability hotspots
+          const highRiskHotspots = hotspots.filter(h => h.probability > 70);
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'high_risk_resistance_areas',
+            highRiskHotspots.map(h => h.area).join(', '),
+            0.80
+          );
 
           return {
             changeId,

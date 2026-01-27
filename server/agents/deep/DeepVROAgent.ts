@@ -761,6 +761,28 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               timeline: opp.potential === "high" ? "immediate" : "near-term",
             }));
 
+            // Broadcast optimization analysis
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'optimization_potential',
+              optimizationPotential,
+              0.80
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'optimization_opportunities',
+              opportunities.length,
+              0.85
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'performance_score',
+              Math.round(avgScore),
+              0.85
+            );
+
             return {
               projectId,
               projectName: project.name,

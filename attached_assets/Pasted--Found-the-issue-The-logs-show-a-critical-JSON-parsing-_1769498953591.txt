@@ -1,0 +1,14 @@
+● Found the issue! The logs show a critical JSON parsing error in the LettaAgentMemory at line 102. The problem is that agents are trying to access memory that hasn't been properly initialized with their agent
+   IDs.                                                                                                                                                                                                          
+                                                                                                                                                                                                                 
+● Read(server/agents/deep/DeepAgentBase.ts)                                                                                                                                                                      
+  ⎿  Read 100 lines                                                                                                                                                                                              
+                                                                                                                                                                                                                 
+● Search(pattern: "new LettaAgentMemory", output_mode: "content")                                                                                                                                                
+  ⎿  Found 1 line (ctrl+o to expand)                                                                                                                                                                             
+                                                                                                                                                                                                                 
+● Read(server/agents/deep/DeepAgentBase.ts)                                                                                                                                                                      
+  ⎿  Read 80 lines                                                                                                                                                                                               
+                                                                                                                                                                                                                 
+● I found the root cause! The issue is in DeepAgentBase.ts:116-121. The memory initialization is happening asynchronously but the constructor doesn't wait for it to complete. This means agents start processing
+   facts before their memory is initialized, causing JSON parsing errors.       

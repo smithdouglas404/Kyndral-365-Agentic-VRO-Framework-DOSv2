@@ -81,6 +81,44 @@ export abstract class DeepAgentWithRAG extends DeepAgentBase {
     // 6. Generate PREDICTIVE forecast
     const forecast = await this.generateForecast(project, similarDecisions, patterns);
 
+    // Broadcast forecast facts
+    if (forecast.alertType) {
+      await this.broadcastFact(
+        projectId,
+        `${this.config.agentType}_alert_type`,
+        forecast.alertType,
+        forecast.confidence
+      );
+      await this.broadcastFact(
+        projectId,
+        `${this.config.agentType}_forecast_confidence`,
+        forecast.confidence,
+        forecast.confidence
+      );
+    }
+
+    // Broadcast critical milestone if present
+    if (forecast.criticalMilestone) {
+      await this.broadcastFact(
+        projectId,
+        `${this.config.agentType}_critical_milestone`,
+        `Week ${forecast.criticalMilestone.week}: ${forecast.criticalMilestone.event}`,
+        forecast.confidence
+      );
+    }
+
+    // Broadcast key predictions
+    if (forecast.predictions && forecast.predictions.length > 0) {
+      // Broadcast the most critical prediction (usually the last/furthest out)
+      const criticalPrediction = forecast.predictions[forecast.predictions.length - 1];
+      await this.broadcastFact(
+        projectId,
+        `${this.config.agentType}_predicted_${criticalPrediction.metric}`,
+        criticalPrediction.predictedValue,
+        criticalPrediction.confidence
+      );
+    }
+
     // 7. Generate detailed narrative
     const narrative = await this.constructNarrative(
       project,
@@ -101,6 +139,14 @@ export abstract class DeepAgentWithRAG extends DeepAgentBase {
       confidenceScore: forecast.confidence,
       predictedOutcome: forecast.predictions,
     });
+
+    // Broadcast decision storage
+    await this.broadcastFact(
+      projectId,
+      `${this.config.agentType}_decision_id`,
+      decisionId,
+      forecast.confidence
+    );
 
     console.log(`[${this.config.agentName}] Narrative generated, stored as decision ${decisionId}`);
 
