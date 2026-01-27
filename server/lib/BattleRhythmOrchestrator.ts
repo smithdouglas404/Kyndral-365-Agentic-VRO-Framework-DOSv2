@@ -13,6 +13,7 @@
  */
 
 import type { IStorage } from "../storage.js";
+import { pool } from "../db.js";
 import { getLLMRouter } from "./LLMRouter.js";
 import { getKnowledgeBaseRepository } from "./KnowledgeBaseRepository.js";
 import { broadcastNotification } from "../websocket.js";
@@ -178,7 +179,7 @@ export class BattleRhythmOrchestrator {
       const projects = await this.storage.getProjects();
 
       // Trigger agent analysis (they run in background)
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO agent_task_queue (id, agent_name, task_type, task_data, priority, status, created_at)
         VALUES
           ($1, 'FinOps', 'weekly_synthesis', $2, 'high', 'pending', NOW()),
@@ -221,7 +222,7 @@ export class BattleRhythmOrchestrator {
       }
 
       // Store in database
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO battle_rhythm_syntheses (id, event, week_of, agenda, key_findings, decisions, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())
       `, [
@@ -260,7 +261,7 @@ export class BattleRhythmOrchestrator {
         this.currentWeekSynthesis.tuesday = synthesis;
       }
 
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO battle_rhythm_syntheses (id, event, week_of, agenda, key_findings, decisions, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())
       `, [
@@ -298,7 +299,7 @@ export class BattleRhythmOrchestrator {
         this.currentWeekSynthesis.wednesday = synthesis;
       }
 
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO battle_rhythm_syntheses (id, event, week_of, agenda, key_findings, decisions, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())
       `, [
@@ -336,7 +337,7 @@ export class BattleRhythmOrchestrator {
         this.currentWeekSynthesis.thursday = synthesis;
       }
 
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO battle_rhythm_syntheses (id, event, week_of, agenda, key_findings, decisions, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())
       `, [
@@ -374,7 +375,7 @@ export class BattleRhythmOrchestrator {
         this.currentWeekSynthesis.friday = synthesis;
       }
 
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO battle_rhythm_syntheses (id, event, week_of, agenda, key_findings, decisions, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())
       `, [
@@ -412,15 +413,15 @@ export class BattleRhythmOrchestrator {
    */
   private async generateScrumOfScrumsAgenda(): Promise<BattleRhythmSynthesis> {
     // Get agent findings from Sunday recon
-    const findings = await this.storage.db.query(`
+    const findings = await pool.query(`
       SELECT * FROM agent_activity_log
       WHERE created_at >= NOW() - INTERVAL '24 hours'
-      AND activity_type = 'weekly_synthesis'
+      AND event_type = 'weekly_synthesis'
       ORDER BY created_at DESC
     `);
 
     const keyFindings: BattleRhythmSynthesis["keyFindings"] = findings.rows.map((row: any) => ({
-      source: row.agent_name,
+      source: row.primary_agent_name,
       finding: row.details?.finding || "",
       severity: row.details?.severity || "medium",
       recommendation: row.details?.recommendation || "",
@@ -509,7 +510,7 @@ Major decisions requiring VRO/Sponsor approval flagged.
     const decisions: BattleRhythmSynthesis["decisions"] = [];
 
     // Get projects that need kill/continue/pivot decisions
-    const atRiskProjects = await this.storage.db.query(`
+    const atRiskProjects = await pool.query(`
       SELECT * FROM projects
       WHERE status IN ('at-risk', 'delayed', 'critical')
     `);
@@ -632,7 +633,7 @@ Orders distributed via A2A communication to all agents.
     const agents = ["FinOps", "Risk", "VRO", "TMO", "Planning", "Governance", "DependencyCollaboration"];
 
     for (const agent of agents) {
-      await this.storage.db.query(`
+      await pool.query(`
         INSERT INTO agent_task_queue (id, agent_name, task_type, task_data, priority, status, created_at)
         VALUES ($1, $2, 'weekly_orders', $3, 'high', 'pending', NOW())
       `, [

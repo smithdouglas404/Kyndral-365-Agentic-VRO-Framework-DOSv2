@@ -85,6 +85,32 @@ export class DeepFinOpsAgent extends DeepAgentBase {
               detectedAt: new Date(),
             });
 
+            // Execute Langflow workflow for budget alert orchestration
+            try {
+              const flowResult = await this.orchestrator.executeLangflowFlow(
+                '70d569d8-3e9c-4684-9227-ee4743d4be09',  // FinOps Budget Alert flow (auto-generated)
+                {
+                  projectId,
+                  projectName: project.name,
+                  budgetVariance: variance / 100,  // Convert to decimal (0.20)
+                  currentBudget: budget,
+                  actualSpent: actualCost,
+                  severity: variance > 30 ? 'critical' : 'high',
+                  message: `Budget overrun detected: ${project.name} is ${variance.toFixed(1)}% over budget`,
+                },
+                'finops'  // Agent ID
+              );
+
+              if (flowResult.success) {
+                console.log(`[DeepFinOps] ✅ Langflow workflow executed successfully`);
+                console.log(`[DeepFinOps] Flow outputs:`, JSON.stringify(flowResult.outputs));
+              } else {
+                console.error(`[DeepFinOps] ❌ Langflow workflow failed:`, flowResult.error);
+              }
+            } catch (error: any) {
+              console.error(`[DeepFinOps] Langflow execution error:`, error.message);
+            }
+
             await this.archiveContext(
               `Project ${project.name} detected with ${variance.toFixed(1)}% budget overrun (critical threshold exceeded)`,
               {

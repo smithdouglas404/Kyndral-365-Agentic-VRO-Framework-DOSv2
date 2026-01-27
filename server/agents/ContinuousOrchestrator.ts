@@ -204,6 +204,67 @@ export class MCPProtocolHandler {
   }
 
   /**
+   * Execute a Langflow flow (visual workflow orchestration)
+   *
+   * This replaces hardcoded MCP calls with visual, configurable workflows.
+   * Agents can call Langflow flows instead of direct MCP service calls.
+   *
+   * @param flowId - The Langflow flow ID or name
+   * @param input - Input data for the flow
+   * @param agentId - Agent making the call (for tracking)
+   */
+  async executeLangflowFlow(flowId: string, input: any, agentId?: string): Promise<any> {
+    console.log(`[Langflow] ${agentId || 'system'} → ${flowId}`);
+
+    try {
+      // Get Langflow service from server instance
+      const { langflowService } = await import('../index.js');
+
+      if (!langflowService) {
+        console.warn('[Langflow] Service not initialized - falling back to direct MCP calls');
+        return {
+          success: false,
+          error: 'Langflow not configured',
+          _fallback: true,
+        };
+      }
+
+      // Execute the flow
+      const result = await langflowService.executeFlow(flowId, input);
+
+      if (result.status === 'error') {
+        console.error(`[Langflow] Flow ${flowId} failed:`, result.error);
+        return {
+          success: false,
+          flowId,
+          error: result.error,
+          agentId,
+        };
+      }
+
+      console.log(`[Langflow] Flow ${flowId} completed in ${result.executionTime}ms`);
+
+      return {
+        success: true,
+        flowId,
+        runId: result.runId,
+        outputs: result.outputs,
+        executionTime: result.executionTime,
+        agentId,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error: any) {
+      console.error(`[Langflow] Flow execution failed for ${flowId}:`, error.message);
+      return {
+        success: false,
+        flowId,
+        error: error.message,
+        agentId,
+      };
+    }
+  }
+
+  /**
    * Get available services
    */
   getServices(): MCPService[] {

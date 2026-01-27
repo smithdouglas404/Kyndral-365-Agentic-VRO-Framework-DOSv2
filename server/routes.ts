@@ -20,6 +20,8 @@ import { registerUserManagementRoutes } from "./routes/admin/users.js";
 import { registerMCPServerRoutes } from "./routes/admin/mcp-servers.js";
 import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets.js";
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
+import { registerLangflowRoutes } from "./routes/langflow.js";
+import { registerAgentActionRoutes } from "./routes/agent-actions.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
@@ -174,6 +176,12 @@ export async function registerRoutes(
 
   // Register Custom MCP Preset Management routes (ADMIN - Custom integration builder)
   registerCustomMCPPresetRoutes(app);
+
+  // Register Langflow routes (Visual workflow orchestration)
+  registerLangflowRoutes(app);
+
+  // Register Agent Action routes (Server endpoints for Langflow flows to call MCP integrations)
+  registerAgentActionRoutes(app);
 
   // Register Agent Configuration routes (ADMIN - AI agent settings and thresholds)
   registerAgentConfigRoutes(app);

@@ -8,6 +8,9 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
+import { BattleRhythmTaskProcessor } from "./lib/BattleRhythmTaskProcessor.js";
+import { initializeLangflowService, type LangflowService } from "./lib/LangflowService.js";
+import { LangflowFlowGenerator } from "./lib/LangflowFlowGenerator.js";
 import { initializeMCPServices } from "./mcp/MCPServiceFactory.js";
 import { initializeFirebaseAuthService } from "./auth/firebaseAdmin.js";
 import { startSyncScheduler } from "./syncScheduler";
@@ -41,6 +44,12 @@ export function getGlobalAgentScheduler(): AgentScheduler {
 
 // Export Battle Rhythm orchestrator (cadence-aware weekly scheduling)
 export let battleRhythmOrchestrator: BattleRhythmOrchestrator | null = null;
+
+// Export Battle Rhythm task processor (processes Sunday Recon tasks)
+export let battleRhythmTaskProcessor: BattleRhythmTaskProcessor | null = null;
+
+// Export Langflow service (visual workflow orchestration)
+export let langflowService: LangflowService | null = null;
 
 const app = express();
 const httpServer = createServer(app);
@@ -189,6 +198,41 @@ app.use((req, res, next) => {
       log("✅ MCP Services initialized - Real API integrations ready");
 
       // ===================================================================
+      // Initialize Langflow Service (Visual Workflow Orchestration)
+      // ===================================================================
+      log("🎨 Initializing Langflow Service...");
+      langflowService = initializeLangflowService();
+      if (langflowService) {
+        const connected = await langflowService.testConnection();
+        if (connected) {
+          log("✅ Langflow connected - Visual workflow orchestration ready");
+          const flows = await langflowService.listFlows();
+          log(`📋 Langflow: ${flows.length} flows available`);
+
+          // ===================================================================
+          // Auto-Generate Agent Flows (Programmatic Flow Creation)
+          // ===================================================================
+          log("🤖 Generating Langflow flows for all Deep Agents...");
+          const flowGenerator = new LangflowFlowGenerator(langflowService);
+          try {
+            const generatedFlows = await flowGenerator.generateAllAgentFlows();
+            log(`✅ Generated ${generatedFlows.size} agent flows programmatically`);
+
+            // Log flow IDs
+            for (const [agent, flowId] of generatedFlows.entries()) {
+              log(`   - ${agent}: ${flowId}`);
+            }
+          } catch (error: any) {
+            log(`⚠️  Flow generation failed: ${error.message}`);
+          }
+        } else {
+          log("⚠️  Langflow connection test failed");
+        }
+      } else {
+        log("⚠️  Langflow not configured - set LANGFLOW_API_URL and LANGFLOW_API_KEY");
+      }
+
+      // ===================================================================
       // Start LangChain Agent Scheduler (INTEGRATED WITH BATTLE RHYTHM)
       // Agents now compile findings for weekly synthesis instead of continuous alerts
       // Agent runs triggered by Battle Rhythm events (Sun → Mon → Tue → Wed → Thu → Fri)
@@ -199,6 +243,16 @@ app.use((req, res, next) => {
         console.error("Failed to start agent scheduler:", err);
       });
       log("✅ Agent Scheduler started - Integrated with Battle Rhythm");
+
+      // ===================================================================
+      // Start Battle Rhythm Task Processor
+      // Processes tasks from agent_task_queue (created by Sunday Recon)
+      // Executes agent synthesis and logs to agent_activity_log
+      // ===================================================================
+      log("⚙️  Initializing Battle Rhythm Task Processor...");
+      battleRhythmTaskProcessor = new BattleRhythmTaskProcessor(storage, agentScheduler);
+      battleRhythmTaskProcessor.start();
+      log("✅ Battle Rhythm Task Processor started - Processing synthesis tasks");
 
       // Start MCP sync scheduler for cron-based sync jobs
       startSyncScheduler().catch(err => {
@@ -221,6 +275,13 @@ app.use((req, res, next) => {
 
       if (battleRhythmOrchestrator) {
         cleanupCallbacks.push(createOrchestratorCleanup(battleRhythmOrchestrator));
+      }
+
+      if (battleRhythmTaskProcessor) {
+        cleanupCallbacks.push(async () => {
+          console.log('[Cleanup] Stopping Battle Rhythm Task Processor...');
+          battleRhythmTaskProcessor?.stop();
+        });
       }
 
       setupProcessHandlers(httpServer, cleanupCallbacks, {

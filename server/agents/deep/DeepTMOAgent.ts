@@ -101,6 +101,31 @@ export class DeepTMOAgent extends DeepAgentBase {
               detectedAt: new Date(),
             });
 
+            // Execute Langflow workflow for schedule delay response
+            try {
+              const flowResult = await this.orchestrator.executeLangflowFlow(
+                'be3ebfe5-ac51-456d-8b22-c7ff5d123ed4',  // TMO Schedule Delay flow
+                {
+                  projectId,
+                  projectName: project.name,
+                  delayDays: Math.abs(varianceDays),
+                  criticalPath: true,
+                  scheduledDate: project.endDate?.toISOString().split('T')[0] || 'N/A',
+                  severity: 'critical',
+                  message: `Schedule delay detected: ${project.name} is ${Math.abs(varianceDays)} days behind`,
+                },
+                'tmo'
+              );
+
+              if (flowResult.success) {
+                console.log(`[DeepTMO] ✅ Langflow workflow executed successfully`);
+              } else {
+                console.error(`[DeepTMO] ❌ Langflow workflow failed:`, flowResult.error);
+              }
+            } catch (error: any) {
+              console.error(`[DeepTMO] Langflow execution error:`, error.message);
+            }
+
             await this.archiveContext(
               `Project ${project.name} detected with ${Math.abs(varianceDays)} days schedule delay - critical threshold exceeded`,
               {
