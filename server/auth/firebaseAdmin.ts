@@ -23,8 +23,8 @@ export type FirebaseUserRole =
  * Initialize Firebase Admin SDK
  */
 export function initializeFirebaseAdmin(): admin.app.App {
-  // Check if already initialized
-  if (admin.apps.length > 0) {
+  // Check if already initialized (defensive check for undefined apps array)
+  if (admin.apps && admin.apps.length > 0) {
     console.log('[Firebase] Admin SDK already initialized');
     return admin.apps[0]!;
   }
@@ -271,7 +271,7 @@ export class FirebaseAuthService {
    */
   isAvailable(): boolean {
     try {
-      return admin.apps.length > 0;
+      return admin.apps && admin.apps.length > 0;
     } catch {
       return false;
     }

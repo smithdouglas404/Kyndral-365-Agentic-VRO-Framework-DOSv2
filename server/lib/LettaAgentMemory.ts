@@ -52,6 +52,19 @@ export class LettaAgentMemory {
   }
 
   /**
+   * Safely parse JSON with fallback to default value
+   */
+  private safeParseJSON(value: any, fallback: any, fieldName: string): any {
+    if (!value) return fallback;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      console.error(`[Letta] ${this.agentId} failed to parse ${fieldName}, using default:`, error);
+      return fallback;
+    }
+  }
+
+  /**
    * Initialize core memory for agent (if not exists)
    */
   async initialize(persona: string): Promise<void> {
@@ -99,10 +112,10 @@ export class LettaAgentMemory {
 
     this.coreCache = {
       persona: row.persona || '',
-      policies: JSON.parse(row.policies || '[]'),
-      learnedFacts: JSON.parse(row.learned_facts || '{}'),
+      policies: this.safeParseJSON(row.policies, [], 'policies'),
+      learnedFacts: this.safeParseJSON(row.learned_facts, {}, 'learned_facts'),
       currentContext: row.current_context || '',
-      pendingActions: JSON.parse(row.pending_actions || '[]'),
+      pendingActions: this.safeParseJSON(row.pending_actions, [], 'pending_actions'),
     };
 
     return this.coreCache;
@@ -255,7 +268,7 @@ export class LettaAgentMemory {
     return result.rows.map((row: any) => ({
       id: row.id,
       content: row.content,
-      metadata: JSON.parse(row.metadata || '{}'),
+      metadata: this.safeParseJSON(row.metadata, {}, `metadata for archive ${row.id}`),
       timestamp: new Date(row.created_at),
     }));
   }
@@ -275,7 +288,7 @@ export class LettaAgentMemory {
     return result.rows.map((row: any) => ({
       id: row.id,
       content: row.content,
-      metadata: JSON.parse(row.metadata || '{}'),
+      metadata: this.safeParseJSON(row.metadata, {}, `metadata for archive ${row.id}`),
       timestamp: new Date(row.created_at),
     }));
   }
