@@ -22,6 +22,9 @@ import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerLangflowRoutes } from "./routes/langflow.js";
 import { registerAgentActionRoutes } from "./routes/agent-actions.js";
+import mem0ApiRouter from "./routes/mem0-api.js";
+import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
+import ontologyApiRouter from "./routes/ontology-api.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
@@ -182,6 +185,26 @@ export async function registerRoutes(
 
   // Register Agent Action routes (Server endpoints for Langflow flows to call MCP integrations)
   registerAgentActionRoutes(app);
+
+  // Register Mem0 API routes (Expose Mem0 fact operations to Langflow flows)
+  app.use('/api/mem0', mem0ApiRouter);
+
+  // Register A2A API routes (Expose Agent-to-Agent messaging to Langflow flows)
+  app.use('/api/a2a', a2aApiRouter);
+
+  // Register Ontology API routes (Expose ontology operations to Langflow flows)
+  app.use('/api/ontology', ontologyApiRouter);
+
+  // Initialize A2A bus getter for API routes
+  setA2ABusGetter(() => {
+    const { createAgentScheduler } = require("./agents/AgentScheduler.js");
+    const scheduler = createAgentScheduler(storage);
+    const orchestrator = scheduler.getOrchestrator();
+    if (!orchestrator) {
+      throw new Error('Orchestrator not initialized');
+    }
+    return orchestrator.getA2ABus();
+  });
 
   // Register Agent Configuration routes (ADMIN - AI agent settings and thresholds)
   registerAgentConfigRoutes(app);
