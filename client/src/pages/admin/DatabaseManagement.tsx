@@ -227,31 +227,7 @@ export default function DatabaseManagement() {
           </Card>
         )}
 
-        {/* Additional Operations */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <RefreshCw className="w-5 h-5" />
-              Other Database Operations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Button variant="outline" disabled className="w-full justify-start">
-                <Download className="w-4 h-4 mr-2" />
-                Export Database Backup (Coming Soon)
-              </Button>
-              <Button variant="outline" disabled className="w-full justify-start">
-                <Upload className="w-4 h-4 mr-2" />
-                Import Database Backup (Coming Soon)
-              </Button>
-              <Button variant="outline" disabled className="w-full justify-start text-red-600">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Clear All Data (Coming Soon)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Database backup/restore/clear features removed - implement when needed */}
       </div>
 
       {/* Confirmation Dialog */}
