@@ -88,6 +88,10 @@ The system implements 10 specialized agents:
 ### Workflow & Rules
 - **Camunda 8**: BPMN/DMN workflow and decision engine
 - **Retool**: External rule editor interfaces (8 domain-specific apps)
+- **Langflow**: Visual workflow builder via MCP integration
+  - **Sync**: Bidirectional mapping between PostgreSQL rules and Langflow flows
+  - **API**: `/api/langflow/sync/*` endpoints for rule-flow synchronization
+  - **Webhook**: Secure webhook at `/api/langflow/webhook` (Bearer token auth)
 
 ### Notifications
 - **Email**: SendGrid, Mailgun, AWS SES, SMTP support
