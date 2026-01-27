@@ -27,6 +27,7 @@ interface PlanStep {
   step: number;
   description: string;
   tool?: string;
+  toolInput?: Record<string, any>; // Parameters for tool execution
   expectedOutcome: string;
   dependencies: number[]; // Steps that must complete first
   status: 'pending' | 'executing' | 'completed' | 'failed';
@@ -93,6 +94,7 @@ export abstract class DeepAgentBase {
   // Memory layers
   protected mem0: ReturnType<typeof getMem0Service>; // Shared facts with other agents
   protected memory: LettaAgentMemory; // Private self-editing memory
+  private memoryInitPromise: Promise<void>; // Ensure memory is ready before use
 
   constructor(config: DeepAgentConfig, storage: IStorage) {
     this.config = {
@@ -114,9 +116,10 @@ export abstract class DeepAgentBase {
     this.mem0 = getMem0Service();
     this.memory = createAgentMemory(config.agentName.toLowerCase());
 
-    // Initialize agent's core memory with persona
-    this.memory.initialize(`I am the ${config.agentName} agent responsible for ${config.description}`).catch((error) => {
-      console.error(`[${config.agentName}] Failed to initialize memory:`, error);
+    // Initialize agent's core memory with persona - MUST complete before agent works
+    this.memoryInitPromise = this.memory.initialize(`I am the ${config.agentName} agent responsible for ${config.description}`).catch((error) => {
+      console.error(`[${config.agentName}] CRITICAL: Failed to initialize memory:`, error);
+      throw error; // Fail fast if memory can't initialize
     });
 
     // Subscribe to relevant facts from other agents
@@ -228,6 +231,9 @@ export abstract class DeepAgentBase {
    * Subclasses can override to respond to specific facts
    */
   protected async onFactObserved(fact: Fact): Promise<void> {
+    // Ensure memory is initialized before using it
+    await this.memoryInitPromise;
+
     // Update working memory
     await this.memory.appendContext(
       `Observed: ${fact.entity}.${fact.attribute} = ${JSON.stringify(fact.value)} (by ${fact.sourceAgent})`
@@ -243,6 +249,7 @@ export abstract class DeepAgentBase {
    * Agent learns and remembers a fact
    */
   protected async learn(key: string, value: any): Promise<void> {
+    await this.memoryInitPromise;
     await this.memory.learn(key, value);
     console.log(`[${this.config.agentName}] Learned: ${key}`);
   }
@@ -346,6 +353,7 @@ export abstract class DeepAgentBase {
    * Archive important context to long-term memory
    */
   protected async archiveContext(content: string, metadata: Record<string, any> = {}): Promise<void> {
+    await this.memoryInitPromise;
     await this.memory.archive(content, {
       ...metadata,
       archivedAt: new Date().toISOString(),
@@ -548,11 +556,15 @@ Return a JSON plan with this structure:
       "step": 1,
       "description": "What to do",
       "tool": "tool_name or null",
+      "toolInput": {{"param1": "value1"}},
       "expectedOutcome": "What we expect",
       "dependencies": []
     }}}}
   ]
-}}}}`],
+}}}}
+
+IMPORTANT: When specifying toolInput, extract the required parameters from the context (e.g., projectId, changeId, etc.).
+Example: If context has projectId: "proj_123", use {{"projectId": "proj_123"}} as toolInput.`],
       ["human", `{priorKnowledge}
 
 ## Current Goal
@@ -728,10 +740,24 @@ Previous results: ${serializedPreviousResults}`;
     if (step.tool) {
       const tool = tools.find(t => t.name === step.tool);
       if (tool) {
-        console.log(`[${this.config.agentName}] Using tool: ${step.tool}`);
-        // TODO: Execute tool dynamically using tool.function()
-        // For now, tools are provided but not executed - LLM handles execution
-        return { toolUsed: step.tool, summary: `Used ${step.tool}` };
+        console.log(`[${this.config.agentName}] Executing tool: ${step.tool}`);
+        try {
+          // Extract tool parameters from step description or use default context
+          const toolInput = step.toolInput || {};
+
+          // Invoke the tool function
+          const toolResult = await tool.invoke(toolInput);
+          console.log(`[${this.config.agentName}] Tool ${step.tool} completed successfully`);
+
+          return {
+            toolUsed: step.tool,
+            toolResult,
+            summary: typeof toolResult === 'string' ? toolResult : JSON.stringify(toolResult).substring(0, 200)
+          };
+        } catch (error: any) {
+          console.error(`[${this.config.agentName}] Tool ${step.tool} failed:`, error.message);
+          throw error;
+        }
       }
     }
 
