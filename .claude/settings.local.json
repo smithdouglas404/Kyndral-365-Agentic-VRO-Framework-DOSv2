@@ -77,7 +77,14 @@
       "Bash(LANGCHAIN_PROJECT=nexus-ppm npm run dev:*)",
       "Bash(timeout 30 npm start:*)",
       "Bash(1)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(for agent in FinOps Governance IntegratedMgmt OCM OKRInference Planning VRO PMO Risk TMO)",
+      "Bash(do)",
+      "Bash(file=\"server/agents/deep/Deep$agentAgent.ts\")",
+      "Bash(if [ -f \"$file\" ])",
+      "Bash(then)",
+      "Bash(if grep -q \"runScheduledScan\" \"$file\":*)",
+      "Bash(else)"
     ]
   }
 }
