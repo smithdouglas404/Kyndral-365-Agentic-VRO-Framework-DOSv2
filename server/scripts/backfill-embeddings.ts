@@ -9,20 +9,14 @@
 
 import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
-import { EmbeddingsService } from '../services/EmbeddingsService.js';
+import OpenAI from 'openai';
 import { config } from 'dotenv';
 
 config();
 
-// Use local embeddings provider (TF-IDF) since Anthropic doesn't provide embedding API
-const embeddingsService = new EmbeddingsService({
-  provider: 'local',
-  model: 'text-embedding-3-small',
-  dimensions: 1536,
-  vectorDB: { type: 'memory' },
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
-
-console.log('[Backfill] Using local TF-IDF embeddings (Anthropic-compatible)');
 
 interface Fact {
   id: string;
@@ -35,7 +29,13 @@ interface Fact {
 }
 
 async function generateEmbedding(text: string): Promise<number[]> {
-  return await embeddingsService.generateEmbedding(text);
+  const response = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: text,
+    dimensions: 1536
+  });
+
+  return response.data[0].embedding;
 }
 
 async function backfillEmbeddings() {

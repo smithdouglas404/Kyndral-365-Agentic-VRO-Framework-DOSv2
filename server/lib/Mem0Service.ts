@@ -22,7 +22,7 @@ import { sql } from 'drizzle-orm';
 import { agentFacts, agentFactSubscriptions } from '../../shared/schema.js';
 import type { InsertAgentFact, AgentFact } from '../../shared/schema.js';
 import EventEmitter from 'events';
-import { EmbeddingsService } from '../services/EmbeddingsService.js';
+import OpenAI from 'openai';
 
 export interface Fact {
   id: string;
@@ -44,23 +44,19 @@ export interface FactFilter {
 
 export class Mem0Service extends EventEmitter {
   private static instance: Mem0Service;
-  private embeddingsService: EmbeddingsService;
+  private openai: OpenAI;
 
   private constructor() {
     super();
     // Increase max listeners to support 10+ agents subscribing to fact events
     this.setMaxListeners(20);
 
-    // Initialize embeddings service with local provider (TF-IDF fallback)
-    // Uses local embeddings since Anthropic doesn't provide embedding API
-    this.embeddingsService = new EmbeddingsService({
-      provider: 'local',
-      model: 'text-embedding-3-small',
-      dimensions: 1536,
-      vectorDB: { type: 'memory' },
+    // Initialize OpenAI for embeddings
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
-    console.log('[Mem0] Shared fact ledger initialized with semantic search (local embeddings)');
+    console.log('[Mem0] Shared fact ledger initialized with semantic search');
   }
 
   public static getInstance(): Mem0Service {
@@ -152,10 +148,16 @@ export class Mem0Service extends EventEmitter {
   }
 
   /**
-   * Generate embedding for text using local TF-IDF provider
+   * Generate OpenAI embedding for text
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    return await this.embeddingsService.generateEmbedding(text);
+    const response = await this.openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text,
+      dimensions: 1536
+    });
+
+    return response.data[0].embedding;
   }
 
   /**

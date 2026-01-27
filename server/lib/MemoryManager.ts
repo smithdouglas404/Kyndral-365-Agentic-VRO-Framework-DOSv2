@@ -13,9 +13,9 @@
 
 import { PostgresChatMessageHistory } from "@langchain/community/stores/message/postgres";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
-import { db, pool } from '../db.js';
+import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
-import { EmbeddingsService } from '../services/EmbeddingsService.js';
+import OpenAI from 'openai';
 
 interface MemoryManagerConfig {
   agentId: string;
@@ -35,7 +35,7 @@ export class MemoryManager {
   private contextWindowSize: number;
   private maxHistorySize: number;
   private shortTermHistory: PostgresChatMessageHistory;
-  private embeddingsService: EmbeddingsService;
+  private openai: OpenAI;
 
   constructor(config: MemoryManagerConfig) {
     this.agentId = config.agentId;
@@ -44,21 +44,17 @@ export class MemoryManager {
 
     // Initialize short-term message history (LangChain)
     this.shortTermHistory = new PostgresChatMessageHistory({
-      pool: pool,
+      connectionString: process.env.DATABASE_URL!,
       sessionId: this.agentId,
       tableName: "agent_message_history",
     });
 
-    // Initialize embeddings service with local provider (TF-IDF fallback)
-    // Uses local embeddings since Anthropic doesn't provide embedding API
-    this.embeddingsService = new EmbeddingsService({
-      provider: 'local',
-      model: 'text-embedding-3-small',
-      dimensions: 1536,
-      vectorDB: { type: 'memory' },
+    // Initialize OpenAI for embeddings
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
-    console.log(`[MemoryManager] Initialized for agent: ${this.agentId} (local embeddings)`);
+    console.log(`[MemoryManager] Initialized for agent: ${this.agentId}`);
   }
 
   /**
@@ -182,10 +178,16 @@ export class MemoryManager {
   }
 
   /**
-   * Generate embedding for text using local TF-IDF provider
+   * Generate OpenAI embedding for text
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    return await this.embeddingsService.generateEmbedding(text);
+    const response = await this.openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text,
+      dimensions: 1536
+    });
+
+    return response.data[0].embedding;
   }
 
   /**
