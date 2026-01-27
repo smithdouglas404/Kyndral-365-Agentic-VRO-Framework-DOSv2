@@ -16,6 +16,7 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import type { IStorage } from "../../storage.js";
 import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
 import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
+import { createMemoryManager, type MemoryManager } from "../../lib/MemoryManager.js";
 // Removed: RetoolVectorsMCP is no longer used
 // import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
 type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
@@ -91,9 +92,10 @@ export abstract class DeepAgentBase {
   protected reflectionHistory: ActionReflection[] = [];
   protected actionCount: number = 0;
 
-  // Memory layers
+  // Memory layers (Unified Memory Architecture)
   protected mem0: ReturnType<typeof getMem0Service>; // Shared facts with other agents
-  protected memory: LettaAgentMemory; // Private self-editing memory
+  protected memory: LettaAgentMemory; // Private self-editing memory (persona, policies, learned facts)
+  protected conversationMemory: MemoryManager; // Conversation history + semantic search
   private memoryInitPromise: Promise<void>; // Ensure memory is ready before use
 
   constructor(config: DeepAgentConfig, storage: IStorage) {
@@ -112,9 +114,13 @@ export abstract class DeepAgentBase {
     // Enable knowledge enrichment if Retool Vectors MCP is configured
     this.enableKnowledgeEnrichment = false; // Disabled: RetoolVectorsMCP removed
 
-    // Initialize memory layers
-    this.mem0 = getMem0Service();
-    this.memory = createAgentMemory(config.agentName.toLowerCase());
+    // Initialize memory layers (Unified Memory Architecture)
+    this.mem0 = getMem0Service(); // Shared facts
+    this.memory = createAgentMemory(config.agentName.toLowerCase()); // Core memory (persona, policies)
+    this.conversationMemory = createMemoryManager(config.agentName.toLowerCase(), {
+      contextWindowSize: 10, // Last 10 messages
+      maxHistorySize: 100    // Keep max 100 messages in Postgres
+    }); // Conversation history + semantic search
 
     // Initialize agent's core memory with persona - MUST complete before agent works
     this.memoryInitPromise = this.memory.initialize(`I am the ${config.agentName} agent responsible for ${config.description}`).catch((error) => {
@@ -878,14 +884,67 @@ Reflect on this action.`],
   }
 
   /**
+   * Load conversation context from MemoryManager
+   * Includes recent messages + semantic facts
+   */
+  protected async loadConversationContext(goal: string): Promise<{
+    recentMessages: string;
+    semanticKnowledge: string;
+  }> {
+    try {
+      const context = await this.conversationMemory.getContextForThought(goal);
+
+      const recentMessages = context.history.length > 0
+        ? context.history.map((msg: any) =>
+          `${msg._getType()}: ${msg.content}`
+        ).join('\n')
+        : 'No recent conversation history';
+
+      return {
+        recentMessages,
+        semanticKnowledge: context.knowledge
+      };
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to load conversation context:`, error.message);
+      return {
+        recentMessages: 'No conversation history available',
+        semanticKnowledge: 'No semantic knowledge available'
+      };
+    }
+  }
+
+  /**
+   * Save interaction to conversation memory
+   */
+  protected async saveConversationInteraction(goal: string, result: any): Promise<void> {
+    try {
+      const resultSummary = typeof result === 'string'
+        ? result
+        : JSON.stringify(result).substring(0, 500); // Truncate large results
+
+      await this.conversationMemory.recordInteraction(goal, resultSummary);
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to save conversation:`, error.message);
+    }
+  }
+
+  /**
    * PUBLIC: Run agent with Deep Agent capabilities
+   * NOW WITH CONVERSATION MEMORY
    */
   async run(goal: string, context: any = {}): Promise<any> {
     console.log(`[${this.config.agentName}] Deep Agent run started: ${goal}`);
 
     try {
-      // PHASE 0: RECALL - Retrieve historical facts from memory
+      // PHASE 0A: Load conversation context (new unified memory)
+      const conversationContext = await this.loadConversationContext(goal);
+
+      // PHASE 0B: RECALL - Retrieve historical facts from memory
       const enrichedContext = await this.enrichContextWithFacts(goal, context);
+
+      // Merge conversation context with enriched context
+      enrichedContext.conversationHistory = conversationContext.recentMessages;
+      enrichedContext.semanticKnowledge = conversationContext.semanticKnowledge;
 
       // PHASE 1: PLANNING
       let plan: AgentPlan;
@@ -917,6 +976,9 @@ Reflect on this action.`],
         const finalReflection = await this.reflectOnPlan(plan, result);
         result.finalReflection = finalReflection;
       }
+
+      // PHASE 4: SAVE CONVERSATION - Save interaction to conversation memory
+      await this.saveConversationInteraction(goal, result);
 
       console.log(`[${this.config.agentName}] Deep Agent run completed`);
       return result;
