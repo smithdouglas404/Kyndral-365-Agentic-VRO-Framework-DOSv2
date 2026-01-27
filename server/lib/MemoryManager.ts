@@ -13,7 +13,7 @@
 
 import { PostgresChatMessageHistory } from "@langchain/community/stores/message/postgres";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
-import { db } from '../db.js';
+import { db, pool } from '../db.js';
 import { sql } from 'drizzle-orm';
 import OpenAI from 'openai';
 
@@ -44,7 +44,7 @@ export class MemoryManager {
 
     // Initialize short-term message history (LangChain)
     this.shortTermHistory = new PostgresChatMessageHistory({
-      connectionString: process.env.DATABASE_URL!,
+      pool: pool,
       sessionId: this.agentId,
       tableName: "agent_message_history",
     });
