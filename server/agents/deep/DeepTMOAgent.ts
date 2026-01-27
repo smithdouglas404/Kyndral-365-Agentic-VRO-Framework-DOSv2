@@ -140,13 +140,33 @@ export class DeepTMOAgent extends DeepAgentBase {
           const criticalTasks: any[] = [];
 
           const totalCriticalPathDays = criticalTasks.reduce((sum, t) => sum + t.duration, 0);
+          const riskyTasks = criticalTasks.filter(t => t.status === 'not_started');
+
+          // Broadcast critical path analysis as facts
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'critical_path_duration',
+            totalCriticalPathDays,
+            0.85
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'risky_tasks_count',
+            riskyTasks.length,
+            0.85
+          );
+
+          if (riskyTasks.length > 0) {
+            console.log(`[DeepTMO] ⚠️  ${riskyTasks.length} risky tasks found on critical path for ${project.name}`);
+          }
 
           return {
             projectId,
             projectName: project.name,
             criticalPath: criticalTasks,
             totalDuration: totalCriticalPathDays,
-            riskyTasks: criticalTasks.filter(t => t.status === 'not_started'),
+            riskyTasks: riskyTasks,
             recommendation: "Focus resources on critical path tasks to avoid delays",
           };
         },
@@ -185,6 +205,24 @@ export class DeepTMOAgent extends DeepAgentBase {
           }
 
           // TODO: Add real bottleneck detection from resource allocation, task dependencies, etc.
+
+          // Broadcast bottleneck findings as facts
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'resource_bottlenecks',
+            bottlenecks.length,
+            0.80
+          );
+
+          if (bottlenecks.length > 0) {
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'bottleneck_impact',
+              `${bottlenecks.length} weeks potential delay`,
+              0.75
+            );
+            console.log(`[DeepTMO] 🚧 ${bottlenecks.length} resource bottlenecks detected for ${project.name}`);
+          }
 
           return {
             projectId,
@@ -241,6 +279,33 @@ export class DeepTMOAgent extends DeepAgentBase {
           }
 
           const variance = (forecastDate.getTime() - baselineEnd.getTime()) / (1000 * 60 * 60 * 24);
+          const roundedVariance = Math.round(variance);
+
+          // Broadcast forecast as facts
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'forecast_completion',
+            forecastDate.toISOString().split('T')[0],
+            0.85
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'completion_variance',
+            roundedVariance,
+            0.85
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'velocity',
+            parseFloat(velocity.toFixed(2)),
+            0.90
+          );
+
+          if (Math.abs(roundedVariance) > 7) {
+            console.log(`[DeepTMO] 📅 Forecast: ${project.name} will complete ${roundedVariance} days ${roundedVariance > 0 ? 'late' : 'early'}`);
+          }
 
           return {
             projectId,
@@ -249,7 +314,7 @@ export class DeepTMOAgent extends DeepAgentBase {
             velocity: `${velocity}% per week`,
             forecastCompletion: forecastDate.toISOString().split('T')[0],
             baselineCompletion: baselineEnd.toISOString().split('T')[0],
-            varianceDays: Math.round(variance),
+            varianceDays: roundedVariance,
             onTrack: variance <= 7,
           };
         },

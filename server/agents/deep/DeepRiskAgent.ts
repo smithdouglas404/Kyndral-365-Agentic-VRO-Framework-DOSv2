@@ -135,13 +135,43 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
               factors.push("Project status indicates elevated risk levels");
             }
 
+            const probabilityScore = Math.min(probability, 100);
+            const probabilityLevel = probability > 70 ? "high" : probability > 40 ? "medium" : "low";
+
+            // Broadcast risk probability facts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_probability_score',
+              probabilityScore,
+              0.85
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_probability_level',
+              probabilityLevel,
+              0.85
+            );
+
+            if (riskCategory) {
+              await this.broadcastFact(
+                `project_${projectId}`,
+                `risk_probability_${riskCategory}`,
+                probabilityScore,
+                0.80
+              );
+            }
+
+            if (probabilityLevel === 'high') {
+              console.log(`[DeepRisk] ⚠️  HIGH risk probability for ${project.name} (${riskCategory || 'all'}: ${probabilityScore.toFixed(0)}%)`);
+            }
+
             return {
               projectId,
               projectName: project.name,
               riskCategory: riskCategory || "all",
-              probabilityScore: Math.min(probability, 100),
-              probabilityLevel:
-                probability > 70 ? "high" : probability > 40 ? "medium" : "low",
+              probabilityScore: probabilityScore,
+              probabilityLevel: probabilityLevel,
               historicalMaterialization: `${materializedRisks}/${totalRisks} risks materialized`,
               contributingFactors: factors,
               recommendation:
@@ -406,6 +436,32 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
                     ? "partial"
                     : "insufficient";
 
+            // Broadcast risk mitigation facts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_mitigation_coverage',
+              parseFloat(overallCoverage.toFixed(0)),
+              0.85
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_mitigation_level',
+              coverageLevel,
+              0.85
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_gaps',
+              categoriesWithoutMitigation.length,
+              0.90
+            );
+
+            if (coverageLevel === 'insufficient' || coverageLevel === 'partial') {
+              console.log(`[DeepRisk] ⚠️  ${coverageLevel.toUpperCase()} risk mitigation for ${project.name} (${overallCoverage.toFixed(0)}% coverage, ${categoriesWithoutMitigation.length} gaps)`);
+            }
+
             return {
               projectId,
               projectName: project.name,
@@ -510,6 +566,39 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
                 : forecastedRiskScore < currentRiskScore
                   ? "improving"
                   : "stable";
+
+            // Broadcast risk trend forecasts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_score_current',
+              Math.round(currentRiskScore),
+              0.90
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_score_forecast',
+              Math.round(forecastedRiskScore),
+              0.75
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'risk_trend',
+              trendAssessment,
+              0.80
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'emerging_risks_count',
+              emergingRisks.length,
+              0.85
+            );
+
+            if (trendAssessment === 'deteriorating') {
+              console.log(`[DeepRisk] ⚠️  DETERIORATING risk trend for ${project.name} (current: ${Math.round(currentRiskScore)}, forecast: ${Math.round(forecastedRiskScore)})`);
+            }
 
             return {
               projectId,
@@ -689,6 +778,40 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
 
             actions.push(...(typeSpecificActions[riskType] || []));
 
+            const riskLevel = riskScore >= 9
+              ? "extreme"
+              : riskScore >= 6
+                ? "high"
+                : riskScore >= 3
+                  ? "medium"
+                  : "low";
+
+            // Broadcast risk response recommendations
+            await this.broadcastFact(
+              `project_${projectId}`,
+              `risk_response_${riskType}`,
+              primaryStrategy,
+              0.90
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              `risk_level_${riskType}`,
+              riskLevel,
+              0.90
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              `risk_score_${riskType}`,
+              riskScore,
+              0.95
+            );
+
+            if (riskLevel === 'extreme' || riskLevel === 'high') {
+              console.log(`[DeepRisk] ⚠️  ${riskLevel.toUpperCase()} ${riskType} risk for ${project.name} (score: ${riskScore}, strategy: ${primaryStrategy})`);
+            }
+
             return {
               projectId,
               projectName: project.name,
@@ -697,14 +820,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
                 probability,
                 impact,
                 riskScore,
-                riskLevel:
-                  riskScore >= 9
-                    ? "extreme"
-                    : riskScore >= 6
-                      ? "high"
-                      : riskScore >= 3
-                        ? "medium"
-                        : "low",
+                riskLevel: riskLevel,
               },
               recommendedResponse: {
                 primaryStrategy,

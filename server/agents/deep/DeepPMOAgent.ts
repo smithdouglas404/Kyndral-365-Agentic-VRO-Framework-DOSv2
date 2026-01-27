@@ -257,6 +257,32 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           const atRiskMilestones = predictDelays ?
             milestones.filter(m => m.status !== 'completed' && m.expectedDate && m.expectedDate > m.dueDate) : [];
 
+          // Broadcast milestone tracking facts
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'on_time_delivery_rate',
+            parseFloat(onTimeRate.toFixed(1)),
+            0.90
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'at_risk_milestones',
+            atRiskMilestones.length,
+            0.85
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'milestone_completion',
+            totalCompleted,
+            0.95
+          );
+
+          if (atRiskMilestones.length > 0) {
+            console.log(`[DeepPMO] ⚠️  ${atRiskMilestones.length} at-risk milestones detected for ${project.name}`);
+          }
+
           return {
             projectId,
             projectName: project.name,
@@ -321,12 +347,40 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             }
           }
 
+          const utilizationRate = parseFloat((resources.reduce((sum, r) => sum + r.allocation, 0) / (resources.length * 100) * 100).toFixed(1));
+
+          // Broadcast resource optimization facts (portfolio-level)
+          await this.broadcastFact(
+            'portfolio',
+            'over_allocated_resources',
+            overAllocated.length,
+            0.90
+          );
+
+          await this.broadcastFact(
+            'portfolio',
+            'under_allocated_resources',
+            underAllocated.length,
+            0.90
+          );
+
+          await this.broadcastFact(
+            'portfolio',
+            'resource_utilization',
+            utilizationRate,
+            0.85
+          );
+
+          if (overAllocated.length > 0) {
+            console.log(`[DeepPMO] ⚠️  ${overAllocated.length} over-allocated resources detected (${overAllocated.map(r => r.name).join(', ')})`);
+          }
+
           return {
             totalResources: resources.length,
             overAllocated: overAllocated.length,
             underAllocated: underAllocated.length,
             optimal: optimal.length,
-            utilizationRate: (resources.reduce((sum, r) => sum + r.allocation, 0) / (resources.length * 100) * 100).toFixed(1),
+            utilizationRate: utilizationRate.toFixed(1),
             overAllocatedResources: overAllocated.map(r => ({
               name: r.name,
               role: r.role,
@@ -376,13 +430,40 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           const warnings = relevantChecks.filter(c => c.status === 'warning').length;
 
           const complianceScore = (passed / relevantChecks.length) * 100;
+          const complianceStatus = complianceScore >= 90 ? 'compliant' : complianceScore >= 70 ? 'needs_attention' : 'non_compliant';
+
+          // Broadcast governance compliance facts
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'governance_compliance_score',
+            parseFloat(complianceScore.toFixed(1)),
+            0.90
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'governance_status',
+            complianceStatus,
+            0.90
+          );
+
+          await this.broadcastFact(
+            `project_${projectId}`,
+            'governance_failures',
+            failed,
+            0.95
+          );
+
+          if (complianceStatus === 'non_compliant') {
+            console.log(`[DeepPMO] ⚠️  Governance non-compliant: ${project.name} (score: ${complianceScore.toFixed(1)}%, ${failed} failures)`);
+          }
 
           return {
             projectId,
             projectName: project.name,
             gate: gateType || 'all',
             complianceScore: complianceScore.toFixed(1),
-            status: complianceScore >= 90 ? 'compliant' : complianceScore >= 70 ? 'needs_attention' : 'non_compliant',
+            status: complianceStatus,
             totalChecks: relevantChecks.length,
             passed,
             failed,

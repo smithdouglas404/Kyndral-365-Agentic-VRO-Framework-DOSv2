@@ -939,4 +939,50 @@ Provide a summary of what was learned and how to improve next time.`],
   getCurrentPlan(): AgentPlan | undefined {
     return this.currentPlan;
   }
+
+  /**
+   * Scheduled scan entry point for AgentScheduler
+   * This method is called periodically by the scheduler
+   */
+  async runScheduledScan(): Promise<void> {
+    console.log(`[${this.config.agentName}] Starting scheduled scan...`);
+
+    try {
+      // Get all projects to analyze
+      const projects = await this.storage.getProjects();
+
+      if (projects.length === 0) {
+        console.log(`[${this.config.agentName}] No projects found to analyze`);
+        return;
+      }
+
+      console.log(`[${this.config.agentName}] Found ${projects.length} projects to analyze`);
+
+      // Analyze each project
+      for (const project of projects) {
+        try {
+          const goal = `Analyze project "${project.name}" (${project.id}) for ${this.config.agentType} concerns`;
+
+          console.log(`[${this.config.agentName}] Analyzing project: ${project.name}`);
+
+          // Call the main run method with enrichContextWithFacts enabled
+          await this.run(goal, {
+            projectId: project.id,
+            projectName: project.name,
+            projectType: project.type,
+            scheduledScan: true,
+          });
+
+          console.log(`[${this.config.agentName}] ✅ Completed analysis of ${project.name}`);
+        } catch (error: any) {
+          console.error(`[${this.config.agentName}] Error analyzing project ${project.name}:`, error.message);
+        }
+      }
+
+      console.log(`[${this.config.agentName}] Scheduled scan complete`);
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Scheduled scan failed:`, error.message);
+      throw error;
+    }
+  }
 }
