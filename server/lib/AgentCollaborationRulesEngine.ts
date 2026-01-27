@@ -20,6 +20,7 @@ import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
 import { ruleExecutionHistory } from '../../shared/schema.js';
 import { getLangflowRuleSyncService } from './LangflowRuleSyncService.js';
+import { getMem0Service } from '../services/mem0Service.js';
 
 // ============================================================================
 // TYPES
@@ -278,6 +279,34 @@ export class AgentCollaborationRulesEngine {
           executionTime,
           hasFailures,
         });
+
+        // Write rule outcome to Mem0 (memory layer for Langflow and agents)
+        try {
+          const mem0 = getMem0Service();
+          const entity = facts.projectId || `agent_${facts.agentId}`;
+
+          await mem0.writeFact({
+            entity,
+            attribute: `rule_outcome_${ruleId}`,
+            value: {
+              ruleName,
+              triggered: true,
+              fromAgent: facts.agentId,
+              toAgent: actions.find((a: any) => a.targetAgent)?.targetAgent || null,
+              triggerFacts: facts,
+              actionResults,
+              executionTime,
+              hasFailures,
+              timestamp: new Date().toISOString()
+            },
+            sourceAgent: facts.agentId,
+            confidence: hasFailures ? 0.7 : 1.0
+          });
+
+          console.log(`[RulesEngine] Rule outcome written to Mem0: ${ruleName}`);
+        } catch (error: any) {
+          console.error('[RulesEngine] Failed to write outcome to Mem0:', error.message);
+        }
 
         results.push({
           ruleId,
