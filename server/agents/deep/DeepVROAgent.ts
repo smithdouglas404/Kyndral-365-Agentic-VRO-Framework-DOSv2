@@ -425,6 +425,25 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
                 action: "Review project scope and strategic contribution",
               }));
 
+            // Broadcast strategic alignment facts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'strategic_alignment_score',
+              Math.round(averageAlignment),
+              0.80
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'strategic_alignment_level',
+              alignmentLevel,
+              0.80
+            );
+
+            if (alignmentLevel === 'weak' || alignmentLevel === 'moderate') {
+              console.log(`[DeepVRO] ⚠️  ${alignmentLevel.toUpperCase()} strategic alignment for ${project.name} (${Math.round(averageAlignment)}%)`);
+            }
+
             // Strategic recommendations
             const recommendations = [];
             if (alignmentLevel === "weak") {
@@ -563,6 +582,32 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             }
             if (actualCost > budget * 0.9) {
               riskFactors.push("Budget constraints may limit value capture");
+            }
+
+            // Broadcast value trajectory facts
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'value_velocity',
+              Math.round(monthlyValueVelocity),
+              0.75
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'months_to_value_target',
+              monthsToTarget,
+              0.70
+            );
+
+            await this.broadcastFact(
+              `project_${projectId}`,
+              'value_target_achievable',
+              willAchieveTarget ? 'yes' : 'no',
+              0.75
+            );
+
+            if (!willAchieveTarget) {
+              console.log(`[DeepVRO] ⚠️  Value target at risk for ${project.name} (${monthsToTarget} months needed, ${forecastMonths} available)`);
             }
 
             return {

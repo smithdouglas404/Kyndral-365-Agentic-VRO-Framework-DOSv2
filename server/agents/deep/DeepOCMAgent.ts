@@ -275,11 +275,32 @@ When you identify resistance or adoption issues, recommend collaboration with PM
             ).map(s => s.name),
           } : undefined;
 
+          const supportLevelPct = (supporters / stakeholders.length) * 100;
+          
+          // Broadcast stakeholder analysis facts
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'stakeholder_support_level',
+            parseFloat(supportLevelPct.toFixed(1)),
+            0.85
+          );
+
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'high_influence_resistors',
+            highInfluenceResistors.length,
+            0.90
+          );
+
+          if (highInfluenceResistors.length > 0) {
+            console.log(`[DeepOCM] ⚠️  ${highInfluenceResistors.length} high-influence resistors detected for change ${changeId}`);
+          }
+
           return {
             changeId,
             totalStakeholders: stakeholders.length,
             distribution: { supporters, neutral, resistors },
-            supportLevel: ((supporters / stakeholders.length) * 100).toFixed(1),
+            supportLevel: supportLevelPct.toFixed(1),
             resistancePoints: highInfluenceResistors.map(s => ({
               name: s.name,
               role: s.role,
@@ -349,6 +370,32 @@ When you identify resistance or adoption issues, recommend collaboration with PM
           const adoptionStatus = adoptionMetrics.adoptionRate >= 80 ? 'excellent' :
             adoptionMetrics.adoptionRate >= 70 ? 'good' :
               adoptionMetrics.adoptionRate >= 60 ? 'moderate' : 'low';
+
+          // Broadcast adoption metrics as facts
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'adoption_rate',
+            adoptionMetrics.adoptionRate,
+            0.90
+          );
+
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'adoption_status',
+            adoptionStatus,
+            0.90
+          );
+
+          await this.broadcastFact(
+            `change_${changeId}`,
+            'training_completion_rate',
+            adoptionMetrics.trainingCompletionRate,
+            0.95
+          );
+
+          if (adoptionStatus === 'low' || adoptionStatus === 'moderate') {
+            console.log(`[DeepOCM] ⚠️  Adoption ${adoptionStatus} for change ${changeId} (${adoptionMetrics.adoptionRate}%)`);
+          }
 
           return {
             changeId,
