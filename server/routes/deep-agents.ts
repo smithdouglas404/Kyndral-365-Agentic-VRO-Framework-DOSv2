@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { authenticate } from '../auth/authMiddleware.js';
 import type { IStorage } from '../storage.js';
 import { DeepAgentOrchestrator } from '../agents/deep/DeepAgentOrchestrator.js';
+import { AgentJobService } from '../lib/AgentJobService.js';
 
 let deepOrchestrator: DeepAgentOrchestrator | null = null;
 
@@ -108,6 +109,9 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
   /**
    * POST /api/deep-agents/run
    * Run a deep agent with planning + execution + reflection
+   *
+   * Query params:
+   * - wait: boolean (default: false) - If true, waits for job completion before returning
    */
   app.post('/api/deep-agents/run', authenticate, async (req: Request, res: Response) => {
     try {
@@ -116,18 +120,50 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
       }
 
       const validated = RunDeepAgentSchema.parse(req.body);
+      const wait = req.query.wait === 'true';
 
-      console.log(`[DeepAgents] Running agent: ${validated.agentName} with goal: ${validated.goal}`);
+      console.log(`[DeepAgents] Creating job for agent: ${validated.agentName} with goal: ${validated.goal}`);
 
-      const result = await deepOrchestrator.runDeepAgent(
-        validated.agentName,
-        validated.goal,
-        validated.context || {}
-      );
+      // Create async job for agent execution
+      const jobId = await AgentJobService.createJob({
+        agentType: validated.agentName,
+        task: validated.goal,
+        context: validated.context || {},
+        priority: 5,
+      });
+
+      // If wait=false, return job ID immediately (non-blocking)
+      if (!wait) {
+        return res.json({
+          success: true,
+          jobId,
+          status: 'pending',
+          message: 'Agent job created. Use job ID to check status.',
+        });
+      }
+
+      // If wait=true, wait for completion (with 5 minute timeout)
+      console.log(`[DeepAgents] Waiting for job ${jobId} to complete...`);
+      const job = await AgentJobService.waitForJob(jobId, {
+        timeoutMs: 300000, // 5 minutes
+        pollIntervalMs: 1000,
+      });
+
+      if (job.status === 'failed') {
+        return res.status(500).json({
+          success: false,
+          jobId,
+          status: 'failed',
+          error: job.error,
+          message: 'Agent execution failed',
+        });
+      }
 
       res.json({
         success: true,
-        result,
+        jobId,
+        status: 'completed',
+        result: job.result,
         message: 'Deep agent execution completed',
       });
     } catch (error: any) {
@@ -144,6 +180,50 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
         error: 'Failed to run deep agent',
         message: error.message,
       });
+    }
+  });
+
+  /**
+   * GET /api/deep-agents/jobs/:jobId
+   * Get status and result of an agent job
+   */
+  app.get('/api/deep-agents/jobs/:jobId', authenticate, async (req: Request, res: Response) => {
+    try {
+      const jobId = req.params.jobId;
+      const job = await AgentJobService.getJob(jobId);
+
+      if (!job) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+
+      res.json({
+        jobId: job.id,
+        agentType: job.agent_type,
+        task: job.task,
+        status: job.status,
+        result: job.result,
+        error: job.error,
+        createdAt: job.created_at,
+        startedAt: job.started_at,
+        completedAt: job.completed_at,
+      });
+    } catch (error: any) {
+      console.error('[DeepAgents] Get job error:', error);
+      res.status(500).json({ error: 'Failed to get job status' });
+    }
+  });
+
+  /**
+   * GET /api/deep-agents/jobs
+   * Get queue statistics
+   */
+  app.get('/api/deep-agents/jobs', authenticate, async (req: Request, res: Response) => {
+    try {
+      const stats = await AgentJobService.getQueueStats();
+      res.json(stats);
+    } catch (error: any) {
+      console.error('[DeepAgents] Get queue stats error:', error);
+      res.status(500).json({ error: 'Failed to get queue statistics' });
     }
   });
 
@@ -316,8 +396,11 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
   });
 
   /**
-   * POST /api/deep-agents/analyze-project
+   * POST /api/deep-agents/analyze-project/:projectId
    * Quick helper: Analyze project with DeepFinOps
+   *
+   * Query params:
+   * - wait: boolean (default: true) - If true, waits for job completion before returning
    */
   app.post('/api/deep-agents/analyze-project/:projectId', authenticate, async (req: Request, res: Response) => {
     try {
@@ -327,12 +410,13 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
 
       const projectId = req.params.projectId;
       const project = await storage.getProject(projectId);
+      const wait = req.query.wait !== 'false'; // Default to true for this endpoint
 
       if (!project) {
         return res.status(404).json({ error: 'Project not found' });
       }
 
-      // Run DeepFinOps agent to analyze project
+      // Create job for DeepFinOps agent to analyze project
       const goal = `Perform comprehensive financial analysis of project "${project.name}" and provide optimization recommendations`;
       const context = {
         projectId,
@@ -340,13 +424,48 @@ export function registerDeepAgentRoutes(app: Express, storage: IStorage): void {
         analysisType: 'comprehensive',
       };
 
-      const result = await deepOrchestrator.runDeepAgent('deep-finops', goal, context);
+      const jobId = await AgentJobService.createJob({
+        agentType: 'deep-finops',
+        task: goal,
+        context,
+        priority: 6, // Slightly higher priority for project analysis
+      });
+
+      // Return immediately if wait=false
+      if (!wait) {
+        return res.json({
+          success: true,
+          jobId,
+          projectId,
+          projectName: project.name,
+          status: 'pending',
+          message: 'Analysis job created. Use job ID to check status.',
+        });
+      }
+
+      // Wait for completion
+      const job = await AgentJobService.waitForJob(jobId, {
+        timeoutMs: 300000,
+        pollIntervalMs: 1000,
+      });
+
+      if (job.status === 'failed') {
+        return res.status(500).json({
+          success: false,
+          jobId,
+          projectId,
+          projectName: project.name,
+          error: job.error,
+          message: 'Analysis failed',
+        });
+      }
 
       res.json({
         success: true,
+        jobId,
         projectId,
         projectName: project.name,
-        analysis: result,
+        analysis: job.result,
         message: 'Deep financial analysis completed',
       });
     } catch (error: any) {

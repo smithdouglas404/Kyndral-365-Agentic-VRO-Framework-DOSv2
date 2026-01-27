@@ -16,6 +16,7 @@ import { config } from 'dotenv';
 config();
 
 import { createAgentScheduler } from './agents/AgentScheduler.js';
+import { DeepAgentOrchestrator } from './agents/deep/DeepAgentOrchestrator.js';
 import { storage } from './storage.js';
 import { db } from './db.js';
 import { sql } from 'drizzle-orm';
@@ -31,6 +32,7 @@ interface AgentJob {
 
 class AgentWorker {
   private scheduler: ReturnType<typeof createAgentScheduler>;
+  private deepOrchestrator: DeepAgentOrchestrator;
   private pollIntervalMs: number;
   private isShuttingDown: boolean = false;
   private currentJobId: string | null = null;
@@ -41,6 +43,10 @@ class AgentWorker {
     // Initialize agent scheduler (singleton)
     console.log('[Worker] Initializing agent scheduler...');
     this.scheduler = createAgentScheduler(storage);
+
+    // Initialize deep agent orchestrator
+    console.log('[Worker] Initializing deep agent orchestrator...');
+    this.deepOrchestrator = new DeepAgentOrchestrator(storage);
 
     console.log('[Worker] Agent worker started');
     console.log(`[Worker] Polling for jobs every ${pollIntervalMs}ms`);
@@ -99,14 +105,27 @@ class AgentWorker {
         WHERE id = ${job.id}
       `);
 
-      // Get the agent
-      const agent = this.scheduler.getAgentsMap().get(job.agent_type);
-      if (!agent) {
-        throw new Error(`Agent type '${job.agent_type}' not found`);
-      }
+      // Check if this is a deep agent or regular agent
+      let jobResult: any;
 
-      // Execute the agent
-      const jobResult = await agent.run(job.task, job.context);
+      if (job.agent_type.startsWith('deep-')) {
+        // Deep agent - use orchestrator
+        console.log(`[Worker] Executing deep agent: ${job.agent_type}`);
+        jobResult = await this.deepOrchestrator.runDeepAgent(
+          job.agent_type,
+          job.task,
+          job.context
+        );
+      } else {
+        // Regular agent - use scheduler
+        const agent = this.scheduler.getAgentsMap().get(job.agent_type);
+        if (!agent) {
+          throw new Error(`Agent type '${job.agent_type}' not found`);
+        }
+
+        console.log(`[Worker] Executing regular agent: ${job.agent_type}`);
+        jobResult = await agent.run(job.task, job.context);
+      }
 
       // Mark job as completed
       await db.execute(sql`
