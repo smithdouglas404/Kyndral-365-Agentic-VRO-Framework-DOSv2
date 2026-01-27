@@ -178,7 +178,7 @@ export class DeepAgentBootstrap {
 
   /**
    * Get orchestration engine (compatibility method)
-   * Returns the orchestrator with ProductionOrchestrationEngine-compatible interface
+   * Returns the orchestrator with a compatibility interface for legacy routes
    */
   getOrchestrationEngine(): any {
     if (!this.orchestrator) {

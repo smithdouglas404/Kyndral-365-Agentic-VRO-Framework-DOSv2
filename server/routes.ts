@@ -28,7 +28,6 @@ import { registerCustomAttributesRoutes } from "./routes/custom-attributes.js";
 import { registerAgentRulesRoutes } from "./routes/agent-rules.js";
 import { registerPolicyAsCodeRoutes } from "./routes/policy-as-code.js";
 import ruleExecutionHistoryRouter from "./routes/rule-execution-history.js";
-import { registerCamundaRoutes } from "./routes/admin/camunda.js";
 import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
 import { registerOKRRuleMappingRoutes } from "./routes/okr-rule-mappings.js";
 import { registerPermissionRoutes } from "./routes/admin/permissions.js";
@@ -205,9 +204,6 @@ export async function registerRoutes(
 
   // Register Rule Execution History routes (MONITORING - Audit trail of rule executions)
   app.use("/api/rules", ruleExecutionHistoryRouter);
-
-  // Register Camunda 8 routes (ADMIN - DMN decisions and BPMN workflows)
-  registerCamundaRoutes(app);
 
   // Register OKR/KPI Management routes (ADMIN - Objectives, Key Results, and KPIs)
   registerOkrKpiRoutes(app);

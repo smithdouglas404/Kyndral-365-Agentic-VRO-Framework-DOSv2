@@ -84,7 +84,14 @@
       "Bash(if [ -f \"$file\" ])",
       "Bash(then)",
       "Bash(if grep -q \"runScheduledScan\" \"$file\":*)",
-      "Bash(else)"
+      "Bash(else)",
+      "Bash(git revert:*)",
+      "Bash(printenv:*)",
+      "WebFetch(domain:docs.langflow.org)",
+      "WebFetch(domain:www.langflow.org)",
+      "Bash(pip install:*)",
+      "Bash(pip show:*)",
+      "Bash(nix-env:*)"
     ]
   }
 }
