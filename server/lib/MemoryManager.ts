@@ -13,9 +13,9 @@
 
 import { PostgresChatMessageHistory } from "@langchain/community/stores/message/postgres";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
-import { db } from '../db.js';
+import { db, pool } from '../db.js';
 import { sql } from 'drizzle-orm';
-import OpenAI from 'openai';
+import { EmbeddingsService } from '../services/EmbeddingsService.js';
 
 interface MemoryManagerConfig {
   agentId: string;
@@ -35,7 +35,7 @@ export class MemoryManager {
   private contextWindowSize: number;
   private maxHistorySize: number;
   private shortTermHistory: PostgresChatMessageHistory;
-  private openai: OpenAI;
+  private embeddingsService: EmbeddingsService;
 
   constructor(config: MemoryManagerConfig) {
     this.agentId = config.agentId;
@@ -44,17 +44,21 @@ export class MemoryManager {
 
     // Initialize short-term message history (LangChain)
     this.shortTermHistory = new PostgresChatMessageHistory({
-      connectionString: process.env.DATABASE_URL!,
+      pool: pool,
       sessionId: this.agentId,
       tableName: "agent_message_history",
     });
 
-    // Initialize OpenAI for embeddings
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    // Initialize embeddings service with local provider (TF-IDF fallback)
+    // Uses local embeddings since Anthropic doesn't provide embedding API
+    this.embeddingsService = new EmbeddingsService({
+      provider: 'local',
+      model: 'text-embedding-3-small',
+      dimensions: 1536,
+      vectorDB: { type: 'memory' },
     });
 
-    console.log(`[MemoryManager] Initialized for agent: ${this.agentId}`);
+    console.log(`[MemoryManager] Initialized for agent: ${this.agentId} (local embeddings)`);
   }
 
   /**
@@ -178,16 +182,10 @@ export class MemoryManager {
   }
 
   /**
-   * Generate OpenAI embedding for text
+   * Generate embedding for text using local TF-IDF provider
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    const response = await this.openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: text,
-      dimensions: 1536
-    });
-
-    return response.data[0].embedding;
+    return await this.embeddingsService.generateEmbedding(text);
   }
 
   /**
