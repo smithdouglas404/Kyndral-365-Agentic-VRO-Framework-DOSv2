@@ -3211,3 +3211,98 @@ export const insertFlowRuleMappingSchema = createInsertSchema(flowRuleMappings).
 
 export type InsertFlowRuleMapping = z.infer<typeof insertFlowRuleMappingSchema>;
 export type FlowRuleMapping = typeof flowRuleMappings.$inferSelect;
+
+// ============================================================================
+// AGENT-MCP CONNECTIONS - Connect MCPs to specific agents for knowledge + governance
+// ============================================================================
+
+/**
+ * MCP DEFINITIONS
+ * Stores available MCPs with their type and configuration
+ *
+ * Two MCP Types:
+ * 1. Knowledge MCPs: Data sources (Jira, SAP, Azure DevOps, etc.)
+ * 2. Governance MCPs: Responsible AI, QA, Policy enforcement
+ */
+export const mcpDefinitions = pgTable("mcp_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(), // "jira-mcp", "sap-mcp", "responsible-ai-mcp"
+  displayName: text("display_name").notNull(), // "Jira Integration"
+  type: text("type").notNull(), // 'knowledge' or 'governance'
+  category: text("category"), // For knowledge: 'ppm', 'erp', 'crm'; For governance: 'responsible_ai', 'qa', 'policy'
+  description: text("description"),
+  serverUrl: text("server_url"), // MCP server endpoint
+  config: text("config"), // JSON: MCP-specific configuration
+  capabilities: text("capabilities"), // JSON: Array of capabilities this MCP provides
+  enabled: boolean("enabled").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMcpDefinitionSchema = createInsertSchema(mcpDefinitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertMcpDefinition = z.infer<typeof insertMcpDefinitionSchema>;
+export type McpDefinition = typeof mcpDefinitions.$inferSelect;
+
+/**
+ * AGENT-MCP CONNECTIONS
+ * Connects agents to their MCPs (many-to-many)
+ *
+ * Example:
+ * - PMO agent → Jira MCP, Azure DevOps MCP, Responsible AI MCP
+ * - FinOps agent → SAP MCP, Coupa MCP, QA MCP
+ * - Risk agent → Governance MCP (enforces policies)
+ */
+export const agentMcpConnections = pgTable("agent_mcp_connections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(), // FK to agentConfigs.id (finops, pmo, risk, etc.)
+  mcpId: varchar("mcp_id").notNull(), // FK to mcpDefinitions.id
+  enabled: boolean("enabled").default(true).notNull(), // Toggle on/off in dashboard
+  priority: integer("priority").default(1).notNull(), // Execution order (lower = higher priority)
+  config: text("config"), // JSON: Agent-specific MCP configuration
+  lastUsed: timestamp("last_used"),
+  usageCount: integer("usage_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAgentMcpConnectionSchema = createInsertSchema(agentMcpConnections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAgentMcpConnection = z.infer<typeof insertAgentMcpConnectionSchema>;
+export type AgentMcpConnection = typeof agentMcpConnections.$inferSelect;
+
+/**
+ * MCP EXECUTION LOG
+ * Logs MCP calls for audit and debugging
+ */
+export const mcpExecutionLog = pgTable("mcp_execution_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  mcpId: varchar("mcp_id").notNull(),
+  mcpType: text("mcp_type").notNull(), // 'knowledge' or 'governance'
+  operation: text("operation").notNull(), // 'query', 'validate', 'enforce'
+  input: text("input"), // JSON: Input to MCP
+  output: text("output"), // JSON: Output from MCP
+  success: boolean("success").notNull(),
+  errorMessage: text("error_message"),
+  executionTime: integer("execution_time"), // in milliseconds
+  governanceDecision: text("governance_decision"), // For governance MCPs: 'allow', 'block', 'warn'
+  governanceReason: text("governance_reason"), // Why governance MCP made this decision
+  executedAt: timestamp("executed_at").defaultNow(),
+});
+
+export const insertMcpExecutionLogSchema = createInsertSchema(mcpExecutionLog).omit({
+  id: true,
+  executedAt: true,
+});
+
+export type InsertMcpExecutionLog = z.infer<typeof insertMcpExecutionLogSchema>;
+export type McpExecutionLog = typeof mcpExecutionLog.$inferSelect;

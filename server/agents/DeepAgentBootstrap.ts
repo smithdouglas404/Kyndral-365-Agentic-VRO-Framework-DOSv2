@@ -88,8 +88,8 @@ export class DeepAgentBootstrap {
       console.log('[DeepAgentBootstrap] Initializing continuous orchestrator...');
       this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
 
-      // Start 24x7 orchestration (15 second intervals)
-      await this.orchestrator.start(15000);
+      // Start 24x7 orchestration (60 second intervals - reduced from 15s for performance)
+      await this.orchestrator.start(60000);
 
       this.isInitialized = true;
 

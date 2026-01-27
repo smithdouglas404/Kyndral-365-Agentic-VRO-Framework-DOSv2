@@ -29,6 +29,8 @@ import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
 import ontologyApiRouter from "./routes/ontology-api.js";
 import agentSchemasRouter from "./routes/agent-schemas.js";
 import llmCalculatorRouter from "./routes/llm-calculator.js";
+import agentMcpRouter from "./routes/agent-mcp.js";
+import { registerAgentMcpConnectionRoutes } from "./routes/admin/agent-mcp-connections.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
@@ -210,6 +212,12 @@ export async function registerRoutes(
 
   // Register LLM Calculator routes (LLM-based attribute calculations with narrative + sourcing)
   app.use('/api/llm-calculator', llmCalculatorRouter);
+
+  // Register Agent-MCP Query routes (Agents query their connected MCPs: Knowledge + Governance)
+  app.use('/api/agent-mcp', agentMcpRouter);
+
+  // Register Agent-MCP Connection Management routes (ADMIN - Manage MCP connections to agents)
+  registerAgentMcpConnectionRoutes(app);
 
   // Initialize A2A bus getter for API routes
   setA2ABusGetter(() => {
