@@ -27,6 +27,17 @@ import { configureSecurityHeaders } from "./auth/securityMiddleware.js";
 // Export agent scheduler instance (initialized after server starts)
 export let agentScheduler: AgentScheduler | null = null;
 
+/**
+ * Get the global agent scheduler instance
+ * Use this in routes instead of creating new schedulers
+ */
+export function getGlobalAgentScheduler(): AgentScheduler {
+  if (!agentScheduler) {
+    throw new Error('Agent scheduler not initialized. Server may still be starting.');
+  }
+  return agentScheduler;
+}
+
 // Export Battle Rhythm orchestrator (cadence-aware weekly scheduling)
 export let battleRhythmOrchestrator: BattleRhythmOrchestrator | null = null;
 

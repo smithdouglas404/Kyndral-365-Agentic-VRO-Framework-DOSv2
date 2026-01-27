@@ -22,6 +22,7 @@ import { sql } from 'drizzle-orm';
 import { agentFacts, agentFactSubscriptions } from '../../shared/schema.js';
 import type { InsertAgentFact, AgentFact } from '../../shared/schema.js';
 import EventEmitter from 'events';
+import OpenAI from 'openai';
 
 export interface Fact {
   id: string;
@@ -43,12 +44,19 @@ export interface FactFilter {
 
 export class Mem0Service extends EventEmitter {
   private static instance: Mem0Service;
+  private openai: OpenAI;
 
   private constructor() {
     super();
     // Increase max listeners to support 10+ agents subscribing to fact events
     this.setMaxListeners(20);
-    console.log('[Mem0] Shared fact ledger initialized');
+
+    // Initialize OpenAI for embeddings
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    console.log('[Mem0] Shared fact ledger initialized with semantic search');
   }
 
   public static getInstance(): Mem0Service {
@@ -61,6 +69,8 @@ export class Mem0Service extends EventEmitter {
   /**
    * Write a fact to the shared ledger
    * Other agents subscribed to this pattern will be notified
+   *
+   * NOW WITH SEMANTIC SEARCH: Also saves to agent_memories with vector embedding
    */
   async writeFact(fact: Omit<Fact, 'id' | 'timestamp'>): Promise<Fact> {
     const result = await db.execute(sql`
@@ -91,12 +101,63 @@ export class Mem0Service extends EventEmitter {
 
     console.log(`[Mem0] Fact written: ${fact.entity}.${fact.attribute} = ${JSON.stringify(fact.value)} (by ${fact.sourceAgent})`);
 
+    // ASYNC: Generate embedding and save to agent_memories (don't block)
+    this.saveToSemanticMemory(createdFact).catch(err => {
+      console.error(`[Mem0] Failed to save to semantic memory:`, err.message);
+    });
+
     // Emit event for real-time subscriptions
     this.emit('fact:created', createdFact);
     this.emit(`fact:${fact.entity}`, createdFact);
     this.emit(`fact:${fact.entity}:${fact.attribute}`, createdFact);
 
     return createdFact;
+  }
+
+  /**
+   * Save fact to agent_memories with vector embedding for semantic search
+   */
+  private async saveToSemanticMemory(fact: Fact): Promise<void> {
+    try {
+      // Create semantic content from fact
+      const content = `${fact.entity}.${fact.attribute} = ${JSON.stringify(fact.value)}`;
+
+      // Generate embedding
+      const embedding = await this.generateEmbedding(content);
+
+      // Save to agent_memories table
+      await db.execute(sql`
+        INSERT INTO agent_memories (agent_id, content, embedding, metadata)
+        VALUES (
+          ${fact.sourceAgent},
+          ${content},
+          ${JSON.stringify(embedding)}::vector,
+          ${JSON.stringify({
+            fact_id: fact.id,
+            entity: fact.entity,
+            attribute: fact.attribute,
+            confidence: fact.confidence,
+            type: 'fact'
+          })}
+        )
+      `);
+    } catch (error: any) {
+      // Don't throw - this is async enhancement
+      console.error(`[Mem0] Semantic memory save failed:`, error.message);
+    }
+  }
+
+  /**
+   * Generate OpenAI embedding for text
+   */
+  private async generateEmbedding(text: string): Promise<number[]> {
+    const response = await this.openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text,
+      dimensions: 1536
+    });
+
+    return response.data[0].embedding;
   }
 
   /**
@@ -144,6 +205,55 @@ export class Mem0Service extends EventEmitter {
       supersedes: row.supersedes,
       timestamp: new Date(row.created_at),
     }));
+  }
+
+  /**
+   * Semantic search across agent memories using vector similarity
+   * NEW: Replaces keyword-based ILIKE search with AI-powered semantic search
+   */
+  async searchSemanticFacts(query: string, options: {
+    agentId?: string;
+    limit?: number;
+    minSimilarity?: number;
+  } = {}): Promise<Array<{
+    content: string;
+    metadata: Record<string, any>;
+    similarity: number;
+    agentId: string;
+  }>> {
+    try {
+      const { agentId, limit = 10, minSimilarity = 0.7 } = options;
+
+      // Generate embedding for the search query
+      const embedding = await this.generateEmbedding(query);
+
+      // Build query with optional agent filter
+      const agentFilter = agentId ? sql`AND agent_id = ${agentId}` : sql``;
+
+      const result = await db.execute(sql`
+        SELECT
+          content,
+          metadata,
+          agent_id,
+          1 - (embedding <=> ${JSON.stringify(embedding)}::vector) as similarity
+        FROM agent_memories
+        WHERE embedding IS NOT NULL
+          ${agentFilter}
+          AND (1 - (embedding <=> ${JSON.stringify(embedding)}::vector)) >= ${minSimilarity}
+        ORDER BY embedding <=> ${JSON.stringify(embedding)}::vector
+        LIMIT ${limit}
+      `);
+
+      return result.rows.map((row: any) => ({
+        content: row.content,
+        metadata: row.metadata || {},
+        similarity: parseFloat(row.similarity),
+        agentId: row.agent_id
+      }));
+    } catch (error: any) {
+      console.error(`[Mem0] Semantic search failed:`, error.message);
+      return [];
+    }
   }
 
   /**

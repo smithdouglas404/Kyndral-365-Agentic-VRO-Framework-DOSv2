@@ -375,6 +375,20 @@ export class AgentScheduler {
 }
 
 // Export singleton instance (will be initialized in server/index.ts)
+// Singleton instance to prevent memory leaks from creating multiple schedulers
+let schedulerInstance: AgentScheduler | null = null;
+
 export function createAgentScheduler(storage: IStorage): AgentScheduler {
-  return new AgentScheduler(storage);
+  if (schedulerInstance) {
+    console.log('[AgentScheduler] Returning existing singleton instance');
+    return schedulerInstance;
+  }
+
+  console.log('[AgentScheduler] Creating new singleton instance');
+  schedulerInstance = new AgentScheduler(storage);
+  return schedulerInstance;
+}
+
+export function getAgentSchedulerInstance(): AgentScheduler | null {
+  return schedulerInstance;
 }

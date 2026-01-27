@@ -5481,9 +5481,9 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     try {
       const { agentId } = req.params;
 
-      // Import agent scheduler dynamically
-      const { createAgentScheduler } = await import("./agents/AgentScheduler.js");
-      const scheduler = createAgentScheduler(storage);
+      // Use global agent scheduler (singleton)
+      const { getGlobalAgentScheduler } = await import("./index.js");
+      const scheduler = getGlobalAgentScheduler();
 
       // Get the specific agent
       const agentsMap = scheduler.getAgentsMap();
