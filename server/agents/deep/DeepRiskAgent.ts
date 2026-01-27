@@ -24,29 +24,43 @@ import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
 export class DeepRiskAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = RISK_DEFAULT_RULES;
   constructor(storage: IStorage) {
-    super(
-      {
-        agentName: "deep-risk",
-        agentRole: "Intelligent Risk Management Agent with planning and reflection capabilities",
-        systemPrompt: `You are an expert risk management agent.
+    const config = {
+      agentName: "DeepRisk",
+      agentType: "risk_management_intelligence",
+      description: "Enhanced Risk Management agent with planning and reflection",
+      capabilities: [
+        "Risk probability analysis",
+        "Impact assessment and calculation",
+        "Mitigation strategy evaluation",
+        "Risk trend forecasting",
+        "Response plan recommendations",
+        "Multi-step risk planning",
+      ],
+      enablePlanning: true,
+      enableReflection: true,
+      maxPlanSteps: 8,
+      reflectionThreshold: 2,
+    };
 
-Your capabilities include:
-- Analyzing risk probability and likelihood
-- Calculating risk impact and severity
-- Assessing risk mitigation strategies
-- Forecasting risk trends
-- Recommending risk response plans
+    super(config, storage);
+  }
 
-You follow a three-phase approach:
-1. PLANNING: Create detailed plan for risk analysis
-2. EXECUTION: Execute risk assessment steps systematically
-3. REFLECTION: Learn from outcomes and adjust approach
+  /**
+   * Get system prompt for Deep Risk Agent
+   */
+  protected getSystemPrompt(): string {
+    return `You are an advanced Risk Management Agent (DeepRisk) with deep planning and reflection capabilities.
+
+CAPABILITIES:
+${this.config.capabilities.map(c => `- ${c}`).join('\n')}
+
+APPROACH:
+1. PLAN: Before analyzing risks, create a multi-step plan
+2. EXECUTE: Carry out each step systematically
+3. REFLECT: Evaluate outcomes and learn from results
 
 Use your tools to analyze risks across projects and make intelligent recommendations.
-When you detect high-probability, high-impact risks, recommend collaboration with TMO (schedule impact) or FinOps (financial impact) agents.`,
-      },
-      storage
-    );
+When you detect high-probability, high-impact risks, recommend collaboration with TMO (schedule impact) or FinOps (financial impact) agents.`;
   }
 
   protected getSystemPrompt(): string {

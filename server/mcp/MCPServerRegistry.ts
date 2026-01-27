@@ -1424,7 +1424,7 @@ Retool MCP Integration:
         type: 'text',
         required: false,
         description: 'Specific data model to query',
-        placeholder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+        placeholder: 'your-uuid-here',
       },
       {
         name: 'workspaceId',
@@ -1432,7 +1432,7 @@ Retool MCP Integration:
         type: 'text',
         required: false,
         description: 'Workspace containing your analyses',
-        placeholder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+        placeholder: 'your-uuid-here',
       },
     ],
     documentation: 'https://docs.celonis.com/en/introduction.html',
@@ -1585,7 +1585,7 @@ Your platform becomes the AI orchestration layer on top of Palantir's data layer
         type: 'text',
         required: true,
         description: 'Your Anaplan workspace ID',
-        placeholder: '8a81b09a7XXXXXXXXXXXXXXXXX',
+        placeholder: 'your-api-key-here',
       },
       {
         name: 'modelId',

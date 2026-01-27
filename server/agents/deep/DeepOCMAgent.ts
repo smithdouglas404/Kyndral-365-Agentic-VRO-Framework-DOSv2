@@ -39,6 +39,24 @@ export class DeepOCMAgent extends DeepAgentBase {
     super(config, storage);
   }
 
+  /**
+   * Get system prompt for Deep OCM Agent
+   */
+  protected getSystemPrompt(): string {
+    return `You are an advanced Organizational Change Management Agent (DeepOCM) with deep planning and reflection capabilities.
+
+CAPABILITIES:
+${this.config.capabilities.map(c => `- ${c}`).join('\n')}
+
+APPROACH:
+1. PLAN: Before assessing change impact, create a multi-step plan
+2. EXECUTE: Carry out each step systematically
+3. REFLECT: Evaluate outcomes and learn from results
+
+Use your tools to assess change impact, map stakeholders, track adoption metrics, and recommend interventions.
+When you identify resistance or adoption issues, recommend collaboration with PMO (project coordination) or Planning (strategic alignment) agents.`;
+  }
+
   protected defineTools(): DynamicStructuredTool[] {
     return [
       new DynamicStructuredTool({

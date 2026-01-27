@@ -314,8 +314,8 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
         },
       };
 
-      // For now, generate trend based on current values with realistic variation
-      // In production, you would query historical snapshots from database
+      // TODO: Query historical snapshots from database
+      // For now, return current values for all historical data points (no historical data available)
       const baseValues = {
         budget: currentMetrics.totalBudget,
         cost: currentMetrics.totalActualCost,
@@ -323,16 +323,12 @@ export function registerFinancialRoutes(app: Express, storage: IStorage): void {
         cpi: currentMetrics.avgCPI,
       };
 
-      // Generate realistic historical trend (decreasing variation as we approach current)
+      // Return current values for all time points (flat lines until historical tracking implemented)
       for (let i = days; i >= 0; i--) {
-        const dayFactor = i / days; // 1.0 at start, 0.0 at current
-        const variation = 0.02 * dayFactor; // 2% max variation, decreasing over time
-        const randomFactor = 1 + (Math.random() - 0.5) * variation;
-
-        historical.totalBudget.values.push(baseValues.budget * randomFactor);
-        historical.totalActualCost.values.push(baseValues.cost * (1 - dayFactor * 0.15)); // Cost increases over time
-        historical.variance.values.push(baseValues.variance * (1 + dayFactor * 0.1));
-        historical.avgCPI.values.push(baseValues.cpi * (1 + (Math.random() - 0.4) * variation));
+        historical.totalBudget.values.push(baseValues.budget);
+        historical.totalActualCost.values.push(baseValues.cost);
+        historical.variance.values.push(baseValues.variance);
+        historical.avgCPI.values.push(baseValues.cpi);
       }
 
       // Calculate percentage changes

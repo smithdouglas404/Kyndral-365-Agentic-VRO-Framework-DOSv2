@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
@@ -400,7 +399,6 @@ interface AIRecommendationsProps {
 export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendationsProps) {
   const effectiveAgent = agentType || 'integrated-management';
   const displayLabel = agentLabels[effectiveAgent];
-  const { setSelectedEvent } = useSimulation();
   const { toast } = useToast();
   const [activeActions, setActiveActions] = useState<Set<string>>(new Set());
   const [completedActions, setCompletedActions] = useState<Set<string>>(new Set());
@@ -494,34 +492,6 @@ export function AIRecommendations({ dataMode = 'VRO', agentType }: AIRecommendat
         title: actionInfo.title,
         description: actionInfo.description,
       });
-      
-      // Create a simulation event for this action
-      const simulationEvent = {
-        id: `rec-${Date.now()}`,
-        type: rec.type === 'risk' ? 'action_required' as const : 'opportunity' as const,
-        priority: 'medium' as const,
-        timestamp: new Date(),
-        title: actionInfo.title,
-        message: actionInfo.description,
-        detail: `Action initiated from ${displayLabel} recommendation: ${rec.title}. ${rec.description}`,
-        confidence: rec.confidence,
-        source: `${displayLabel} AI Agent`,
-        relatedEntity: {
-          type: 'program' as const,
-          id: `rec-${rec.id}`,
-          name: rec.title,
-          bu: 'Transformation'
-        },
-        metrics: {
-          impact: rec.impact || 'In progress',
-          timeframe: 'This week'
-        },
-        actions: [],
-        citations: ['AI Recommendations Dashboard'],
-        read: false
-      };
-      
-      setSelectedEvent(simulationEvent);
     }, 1500);
   };
   

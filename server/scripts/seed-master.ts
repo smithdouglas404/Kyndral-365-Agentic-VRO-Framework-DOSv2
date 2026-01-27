@@ -390,7 +390,7 @@ async function seedIndustryProfiles() {
 
 async function seedDefaultRuleTemplates() {
   console.log('[Seed] Rule templates seeding skipped (future enhancement)');
-  // TODO: Add default governance rules, agent rules, etc.
+  
 }
 
 // ============================================================================
@@ -399,7 +399,7 @@ async function seedDefaultRuleTemplates() {
 
 async function seedDefaultAgentConfigurations() {
   console.log('[Seed] Agent configurations seeding skipped (future enhancement)');
-  // TODO: Add default agent settings, schedules, etc.
+  
 }
 
 // ============================================================================

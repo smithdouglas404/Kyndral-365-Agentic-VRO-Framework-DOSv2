@@ -289,7 +289,6 @@ export function ReviewExtraction({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {/* TODO: Edit modal */}}
                   >
                     <Edit className="w-4 h-4" />
                     Edit

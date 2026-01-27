@@ -4,7 +4,6 @@
 // ============================================================================
 
 import type { PMOProject, VROProgram, RiskIssue, BUPortfolio } from './buPrograms';
-import type { SimulationEvent } from './liveSimulation';
 
 export type AgentType = 'integrated-management' | 'vro' | 'pmo' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
 
@@ -16,7 +15,6 @@ export interface AgentDataSlice {
   programs: VROProgram[];
   risks: RiskIssue[];
   portfolios: BUPortfolio[];
-  events: SimulationEvent[];
   metrics: AgentMetrics;
   crossAgentMessages: CrossAgentMessage[];
 }
@@ -49,7 +47,6 @@ export interface EntityDrilldown {
   entityName: string;
   bu: string;
   relatedAgents: AgentType[];
-  events: SimulationEvent[];
   metrics: Record<string, number | string>;
   actions: { id: string; label: string; type: string }[];
   history: { timestamp: Date; action: string; agent: AgentType }[];
@@ -116,7 +113,7 @@ export function getAgentConfig(agentId: AgentType) {
 }
 
 // DEPRECATED: Use WebSocket/SSE for real cross-agent messages
-export function generateCrossAgentMessages(events: SimulationEvent[]): CrossAgentMessage[] {
+export function generateCrossAgentMessages(): CrossAgentMessage[] {
   return [];
 }
 
@@ -130,7 +127,6 @@ export function getAgentDataSlice(agentId: AgentType): AgentDataSlice {
     programs: [],
     risks: [],
     portfolios: [],
-    events: [],
     metrics: {
       totalProjects: 0,
       healthyProjects: 0,

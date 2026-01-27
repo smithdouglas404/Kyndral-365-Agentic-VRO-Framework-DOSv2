@@ -36,10 +36,15 @@ export abstract class AgentBase {
   protected tracingEnabled: boolean = false;
   protected langsmithClient: Client | null = null;
   protected tracer: LangChainTracer | null = null;
+  protected mem0: ReturnType<typeof import('../../lib/Mem0Service.js').getMem0Service>;
 
   constructor(config: AgentConfig, storage: IStorage) {
     this.config = config;
     this.storage = storage;
+
+    // Initialize Mem0 for cross-agent learning
+    const { getMem0Service } = require('../../lib/Mem0Service.js');
+    this.mem0 = getMem0Service();
 
     // Check if LangSmith tracing is configured
     this.tracingEnabled = !!(process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true');
@@ -343,6 +348,74 @@ export abstract class AgentBase {
     } catch (error) {
       console.error(`[${this.config.agentName}] Failed to log activity:`, error);
     }
+  }
+
+  /**
+   * Recall past facts about an entity before making new decisions
+   * This enables learning and prevents duplicate interventions
+   */
+  protected async recallEntityContext(entityId: string): Promise<Record<string, any>> {
+    const facts = await this.mem0.observeFacts({ entity: entityId });
+    const state = await this.mem0.getEntityState(entityId);
+
+    console.log(`[${this.config.agentName}] 🧠 Recalled ${facts.length} facts about ${entityId}`);
+
+    if (facts.length > 0) {
+      console.log(`[${this.config.agentName}] 📚 Historical context:`,
+        facts.slice(0, 3).map(f => `${f.attribute}=${JSON.stringify(f.value)} (${f.sourceAgent})`).join(', ')
+      );
+    }
+
+    return state;
+  }
+
+  /**
+   * Check if an intervention was already issued to avoid duplicates
+   */
+  protected async hasRecentIntervention(entityId: string, interventionType: string, withinHours: number = 24): Promise<boolean> {
+    const cutoffTime = new Date(Date.now() - (withinHours * 60 * 60 * 1000));
+    const recentFacts = await this.mem0.observeFacts({
+      entity: entityId,
+      attribute: `intervention_${interventionType}`,
+      sinceTimestamp: cutoffTime,
+    });
+
+    if (recentFacts.length > 0) {
+      console.log(`[${this.config.agentName}] ⚠️  Duplicate intervention detected: ${interventionType} already issued for ${entityId} within ${withinHours}h`);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Record that an intervention was issued
+   */
+  protected async recordIntervention(entityId: string, interventionType: string, interventionId: string): Promise<void> {
+    await this.mem0.writeFact({
+      entity: entityId,
+      attribute: `intervention_${interventionType}`,
+      value: { interventionId, issuedAt: new Date().toISOString() },
+      sourceAgent: this.config.agentName.toLowerCase(),
+      confidence: 1.0,
+    });
+
+    console.log(`[${this.config.agentName}] 📝 Recorded intervention: ${interventionType} for ${entityId}`);
+  }
+
+  /**
+   * Broadcast a fact to Mem0 for other agents to observe
+   */
+  protected async broadcastFact(entity: string, attribute: string, value: any, confidence: number = 1.0): Promise<void> {
+    await this.mem0.writeFact({
+      entity,
+      attribute,
+      value,
+      sourceAgent: this.config.agentName.toLowerCase(),
+      confidence,
+    });
+
+    console.log(`[${this.config.agentName}] 📡 Broadcast fact: ${entity}.${attribute} = ${JSON.stringify(value)}`);
   }
 
   /**

@@ -405,10 +405,8 @@ export class ContinuousOrchestrator {
         }
       }
 
-      // Phase 5: Full autonomy agents may self-approve actions
-      if (config.autonomy === 'full' && Math.random() < 0.3) {
-        await this.createSelfApprovedAction(agent);
-      }
+      // Phase 5: Autonomous actions only created for actual findings (not random)
+      // Agents only act when they detect real issues, not on random chance
 
       // Phase 6: Clear agent memory to prevent history buildup between cycles
       if (agent && typeof agent.clearMemory === 'function') {
@@ -657,26 +655,14 @@ export class ContinuousOrchestrator {
 
     // Planning Agent: Check dependencies
     if (config.agentId === 'planning') {
-      if (Math.random() < 0.15) {
-        return {
-          description: 'Potential dependency conflict detected',
-          severity: 'medium',
-          confidence: 0.72,
-          action: 'Review project dependencies and update dependency map',
-        };
-      }
+      // TODO: Implement real dependency conflict detection using dependency graph
+      // For now, skip random detection - only detect real issues from rules engine
     }
 
     // OCM Agent: Check change management
     if (config.agentId === 'ocm') {
-      if (Math.random() < 0.12) {
-        return {
-          description: 'Change adoption metrics below target',
-          severity: 'medium',
-          confidence: 0.68,
-          action: 'Increase stakeholder engagement and training initiatives',
-        };
-      }
+      // TODO: Implement real change adoption metrics analysis from database
+      // For now, skip random detection - only detect real issues from rules engine
     }
 
     // Integrated Mgmt Agent: Check quality
@@ -985,12 +971,12 @@ Keep response brief and actionable.`;
 
       const intervention: InsertIntervention = {
         type: this.getInterventionType(config.agentId),
-        severity: 'low',
-        title: `[Agent Self-Approved] ${finding?.issue || this.generateOptimizationAction(config.agentId)}`,
+        severity: finding?.severity || 'low',
+        title: `[Agent Self-Approved] ${finding?.issue || 'Autonomous action'}`,
         description: `${config.agentName} autonomously executed this action based on continuous monitoring.`,
         projectId: project.id,
         projectName: project.name,
-        confidence: String((0.85 + Math.random() * 0.1).toFixed(2)),
+        confidence: String(finding?.confidence || 0.85),
         suggestedAction: finding?.recommendedAction || 'Automated optimization applied',
         impact: finding ? `Addressed: ${finding.issue}` : 'Proactive optimization',
         status: 'approved',
@@ -1087,8 +1073,27 @@ Keep response brief and actionable.`;
    * Helper: Sample random projects
    */
   private sampleProjects(projects: any[], count: number): any[] {
-    const shuffled = [...projects].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count);
+    // Priority-based selection: active projects with issues first
+    const prioritized = [...projects].sort((a, b) => {
+      // Prioritize by status (in_progress > planning > on_hold > completed)
+      const statusPriority: Record<string, number> = {
+        'in_progress': 4,
+        'planning': 3,
+        'on_hold': 2,
+        'completed': 1,
+      };
+      const aPriority = statusPriority[a.status] || 0;
+      const bPriority = statusPriority[b.status] || 0;
+
+      if (aPriority !== bPriority) return bPriority - aPriority;
+
+      // Then by progress (lower progress first - newer projects need more attention)
+      const aProgress = parseInt(a.progress || '0');
+      const bProgress = parseInt(b.progress || '0');
+      return aProgress - bProgress;
+    });
+
+    return prioritized.slice(0, count);
   }
 
   /**
@@ -1112,14 +1117,18 @@ Keep response brief and actionable.`;
    * Helper: Generate optimization action description
    */
   private generateOptimizationAction(agentId: string): string {
-    const actions: Record<string, string[]> = {
-      finops: ['Optimized cloud resource allocation', 'Automated cost reduction measure', 'Rebalanced budget allocation'],
-      tmo: ['Adjusted sprint capacity', 'Optimized critical path', 'Automated schedule recovery'],
-      ocm: ['Enhanced stakeholder communication', 'Improved change adoption metrics', 'Automated training initiative'],
-      integrated: ['Increased test coverage', 'Applied quality gate improvement', 'Automated defect prevention'],
+    // Return generic action - agents should only act based on real findings
+    const actionMap: Record<string, string> = {
+      finops: 'Routine financial optimization',
+      tmo: 'Routine schedule optimization',
+      ocm: 'Routine change management review',
+      integrated: 'Routine quality review',
+      vro: 'Routine value tracking',
+      risk: 'Routine risk assessment',
+      planning: 'Routine dependency check',
+      governance: 'Routine compliance check',
     };
-    const agentActions = actions[agentId] || ['Applied automated optimization'];
-    return agentActions[Math.floor(Math.random() * agentActions.length)];
+    return actionMap[agentId] || 'Routine monitoring check';
   }
 
   /**

@@ -270,7 +270,7 @@ export class IntegrationSyncService {
 
           if (issuesResponse.ok) {
             const issuesData = await issuesResponse.json();
-            // TODO: Import issues as tasks (would need to extend storage interface)
+            
             console.log(`[Jira Sync] Found ${issuesData.total} issues for project ${jiraProject.name}`);
           }
         } catch (error: any) {

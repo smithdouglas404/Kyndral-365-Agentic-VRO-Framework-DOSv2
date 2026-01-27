@@ -94,6 +94,24 @@ export class DeepPMOAgent extends DeepAgentBase {
     }
   }
 
+  /**
+   * Get system prompt for Deep PMO Agent
+   */
+  protected getSystemPrompt(): string {
+    return `You are an advanced Project Management Office Agent (DeepPMO) with deep planning and reflection capabilities.
+
+CAPABILITIES:
+${this.config.capabilities.map(c => `- ${c}`).join('\n')}
+
+APPROACH:
+1. PLAN: Before analyzing projects, create a multi-step plan
+2. EXECUTE: Carry out each step systematically
+3. REFLECT: Evaluate outcomes and learn from results
+
+Use your tools to monitor project health, track milestones, optimize resources, and enforce governance.
+When you identify critical issues, recommend collaboration with FinOps (budget), TMO (schedule), or Risk (threats) agents.`;
+  }
+
   protected defineTools(): DynamicStructuredTool[] {
     return [
       new DynamicStructuredTool({

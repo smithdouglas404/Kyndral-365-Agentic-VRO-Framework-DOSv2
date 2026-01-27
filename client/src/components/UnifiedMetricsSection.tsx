@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, BarChart3, Clock, Zap, Target, Activity } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { useSimulation } from "@/lib/liveSimulationEngine";
 import { cn } from "@/lib/utils";
+import { useVroMetrics, usePmoMetrics } from "@/hooks/useVroMetrics";
 
 interface PMOMetric {
   id: string;
@@ -142,9 +142,39 @@ interface UnifiedMetricsSectionProps {
 }
 
 export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProps) {
-  const { state } = useSimulation();
-  const vroMetrics = state.vroMetrics;
-  
+  const { data: vroMetricsData = [], isLoading: vroLoading } = useVroMetrics();
+  const { data: pmoMetricsData = [], isLoading: pmoLoading } = usePmoMetrics();
+
+  // Convert VroMetric to display format
+  const vroMetrics = vroMetricsData
+    .filter(m => m.isActive !== false)
+    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+    .map(m => ({
+      id: m.id,
+      name: m.label,
+      value: parseFloat(m.value) || 0,
+      target: 100, // Default target, could be added to DB
+      unit: m.unit || '',
+      trend: 'up' as const,
+      source: m.source || 'VRO Analytics'
+    }));
+
+  const pmoMetrics = pmoMetricsData
+    .filter(m => m.isActive !== false)
+    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+    .map(m => ({
+      id: m.id,
+      name: m.label,
+      value: parseFloat(m.value) || 0,
+      target: 100,
+      unit: m.unit || '',
+      trend: 'up' as const,
+      source: m.source || 'PMO Analytics'
+    }));
+
+  // Fallback to static PMO metrics if no data
+  const displayPmoMetrics = pmoMetrics.length > 0 ? pmoMetrics : PMO_METRICS;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -158,19 +188,11 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
             <span className="text-sm font-medium text-gray-600">PMO Metrics</span>
           </div>
         </div>
-        {state.isLive && (
-          <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="flex items-center gap-1"
-            >
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-xs text-green-600 font-medium">LIVE</span>
-            </motion.div>
-            <span className="text-xs text-gray-400">Updated: {state.lastUpdate.toLocaleTimeString()}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">
+            {vroLoading || pmoLoading ? 'Loading...' : 'Live from database'}
+          </span>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -184,20 +206,11 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
           </div>
           <div className="grid grid-cols-2 gap-3">
             {vroMetrics.map((metric) => {
-              const isPulsing = state.pulsingMetrics.includes(`vro-${metric.id}`);
               return (
-                <MetricCard 
+                <MetricCard
                   key={metric.id}
-                  metric={{
-                    id: metric.id,
-                    name: metric.name,
-                    value: metric.currentValue,
-                    target: metric.targetValue,
-                    unit: metric.unit,
-                    trend: 'up',
-                    source: 'VRO Analytics'
-                  }}
-                  isPulsing={isPulsing}
+                  metric={metric}
+                  isPulsing={false}
                   domain="VRO"
                   onClick={() => onDrillDown?.('metric', metric.id)}
                 />
@@ -215,10 +228,9 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
             </Badge>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {PMO_METRICS.map((metric) => {
-              const isPulsing = state.pulsingMetrics.includes(`pmo-${metric.id}`);
+            {displayPmoMetrics.map((metric) => {
               return (
-                <MetricCard 
+                <MetricCard
                   key={metric.id}
                   metric={{
                     id: metric.id,
@@ -229,7 +241,7 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
                     trend: metric.trend,
                     source: metric.source
                   }}
-                  isPulsing={isPulsing}
+                  isPulsing={false}
                   domain="PMO"
                   onClick={() => onDrillDown?.('metric', metric.id)}
                 />

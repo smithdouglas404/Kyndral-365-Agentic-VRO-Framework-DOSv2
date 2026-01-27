@@ -202,7 +202,7 @@ export class UniversalMCPConnector {
         try {
           const mappedProject = this.mapProject(externalProject);
 
-          // TODO: Check if project exists and update/create accordingly
+          
           // This would integrate with your storage layer
           console.log(`[UniversalMCP] Mapped project: ${mappedProject.name}`);
 

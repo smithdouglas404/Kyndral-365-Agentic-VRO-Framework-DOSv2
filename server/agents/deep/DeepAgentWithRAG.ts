@@ -262,7 +262,7 @@ CRITICAL REQUIREMENTS:
 - Reference SPECIFIC projects by name
 - Provide WEEK-BY-WEEK forecast
 - Include SUCCESS RATES from history
-- Include FINANCIAL IMPACTS ($XXX,XXX)
+
 - Be PREDICTIVE (future-looking, not current state)`],
       ["human", `Project: {projectName}
 

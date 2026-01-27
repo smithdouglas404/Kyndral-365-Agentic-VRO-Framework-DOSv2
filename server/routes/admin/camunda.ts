@@ -161,39 +161,12 @@ export function registerCamundaRoutes(app: Express): void {
         }
       }
 
-      // Fallback: Return expected seeded processes
-      // These are the processes that should be deployed during wizard setup
-      console.log('[Camunda] Operate API not available, returning seeded defaults');
-      const processes = [
-        {
-          key: '2251799813685249',
-          name: 'Agent Collaboration Decision',
-          version: 1,
-          resourceName: 'agent-collaboration.dmn',
-          deploymentTime: new Date().toISOString(),
-        },
-        {
-          key: '2251799813685250',
-          name: 'Budget Overrun Workflow',
-          version: 1,
-          resourceName: 'budget-overrun-workflow.bpmn',
-          deploymentTime: new Date().toISOString(),
-        },
-        {
-          key: '2251799813685251',
-          name: 'Risk Escalation Process',
-          version: 1,
-          resourceName: 'risk-escalation.bpmn',
-          deploymentTime: new Date().toISOString(),
-        },
-      ];
-
-      res.json({
-        success: true,
-        processes,
-        count: processes.length,
-        source: 'seeded-defaults',
-        note: 'Configure CAMUNDA_OPERATE_URL to query live processes',
+      // No fallback - return error if Camunda not configured
+      console.error('[Camunda] Operate API not available');
+      return res.status(503).json({
+        success: false,
+        error: 'Camunda Operate API not available',
+        message: 'Configure CAMUNDA_OPERATE_URL and CAMUNDA_OPERATE_API_KEY to query deployed processes.',
       });
     } catch (error: any) {
       console.error('[Camunda] Get processes error:', error);
@@ -432,34 +405,14 @@ export function registerCamundaRoutes(app: Express): void {
         }
       }
 
-      // Fallback: Generate sample DMN for demo purposes
-      console.log(`[Camunda] Operate API not available, generating sample DMN for: ${decisionKey}`);
+      // No fallback - return error if Camunda is not configured
+      console.error(`[Camunda] Operate API not configured or unavailable for: ${decisionKey}`);
 
-      // Map common decision keys to friendly names
-      const decisionNames: Record<string, string> = {
-        'agent-collaboration-decision': 'Agent Collaboration',
-        'budget-approval-decision': 'Budget Approval',
-        'risk-escalation-decision': 'Risk Escalation',
-        'resource-allocation-decision': 'Resource Allocation',
-        'change-request-decision': 'Change Request Approval',
-      };
-
-      const decisionName = decisionNames[decisionKey] || decisionKey
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, (l) => l.toUpperCase());
-
-      const sampleDmn = generateSampleDmn(decisionName);
-
-      if (format === 'markdown') {
-        res.setHeader('Content-Type', 'text/markdown');
-        return res.send(formatDmnAsMarkdown(sampleDmn));
-      }
-
-      res.json({
-        success: true,
-        dmn: sampleDmn,
-        source: 'sample-data',
-        note: 'Configure CAMUNDA_OPERATE_URL to fetch live DMN tables',
+      return res.status(503).json({
+        success: false,
+        error: 'Camunda Operate API not available',
+        message: 'Configure CAMUNDA_OPERATE_URL and CAMUNDA_OPERATE_API_KEY environment variables to use Camunda DMN features.',
+        decisionKey,
       });
     } catch (error: any) {
       console.error('[Camunda] Get DMN error:', error);
@@ -503,10 +456,13 @@ export function registerCamundaRoutes(app: Express): void {
         }
       }
 
-      // Fallback: Return sample DMN XML
-      const sampleXml = generateSampleDmnXml(decisionKey);
-      res.setHeader('Content-Type', 'application/xml');
-      res.send(sampleXml);
+      // No fallback - return error if Camunda not configured
+      return res.status(503).json({
+        success: false,
+        error: 'Camunda Operate API not available',
+        message: 'Configure CAMUNDA_OPERATE_URL to download DMN XML files.',
+        decisionKey,
+      });
     } catch (error: any) {
       console.error('[Camunda] Get DMN XML error:', error);
       res.status(500).json({
@@ -558,21 +514,13 @@ export function registerCamundaRoutes(app: Express): void {
         }
       }
 
-      // Fallback: Use sample DMN
+      // No fallback - require real DMN data
       if (!parsedDmn) {
-        const decisionNames: Record<string, string> = {
-          'agent-collaboration-decision': 'Agent Collaboration',
-          'budget-approval-decision': 'Budget Approval',
-          'risk-escalation-decision': 'Risk Escalation',
-          'resource-allocation-decision': 'Resource Allocation',
-          'change-request-decision': 'Change Request Approval',
-        };
-
-        const decisionName = decisionNames[decisionKey] || decisionKey
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, (l) => l.toUpperCase());
-
-        parsedDmn = generateSampleDmn(decisionName);
+        return res.status(503).json({
+          success: false,
+          error: 'Camunda Operate API not available',
+          message: 'Configure CAMUNDA_OPERATE_URL to use DMN features.',
+        });
       }
 
       if (!parsedDmn.decisionTables || parsedDmn.decisionTables.length === 0) {
@@ -661,44 +609,12 @@ export function registerCamundaRoutes(app: Express): void {
         }
       }
 
-      // Fallback: Generate sample version history
-      const now = new Date();
-      const versions = [
-        {
-          key: '2251799813685253',
-          decisionId: decisionKey,
-          name: decisionKey.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-          version: 3,
-          versionTag: 'v3.0',
-          deploymentTime: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          resourceName: `${decisionKey}.dmn`,
-        },
-        {
-          key: '2251799813685252',
-          decisionId: decisionKey,
-          name: decisionKey.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-          version: 2,
-          versionTag: 'v2.0',
-          deploymentTime: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          resourceName: `${decisionKey}.dmn`,
-        },
-        {
-          key: '2251799813685251',
-          decisionId: decisionKey,
-          name: decisionKey.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-          version: 1,
-          versionTag: 'v1.0',
-          deploymentTime: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          resourceName: `${decisionKey}.dmn`,
-        },
-      ];
-
-      res.json({
-        success: true,
-        versions,
-        count: versions.length,
-        source: 'sample-data',
-        note: 'Configure CAMUNDA_OPERATE_URL to fetch live version history',
+      // No fallback - return error if Camunda not configured
+      return res.status(503).json({
+        success: false,
+        error: 'Camunda Operate API not available',
+        message: 'Configure CAMUNDA_OPERATE_URL to fetch DMN version history.',
+        decisionKey,
       });
     } catch (error: any) {
       console.error('[Camunda] Get DMN versions error:', error);
@@ -743,21 +659,13 @@ export function registerCamundaRoutes(app: Express): void {
         }
       }
 
-      // Fallback: Use sample DMN
+      // No fallback - require real DMN data
       if (!parsedDmn) {
-        const decisionNames: Record<string, string> = {
-          'agent-collaboration-decision': 'Agent Collaboration',
-          'budget-approval-decision': 'Budget Approval',
-          'risk-escalation-decision': 'Risk Escalation',
-          'resource-allocation-decision': 'Resource Allocation',
-          'change-request-decision': 'Change Request Approval',
-        };
-
-        const decisionName = decisionNames[decisionKey] || decisionKey
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, (l) => l.toUpperCase());
-
-        parsedDmn = generateSampleDmn(decisionName);
+        return res.status(503).json({
+          success: false,
+          error: 'Camunda Operate API not available',
+          message: 'Configure CAMUNDA_OPERATE_URL to use DMN features.',
+        });
       }
 
       if (!parsedDmn.decisionTables || parsedDmn.decisionTables.length === 0) {

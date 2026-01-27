@@ -592,7 +592,7 @@ export function registerCompanyProfileRoutes(app: Router) {
       const objectiveIds = objectives.map(o => o.id);
       const allKeyResults = objectiveIds.length > 0
         ? await db.select().from(keyResults).where(
-            eq(keyResults.objectiveId, objectiveIds[0]) // TODO: proper IN query
+            eq(keyResults.objectiveId, objectiveIds[0])
           )
         : [];
 

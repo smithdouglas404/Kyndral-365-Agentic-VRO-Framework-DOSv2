@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, Info, ChevronDown, ChevronUp, Calculator, Target, Layers, ChevronRight, FileText, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSimulation } from '@/lib/liveSimulationEngine';
+// Simulation engine removed
 import type { VROAggregatedMetric, TraceableMetricBreakdown } from '@/lib/unifiedMetrics';
 import { getFullTraceabilityChain, OKRS } from '@/lib/unifiedMetrics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -88,9 +88,7 @@ interface VROMetricCardProps {
 
 export function VROMetricCard({ metric, index }: VROMetricCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { state } = useSimulation();
-  
-  const isPulsing = state.pulsingMetrics.includes(`vro-${metric.id}`);
+
   const progressPercent = Math.min(100, (metric.currentValue / metric.targetValue) * 100);
   const isOnTarget = metric.currentValue >= metric.targetValue * 0.9;
   
@@ -100,23 +98,13 @@ export function VROMetricCard({ metric, index }: VROMetricCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
     >
-      <Card 
+      <Card
         className={cn(
           "relative overflow-hidden transition-all duration-300",
-          isPulsing && "ring-2 ring-blue-400 ring-opacity-50",
           isExpanded && "shadow-lg"
         )}
         data-testid={`vro-metric-card-${metric.id}`}
       >
-        {isPulsing && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.3, 0] }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0 bg-blue-400 pointer-events-none"
-          />
-        )}
-        
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between">
@@ -124,11 +112,7 @@ export function VROMetricCard({ metric, index }: VROMetricCardProps) {
                 <CardTitle className="text-sm font-medium text-gray-600">
                   {metric.name}
                 </CardTitle>
-                <motion.div 
-                  className="flex items-baseline gap-2 mt-1"
-                  animate={isPulsing ? { scale: [1, 1.05, 1] } : {}}
-                  transition={{ duration: 0.5 }}
-                >
+                <div className="flex items-baseline gap-2 mt-1">
                   <span className={cn(
                     "text-3xl font-bold",
                     isOnTarget ? "text-green-600" : "text-amber-600"
@@ -136,8 +120,8 @@ export function VROMetricCard({ metric, index }: VROMetricCardProps) {
                     {metric.currentValue}
                   </span>
                   <span className="text-lg text-gray-400">{metric.unit}</span>
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className={cn(
                       "text-xs",
                       isOnTarget ? "border-green-300 text-green-600" : "border-amber-300 text-amber-600"
@@ -145,7 +129,7 @@ export function VROMetricCard({ metric, index }: VROMetricCardProps) {
                   >
                     Target: {metric.targetValue}{metric.unit}
                   </Badge>
-                </motion.div>
+                </div>
               </div>
               
               <TooltipProvider>

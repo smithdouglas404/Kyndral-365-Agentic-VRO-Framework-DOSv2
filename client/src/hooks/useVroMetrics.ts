@@ -27,6 +27,20 @@ export function useVroMetrics() {
   });
 }
 
+export function usePmoMetrics() {
+  return useQuery<VroMetric[], Error>({
+    queryKey: ["pmo-metrics"],
+    queryFn: async () => {
+      const response = await fetch("/api/pmo-metrics");
+      if (!response.ok) {
+        throw new Error("Failed to fetch PMO metrics");
+      }
+      return response.json();
+    },
+    staleTime: 30000,
+  });
+}
+
 export function useUpdateVroMetric() {
   const queryClient = useQueryClient();
 
@@ -44,21 +58,7 @@ export function useUpdateVroMetric() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vro-metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["pmo-metrics"] });
     },
-  });
-}
-
-// PMO Metrics - uses same type but different category
-export function usePmoMetrics() {
-  return useQuery<VroMetric[], Error>({
-    queryKey: ["pmo-metrics"],
-    queryFn: async () => {
-      const response = await fetch("/api/pmo-metrics");
-      if (!response.ok) {
-        throw new Error("Failed to fetch PMO metrics");
-      }
-      return response.json();
-    },
-    staleTime: 30000,
   });
 }

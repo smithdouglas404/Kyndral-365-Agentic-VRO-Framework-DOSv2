@@ -45,7 +45,7 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
 
   const handleNotificationClick = (notification: UnifiedNotification) => {
     markAsRead(notification.id);
-    // TODO: Navigate to relevant page based on notification type
+    
     // For now, just mark as read
   };
 

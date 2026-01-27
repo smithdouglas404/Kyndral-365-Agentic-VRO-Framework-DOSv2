@@ -8,7 +8,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
+// Handle both ESM and CommonJS builds
+const __filename = typeof import.meta !== 'undefined' && import.meta.url
+  ? fileURLToPath(import.meta.url)
+  : path.join(process.cwd(), 'dist', 'routes', 'demo.js');
 const __dirname = path.dirname(__filename);
 
 // In-memory demo session store (in production, use Redis or database)

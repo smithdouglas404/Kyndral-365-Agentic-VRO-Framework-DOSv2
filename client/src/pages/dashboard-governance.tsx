@@ -16,7 +16,6 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -192,7 +191,8 @@ function RiskCategoryCard({ category }: { category: any }) {
 }
 
 export default function GovernanceDashboard() {
-  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('governance');
   const [drillDownOpen, setDrillDownOpen] = useState(false);

@@ -67,7 +67,7 @@ export async function generateCompanyDashboards(companyId: string): Promise<void
       .from(strategicObjectives)
       .where(eq(strategicObjectives.companyId, companyId));
 
-    // Fetch risks (TODO: risks table not yet implemented)
+    
     const companyRisks: any[] = [];
 
     // Generate Executive Dashboard

@@ -4,7 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SimulationProvider as EventSimulationProvider } from "@/contexts/SimulationContext";
+// Simulation engine removed - no longer needed
 import { PageContextProvider } from "@/contexts/PageContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
 import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
@@ -344,22 +344,20 @@ function App() {
       <WebSocketProvider>
         <CompanyProfileProvider>
           <UnifiedNotificationProvider>
-            <EventSimulationProvider>
-              <PageContextProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <DemoModeActiveBanner />
-                  <DemoModeBanner />
-                  {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
-                  {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
-                  <FloatingAlertBanner />
-                  {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
-                  {/* <GlobalAIOverlay /> */}
-                  <AskPMChat />
-                  <Router />
-                </TooltipProvider>
-              </PageContextProvider>
-            </EventSimulationProvider>
+            <PageContextProvider>
+              <TooltipProvider>
+                <Toaster />
+                <DemoModeActiveBanner />
+                <DemoModeBanner />
+                {/* Unified notification system - GlobalNotificationBell is now in page headers (AdminLayout, etc.) */}
+                {/* FloatingAlertBanner kept temporarily for backwards compatibility */}
+                <FloatingAlertBanner />
+                {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
+                {/* <GlobalAIOverlay /> */}
+                <AskPMChat />
+                <Router />
+              </TooltipProvider>
+            </PageContextProvider>
           </UnifiedNotificationProvider>
         </CompanyProfileProvider>
       </WebSocketProvider>

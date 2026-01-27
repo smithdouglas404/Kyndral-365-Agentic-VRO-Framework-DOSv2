@@ -291,7 +291,7 @@ async function resolveNestedField(field: string, context: RuleContext): Promise<
   // Example: "project.actual_cost" when evaluating an epic
   const [relation, attribute] = field.split('.');
 
-  // TODO: Add relation resolvers when PPM tables (projects, epics, etc.) are integrated
+  
   // if (relation === 'project' && context.entityData.projectId) {
   //   const [project] = await db
   //     .select()

@@ -3523,28 +3523,22 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         startedAt: new Date()
       });
 
-      // Simulate sync execution (in production, this would call MCP tools)
-      setTimeout(async () => {
-        const recordsProcessed = Math.floor(Math.random() * 100) + 10;
-        const recordsCreated = Math.floor(recordsProcessed * 0.2);
-        const recordsUpdated = Math.floor(recordsProcessed * 0.6);
-        
-        await storage.updateSyncJobRun(run.id, {
-          status: "success",
-          completedAt: new Date(),
-          recordsProcessed,
-          recordsCreated,
-          recordsUpdated,
-          recordsDeleted: 0,
-          recordsFailed: 0,
-          summary: JSON.stringify({ 
-            duration: "2.3s", 
-            entityTypes: JSON.parse(job.entityTypes || "[]")
-          })
-        });
-
-        await storage.updateSyncJobLastRun(job.id, "success");
-      }, 2000);
+      // Execute real MCP sync in background (not blocking response)
+      (async () => {
+        try {
+          const { executeSyncJob } = await import("./syncScheduler");
+          // Note: executeSyncJob creates its own run, so we need to clean up the initial one
+          await storage.deleteSyncJobRun(run.id);
+          await executeSyncJob(req.params.id);
+        } catch (error: any) {
+          console.error(`[ManualSync] Failed to execute sync job ${req.params.id}:`, error);
+          await storage.updateSyncJobRun(run.id, {
+            status: "failed",
+            completedAt: new Date(),
+            summary: JSON.stringify({ error: error.message })
+          });
+        }
+      })();
 
       res.json({ 
         message: "Sync job triggered", 

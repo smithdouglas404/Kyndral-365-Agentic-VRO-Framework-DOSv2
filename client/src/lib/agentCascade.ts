@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
 import { notifyAction } from './backgroundAgentMonitor';
 import { recordMemory } from './agentOrchestrator';
-import { simulationEngine } from './liveSimulation';
 import type { AgentType } from './dataHub';
 
 export interface CascadeAction {
@@ -180,16 +179,9 @@ export async function dispatchAgentCascade(scenario: ActionScenario): Promise<vo
         duration: 4000,
       }
     );
-    
-    simulationEngine.pushEvent({
-      type: 'action_required',
-      priority: i === 0 ? 'critical' : 'high',
-      title: `${action.icon} ${action.agentName}: ${action.action}`,
-      message: action.detail,
-      source: action.agentName,
-      detail: `Trigger: ${scenario.trigger}`
-    });
-    
+
+    // Simulation engine disabled - events removed
+
     notifyAction(action.agentId, 'notify', action.detail);
     
     recordMemory(

@@ -24,29 +24,43 @@ import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
 export class DeepVROAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = VRO_DEFAULT_RULES;
   constructor(storage: IStorage) {
-    super(
-      {
-        agentName: "deep-vro",
-        agentRole: "Intelligent Value Realization Office Agent with planning and reflection capabilities",
-        systemPrompt: `You are an expert value realization and benefits management agent.
+    const config = {
+      agentName: "DeepVRO",
+      agentType: "value_realization_intelligence",
+      description: "Enhanced Value Realization Office agent with planning and reflection",
+      capabilities: [
+        "Value delivery tracking",
+        "Benefits realization analysis",
+        "ROI calculation and optimization",
+        "Strategic alignment assessment",
+        "Value trajectory forecasting",
+        "Multi-step value planning",
+      ],
+      enablePlanning: true,
+      enableReflection: true,
+      maxPlanSteps: 8,
+      reflectionThreshold: 2,
+    };
 
-Your capabilities include:
-- Tracking value delivery and benefits realization
-- Calculating ROI and business value metrics
-- Assessing strategic alignment
-- Forecasting value trajectories
-- Optimizing value delivery
+    super(config, storage);
+  }
 
-You follow a three-phase approach:
-1. PLANNING: Create detailed plan for value analysis
-2. EXECUTION: Execute value assessment steps systematically
-3. REFLECTION: Learn from outcomes and adjust approach
+  /**
+   * Get system prompt for Deep VRO Agent
+   */
+  protected getSystemPrompt(): string {
+    return `You are an advanced Value Realization Office Agent (DeepVRO) with deep planning and reflection capabilities.
+
+CAPABILITIES:
+${this.config.capabilities.map(c => `- ${c}`).join('\n')}
+
+APPROACH:
+1. PLAN: Before analyzing value, create a multi-step plan
+2. EXECUTE: Carry out each step systematically
+3. REFLECT: Evaluate outcomes and learn from results
 
 Use your tools to analyze value delivery across projects and make intelligent recommendations.
-When you identify value gaps or strategic misalignment, recommend collaboration with FinOps (financial value) or PMO (delivery optimization) agents.`,
-      },
-      storage
-    );
+When you identify value gaps or strategic misalignment, recommend collaboration with FinOps (financial value) or PMO (delivery optimization) agents.`;
   }
 
   /**
@@ -74,8 +88,10 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             }
 
             // Calculate value realization (would integrate with actual benefits tracking)
-            const plannedValue = project.budget * 1.5; // Simulate 1.5x ROI target
-            const actualValue = project.progress * plannedValue; // Value proportional to progress
+            const budget = parseFloat(project.budget || '0');
+            const progress = project.progress || 0;
+            const plannedValue = budget * 1.5; // Simulate 1.5x ROI target
+            const actualValue = (progress / 100) * plannedValue; // Value proportional to progress
 
             const valueRealizationPercent = (actualValue / plannedValue) * 100;
 
@@ -233,14 +249,15 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             }
 
             // Calculate financial metrics
-            const totalInvestment = project.actualCost;
-            const valueRealized = totalInvestment * (1 + project.progress * 0.5); // Simulate value
+            const totalInvestment = parseFloat(project.actualCost || '0');
+            const progress = project.progress || 0;
+            const valueRealized = totalInvestment * (1 + (progress / 100) * 0.5); // Simulate value
             const netValue = valueRealized - totalInvestment;
-            const roi = (netValue / totalInvestment) * 100;
+            const roi = totalInvestment > 0 ? (netValue / totalInvestment) * 100 : 0;
 
             // Calculate payback period
             const monthlyValue = valueRealized / 12; // Assume annual value spread monthly
-            const paybackMonths = Math.ceil(totalInvestment / monthlyValue);
+            const paybackMonths = monthlyValue > 0 ? Math.ceil(totalInvestment / monthlyValue) : 0;
 
             // NPV calculation (simplified)
             const discountRate = 0.1; // 10% discount rate
@@ -383,11 +400,11 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
 
             // Calculate overall alignment score
             const scoresToConsider = strategicPriorities
-              ? strategicPriorities.map((p) => alignmentScores[p])
+              ? strategicPriorities.map((p: keyof typeof alignmentScores) => alignmentScores[p])
               : Object.values(alignmentScores);
 
             const averageAlignment =
-              scoresToConsider.reduce((sum, score) => sum + score, 0) / scoresToConsider.length;
+              scoresToConsider.reduce((sum: number, score: number) => sum + score, 0) / scoresToConsider.length;
 
             const alignmentLevel =
               averageAlignment > 85
@@ -497,7 +514,9 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             }
 
             // Calculate current value velocity
-            const currentValue = project.actualCost * (1 + project.progress * 0.5);
+            const actualCost = parseFloat(project.actualCost || '0');
+            const progress = project.progress || 0;
+            const currentValue = actualCost * (1 + (progress / 100) * 0.5);
 
             // Calculate project age with validation
             let projectAgeMonths = 1; // Default to 1 month
@@ -531,17 +550,18 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             }
 
             // Calculate value realization milestones
-            const targetValue = project.budget * 1.5; // 1.5x ROI target
+            const budget = parseFloat(project.budget || '0');
+            const targetValue = budget * 1.5; // 1.5x ROI target
             const monthsToTarget = Math.ceil((targetValue - currentValue) / monthlyValueVelocity);
             const willAchieveTarget = monthsToTarget <= forecastMonths;
 
             // Trend analysis
-            const velocityTrend = project.progress > 0.7 ? "accelerating" : "steady";
+            const velocityTrend = progress > 70 ? "accelerating" : "steady";
             const riskFactors = [];
             if (project.status === "at_risk") {
               riskFactors.push("Project health issues may impact value delivery");
             }
-            if (project.actualCost > project.budget * 0.9) {
+            if (actualCost > budget * 0.9) {
               riskFactors.push("Budget constraints may limit value capture");
             }
 
@@ -551,7 +571,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               currentState: {
                 currentValue: `$${currentValue.toLocaleString()}`,
                 valueVelocity: `$${monthlyValueVelocity.toLocaleString()}/month`,
-                projectProgress: `${(project.progress * 100).toFixed(0)}%`,
+                projectProgress: `${progress.toFixed(0)}%`,
               },
               forecast: {
                 horizon: `${forecastMonths} months`,
@@ -619,10 +639,15 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             }
 
             // Analyze current performance dimensions
+            const projectProgress = project.progress || 0;
+            const epicProgress = typeof project.epicProgress === 'number' ? project.epicProgress : parseFloat(project.epicProgress || '0');
+            const projectActualCost = parseFloat(project.actualCost || '0');
+            const projectBudget = parseFloat(project.budget || '0');
+
             const performanceDimensions = {
               speed: {
-                current: project.progress < project.expectedProgress ? "slow" : "on_pace",
-                score: project.progress >= project.expectedProgress ? 85 : 60,
+                current: projectProgress < epicProgress ? "slow" : "on_pace",
+                score: projectProgress >= epicProgress ? 85 : 60,
                 optimization: "Consider parallel workstreams or resource augmentation",
               },
               quality: {
@@ -637,8 +662,8 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               },
               cost: {
                 current:
-                  project.actualCost > project.budget * 0.9 ? "constrained" : "within_budget",
-                score: project.actualCost < project.budget * 0.8 ? 95 : 70,
+                  projectActualCost > projectBudget * 0.9 ? "constrained" : "within_budget",
+                score: projectActualCost < projectBudget * 0.8 ? 95 : 70,
                 optimization: "Review resource efficiency and vendor contracts",
               },
               risk: {

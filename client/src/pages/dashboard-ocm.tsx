@@ -16,7 +16,6 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getTrainingProgramsFromOKRs,
@@ -241,7 +240,8 @@ function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, 
 }
 
 export default function OCMDashboard() {
-  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('ocm');
   const [drillDownOpen, setDrillDownOpen] = useState(false);

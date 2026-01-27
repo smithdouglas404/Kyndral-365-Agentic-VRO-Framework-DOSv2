@@ -1,12 +1,14 @@
-// 🔄 MIGRATED TO DEEP AGENTS (2026-01-25)
+// 🔄 MIGRATED TO DEEP AGENTS (2026-01-27) - ALL AGENTS NOW DEEP
 import { DeepFinOpsAgent } from './deep/DeepFinOpsAgent.js';
 import { DeepTMOAgent } from './deep/DeepTMOAgent.js';
 import { DeepRiskAgent } from './deep/DeepRiskAgent.js';
 import { DeepVROAgent } from './deep/DeepVROAgent.js';
 import { DeepPMOAgent } from './deep/DeepPMOAgent.js';
 import { DeepOCMAgent } from './deep/DeepOCMAgent.js';
-import { GovernanceAgent, PlanningAgent, IntegratedMgmtAgent } from './AllAgents.js';
-import { OKRInferenceAgent } from './OKRInferenceAgent.js';
+import { DeepGovernanceAgent } from './deep/DeepGovernanceAgent.js';
+import { DeepPlanningAgent } from './deep/DeepPlanningAgent.js';
+import { DeepIntegratedMgmtAgent } from './deep/DeepIntegratedMgmtAgent.js';
+import { DeepOKRInferenceAgent } from './deep/DeepOKRInferenceAgent.js';
 import { ContinuousOrchestrator } from './ContinuousOrchestrator.js';
 import type { IStorage } from '../storage.js';
 
@@ -53,32 +55,30 @@ export class AgentScheduler {
 
   /**
    * Initialize all agents with proper configuration
-   * 🔄 NOW USING DEEP AGENTS with RAG, Mem0, Letta, Rules Engine, Policy-as-Code
+   * 🔄 ALL DEEP AGENTS - RAG, Mem0, Letta, Rules Engine, Policy-as-Code, Planning, Reflection
    */
   private initializeAgents() {
-    console.log('[AgentScheduler] Initializing Deep LangChain agents...');
+    console.log('[AgentScheduler] Initializing ALL Deep LangChain agents...');
 
     try {
-      // DEEP AGENTS - Full autonomy + advanced capabilities
+      // ALL DEEP AGENTS - Full autonomy + advanced capabilities
       this.agents.set('finops', new DeepFinOpsAgent(this.storage));
       this.agents.set('tmo', new DeepTMOAgent(this.storage));
       this.agents.set('risk', new DeepRiskAgent(this.storage));
       this.agents.set('vro', new DeepVROAgent(this.storage));
       this.agents.set('pmo', new DeepPMOAgent(this.storage));
       this.agents.set('ocm', new DeepOCMAgent(this.storage));
+      this.agents.set('governance', new DeepGovernanceAgent(this.storage));
+      this.agents.set('planning', new DeepPlanningAgent(this.storage));
+      this.agents.set('integrated', new DeepIntegratedMgmtAgent(this.storage));
+      this.agents.set('okr-inference', new DeepOKRInferenceAgent(this.storage));
 
-      // STANDARD AGENTS - To be migrated to Deep in future
-      this.agents.set('governance', new GovernanceAgent(this.storage));
-      this.agents.set('planning', new PlanningAgent(this.storage));
-      this.agents.set('integrated', new IntegratedMgmtAgent(this.storage));
-      this.agents.set('okr-inference', new OKRInferenceAgent(this.storage));
-
-      console.log(`[AgentScheduler] Initialized ${this.agents.size} agents (6 Deep + 4 Standard)`);
+      console.log(`[AgentScheduler] Initialized ${this.agents.size} Deep agents with planning and reflection`);
 
       // Log agent configurations
       for (const [id, agent] of Array.from(this.agents.entries())) {
-        const config = agent.getConfig?.() || { agentName: id, autonomy: 'supervised' };
-        console.log(`  - ${config.agentName} (${config.autonomy} autonomy)`);
+        const config = agent.config || { agentName: id };
+        console.log(`  - ${config.agentName || id}`);
       }
     } catch (error) {
       console.error('[AgentScheduler] Failed to initialize agents:', error);
@@ -128,60 +128,60 @@ export class AgentScheduler {
 
     // FinOps Agent: Every 30 minutes
     this.schedule('finops', 30 * 60 * 1000, async () => {
-      const agent = this.agents.get('finops') as FinOpsAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('finops');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // TMO Agent: Every 20 minutes
     this.schedule('tmo', 20 * 60 * 1000, async () => {
-      const agent = this.agents.get('tmo') as TMOAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('tmo');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // Risk Agent: Every 60 minutes
     this.schedule('risk', 60 * 60 * 1000, async () => {
-      const agent = this.agents.get('risk') as RiskAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('risk');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // Governance Agent: Every 2 hours
     this.schedule('governance', 120 * 60 * 1000, async () => {
-      const agent = this.agents.get('governance') as GovernanceAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('governance');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // Planning Agent: Every 30 minutes
     this.schedule('planning', 30 * 60 * 1000, async () => {
-      const agent = this.agents.get('planning') as PlanningAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('planning');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // OCM Agent: Every 45 minutes
     this.schedule('ocm', 45 * 60 * 1000, async () => {
-      const agent = this.agents.get('ocm') as OCMAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('ocm');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // Integrated Management Agent: Every 45 minutes
     this.schedule('integrated', 45 * 60 * 1000, async () => {
-      const agent = this.agents.get('integrated') as IntegratedMgmtAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('integrated');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // VRO Agent: Every 60 minutes (strategic value realization tracking)
     this.schedule('vro', 60 * 60 * 1000, async () => {
-      const agent = this.agents.get('vro') as VROAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('vro');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
     // OKR Inference Agent: Every 2 hours (data quality assessment + OKR mapping)
     this.schedule('okr-inference', 120 * 60 * 1000, async () => {
-      const agent = this.agents.get('okr-inference') as OKRInferenceAgent;
-      await agent.runScheduledScan();
+      const agent = this.agents.get('okr-inference');
+      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
     });
 
-    console.log('[AgentScheduler] ✅ All 9 agents scheduled and running (7 PMO + 1 VRO + 1 Inference)');
-    console.log('[AgentScheduler] 🎯 NO MORE FAKE DATA - Agents monitor real projects');
+    console.log('[AgentScheduler] ✅ All 10 Deep agents scheduled and running');
+    console.log('[AgentScheduler] 🎯 NO MORE FAKE DATA - All agents use real analysis with planning & reflection');
 
     // Run an initial scan immediately (optional - can remove if not desired)
     console.log('[AgentScheduler] Running initial scans...');

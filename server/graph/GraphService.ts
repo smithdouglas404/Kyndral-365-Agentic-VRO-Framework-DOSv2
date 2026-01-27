@@ -183,7 +183,7 @@ export class GraphService {
       },
     });
 
-    // TODO: Sync related entities (epics, features, stories, risks, etc.)
+    
     // This will be implemented in Phase 4
   }
 

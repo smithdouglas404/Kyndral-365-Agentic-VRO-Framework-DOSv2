@@ -16,7 +16,6 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useDivisions } from '@/hooks/useNexteraData';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import {
   getCompanyMetrics,
@@ -287,7 +286,8 @@ function InitiativeCard({ initiative, mode }: { initiative: any, mode: DataMode 
 }
 
 export default function TMODashboard() {
-  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('tmo');
   const { data: divisions = [] } = useDivisions();

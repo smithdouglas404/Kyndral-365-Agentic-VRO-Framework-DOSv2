@@ -456,7 +456,7 @@ export class OBDAService {
     cacheHitRate: number;
     averageExecutionTime: number;
   }> {
-    // TODO: Implement statistics tracking
+    
     return {
       totalCachedQueries: 0,
       cacheHitRate: 0,

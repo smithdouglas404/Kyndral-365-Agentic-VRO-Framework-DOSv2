@@ -18,7 +18,6 @@ import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import AgentActionQueue from '@/components/AgentActionQueue';
 import { useDivisions } from '@/hooks/useNexteraData';
 import { formatMoney } from '@/lib/formatters';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import {
   getCompanyMetrics,
@@ -198,7 +197,8 @@ function SavingsOpportunityCard({ opportunity, mode }: { opportunity: Transforme
 }
 
 export default function FinOpsDashboard() {
-  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('finops');
   const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();

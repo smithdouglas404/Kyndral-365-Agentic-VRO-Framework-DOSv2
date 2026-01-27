@@ -185,32 +185,31 @@ export class WorkflowExecutionEngine {
 
   /**
    * Execute approval step
-   * Requests approval from specified users, waits for response
+   * TODO: Implement real approval workflow with database persistence
    */
   private async executeApprovalStep(
     execution: WorkflowExecution,
     step: WorkflowStep
   ): Promise<any> {
-    console.log(`[WorkflowEngine] Approval step: Waiting for approval from ${step.approvers?.join(', ')}`);
-
-    // In a real implementation, this would:
-    // 1. Create approval request in database
-    // 2. Send notifications to approvers
-    // 3. Wait for approval (async, would resume later)
-    // 4. Handle timeout and escalation
-
-    // For now, simulate immediate approval
-    const approved = Math.random() > 0.2; // 80% approval rate
-
-    if (!approved) {
-      throw new Error('Approval denied');
+    const approvers = step.approvers || [];
+    if (approvers.length === 0) {
+      throw new Error('No approvers specified for approval step');
     }
 
-    return {
-      approved: true,
-      approvedBy: step.approvers?.[0] || 'system',
-      approvedAt: new Date(),
-    };
+    console.log(`[WorkflowEngine] Approval step requested for: ${approvers.join(', ')}`);
+
+    // TODO: Implement real approval workflow:
+    // 1. Create approval request in approvalQueues table
+    // 2. Send notifications to approvers
+    // 3. Pause workflow execution
+    // 4. Resume when approved via webhook/callback
+    // 5. Handle timeout and escalation
+
+    throw new Error(
+      `Workflow approval not implemented. ` +
+      `Would request approval from: ${approvers.join(', ')}. ` +
+      `Implement approval workflow to use this feature.`
+    );
   }
 
   /**

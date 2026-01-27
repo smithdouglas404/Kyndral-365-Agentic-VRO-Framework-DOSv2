@@ -18,7 +18,6 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useDivisions } from '@/hooks/useNexteraData';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getObjectivesFromDivisions,
@@ -201,7 +200,8 @@ function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, m
 }
 
 export default function OKRDashboard() {
-  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('okr');
   const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();

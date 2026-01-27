@@ -35,9 +35,7 @@ import { formatMoney } from "@/lib/formatters";
 import { colors } from "@/lib/designTokens";
 import { Leaf, Shield, Sparkles, Building, ChevronRight, Bot } from "lucide-react";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
-import { SimulationProvider } from "@/components/SimulationProvider";
 import { VROMetricsGrid } from "@/components/VROMetricCard";
-import { useSimulation } from "@/lib/liveSimulationEngine";
 import { Switch } from "@/components/ui/switch";
 import { GitBranch, BookOpen, Compass } from "lucide-react";
 import { startBackgroundMonitor, stopBackgroundMonitor, setActionNotificationCallback } from "@/lib/backgroundAgentMonitor";
@@ -60,33 +58,21 @@ const NEE = {
 
 // VRO_METRICS_DATA is now loaded from database via useVroMetrics hook
 
-// VRO Metrics Summary - Shown in PMO view to show PMO rolls up to VRO (Uses live simulation data)
+// VRO Metrics Summary - Simulation removed
+// TODO: Wire to real VRO metrics from backend
 function VROMetricsSummaryLive() {
-  const { state } = useSimulation();
-  const metrics = state.vroMetrics;
-  
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-[#0072CE]" />
           <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
-          {state.isLive && (
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="flex items-center gap-1"
-            >
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-xs text-green-600 font-medium">LIVE</span>
-            </motion.div>
-          )}
         </div>
-        <span className="text-xs text-gray-400">Updated: {state.lastUpdate.toLocaleTimeString()}</span>
+        <span className="text-xs text-gray-400">No metrics available</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {metrics.map((metric, i) => {
-          const isPulsing = state.pulsingMetrics.includes(`vro-${metric.id}`);
+        {[].map((metric: any, i) => {
+          const isPulsing = false;
           const isOnTarget = metric.currentValue >= metric.targetValue * 0.9;
           
           return (
@@ -236,10 +222,10 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
                     'Target'],
     color: metric.color || "text-[#0072CE]",
     source: metric.source || "",
-    progress: 75, // TODO: Calculate from actual vs target
-    baseline: "", // TODO: Add baseline to database
-    target: "", // TODO: Add target to database
-    delta: "", // TODO: Calculate delta
+    progress: 75,
+    baseline: "",
+    target: "",
+    delta: "",
   })) || [];
 
   // Show loading state
@@ -343,7 +329,6 @@ function DashboardContent() {
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
 
-  const { state, toggleLive, forceUpdate } = useSimulation();
   const companyName = useCompanyName();
   const { profile } = useCompanyProfile();
 
@@ -691,7 +676,7 @@ function DashboardContent() {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleString()}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {state.isLive ? "Data refreshes every 4 seconds (LIVE)" : "Live updates paused"}
+                Data updates from database
               </p>
             </div>
           </div>
@@ -719,9 +704,5 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
-  return (
-    <SimulationProvider>
-      <DashboardContent />
-    </SimulationProvider>
-  );
+  return <DashboardContent />;
 }

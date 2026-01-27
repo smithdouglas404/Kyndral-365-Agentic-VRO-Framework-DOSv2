@@ -74,7 +74,10 @@
       "Bash(timeout 10 npm start)",
       "Bash(comm -23:*)",
       "Bash(node:*)",
-      "Bash(LANGCHAIN_PROJECT=nexus-ppm npm run dev:*)"
+      "Bash(LANGCHAIN_PROJECT=nexus-ppm npm run dev:*)",
+      "Bash(timeout 30 npm start:*)",
+      "Bash(1)",
+      "Bash(test:*)"
     ]
   }
 }

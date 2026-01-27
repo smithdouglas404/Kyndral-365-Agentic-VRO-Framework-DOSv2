@@ -18,7 +18,10 @@ import { fileURLToPath } from 'url';
 import { db } from '../db.js';
 import { ontologyIndustryProfiles } from '../db/schema.js';
 
-const __filename = fileURLToPath(import.meta.url);
+// Handle both ESM and CommonJS builds
+const __filename = typeof import.meta !== 'undefined' && import.meta.url
+  ? fileURLToPath(import.meta.url)
+  : path.join(process.cwd(), 'dist', 'services', 'industryProfileLoader.js');
 const __dirname = path.dirname(__filename);
 
 export interface IndustryMetric {

@@ -22,8 +22,9 @@ import {
   type MCPServerCategory,
 } from '../../mcp/MCPServerRegistry.js';
 import { encryptFields, decryptFields } from '../../lib/encryption.js';
-import { MCPConnectionTester } from '../../mcp/MCPConnectionTester.js';
-import { getMCPSyncScheduler } from '../../mcp/MCPSyncScheduler.js';
+import { UniversalMCPConnector } from '../../mcp/UniversalMCPConnector.js';
+// DISABLED: MCPSyncScheduler file removed
+// import { getMCPSyncScheduler } from '../../mcp/MCPSyncScheduler.js';
 
 /**
  * Register MCP server management routes
@@ -322,29 +323,68 @@ export function registerMCPServerRoutes(app: Express): void {
         }
       }
 
-      // Perform real connection test
+      // Perform real connection test using UniversalMCPConnector
       console.log(`[MCPServers] Testing connection to ${mcpServer.displayName}...`);
-      const testResult = await MCPConnectionTester.testConnection(id, credentials);
 
-      // Add additional metadata
-      const enrichedResult = {
-        ...testResult,
-        details: {
-          ...testResult.details,
-          server: mcpServer.displayName,
-          category: mcpServer.category,
-          officialMCP: mcpServer.officialMCP,
-          timestamp: new Date().toISOString(),
+      // Create mock integration for testing
+      const mockIntegration: any = {
+        id: 'test-connection',
+        type: id,
+        name: mcpServer.displayName,
+        status: 'testing',
+        credentials: credentials,
+        connectionDetails: {
+          mcpServerId: id,
+          baseUrl: credentials.baseUrl || credentials.apiUrl || credentials.url,
+          authType: mcpServer.authType || 'bearer',
+          apiType: mcpServer.apiType || 'rest',
+          endpoints: mcpServer.endpoints || {},
         },
+        fieldMappings: {},
       };
 
-      if (testResult.success) {
-        console.log(`[MCPServers] Connection test successful for ${mcpServer.displayName}`);
-      } else {
-        console.error(`[MCPServers] Connection test failed for ${mcpServer.displayName}: ${testResult.error}`);
-      }
+      try {
+        // Encrypt credentials for connector (it will decrypt them)
+        const encrypted = encryptFields(mockIntegration, ['credentials']);
+        mockIntegration.credentials = encrypted.credentials;
 
-      res.json(enrichedResult);
+        const connector = new UniversalMCPConnector(mockIntegration);
+        const testResult = await connector.testConnection();
+
+        // Add additional metadata
+        const enrichedResult = {
+          success: testResult.success,
+          message: testResult.message,
+          latency: testResult.latency,
+          details: {
+            server: mcpServer.displayName,
+            category: mcpServer.category,
+            officialMCP: mcpServer.officialMCP,
+            timestamp: new Date().toISOString(),
+          },
+        };
+
+        if (testResult.success) {
+          console.log(`[MCPServers] Connection test successful for ${mcpServer.displayName} (${testResult.latency}ms)`);
+        } else {
+          console.error(`[MCPServers] Connection test failed for ${mcpServer.displayName}: ${testResult.message}`);
+        }
+
+        res.json(enrichedResult);
+      } catch (connectorError: any) {
+        console.error(`[MCPServers] Error creating connector for ${mcpServer.displayName}:`, connectorError);
+        res.json({
+          success: false,
+          message: `Connection test failed: ${connectorError.message}`,
+          latency: 0,
+          details: {
+            server: mcpServer.displayName,
+            category: mcpServer.category,
+            officialMCP: mcpServer.officialMCP,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      }
     } catch (error: any) {
       console.error('[MCPServers] Error testing MCP server:', error);
       res.status(500).json({
@@ -410,26 +450,33 @@ export function registerMCPServerRoutes(app: Express): void {
         });
       }
 
-      // Trigger manual sync
-      const syncScheduler = getMCPSyncScheduler();
-      if (!syncScheduler) {
-        return res.status(503).json({
+      // Trigger manual sync using UniversalMCPConnector
+      const integration = existing[0];
+      console.log(`[MCPServers] Manual sync requested for ${integration.name} by ${req.user?.email}`);
+
+      try {
+        const connector = new UniversalMCPConnector(integration);
+        const syncResult = await connector.syncProjects();
+
+        console.log(`[MCPServers] Manual sync completed for ${integration.name}: ${syncResult.recordsImported} records imported`);
+
+        res.json({
+          success: true,
+          message: 'Manual sync completed successfully',
+          result: {
+            recordsImported: syncResult.recordsImported,
+            duration: syncResult.duration,
+            errors: syncResult.errors,
+          },
+        });
+      } catch (syncError: any) {
+        console.error(`[MCPServers] Manual sync failed for ${integration.name}:`, syncError);
+        res.status(500).json({
           success: false,
-          error: 'Sync scheduler not available',
+          error: 'Manual sync failed',
+          message: syncError.message,
         });
       }
-
-      console.log(`[MCPServers] Manual sync triggered for ${existing[0].name} by ${req.user?.email}`);
-
-      // Trigger sync asynchronously (don't wait for completion)
-      syncScheduler.triggerManualSync(integrationId).catch(err => {
-        console.error(`[MCPServers] Manual sync failed for ${existing[0].name}:`, err);
-      });
-
-      res.json({
-        success: true,
-        message: 'Sync started successfully',
-      });
     } catch (error: any) {
       console.error('[MCPServers] Error triggering manual sync:', error);
       res.status(500).json({

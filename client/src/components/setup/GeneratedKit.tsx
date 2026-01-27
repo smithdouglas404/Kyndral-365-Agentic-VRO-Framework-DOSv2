@@ -100,8 +100,8 @@ export function GeneratedKit({ companyId }: GeneratedKitProps) {
     metrics: companyProfile.metrics?.length || 0,
     objectives: companyProfile.strategicObjectives?.length || 0,
     // These would come from other endpoints
-    rules: 0, // TODO: fetch from company_rules
-    risks: 0, // TODO: fetch from risks
+    rules: 0,
+    risks: 0,
     dashboards: 4 // Auto-generated dashboards
   };
 

@@ -16,8 +16,9 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import type { IStorage } from "../../storage.js";
 import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
 import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
-import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
-import type { VectorDocument } from "../../mcp/RetoolVectorsMCP.js";
+// Removed: RetoolVectorsMCP is no longer used
+// import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
+type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
 
 /**
  * Plan step for multi-step reasoning
@@ -107,7 +108,7 @@ export abstract class DeepAgentBase {
     this.tracingEnabled = false;
 
     // Enable knowledge enrichment if Retool Vectors MCP is configured
-    this.enableKnowledgeEnrichment = !!getRetoolVectorsMCP();
+    this.enableKnowledgeEnrichment = false; // Disabled: RetoolVectorsMCP removed
 
     // Initialize memory layers
     this.mem0 = getMem0Service();
@@ -262,6 +263,86 @@ export abstract class DeepAgentBase {
   }
 
   /**
+   * Recall past facts about an entity before making new decisions
+   * This enables learning and prevents duplicate interventions
+   */
+  protected async recallEntityContext(entityId: string): Promise<Record<string, any>> {
+    const facts = await this.mem0.observeFacts({ entity: entityId });
+    const state = await this.mem0.getEntityState(entityId);
+
+    console.log(`[${this.config.agentName}] 🧠 Recalled ${facts.length} facts about ${entityId}`);
+
+    if (facts.length > 0) {
+      console.log(`[${this.config.agentName}] 📚 Historical context:`,
+        facts.slice(0, 3).map(f => `${f.attribute}=${JSON.stringify(f.value)} (${f.sourceAgent})`).join(', ')
+      );
+    }
+
+    return state;
+  }
+
+  /**
+   * Check if an intervention was already issued to avoid duplicates
+   */
+  protected async hasRecentIntervention(entityId: string, interventionType: string, withinHours: number = 24): Promise<boolean> {
+    const cutoffTime = new Date(Date.now() - (withinHours * 60 * 60 * 1000));
+    const recentFacts = await this.mem0.observeFacts({
+      entity: entityId,
+      attribute: `intervention_${interventionType}`,
+      sinceTimestamp: cutoffTime,
+    });
+
+    if (recentFacts.length > 0) {
+      console.log(`[${this.config.agentName}] ⚠️  Duplicate intervention detected: ${interventionType} already issued for ${entityId} within ${withinHours}h`);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Record that an intervention was issued
+   */
+  protected async recordIntervention(entityId: string, interventionType: string, interventionId: string): Promise<void> {
+    await this.broadcastFact(
+      entityId,
+      `intervention_${interventionType}`,
+      { interventionId, issuedAt: new Date().toISOString() },
+      1.0
+    );
+  }
+
+  /**
+   * Create intervention with automatic duplicate checking
+   * Returns intervention ID if created, null if duplicate detected
+   */
+  protected async createInterventionIfNew(
+    entityId: string,
+    interventionType: string,
+    interventionData: any,
+    withinHours: number = 24
+  ): Promise<string | null> {
+    // Check for recent duplicate
+    const isDuplicate = await this.hasRecentIntervention(entityId, interventionType, withinHours);
+
+    if (isDuplicate) {
+      console.log(`[${this.config.agentName}] ⏭️  Skipping duplicate ${interventionType} intervention for ${entityId}`);
+      return null;
+    }
+
+    // Create the intervention (agents must implement this)
+    const interventionId = `intervention_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Log intervention creation
+    console.log(`[${this.config.agentName}] ✅ Creating ${interventionType} intervention for ${entityId}: ${interventionId}`);
+
+    // Record that we issued this intervention
+    await this.recordIntervention(entityId, interventionType, interventionId);
+
+    return interventionId;
+  }
+
+  /**
    * Archive important context to long-term memory
    */
   protected async archiveContext(content: string, metadata: Record<string, any> = {}): Promise<void> {
@@ -281,7 +362,8 @@ export abstract class DeepAgentBase {
     }
 
     try {
-      const vectorsMCP = getRetoolVectorsMCP();
+      // Disabled: RetoolVectorsMCP removed
+      const vectorsMCP = null;
       if (!vectorsMCP) {
         return context;
       }
@@ -321,13 +403,102 @@ export abstract class DeepAgentBase {
   }
 
   /**
+   * Extract entity IDs from goal text and context
+   */
+  protected extractEntityIds(goal: string, context: any): string[] {
+    const entityIds: string[] = [];
+
+    // Look for entity IDs in context
+    if (context.projectId) entityIds.push(context.projectId);
+    if (context.entityId) entityIds.push(context.entityId);
+
+    // Look for project IDs in goal text (e.g., "analyze project_123")
+    const projectMatches = goal.match(/project[_-]?([a-zA-Z0-9-]+)/gi);
+    if (projectMatches) {
+      entityIds.push(...projectMatches.map(m => m.toLowerCase()));
+    }
+
+    return [...new Set(entityIds)]; // Remove duplicates
+  }
+
+  /**
+   * Retrieve all facts about an entity as a structured record
+   */
+  protected async retrieveEntityFacts(entityId: string): Promise<Record<string, any>> {
+    const facts: Record<string, any> = {};
+
+    // Get current state (latest value for each attribute)
+    const state = await this.mem0.getEntityState(entityId);
+
+    for (const [attribute, data] of Object.entries(state)) {
+      facts[attribute] = data.value;
+      console.log(`[${this.config.agentName}] 🧠 Fact retrieved: ${entityId}.${attribute} = ${JSON.stringify(data.value)}`);
+    }
+
+    return facts;
+  }
+
+  /**
+   * Enrich context with historical facts from Mem0
+   * Formats facts as human-readable text for LLM consumption
+   */
+  protected async enrichContextWithFacts(goal: string, context: any): Promise<any> {
+    try {
+      const entityIds = this.extractEntityIds(goal, context);
+
+      if (entityIds.length === 0) {
+        return context;
+      }
+
+      // Build human-readable prior knowledge section
+      const priorKnowledgeLines: string[] = [];
+      priorKnowledgeLines.push('## Prior Knowledge (from previous observations)');
+      priorKnowledgeLines.push('');
+
+      for (const entityId of entityIds) {
+        const facts = await this.retrieveEntityFacts(entityId);
+
+        if (Object.keys(facts).length > 0) {
+          priorKnowledgeLines.push(`### ${entityId}`);
+
+          // Sort facts by key for consistent ordering
+          const sortedFacts = Object.entries(facts).sort(([a], [b]) => a.localeCompare(b));
+
+          for (const [key, value] of sortedFacts) {
+            const formattedValue = typeof value === 'object'
+              ? JSON.stringify(value)
+              : String(value);
+            priorKnowledgeLines.push(`- ${key}: ${formattedValue}`);
+          }
+
+          priorKnowledgeLines.push('');
+          console.log(`[${this.config.agentName}] 🧠 Recalled ${Object.keys(facts).length} facts about ${entityId}`);
+        }
+      }
+
+      // Add formatted prior knowledge to context
+      const priorKnowledge = priorKnowledgeLines.join('\n');
+
+      return {
+        ...context,
+        priorKnowledge,
+        hasPriorKnowledge: priorKnowledgeLines.length > 2, // More than just headers
+        _entityIds: entityIds // Keep for duplicate checking
+      };
+    } catch (error) {
+      console.error(`[${this.config.agentName}] Failed to enrich context with facts:`, error);
+      return context;
+    }
+  }
+
+  /**
    * PHASE 1: PLANNING
    * Create a multi-step plan before executing
    */
   protected async createPlan(goal: string, context: any): Promise<AgentPlan> {
     console.log(`[${this.config.agentName}] Creating plan for goal: ${goal}`);
 
-    // Enrich context with knowledge from Retool Vectors
+    // Enrich context with knowledge from Retool Vectors (context already has facts from run())
     const enrichedContext = await this.enrichContextWithKnowledge(goal, context);
 
     const tools = this.defineTools();
@@ -363,16 +534,21 @@ Return a JSON plan with this structure:
     }}}}
   ]
 }}}}`],
-      ["human", `Goal: {goal}
+      ["human", `{priorKnowledge}
 
-Context: {context}
+## Current Goal
+{goal}
 
-Create a plan to achieve this goal.`],
+## Additional Context
+{context}
+
+Create a plan to achieve this goal. Consider the prior knowledge when planning to avoid duplicate work.`],
     ]);
 
     const chain = planningPrompt.pipe(this.plannerModel);
     const response = await chain.invoke({
       goal,
+      priorKnowledge: enrichedContext.priorKnowledge || '## Prior Knowledge\nNo prior observations for this entity.',
       context: JSON.stringify(enrichedContext, null, 2),
     });
 
@@ -494,21 +670,49 @@ Create a plan to achieve this goal.`],
    */
   protected async executeStep(step: PlanStep, previousResults: any[]): Promise<any> {
     const tools = this.defineTools();
-    const context = {
-      step: step.step,
-      description: step.description,
-      expectedOutcome: step.expectedOutcome,
-      previousResults,
+
+    // Create circular reference handler
+    const seen = new WeakSet();
+    const circularReplacer = (key: string, value: any) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular Reference]';
+        }
+        seen.add(value);
+      }
+      return value;
     };
+
+    // Safely serialize previousResults
+    let serializedPreviousResults: string;
+    try {
+      // Convert previousResults to simple summary format
+      const simplifiedResults = previousResults.map((result, idx) => {
+        if (typeof result === 'object' && result !== null) {
+          return {
+            stepIndex: idx,
+            summary: typeof result === 'string' ? result : JSON.stringify(result, circularReplacer).substring(0, 500)
+          };
+        }
+        return { stepIndex: idx, summary: String(result) };
+      });
+      serializedPreviousResults = JSON.stringify(simplifiedResults, null, 2);
+    } catch (e) {
+      serializedPreviousResults = `[Previous results: ${previousResults.length} steps completed]`;
+    }
+
+    const contextString = `Step ${step.step}: ${step.description}
+Expected outcome: ${step.expectedOutcome}
+Previous results: ${serializedPreviousResults}`;
 
     // If step specifies a tool, use it
     if (step.tool) {
       const tool = tools.find(t => t.name === step.tool);
       if (tool) {
         console.log(`[${this.config.agentName}] Using tool: ${step.tool}`);
-        // Tool execution would happen here
-        // For now, return a mock result
-        return { toolUsed: step.tool, context };
+        // TODO: Execute tool dynamically using tool.function()
+        // For now, tools are provided but not executed - LLM handles execution
+        return { toolUsed: step.tool, summary: `Used ${step.tool}` };
       }
     }
 
@@ -527,7 +731,7 @@ Provide the result of executing this step.`],
     const response = await chain.invoke({
       description: step.description,
       expectedOutcome: step.expectedOutcome,
-      context: JSON.stringify(context, null, 2),
+      context: contextString,
     });
 
     return {
@@ -635,10 +839,13 @@ Reflect on this action.`],
     console.log(`[${this.config.agentName}] Deep Agent run started: ${goal}`);
 
     try {
+      // PHASE 0: RECALL - Retrieve historical facts from memory
+      const enrichedContext = await this.enrichContextWithFacts(goal, context);
+
       // PHASE 1: PLANNING
       let plan: AgentPlan;
       if (this.config.enablePlanning) {
-        plan = await this.createPlan(goal, context);
+        plan = await this.createPlan(goal, enrichedContext);
       } else {
         // Direct execution without planning
         plan = {

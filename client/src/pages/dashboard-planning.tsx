@@ -18,7 +18,6 @@ import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useDivisions } from '@/hooks/useNexteraData';
 import { useProjects } from '@/hooks/useDashboardData';
-import { useSimulation } from '@/contexts/SimulationContext';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getCompanyMetrics,
@@ -208,7 +207,8 @@ function DeadlineCard({ deadline, mode }: { deadline: TransformedDeadline, mode:
 }
 
 export default function PlanningDashboard() {
-  const { dataMode, setDataMode, viewMode, setViewMode } = useSimulation();
+  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('planning');
   const { data: divisions = [] } = useDivisions();

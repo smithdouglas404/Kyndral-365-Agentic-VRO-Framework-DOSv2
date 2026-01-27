@@ -53,10 +53,26 @@ export class DeepTMOAgent extends DeepAgentBase {
             return { error: "Project not found" };
           }
 
-          // Calculate schedule variance (mock - in production use actual dates)
+          // Calculate schedule variance using real dates
           const progress = project.progress || 0;
-          const expectedProgress = 50; // Mock baseline
-          const varianceDays = ((expectedProgress - progress) / 100) * 90; // Assuming 90-day project
+
+          // Calculate expected progress based on actual dates
+          let expectedProgress = 0;
+          let totalDays = 1;
+
+          if (project.startDate && project.endDate) {
+            const now = new Date();
+            const start = new Date(project.startDate);
+            const end = new Date(project.endDate);
+            totalDays = Math.max(1, Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+            const elapsedDays = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            expectedProgress = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
+          } else {
+            // No dates available - use progress as both actual and expected
+            expectedProgress = progress;
+          }
+
+          const varianceDays = ((expectedProgress - progress) / 100) * totalDays;
           const severity = Math.abs(varianceDays) > 14 ? 'critical' : Math.abs(varianceDays) > threshold ? 'warning' : 'normal';
 
           // Broadcast schedule variance as a fact
@@ -119,12 +135,9 @@ export class DeepTMOAgent extends DeepAgentBase {
             return { error: "Project not found" };
           }
 
-          // Mock critical path analysis
-          const criticalTasks = [
-            { task: "Infrastructure Setup", duration: 14, slack: 0, status: "in_progress" },
-            { task: "Data Migration", duration: 21, slack: 0, status: "not_started" },
-            { task: "Testing", duration: 10, slack: 0, status: "not_started" },
-          ];
+          // TODO: Query real task dependencies and calculate critical path from database
+          // For now, return empty critical path until task dependencies are available
+          const criticalTasks: any[] = [];
 
           const totalCriticalPathDays = criticalTasks.reduce((sum, t) => sum + t.duration, 0);
 
@@ -151,26 +164,27 @@ export class DeepTMOAgent extends DeepAgentBase {
             return { error: "Project not found" };
           }
 
-          // Mock bottleneck detection
+          // TODO: Implement sophisticated bottleneck detection using resource allocation data
+          // For now, use simple heuristics based on project state
           const bottlenecks = [];
 
-          if (project.progress < 30) {
-            bottlenecks.push({
-              type: "resource_shortage",
-              resource: "Senior Developers",
-              impact: "2 weeks delay",
-              recommendation: "Allocate 2 additional senior developers",
-            });
+          // Detect early-stage delays (low progress relative to time)
+          if (project.progress !== null && project.progress < 30) {
+            const now = new Date();
+            const start = project.startDate ? new Date(project.startDate) : now;
+            const elapsedWeeks = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 7));
+
+            if (elapsedWeeks > 4) { // More than 4 weeks elapsed but < 30% progress
+              bottlenecks.push({
+                type: "slow_start",
+                resource: "Project velocity below expected",
+                impact: `${elapsedWeeks} weeks elapsed, only ${project.progress}% complete`,
+                recommendation: "Review resource allocation and remove blockers",
+              });
+            }
           }
 
-          if (project.risks && project.risks.length > 3) {
-            bottlenecks.push({
-              type: "dependency_risk",
-              resource: "External API Integration",
-              impact: "1 week delay",
-              recommendation: "Escalate vendor issue to management",
-            });
-          }
+          // TODO: Add real bottleneck detection from resource allocation, task dependencies, etc.
 
           return {
             projectId,
@@ -197,15 +211,34 @@ export class DeepTMOAgent extends DeepAgentBase {
           const progress = project.progress || 0;
           const remainingWork = 100 - progress;
 
-          // Mock velocity calculation (5% per week)
-          const velocity = 5;
-          const weeksRemaining = remainingWork / velocity;
-          const forecastDate = new Date();
-          forecastDate.setDate(forecastDate.getDate() + (weeksRemaining * 7));
+          // Calculate velocity based on actual progress and elapsed time
+          let velocity = 5; // Default 5% per week if no date data
+          let forecastDate = new Date();
+          let baselineEnd = new Date();
 
-          // Mock baseline end date (3 months from now)
-          const baselineEnd = new Date();
-          baselineEnd.setMonth(baselineEnd.getMonth() + 3);
+          if (project.startDate && project.endDate) {
+            const now = new Date();
+            const start = new Date(project.startDate);
+            const end = new Date(project.endDate);
+
+            // Calculate actual velocity from historical progress
+            const elapsedDays = Math.max(1, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+            const elapsedWeeks = elapsedDays / 7;
+            velocity = elapsedWeeks > 0 ? progress / elapsedWeeks : 5;
+
+            // Forecast based on actual velocity
+            const weeksRemaining = velocity > 0 ? remainingWork / velocity : 0;
+            forecastDate = new Date(now);
+            forecastDate.setDate(forecastDate.getDate() + (weeksRemaining * 7));
+
+            // Use actual baseline end date
+            baselineEnd = end;
+          } else {
+            // No date data - use default calculation
+            const weeksRemaining = remainingWork / velocity;
+            forecastDate.setDate(forecastDate.getDate() + (weeksRemaining * 7));
+            baselineEnd.setMonth(baselineEnd.getMonth() + 3);
+          }
 
           const variance = (forecastDate.getTime() - baselineEnd.getTime()) / (1000 * 60 * 60 * 24);
 

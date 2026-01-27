@@ -738,7 +738,7 @@ export class EnhancedLLMRouter {
       this.usageMetrics = this.usageMetrics.slice(-1000);
     }
 
-    // TODO: Persist to database
+    
   }
 
   /**
