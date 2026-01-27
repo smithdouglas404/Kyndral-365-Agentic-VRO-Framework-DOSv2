@@ -82,7 +82,7 @@ export class Mem0Service extends EventEmitter {
       id: row.id,
       entity: row.entity,
       attribute: row.attribute,
-      value: JSON.parse(row.value),
+      value: row.value, // JSONB column returns already-parsed value
       sourceAgent: row.source_agent,
       confidence: parseFloat(row.confidence),
       supersedes: row.supersedes,
@@ -138,7 +138,7 @@ export class Mem0Service extends EventEmitter {
       id: row.id,
       entity: row.entity,
       attribute: row.attribute,
-      value: JSON.parse(row.value),
+      value: row.value, // JSONB column returns already-parsed value
       sourceAgent: row.source_agent,
       confidence: parseFloat(row.confidence),
       supersedes: row.supersedes,
@@ -163,7 +163,7 @@ export class Mem0Service extends EventEmitter {
 
     for (const row of result.rows as any[]) {
       state[row.attribute] = {
-        value: JSON.parse(row.value),
+        value: row.value, // JSONB column returns already-parsed value
         sourceAgent: row.source_agent,
         timestamp: new Date(row.created_at),
       };
@@ -260,7 +260,7 @@ export class Mem0Service extends EventEmitter {
       id: row.id,
       entity: row.entity,
       attribute: row.attribute,
-      value: JSON.parse(row.value),
+      value: row.value, // JSONB column returns already-parsed value
       sourceAgent: row.source_agent,
       confidence: parseFloat(row.confidence),
       supersedes: row.supersedes,
