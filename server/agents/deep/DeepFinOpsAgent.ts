@@ -13,6 +13,7 @@ import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
 import { FINOPS_DEFAULT_RULES, FINOPS_DEFAULT_ATTRIBUTES } from "../attributes/FinOpsAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
+import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepFinOpsAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = FINOPS_DEFAULT_RULES;
@@ -87,28 +88,29 @@ export class DeepFinOpsAgent extends DeepAgentBase {
 
             // Execute Langflow workflow for budget alert orchestration
             try {
-              const flowResult = await this.orchestrator.executeLangflowFlow(
-                '70d569d8-3e9c-4684-9227-ee4743d4be09',  // FinOps Budget Alert flow (auto-generated)
+              const flowResult = await executeLangflowFlow(
+                'new_flow',
                 {
-                  projectId,
-                  projectName: project.name,
-                  budgetVariance: variance / 100,  // Convert to decimal (0.20)
-                  currentBudget: budget,
-                  actualSpent: actualCost,
-                  severity: variance > 30 ? 'critical' : 'high',
-                  message: `Budget overrun detected: ${project.name} is ${variance.toFixed(1)}% over budget`,
+                  input_value: JSON.stringify({
+                    projectId,
+                    projectName: project.name,
+                    budgetVariance: variance / 100,
+                    currentBudget: budget,
+                    actualSpent: actualCost,
+                    severity: variance > 30 ? 'critical' : 'high',
+                    message: `Budget overrun detected: ${project.name} is ${variance.toFixed(1)}% over budget`,
+                  })
                 },
-                'finops'  // Agent ID
+                'finops'
               );
 
               if (flowResult.success) {
                 console.log(`[DeepFinOps] ✅ Langflow workflow executed successfully`);
-                console.log(`[DeepFinOps] Flow outputs:`, JSON.stringify(flowResult.outputs));
               } else {
-                console.error(`[DeepFinOps] ❌ Langflow workflow failed:`, flowResult.error);
+                console.warn(`[DeepFinOps] Langflow workflow not executed:`, flowResult.error);
               }
             } catch (error: any) {
-              console.error(`[DeepFinOps] Langflow execution error:`, error.message);
+              console.warn(`[DeepFinOps] Langflow execution skipped:`, error.message);
             }
 
             await this.archiveContext(

@@ -13,6 +13,7 @@ import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
 import { OCM_DEFAULT_RULES, OCM_DEFAULT_ATTRIBUTES } from "../attributes/OCMAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/OCMAgentAttributes.js";
+import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepOCMAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = OCM_DEFAULT_RULES;
@@ -155,6 +156,30 @@ When you identify resistance or adoption issues, recommend collaboration with PM
               highImpactCount: highImpacts,
               detectedAt: new Date(),
             });
+
+            // Execute Langflow workflow for change alert
+            try {
+              const flowResult = await executeLangflowFlow(
+                'new_flow',
+                {
+                  input_value: JSON.stringify({
+                    changeId,
+                    changeType: change.type || 'organizational',
+                    impact: overallImpact,
+                    stakeholders: ['leadership', 'managers', 'employees'],
+                    severity: 'high',
+                    message: `High impact change: ${change.name}`,
+                  })
+                },
+                'ocm'
+              );
+
+              if (flowResult.success) {
+                console.log(`[DeepOCM] ✅ Langflow workflow executed`);
+              }
+            } catch (error: any) {
+              console.warn(`[DeepOCM] Langflow skipped:`, error.message);
+            }
 
             await this.archiveContext(
               `Change ${change.name} identified with high organizational impact (${highImpacts} high-impact areas) requiring comprehensive change management`,

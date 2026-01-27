@@ -16,6 +16,7 @@ import type { IStorage } from "../../storage.js";
 import { DeepAgentBase } from "./DeepAgentBase.js";
 import { VRO_DEFAULT_RULES, VRO_DEFAULT_ATTRIBUTES } from "../attributes/VROAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
+import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 /**
  * Deep VRO Agent
@@ -170,6 +171,31 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               });
 
               if (overallStatus === "critical") {
+                // Execute Langflow workflow for value gap alert
+                try {
+                  const flowResult = await executeLangflowFlow(
+                    'new_flow',
+                    {
+                      input_value: JSON.stringify({
+                        projectId,
+                        projectName: project.name,
+                        valueGap: Math.round(plannedValue - actualValue),
+                        expectedValue: plannedValue,
+                        actualValue,
+                        severity: 'critical',
+                        message: `Critical value gap: ${project.name} at ${Math.round(valueRealizationPercent)}% realization`,
+                      })
+                    },
+                    'vro'
+                  );
+
+                  if (flowResult.success) {
+                    console.log(`[DeepVRO] ✅ Langflow workflow executed`);
+                  }
+                } catch (error: any) {
+                  console.warn(`[DeepVRO] Langflow skipped:`, error.message);
+                }
+
                 await this.archiveContext(
                   `Project ${project.name} has critical value delivery issue (${Math.round(valueRealizationPercent)}% realization)`,
                   {

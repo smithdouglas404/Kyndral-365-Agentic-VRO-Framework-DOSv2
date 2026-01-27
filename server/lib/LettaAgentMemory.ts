@@ -53,15 +53,36 @@ export class LettaAgentMemory {
 
   /**
    * Safely parse JSON with fallback to default value
+   * Handles: string JSON, already-parsed objects, null/undefined, corrupted data
    */
   private safeParseJSON(value: any, fallback: any, fieldName: string): any {
-    if (!value) return fallback;
-    try {
-      return JSON.parse(value);
-    } catch (error) {
-      console.error(`[Letta] ${this.agentId} failed to parse ${fieldName}, using default:`, error);
+    // Null or undefined
+    if (value === null || value === undefined) return fallback;
+    
+    // Already an object or array (Drizzle may auto-deserialize)
+    if (typeof value === 'object') {
+      // Check for valid structure
+      if (Array.isArray(value)) return value;
+      if (Object.keys(value).length > 0 || fieldName === 'learned_facts') return value;
       return fallback;
     }
+    
+    // Empty string
+    if (value === '') return fallback;
+    
+    // String that needs parsing
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return parsed;
+      } catch (error) {
+        // Corrupted data - log warning but don't spam console
+        console.warn(`[Letta] ${this.agentId} ${fieldName} had invalid data, resetting to default`);
+        return fallback;
+      }
+    }
+    
+    return fallback;
   }
 
   /**

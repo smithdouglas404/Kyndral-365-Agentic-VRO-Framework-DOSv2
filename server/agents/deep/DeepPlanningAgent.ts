@@ -11,6 +11,7 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
+import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepPlanningAgent extends DeepAgentBase {
   constructor(storage: IStorage) {
@@ -93,6 +94,30 @@ export class DeepPlanningAgent extends DeepAgentBase {
                 atRiskCount: atRisk.length,
                 detectedAt: new Date(),
               });
+
+              // Execute Langflow workflow for alignment alert
+              try {
+                const flowResult = await executeLangflowFlow(
+                  'new_flow',
+                  {
+                    input_value: JSON.stringify({
+                      projectId: 'portfolio',
+                      alignmentScore: 40,
+                      strategicGoals: ['dependency_resolution'],
+                      gaps: [`${blocked.length} blocked`, `${atRisk.length} at risk`],
+                      severity: 'critical',
+                      message: `Critical: ${blocked.length} blocked, ${atRisk.length} at risk`,
+                    })
+                  },
+                  'planning'
+                );
+
+                if (flowResult.success) {
+                  console.log(`[DeepPlanning] ✅ Langflow workflow executed`);
+                }
+              } catch (error: any) {
+                console.warn(`[DeepPlanning] Langflow skipped:`, error.message);
+              }
 
               await this.archiveContext(
                 `Critical dependency situation: ${blocked.length} blocked, ${atRisk.length} at risk`,

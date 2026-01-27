@@ -13,6 +13,7 @@ import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
 import { TMO_DEFAULT_RULES, TMO_DEFAULT_ATTRIBUTES } from "../attributes/TMOAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
+import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepTMOAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = TMO_DEFAULT_RULES;
@@ -103,16 +104,18 @@ export class DeepTMOAgent extends DeepAgentBase {
 
             // Execute Langflow workflow for schedule delay response
             try {
-              const flowResult = await this.orchestrator.executeLangflowFlow(
-                'be3ebfe5-ac51-456d-8b22-c7ff5d123ed4',  // TMO Schedule Delay flow
+              const flowResult = await executeLangflowFlow(
+                'new_flow',  // Use the available Langflow tool
                 {
-                  projectId,
-                  projectName: project.name,
-                  delayDays: Math.abs(varianceDays),
-                  criticalPath: true,
-                  scheduledDate: project.endDate?.toISOString().split('T')[0] || 'N/A',
-                  severity: 'critical',
-                  message: `Schedule delay detected: ${project.name} is ${Math.abs(varianceDays)} days behind`,
+                  input_value: JSON.stringify({
+                    projectId,
+                    projectName: project.name,
+                    delayDays: Math.abs(varianceDays),
+                    criticalPath: true,
+                    scheduledDate: project.endDate?.toISOString().split('T')[0] || 'N/A',
+                    severity: 'critical',
+                    message: `Schedule delay detected: ${project.name} is ${Math.abs(varianceDays)} days behind`,
+                  })
                 },
                 'tmo'
               );
@@ -120,10 +123,10 @@ export class DeepTMOAgent extends DeepAgentBase {
               if (flowResult.success) {
                 console.log(`[DeepTMO] ✅ Langflow workflow executed successfully`);
               } else {
-                console.error(`[DeepTMO] ❌ Langflow workflow failed:`, flowResult.error);
+                console.warn(`[DeepTMO] Langflow workflow not executed:`, flowResult.error);
               }
             } catch (error: any) {
-              console.error(`[DeepTMO] Langflow execution error:`, error.message);
+              console.warn(`[DeepTMO] Langflow execution skipped:`, error.message);
             }
 
             await this.archiveContext(

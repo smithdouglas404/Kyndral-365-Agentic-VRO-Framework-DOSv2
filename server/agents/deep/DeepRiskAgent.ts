@@ -16,6 +16,7 @@ import type { IStorage } from "../../storage.js";
 import { DeepAgentBase } from "./DeepAgentBase.js";
 import { RISK_DEFAULT_RULES, RISK_DEFAULT_ATTRIBUTES } from "../attributes/RiskAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
+import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 /**
  * Deep Risk Agent
@@ -791,6 +792,33 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
 
             if (riskLevel === 'extreme' || riskLevel === 'high') {
               console.log(`[DeepRisk] ⚠️  ${riskLevel.toUpperCase()} ${riskType} risk for ${project.name} (score: ${riskScore}, strategy: ${primaryStrategy})`);
+
+              // Execute Langflow workflow for risk escalation
+              try {
+                const flowResult = await executeLangflowFlow(
+                  'new_flow',
+                  {
+                    input_value: JSON.stringify({
+                      projectId,
+                      projectName: project.name,
+                      riskScore,
+                      riskCategory: riskType,
+                      impact: impact,
+                      severity: riskLevel,
+                      message: `${riskLevel.toUpperCase()} risk detected: ${riskType} for ${project.name}`,
+                    })
+                  },
+                  'risk'
+                );
+
+                if (flowResult.success) {
+                  console.log(`[DeepRisk] ✅ Langflow workflow executed successfully`);
+                } else {
+                  console.warn(`[DeepRisk] Langflow workflow not executed:`, flowResult.error);
+                }
+              } catch (error: any) {
+                console.warn(`[DeepRisk] Langflow execution skipped:`, error.message);
+              }
             }
 
             return {
