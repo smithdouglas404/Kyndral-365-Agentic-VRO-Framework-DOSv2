@@ -239,6 +239,7 @@ export interface IStorage {
   getMilestones(projectId: string): Promise<Milestone[]>;
   createMilestone(milestone: InsertMilestone): Promise<Milestone>;
   getDependencies(projectId: string): Promise<Dependency[]>;
+  getAllDependencies(): Promise<Dependency[]>;
   createDependency(dependency: InsertDependency): Promise<Dependency>;
   getProjectFinancials(projectId: string): Promise<ProjectFinancials | undefined>;
   upsertProjectFinancials(financials: InsertProjectFinancials): Promise<ProjectFinancials>;
@@ -1658,6 +1659,10 @@ export class DatabaseStorage implements IStorage {
 
   async getDependencies(projectId: string): Promise<Dependency[]> {
     return await db.select().from(dependencies).where(eq(dependencies.projectId, projectId));
+  }
+
+  async getAllDependencies(): Promise<Dependency[]> {
+    return await db.select().from(dependencies);
   }
 
   async createDependency(dependency: InsertDependency): Promise<Dependency> {

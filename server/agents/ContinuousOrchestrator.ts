@@ -507,12 +507,44 @@ export class ContinuousOrchestrator {
 
   /**
    * Detect if project has issues in agent's domain
-   * Now uses rules from *_DEFAULT_RULES instead of hardcoded logic
+   * Uses Deep Agent run() method for full planning, execution, and learning
    */
   private async detectIssue(agent: any, agentId: string, project: any): Promise<any | null> {
     const config = this.getAgentConfig(agent, agentId);
 
-    // Check if agent has evaluateRules method (Deep Agents)
+    // FOR DEEP AGENTS: Call run() method with full planning, execution, and fact retrieval
+    if (typeof agent.run === 'function') {
+      try {
+        const goal = `Analyze ${project.name} (${project.id}) for ${config.agentName.toLowerCase()} issues. Check for budget, schedule, risk, and quality concerns.`;
+
+        console.log(`[ContinuousOrchestrator] ${config.agentName} running deep analysis on ${project.name}...`);
+
+        const result = await agent.run(goal, { projectId: project.id, project });
+
+        // Extract findings from Deep Agent result
+        if (result && result.success && result.steps) {
+          // Check if any step found issues
+          for (const step of result.steps) {
+            if (step.result && step.result.issues && step.result.issues.length > 0) {
+              const issue = step.result.issues[0]; // Take first issue
+              return {
+                description: issue.description || step.description,
+                severity: issue.severity || 'medium',
+                confidence: issue.confidence || 0.8,
+                action: issue.recommendedAction || 'Review and address',
+              };
+            }
+          }
+        }
+
+        return null; // No issues found
+      } catch (error) {
+        console.error(`[ContinuousOrchestrator] Deep Agent run failed for ${config.agentName}:`, error);
+        // Fall through to rule evaluation as fallback
+      }
+    }
+
+    // FALLBACK: Use rule evaluation for agents without run() method
     if (typeof agent.evaluateRules === 'function') {
       // Build metrics from project data
       const metrics = this.buildMetricsFromProject(config.agentId, project);

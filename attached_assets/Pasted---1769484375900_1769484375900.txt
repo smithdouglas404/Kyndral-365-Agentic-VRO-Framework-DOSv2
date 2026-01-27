@@ -1,0 +1,26 @@
+                                                                                                                                                                                                            
+  ✅ Success Indicators                                                                                                                                                                                          
+  ┌─────────────────────────┬──────────────────────────────────────────────┐                                                                                                                                     
+  │        Indicator        │               What to Look For               │                                                                                                                                     
+  ├─────────────────────────┼──────────────────────────────────────────────┤                                                                                                                                     
+  │ 🧠 Brain emoji          │ Fact retrieval is working                    │                                                                                                                                     
+  ├─────────────────────────┼──────────────────────────────────────────────┤                                                                                                                                     
+  │ ⚠️ Warning emoji        │ Duplicate detection is working               │                                                                                                                                     
+  ├─────────────────────────┼──────────────────────────────────────────────┤                                                                                                                                     
+  │ ⏭️ Skip emoji           │ Interventions being skipped                  │                                                                                                                                     
+  ├─────────────────────────┼──────────────────────────────────────────────┤                                                                                                                                     
+  │ Cycle time > 2000ms     │ Deep Agent workflow running (not just rules) │                                                                                                                                     
+  ├─────────────────────────┼──────────────────────────────────────────────┤                                                                                                                                     
+  │ "Creating plan"         │ Planning phase is executing                  │                                                                                                                                     
+  ├─────────────────────────┼──────────────────────────────────────────────┤                                                                                                                                     
+  │ No circular JSON errors │ Multi-step plans working                     │                                                                                                                                     
+  └─────────────────────────┴──────────────────────────────────────────────┘                                                                                                                                     
+  ---                                                                                                                                                                                                            
+  🐛 If You Don't See These Logs                                                                                                                                                                                 
+                                                                                                                                                                                                                 
+  Check:                                                                                                                                                                                                         
+  1. Are agents actually being selected? (Active agent: DeepFinOps)                                                                                                                                              
+  2. Are projects being scanned? (scanning 3 projects)                                                                                                                                                           
+  3. Any errors in the orchestration cycle?                                                                                                                                                                      
+                                                                                                                                                                                                                 
+  ---                                                                                     

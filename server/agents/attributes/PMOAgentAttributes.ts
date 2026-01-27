@@ -6,6 +6,9 @@
 
 import { AttributeDefinition, RuleDefinition } from './FinOpsAgentAttributes';
 
+// Re-export for use in PMO agent
+export type { AttributeDefinition, RuleDefinition };
+
 /**
  * Default attributes that PMO agent can measure
  */

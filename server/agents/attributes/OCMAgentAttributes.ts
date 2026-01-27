@@ -6,6 +6,9 @@
 
 import { AttributeDefinition, RuleDefinition } from './FinOpsAgentAttributes';
 
+// Re-export for use in OCM agent
+export type { AttributeDefinition, RuleDefinition };
+
 /**
  * Default attributes that OCM agent can measure
  */

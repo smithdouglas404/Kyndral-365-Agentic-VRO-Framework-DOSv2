@@ -193,8 +193,8 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             };
           } else {
             // Analyze all projects
-            const projects = await this.storage.getAllProjects();
-            const healthScores = projects.map(p => {
+            const projects = await this.storage.getProjects();
+            const healthScores = projects.map((p: any) => {
               const budget = parseFloat(p.budget || '0');
               const actualCost = parseFloat(p.actualCost || '0');
               const budgetVariance = budget > 0 ? ((actualCost - budget) / budget) * 100 : 0;
@@ -212,9 +212,9 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
               };
             });
 
-            const avgHealth = healthScores.reduce((sum, p) => sum + p.healthScore, 0) / healthScores.length;
-            const criticalProjects = healthScores.filter(p => p.status === 'critical').length;
-            const atRiskProjects = healthScores.filter(p => p.status === 'at_risk').length;
+            const avgHealth = healthScores.reduce((sum: number, p: any) => sum + p.healthScore, 0) / healthScores.length;
+            const criticalProjects = healthScores.filter((p: any) => p.status === 'critical').length;
+            const atRiskProjects = healthScores.filter((p: any) => p.status === 'at_risk').length;
 
             return {
               portfolioHealth: avgHealth.toFixed(2),
@@ -284,7 +284,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           threshold: z.number().optional().describe("Allocation threshold percentage (default 80)"),
         }),
         func: async ({ portfolioView = true, threshold = 80 }) => {
-          const projects = await this.storage.getAllProjects();
+          const projects = await this.storage.getProjects();
 
           // Mock resource allocation data - in production, would query resource management system
           const resources = [
@@ -442,7 +442,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             return summary;
           } else {
             // Portfolio status report
-            const projects = await this.storage.getAllProjects();
+            const projects = await this.storage.getProjects();
             const totalBudget = projects.reduce((sum, p) => sum + parseFloat(p.budget || '0'), 0);
             const totalActual = projects.reduce((sum, p) => sum + parseFloat(p.actualCost || '0'), 0);
             const avgProgress = projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length;

@@ -370,8 +370,8 @@ export abstract class DeepAgentBase {
 
       console.log(`[${this.config.agentName}] Enriching context with knowledge base via MCP`);
 
-      // Query relevant documents
-      const relevantDocs = await vectorsMCP.query({
+      // Query relevant documents (unreachable code - vectorsMCP is null)
+      const relevantDocs: any[] = await vectorsMCP.query({
         text: goal,
         topK: 3,
         filter: {
@@ -389,12 +389,12 @@ export abstract class DeepAgentBase {
       // Add knowledge context
       return {
         ...context,
-        knowledgeContext: relevantDocs.map(doc => ({
+        knowledgeContext: relevantDocs.map((doc: any) => ({
           content: doc.content,
           source: doc.metadata.source,
           relevance: doc.score,
         })),
-        documentSources: relevantDocs.map(doc => doc.metadata.source),
+        documentSources: relevantDocs.map((doc: any) => doc.metadata.source),
       };
     } catch (error: any) {
       console.warn(`[${this.config.agentName}] Knowledge enrichment failed:`, error.message);
@@ -408,17 +408,36 @@ export abstract class DeepAgentBase {
   protected extractEntityIds(goal: string, context: any): string[] {
     const entityIds: string[] = [];
 
-    // Look for entity IDs in context
+    // Look for entity IDs in context (highest priority)
     if (context.projectId) entityIds.push(context.projectId);
     if (context.entityId) entityIds.push(context.entityId);
 
-    // Look for project IDs in goal text (e.g., "analyze project_123")
-    const projectMatches = goal.match(/project[_-]?([a-zA-Z0-9-]+)/gi);
+    // Look for UUIDs in parentheses: "(d13c54a6-6514-47c3-9003-40c274731c9b)"
+    const uuidInParensMatches = goal.match(/\(([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\)/gi);
+    if (uuidInParensMatches) {
+      // Extract UUID from parentheses
+      entityIds.push(...uuidInParensMatches.map(m => m.replace(/[()]/g, '').toLowerCase()));
+    }
+
+    // Look for bare UUIDs anywhere in text
+    const uuidMatches = goal.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi);
+    if (uuidMatches) {
+      entityIds.push(...uuidMatches.map(m => m.toLowerCase()));
+    }
+
+    // Look for project IDs with prefix (e.g., "project_123", "proj-abc")
+    const projectMatches = goal.match(/(?:project|proj)[_-]([a-zA-Z0-9-]+)/gi);
     if (projectMatches) {
       entityIds.push(...projectMatches.map(m => m.toLowerCase()));
     }
 
-    return [...new Set(entityIds)]; // Remove duplicates
+    const uniqueIds = [...new Set(entityIds)]; // Remove duplicates
+
+    if (uniqueIds.length > 0) {
+      console.log(`[${this.config.agentName}] 🔍 Extracted entity IDs: ${uniqueIds.join(', ')}`);
+    }
+
+    return uniqueIds;
   }
 
   /**
@@ -736,7 +755,7 @@ Provide the result of executing this step.`],
 
     return {
       stepResult: response.content.toString(),
-      context,
+      summary: response.content.toString().substring(0, 200),
     };
   }
 

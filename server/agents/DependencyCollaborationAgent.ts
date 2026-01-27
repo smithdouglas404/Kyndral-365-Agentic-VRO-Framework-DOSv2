@@ -76,28 +76,25 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
           portfolioId: z.string().optional(),
         }),
         func: async ({ portfolioId }) => {
-          const projects = portfolioId
-            ? await this.storage.getProjectsByPortfolio(portfolioId)
-            : await this.storage.getProjects();
+          // Note: portfolioId filtering not implemented yet, fetching all projects
+          const projects = await this.storage.getProjects();
 
-          const dependenciesResult = await this.storage.db.query(`
-            SELECT * FROM dependencies WHERE status = 'active'
-          `);
-          const dependencies = dependenciesResult.rows;
+          const allDependencies = await this.storage.getAllDependencies();
+          const dependencies = allDependencies.filter((d: any) => d.status === 'active');
 
           // Build dependency graph
           const graph = {
-            nodes: projects.map(p => ({
+            nodes: projects.map((p: any) => ({
               id: p.id,
               name: p.name,
               status: p.status,
-              owner: p.owner,
+              owner: p.owner || 'Unknown',
             })),
-            edges: dependencies.map(d => ({
-              from: d.blocking_project_id || d.target_project_id,
-              to: d.blocked_project_id || d.project_id,
-              deliverable: d.deliverable || d.description,
-              expectedDate: d.expected_completion_date,
+            edges: dependencies.map((d: any) => ({
+              from: d.targetProjectId,  // The project being depended on
+              to: d.projectId,          // The project with the dependency
+              deliverable: d.description,
+              expectedDate: null,  // Not tracked in this table
             })),
           };
 
@@ -112,73 +109,69 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
           portfolioId: z.string().optional(),
         }),
         func: async ({ portfolioId }) => {
-          const projects = portfolioId
-            ? await this.storage.getProjectsByPortfolio(portfolioId)
-            : await this.storage.getProjects();
+          // Note: portfolioId filtering not implemented yet, fetching all projects
+          const projects = await this.storage.getProjects();
 
-          const dependenciesResult = await this.storage.db.query(`
-            SELECT * FROM dependencies WHERE status = 'active'
-          `);
-          const dependencies = dependenciesResult.rows;
+          const allDependencies = await this.storage.getAllDependencies();
+          const dependencies = allDependencies.filter((d: any) => d.status === 'active');
 
           const blockingRisks: DependencyRisk[] = [];
 
           for (const dep of dependencies) {
-            const blockingProjId = dep.blocking_project_id || dep.target_project_id;
-            const blockedProjId = dep.blocked_project_id || dep.project_id;
+            // In our schema: projectId = project with dependency, targetProjectId = project being depended on
+            const blockingProjId = dep.targetProjectId;  // The blocking project
+            const blockedProjId = dep.projectId;         // The blocked project
 
-            const blockingProj = projects.find(p => p.id === blockingProjId);
-            const blockedProj = projects.find(p => p.id === blockedProjId);
+            if (!blockingProjId || !blockedProjId) continue;
+
+            const blockingProj = projects.find((p: any) => p.id === blockingProjId);
+            const blockedProj = projects.find((p: any) => p.id === blockedProjId);
 
             if (!blockingProj || !blockedProj) continue;
 
             // Check if blocking project is delayed or at-risk
             const isDelayed = ['at-risk', 'delayed', 'red'].includes(blockingProj.status || '');
-            const expectedDate = dep.expected_completion_date ? new Date(dep.expected_completion_date) : null;
+            // Note: dependencies table doesn't have expected_completion_date, using status instead
             const now = new Date();
-            const isOverdue = expectedDate && expectedDate < now;
 
-            if (isDelayed || isOverdue) {
-              // Calculate delay
-              const delayDays = expectedDate
-                ? Math.floor((now.getTime() - expectedDate.getTime()) / (1000 * 60 * 60 * 24))
-                : 7; // Default estimate
+            if (isDelayed) {
+              // Calculate delay (estimate based on status)
+              const delayDays = 7; // Default estimate when no date available
 
               // Find all projects blocked by this one
               const allBlocked = dependencies
-                .filter(d =>
-                  (d.blocking_project_id === blockingProj.id || d.target_project_id === blockingProj.id) &&
-                  (d.blocked_project_id || d.project_id) !== blockingProj.id
+                .filter((d: any) =>
+                  d.targetProjectId === blockingProj.id &&
+                  d.projectId !== blockingProj.id
                 )
-                .map(d => {
-                  const blockedId = d.blocked_project_id || d.project_id;
-                  return projects.find(p => p.id === blockedId);
+                .map((d: any) => {
+                  return projects.find((p: any) => p.id === d.projectId);
                 })
-                .filter(p => p);
+                .filter((p: any) => p);
 
               // Search RAG for similar dependency patterns
-              const patterns = await this.ragService.findPatternMatches({
+              const patterns: any = await this.ragService.findPatternMatches({
                 type: 'dependency_delay',
                 blockingProjectStatus: blockingProj.status,
                 delayDays,
                 numBlockedProjects: allBlocked.length,
               }, 3);
 
-              const bestPattern = patterns[0];
+              const bestPattern: any = patterns[0];
 
               blockingRisks.push({
                 blockingProject: {
                   id: blockingProj.id,
                   name: blockingProj.name,
-                  owner: blockingProj.owner || 'Unknown',
+                  owner: (blockingProj as any).owner || 'Unknown',
                   status: blockingProj.status || 'unknown',
                   delayDays,
                 },
-                blockedProjects: allBlocked.map(bp => ({
+                blockedProjects: allBlocked.map((bp: any) => ({
                   id: bp.id,
                   name: bp.name,
                   owner: bp.owner || 'Unknown',
-                  waitingFor: dep.deliverable || dep.description || 'Unknown deliverable',
+                  waitingFor: dep.description || 'Unknown deliverable',
                   impactDays: delayDays,
                 })),
                 riskLevel: delayDays > 14 ? 'critical' : delayDays > 7 ? 'high' : 'medium',
@@ -190,9 +183,9 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
                 } : undefined,
                 recommendedCollaboration: {
                   participants: [
-                    blockingProj.owner,
-                    ...allBlocked.map(bp => bp.owner)
-                  ].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i), // Unique
+                    (blockingProj as any).owner,
+                    ...allBlocked.map((bp: any) => bp.owner)
+                  ].filter(Boolean).filter((v: any, i: number, a: any[]) => a.indexOf(v) === i), // Unique
                   urgency: delayDays > 14 ? 'immediate' : 'within_48hrs',
                   suggestedActions: [
                     'Schedule joint planning session',
@@ -250,23 +243,21 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
           };
 
           const interventionId = `intervention-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-          await this.storage.db.query(`
-            INSERT INTO interventions
-            (id, agent_name, type, severity, title, description, recommended_action, confidence, expected_impact, status, metadata, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
-          `, [
-            interventionId,
-            intervention.agentName,
-            intervention.type,
-            intervention.severity,
-            intervention.title,
-            intervention.description,
-            intervention.recommendedAction,
-            intervention.confidence,
-            intervention.expectedImpact,
-            intervention.status,
-            intervention.metadata,
-          ]);
+
+          // Create intervention using storage method
+          await this.storage.createIntervention({
+            id: interventionId,
+            agentName: intervention.agentName,
+            type: intervention.type,
+            severity: intervention.severity,
+            title: intervention.title,
+            description: intervention.description,
+            recommendedAction: intervention.recommendedAction,
+            confidence: intervention.confidence,
+            expectedImpact: intervention.expectedImpact,
+            status: intervention.status,
+            metadata: intervention.metadata,
+          } as any);
 
           console.log(`[DependencyAgent] Created intervention ${interventionId}`);
 
