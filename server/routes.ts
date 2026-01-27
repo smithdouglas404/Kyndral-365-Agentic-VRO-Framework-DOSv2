@@ -22,10 +22,12 @@ import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerLangflowRoutes } from "./routes/langflow.js";
 import langflowSyncRouter from "./routes/langflow-sync.js";
+import { registerAgentModelRoutes } from "./routes/agent-model.js";
 import { registerAgentActionRoutes } from "./routes/agent-actions.js";
 import mem0ApiRouter from "./routes/mem0-api.js";
 import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
 import ontologyApiRouter from "./routes/ontology-api.js";
+import agentSchemasRouter from "./routes/agent-schemas.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
@@ -196,8 +198,14 @@ export async function registerRoutes(
   // Register A2A API routes (Expose Agent-to-Agent messaging to Langflow flows)
   app.use('/api/a2a', a2aApiRouter);
 
+  // Register Agent Object Model routes (Agent definitions, attributes, signals)
+  registerAgentModelRoutes(app);
+
   // Register Ontology API routes (Expose ontology operations to Langflow flows)
   app.use('/api/ontology', ontologyApiRouter);
+
+  // Register Agent Schemas routes (Predefined agent attributes and relationships)
+  app.use('/api/agent-schemas', agentSchemasRouter);
 
   // Initialize A2A bus getter for API routes
   setA2ABusGetter(() => {
