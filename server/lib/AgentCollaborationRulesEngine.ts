@@ -19,6 +19,7 @@ import { Engine, Rule } from 'json-rules-engine';
 import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
 import { ruleExecutionHistory } from '../../shared/schema.js';
+import { getLangflowRuleSyncService } from './LangflowRuleSyncService.js';
 
 // ============================================================================
 // TYPES
@@ -494,6 +495,14 @@ export class AgentCollaborationRulesEngine {
 
     console.log(`[RulesEngine] Created rule: ${newRule.name}`);
 
+    // Auto-sync to Langflow if rule has trigger_workflow action
+    try {
+      const syncService = getLangflowRuleSyncService();
+      await syncService.syncRuleToFlow(newRule);
+    } catch (syncError) {
+      console.warn(`[RulesEngine] Langflow sync skipped:`, syncError);
+    }
+
     return newRule;
   }
 
@@ -549,6 +558,17 @@ export class AgentCollaborationRulesEngine {
     await this.loadRules();
 
     console.log(`[RulesEngine] Updated rule: ${ruleId}`);
+
+    // Re-sync to Langflow if rule has trigger_workflow action
+    try {
+      const updatedRule = await this.getRule(ruleId);
+      if (updatedRule) {
+        const syncService = getLangflowRuleSyncService();
+        await syncService.syncRuleToFlow(updatedRule);
+      }
+    } catch (syncError) {
+      console.warn(`[RulesEngine] Langflow sync skipped:`, syncError);
+    }
   }
 
   /**
@@ -563,6 +583,14 @@ export class AgentCollaborationRulesEngine {
     await this.loadRules();
 
     console.log(`[RulesEngine] Deleted rule: ${ruleId}`);
+
+    // Unlink from Langflow
+    try {
+      const syncService = getLangflowRuleSyncService();
+      await syncService.unlinkRule(ruleId);
+    } catch (syncError) {
+      console.warn(`[RulesEngine] Langflow unlink skipped:`, syncError);
+    }
   }
 
   /**

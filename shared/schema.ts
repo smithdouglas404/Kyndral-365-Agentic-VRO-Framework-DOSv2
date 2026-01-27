@@ -3187,3 +3187,27 @@ export const insertGraphSyncLogSchema = createInsertSchema(graphSyncLog).omit({
 
 export type InsertGraphSyncLog = z.infer<typeof insertGraphSyncLogSchema>;
 export type GraphSyncLog = typeof graphSyncLog.$inferSelect;
+
+// ============================================================================
+// FLOW RULE MAPPINGS - Langflow to PostgreSQL rule sync
+// ============================================================================
+
+export const flowRuleMappings = pgTable("flow_rule_mappings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleId: varchar("rule_id").notNull(),
+  flowId: varchar("flow_id").notNull(),
+  flowName: varchar("flow_name").notNull(),
+  sourceAgent: varchar("source_agent").notNull(),
+  syncDirection: varchar("sync_direction").notNull().default("manual"), // 'rule_to_flow' | 'flow_to_rule' | 'manual'
+  lastSynced: timestamp("last_synced").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFlowRuleMappingSchema = createInsertSchema(flowRuleMappings).omit({
+  id: true,
+  lastSynced: true,
+  createdAt: true,
+});
+
+export type InsertFlowRuleMapping = z.infer<typeof insertFlowRuleMappingSchema>;
+export type FlowRuleMapping = typeof flowRuleMappings.$inferSelect;

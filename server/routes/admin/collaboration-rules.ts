@@ -11,6 +11,7 @@ import type { CollaborationRule, RuleCondition, RuleAction } from '../../lib/Age
 import { db } from '../../db.js';
 import { sql } from 'drizzle-orm';
 import { ruleExecutionHistory } from '../../../shared/schema.js';
+import { syncRuleAfterUpdate } from '../langflow-sync.js';
 
 export function registerCollaborationRulesRoutes(app: Express): void {
   const rulesEngine = getAgentCollaborationRulesEngine();
@@ -100,6 +101,12 @@ export function registerCollaborationRulesRoutes(app: Express): void {
         createdBy: req.user.id,
       });
 
+      // Auto-sync to Langflow (Database → Langflow)
+      syncRuleAfterUpdate(rule.id).catch((error) => {
+        console.error('[CollaborationRules] Auto-sync to Langflow failed:', error);
+        // Don't fail the request if sync fails
+      });
+
       res.json({
         success: true,
         rule,
@@ -130,6 +137,12 @@ export function registerCollaborationRulesRoutes(app: Express): void {
       const updates = req.body;
 
       await rulesEngine.updateRule(id, updates);
+
+      // Auto-sync to Langflow (Database → Langflow)
+      syncRuleAfterUpdate(id).catch((error) => {
+        console.error('[CollaborationRules] Auto-sync to Langflow failed:', error);
+        // Don't fail the request if sync fails
+      });
 
       res.json({
         success: true,

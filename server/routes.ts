@@ -21,6 +21,7 @@ import { registerMCPServerRoutes } from "./routes/admin/mcp-servers.js";
 import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets.js";
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerLangflowRoutes } from "./routes/langflow.js";
+import langflowSyncRouter from "./routes/langflow-sync.js";
 import { registerAgentActionRoutes } from "./routes/agent-actions.js";
 import mem0ApiRouter from "./routes/mem0-api.js";
 import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
@@ -182,6 +183,9 @@ export async function registerRoutes(
 
   // Register Langflow routes (Visual workflow orchestration)
   registerLangflowRoutes(app);
+
+  // Register Langflow Sync routes (Bidirectional sync between DB rules and Langflow flows)
+  app.use('/api/langflow-sync', langflowSyncRouter);
 
   // Register Agent Action routes (Server endpoints for Langflow flows to call MCP integrations)
   registerAgentActionRoutes(app);

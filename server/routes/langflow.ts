@@ -6,6 +6,7 @@
 import type { Express, Request, Response } from 'express';
 import { langflowService } from '../index.js';
 import { initializeLangflowMCPClient, type LangflowMCPClient } from '../lib/LangflowMCPClient.js';
+import { getLangflowRuleSyncService } from '../lib/LangflowRuleSyncService.js';
 
 // MCP Client instance
 let langflowMCPClient: LangflowMCPClient | null = null;
@@ -237,6 +238,153 @@ export function registerLangflowRoutes(app: Express): void {
         connected: false,
         error: error.message,
       });
+    }
+  });
+
+  // ============================================================================
+  // LANGFLOW-RULE SYNC ROUTES
+  // ============================================================================
+
+  /**
+   * Sync Langflow flows to database rules
+   * Discovers new flows in Langflow and creates corresponding rule suggestions
+   */
+  app.post('/api/langflow/sync/flows-to-rules', async (req: Request, res: Response) => {
+    try {
+      const syncService = getLangflowRuleSyncService();
+      await syncService.initialize();
+
+      const result = await syncService.syncFlowsToRules();
+
+      res.json({
+        success: true,
+        message: `Synced flows to rules: ${result.created} created, ${result.updated} updated`,
+        ...result,
+      });
+    } catch (error: any) {
+      console.error('[LangflowSync] Sync flows to rules failed:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  /**
+   * Get all flow-rule mappings
+   */
+  app.get('/api/langflow/sync/mappings', async (req: Request, res: Response) => {
+    try {
+      const syncService = getLangflowRuleSyncService();
+      await syncService.initialize();
+
+      const mappings = await syncService.getMappings();
+      const flowsWithRules = await syncService.getFlowsWithRules();
+
+      res.json({
+        success: true,
+        mappings,
+        flowsWithRules,
+      });
+    } catch (error: any) {
+      console.error('[LangflowSync] Get mappings failed:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  /**
+   * Manually link a rule to a Langflow flow
+   */
+  app.post('/api/langflow/sync/link', async (req: Request, res: Response) => {
+    try {
+      const { ruleId, flowId, sourceAgent } = req.body;
+
+      if (!ruleId || !flowId) {
+        return res.status(400).json({ success: false, error: 'ruleId and flowId are required' });
+      }
+
+      const syncService = getLangflowRuleSyncService();
+      await syncService.initialize();
+
+      const mapping = await syncService.linkRuleToFlow(ruleId, flowId, sourceAgent || 'integrated');
+
+      res.json({
+        success: true,
+        message: `Linked rule "${ruleId}" to flow "${flowId}"`,
+        mapping,
+      });
+    } catch (error: any) {
+      console.error('[LangflowSync] Link failed:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  /**
+   * Unlink a rule from a flow
+   */
+  app.delete('/api/langflow/sync/link/:ruleId', async (req: Request, res: Response) => {
+    try {
+      const { ruleId } = req.params;
+
+      const syncService = getLangflowRuleSyncService();
+      await syncService.initialize();
+
+      await syncService.unlinkRule(ruleId);
+
+      res.json({
+        success: true,
+        message: `Unlinked rule "${ruleId}"`,
+      });
+    } catch (error: any) {
+      console.error('[LangflowSync] Unlink failed:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  /**
+   * Webhook endpoint for Langflow to notify of flow changes
+   * Langflow can POST here when flows are created/updated/deleted
+   * 
+   * SECURITY: Requires Authorization header with Bearer token matching LANGFLOW_MCP_TOKEN
+   * Configure in Langflow: Set webhook header Authorization: Bearer <your-token>
+   */
+  app.post('/api/langflow/webhook', async (req: Request, res: Response) => {
+    try {
+      // Security: Validate webhook token
+      const authHeader = req.headers.authorization;
+      const expectedToken = process.env.LANGFLOW_MCP_TOKEN;
+      
+      if (!expectedToken) {
+        console.warn('[LangflowSync] Webhook disabled: LANGFLOW_MCP_TOKEN not configured');
+        return res.status(503).json({ 
+          success: false, 
+          error: 'Webhook not configured. Set LANGFLOW_MCP_TOKEN env var.' 
+        });
+      }
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.warn('[LangflowSync] Webhook rejected: Missing Authorization header');
+        return res.status(401).json({ success: false, error: 'Authorization required' });
+      }
+
+      const providedToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+      if (providedToken !== expectedToken) {
+        console.warn('[LangflowSync] Webhook rejected: Invalid token');
+        return res.status(403).json({ success: false, error: 'Invalid token' });
+      }
+
+      const { event, flowId, flowName } = req.body;
+
+      console.log(`[LangflowSync] Webhook received: ${event} for flow ${flowId || flowName}`);
+
+      // Auto-sync when Langflow notifies us of changes
+      if (event === 'flow_created' || event === 'flow_updated') {
+        const syncService = getLangflowRuleSyncService();
+        await syncService.initialize();
+        await syncService.syncFlowsToRules();
+      }
+
+      res.json({ success: true, received: event });
+    } catch (error: any) {
+      console.error('[LangflowSync] Webhook processing failed:', error);
+      res.status(500).json({ success: false, error: error.message });
     }
   });
 
