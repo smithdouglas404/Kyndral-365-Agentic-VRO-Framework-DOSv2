@@ -112,6 +112,393 @@ export const TMO_DEFAULT_ATTRIBUTES: Record<string, AttributeDefinition> = {
       warning: 3,
       critical: 6
     }
+  },
+
+  // ===== SAFe 6.0 Attributes - Team Maturity =====
+
+  competency_score: {
+    name: 'competency_score',
+    displayName: 'Competency Score',
+    type: 'number',
+    description: 'Team agile maturity level (0-5) ⭐',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 2.5,
+      critical: 2.0
+    }
+  },
+
+  business_agility_score: {
+    name: 'business_agility_score',
+    displayName: 'Business Agility Score',
+    type: 'number',
+    description: 'Overall business agility (0-100)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 60,
+      critical: 40
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Sentiment & Morale =====
+
+  enps_sentiment: {
+    name: 'enps_sentiment',
+    displayName: 'eNPS Sentiment',
+    type: 'number',
+    description: 'Employee Net Promoter Score (-100 to 100) ⭐',
+    unit: 'score',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 0,
+      critical: -20
+    }
+  },
+
+  team_morale: {
+    name: 'team_morale',
+    displayName: 'Team Morale',
+    type: 'number',
+    description: 'Team satisfaction (0-100)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 60,
+      critical: 40
+    }
+  },
+
+  psychological_safety: {
+    name: 'psychological_safety',
+    displayName: 'Psychological Safety',
+    type: 'number',
+    description: 'Team safety to speak up (0-100)',
+    unit: 'score',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 60,
+      critical: 40
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Flow Metrics =====
+
+  flow_load_variance: {
+    name: 'flow_load_variance',
+    displayName: 'Flow Load Variance',
+    type: 'number',
+    description: 'Variability in WIP over time ⭐',
+    unit: 'variance',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 0.3,
+      critical: 0.5
+    }
+  },
+
+  lead_time_reduction: {
+    name: 'lead_time_reduction',
+    displayName: 'Lead Time Reduction',
+    type: 'percentage',
+    description: 'Improvement in lead time ⭐',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  throughput: {
+    name: 'throughput',
+    displayName: 'Throughput',
+    type: 'number',
+    description: 'Work items completed per period',
+    unit: 'count',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Capacity Management =====
+
+  capacity_utilization: {
+    name: 'capacity_utilization',
+    displayName: 'Capacity Utilization',
+    type: 'percentage',
+    description: 'Actual vs available capacity',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 85,
+      critical: 95
+    }
+  },
+
+  capacity_forecast: {
+    name: 'capacity_forecast',
+    displayName: 'Capacity Forecast',
+    type: 'text',
+    description: 'Future capacity predictions (JSON object)',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  overtime_hours: {
+    name: 'overtime_hours',
+    displayName: 'Overtime Hours',
+    type: 'number',
+    description: 'Unplanned extra hours worked',
+    unit: 'hours',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 40,
+      critical: 80
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Velocity Stability =====
+
+  velocity_variance: {
+    name: 'velocity_variance',
+    displayName: 'Velocity Variance',
+    type: 'percentage',
+    description: 'Sprint-to-sprint velocity variance',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 20,
+      critical: 35
+    }
+  },
+
+  velocity_trend: {
+    name: 'velocity_trend',
+    displayName: 'Velocity Trend',
+    type: 'enum',
+    description: 'Velocity direction',
+    values: ['Improving', 'Stable', 'Declining'],
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 'Declining'
+    }
+  },
+
+  predictability: {
+    name: 'predictability',
+    displayName: 'Predictability',
+    type: 'percentage',
+    description: 'Ability to meet commitments',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 75,
+      critical: 60
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Team Health =====
+
+  team_size: {
+    name: 'team_size',
+    displayName: 'Team Size',
+    type: 'number',
+    description: '# of team members',
+    unit: 'count',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  team_tenure_avg: {
+    name: 'team_tenure_avg',
+    displayName: 'Avg Team Tenure',
+    type: 'number',
+    description: 'Average time on team (months)',
+    unit: 'months',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  turnover_rate: {
+    name: 'turnover_rate',
+    displayName: 'Turnover Rate',
+    type: 'percentage',
+    description: 'Annual turnover rate',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 15,
+      critical: 25
+    }
+  },
+
+  vacancy_count: {
+    name: 'vacancy_count',
+    displayName: 'Vacancy Count',
+    type: 'number',
+    description: 'Open positions',
+    unit: 'count',
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 2,
+      critical: 4
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Impediments =====
+
+  impediment_count: {
+    name: 'impediment_count',
+    displayName: 'Impediment Count',
+    type: 'number',
+    description: 'Active blockers',
+    unit: 'count',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 3,
+      critical: 5
+    }
+  },
+
+  impediment_age_avg: {
+    name: 'impediment_age_avg',
+    displayName: 'Avg Impediment Age',
+    type: 'number',
+    description: 'Avg age of impediments (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 7,
+      critical: 14
+    }
+  },
+
+  impediment_resolution_time: {
+    name: 'impediment_resolution_time',
+    displayName: 'Impediment Resolution Time',
+    type: 'number',
+    description: 'Avg time to resolve (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 5,
+      critical: 10
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Collaboration =====
+
+  collaboration_score: {
+    name: 'collaboration_score',
+    displayName: 'Collaboration Score',
+    type: 'number',
+    description: 'Cross-team collaboration (0-100)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 60,
+      critical: 40
+    }
+  },
+
+  dependency_wait_time: {
+    name: 'dependency_wait_time',
+    displayName: 'Dependency Wait Time',
+    type: 'number',
+    description: 'Time waiting on dependencies (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 3,
+      critical: 7
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Skills & Growth =====
+
+  skill_gap_count: {
+    name: 'skill_gap_count',
+    displayName: 'Skill Gap Count',
+    type: 'number',
+    description: '# of identified skill gaps',
+    unit: 'count',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 3,
+      critical: 5
+    }
+  },
+
+  training_hours_per_person: {
+    name: 'training_hours_per_person',
+    displayName: 'Training Hours per Person',
+    type: 'number',
+    description: 'Annual training hours',
+    unit: 'hours',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 20,
+      critical: 10
+    }
+  },
+
+  certification_count: {
+    name: 'certification_count',
+    displayName: 'Certification Count',
+    type: 'number',
+    description: '# of team certifications',
+    unit: 'count',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Coaching =====
+
+  coaching_sessions: {
+    name: 'coaching_sessions',
+    displayName: 'Coaching Sessions',
+    type: 'number',
+    description: '# coaching sessions per period',
+    unit: 'count',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  retrospective_action_items: {
+    name: 'retrospective_action_items',
+    displayName: 'Retrospective Action Items',
+    type: 'number',
+    description: 'Open retro actions',
+    unit: 'count',
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 5,
+      critical: 10
+    }
+  },
+
+  improvement_experiments: {
+    name: 'improvement_experiments',
+    displayName: 'Improvement Experiments',
+    type: 'number',
+    description: 'Active improvement experiments',
+    unit: 'count',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Metrics Tracking =====
+
+  metrics_dashboard_usage: {
+    name: 'metrics_dashboard_usage',
+    displayName: 'Metrics Dashboard Usage',
+    type: 'percentage',
+    description: '% team using metrics',
+    unit: '%',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
   }
 };
 

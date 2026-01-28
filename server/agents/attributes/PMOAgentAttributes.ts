@@ -115,6 +115,368 @@ export const PMO_DEFAULT_ATTRIBUTES: Record<string, AttributeDefinition> = {
       warning: 7,
       critical: 14
     }
+  },
+
+  // ===== SAFe 6.0 Attributes - Identifiers & Traceability =====
+
+  feature_uuid: {
+    name: 'feature_uuid',
+    displayName: 'Feature UUID',
+    type: 'string',
+    description: 'Global unique identifier across ALM tools',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  parent_epic_id: {
+    name: 'parent_epic_id',
+    displayName: 'Parent Epic ID',
+    type: 'string',
+    description: 'Upward traceability to Portfolio',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  art_id: {
+    name: 'art_id',
+    displayName: 'ART ID',
+    type: 'string',
+    description: 'The specific Agile Release Train responsible',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - WSJF Prioritization =====
+
+  wsjf_score: {
+    name: 'wsjf_score',
+    displayName: 'WSJF Score',
+    type: 'number',
+    description: 'Weighted Shortest Job First (CoD/JobSize) primary priority driver',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 5,
+      critical: 3
+    }
+  },
+
+  user_business_value: {
+    name: 'user_business_value',
+    displayName: 'User Business Value',
+    type: 'number',
+    description: 'Component of Cost of Delay (1-20)',
+    unit: 'score',
+    source: 'input',
+    defaultThresholds: {
+      warning: 10,
+      critical: 5
+    }
+  },
+
+  time_criticality: {
+    name: 'time_criticality',
+    displayName: 'Time Criticality',
+    type: 'number',
+    description: 'Component of Cost of Delay (1-20)',
+    unit: 'score',
+    source: 'input',
+    defaultThresholds: {
+      warning: 10,
+      critical: 5
+    }
+  },
+
+  rroe_value: {
+    name: 'rroe_value',
+    displayName: 'RR/OE Value',
+    type: 'number',
+    description: 'Risk Reduction / Opportunity Enablement - Component of CoD (1-20)',
+    unit: 'score',
+    source: 'input',
+    defaultThresholds: {
+      warning: 10,
+      critical: 5
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Story Points & Completion =====
+
+  estimated_story_points: {
+    name: 'estimated_story_points',
+    displayName: 'Estimated Story Points',
+    type: 'number',
+    description: 'Total size of feature in points',
+    unit: 'points',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  actual_points_completed: {
+    name: 'actual_points_completed',
+    displayName: 'Actual Points Completed',
+    type: 'number',
+    description: 'Real-time burn count from synced Stories',
+    unit: 'points',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  percent_complete: {
+    name: 'percent_complete',
+    displayName: 'Percent Complete',
+    type: 'percentage',
+    description: 'Actual/Estimated completion percentage',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Flow Status & Timing =====
+
+  flow_status: {
+    name: 'flow_status',
+    displayName: 'Flow Status',
+    type: 'string',
+    description: 'SAFe flow state: Funnel, Analyzing, Backlog, Implementing, Validating, Done',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  wip_age: {
+    name: 'wip_age',
+    displayName: 'WIP Age',
+    type: 'number',
+    description: 'Time elapsed since entering "Implementing" status (days) ⭐',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 14,
+      critical: 30
+    }
+  },
+
+  flow_efficiency: {
+    name: 'flow_efficiency',
+    displayName: 'Flow Efficiency',
+    type: 'percentage',
+    description: 'Active Time / Total Lead Time (%)',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 40,
+      critical: 20
+    }
+  },
+
+  cycle_time_avg: {
+    name: 'cycle_time_avg',
+    displayName: 'Avg Cycle Time',
+    type: 'number',
+    description: 'Average time to finish similar features',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 30,
+      critical: 60
+    }
+  },
+
+  lead_time: {
+    name: 'lead_time',
+    displayName: 'Lead Time',
+    type: 'number',
+    description: 'Total time from Funnel to Done',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 90,
+      critical: 120
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Dependencies & Blockers =====
+
+  dependency_count: {
+    name: 'dependency_count',
+    displayName: 'Dependency Count',
+    type: 'number',
+    description: 'Number of blocked/blocking links',
+    unit: 'count',
+    source: 'external',
+    defaultThresholds: {
+      warning: 3,
+      critical: 5
+    }
+  },
+
+  blocker_status: {
+    name: 'blocker_status',
+    displayName: 'Blocker Status',
+    type: 'boolean',
+    description: 'Is there an active "Red" impediment?',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Dates & Forecasting =====
+
+  planned_finish_date: {
+    name: 'planned_finish_date',
+    displayName: 'Planned Finish Date',
+    type: 'date',
+    description: 'Targeted PI/Sprint end',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  forecasted_finish_date: {
+    name: 'forecasted_finish_date',
+    displayName: 'Forecasted Finish Date',
+    type: 'date',
+    description: 'Agent-calculated date based on current velocity',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  say_do_variance: {
+    name: 'say_do_variance',
+    displayName: 'Say-Do Variance',
+    type: 'number',
+    description: 'Variance between planned vs actual points',
+    unit: 'points',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 20,
+      critical: 40
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Quality & Readiness =====
+
+  refinement_depth: {
+    name: 'refinement_depth',
+    displayName: 'Refinement Depth',
+    type: 'percentage',
+    description: '% of child stories with "Ready" status',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  quality_gate_status: {
+    name: 'quality_gate_status',
+    displayName: 'Quality Gate Status',
+    type: 'string',
+    description: 'Pass/Fail based on Definition of Done (DoD)',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  enabler_ratio: {
+    name: 'enabler_ratio',
+    displayName: 'Enabler Ratio',
+    type: 'number',
+    description: 'Ratio of technical debt/infrastructure vs business value',
+    unit: 'ratio',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 0.4,
+      critical: 0.6
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Team Metrics =====
+
+  team_velocity_current: {
+    name: 'team_velocity_current',
+    displayName: 'Current Team Velocity',
+    type: 'number',
+    description: 'Combined velocity of teams assigned to feature',
+    unit: 'points',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  sprint_load_factor: {
+    name: 'sprint_load_factor',
+    displayName: 'Sprint Load Factor',
+    type: 'number',
+    description: 'Current WIP vs Capacity for assigned teams',
+    unit: 'ratio',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 0.85,
+      critical: 0.95
+    }
+  },
+
+  scope_growth: {
+    name: 'scope_growth',
+    displayName: 'Scope Growth',
+    type: 'percentage',
+    description: 'Points added after Feature was "In Progress"',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 20,
+      critical: 35
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Release & Ownership =====
+
+  release_vehicle_id: {
+    name: 'release_vehicle_id',
+    displayName: 'Release Vehicle ID',
+    type: 'string',
+    description: 'The deployment package ID',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  feature_owner: {
+    name: 'feature_owner',
+    displayName: 'Feature Owner',
+    type: 'string',
+    description: 'Human PM responsible',
+    unit: '',
+    source: 'external',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Agent Health & Sync =====
+
+  last_sync_timestamp: {
+    name: 'last_sync_timestamp',
+    displayName: 'Last Sync Timestamp',
+    type: 'date',
+    description: 'When agent last polled the ALM',
+    unit: '',
+    source: 'system',
+    defaultThresholds: {}
+  },
+
+  agent_health_status: {
+    name: 'agent_health_status',
+    displayName: 'Agent Health Status',
+    type: 'string',
+    description: 'Green/Yellow/Red for data integrity',
+    unit: '',
+    source: 'system',
+    defaultThresholds: {}
   }
 };
 

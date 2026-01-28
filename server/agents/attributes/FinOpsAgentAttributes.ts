@@ -130,6 +130,334 @@ export const FINOPS_DEFAULT_ATTRIBUTES: Record<string, AttributeDefinition> = {
     description: 'Average monthly spending rate',
     unit: '$',
     source: 'calculated'
+  },
+
+  // ===== SAFe 6.0 Attributes - Funding Classification =====
+
+  budget_line_item: {
+    name: 'budget_line_item',
+    displayName: 'Budget Line Item',
+    type: 'text',
+    description: 'Link to specific funding source',
+    unit: '',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  investment_horizon: {
+    name: 'investment_horizon',
+    displayName: 'Investment Horizon',
+    type: 'enum',
+    description: 'SAFe investment horizon classification',
+    values: ['H1_Current', 'H2_Emerging', 'H3_Future'],
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  capital_vs_operating: {
+    name: 'capital_vs_operating',
+    displayName: 'CapEx/OpEx',
+    type: 'enum',
+    description: 'Capital vs Operating expense classification for accounting',
+    values: ['CapEx', 'OpEx'],
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Budget & Spend =====
+
+  allocated_budget: {
+    name: 'allocated_budget',
+    displayName: 'Allocated Budget',
+    type: 'currency',
+    description: 'Total funding approved for Epic/Feature',
+    unit: '$',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  actual_spend_to_date: {
+    name: 'actual_spend_to_date',
+    displayName: 'Actual Spend to Date',
+    type: 'currency',
+    description: 'Real-time cost based on labor + tools',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  burn_rate_monthly: {
+    name: 'burn_rate_monthly',
+    displayName: 'Monthly Burn Rate',
+    type: 'currency',
+    description: 'Projected spend per month',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - EVM Forecasting =====
+
+  etc_estimate_to_complete: {
+    name: 'etc_estimate_to_complete',
+    displayName: 'ETC (Estimate to Complete)',
+    type: 'currency',
+    description: 'Financial forecast to finish work',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  eac_estimate_at_completion: {
+    name: 'eac_estimate_at_completion',
+    displayName: 'EAC (Estimate at Completion)',
+    type: 'currency',
+    description: 'Actual + ETC',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  cost_variance: {
+    name: 'cost_variance',
+    displayName: 'Cost Variance',
+    type: 'currency',
+    description: 'Budget − Actual',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: -50000,
+      critical: -100000
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Labor & External Costs =====
+
+  labor_rate_blended: {
+    name: 'labor_rate_blended',
+    displayName: 'Blended Labor Rate',
+    type: 'currency',
+    description: 'Average cost per team member/day',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  external_vendor_spend: {
+    name: 'external_vendor_spend',
+    displayName: 'External Vendor Spend',
+    type: 'currency',
+    description: '3rd party contractors/licenses',
+    unit: '$',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Economic Impact =====
+
+  cost_of_delay_monthly: {
+    name: 'cost_of_delay_monthly',
+    displayName: 'Cost of Delay (Monthly)',
+    type: 'currency',
+    description: 'Revenue/Value lost per month delayed',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 50000,
+      critical: 100000
+    }
+  },
+
+  roi_projected: {
+    name: 'roi_projected',
+    displayName: 'Projected ROI',
+    type: 'number',
+    description: 'Expected multiplier (Value/Cost)',
+    unit: 'x',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 1.5,
+      critical: 1.0
+    }
+  },
+
+  roi_realized: {
+    name: 'roi_realized',
+    displayName: 'Realized ROI',
+    type: 'number',
+    description: 'Post-launch financial impact',
+    unit: 'x',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Funding Status & Compliance =====
+
+  funding_status: {
+    name: 'funding_status',
+    displayName: 'Funding Status',
+    type: 'enum',
+    description: 'Current funding state',
+    values: ['Funded', 'Partially', 'Pending', 'Over-budget'],
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 'Partially',
+      critical: 'Over-budget'
+    }
+  },
+
+  financial_guardrail_compliance: {
+    name: 'financial_guardrail_compliance',
+    displayName: 'Financial Guardrail Compliance',
+    type: 'boolean',
+    description: 'Within 10% variance limit?',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  participatory_budget_rank: {
+    name: 'participatory_budget_rank',
+    displayName: 'Participatory Budget Rank',
+    type: 'number',
+    description: 'Ranking from last PB event',
+    unit: 'rank',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Tax & Benefits =====
+
+  tax_credit_eligibility: {
+    name: 'tax_credit_eligibility',
+    displayName: 'Tax Credit Eligibility',
+    type: 'boolean',
+    description: 'Is this R&D Tax Credit eligible?',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  benefit_owner: {
+    name: 'benefit_owner',
+    displayName: 'Benefit Owner',
+    type: 'text',
+    description: 'Exec responsible for realizing value',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Efficiency Metrics =====
+
+  cost_per_story_point: {
+    name: 'cost_per_story_point',
+    displayName: 'Cost Per Story Point',
+    type: 'currency',
+    description: 'ActualSpend/Points',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Additional Financial Metadata =====
+
+  depreciation_schedule: {
+    name: 'depreciation_schedule',
+    displayName: 'Depreciation Schedule',
+    type: 'text',
+    description: 'Asset depreciation timeline (JSON object)',
+    unit: '',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  amortization_start: {
+    name: 'amortization_start',
+    displayName: 'Amortization Start',
+    type: 'text',
+    description: 'When amortization begins',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  capital_approval_date: {
+    name: 'capital_approval_date',
+    displayName: 'Capital Approval Date',
+    type: 'text',
+    description: 'Board approval date',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  accounting_period: {
+    name: 'accounting_period',
+    displayName: 'Accounting Period',
+    type: 'text',
+    description: 'Fiscal quarter/year',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  cost_center: {
+    name: 'cost_center',
+    displayName: 'Cost Center',
+    type: 'text',
+    description: 'Organizational cost center code',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  gl_account: {
+    name: 'gl_account',
+    displayName: 'GL Account',
+    type: 'text',
+    description: 'General Ledger account number',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  payment_terms: {
+    name: 'payment_terms',
+    displayName: 'Payment Terms',
+    type: 'text',
+    description: 'Vendor payment schedule',
+    unit: '',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  currency_code: {
+    name: 'currency_code',
+    displayName: 'Currency Code',
+    type: 'text',
+    description: 'ISO currency code',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  exchange_rate: {
+    name: 'exchange_rate',
+    displayName: 'Exchange Rate',
+    type: 'number',
+    description: 'Current forex rate if applicable',
+    unit: 'rate',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  inflation_adjustment: {
+    name: 'inflation_adjustment',
+    displayName: 'Inflation Adjustment',
+    type: 'percentage',
+    description: 'Annual inflation factor',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
   }
 };
 

@@ -112,6 +112,374 @@ export const RISK_DEFAULT_ATTRIBUTES: Record<string, AttributeDefinition> = {
       warning: 'worsening',
       critical: 'critical'
     }
+  },
+
+  // ===== SAFe 6.0 Attributes - Risk Identification =====
+
+  risk_id: {
+    name: 'risk_id',
+    displayName: 'Risk ID',
+    type: 'text',
+    description: 'Unique risk identifier',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  parent_risk_id: {
+    name: 'parent_risk_id',
+    displayName: 'Parent Risk ID',
+    type: 'text',
+    description: 'Parent risk if this is a sub-risk',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - ROAM Classification =====
+
+  roam_status: {
+    name: 'roam_status',
+    displayName: 'ROAM Status',
+    type: 'enum',
+    description: 'ROAM classification',
+    values: ['Resolved', 'Owned', 'Accepted', 'Mitigated'],
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Risk Assessment =====
+
+  exposure_value: {
+    name: 'exposure_value',
+    displayName: 'Exposure Value',
+    type: 'currency',
+    description: 'Financial exposure (Probability × Impact) ⭐',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 50000,
+      critical: 100000
+    }
+  },
+
+  impact_score: {
+    name: 'impact_score',
+    displayName: 'Impact Score',
+    type: 'number',
+    description: 'Severity if risk occurs (1-10)',
+    unit: 'score',
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 7,
+      critical: 9
+    }
+  },
+
+  probability_score: {
+    name: 'probability_score',
+    displayName: 'Probability Score',
+    type: 'number',
+    description: 'Likelihood of occurrence (0-1)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 0.7,
+      critical: 0.9
+    }
+  },
+
+  risk_score_calc: {
+    name: 'risk_score_calc',
+    displayName: 'Risk Score (Calculated)',
+    type: 'number',
+    description: 'impact_score × probability_score × 10',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 50,
+      critical: 70
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Risk Type =====
+
+  risk_category: {
+    name: 'risk_category',
+    displayName: 'Risk Category',
+    type: 'enum',
+    description: 'Type of risk',
+    values: ['Technical', 'Schedule', 'Budget', 'Resource', 'External'],
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  risk_tier: {
+    name: 'risk_tier',
+    displayName: 'Risk Tier',
+    type: 'enum',
+    description: 'Level at which risk exists',
+    values: ['Portfolio', 'Program', 'Team'],
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Mitigation =====
+
+  mitigation_strategy: {
+    name: 'mitigation_strategy',
+    displayName: 'Mitigation Strategy',
+    type: 'text',
+    description: 'Planned response',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  mitigation_owner: {
+    name: 'mitigation_owner',
+    displayName: 'Mitigation Owner',
+    type: 'text',
+    description: 'Person responsible',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  mitigation_cost: {
+    name: 'mitigation_cost',
+    displayName: 'Mitigation Cost',
+    type: 'currency',
+    description: 'Cost to mitigate',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  mitigation_deadline: {
+    name: 'mitigation_deadline',
+    displayName: 'Mitigation Deadline',
+    type: 'text',
+    description: 'When mitigation must be complete',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  mitigation_status: {
+    name: 'mitigation_status',
+    displayName: 'Mitigation Status',
+    type: 'enum',
+    description: 'Status of mitigation effort',
+    values: ['Not Started', 'In Progress', 'Complete'],
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 'Not Started'
+    }
+  },
+
+  mitigation_velocity: {
+    name: 'mitigation_velocity',
+    displayName: 'Mitigation Velocity',
+    type: 'number',
+    description: 'Risks mitigated per period ⭐',
+    unit: 'count',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 2,
+      critical: 1
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Residual Risk =====
+
+  residual_risk: {
+    name: 'residual_risk',
+    displayName: 'Residual Risk',
+    type: 'number',
+    description: 'Risk remaining after mitigation ⭐',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 30,
+      critical: 50
+    }
+  },
+
+  residual_exposure: {
+    name: 'residual_exposure',
+    displayName: 'Residual Exposure',
+    type: 'currency',
+    description: 'Financial exposure after mitigation',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 25000,
+      critical: 50000
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Risk Metrics =====
+
+  risk_burndown_rate: {
+    name: 'risk_burndown_rate',
+    displayName: 'Risk Burndown Rate',
+    type: 'number',
+    description: 'Risks closed per period',
+    unit: 'count',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  risk_velocity: {
+    name: 'risk_velocity',
+    displayName: 'Risk Velocity',
+    type: 'number',
+    description: 'New risks identified per period',
+    unit: 'count',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 5,
+      critical: 10
+    }
+  },
+
+  threat_opportunity_ratio: {
+    name: 'threat_opportunity_ratio',
+    displayName: 'Threat/Opportunity Ratio',
+    type: 'number',
+    description: 'Negative vs positive risks',
+    unit: 'ratio',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Contingency =====
+
+  contingency_reserve: {
+    name: 'contingency_reserve',
+    displayName: 'Contingency Reserve',
+    type: 'currency',
+    description: 'Remaining risk budget ⭐',
+    unit: '$',
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 50000,
+      critical: 25000
+    }
+  },
+
+  contingency_used: {
+    name: 'contingency_used',
+    displayName: 'Contingency Used',
+    type: 'currency',
+    description: 'Reserve already consumed',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Risk Response =====
+
+  risk_response_type: {
+    name: 'risk_response_type',
+    displayName: 'Risk Response Type',
+    type: 'enum',
+    description: 'Type of risk response',
+    values: ['Avoid', 'Transfer', 'Mitigate', 'Accept', 'Exploit'],
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  risk_response_effectiveness: {
+    name: 'risk_response_effectiveness',
+    displayName: 'Risk Response Effectiveness',
+    type: 'percentage',
+    description: '% risks successfully mitigated',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Dependencies =====
+
+  dependency_risks: {
+    name: 'dependency_risks',
+    displayName: 'Dependency Risks',
+    type: 'text',
+    description: 'Risks related to dependencies (array)',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  external_dependencies: {
+    name: 'external_dependencies',
+    displayName: 'External Dependencies',
+    type: 'text',
+    description: 'Risks from external parties (array)',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Tracking =====
+
+  risk_identified_date: {
+    name: 'risk_identified_date',
+    displayName: 'Risk Identified Date',
+    type: 'text',
+    description: 'When risk was first identified',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  risk_closed_date: {
+    name: 'risk_closed_date',
+    displayName: 'Risk Closed Date',
+    type: 'text',
+    description: 'When risk was resolved',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  last_assessment_date: {
+    name: 'last_assessment_date',
+    displayName: 'Last Assessment Date',
+    type: 'text',
+    description: 'Last time risk was reviewed',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Escalation =====
+
+  escalation_required: {
+    name: 'escalation_required',
+    displayName: 'Escalation Required',
+    type: 'boolean',
+    description: 'Does this need executive attention?',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  escalation_level: {
+    name: 'escalation_level',
+    displayName: 'Escalation Level',
+    type: 'enum',
+    description: 'Level of escalation',
+    values: ['Team', 'Program', 'Portfolio', 'Executive'],
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 'Portfolio',
+      critical: 'Executive'
+    }
   }
 };
 

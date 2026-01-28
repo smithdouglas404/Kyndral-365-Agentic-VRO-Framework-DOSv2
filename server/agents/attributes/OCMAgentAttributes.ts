@@ -115,6 +115,397 @@ export const OCM_DEFAULT_ATTRIBUTES: Record<string, AttributeDefinition> = {
       warning: 3,
       critical: 5
     }
+  },
+
+  // ===== SAFe 6.0 Attributes - Change Identification =====
+
+  change_impact_id: {
+    name: 'change_impact_id',
+    displayName: 'Change Impact ID',
+    type: 'text',
+    description: 'Identifier for specific change initiative',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  persona_impact_list: {
+    name: 'persona_impact_list',
+    displayName: 'Persona Impact List',
+    type: 'text',
+    description: 'List of roles affected by change (array)',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Adoption Metrics =====
+
+  adoption_velocity: {
+    name: 'adoption_velocity',
+    displayName: 'Adoption Velocity',
+    type: 'number',
+    description: 'Speed users migrate to new process/tool',
+    unit: 'rate',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 0.5,
+      critical: 0.3
+    }
+  },
+
+  resistance_level: {
+    name: 'resistance_level',
+    displayName: 'Resistance Level',
+    type: 'enum',
+    description: 'Level of resistance to change',
+    values: ['Low', 'Medium', 'High', 'Critical'],
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 'High',
+      critical: 'Critical'
+    }
+  },
+
+  sentiment_trend: {
+    name: 'sentiment_trend',
+    displayName: 'Sentiment Trend',
+    type: 'enum',
+    description: 'Sentiment direction',
+    values: ['Improving', 'Neutral', 'Declining'],
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 'Declining'
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Training & Communication =====
+
+  training_saturation: {
+    name: 'training_saturation',
+    displayName: 'Training Saturation',
+    type: 'percentage',
+    description: '% target audience completed training',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 80,
+      critical: 60
+    }
+  },
+
+  communication_reach: {
+    name: 'communication_reach',
+    displayName: 'Communication Reach',
+    type: 'percentage',
+    description: '% employees opened/read updates',
+    unit: '%',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  tooling_proficiency: {
+    name: 'tooling_proficiency',
+    displayName: 'Tooling Proficiency',
+    type: 'percentage',
+    description: 'Actual skill level using Jira/ADO/Miro',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Leadership & Culture =====
+
+  leadership_alignment: {
+    name: 'leadership_alignment',
+    displayName: 'Leadership Alignment',
+    type: 'number',
+    description: 'Executive "walk the talk" consistency (1-10)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 6,
+      critical: 4
+    }
+  },
+
+  vibrancy_score: {
+    name: 'vibrancy_score',
+    displayName: 'Vibrancy Score',
+    type: 'number',
+    description: 'Activity in Slack/Teams/CoP channels',
+    unit: 'score',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 50,
+      critical: 30
+    }
+  },
+
+  agile_mindset_delta: {
+    name: 'agile_mindset_delta',
+    displayName: 'Agile Mindset Delta',
+    type: 'percentage',
+    description: 'Growth in "Growth Mindset" surveys',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Change Champions =====
+
+  advocate_count: {
+    name: 'advocate_count',
+    displayName: 'Advocate Count',
+    type: 'number',
+    description: '# of "Change Champions" active in ART',
+    unit: 'count',
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 3,
+      critical: 1
+    }
+  },
+
+  benefit_awareness_pct: {
+    name: 'benefit_awareness_pct',
+    displayName: 'Benefit Awareness %',
+    type: 'percentage',
+    description: '% staff who can articulate "Why"',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Burnout & Fatigue =====
+
+  burnout_risk_idx: {
+    name: 'burnout_risk_idx',
+    displayName: 'Burnout Risk Index',
+    type: 'number',
+    description: 'Correlation of high Flow Load + low eNPS ⭐',
+    unit: 'index',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 0.7,
+      critical: 0.85
+    }
+  },
+
+  transformation_fatigue: {
+    name: 'transformation_fatigue',
+    displayName: 'Transformation Fatigue',
+    type: 'number',
+    description: "Org's capacity for more change",
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 6,
+      critical: 8
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Feedback & Response =====
+
+  feedback_response_time: {
+    name: 'feedback_response_time',
+    displayName: 'Feedback Response Time',
+    type: 'number',
+    description: 'How fast OCM responds to concerns (hours)',
+    unit: 'hours',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 48,
+      critical: 72
+    }
+  },
+
+  friction_point_id: {
+    name: 'friction_point_id',
+    displayName: 'Friction Point ID',
+    type: 'text',
+    description: 'Top reason for adoption failure',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - HR Alignment =====
+
+  incentive_alignment: {
+    name: 'incentive_alignment',
+    displayName: 'Incentive Alignment',
+    type: 'boolean',
+    description: 'HR goals aligned with new SAFe behaviors?',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Readiness =====
+
+  readiness_gate_status: {
+    name: 'readiness_gate_status',
+    displayName: 'Readiness Gate Status',
+    type: 'boolean',
+    description: 'Final "Human Go" for major transition',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  culture_survey_id: {
+    name: 'culture_survey_id',
+    displayName: 'Culture Survey ID',
+    type: 'text',
+    description: 'Link to latest culture assessment',
+    unit: '',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Legacy Behavior =====
+
+  legacy_behavior_count: {
+    name: 'legacy_behavior_count',
+    displayName: 'Legacy Behavior Count',
+    type: 'number',
+    description: '# of "Old Way" processes still used',
+    unit: 'count',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 5,
+      critical: 10
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Workshop & Engagement =====
+
+  workshop_attendance: {
+    name: 'workshop_attendance',
+    displayName: 'Workshop Attendance',
+    type: 'percentage',
+    description: '% attendance at change workshops',
+    unit: '%',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 75,
+      critical: 60
+    }
+  },
+
+  resistance_reason_code: {
+    name: 'resistance_reason_code',
+    displayName: 'Resistance Reason Code',
+    type: 'text',
+    description: 'Coded reason for resistance',
+    unit: '',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Change Impact Assessment =====
+
+  change_magnitude: {
+    name: 'change_magnitude',
+    displayName: 'Change Magnitude',
+    type: 'number',
+    description: 'Size of change impact (0-100)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 85
+    }
+  },
+
+  stakeholder_readiness_calc: {
+    name: 'stakeholder_readiness_calc',
+    displayName: 'Stakeholder Readiness (Calculated)',
+    type: 'number',
+    description: 'Readiness for change (0-100)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 60,
+      critical: 40
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Adoption Stages =====
+
+  awareness_level: {
+    name: 'awareness_level',
+    displayName: 'Awareness Level',
+    type: 'percentage',
+    description: '% aware of upcoming change',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  understanding_level: {
+    name: 'understanding_level',
+    displayName: 'Understanding Level',
+    type: 'percentage',
+    description: '% understand why change needed',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  acceptance_level: {
+    name: 'acceptance_level',
+    displayName: 'Acceptance Level',
+    type: 'percentage',
+    description: '% accept change is necessary',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  proficiency_level: {
+    name: 'proficiency_level',
+    displayName: 'Proficiency Level',
+    type: 'percentage',
+    description: '% proficient in new way',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Change Metrics =====
+
+  time_to_proficiency: {
+    name: 'time_to_proficiency',
+    displayName: 'Time to Proficiency',
+    type: 'number',
+    description: 'Average time to become proficient (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 60,
+      critical: 90
+    }
   }
 };
 

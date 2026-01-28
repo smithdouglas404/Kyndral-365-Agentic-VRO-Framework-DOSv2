@@ -112,6 +112,364 @@ export const VRO_DEFAULT_ATTRIBUTES: Record<string, AttributeDefinition> = {
       warning: 60,
       critical: 40
     }
+  },
+
+  // ===== SAFe 6.0 Attributes - Strategic Alignment =====
+
+  strategic_theme_id: {
+    name: 'strategic_theme_id',
+    displayName: 'Strategic Theme ID',
+    type: 'text',
+    description: 'Alignment to top-level corporate goals',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  okr_key_result_link: {
+    name: 'okr_key_result_link',
+    displayName: 'OKR Key Result Link',
+    type: 'text',
+    description: 'The specific KR this work moves',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Leading Indicators =====
+
+  leading_indicator_name: {
+    name: 'leading_indicator_name',
+    displayName: 'Leading Indicator Name',
+    type: 'text',
+    description: 'e.g., "Page Load Time" or "Sign-up Rate"',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  leading_indicator_baseline: {
+    name: 'leading_indicator_baseline',
+    displayName: 'Leading Indicator Baseline',
+    type: 'number',
+    description: 'Starting value before work began',
+    unit: 'value',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  leading_indicator_current: {
+    name: 'leading_indicator_current',
+    displayName: 'Leading Indicator Current',
+    type: 'number',
+    description: 'Real-time movement of indicator',
+    unit: 'value',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Hypothesis Testing =====
+
+  hypothesis_state: {
+    name: 'hypothesis_state',
+    displayName: 'Hypothesis State',
+    type: 'enum',
+    description: 'Current state of hypothesis testing',
+    values: ['Not Started', 'Testing', 'Proven', 'Disproven'],
+    source: 'project_field',
+    defaultThresholds: {
+      warning: 'Disproven'
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Customer Impact =====
+
+  customer_segment: {
+    name: 'customer_segment',
+    displayName: 'Customer Segment',
+    type: 'text',
+    description: 'Who is this value for?',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  nps_impact_score: {
+    name: 'nps_impact_score',
+    displayName: 'NPS Impact Score',
+    type: 'number',
+    description: 'Survey-based impact on satisfaction',
+    unit: 'score',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 0,
+      critical: -20
+    }
+  },
+
+  value_threshold: {
+    name: 'value_threshold',
+    displayName: 'Value Threshold',
+    type: 'number',
+    description: 'Minimum Viable value needed to continue',
+    unit: 'value',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Market Impact =====
+
+  market_share_impact: {
+    name: 'market_share_impact',
+    displayName: 'Market Share Impact',
+    type: 'percentage',
+    description: 'Estimated gain in market position',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  adoption_rate: {
+    name: 'adoption_rate',
+    displayName: 'Adoption Rate',
+    type: 'percentage',
+    description: '% of users adopting feature',
+    unit: '%',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 50,
+      critical: 30
+    }
+  },
+
+  churn_impact: {
+    name: 'churn_impact',
+    displayName: 'Churn Impact',
+    type: 'percentage',
+    description: 'Effect on customer churn',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  feature_usage_daily: {
+    name: 'feature_usage_daily',
+    displayName: 'Feature Usage (Daily)',
+    type: 'number',
+    description: 'Daily active users of feature',
+    unit: 'users',
+    source: 'external_api',
+    defaultThresholds: {}
+  },
+
+  // ===== SAFe 6.0 Attributes - Customer Metrics =====
+
+  customer_acquisition_cost: {
+    name: 'customer_acquisition_cost',
+    displayName: 'Customer Acquisition Cost (CAC)',
+    type: 'currency',
+    description: 'Cost to acquire a customer',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  customer_lifetime_value: {
+    name: 'customer_lifetime_value',
+    displayName: 'Customer Lifetime Value (CLV)',
+    type: 'currency',
+    description: 'Lifetime value of a customer',
+    unit: '$',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  customer_retention_rate: {
+    name: 'customer_retention_rate',
+    displayName: 'Customer Retention Rate',
+    type: 'percentage',
+    description: 'Percentage of customers retained',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 80,
+      critical: 70
+    }
+  },
+
+  customer_satisfaction_score: {
+    name: 'customer_satisfaction_score',
+    displayName: 'Customer Satisfaction Score (CSAT)',
+    type: 'number',
+    description: 'Customer satisfaction score (0-100)',
+    unit: 'score',
+    source: 'external_api',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Revenue & Growth =====
+
+  revenue_growth: {
+    name: 'revenue_growth',
+    displayName: 'Revenue Growth',
+    type: 'percentage',
+    description: 'Revenue increase attributed to feature',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {}
+  },
+
+  return_on_investment: {
+    name: 'return_on_investment',
+    displayName: 'Return on Investment',
+    type: 'percentage',
+    description: 'Portfolio ROI',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 100,
+      critical: 50
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Time to Value =====
+
+  time_to_market: {
+    name: 'time_to_market',
+    displayName: 'Time to Market',
+    type: 'number',
+    description: 'Concept to delivery time (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 180,
+      critical: 365
+    }
+  },
+
+  time_to_value: {
+    name: 'time_to_value',
+    displayName: 'Time to Value',
+    type: 'number',
+    description: 'Concept to customer realizes value (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 90,
+      critical: 180
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Innovation =====
+
+  innovation_rate: {
+    name: 'innovation_rate',
+    displayName: 'Innovation Rate',
+    type: 'percentage',
+    description: '% new features vs maintenance',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 30,
+      critical: 20
+    }
+  },
+
+  // ===== SAFe 6.0 Attributes - Benefits Realization =====
+
+  benefits_register: {
+    name: 'benefits_register',
+    displayName: 'Benefits Register',
+    type: 'text',
+    description: 'Array of [{benefit, target, actual, status}]',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  benefits_dependency_map: {
+    name: 'benefits_dependency_map',
+    displayName: 'Benefits Dependency Map',
+    type: 'text',
+    description: 'Benefit interdependencies (JSON object)',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  leading_indicators_list: {
+    name: 'leading_indicators_list',
+    displayName: 'Leading Indicators List',
+    type: 'text',
+    description: 'Early signals of success (array)',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  lagging_indicators_list: {
+    name: 'lagging_indicators_list',
+    displayName: 'Lagging Indicators List',
+    type: 'text',
+    description: 'Outcome measures (array)',
+    unit: '',
+    source: 'project_field',
+    defaultThresholds: {}
+  },
+
+  benefits_realization_rate_calc: {
+    name: 'benefits_realization_rate_calc',
+    displayName: 'Benefits Realization Rate (Calculated)',
+    type: 'percentage',
+    description: '% expected benefits achieved',
+    unit: '%',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 70,
+      critical: 50
+    }
+  },
+
+  benefit_cost_ratio: {
+    name: 'benefit_cost_ratio',
+    displayName: 'Benefit Cost Ratio (BCR)',
+    type: 'number',
+    description: 'BCR (target: >= 1.5)',
+    unit: 'ratio',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 1.5,
+      critical: 1.0
+    }
+  },
+
+  business_value_score: {
+    name: 'business_value_score',
+    displayName: 'Business Value Score',
+    type: 'number',
+    description: 'Delivered business value (0-100)',
+    unit: 'score',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 60,
+      critical: 40
+    }
+  },
+
+  outcome_realization_time: {
+    name: 'outcome_realization_time',
+    displayName: 'Outcome Realization Time',
+    type: 'number',
+    description: 'Time to realize outcomes (days)',
+    unit: 'days',
+    source: 'calculated',
+    defaultThresholds: {
+      warning: 90,
+      critical: 180
+    }
   }
 };
 
