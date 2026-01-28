@@ -1,6 +1,6 @@
 /**
  * PUBLIC LANDING PAGE
- * Marketing page for Nexus PPM - AI-Powered Portfolio Intelligence
+ * Marketing page for Nexus PPM - Kyndryl 365 AI
  */
 
 import { useLocation } from 'wouter';
@@ -38,7 +38,7 @@ export default function LandingPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Nexus PPM</h1>
-              <p className="text-xs text-gray-600">AI-Powered Portfolio Intelligence</p>
+              <p className="text-xs text-gray-600">Kyndryl 365 AI</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -60,9 +60,9 @@ export default function LandingPage() {
             10 Specialized AI Agents Working 24/7
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-            AI-Powered Portfolio
+            Kyndryl 365 AI
             <br />
-            <span className="text-blue-600">Intelligence System</span>
+            <span className="text-blue-600">Portfolio Intelligence</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Transform your PMO from reactive firefighting to proactive intelligence.
@@ -353,7 +353,7 @@ export default function LandingPage() {
                 <span className="text-white font-bold">Nexus PPM</span>
               </div>
               <p className="text-sm">
-                AI-Powered Portfolio Intelligence for enterprise PMOs
+                Kyndryl 365 AI - Portfolio Intelligence for enterprise PMOs
               </p>
             </div>
 

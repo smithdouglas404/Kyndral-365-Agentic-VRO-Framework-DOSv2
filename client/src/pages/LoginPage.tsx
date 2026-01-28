@@ -114,7 +114,7 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Nexus PPM</h1>
-              <p className="text-xs text-gray-600">AI-Powered Portfolio Intelligence</p>
+              <p className="text-xs text-gray-600">Kyndryl 365 AI</p>
             </div>
           </div>
           <Button variant="ghost" onClick={() => navigate('/')}>

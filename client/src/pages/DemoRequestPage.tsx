@@ -116,7 +116,7 @@ export default function DemoRequestPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Nexus PPM</h1>
-              <p className="text-xs text-gray-600">AI-Powered Portfolio Intelligence</p>
+              <p className="text-xs text-gray-600">Kyndryl 365 AI</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
