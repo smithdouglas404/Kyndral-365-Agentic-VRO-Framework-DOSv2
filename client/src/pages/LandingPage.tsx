@@ -65,7 +65,7 @@ export default function LandingPage() {
             <span className="text-blue-600">Portfolio Intelligence</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Transform your PMO from reactive firefighting to proactive intelligence.
+            Transform from reactive firefighting to proactive intelligence.
             Ten specialized AI agents monitor portfolios, predict risks, and recommend
             actions—before problems escalate.
           </p>
