@@ -119,9 +119,22 @@ export class AgentScheduler {
     console.log('[AgentScheduler] Mode 2: Scheduled Deep Scans');
 
     // Start Mode 1: Continuous orchestration (every 15 seconds)
+    // ONLY if admin has enabled it - check persisted settings first
     if (this.orchestrator) {
-      await this.orchestrator.start(15000); // 15 second intervals
-      console.log('[AgentScheduler] ✅ Continuous orchestration started (15s interval)');
+      try {
+        const { getOrchestratorSettings } = await import('../lib/OrchestratorSettings.js');
+        const settings = await getOrchestratorSettings();
+        
+        if (settings.enabled) {
+          await this.orchestrator.start(settings.interval || 15000);
+          console.log(`[AgentScheduler] ✅ Continuous orchestration started (${(settings.interval || 15000) / 1000}s interval)`);
+        } else {
+          console.log('[AgentScheduler] ⚠️  Continuous orchestration OFF - respecting admin setting');
+          console.log('[AgentScheduler] 💡 Enable via Admin > Settings > Orchestrator');
+        }
+      } catch (settingsError) {
+        console.log('[AgentScheduler] ⚠️  Could not load orchestrator settings, defaulting to OFF');
+      }
     }
 
     // Start Mode 2: Scheduled deep scans

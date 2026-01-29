@@ -1,7 +1,5 @@
 import { useState, useCallback, useMemo, ReactNode } from 'react';
-import { Responsive } from 'react-grid-layout';
-// @ts-ignore - WidthProvider types are bundled differently
-import WidthProvider from 'react-grid-layout/lib/components/WidthProvider';
+import { Responsive, WidthProvider } from 'react-grid-layout';
 import { motion } from 'framer-motion';
 import { GripVertical, Settings, Eye, EyeOff, RotateCcw, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
