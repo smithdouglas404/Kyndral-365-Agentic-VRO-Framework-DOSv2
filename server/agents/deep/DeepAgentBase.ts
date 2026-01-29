@@ -13,12 +13,12 @@
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
+import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { IStorage } from "../../storage.js";
 import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
 import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
 import { createMemoryManager, type MemoryManager } from "../../lib/MemoryManager.js";
-// Removed: RetoolVectorsMCP is no longer used
-// import { getRetoolVectorsMCP } from "../../mcp/RetoolVectorsMCP.js";
+import { getSmartRouter, ModelTier, type ProjectChangeEvent } from "../../lib/SmartModelRouter.js";
 type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
 
 /**
@@ -72,6 +72,7 @@ export interface DeepAgentConfig {
   enableReflection?: boolean;
   maxPlanSteps?: number;
   reflectionThreshold?: number; // How many actions before reflecting
+  useSmartRouting?: boolean; // Enable cost-optimized model routing
 }
 
 /**
@@ -930,17 +931,45 @@ Reflect on this action.`],
 
   /**
    * PUBLIC: Run agent with Deep Agent capabilities
-   * NOW WITH CONVERSATION MEMORY
+   * NOW WITH CONVERSATION MEMORY AND SMART ROUTING
    */
   async run(goal: string, context: any = {}): Promise<any> {
     console.log(`[${this.config.agentName}] Deep Agent run started: ${goal}`);
 
     try {
+      // PHASE 0: SMART ROUTING - Check cache and classify task
+      const router = getSmartRouter();
+      const classification = router.classifyTask(
+        this.config.agentType,
+        context.projectData || context,
+        this.config.agentName
+      );
+
+      // Check if we can skip analysis (cached result)
+      if (classification.skipAnalysis && classification.cachedResult) {
+        console.log(`[${this.config.agentName}] Using cached result (saving API costs)`);
+        return {
+          cached: true,
+          result: classification.cachedResult,
+          tier: classification.tier,
+          reason: classification.reason,
+        };
+      }
+
+      // Get other agents' summaries for context
+      const projectId = context.projectData?.id || context.projectId;
+      const otherSummaries = projectId ? router.getAllSummaries(projectId) : {};
+      
+      console.log(`[${this.config.agentName}] Using ${classification.tier} tier model (${classification.reason})`);
+
       // PHASE 0A: Load conversation context (new unified memory)
       const conversationContext = await this.loadConversationContext(goal);
 
       // PHASE 0B: RECALL - Retrieve historical facts from memory
       const enrichedContext = await this.enrichContextWithFacts(goal, context);
+      
+      // Add other agent summaries to context
+      enrichedContext.otherAgentInsights = otherSummaries;
 
       // Merge conversation context with enriched context
       enrichedContext.conversationHistory = conversationContext.recentMessages;
@@ -980,7 +1009,21 @@ Reflect on this action.`],
       // PHASE 4: SAVE CONVERSATION - Save interaction to conversation memory
       await this.saveConversationInteraction(goal, result);
 
-      console.log(`[${this.config.agentName}] Deep Agent run completed`);
+      // PHASE 5: STORE SUMMARY & CACHE RESULT for smart routing
+      const projectId2 = context.projectData?.id || context.projectId;
+      if (projectId2) {
+        const summary = this.extractSummary(result);
+        router.storeSummary(this.config.agentName, projectId2, summary);
+        router.cacheResult(
+          this.config.agentType,
+          context.projectData || context,
+          this.config.agentName,
+          JSON.stringify(result),
+          classification.tier
+        );
+      }
+
+      console.log(`[${this.config.agentName}] Deep Agent run completed (${classification.tier} tier)`);
       return result;
     } catch (error: any) {
       console.error(`[${this.config.agentName}] Deep Agent run failed:`, error);
@@ -1026,6 +1069,17 @@ Provide a summary of what was learned and how to improve next time.`],
    */
   getCurrentPlan(): AgentPlan | undefined {
     return this.currentPlan;
+  }
+
+  /**
+   * Extract a compact summary from analysis result for agent collaboration
+   */
+  protected extractSummary(result: any): string {
+    if (result.summary) return result.summary;
+    if (result.finalReflection) return String(result.finalReflection).slice(0, 200);
+    if (result.analysis) return String(result.analysis).slice(0, 200);
+    if (result.content) return String(result.content).slice(0, 200);
+    return `${this.config.agentName} analysis completed`;
   }
 
   /**
