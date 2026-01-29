@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, ReactNode } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import * as RGL from 'react-grid-layout';
 import { motion } from 'framer-motion';
 import { GripVertical, Settings, Eye, EyeOff, RotateCcw, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,10 @@ import {
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const RGLModule = RGL as any;
+const Responsive = RGLModule.Responsive || RGLModule.default?.Responsive;
+const WidthProviderFn = RGLModule.WidthProvider || RGLModule.default?.WidthProvider;
+const ResponsiveGridLayout = WidthProviderFn ? WidthProviderFn(Responsive) : Responsive;
 
 interface WidgetWrapperProps {
   widget: WidgetDefinition;

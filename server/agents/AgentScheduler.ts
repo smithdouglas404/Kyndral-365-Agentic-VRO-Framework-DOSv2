@@ -137,7 +137,24 @@ export class AgentScheduler {
       }
     }
 
-    // Start Mode 2: Scheduled deep scans
+    // Start Mode 2: Scheduled deep scans - ONLY if orchestrator is enabled
+    // This respects the admin setting to turn off all agent activity
+    try {
+      const { getOrchestratorSettings } = await import('../lib/OrchestratorSettings.js');
+      const schedulerSettings = await getOrchestratorSettings();
+      
+      if (!schedulerSettings.enabled) {
+        console.log('[AgentScheduler] ⚠️  Scheduled deep scans OFF - respecting admin setting');
+        console.log('[AgentScheduler] 💡 Enable via Admin > Settings > Orchestrator');
+        console.log('[AgentScheduler] Agents initialized but NOT running automatic scans');
+        return; // Don't schedule any scans
+      }
+      
+      console.log('[AgentScheduler] ✅ Orchestrator enabled - scheduling deep scans');
+    } catch (e) {
+      console.log('[AgentScheduler] ⚠️  Could not load settings, defaulting to OFF for safety');
+      return; // Default to OFF if settings can't be loaded
+    }
 
     // FinOps Agent: Every 30 minutes
     this.schedule('finops', 30 * 60 * 1000, async () => {
