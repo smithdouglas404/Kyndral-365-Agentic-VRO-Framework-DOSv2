@@ -7,6 +7,10 @@ import type { Express, Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { db } from '../db';
+import { demoRequests } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { requireAuth } from '../lib/auth';
 
 // Handle both ESM and CommonJS builds
 const __filename = typeof import.meta !== 'undefined' && import.meta.url
@@ -118,9 +122,20 @@ export function registerDemoRoutes(app: Express) {
    * GET /api/demo/data
    * Returns demo data for current session's industry
    * Used by dashboard and other pages to load ACME data
+   * NOTE: This endpoint is for legacy cookie-based sessions (setup wizard flow)
+   * For new demo request flow, use /api/demo/user-data with auth token
    */
   app.get("/api/demo/data", async (req: Request, res: Response) => {
     try {
+      // Check if user has an auth token - if so, redirect to proper flow
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        return res.status(403).json({ 
+          error: "Use /api/demo/user-data for authenticated demo access",
+          message: "Demo users with tokens must use the authenticated endpoint"
+        });
+      }
+
       const sessionId = req.cookies?.demo_session;
 
       if (!sessionId || !demoSessions.has(sessionId)) {
@@ -185,9 +200,20 @@ export function registerDemoRoutes(app: Express) {
   /**
    * GET /api/demo/status
    * Checks if demo mode is active for current session
+   * NOTE: This is for legacy cookie-based sessions only
+   * Token-bearing users should use /api/tenant-auth/demo-status
    */
   app.get("/api/demo/status", async (req: Request, res: Response) => {
     try {
+      // Token-bearing users should not use legacy session
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        return res.json({ 
+          active: false,
+          message: "Use /api/tenant-auth/demo-status for authenticated demo access"
+        });
+      }
+
       const sessionId = req.cookies?.demo_session;
 
       if (!sessionId || !demoSessions.has(sessionId)) {
@@ -207,6 +233,71 @@ export function registerDemoRoutes(app: Express) {
     } catch (error: any) {
       console.error("Error checking demo status:", error);
       res.json({ active: false });
+    }
+  });
+
+  /**
+   * GET /api/demo/user-data
+   * Returns demo data for authenticated demo user based on their demoIndustry
+   * Used by approved demo users to get industry-specific ACME data
+   */
+  app.get("/api/demo/user-data", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      
+      if (!user || user.role !== 'demo_user') {
+        return res.status(403).json({ error: "Not a demo user" });
+      }
+
+      // Get demo request to find user's selected industry
+      const [demoRequest] = await db
+        .select()
+        .from(demoRequests)
+        .where(eq(demoRequests.id, user.userId))
+        .limit(1);
+
+      if (!demoRequest) {
+        return res.status(404).json({ error: "Demo request not found" });
+      }
+
+      if (demoRequest.status !== 'demo_active') {
+        return res.status(403).json({ 
+          error: "Demo not approved", 
+          status: demoRequest.status,
+          message: "Your demo request is pending approval"
+        });
+      }
+
+      const industryId = demoRequest.demoIndustry;
+      if (!industryId) {
+        return res.status(400).json({ error: "No industry selected for demo" });
+      }
+
+      const seedData = loadSeedData();
+
+      // Find company by industry
+      const companyData = seedData.companies.find((c: any) => c.industryId === industryId);
+      const projectsData = seedData.projects.find((p: any) => p.industryId === industryId);
+      const interventions = seedData.interventions.filter((i: any) => i.industryId === industryId);
+      const observations = seedData.observations.filter((o: any) => o.industryId === industryId);
+      const battleRhythm = seedData.battleRhythm.filter((b: any) => b.industryId === industryId);
+      const rulesState = seedData.rulesState.filter((r: any) => r.industryId === industryId);
+
+      res.json({
+        company: companyData,
+        projects: projectsData?.projects || [],
+        interventions,
+        observations,
+        battleRhythm,
+        rulesState,
+        isDemoMode: true,
+        industryId,
+        demoUserId: demoRequest.id,
+        demoUserName: `${demoRequest.firstName} ${demoRequest.lastName}`.trim() || demoRequest.email,
+      });
+    } catch (error: any) {
+      console.error("Error loading authenticated demo data:", error);
+      res.status(500).json({ error: "Failed to load demo data", details: error.message });
     }
   });
 

@@ -80,18 +80,35 @@ export interface CompanyProfile {
   };
 }
 
+interface DemoRequestStatus {
+  isDemoUser: boolean;
+  demoRequestId?: string;
+  status?: string; // 'requested' | 'demo_active' | 'contacted' | 'converted'
+  isApproved?: boolean;
+  demoIndustry?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+  message?: string;
+}
+
 interface CompanyProfileContextValue {
   profile: CompanyProfile | null;
   isLoading: boolean;
   error: Error | null;
   hasActiveCompany: boolean;
   isDemoMode: boolean; // True if no active company or status is 'demo'
+  isDemoUser: boolean; // True if current user is a demo user
+  isDemoApproved: boolean; // True if demo request is approved (status = 'demo_active')
+  demoIndustry: string | null; // Selected demo industry
+  demoStatus: DemoRequestStatus | null; // Full demo request status
   refresh: () => void;
 }
 
 const CompanyProfileContext = createContext<CompanyProfileContextValue | undefined>(undefined);
 
-interface DemoStatus {
+interface DemoSessionStatus {
   active: boolean;
   industryId?: string;
   companyId?: string;
@@ -113,11 +130,18 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
     retry: 1,
   });
 
-  // Also check for active demo session (cookie-based)
-  const { data: demoStatus, isLoading: isLoadingDemo } = useQuery<DemoStatus>({
-    queryKey: ['demo-status'],
+  // Check for active demo session (cookie-based - legacy flow for setup wizard)
+  // Include auth header so backend can reject if user has a token (should use new flow)
+  const { data: demoSessionStatus, isLoading: isLoadingDemoSession } = useQuery<DemoSessionStatus>({
+    queryKey: ['demo-session-status'],
     queryFn: async () => {
-      const response = await fetch('/api/demo/status');
+      const token = localStorage.getItem('auth_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('/api/demo/status', { headers });
       if (!response.ok) {
         return { active: false };
       }
@@ -127,13 +151,49 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
     retry: 1,
   });
 
-  const isLoading = isLoadingProfile || isLoadingDemo;
+  // Check demo request status (new approval-based flow)
+  const { data: demoRequestStatus, isLoading: isLoadingDemoRequest, refetch: refetchDemoStatus } = useQuery<DemoRequestStatus>({
+    queryKey: ['demo-request-status'],
+    queryFn: async () => {
+      // Only check if we have an auth token
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        return { isDemoUser: false };
+      }
+      
+      const response = await fetch('/api/tenant-auth/demo-status', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        return { isDemoUser: false };
+      }
+      return response.json();
+    },
+    staleTime: 30 * 1000, // 30 seconds - check more frequently for approval status
+    retry: 1,
+  });
 
-  // hasActiveCompany is true if either:
-  // 1. There's an active company in the database, OR
-  // 2. There's an active demo session (user selected industry in setup wizard)
-  const hasActiveCompany = (profile?.active ?? false) || (demoStatus?.active ?? false);
-  const isDemoMode = demoStatus?.active || (!profile?.active && !demoStatus?.active) || profile?.company?.status === 'demo';
+  const isLoading = isLoadingProfile || isLoadingDemoSession || isLoadingDemoRequest;
+
+  // Determine if this is a demo user and if they're approved
+  const isDemoUser = demoRequestStatus?.isDemoUser ?? false;
+  const isDemoApproved = demoRequestStatus?.isApproved ?? false;
+  const demoIndustry = demoRequestStatus?.demoIndustry ?? null;
+
+  // hasActiveCompany is true if:
+  // 1. There's an active company in the database (real tenant), OR
+  // 2. Demo user with APPROVED status (demo_active) - must be approved to access data
+  // Note: Legacy cookie-based demo sessions are only valid for non-demo-token users
+  const hasActiveCompany = (profile?.active ?? false) || 
+    (isDemoUser && isDemoApproved) ||
+    (!isDemoUser && (demoSessionStatus?.active ?? false)); // Legacy session only if not using token auth
+
+  const isDemoMode = isDemoUser || 
+    (!isDemoUser && demoSessionStatus?.active) || 
+    (!profile?.active) || 
+    profile?.company?.status === 'demo';
 
   const value: CompanyProfileContextValue = {
     profile: profile ?? null,
@@ -141,7 +201,14 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
     error: error as Error | null,
     hasActiveCompany,
     isDemoMode,
-    refresh: () => refetch(),
+    isDemoUser,
+    isDemoApproved,
+    demoIndustry,
+    demoStatus: demoRequestStatus ?? null,
+    refresh: () => {
+      refetch();
+      refetchDemoStatus();
+    },
   };
 
   return (

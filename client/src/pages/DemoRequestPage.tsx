@@ -19,16 +19,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// Demo industries (matching backend)
+// Demo industries (matching backend seed data)
 const DEMO_INDUSTRIES = [
-  { id: 'utilities', name: 'Utilities & Energy', description: 'Power generation, renewables, grid modernization' },
-  { id: 'manufacturing', name: 'Manufacturing', description: 'Discrete & process manufacturing, supply chain' },
-  { id: 'financial', name: 'Financial Services', description: 'Banking, insurance, fintech transformation' },
-  { id: 'healthcare', name: 'Healthcare', description: 'Provider systems, payer operations, digital health' },
+  { id: 'energy-utilities', name: 'Energy & Utilities', description: 'Power generation, renewables, grid modernization' },
   { id: 'technology', name: 'Technology', description: 'Software, hardware, cloud services' },
-  { id: 'government', name: 'Government', description: 'Federal, state, local agency modernization' },
-  { id: 'retail', name: 'Retail & CPG', description: 'Omnichannel retail, consumer goods' },
-  { id: 'telecom', name: 'Telecommunications', description: '5G rollout, network transformation' },
+  { id: 'healthcare', name: 'Healthcare', description: 'Provider systems, payer operations, digital health' },
+  { id: 'financial-services', name: 'Financial Services', description: 'Banking, insurance, fintech transformation' },
+  { id: 'manufacturing', name: 'Manufacturing', description: 'Discrete & process manufacturing, supply chain' },
+  { id: 'retail-ecommerce', name: 'Retail & E-commerce', description: 'Omnichannel retail, consumer products' },
+  { id: 'telecommunications', name: 'Telecommunications', description: '5G rollout, network transformation' },
+  { id: 'transportation-logistics', name: 'Transportation & Logistics', description: 'Supply chain, fleet management' },
 ];
 
 export default function DemoRequestPage() {
@@ -66,14 +66,21 @@ export default function DemoRequestPage() {
 
       // Store demo access token
       localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('auth_token', data.accessToken);
       localStorage.setItem('demoMode', 'true');
       localStorage.setItem('auth_user', JSON.stringify(data.user));
 
       setSuccess(true);
 
-      // Wait 2 seconds to show success message, then redirect
+      // Redirect based on approval status
       setTimeout(() => {
-        navigate('/dashboard?demo=true');
+        if (data.isApproved) {
+          // Already approved (existing user) - go to dashboard
+          navigate('/dashboard?demo=true');
+        } else {
+          // New request - go to pending approval page
+          navigate('/demo/pending');
+        }
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'Failed to submit demo request');
@@ -91,12 +98,12 @@ export default function DemoRequestPage() {
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-6">
         <Card className="max-w-md w-full">
           <CardContent className="pt-12 pb-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-8 h-8 text-amber-600" />
             </div>
-            <h2 className="text-2xl font-bold mb-3">Demo Access Granted!</h2>
+            <h2 className="text-2xl font-bold mb-3">Demo Request Submitted!</h2>
             <p className="text-gray-600 mb-6">
-              Redirecting you to your personalized {DEMO_INDUSTRIES.find(i => i.id === formData.demoIndustry)?.name || 'industry'} demo...
+              Your request for the {DEMO_INDUSTRIES.find(i => i.id === formData.demoIndustry)?.name || 'industry'} demo is being reviewed...
             </p>
             <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
           </CardContent>

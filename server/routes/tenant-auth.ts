@@ -125,34 +125,54 @@ router.post('/demo-login', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid demo credentials. Use password: nexusppm' });
     }
 
-    // Record demo request (lead capture)
-    const [demoRequest] = await db
-      .insert(demoRequests)
-      .values({
-        email: email.toLowerCase(),
-        status: 'demo_active',
-      })
-      .returning();
+    // Check if user already has a demo request
+    const [existingRequest] = await db
+      .select()
+      .from(demoRequests)
+      .where(eq(demoRequests.email, email.toLowerCase()))
+      .limit(1);
 
-    // Create demo session (no actual user account)
+    let demoRequest = existingRequest;
+
+    if (!existingRequest) {
+      // Create new demo request with 'requested' status (requires admin approval)
+      const [newRequest] = await db
+        .insert(demoRequests)
+        .values({
+          email: email.toLowerCase(),
+          status: 'requested',
+        })
+        .returning();
+      demoRequest = newRequest;
+    }
+
+    // Generate token with demo request ID (used to check status later)
     const demoToken = generateAccessToken({
-      userId: demoRequest.id, // Use demo request ID as temporary user ID
-      tenantId: null, // No tenant for demo
+      userId: demoRequest.id,
+      tenantId: null,
       email: email.toLowerCase(),
-      role: 'viewer',
+      role: 'demo_user',
       isSystemAdmin: false,
     });
+
+    // Check if demo is approved
+    const isApproved = demoRequest.status === 'demo_active';
 
     res.json({
       success: true,
       demoMode: true,
+      demoRequestId: demoRequest.id,
+      demoStatus: demoRequest.status,
+      isApproved,
       user: {
         email: email.toLowerCase(),
         role: 'viewer',
         isDemo: true,
       },
       accessToken: demoToken,
-      message: 'Demo access granted. Explore with ACME sample data.',
+      message: isApproved 
+        ? 'Demo access granted. Explore with ACME sample data.'
+        : 'Demo request received! An admin will review and approve your access shortly.',
     });
   } catch (error: any) {
     console.error('Demo login error:', error);
@@ -172,58 +192,128 @@ router.post('/demo-request', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email required' });
     }
 
-    // Create demo request
-    const [demoRequest] = await db
-      .insert(demoRequests)
-      .values({
-        email: email.toLowerCase(),
-        firstName,
-        lastName,
-        companyName,
-        phone,
-        demoIndustry,
-        status: 'demo_active',
-      })
-      .returning();
+    // Check if user already has a demo request
+    const [existingRequest] = await db
+      .select()
+      .from(demoRequests)
+      .where(eq(demoRequests.email, email.toLowerCase()))
+      .limit(1);
 
-    // Log to console (will be email in production)
-    console.log('\n🎯 NEW DEMO REQUEST:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`Email: ${email}`);
-    console.log(`Name: ${firstName} ${lastName}`);
-    console.log(`Company: ${companyName}`);
-    console.log(`Phone: ${phone}`);
-    console.log(`Industry: ${demoIndustry}`);
-    console.log(`Demo Credentials:`);
-    console.log(`  Email: ${email}`);
-    console.log(`  Password: nexusppm`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    let demoRequest = existingRequest;
 
-    // Generate demo access token
+    if (!existingRequest) {
+      // Create demo request with 'requested' status (requires admin approval)
+      const [newRequest] = await db
+        .insert(demoRequests)
+        .values({
+          email: email.toLowerCase(),
+          firstName,
+          lastName,
+          companyName,
+          phone,
+          demoIndustry,
+          status: 'requested',
+        })
+        .returning();
+      demoRequest = newRequest;
+
+      // Log to console (will be email in production)
+      console.log('\n🎯 NEW DEMO REQUEST (PENDING APPROVAL):');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`Email: ${email}`);
+      console.log(`Name: ${firstName} ${lastName}`);
+      console.log(`Company: ${companyName}`);
+      console.log(`Phone: ${phone}`);
+      console.log(`Industry: ${demoIndustry}`);
+      console.log(`Status: PENDING ADMIN APPROVAL`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    }
+
+    // Generate demo access token (used to check status later)
     const demoToken = generateAccessToken({
       userId: demoRequest.id,
       tenantId: null,
       email: email.toLowerCase(),
-      role: 'viewer',
+      role: 'demo_user',
       isSystemAdmin: false,
     });
+
+    // Check if demo is approved
+    const isApproved = demoRequest.status === 'demo_active';
 
     res.json({
       success: true,
       demoMode: true,
       demoRequestId: demoRequest.id,
+      demoStatus: demoRequest.status,
+      demoIndustry: demoRequest.demoIndustry,
+      isApproved,
       accessToken: demoToken,
       user: {
         email: email.toLowerCase(),
-        firstName,
-        lastName,
+        firstName: demoRequest.firstName,
+        lastName: demoRequest.lastName,
         isDemo: true,
       },
-      message: 'Demo access granted! Redirecting to dashboard...',
+      message: isApproved 
+        ? 'Demo access granted! Redirecting to dashboard...'
+        : 'Demo request submitted! An admin will review and approve your access shortly.',
     });
   } catch (error: any) {
     console.error('Demo request error:', error);
     res.status(500).json({ error: error.message || 'Demo request failed' });
+  }
+});
+
+// ============================================================================
+// GET /api/auth/demo-status
+// Check current user's demo request status and industry
+// ============================================================================
+router.get('/demo-status', requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    // Check if this is a demo user (role = demo_user means their userId is actually a demoRequest.id)
+    if (req.user.role !== 'demo_user') {
+      return res.json({
+        isDemoUser: false,
+        message: 'Not a demo user',
+      });
+    }
+
+    // Get demo request by ID (userId contains demoRequest.id for demo users)
+    const [demoRequest] = await db
+      .select()
+      .from(demoRequests)
+      .where(eq(demoRequests.id, req.user.userId))
+      .limit(1);
+
+    if (!demoRequest) {
+      return res.status(404).json({ error: 'Demo request not found' });
+    }
+
+    const isApproved = demoRequest.status === 'demo_active';
+
+    res.json({
+      isDemoUser: true,
+      demoRequestId: demoRequest.id,
+      status: demoRequest.status,
+      isApproved,
+      demoIndustry: demoRequest.demoIndustry,
+      email: demoRequest.email,
+      firstName: demoRequest.firstName,
+      lastName: demoRequest.lastName,
+      companyName: demoRequest.companyName,
+      createdAt: demoRequest.createdAt,
+      message: isApproved 
+        ? 'Demo access approved. You can view demo data.'
+        : 'Demo request pending. Waiting for admin approval.',
+    });
+  } catch (error: any) {
+    console.error('Demo status error:', error);
+    res.status(500).json({ error: error.message || 'Failed to get demo status' });
   }
 });
 
@@ -452,6 +542,7 @@ console.log('[TenantAuth] ✅ Multi-tenant authentication routes registered:');
 console.log('  - POST /api/tenant-auth/login');
 console.log('  - POST /api/tenant-auth/demo-login');
 console.log('  - POST /api/tenant-auth/demo-request');
+console.log('  - GET  /api/tenant-auth/demo-status');
 console.log('  - GET  /api/tenant-auth/me');
 console.log('  - GET  /api/tenant-auth/invitation/:token');
 console.log('  - POST /api/tenant-auth/invitation/:token/accept');

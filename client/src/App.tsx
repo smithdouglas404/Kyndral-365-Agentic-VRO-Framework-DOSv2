@@ -106,6 +106,7 @@ import OCMWorkspace from "@/pages/workspaces/OCMWorkspace";
 import AdminWorkspace from "@/pages/workspaces/AdminWorkspace";
 import DemoPage from "@/pages/DemoPage";
 import DemoShowcase from "@/pages/DemoShowcase";
+import PendingApprovalPage from "@/pages/PendingApprovalPage";
 
 function Router() {
   return (
@@ -114,6 +115,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/demo" component={DemoRequestPage} />
+      <Route path="/demo/pending" component={PendingApprovalPage} />
       <Route path="/invite/:token" component={InvitationAcceptPage} />
       <Route path="/system-admin" component={SystemAdminPage} />
 
