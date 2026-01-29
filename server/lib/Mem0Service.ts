@@ -111,6 +111,9 @@ export class Mem0Service extends EventEmitter {
     this.emit(`fact:${fact.entity}`, createdFact);
     this.emit(`fact:${fact.entity}:${fact.attribute}`, createdFact);
 
+    // TRIGGER ORCHESTRATOR: Memory change → Caching check → OpenRouter
+    this.notifyOrchestratorOfChange(createdFact);
+
     return createdFact;
   }
 
@@ -423,6 +426,36 @@ export class Mem0Service extends EventEmitter {
       uniqueAttributes: parseInt((result.rows[0] as any).unique_attributes),
       factsByAgent,
     };
+  }
+
+  /**
+   * Notify the event-driven orchestrator when memory changes
+   * This triggers: Caching check (#1) → OpenRouter analysis
+   */
+  private notifyOrchestratorOfChange(fact: Fact): void {
+    try {
+      // Extract project ID from entity if present
+      const projectIdMatch = fact.entity.match(/project[_-]?([a-f0-9-]+)/i);
+      const projectId = projectIdMatch ? projectIdMatch[1] : fact.entity;
+      
+      // Dynamically import to avoid circular dependency
+      import('./EventDrivenOrchestrator.js').then(({ getEventDrivenOrchestrator }) => {
+        const orchestrator = getEventDrivenOrchestrator();
+        if (orchestrator) {
+          orchestrator.registerMemoryChange(
+            projectId,
+            'mem0',
+            `${fact.attribute}`,
+            JSON.stringify(fact.value),
+            fact.sourceAgent
+          );
+        }
+      }).catch(() => {
+        // Orchestrator not available - silent fail
+      });
+    } catch (error) {
+      // Silent fail - orchestrator notification is optional
+    }
   }
 }
 

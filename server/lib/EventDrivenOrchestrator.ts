@@ -22,14 +22,15 @@ interface ProjectHash {
 
 // Change event that triggers analysis
 export interface ChangeEvent {
-  type: 'project_update' | 'budget_change' | 'schedule_change' | 'risk_change' | 'milestone' | 'resource_change';
+  type: 'project_update' | 'budget_change' | 'schedule_change' | 'risk_change' | 'milestone' | 'resource_change' | 'memory_change';
   projectId: string;
   field?: string;
   previousValue?: any;
   newValue?: any;
   severity: 'low' | 'medium' | 'high' | 'critical';
   timestamp: Date;
-  source: string; // What triggered the change
+  source: string; // What triggered the change (e.g., 'mem0', 'letta', 'api')
+  memoryType?: 'mem0' | 'letta'; // For memory_change events
 }
 
 // Agent summary note
@@ -105,6 +106,45 @@ export class EventDrivenOrchestrator {
     
     // Store in Mem0 for historical tracking (no API cost - just memory)
     this.storeEventInMemory(event);
+  }
+
+  /**
+   * Register a memory change from Mem0 or Letta
+   * This triggers: Caching check (#1) → OpenRouter analysis
+   */
+  registerMemoryChange(
+    projectId: string,
+    memoryType: 'mem0' | 'letta',
+    factKey: string,
+    factValue: string,
+    category?: string
+  ): void {
+    // Determine severity based on content
+    let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    const lowerValue = factValue.toLowerCase();
+    if (lowerValue.includes('critical') || lowerValue.includes('urgent') || lowerValue.includes('blocker')) {
+      severity = 'critical';
+    } else if (lowerValue.includes('high') || lowerValue.includes('risk') || lowerValue.includes('overrun')) {
+      severity = 'high';
+    } else if (lowerValue.includes('medium') || lowerValue.includes('delay') || lowerValue.includes('issue')) {
+      severity = 'medium';
+    }
+
+    const event: ChangeEvent = {
+      type: 'memory_change',
+      projectId,
+      field: factKey,
+      newValue: factValue,
+      severity,
+      timestamp: new Date(),
+      source: memoryType,
+      memoryType,
+    };
+
+    // Register as a change event - this goes through caching first
+    this.registerChange(event);
+    
+    console.log(`[EventDrivenOrchestrator] Memory change from ${memoryType}: ${factKey} → triggers caching check then OpenRouter`);
   }
 
   /**
@@ -269,6 +309,22 @@ export class EventDrivenOrchestrator {
         case 'resource_change':
           agents.add('deepocm');
           agents.add('deeppmo');
+          break;
+        case 'memory_change':
+          // Mem0/Letta stored new facts - trigger relevant agents via OpenRouter
+          // Memory changes always go through caching check first, then OpenRouter
+          if (event.field?.includes('risk') || event.field?.includes('threat')) {
+            agents.add('deeprisk');
+          } else if (event.field?.includes('budget') || event.field?.includes('cost') || event.field?.includes('spend')) {
+            agents.add('deepfinops');
+          } else if (event.field?.includes('schedule') || event.field?.includes('timeline')) {
+            agents.add('deeptmo');
+          } else if (event.field?.includes('value') || event.field?.includes('benefit')) {
+            agents.add('deepvro');
+          } else {
+            // General memory update - trigger integrated management for coordination
+            agents.add('deepintegratedmgmt');
+          }
           break;
         case 'project_update':
         default:
