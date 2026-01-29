@@ -56,7 +56,7 @@ export default function LandingPage() {
         <div className="text-center space-y-6">
           <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
             <Sparkles className="w-3 h-3 mr-1" />
-            10 Specialized AI Agents Working 24/7
+            Purpose Built Agents Working 24/7
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
             Kyndryl Clarity
@@ -188,7 +188,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              10 Specialized AI Agents
+              Purpose Built Agents
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Each agent is an expert in its domain, working together to provide comprehensive portfolio intelligence
