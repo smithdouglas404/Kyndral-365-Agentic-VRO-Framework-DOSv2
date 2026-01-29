@@ -91,8 +91,16 @@ interface CompanyProfileContextValue {
 
 const CompanyProfileContext = createContext<CompanyProfileContextValue | undefined>(undefined);
 
+interface DemoStatus {
+  active: boolean;
+  industryId?: string;
+  companyId?: string;
+  companyName?: string;
+}
+
 export function CompanyProfileProvider({ children }: { children: ReactNode }) {
-  const { data: profile, isLoading, error, refetch } = useQuery<CompanyProfile>({
+  // Check for active company in database
+  const { data: profile, isLoading: isLoadingProfile, error, refetch } = useQuery<CompanyProfile>({
     queryKey: ['company-profile', 'active'],
     queryFn: async () => {
       const response = await fetch('/api/company-profile/active');
@@ -105,8 +113,27 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
     retry: 1,
   });
 
-  const hasActiveCompany = profile?.active ?? false;
-  const isDemoMode = !hasActiveCompany || profile?.company?.status === 'demo';
+  // Also check for active demo session (cookie-based)
+  const { data: demoStatus, isLoading: isLoadingDemo } = useQuery<DemoStatus>({
+    queryKey: ['demo-status'],
+    queryFn: async () => {
+      const response = await fetch('/api/demo/status');
+      if (!response.ok) {
+        return { active: false };
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+  });
+
+  const isLoading = isLoadingProfile || isLoadingDemo;
+
+  // hasActiveCompany is true if either:
+  // 1. There's an active company in the database, OR
+  // 2. There's an active demo session (user selected industry in setup wizard)
+  const hasActiveCompany = (profile?.active ?? false) || (demoStatus?.active ?? false);
+  const isDemoMode = demoStatus?.active || (!profile?.active && !demoStatus?.active) || profile?.company?.status === 'demo';
 
   const value: CompanyProfileContextValue = {
     profile: profile ?? null,
