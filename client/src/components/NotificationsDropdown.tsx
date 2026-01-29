@@ -1,10 +1,11 @@
-import { Bell, Check, X, AlertCircle, CheckCircle, Info, AlertTriangle, ExternalLink, Wifi, WifiOff } from "lucide-react";
+import { Bell, Check, X, AlertCircle, CheckCircle, Info, AlertTriangle, ExternalLink, Wifi, WifiOff, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDismissNotification, type Notification } from "@/hooks/useNotifications";
 import { useWebSocketContext } from "@/contexts/WebSocketContext";
+import { useCompanyProfile } from "@/contexts/CompanyProfileContext";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
@@ -109,13 +110,15 @@ function NotificationItem({ notification, onMarkRead, onDismiss }: {
 }
 
 export function NotificationsDropdown() {
+  const { hasActiveCompany, isLoading: profileLoading } = useCompanyProfile();
   const { data: notifications = [], isLoading } = useNotifications(true);
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const dismiss = useDismissNotification();
   const { isConnected } = useWebSocketContext();
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  // Only show notification count if setup is complete
+  const unreadCount = hasActiveCompany ? notifications.filter(n => !n.isRead).length : 0;
 
   return (
     <DropdownMenu>
@@ -130,7 +133,7 @@ export function NotificationsDropdown() {
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
-          {isConnected && (
+          {hasActiveCompany && isConnected && (
             <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-white" title="Live updates active" />
           )}
         </Button>
@@ -139,18 +142,18 @@ export function NotificationsDropdown() {
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-sm">Notifications</h3>
-            {isConnected ? (
+            {hasActiveCompany && isConnected ? (
               <span className="flex items-center gap-1 text-[10px] text-green-600">
                 <Wifi className="h-3 w-3" />
                 Live
               </span>
-            ) : (
+            ) : hasActiveCompany ? (
               <span className="flex items-center gap-1 text-[10px] text-gray-400">
                 <WifiOff className="h-3 w-3" />
               </span>
-            )}
+            ) : null}
           </div>
-          {unreadCount > 0 && (
+          {hasActiveCompany && unreadCount > 0 && (
             <Button 
               variant="ghost" 
               size="sm" 
@@ -164,7 +167,13 @@ export function NotificationsDropdown() {
         </div>
         
         <ScrollArea className="max-h-96">
-          {isLoading ? (
+          {!hasActiveCompany ? (
+            <div className="p-8 text-center text-sm text-gray-500">
+              <Settings className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              <p className="font-medium text-gray-600 mb-1">Setup Required</p>
+              <p className="text-xs">Complete the setup wizard to enable notifications</p>
+            </div>
+          ) : isLoading || profileLoading ? (
             <div className="p-8 text-center text-sm text-gray-500">
               Loading...
             </div>
@@ -185,7 +194,7 @@ export function NotificationsDropdown() {
           )}
         </ScrollArea>
         
-        {notifications.length > 0 && (
+        {hasActiveCompany && notifications.length > 0 && (
           <>
             <DropdownMenuSeparator />
             <div className="p-2">

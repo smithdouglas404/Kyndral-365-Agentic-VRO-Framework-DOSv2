@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { useUnifiedNotifications } from '@/contexts/UnifiedNotificationContext';
+import { useCompanyProfile } from '@/contexts/CompanyProfileContext';
 import { AlertsFlyout } from '@/components/AlertsFlyout';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +23,7 @@ import { cn } from '@/lib/utils';
 
 interface GlobalNotificationBellProps {
   className?: string;
-  variant?: 'default' | 'ghost' | 'minimal';
+  variant?: 'default' | 'ghost';
 }
 
 export function GlobalNotificationBell({
@@ -30,10 +31,12 @@ export function GlobalNotificationBell({
   variant = 'ghost'
 }: GlobalNotificationBellProps) {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const { hasActiveCompany } = useCompanyProfile();
   const { unreadCount, criticalCount, isConnected } = useUnifiedNotifications();
 
-  const hasCritical = criticalCount > 0;
-  const hasUnread = unreadCount > 0;
+  // Only show counts if setup is complete
+  const hasCritical = hasActiveCompany && criticalCount > 0;
+  const hasUnread = hasActiveCompany && unreadCount > 0;
 
   return (
     <>
@@ -125,7 +128,7 @@ export function GlobalNotificationBell({
 export function GlobalNotificationBellMini() {
   return (
     <GlobalNotificationBell
-      variant="minimal"
+      variant="ghost"
       className="h-8 w-8"
     />
   );

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, AlertTriangle, Lightbulb, TrendingUp, GitBranch, Zap, Target, X, DollarSign, Clock, Users, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLocation } from 'wouter';
+import { useCompanyProfile } from '@/contexts/CompanyProfileContext';
 
 interface CommandCenterIntervention {
   id: string;
@@ -54,6 +55,7 @@ const typeIcons: Record<string, React.ReactNode> = {
  */
 export function FloatingAlertBanner() {
   const [location, setLocation] = useLocation();
+  const { hasActiveCompany } = useCompanyProfile();
   const [showBanner, setShowBanner] = useState(false);
   const [currentIntervention, setCurrentIntervention] = useState<CommandCenterIntervention | null>(null);
   const seenIdsRef = useRef<Set<string>>(new Set());
@@ -61,8 +63,8 @@ export function FloatingAlertBanner() {
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Show on dashboard, segment, and command center pages
-  const shouldShowBanner = location && (
+  // Only show alerts if setup is complete AND on relevant pages
+  const shouldShowBanner = hasActiveCompany && location && (
     location === '/dashboard' ||
     location.startsWith('/dashboard/') ||
     location.startsWith('/segment/') ||

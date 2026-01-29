@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Brain, AlertTriangle, Lightbulb, TrendingUp, GitBranch, Zap, Target, Clock, ChevronRight, DollarSign, Users, Shield } from 'lucide-react';
+import { X, Brain, AlertTriangle, Lightbulb, TrendingUp, GitBranch, Zap, Target, Clock, ChevronRight, DollarSign, Users, Shield, Settings } from 'lucide-react';
 import { useUnifiedNotifications, UnifiedNotification, NotificationSeverity } from '@/contexts/UnifiedNotificationContext';
+import { useCompanyProfile } from '@/contexts/CompanyProfileContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -33,6 +34,7 @@ interface AlertsFlyoutProps {
 }
 
 export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
+  const { hasActiveCompany } = useCompanyProfile();
   const {
     notifications,
     unreadCount,
@@ -171,12 +173,12 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
                   <div>
                     <h2 className="font-bold text-lg">Notification Center</h2>
                     <p className="text-sm text-white/80">
-                      {unreadCount} unread · {critical.length} critical
+                      {hasActiveCompany ? `${unreadCount} unread · ${critical.length} critical` : 'Setup required'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {unreadCount > 0 && (
+                  {hasActiveCompany && unreadCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -199,7 +201,21 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
               </div>
             </div>
 
-            {/* Tabs */}
+            {/* Setup Required Message or Tabs */}
+            {!hasActiveCompany ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center py-12 px-6">
+                  <Settings size={64} className="mx-auto mb-4 text-gray-300" />
+                  <h3 className="font-semibold text-lg text-gray-700 mb-2">Setup Required</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Complete the setup wizard to enable notifications and alerts.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Once configured, you'll receive real-time insights from AI agents monitoring your portfolio.
+                  </p>
+                </div>
+              </div>
+            ) : (
             <Tabs defaultValue="all" className="flex-1 flex flex-col overflow-hidden">
               <TabsList className="w-full justify-start rounded-none border-b px-4 bg-gray-50">
                 <TabsTrigger value="all" className="text-xs">
@@ -296,6 +312,7 @@ export function AlertsFlyout({ isOpen, onClose }: AlertsFlyoutProps) {
                 </ScrollArea>
               </TabsContent>
             </Tabs>
+            )}
 
             {/* Footer */}
             <div className="p-4 border-t bg-gray-50">

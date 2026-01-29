@@ -4,6 +4,7 @@ import { ChevronDown, Activity, User, Settings, LogOut, Menu } from 'lucide-reac
 import { GlobalNotificationBell } from './GlobalNotificationBell';
 import { ConnectionIndicator } from './RealTimeNotifications';
 import { useUnifiedNotifications } from '@/contexts/UnifiedNotificationContext';
+import { useCompanyProfile } from '@/contexts/CompanyProfileContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,6 +67,7 @@ export function GlobalHeader({
 }: GlobalHeaderProps) {
   const [location, navigate] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { hasActiveCompany } = useCompanyProfile();
   const { notifications, criticalCount } = useUnifiedNotifications();
 
   // Detect current workspace from URL
@@ -74,11 +76,11 @@ export function GlobalHeader({
 
   const currentWorkspaceData = WORKSPACES.find(w => w.id === currentWorkspace);
 
-  // Count active agent activities (last 5 minutes)
-  const recentActivities = notifications.filter(n => {
+  // Count active agent activities (last 5 minutes) - only if setup is complete
+  const recentActivities = hasActiveCompany ? notifications.filter(n => {
     const age = Date.now() - n.timestamp.getTime();
     return age < 5 * 60 * 1000; // 5 minutes
-  }).length;
+  }).length : 0;
 
   return (
     <header
