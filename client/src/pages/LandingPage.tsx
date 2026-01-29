@@ -314,8 +314,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
           <h2 className="text-4xl font-bold">Ready to Explore?</h2>
           <p className="text-xl text-blue-100">
-            See how 10 specialized AI agents can save your team 40% of their time
-            while detecting risks 2-3 weeks earlier
+            See how Agentic Technology can save time, increase productivity, while detecting risks 2-3 weeks earlier
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
             <Button
