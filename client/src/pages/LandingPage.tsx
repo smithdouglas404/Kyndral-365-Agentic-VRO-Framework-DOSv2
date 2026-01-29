@@ -65,9 +65,7 @@ export default function LandingPage() {
             <span className="text-blue-600">Portfolio Intelligence</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Transform from reactive firefighting to proactive intelligence.
-            Ten specialized AI agents monitor portfolios, predict risks, and recommend
-            actions—before problems escalate.
+            Detect, predict, and recommend—monitor your portfolio to resolve risks before they escalate.
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
             <Button
