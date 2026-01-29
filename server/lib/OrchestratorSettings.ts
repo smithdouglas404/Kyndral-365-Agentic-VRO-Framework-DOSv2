@@ -28,13 +28,15 @@ export interface OrchestratorSettings {
  */
 export async function getOrchestratorSettings(): Promise<OrchestratorSettings> {
   try {
-    const enabledRow = await db.query.appConfig.findFirst({
-      where: eq(appConfig.configKey, ORCHESTRATOR_ENABLED_KEY),
-    });
+    const [enabledRow] = await db.select()
+      .from(appConfig)
+      .where(eq(appConfig.configKey, ORCHESTRATOR_ENABLED_KEY))
+      .limit(1);
 
-    const intervalRow = await db.query.appConfig.findFirst({
-      where: eq(appConfig.configKey, ORCHESTRATOR_INTERVAL_KEY),
-    });
+    const [intervalRow] = await db.select()
+      .from(appConfig)
+      .where(eq(appConfig.configKey, ORCHESTRATOR_INTERVAL_KEY))
+      .limit(1);
 
     return {
       enabled: enabledRow?.configValue === 'true',
@@ -56,9 +58,10 @@ export async function getOrchestratorSettings(): Promise<OrchestratorSettings> {
  */
 export async function setOrchestratorEnabled(enabled: boolean): Promise<void> {
   try {
-    const existing = await db.query.appConfig.findFirst({
-      where: eq(appConfig.configKey, ORCHESTRATOR_ENABLED_KEY),
-    });
+    const [existing] = await db.select()
+      .from(appConfig)
+      .where(eq(appConfig.configKey, ORCHESTRATOR_ENABLED_KEY))
+      .limit(1);
 
     if (existing) {
       await db.update(appConfig)
@@ -91,9 +94,10 @@ export async function setOrchestratorInterval(intervalMs: number): Promise<void>
     // Minimum 30 seconds to prevent credit burn
     const safeInterval = Math.max(30000, intervalMs);
 
-    const existing = await db.query.appConfig.findFirst({
-      where: eq(appConfig.configKey, ORCHESTRATOR_INTERVAL_KEY),
-    });
+    const [existing] = await db.select()
+      .from(appConfig)
+      .where(eq(appConfig.configKey, ORCHESTRATOR_INTERVAL_KEY))
+      .limit(1);
 
     if (existing) {
       await db.update(appConfig)

@@ -1,10 +1,17 @@
-# Agentic Nexus - Deep Agent System
+# Kyndryl 365 AI - Level 4 Autonomous System
+
+**Version:** 2.0.0  
+**Updated:** 2026-01-29
 
 ## Overview
 
-Agentic Nexus is an enterprise-grade AI-powered project management and governance platform that orchestrates multiple specialized AI agents to provide continuous monitoring, risk assessment, and intelligent interventions across organizational portfolios. The system implements a sophisticated multi-agent architecture with 10 specialized agents (6 Deep Agents + 4 Standard Agents) that collaborate via an A2A (Agent-to-Agent) message bus to deliver real-time insights, predictions, and automated recommendations.
+Kyndryl 365 AI is a Level 4 fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements 10 specialized Deep Agents that continuously monitor, learn, communicate, and take action without human intervention.
 
-The platform serves as a comprehensive transformation management office (TMO) solution, integrating portfolio management, risk assessment, financial operations (FinOps), value realization (VRO), organizational change management (OCM), and governance capabilities into a unified AI-driven system.
+Key Architecture (v2.0.0):
+- **Cost Optimization Flow**: Cache → OpenRouter ($0.10-0.50/1M) → Claude ($3-15/1M complex only)
+- **Admin Control**: Orchestrator OFF by default, persisted setting survives restarts
+- **Self-Learning**: Agents query their own Mem0 risks each cycle
+- **A2A Communication**: Unlimited agent-to-agent messaging via message bus
 
 ## User Preferences
 
