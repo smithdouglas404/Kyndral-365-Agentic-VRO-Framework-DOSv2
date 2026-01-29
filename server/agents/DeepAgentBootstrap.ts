@@ -88,17 +88,28 @@ export class DeepAgentBootstrap {
       console.log('[DeepAgentBootstrap] Initializing continuous orchestrator...');
       this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
 
-      // DISABLED: Continuous orchestration was consuming Anthropic API credits
-      // To re-enable, uncomment the line below:
-      // await this.orchestrator.start(60000);
+      // Check persisted setting - auto-start only if admin enabled it
+      const { getOrchestratorSettings, getCostOptimizationStatus } = await import('../lib/OrchestratorSettings.js');
+      const settings = await getOrchestratorSettings();
+      const costStatus = getCostOptimizationStatus();
       
       this.isInitialized = true;
 
       console.log('[DeepAgentBootstrap] ✅ Deep agent system initialized');
-      console.log('[DeepAgentBootstrap] ⚠️  Continuous orchestration DISABLED (saves API credits)');
       console.log('[DeepAgentBootstrap] ✅ A2A message bus active');
       console.log('[DeepAgentBootstrap] ✅ MCP protocol ready');
-      console.log('[DeepAgentBootstrap] 💡 Agents run on-demand only (not automatically)');
+      console.log(`[DeepAgentBootstrap] ✅ Cost optimization: ${costStatus.preferredTier}`);
+      
+      if (settings.enabled) {
+        // Admin enabled orchestration - auto-start
+        console.log('[DeepAgentBootstrap] ⚡ Orchestration ENABLED by admin');
+        await this.orchestrator.start(settings.interval);
+        console.log(`[DeepAgentBootstrap] ✅ Continuous orchestration running (${settings.interval / 1000}s interval)`);
+      } else {
+        // Default OFF - respects admin preference
+        console.log('[DeepAgentBootstrap] ⚠️  Continuous orchestration OFF (default)');
+        console.log('[DeepAgentBootstrap] 💡 Admin can enable in Settings > Orchestrator');
+      }
     } catch (error) {
       console.error('[DeepAgentBootstrap] ❌ Initialization failed:', error);
       throw error;

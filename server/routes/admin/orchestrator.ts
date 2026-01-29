@@ -3,13 +3,22 @@
  * 
  * Admin endpoints to control the continuous orchestrator:
  * - Get status (running, interval, cycle count)
- * - Start/stop orchestration
+ * - Start/stop orchestration (persisted setting, default OFF)
  * - Update interval timing
  * - Trigger single agent run
+ * 
+ * Version: 2.0.0
+ * Date: 2026-01-29
  */
 
 import type { Express, Request, Response } from 'express';
 import { authenticate } from '../../auth/authMiddleware.js';
+import { 
+  getOrchestratorSettings, 
+  setOrchestratorEnabled, 
+  setOrchestratorInterval,
+  getCostOptimizationStatus,
+} from '../../lib/OrchestratorSettings.js';
 
 // Reference to orchestrator - dynamically resolved from bootstrap
 let orchestratorInstance: any = null;
@@ -76,14 +85,20 @@ export function registerOrchestratorRoutes(app: Express): void {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
+      // Get persisted settings (default OFF)
+      const settings = await getOrchestratorSettings();
+      const costStatus = getCostOptimizationStatus();
+      
       const orchestrator = getOrchestrator();
       if (!orchestrator) {
         return res.json({
           initialized: false,
+          enabled: settings.enabled, // Persisted setting
           isRunning: false,
-          interval: 0,
+          interval: settings.interval,
           cycleCount: 0,
           agents: [],
+          costOptimization: costStatus,
         });
       }
 
@@ -94,13 +109,15 @@ export function registerOrchestratorRoutes(app: Express): void {
 
       res.json({
         initialized: true,
+        enabled: settings.enabled, // Admin switch (persisted)
         isRunning: status.isRunning || false,
-        interval: status.interval || 60000,
+        interval: settings.interval,
         cycleCount: status.cycleCount || 0,
         lastCycleTime: status.lastCycleTime || null,
         activeScans: status.activeScans || 0,
         a2a: status.a2a || { totalMessages: 0 },
         agents: status.agents || [],
+        costOptimization: costStatus,
       });
     } catch (error: any) {
       console.error('[Orchestrator API] Error getting status:', error);
@@ -128,12 +145,20 @@ export function registerOrchestratorRoutes(app: Express): void {
       // Validate interval (minimum 30 seconds to prevent credit burn)
       const safeInterval = Math.max(30000, Number(interval));
 
+      // Persist the settings (survives restarts)
+      await setOrchestratorEnabled(true);
+      await setOrchestratorInterval(safeInterval);
+
       await orchestrator.start(safeInterval);
+
+      const costStatus = getCostOptimizationStatus();
 
       res.json({
         success: true,
-        message: `Orchestrator started with ${safeInterval / 1000}s interval`,
+        message: `Orchestrator ENABLED with ${safeInterval / 1000}s interval`,
         interval: safeInterval,
+        costOptimization: costStatus,
+        note: 'Setting persisted - will auto-start on next server restart',
       });
     } catch (error: any) {
       console.error('[Orchestrator API] Error starting:', error);
@@ -156,11 +181,15 @@ export function registerOrchestratorRoutes(app: Express): void {
         return res.status(400).json({ error: 'Orchestrator not initialized' });
       }
 
+      // Persist the setting (survives restarts)
+      await setOrchestratorEnabled(false);
+
       orchestrator.stop();
 
       res.json({
         success: true,
-        message: 'Orchestrator stopped',
+        message: 'Orchestrator DISABLED',
+        note: 'Setting persisted - will remain OFF on next server restart',
       });
     } catch (error: any) {
       console.error('[Orchestrator API] Error stopping:', error);

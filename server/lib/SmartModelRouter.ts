@@ -98,6 +98,7 @@ export class SmartModelRouter {
 
   /**
    * Get the appropriate model for a task based on complexity
+   * OpenRouter tracking: You'll see all requests in your OpenRouter dashboard
    */
   getModel(tier: ModelTier, metadata?: Record<string, any>): BaseChatModel {
     // If OpenRouter is available and tier is not premium, use it
@@ -105,20 +106,30 @@ export class SmartModelRouter {
       const modelName = TIER_MODELS[tier][0];
       console.log(`[SmartModelRouter] Using OpenRouter: ${modelName} (${tier} tier)`);
       
+      // Add tracking headers for OpenRouter dashboard visibility
+      const trackingMetadata = {
+        ...metadata,
+        // These appear in your OpenRouter dashboard
+        'HTTP-Referer': 'https://kyndryl365.ai',
+        'X-Title': 'Kyndryl 365 AI - Agent Orchestration',
+      };
+      
       return new ChatOpenAI({
         modelName,
         temperature: tier === ModelTier.CHEAP ? 0.3 : 0.7,
         openAIApiKey: this.openRouterKey,
         configuration: {
           baseURL: 'https://openrouter.ai/api/v1',
+          defaultHeaders: {
+            'HTTP-Referer': 'https://kyndryl365.ai',
+            'X-Title': 'Kyndryl 365 AI',
+          },
         },
-        modelKwargs: {
-          ...metadata,
-        },
+        modelKwargs: trackingMetadata,
       });
     }
 
-    // Fallback to Anthropic
+    // Fallback to Anthropic (for premium tier or if OpenRouter not configured)
     console.log(`[SmartModelRouter] Using Anthropic Claude (${tier} tier)`);
     return new ChatAnthropic({
       modelName: 'claude-sonnet-4-5-20250929',
