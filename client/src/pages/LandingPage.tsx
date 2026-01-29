@@ -1,6 +1,6 @@
 /**
  * PUBLIC LANDING PAGE
- * Marketing page for Nexus PPM - Kyndryl Clarity
+ * Marketing page for Kyndryl Clarity
  */
 
 import { useLocation } from 'wouter';
@@ -37,8 +37,7 @@ export default function LandingPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Nexus PPM</h1>
-              <p className="text-xs text-gray-600">Kyndryl Clarity</p>
+              <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -348,7 +347,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white font-bold">Nexus PPM</span>
+                <span className="text-white font-bold">Kyndryl Clarity</span>
               </div>
               <p className="text-sm">
                 Kyndryl Clarity - Portfolio Intelligence for enterprise PMOs
@@ -384,7 +383,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-            © 2026 Nexus PPM. All rights reserved.
+            © 2026 Kyndryl Clarity. All rights reserved.
           </div>
         </div>
       </footer>
