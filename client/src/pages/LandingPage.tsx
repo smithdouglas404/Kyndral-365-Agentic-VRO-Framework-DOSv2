@@ -312,7 +312,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="bg-blue-600 text-white py-20">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
-          <h2 className="text-4xl font-bold">Ready to Transform Your PMO?</h2>
+          <h2 className="text-4xl font-bold">Ready to Explore?</h2>
           <p className="text-xl text-blue-100">
             See how 10 specialized AI agents can save your team 40% of their time
             while detecting risks 2-3 weeks earlier
