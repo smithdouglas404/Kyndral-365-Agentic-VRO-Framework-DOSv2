@@ -1,14 +1,18 @@
 # Kyndryl 365 AI - Level 4 Autonomous System
 
-**Version:** 2.0.0  
+**Version:** 2.0.1  
 **Updated:** 2026-01-29
 
 ## Overview
 
 Kyndryl 365 AI is a Level 4 fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements 10 specialized Deep Agents that continuously monitor, learn, communicate, and take action without human intervention.
 
-Key Architecture (v2.0.0):
-- **Cost Optimization Flow**: Cache → OpenRouter ($0.10-0.50/1M) → Claude ($3-15/1M complex only)
+Key Architecture (v2.0.1):
+- **Cost Optimization Flow** (2 tiers only):
+  1. Cache check - Hash comparison, skip if unchanged (no API cost)
+  2. OpenRouter CHEAP tier - Llama 3.1 8B, GPT-4o-mini, Mixtral ($0.10-0.50/1M tokens)
+  3. Claude PREMIUM tier - Only for critical/complex decisions ($3-15/1M tokens)
+- **Full Portfolio Scanning**: Agents scan ALL projects each cycle (not sampled)
 - **Admin Control**: Orchestrator OFF by default, persisted setting survives restarts
 - **Self-Learning**: Agents query their own Mem0 risks each cycle
 - **A2A Communication**: Unlimited agent-to-agent messaging via message bus

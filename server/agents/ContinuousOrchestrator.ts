@@ -557,11 +557,10 @@ export class ContinuousOrchestrator {
     const config = this.getAgentConfig(agent, agentId);
 
     try {
-      // Get projects to scan (sample 3 random projects per cycle)
+      // Get ALL projects to scan (Level 4 autonomy - full portfolio coverage)
       const allProjects = await this.storage.getProjects();
-      const projectsToScan = this.sampleProjects(allProjects, 3);
 
-      this.state.activeScans.set(config.agentId, projectsToScan.map(p => p.id));
+      this.state.activeScans.set(config.agentId, allProjects.map(p => p.id));
 
       // LEVEL 4 AUTONOMY: Agent also checks their own Mem0 risks
       const mem0Risks = await this.checkAgentMem0Risks(agentId);
@@ -571,7 +570,7 @@ export class ContinuousOrchestrator {
         eventType: 'detection',
         primaryAgentId: config.agentId,
         primaryAgentName: config.agentName,
-        summary: `${config.agentName} scanning ${projectsToScan.length} projects + ${mem0Risks.length} stored risks`,
+        summary: `${config.agentName} scanning ALL ${allProjects.length} projects + ${mem0Risks.length} stored risks`,
       });
 
       const findings: any[] = [];
@@ -589,9 +588,9 @@ export class ContinuousOrchestrator {
         });
       }
 
-      // Each agent uses its tools to analyze projects
-      // COST FLOW: Cache check → OpenRouter → Claude (embedded in agent.run)
-      for (const project of projectsToScan) {
+      // Each agent uses its tools to analyze ALL projects
+      // COST FLOW: Cache check → OpenRouter (cheap) → Claude (complex only)
+      for (const project of allProjects) {
         // Check if project has issues in agent's domain
         const issue = await this.detectIssue(agent, agentId, project);
         if (issue) {

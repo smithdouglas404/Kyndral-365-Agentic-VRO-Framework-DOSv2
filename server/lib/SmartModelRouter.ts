@@ -14,10 +14,10 @@ import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import crypto from 'crypto';
 
 // Model tiers for different task complexity
+// DESIGN: Only 2 tiers - cheap for routine, Claude for complex only
 export enum ModelTier {
-  CHEAP = 'cheap',      // Routine monitoring, simple checks
-  BALANCED = 'balanced', // Standard analysis
-  PREMIUM = 'premium',   // Complex reasoning, critical decisions
+  CHEAP = 'cheap',      // Routine monitoring via OpenRouter (Llama, GPT-4o-mini, Mixtral)
+  PREMIUM = 'premium',   // Complex reasoning, critical decisions (Claude only)
 }
 
 // Cost per 1M tokens (input/output average)
@@ -33,21 +33,17 @@ const MODEL_COSTS: Record<string, number> = {
 };
 
 // Tier to model mapping
+// CHEAP: OpenRouter models ($0.10-0.50/1M tokens)
+// PREMIUM: Claude only for complex decisions ($3-15/1M tokens)
 const TIER_MODELS: Record<ModelTier, string[]> = {
   [ModelTier.CHEAP]: [
     'meta-llama/llama-3.1-8b-instruct',
     'openai/gpt-4o-mini',
     'mistralai/mixtral-8x7b-instruct',
   ],
-  [ModelTier.BALANCED]: [
-    'anthropic/claude-3-haiku',
-    'openai/gpt-4o-mini',
-    'mistralai/mixtral-8x7b-instruct',
-  ],
   [ModelTier.PREMIUM]: [
     'anthropic/claude-3.5-sonnet',
     'anthropic/claude-sonnet-4',
-    'openai/gpt-4o',
   ],
 };
 
@@ -176,6 +172,7 @@ export class SmartModelRouter {
     const hasCritical = changes.some(c => c.severity === 'critical');
     const hasHigh = changes.some(c => c.severity === 'high');
     
+    // PREMIUM tier: Only for critical changes (Claude)
     if (hasCritical) {
       return {
         tier: ModelTier.PREMIUM,
@@ -184,17 +181,10 @@ export class SmartModelRouter {
       };
     }
 
-    if (hasHigh) {
-      return {
-        tier: ModelTier.BALANCED,
-        reason: `High-priority changes: ${changes.filter(c => c.severity === 'high').map(c => c.changeType).join(', ')}`,
-        skipAnalysis: false,
-      };
-    }
-
+    // CHEAP tier: All other changes use OpenRouter models
     return {
       tier: ModelTier.CHEAP,
-      reason: 'Low/medium changes only',
+      reason: hasHigh ? `High-priority changes: ${changes.filter(c => c.severity === 'high').map(c => c.changeType).join(', ')}` : 'Low/medium changes only',
       skipAnalysis: false,
     };
   }
