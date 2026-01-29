@@ -38,24 +38,14 @@ export function DemoModeBanner() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={() => setLocation('/admin/company-profile')}
-            variant="secondary"
-            size="sm"
-            className="bg-white text-orange-600 hover:bg-gray-100"
-          >
-            View Setup Status
-          </Button>
-          <Button
-            onClick={() => setLocation('/setup')}
-            size="sm"
-            className="bg-white text-orange-600 hover:bg-gray-100 flex items-center gap-2"
-          >
-            <Sparkles className="h-4 w-4" />
-            Complete Setup
-          </Button>
-        </div>
+        <Button
+          onClick={() => setLocation('/setup')}
+          size="sm"
+          className="bg-white text-orange-600 hover:bg-gray-100 flex items-center gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          Complete Setup
+        </Button>
       </div>
     </div>
   );
