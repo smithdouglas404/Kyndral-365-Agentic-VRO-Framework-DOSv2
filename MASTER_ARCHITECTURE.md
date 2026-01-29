@@ -1,7 +1,7 @@
 # DEEP AGENT SYSTEM - MASTER ARCHITECTURE
 
-**Version:** 2.6
-**Last Updated:** January 27, 2026 (Agent Fact Broadcasting & Tool Execution Fix)
+**Version:** 2.7
+**Last Updated:** January 29, 2026 (Demo Approval Workflow Implementation)
 **Status:** Production Ready
 
 > **THIS IS THE SINGLE SOURCE OF TRUTH**
@@ -6567,6 +6567,93 @@ await this.learn('incident_x', { severity: 9, detectedAt: new Date() });
 The ACME Demo Data System provides realistic, pre-populated demo environments across 20 industries. Unlike static demo data, ACME demos showcase the Deep Agent System actively working on real problems with pre-fired rules, agent interventions, and Battle Rhythm events.
 
 **Key Principle**: Demos should feel like a living system, not a static showcase. Prospects see agents analyzing, collaborating, and solving problems in real-time.
+
+### Demo Approval Workflow (Updated January 29, 2026)
+
+The demo system implements a proper approval-based workflow to ensure quality lead capture and controlled access:
+
+#### Two-Phase User Journey
+
+**Phase 1: Try Me (Demo Access)**
+```
+1. User visits /demo and fills out demo request form
+   - Required: Email, First Name, Last Name, Company Name
+   - Required: Select industry (determines ACME variant shown)
+   
+2. Request created with status: 'requested' (NOT auto-approved)
+   
+3. User redirected to /demo/pending (Pending Approval Page)
+   - Shows submitted information
+   - Auto-refreshes every 10 seconds checking status
+   - Clear messaging about pending admin review
+   
+4. System Admin reviews request in System Admin Panel
+   - Views all pending demo requests
+   - Approves by changing status to 'demo_active'
+   
+5. User auto-redirected to /dashboard upon approval
+   - Sees industry-specific ACME data matching their selection
+   - Demo mode banner shows they are viewing demo data
+```
+
+**Phase 2: Convert to Real Company (After Demo)**
+```
+1. User likes the product and wants full access
+   
+2. System Admin converts demo user to real tenant:
+   - Creates new tenant organization
+   - Sends invitation email to demo user
+   
+3. User accepts invitation:
+   - Sets password
+   - Gets full tenant access (no longer demo mode)
+   
+4. User can now upload their own company data
+```
+
+#### API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/tenant-auth/demo-request` | POST | Submit demo request form |
+| `/api/tenant-auth/demo-status` | GET | Check current user's approval status (requires auth token) |
+| `/api/demo/user-data` | GET | Get industry-specific ACME data (requires approved demo user) |
+| `/api/system-admin/demo-requests` | GET | List all demo requests (admin only) |
+| `/api/system-admin/demo-requests/:id` | PATCH | Approve/update demo request (admin only) |
+| `/api/system-admin/demo-requests/:id/convert` | POST | Convert demo user to real tenant (admin only) |
+
+#### Demo Request Status Values
+
+| Status | Meaning | User Experience |
+|--------|---------|-----------------|
+| `requested` | New request, pending review | Sees Pending Approval page |
+| `demo_active` | Admin approved | Full demo dashboard access |
+| `contacted` | Admin has contacted user | (Future: sales follow-up) |
+| `converted` | Now a real tenant | Redirected to tenant flow |
+
+#### Security Implementation
+
+The system prevents bypass of the approval workflow:
+
+1. **Token-based Authentication**: Demo users receive JWT with `role: 'demo_user'`
+2. **Status Check on Every Request**: CompanyProfileContext queries approval status
+3. **Legacy Session Blocking**: Cookie-based demo sessions rejected for token holders
+4. **Industry Filtering**: Approved users only see data for their selected industry
+
+```typescript
+// CompanyProfileContext approval check
+const hasActiveCompany = (profile?.active ?? false) || 
+  (isDemoUser && isDemoApproved) ||  // Must be approved
+  (!isDemoUser && (demoSessionStatus?.active ?? false));
+```
+
+#### Frontend Components
+
+| Component | Route | Purpose |
+|-----------|-------|---------|
+| `DemoRequestPage` | `/demo` | Lead capture form with industry selection |
+| `PendingApprovalPage` | `/demo/pending` | Waiting room with status polling |
+| `CompanyProfileContext` | N/A | Manages demo status and access control |
 
 ### Architecture
 

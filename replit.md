@@ -1,7 +1,15 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.0.1  
+**Version:** 2.0.2  
 **Updated:** 2026-01-29
+
+## Recent Changes
+
+### January 29, 2026 - Demo Approval Workflow
+- Demo requests now require admin approval before users can access dashboard
+- New `/demo/pending` page shows users their request is being reviewed
+- Industry-specific ACME data only shown after approval
+- Full documentation in MASTER_ARCHITECTURE.md Section 4.11
 
 ## Overview
 
