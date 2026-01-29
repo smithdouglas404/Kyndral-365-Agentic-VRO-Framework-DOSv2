@@ -1,11 +1,11 @@
-# Kyndryl 365 AI - Level 4 Autonomous System
+# Kyndryl Clarity - Level 4 Autonomous System
 
 **Version:** 2.0.1  
 **Updated:** 2026-01-29
 
 ## Overview
 
-Kyndryl 365 AI is a Level 4 fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements 10 specialized Deep Agents that continuously monitor, learn, communicate, and take action without human intervention.
+Kyndryl Clarity is a Level 4 fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements 10 specialized Deep Agents that continuously monitor, learn, communicate, and take action without human intervention.
 
 Key Architecture (v2.0.1):
 - **Cost Optimization Flow** (2 tiers only):

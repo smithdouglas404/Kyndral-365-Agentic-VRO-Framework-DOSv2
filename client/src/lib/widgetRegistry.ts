@@ -46,7 +46,7 @@ export const widgetDefinitions: WidgetDefinition[] = [
   {
     id: 'ai-executive-insights',
     name: 'AI Executive Insights',
-    description: 'Kyndryl 365 AI portfolio insights and strategic recommendations',
+    description: 'Kyndryl Clarity portfolio insights and strategic recommendations',
     defaultSize: 'full',
     allowedSizes: ['large', 'full'],
     category: 'insights',

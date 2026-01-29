@@ -1,4 +1,4 @@
-# Kyndryl 365 AI - Master Architecture
+# Kyndryl Clarity - Master Architecture
 
 **Version:** 2.0.0  
 **Date:** 2026-01-29  
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Kyndryl 365 AI is a fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements Level 4 autonomy where agents continuously monitor, learn, communicate, and take action without human intervention.
+Kyndryl Clarity is a fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements Level 4 autonomy where agents continuously monitor, learn, communicate, and take action without human intervention.
 
 ---
 

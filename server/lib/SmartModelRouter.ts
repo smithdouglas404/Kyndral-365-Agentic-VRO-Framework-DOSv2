@@ -107,7 +107,7 @@ export class SmartModelRouter {
       const trackingMetadata = {
         ...metadata,
         'HTTP-Referer': 'https://kyndryl365.ai',
-        'X-Title': 'Kyndryl 365 AI - Agent Orchestration',
+        'X-Title': 'Kyndryl Clarity - Agent Orchestration',
       };
       
       return new ChatOpenAI({
@@ -118,7 +118,7 @@ export class SmartModelRouter {
           baseURL: 'https://openrouter.ai/api/v1',
           defaultHeaders: {
             'HTTP-Referer': 'https://kyndryl365.ai',
-            'X-Title': 'Kyndryl 365 AI',
+            'X-Title': 'Kyndryl Clarity',
           },
         },
         modelKwargs: trackingMetadata,

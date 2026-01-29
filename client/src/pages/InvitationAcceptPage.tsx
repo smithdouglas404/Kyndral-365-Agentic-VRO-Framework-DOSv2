@@ -195,7 +195,7 @@ export default function InvitationAcceptPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Nexus PPM</h1>
-              <p className="text-xs text-gray-600">Kyndryl 365 AI</p>
+              <p className="text-xs text-gray-600">Kyndryl Clarity</p>
             </div>
           </div>
         </div>
