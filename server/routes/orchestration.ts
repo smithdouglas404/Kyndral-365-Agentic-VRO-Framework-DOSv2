@@ -16,6 +16,13 @@ import { DeepAgentBootstrap } from '../agents/DeepAgentBootstrap.js';
 
 let bootstrapInstance: DeepAgentBootstrap | null = null;
 
+/**
+ * Get the bootstrap instance for external access (e.g., orchestrator API)
+ */
+export function getBootstrapInstance(): DeepAgentBootstrap | null {
+  return bootstrapInstance;
+}
+
 export function registerOrchestrationRoutes(app: Express, storage: IStorage): void {
   // Initialize deep agent bootstrap
   if (!bootstrapInstance) {

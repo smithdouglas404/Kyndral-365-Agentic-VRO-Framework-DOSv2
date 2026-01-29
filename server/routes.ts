@@ -10,7 +10,7 @@ import { registerFirebaseAuthRoutes } from "./routes/firebase-auth.js";
 import { registerFinancialRoutes } from "./routes/financials.js";
 import { registerPredictiveRoutes } from "./routes/predictive.js";
 import { registerCrossProjectImpactRoutes } from "./routes/cross-project-impact.js";
-import { registerOrchestrationRoutes } from "./routes/orchestration.js";
+import { registerOrchestrationRoutes, getBootstrapInstance } from "./routes/orchestration.js";
 import { registerIssueRoutes } from "./routes/issues.js";
 import { registerChangeRequestRoutes } from "./routes/change-requests.js";
 import { registerDeepAgentRoutes } from "./routes/deep-agents.js";
@@ -20,6 +20,7 @@ import { registerUserManagementRoutes } from "./routes/admin/users.js";
 import { registerMCPServerRoutes } from "./routes/admin/mcp-servers.js";
 import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets.js";
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
+import { registerOrchestratorRoutes, setBootstrapGetter } from "./routes/admin/orchestrator.js";
 import { registerLangflowRoutes } from "./routes/langflow.js";
 import langflowSyncRouter from "./routes/langflow-sync.js";
 import { registerAgentModelRoutes } from "./routes/agent-model.js";
@@ -233,6 +234,9 @@ export async function registerRoutes(
   // Register Agent Configuration routes (ADMIN - AI agent settings and thresholds)
   registerAgentConfigRoutes(app);
 
+  // Register Orchestrator Control routes (ADMIN - start/stop/configure continuous orchestration)
+  registerOrchestratorRoutes(app);
+
   // Register Agent Setup routes (ADMIN - Agent wizard and MCP/LLM configuration)
   registerAgentSetupRoutes(app);
 
@@ -352,6 +356,10 @@ export async function registerRoutes(
 
   // Register Multi-Agent Orchestration routes (UNIFIED INTELLIGENCE LAYER)
   registerOrchestrationRoutes(app, storage);
+
+  // Connect orchestrator to admin API via lazy getter (no timing issues)
+  setBootstrapGetter(getBootstrapInstance);
+  console.log('[Routes] Orchestrator API connected via lazy getter');
 
   // Register Financial Intelligence routes (for agents and dashboards)
   registerFinancialRoutes(app, storage);
