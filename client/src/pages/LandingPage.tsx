@@ -103,7 +103,7 @@ export default function LandingPage() {
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-blue-600">10 Agents</div>
+              <div className="text-3xl font-bold text-blue-600">8+ Agents</div>
               <p className="text-sm text-gray-600 mt-1">Specialized AI Experts</p>
             </CardContent>
           </Card>
