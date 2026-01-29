@@ -15,7 +15,7 @@
  * This allows Langflow workflows and agents to query past calculations
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { callLLM } from './OpenRouterClient.js';
 import { getMem0Service } from './Mem0Service.js';
 
 export interface CalculationRequest {
@@ -40,12 +40,9 @@ export interface CalculationResult {
 
 export class LLMCalculator {
   private static instance: LLMCalculator;
-  private anthropic: Anthropic;
 
   private constructor() {
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY
-    });
+    // Using OpenRouterClient, no initialization needed
   }
 
   public static getInstance(): LLMCalculator {
@@ -65,19 +62,7 @@ export class LLMCalculator {
 
       console.log(`[LLMCalculator] Calculating ${request.attributeName}...`);
 
-      const response = await this.anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
-      });
-
-      const content = response.content[0];
-      const text = content.type === 'text' ? content.text : '';
+      const text = await callLLM('', prompt, { maxTokens: 1024 });
 
       // Parse LLM response
       const result = this.parseCalculationResponse(text, request);

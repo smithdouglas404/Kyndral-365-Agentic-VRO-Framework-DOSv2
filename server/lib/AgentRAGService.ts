@@ -12,7 +12,7 @@
  * 6. Extract and store patterns
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import { callLLM } from './OpenRouterClient.js';
 import type { IStorage } from "../storage.js";
 
 interface SimilarDecision {
@@ -50,13 +50,9 @@ interface KnowledgeArticle {
 }
 
 export class AgentRAGService {
-  private anthropic: Anthropic;
   private storage: IStorage;
 
   constructor(storage: IStorage) {
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
     this.storage = storage;
   }
 
@@ -342,13 +338,8 @@ export class AgentRAGService {
 
       const decision = result.rows[0];
 
-      // Use Claude to extract reusable pattern
-      const response = await this.anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 1024,
-        messages: [{
-          role: "user",
-          content: `Analyze this agent decision and extract a reusable pattern if applicable:
+      // Use LLM to extract reusable pattern
+      const prompt = `Analyze this agent decision and extract a reusable pattern if applicable:
 
 Decision Type: ${decision.decision_type}
 Context: ${JSON.stringify(decision.context_snapshot, null, 2)}
@@ -361,14 +352,9 @@ If this represents a repeatable pattern (e.g., "CPI drop below 0.85 at 40% compl
 3. Typical outcome
 4. Successful interventions
 
-Respond with JSON or "NO_PATTERN" if not a repeatable pattern.`
-        }]
-      });
+Respond with JSON or "NO_PATTERN" if not a repeatable pattern.`;
 
-      const content = response.content[0];
-      if (content.type !== 'text') return;
-
-      const text = content.text.trim();
+      const text = (await callLLM('', prompt, { maxTokens: 1024 })).trim();
       if (text === 'NO_PATTERN' || !text.includes('{')) return;
 
       // Parse pattern

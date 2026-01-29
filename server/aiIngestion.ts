@@ -1,10 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callLLM, openRouterClient } from './lib/OpenRouterClient.js';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-const DEFAULT_MODEL = "claude-sonnet-4-20250514";
+// All Claude calls now route through OpenRouter for cost optimization
 
 interface DataAnalysisResult {
   summary: string;
@@ -142,18 +138,11 @@ Respond in JSON:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: DEFAULT_MODEL,
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const content = response.content[0];
-    if (content.type === "text") {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
+    const text = await callLLM('', prompt, { maxTokens: 1024 });
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
     throw new Error("Failed to parse AI response");
   } catch (error: any) {
@@ -205,18 +194,11 @@ Respond in JSON format:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: DEFAULT_MODEL,
-      max_tokens: 4096,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const content = response.content[0];
-    if (content.type === "text") {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
+    const text = await callLLM('', prompt, { maxTokens: 4096 });
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
     throw new Error("Failed to parse AI response");
   } catch (error: any) {
@@ -287,18 +269,11 @@ Respond in JSON:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: DEFAULT_MODEL,
-      max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const content = response.content[0];
-    if (content.type === "text") {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
+    const text = await callLLM('', prompt, { maxTokens: 2048 });
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
     throw new Error("Failed to parse AI response");
   } catch (error: any) {
@@ -361,18 +336,11 @@ Respond in JSON:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: DEFAULT_MODEL,
-      max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const content = response.content[0];
-    if (content.type === "text") {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
+    const text = await callLLM('', prompt, { maxTokens: 2048 });
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
     throw new Error("Failed to parse AI response");
   } catch (error: any) {
@@ -429,18 +397,11 @@ Respond in JSON:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: DEFAULT_MODEL,
-      max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const content = response.content[0];
-    if (content.type === "text") {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
+    const text = await callLLM('', prompt, { maxTokens: 2048 });
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
     throw new Error("Failed to parse AI response");
   } catch (error: any) {

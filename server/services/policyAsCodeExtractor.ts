@@ -1,14 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callLLM } from '../lib/OpenRouterClient.js';
 import { db } from "../db.js";
 import { ontologyClasses, ontologyIndustryProfiles } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { getIndustryByGICS, getIndustryByNAICS, getIndustryExtractionPrompt, type IndustryProfile } from './industryProfileLoader.js';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-const DEFAULT_MODEL = "claude-sonnet-4-20250514";
 
 export interface ExtractionResult {
   financialMetrics: FinancialMetric[];
@@ -247,14 +241,8 @@ OUTPUT FORMAT (JSON only, no markdown):
   ]
 }`;
 
-  const response = await anthropic.messages.create({
-    model: DEFAULT_MODEL,
-    max_tokens: 4096,
-    temperature: 0.2,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  return parseAIResponse(response, 'organizational_units');
+  const text = await callLLM('', prompt, { maxTokens: 4096, temperature: 0.2 });
+  return parseTextResponse(text, 'organizational_units');
 }
 
 /**
@@ -347,14 +335,8 @@ OUTPUT FORMAT (JSON only):
   ]
 }`;
 
-  const response = await anthropic.messages.create({
-    model: DEFAULT_MODEL,
-    max_tokens: 4096,
-    temperature: 0.2,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  return parseAIResponse(response, 'metrics');
+  const text = await callLLM('', prompt, { maxTokens: 4096, temperature: 0.2 });
+  return parseTextResponse(text, 'metrics');
 }
 
 /**
@@ -421,14 +403,8 @@ OUTPUT FORMAT (JSON only):
   ]
 }`;
 
-  const response = await anthropic.messages.create({
-    model: DEFAULT_MODEL,
-    max_tokens: 4096,
-    temperature: 0.2,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  return parseAIResponse(response, 'strategic_objectives');
+  const text = await callLLM('', prompt, { maxTokens: 4096, temperature: 0.2 });
+  return parseTextResponse(text, 'strategic_objectives');
 }
 
 /**
@@ -485,14 +461,8 @@ OUTPUT FORMAT (JSON only):
   ]
 }`;
 
-  const response = await anthropic.messages.create({
-    model: DEFAULT_MODEL,
-    max_tokens: 4096,
-    temperature: 0.2,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  return parseAIResponse(response, 'rules');
+  const text = await callLLM('', prompt, { maxTokens: 4096, temperature: 0.2 });
+  return parseTextResponse(text, 'rules');
 }
 
 /**
@@ -527,33 +497,24 @@ OUTPUT FORMAT (JSON only):
   ]
 }`;
 
-  const response = await anthropic.messages.create({
-    model: DEFAULT_MODEL,
-    max_tokens: 4096,
-    temperature: 0.2,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  return parseAIResponse(response, 'risks');
+  const text = await callLLM('', prompt, { maxTokens: 4096, temperature: 0.2 });
+  return parseTextResponse(text, 'risks');
 }
 
 /**
- * Parse AI response and validate
+ * Parse text response and validate
  */
-function parseAIResponse(response: Anthropic.Message, expectedKey: string): any[] {
+function parseTextResponse(text: string, expectedKey: string): any[] {
   try {
-    const content = response.content[0];
-    if (content.type === 'text') {
-      const cleaned = content.text.replace(/```json\n?|\n?```/g, '').trim();
-      const parsed = JSON.parse(cleaned);
+    const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
 
-      if (!parsed[expectedKey] || !Array.isArray(parsed[expectedKey])) {
-        console.error(`Invalid response structure: missing ${expectedKey} array`);
-        return [];
-      }
-
-      return parsed[expectedKey];
+    if (!parsed[expectedKey] || !Array.isArray(parsed[expectedKey])) {
+      console.error(`Invalid response structure: missing ${expectedKey} array`);
+      return [];
     }
+
+    return parsed[expectedKey];
   } catch (error) {
     console.error('Parse error:', error);
   }

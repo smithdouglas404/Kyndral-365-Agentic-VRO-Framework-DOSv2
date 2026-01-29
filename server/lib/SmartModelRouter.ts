@@ -98,18 +98,18 @@ export class SmartModelRouter {
 
   /**
    * Get the appropriate model for a task based on complexity
+   * ALL tiers now route through OpenRouter when available (including Claude)
    * OpenRouter tracking: You'll see all requests in your OpenRouter dashboard
    */
   getModel(tier: ModelTier, metadata?: Record<string, any>): BaseChatModel {
-    // If OpenRouter is available and tier is not premium, use it
-    if (this.openRouterKey && tier !== ModelTier.PREMIUM) {
+    // Route ALL tiers through OpenRouter when available (including premium Claude)
+    if (this.openRouterKey) {
       const modelName = TIER_MODELS[tier][0];
       console.log(`[SmartModelRouter] Using OpenRouter: ${modelName} (${tier} tier)`);
       
       // Add tracking headers for OpenRouter dashboard visibility
       const trackingMetadata = {
         ...metadata,
-        // These appear in your OpenRouter dashboard
         'HTTP-Referer': 'https://kyndryl365.ai',
         'X-Title': 'Kyndryl 365 AI - Agent Orchestration',
       };
@@ -129,8 +129,8 @@ export class SmartModelRouter {
       });
     }
 
-    // Fallback to Anthropic (for premium tier or if OpenRouter not configured)
-    console.log(`[SmartModelRouter] Using Anthropic Claude (${tier} tier)`);
+    // Fallback to direct Anthropic ONLY if OpenRouter not configured
+    console.log(`[SmartModelRouter] Fallback to direct Anthropic Claude (${tier} tier)`);
     return new ChatAnthropic({
       modelName: 'claude-sonnet-4-5-20250929',
       temperature: tier === ModelTier.CHEAP ? 0.3 : 0.7,

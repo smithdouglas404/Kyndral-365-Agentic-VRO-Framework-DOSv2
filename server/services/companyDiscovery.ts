@@ -1,9 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callLLM } from '../lib/OpenRouterClient.js';
 import { getIndustryFromCompany, enrichCompanyWithIndustry, type IndustryProfile } from './industryProfileLoader.js';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 export interface CompanyCandidate {
   legalName: string;
@@ -241,30 +237,22 @@ Return JSON only:
   "industryProfile": "string"
 }`;
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      temperature: 0.2,
-      messages: [{ role: 'user', content: prompt }]
-    });
+    const text = await callLLM('', prompt, { maxTokens: 1024, temperature: 0.2 });
 
-    const content = response.content[0];
-    if (content.type === 'text') {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const enriched = JSON.parse(jsonMatch[0]);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const enriched = JSON.parse(jsonMatch[0]);
 
-        return {
-          ...candidate,
-          industryCodes: {
-            ...candidate.industryCodes,
-            naics: [enriched.primaryNaics.code],
-            gics: enriched.gics
-          },
-          confidenceScore: Math.min(candidate.confidenceScore + 0.05, 1.0),
-          dataSources: [...candidate.dataSources, 'AI Enhancement']
-        };
-      }
+      return {
+        ...candidate,
+        industryCodes: {
+          ...candidate.industryCodes,
+          naics: [enriched.primaryNaics.code],
+          gics: enriched.gics
+        },
+        confidenceScore: Math.min(candidate.confidenceScore + 0.05, 1.0),
+        dataSources: [...candidate.dataSources, 'AI Enhancement']
+      };
     }
 
     // Load industry profile based on GICS/NAICS codes

@@ -1,9 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { callLLM } from './lib/OpenRouterClient.js';
 import type { Express } from 'express';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// All Claude calls now route through OpenRouter for cost optimization
 
 interface DrilldownContext {
   entityType: string;
@@ -54,40 +52,30 @@ ${Object.entries(context.metrics).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
 
 Analyze these metrics for any issues (low confidence, at-risk items, budget overruns, missed targets) and provide your assessment as the ${context.agentId.toUpperCase()} Agent.`;
 
-      const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        messages: [
-          { role: 'user', content: userPrompt }
-        ],
-        system: systemPrompt,
-      });
+      const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 1024 });
 
-      const content = message.content[0];
-      if (content.type === 'text') {
-        try {
-          const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const insights = JSON.parse(jsonMatch[0]);
-            res.json(insights);
-          } else {
-            res.json({
-              greeting: "I'm analyzing the data for you.",
-              situation: content.text.slice(0, 200),
-              concerns: [],
-              recommendations: ["Continue monitoring metrics"],
-              questions: ["Would you like me to drill deeper?"]
-            });
-          }
-        } catch {
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const insights = JSON.parse(jsonMatch[0]);
+          res.json(insights);
+        } else {
           res.json({
-            greeting: "I'm here to help you understand this data.",
-            situation: content.text.slice(0, 200),
+            greeting: "I'm analyzing the data for you.",
+            situation: text.slice(0, 200),
             concerns: [],
-            recommendations: ["Review the metrics carefully"],
-            questions: ["What aspect would you like to explore?"]
+            recommendations: ["Continue monitoring metrics"],
+            questions: ["Would you like me to drill deeper?"]
           });
         }
+      } catch {
+        res.json({
+          greeting: "I'm here to help you understand this data.",
+          situation: text.slice(0, 200),
+          concerns: [],
+          recommendations: ["Review the metrics carefully"],
+          questions: ["What aspect would you like to explore?"]
+        });
       }
     } catch (error) {
       console.error('CoPilot error:', error);
@@ -138,28 +126,18 @@ ${metricsStr}
 
 Analyze the overall state of this page. Identify any concerns (alerts, risks, at-risk items, budget issues) and provide recommendations. Be specific and actionable.`;
 
-      const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        messages: [
-          { role: 'user', content: userPrompt }
-        ],
-        system: systemPrompt,
-      });
+      const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 1024 });
 
-      const content = message.content[0];
-      if (content.type === 'text') {
-        try {
-          const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const insights = JSON.parse(jsonMatch[0]);
-            res.json(insights);
-          } else {
-            res.json({ fallback: true });
-          }
-        } catch {
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const insights = JSON.parse(jsonMatch[0]);
+          res.json(insights);
+        } else {
           res.json({ fallback: true });
         }
+      } catch {
+        res.json({ fallback: true });
       }
     } catch (error) {
       console.error('Page summary error:', error);
@@ -182,21 +160,8 @@ ${context?.metrics ? Object.entries(context.metrics).map(([k, v]) => `- ${k}: ${
 
 Respond conversationally but professionally. Be specific and actionable. Keep responses concise (2-4 paragraphs max).`;
 
-      const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        messages: [
-          { role: 'user', content: question }
-        ],
-        system: systemPrompt,
-      });
-
-      const content = message.content[0];
-      if (content.type === 'text') {
-        res.json({ response: content.text });
-      } else {
-        res.json({ response: 'I apologize, I could not generate a response at this time.' });
-      }
+      const text = await callLLM(systemPrompt, question, { maxTokens: 1024 });
+      res.json({ response: text });
     } catch (error) {
       console.error('Chat error:', error);
       res.status(500).json({ 

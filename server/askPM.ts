@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callLLM } from './lib/OpenRouterClient.js';
 import { storage } from "./storage";
 
-const anthropic = new Anthropic();
+// All Claude calls now route through OpenRouter for cost optimization
 
 // Build SAFe 6.0 hierarchy context from database
 async function buildSAFe6Context(): Promise<string> {
@@ -139,22 +139,10 @@ SAFe 6.0 HIERARCHY CONTEXT (from database):
 ${safeContext}${contextHint}`;
 
   try {
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "user",
-          content: question
-        }
-      ],
-      system: systemPrompt
-    });
-
-    const textContent = message.content.find(block => block.type === 'text');
-    return textContent ? textContent.text : 'I could not generate a response. Please try again.';
+    const text = await callLLM(systemPrompt, question, { maxTokens: 2048 });
+    return text || 'I could not generate a response. Please try again.';
   } catch (error: any) {
-    console.error('Anthropic API error:', error);
+    console.error('AI API error:', error);
     throw new Error(`Failed to get AI response: ${error.message}`);
   }
 }

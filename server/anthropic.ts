@@ -1,11 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { callLLM } from './lib/OpenRouterClient.js';
 
-// Using claude-sonnet-4-20250514 as the latest model
-const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// All Claude calls now route through OpenRouter for cost optimization
+// Fallback to direct Anthropic if OpenRouter unavailable
 
 export async function parsePolicyDocument(policyText: string): Promise<string> {
   const systemPrompt = `You are a Policy as Code expert. Your task is to analyze insurance/legal policy documents and convert them into structured YAML code that can be used by automated systems.
@@ -19,34 +15,21 @@ For each policy, extract and structure:
 
 Output ONLY valid YAML code with no additional explanation. Include comments in the YAML to cite specific policy sections where rules come from.`;
 
-  const message = await anthropic.messages.create({
-    model: DEFAULT_MODEL_STR,
-    max_tokens: 4096,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user',
-        content: `Please convert this policy document into Policy as Code (YAML format):\n\n${policyText}`
-      }
-    ],
-  });
+  const userPrompt = `Please convert this policy document into Policy as Code (YAML format):\n\n${policyText}`;
 
-  const content = message.content[0];
-  if (content.type === 'text') {
-    let yaml = content.text;
-    if (yaml.startsWith('```yaml')) {
-      yaml = yaml.slice(7);
-    }
-    if (yaml.startsWith('```')) {
-      yaml = yaml.slice(3);
-    }
-    if (yaml.endsWith('```')) {
-      yaml = yaml.slice(0, -3);
-    }
-    return yaml.trim();
+  const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 4096 });
+
+  let yaml = text;
+  if (yaml.startsWith('```yaml')) {
+    yaml = yaml.slice(7);
   }
-  
-  throw new Error('Unexpected response format from Claude');
+  if (yaml.startsWith('```')) {
+    yaml = yaml.slice(3);
+  }
+  if (yaml.endsWith('```')) {
+    yaml = yaml.slice(0, -3);
+  }
+  return yaml.trim();
 }
 
 export interface ExtractedPolicyMetadata {
@@ -56,77 +39,49 @@ export interface ExtractedPolicyMetadata {
 }
 
 export async function extractPolicyMetadata(policyText: string, filename?: string): Promise<ExtractedPolicyMetadata> {
-  const message = await anthropic.messages.create({
-    model: DEFAULT_MODEL_STR,
-    max_tokens: 512,
-    system: `You are an expert at extracting metadata from insurance and legal policy documents. 
+  const systemPrompt = `You are an expert at extracting metadata from insurance and legal policy documents. 
 Extract the following information and return ONLY a JSON object with these exact keys:
 - policyName: A clear, descriptive name for this policy (e.g., "Life Insurance and Critical Illness Cover")
 - provider: The company/organization that provides this policy (e.g., "Acme Corp")
 - documentId: Any document reference number, policy number, or version identifier found in the text. If none exists, generate a plausible one based on the provider and policy type (e.g., "NEE-POL-2024-001")
 
-Return ONLY valid JSON, no additional text.`,
-    messages: [
-      {
-        role: 'user',
-        content: `Extract metadata from this policy document${filename ? ` (filename: ${filename})` : ''}:\n\n${policyText.slice(0, 3000)}`
-      }
-    ],
-  });
+Return ONLY valid JSON, no additional text.`;
 
-  const content = message.content[0];
-  if (content.type === 'text') {
-    try {
-      let jsonText = content.text.trim();
-      if (jsonText.startsWith('```json')) {
-        jsonText = jsonText.slice(7);
-      }
-      if (jsonText.startsWith('```')) {
-        jsonText = jsonText.slice(3);
-      }
-      if (jsonText.endsWith('```')) {
-        jsonText = jsonText.slice(0, -3);
-      }
-      const parsed = JSON.parse(jsonText.trim());
-      return {
-        policyName: parsed.policyName || 'Untitled Policy',
-        provider: parsed.provider || '',
-        documentId: parsed.documentId || '',
-      };
-    } catch (e) {
-      return {
-        policyName: filename?.replace('.pdf', '').replace(/_/g, ' ') || 'Untitled Policy',
-        provider: '',
-        documentId: '',
-      };
+  const userPrompt = `Extract metadata from this policy document${filename ? ` (filename: ${filename})` : ''}:\n\n${policyText.slice(0, 3000)}`;
+
+  try {
+    const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 512 });
+    
+    let jsonText = text.trim();
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.slice(7);
     }
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.slice(3);
+    }
+    if (jsonText.endsWith('```')) {
+      jsonText = jsonText.slice(0, -3);
+    }
+    const parsed = JSON.parse(jsonText.trim());
+    return {
+      policyName: parsed.policyName || 'Untitled Policy',
+      provider: parsed.provider || '',
+      documentId: parsed.documentId || '',
+    };
+  } catch (e) {
+    return {
+      policyName: filename?.replace('.pdf', '').replace(/_/g, ' ') || 'Untitled Policy',
+      provider: '',
+      documentId: '',
+    };
   }
-  
-  return {
-    policyName: 'Untitled Policy',
-    provider: '',
-    documentId: '',
-  };
 }
 
 export async function suggestPolicyImprovements(policyCode: string): Promise<string> {
-  const message = await anthropic.messages.create({
-    model: DEFAULT_MODEL_STR,
-    max_tokens: 2048,
-    messages: [
-      {
-        role: 'user',
-        content: `Analyze this Policy as Code and suggest improvements for clarity, completeness, and automation potential:\n\n${policyCode}`
-      }
-    ],
-  });
-
-  const content = message.content[0];
-  if (content.type === 'text') {
-    return content.text;
-  }
+  const systemPrompt = 'You are an expert at analyzing Policy as Code and suggesting improvements.';
+  const userPrompt = `Analyze this Policy as Code and suggest improvements for clarity, completeness, and automation potential:\n\n${policyCode}`;
   
-  throw new Error('Unexpected response format from Claude');
+  return callLLM(systemPrompt, userPrompt, { maxTokens: 2048 });
 }
 
 export interface MCPDataAnalysis {
@@ -184,32 +139,20 @@ ${JSON.stringify(sampleData.slice(0, 5), null, 2)}
 `;
 
   try {
-    const message = await anthropic.messages.create({
-      model: DEFAULT_MODEL_STR,
-      max_tokens: 2048,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: `Analyze this external PPM data for SAFe integration:\n${dataContext}`
-        }
-      ],
-    });
-
-    const content = message.content[0];
-    if (content.type === 'text') {
-      let jsonText = content.text.trim();
-      if (jsonText.startsWith('```json')) {
-        jsonText = jsonText.slice(7);
-      }
-      if (jsonText.startsWith('```')) {
-        jsonText = jsonText.slice(3);
-      }
-      if (jsonText.endsWith('```')) {
-        jsonText = jsonText.slice(0, -3);
-      }
-      return JSON.parse(jsonText.trim());
+    const userPrompt = `Analyze this external PPM data for SAFe integration:\n${dataContext}`;
+    const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 2048 });
+    
+    let jsonText = text.trim();
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.slice(7);
     }
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.slice(3);
+    }
+    if (jsonText.endsWith('```')) {
+      jsonText = jsonText.slice(0, -3);
+    }
+    return JSON.parse(jsonText.trim());
   } catch (error: any) {
     console.error('AI analysis error:', error);
   }
@@ -259,26 +202,14 @@ ${JSON.stringify(userResponses, null, 2)}
 `;
 
   try {
-    const message = await anthropic.messages.create({
-      model: DEFAULT_MODEL_STR,
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: `Evaluate this data integration request:\n${context}`
-        }
-      ],
-    });
-
-    const content = message.content[0];
-    if (content.type === 'text') {
-      let jsonText = content.text.trim();
-      if (jsonText.startsWith('```json')) jsonText = jsonText.slice(7);
-      if (jsonText.startsWith('```')) jsonText = jsonText.slice(3);
-      if (jsonText.endsWith('```')) jsonText = jsonText.slice(0, -3);
-      return JSON.parse(jsonText.trim());
-    }
+    const userPrompt = `Evaluate this data integration request:\n${context}`;
+    const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 1024 });
+    
+    let jsonText = text.trim();
+    if (jsonText.startsWith('```json')) jsonText = jsonText.slice(7);
+    if (jsonText.startsWith('```')) jsonText = jsonText.slice(3);
+    if (jsonText.endsWith('```')) jsonText = jsonText.slice(0, -3);
+    return JSON.parse(jsonText.trim());
   } catch (error: any) {
     console.error('QA Gate error:', error);
   }
@@ -312,22 +243,7 @@ Innovation Funnel: ${funnel.map(f => `${f.label}: ${f.count}`).join(', ')}
 Recent Changes: ${recentChanges.slice(0, 5).map(c => `${c.entityName} ${c.field} ${c.trend === 'up' ? 'improved' : 'declined'}`).join('; ') || 'None recorded'}
 `;
 
-  const message = await anthropic.messages.create({
-    model: DEFAULT_MODEL_STR,
-    max_tokens: 256,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user',
-        content: `Generate a brief executive insight for this portfolio state:\n${dataContext}`
-      }
-    ],
-  });
-
-  const content = message.content[0];
-  if (content.type === 'text') {
-    return content.text;
-  }
-  
-  throw new Error('Unexpected response format from Claude');
+  const userPrompt = `Generate a brief executive insight for this portfolio state:\n${dataContext}`;
+  const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 256 });
+  return text;
 }

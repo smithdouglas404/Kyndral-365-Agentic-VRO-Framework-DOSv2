@@ -1,8 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { callLLM } from './lib/OpenRouterClient.js';
 import { z } from "zod";
 import { storage } from "./storage";
 
-const anthropic = new Anthropic();
+// All Claude calls now route through OpenRouter for cost optimization
 
 const ExecutiveInsightSchema = z.object({
   headline: z.string().min(10),
@@ -211,21 +211,9 @@ Provide exactly 3 key risks, 2-3 opportunities, 3 recommendations, and 4 KPI hig
 Focus on energy industry issues: grid reliability, renewable development, storm resilience, regulatory compliance, customer satisfaction.`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
-      messages: [
-        { role: "user", content: userPrompt }
-      ],
-      system: systemPrompt
-    });
+    const text = await callLLM(systemPrompt, userPrompt, { maxTokens: 2000 });
 
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type');
-    }
-
-    const cleanedJson = content.text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const cleanedJson = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(cleanedJson);
     
     const validated = ExecutiveInsightSchema.safeParse(parsed);

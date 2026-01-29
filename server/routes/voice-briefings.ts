@@ -10,7 +10,7 @@
 
 import type { Express, Request, Response } from 'express';
 import type { IStorage } from '../storage.js';
-import Anthropic from '@anthropic-ai/sdk';
+import { callLLM } from '../lib/OpenRouterClient.js';
 import OpenAI from 'openai';
 import { createWriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
@@ -20,9 +20,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// All Claude calls now route through OpenRouter for cost optimization
 
 // Lazy initialization of OpenAI client - only when API key is available
 let openaiClient: OpenAI | null = null;
@@ -184,23 +182,13 @@ STYLE GUIDELINES:
 
 Generate the complete morning briefing script now:`;
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 3000,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
-
-  const content = message.content[0];
-  if (content.type === 'text') {
-    return content.text;
+  const text = await callLLM('', prompt, { maxTokens: 3000 });
+  
+  if (!text) {
+    throw new Error('Failed to generate morning briefing script');
   }
-
-  throw new Error('Failed to generate morning briefing script');
+  
+  return text;
 }
 
 /**
@@ -265,23 +253,13 @@ Sarah: [continues]
 
 Generate the podcast script now:`;
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 2000,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
-
-  const content = message.content[0];
-  if (content.type === 'text') {
-    return content.text;
+  const text = await callLLM('', prompt, { maxTokens: 2000 });
+  
+  if (!text) {
+    throw new Error('Failed to generate podcast script');
   }
-
-  throw new Error('Failed to generate podcast script');
+  
+  return text;
 }
 
 /**
