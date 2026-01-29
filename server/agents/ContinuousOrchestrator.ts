@@ -563,17 +563,34 @@ export class ContinuousOrchestrator {
 
       this.state.activeScans.set(config.agentId, projectsToScan.map(p => p.id));
 
+      // LEVEL 4 AUTONOMY: Agent also checks their own Mem0 risks
+      const mem0Risks = await this.checkAgentMem0Risks(agentId);
+      
       // Log scanning activity
       await this.storage.createAgentActivityLog({
         eventType: 'detection',
         primaryAgentId: config.agentId,
         primaryAgentName: config.agentName,
-        summary: `${config.agentName} scanning ${projectsToScan.length} projects: ${projectsToScan.map(p => p.name).join(', ')}`,
+        summary: `${config.agentName} scanning ${projectsToScan.length} projects + ${mem0Risks.length} stored risks`,
       });
 
       const findings: any[] = [];
 
+      // Process any pending Mem0 risks first (autonomous self-learning)
+      for (const risk of mem0Risks) {
+        findings.push({
+          projectId: risk.projectId,
+          projectName: risk.projectName || 'Unknown',
+          issue: risk.description,
+          severity: risk.severity,
+          confidence: risk.confidence || 0.85,
+          recommendedAction: risk.action,
+          source: 'mem0_self_check',
+        });
+      }
+
       // Each agent uses its tools to analyze projects
+      // COST FLOW: Cache check → OpenRouter → Claude (embedded in agent.run)
       for (const project of projectsToScan) {
         // Check if project has issues in agent's domain
         const issue = await this.detectIssue(agent, agentId, project);
@@ -593,6 +610,42 @@ export class ContinuousOrchestrator {
     } catch (error) {
       console.error(`[ContinuousOrchestrator] Error in agent scan for ${config.agentName}:`, error);
       return { findings: [] };
+    }
+  }
+
+  /**
+   * LEVEL 4 AUTONOMY: Agent checks their own stored risks in Mem0
+   * Agents are self-learning - they track what they've flagged before
+   */
+  private async checkAgentMem0Risks(agentId: string): Promise<any[]> {
+    try {
+      const { getMem0Service } = await import('../lib/Mem0Service.js');
+      const mem0 = getMem0Service();
+      
+      // Query facts this agent stored that are still relevant (use observeFacts)
+      const oneHourAgo = new Date(Date.now() - (60 * 60 * 1000));
+      const agentFacts = await mem0.observeFacts({
+        sourceAgent: agentId,
+        sinceTimestamp: oneHourAgo,
+      });
+      
+      // Filter for risk-related facts
+      return agentFacts
+        .filter((f: any) => {
+          const attr = f.attribute?.toLowerCase() || '';
+          return attr.includes('risk') || attr.includes('issue') || attr.includes('alert');
+        })
+        .slice(0, 5) // Limit to 5 most recent risks per cycle
+        .map((f: any) => ({
+          projectId: f.entity,
+          description: `[Self-check] ${f.attribute}: ${JSON.stringify(f.value)}`,
+          severity: f.value?.severity || 'medium',
+          action: f.value?.action || 'Re-evaluate risk status',
+          confidence: f.confidence,
+        }));
+    } catch (error) {
+      // Silent fail - Mem0 check is enhancement, not critical
+      return [];
     }
   }
 
