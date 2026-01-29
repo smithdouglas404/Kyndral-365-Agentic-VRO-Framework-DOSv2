@@ -49,6 +49,26 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         const message: WebSocketMessage = JSON.parse(event.data);
         setLastMessage(message);
 
+        if (message.type === 'agent:insight') {
+          const dashboardKeys = [
+            ['lpm-attributes'],
+            ['portfolio-strategic-themes'],
+            ['portfolio-flow-metrics'],
+            ['dashboard-value-streams'],
+            ['safe-value-streams-list'],
+            ['value-stream-attributes'],
+            ['art-attributes'],
+            ['art-pi-objectives'],
+            ['art-dora-metrics'],
+            ['art-teams'],
+            ['executive-insights'],
+          ];
+
+          dashboardKeys.forEach((key) => {
+            queryClient.invalidateQueries({ queryKey: key });
+          });
+        }
+
         if (message.type === 'notification') {
           queryClient.invalidateQueries({ queryKey: ['notifications'] });
           

@@ -17,6 +17,8 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useAgentData } from '@/hooks/useAgentData';
+import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
+import { getAttributeMap, parseAttributeNumber, parseAttributeText, useAgentAttributes } from '@/hooks/useAgentAttributes';
 import { useQuery } from '@tanstack/react-query';
 import {
   getCompanyMetrics,
@@ -195,6 +197,8 @@ export default function GovernanceDashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('governance');
+  const { data: governanceAttributes } = useAgentAttributes('governance');
+  const { data: companyAttributes } = useAgentAttributes('company');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -233,6 +237,21 @@ export default function GovernanceDashboard() {
   
   const completedCount = governanceItems.filter(i => i.status === 'complete').length;
   const pendingCount = governanceItems.filter(i => i.status === 'pending').length;
+
+  const governanceMap = getAttributeMap(governanceAttributes?.attributes || []);
+  const companyMap = getAttributeMap(companyAttributes?.attributes || []);
+
+  const decisionAttr = governanceMap.compliance_debt_count;
+  const pendingAttr = governanceMap.compliance_debt_count;
+  const complianceAttr = governanceMap.audit_score;
+  const riskAttr = governanceMap.regulatory_risk;
+  const croAttr = companyMap.cro_name;
+
+  const decisionsValue = parseAttributeNumber(decisionAttr?.value);
+  const pendingValue = parseAttributeNumber(pendingAttr?.value);
+  const complianceValue = parseAttributeNumber(complianceAttr?.value);
+  const riskValue = parseAttributeNumber(riskAttr?.value);
+  const croValue = parseAttributeText(croAttr?.value);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -286,9 +305,9 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Decisions Complete</p>
-                    <p className="text-2xl font-bold text-green-600">{completedCount}/{governanceItems.length}</p>
+                    <p className="text-2xl font-bold text-green-600">{decisionsValue ?? `${completedCount}/${governanceItems.length}`}</p>
                   </div>
-                  <CheckCircle2 className="h-8 w-8 text-green-200" />
+                  {decisionAttr && <AttributeStatusBadge availability={decisionAttr.availability} />}
                 </div>
                 <Progress value={(completedCount / governanceItems.length) * 100} className="h-1.5 mt-2" />
               </CardContent>
@@ -301,9 +320,9 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Pending Actions</p>
-                    <p className="text-2xl font-bold text-amber-600">{liveData.metrics.pendingActions || pendingCount}</p>
+                    <p className="text-2xl font-bold text-amber-600">{(pendingValue ?? liveData.metrics.pendingActions) || pendingCount}</p>
                   </div>
-                  <Clock className="h-8 w-8 text-amber-200" />
+                  {pendingAttr && <AttributeStatusBadge availability={pendingAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{(liveData.metrics.pendingActions || pendingCount) > 0 ? 'Requires attention' : 'All clear'}</p>
               </CardContent>
@@ -313,9 +332,9 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Compliance Score</p>
-                    <p className="text-2xl font-bold text-green-600">{liveData.metrics.avgConfidence || riskMetrics.complianceScore}%</p>
+                    <p className="text-2xl font-bold text-green-600">{complianceValue ?? (liveData.metrics.avgConfidence || riskMetrics.complianceScore)}%</p>
                   </div>
-                  <Shield className="h-8 w-8 text-green-200" />
+                  {complianceAttr && <AttributeStatusBadge availability={complianceAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">FCA aligned</p>
               </CardContent>
@@ -328,9 +347,9 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">High Risks</p>
-                    <p className="text-2xl font-bold text-red-600">{liveData.metrics.atRiskProjects || riskMetrics.high}</p>
+                    <p className="text-2xl font-bold text-red-600">{riskValue ?? (liveData.metrics.atRiskProjects || riskMetrics.high)}</p>
                   </div>
-                  <AlertOctagon className="h-8 w-8 text-red-200" />
+                  {riskAttr && <AttributeStatusBadge availability={riskAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">Actively monitored</p>
               </CardContent>
@@ -340,9 +359,9 @@ export default function GovernanceDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">CRO</p>
-                    <p className="text-lg font-bold text-blue-600">{companyMetrics.cro}</p>
+                    <p className="text-lg font-bold text-blue-600">{croValue || companyMetrics.cro}</p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-200" />
+                  {croAttr && <AttributeStatusBadge availability={croAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">Chief Risk Officer</p>
               </CardContent>
@@ -350,10 +369,6 @@ export default function GovernanceDashboard() {
           </div>
 
           <div className="mb-8">
-          <div className="mb-8">
-            <AgentActionQueue />
-          </div>
-
             <AIRecommendations agentType="governance" />
           </div>
 

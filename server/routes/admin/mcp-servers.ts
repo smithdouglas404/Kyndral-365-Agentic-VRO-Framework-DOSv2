@@ -507,5 +507,105 @@ export function registerMCPServerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * GET /api/admin/mcp/status
+   * Get status of all MCP integrations (connected vs not configured)
+   */
+  app.get('/api/admin/mcp/status', authenticate, async (req: Request, res: Response) => {
+    try {
+      // Check which MCPs are configured via environment variables
+      const mcpStatuses = [
+        {
+          id: 'jira',
+          name: 'Jira',
+          connected: !!(process.env.JIRA_DOMAIN && process.env.JIRA_EMAIL && process.env.JIRA_API_TOKEN),
+          required: false,
+          optional: true,
+          usedByAgents: ['FinOps', 'PMO', 'Risk', 'Governance'],
+          configUrl: '/admin/integrations/jira',
+          errorMessage: process.env.JIRA_DOMAIN
+            ? undefined
+            : 'Not configured - Set JIRA_DOMAIN, JIRA_EMAIL, JIRA_API_TOKEN in .env'
+        },
+        {
+          id: 'servicenow',
+          name: 'ServiceNow',
+          connected: !!(process.env.SERVICENOW_INSTANCE && process.env.SERVICENOW_USERNAME && process.env.SERVICENOW_PASSWORD),
+          required: false,
+          optional: true,
+          usedByAgents: ['TMO', 'Risk', 'OCM'],
+          configUrl: '/admin/integrations/servicenow',
+          errorMessage: process.env.SERVICENOW_INSTANCE
+            ? undefined
+            : 'Not configured - Set SERVICENOW_INSTANCE, SERVICENOW_USERNAME, SERVICENOW_PASSWORD in .env'
+        },
+        {
+          id: 'slack',
+          name: 'Slack',
+          connected: !!(process.env.SLACK_WEBHOOK_URL),
+          required: false,
+          optional: true,
+          usedByAgents: ['All Agents'],
+          configUrl: '/admin/integrations/slack',
+          errorMessage: process.env.SLACK_WEBHOOK_URL
+            ? undefined
+            : 'Not configured - Set SLACK_WEBHOOK_URL in .env'
+        },
+        {
+          id: 'langflow',
+          name: 'Langflow',
+          connected: !!(process.env.LANGFLOW_API_KEY && process.env.LANGFLOW_API_KEY !== 'YOUR_KEY_HERE'),
+          required: true,
+          optional: false,
+          usedByAgents: ['All Agents'],
+          configUrl: '/admin/integrations/langflow',
+          errorMessage: (process.env.LANGFLOW_API_KEY && process.env.LANGFLOW_API_KEY !== 'YOUR_KEY_HERE')
+            ? undefined
+            : 'REQUIRED - Run ./START_LANGFLOW.sh and set LANGFLOW_API_KEY in .env'
+        },
+        {
+          id: 'monday',
+          name: 'Monday.com',
+          connected: !!(process.env.MONDAY_API_KEY),
+          required: false,
+          optional: true,
+          usedByAgents: ['PMO', 'Planning'],
+          configUrl: '/admin/integrations/monday',
+          errorMessage: process.env.MONDAY_API_KEY
+            ? undefined
+            : 'Not configured - Set MONDAY_API_KEY in .env'
+        },
+        {
+          id: 'azure-devops',
+          name: 'Azure DevOps',
+          connected: !!(process.env.AZURE_DEVOPS_ORG && process.env.AZURE_DEVOPS_PAT),
+          required: false,
+          optional: true,
+          usedByAgents: ['TMO', 'PMO'],
+          configUrl: '/admin/integrations/azure-devops',
+          errorMessage: process.env.AZURE_DEVOPS_ORG
+            ? undefined
+            : 'Not configured - Set AZURE_DEVOPS_ORG and AZURE_DEVOPS_PAT in .env'
+        }
+      ];
+
+      res.json({
+        success: true,
+        mcps: mcpStatuses,
+        connectedCount: mcpStatuses.filter(m => m.connected).length,
+        totalCount: mcpStatuses.length,
+        allOptionalMCPsConfigured: mcpStatuses.filter(m => m.optional).every(m => m.connected),
+        requiredMCPsConfigured: mcpStatuses.filter(m => m.required).every(m => m.connected)
+      });
+    } catch (error: any) {
+      console.error('[MCPServers] Error getting MCP status:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get MCP status',
+        message: error.message,
+      });
+    }
+  });
+
   console.log('[MCPServers] MCP server management routes registered');
 }

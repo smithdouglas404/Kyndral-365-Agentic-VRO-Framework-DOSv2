@@ -3,7 +3,7 @@ import {
   Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight,
   BarChart3, Building2, Briefcase, PieChart, Upload, Bot,
-  Settings, Network, Zap
+  Settings, Network, Zap, Layers, GitBranch, Route
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -100,6 +100,16 @@ const agents: Agent[] = [
     color: 'bg-pink-500',
     description: 'Organizational change'
   }
+];
+
+const dashboardNavItems = [
+  { id: "portfolio-dashboard", label: "Portfolio Dashboard", icon: Layers, href: "/dashboard/portfolio" },
+  { id: "art-dashboard", label: "ART Dashboard", icon: Route, href: "/dashboard/art" },
+  { id: "value-stream-dashboard", label: "Value Stream", icon: GitBranch, href: "/dashboard/value-stream" },
+  { id: "prediction-dashboard", label: "Prediction Hub", icon: Zap, href: "/dashboard/predictions" },
+  { id: "dependency-dashboard", label: "Dependency Map", icon: Network, href: "/dashboard/dependencies" },
+  { id: "decision-dashboard", label: "Decision Board", icon: Settings, href: "/dashboard/decisions" },
+  { id: "mcp-dashboard", label: "MCP Management", icon: Network, href: "/dashboard/mcp" },
 ];
 
 interface AgentSidebarProps {
@@ -233,6 +243,42 @@ export function AgentSidebar({ activeTab = "overview", onTabChange = () => {}, c
                       "h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity",
                       active ? "text-white" : "text-gray-400"
                     )} />
+                  )}
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+
+        {/* Dashboard Shortcuts */}
+        {!collapsed && (
+          <div className="px-3 mt-4 mb-1">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dashboards</span>
+          </div>
+        )}
+        {dashboardNavItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          return (
+            <Link key={item.id} href={item.href}>
+              <div
+                className={cn(
+                  "mx-2 mb-1 px-3 py-2.5 rounded-lg cursor-pointer transition-all group relative",
+                  active ? "bg-[#005EB8] text-white" : "hover:bg-gray-100 text-gray-700"
+                )}
+                data-testid={`sidebar-dashboard-${item.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "p-1.5 rounded-md relative",
+                    active ? "bg-white/20" : "bg-gray-200"
+                  )}>
+                    <Icon className={cn("h-4 w-4", active ? "text-white" : "text-gray-600")} />
+                  </div>
+                  {!collapsed && (
+                    <div className="flex-1 min-w-0">
+                      <span className="font-medium text-sm truncate">{item.label}</span>
+                    </div>
                   )}
                 </div>
               </div>

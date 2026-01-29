@@ -1,6 +1,7 @@
 # MASTER TODO - Complete Agent Attribute Expansion (EXACT SAFe Attributes)
 
-**⚠️ THIS IS THE MASTER DOCUMENT - All other TODO files are deprecated**
+**⚠️ THIS IS THE AUTHORITATIVE EXECUTION PLAN FOR ATTRIBUTES + EXECUTION**
+**NOTE**: `MASTER_ARCHITECTURE.md` is the primary authority. `MASTER_TODO.md` remains a reconciled supplement (not deprecated).
 
 **Created**: 2026-01-27
 **Updated**: 2026-01-27 (Phase 2 Complete - 315 Attributes + Logic Gates)
@@ -9,10 +10,36 @@
 **Reference Documents**:
 - `ALL_AGENTS_WIRED.md` - Existing Langflow Flow IDs for all 8 agents
 - `AGENT_MCP_ARCHITECTURE.md` - MCP integration architecture
-- `TODO_FROM_CONVERSATION.md` - Historical context (deprecated)
-- `BACKLOG.md` - Historical backlog (deprecated)
-- `FINAL_TODO.md` - Old version (deprecated)
-- `MASTER_TODO.md` - Old version (deprecated)
+- `TODO_FROM_CONVERSATION.md` - Historical context
+- `BACKLOG.md` - Historical backlog
+- `FINAL_TODO.md` - Old version
+- `MASTER_TODO.md` - Reconciled supplement (dashboards + research archive)
+- `MASTER_ARCHITECTURE.md` - Authoritative architecture
+
+---
+
+## 🔁 RECONCILED BACKLOG (FROM MASTER_ARCHITECTURE + MASTER_TODO)
+
+### A. Architecture-Defined Implementation (not previously tracked here)
+- [x] Company Discovery Service (SEC EDGAR + OpenCorporates, dedupe) → `server/services/companyDiscovery.ts`
+- [x] Policy-as-Code Extractor (Claude prompts, confidence scoring, ontology mapping) → `server/services/policyAsCodeExtractor.ts`
+- [x] Dashboard Generator (executive/value stream/risk templates) → `server/services/dashboardGenerator.ts`
+- [x] Company Profile routes (10 endpoints) → `server/routes/company-profile.ts`
+- [x] Approval Center routes (5 endpoints) → `server/routes/approval-center.ts`
+- [x] Register routes in `server/routes.ts` for company profile + approval center
+- [ ] Add required env vars (ANTHROPIC_API_KEY, SEC_EDGAR_EMAIL)
+- [ ] Testing: company discovery, extraction, dashboard generation workflows
+
+### B. Dashboard Build (from deprecated MASTER_TODO.md)
+- [x] Portfolio Dashboard page created → `client/src/pages/PortfolioDashboard.tsx`
+- [x] ART Dashboard page created → `client/src/pages/ARTDashboard.tsx`
+- [x] Value Stream Dashboard page created → `client/src/pages/ValueStreamDashboard.tsx`
+- [x] MCP Management Dashboard page created → `client/src/pages/MCPDashboard.tsx`
+- [ ] Custom Dashboard Builder (widget-based, add/remove metric tiles) → `client/src/components/CustomizableDashboard.tsx`
+- [ ] Project Dashboard enhancements (SAFe/PMBOK toggle + widgets)
+- [ ] FinOps dashboard enhancements (EVM S-curve, TCPI, variance table)
+- [ ] Governance dashboard enhancements (compliance/audit/control panels)
+- [ ] Planning dashboard enhancements (roadmap health, dependency graph, backlog health, capacity forecast)
 
 ---
 

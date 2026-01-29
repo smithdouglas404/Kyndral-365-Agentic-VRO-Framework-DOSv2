@@ -144,5 +144,122 @@ export function registerAgentExecutionRoutes(app: Express): void {
     }
   });
 
+  /**
+   * GET /api/agents/mcp-requirements
+   * Get which MCPs each agent needs (for MCP status dashboard)
+   */
+  app.get('/api/agents/mcp-requirements', async (_req: Request, res: Response) => {
+    try {
+      // Define MCP requirements for each agent
+      const agentRequirements = [
+        {
+          agentId: 'finops',
+          agentName: 'FinOps',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['jira', 'slack'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'tmo',
+          agentName: 'TMO',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['servicenow', 'slack', 'azure-devops'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'risk',
+          agentName: 'Risk',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['jira', 'servicenow', 'slack'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'pmo',
+          agentName: 'PMO',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['jira', 'monday', 'slack'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'ocm',
+          agentName: 'OCM',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['servicenow', 'slack'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'governance',
+          agentName: 'Governance',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['jira', 'slack'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'planning',
+          agentName: 'Planning',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['monday', 'slack'],
+          status: 'not-configured'
+        },
+        {
+          agentId: 'vro',
+          agentName: 'VRO',
+          requiredMCPs: ['langflow'],
+          optionalMCPs: ['slack'],
+          status: 'not-configured'
+        }
+      ];
+
+      // Calculate status based on environment variables
+      const langflowConnected = !!(process.env.LANGFLOW_API_KEY && process.env.LANGFLOW_API_KEY !== 'YOUR_KEY_HERE');
+
+      const requirements = agentRequirements.map(agent => {
+        // Check required MCPs
+        const requiredConfigured = agent.requiredMCPs.every(mcp => {
+          if (mcp === 'langflow') return langflowConnected;
+          return false;
+        });
+
+        // Check optional MCPs
+        let optionalConfigured = 0;
+        agent.optionalMCPs.forEach(mcp => {
+          if (mcp === 'jira' && process.env.JIRA_DOMAIN) optionalConfigured++;
+          if (mcp === 'servicenow' && process.env.SERVICENOW_INSTANCE) optionalConfigured++;
+          if (mcp === 'slack' && process.env.SLACK_WEBHOOK_URL) optionalConfigured++;
+          if (mcp === 'monday' && process.env.MONDAY_API_KEY) optionalConfigured++;
+          if (mcp === 'azure-devops' && process.env.AZURE_DEVOPS_ORG) optionalConfigured++;
+        });
+
+        let status: 'ready' | 'partial' | 'not-configured';
+        if (!requiredConfigured) {
+          status = 'not-configured';
+        } else if (optionalConfigured === agent.optionalMCPs.length) {
+          status = 'ready';
+        } else if (optionalConfigured > 0) {
+          status = 'partial';
+        } else {
+          status = 'partial'; // Has required but no optional
+        }
+
+        return {
+          ...agent,
+          status
+        };
+      });
+
+      res.json({
+        success: true,
+        agents: requirements
+      });
+    } catch (error: any) {
+      console.error('[AgentExecution] Error getting MCP requirements:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get MCP requirements',
+        message: error.message,
+      });
+    }
+  });
+
   console.log('[AgentExecution] Agent execution routes registered');
 }

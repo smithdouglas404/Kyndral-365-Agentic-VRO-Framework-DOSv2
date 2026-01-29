@@ -62,3 +62,54 @@ export function getAllDefaultAttributes(): Record<AgentType, AgentAttributeRegis
     return acc;
   }, {} as Record<AgentType, AgentAttributeRegistryEntry[]>);
 }
+
+/**
+ * Agent Attribute Registry Class
+ * Provides programmatic access to agent attributes
+ */
+export class AgentAttributeRegistry {
+  /**
+   * Get all attributes for an agent type
+   */
+  getAttributes(agentType: AgentType): AgentAttributeRegistryEntry[] {
+    return getDefaultAttributes(agentType);
+  }
+
+  /**
+   * Get specific attribute definition
+   */
+  getAttribute(agentType: AgentType, attributeName: string): AgentAttributeRegistryEntry | undefined {
+    const attributes = getDefaultAttributes(agentType);
+    return attributes.find(attr => attr.name === attributeName);
+  }
+
+  /**
+   * Get all attributes across all agents
+   */
+  getAllAttributes(): Record<AgentType, AgentAttributeRegistryEntry[]> {
+    return getAllDefaultAttributes();
+  }
+
+  /**
+   * Check if attribute exists
+   */
+  hasAttribute(agentType: AgentType, attributeName: string): boolean {
+    return this.getAttribute(agentType, attributeName) !== undefined;
+  }
+
+  /**
+   * Get attribute count for an agent
+   */
+  getAttributeCount(agentType: AgentType): number {
+    return getDefaultAttributes(agentType).length;
+  }
+
+  /**
+   * Get total attribute count across all agents
+   */
+  getTotalAttributeCount(): number {
+    return AGENT_TYPES.reduce((total, agentType) => {
+      return total + this.getAttributeCount(agentType);
+    }, 0);
+  }
+}

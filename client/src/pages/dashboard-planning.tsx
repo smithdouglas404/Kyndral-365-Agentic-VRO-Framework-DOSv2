@@ -19,6 +19,8 @@ import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useDivisions } from '@/hooks/useNexteraData';
 import { useProjects } from '@/hooks/useDashboardData';
 import { useAgentData } from '@/hooks/useAgentData';
+import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
+import { getAttributeMap, parseAttributeNumber, parseAttributeText, useAgentAttributes } from '@/hooks/useAgentAttributes';
 import { 
   getCompanyMetrics,
   type DataMode,
@@ -26,7 +28,6 @@ import {
   type TransformedDeadline
 } from '@/lib/agentDataTransformers';
 import { AIRecommendations } from "@/components/AIRecommendations";
-import AgentActionQueue from "@/components/AgentActionQueue";
 
 function NavBar() {
   return (
@@ -211,6 +212,7 @@ export default function PlanningDashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('planning');
+  const { data: planningAttributes } = useAgentAttributes('planning');
   const { data: divisions = [] } = useDivisions();
   const { data: projectsData } = useProjects();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
@@ -243,6 +245,19 @@ export default function PlanningDashboard() {
 
   const allProjects = projectsData?.projects || [];
   const inProgressProjects = allProjects.filter((p: any) => p.status === 'active').length;
+
+  const planningMap = getAttributeMap(planningAttributes?.attributes || []);
+  const phaseAttr = planningMap.plan_id;
+  const progressAttr = planningMap.planning_confidence_score;
+  const budgetAttr = planningMap.total_capacity_pts;
+  const deadlineAttr = planningMap.backlog_readiness_idx;
+  const projectCountAttr = planningMap.uncommitted_objectives;
+
+  const phaseValue = parseAttributeText(phaseAttr?.value);
+  const progressValue = parseAttributeNumber(progressAttr?.value);
+  const budgetValue = parseAttributeNumber(budgetAttr?.value);
+  const deadlineValue = parseAttributeNumber(deadlineAttr?.value);
+  const projectCountValue = parseAttributeNumber(projectCountAttr?.value);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -299,9 +314,9 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Current Phase</p>
-                    <p className="text-2xl font-bold text-indigo-600">{completedPhases + 1}/{milestones.length}</p>
+                    <p className="text-2xl font-bold text-indigo-600">{phaseValue ?? `${completedPhases + 1}/${milestones.length}`}</p>
                   </div>
-                  <Flag className="h-8 w-8 text-indigo-200" />
+                  {phaseAttr && <AttributeStatusBadge availability={phaseAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{currentPhase?.name.replace('Phase ', '').split(':')[1]?.trim() || 'Development'}</p>
               </CardContent>
@@ -311,9 +326,9 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Overall Progress</p>
-                    <p className="text-2xl font-bold text-green-600">{liveData.metrics.avgConfidence || overallProgress}%</p>
+                    <p className="text-2xl font-bold text-green-600">{progressValue ?? (liveData.metrics.avgConfidence || overallProgress)}%</p>
                   </div>
-                  <Target className="h-8 w-8 text-green-200" />
+                  {progressAttr && <AttributeStatusBadge availability={progressAttr.availability} />}
                 </div>
                 <Progress value={liveData.metrics.avgConfidence || overallProgress} className="h-1.5 mt-2" />
               </CardContent>
@@ -323,9 +338,9 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Budget Status</p>
-                    <p className="text-2xl font-bold text-blue-600">${liveData.metrics.realizedValue || totalSpent.toFixed(1)}M</p>
+                    <p className="text-2xl font-bold text-blue-600">${budgetValue ?? (liveData.metrics.realizedValue || totalSpent.toFixed(1))}M</p>
                   </div>
-                  <BarChart3 className="h-8 w-8 text-blue-200" />
+                  {budgetAttr && <AttributeStatusBadge availability={budgetAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">of ${liveData.metrics.totalValue || totalBudget}M planned</p>
               </CardContent>
@@ -338,9 +353,9 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Deadlines On Track</p>
-                    <p className="text-2xl font-bold text-green-600">{onTrackDeadlines}/{deadlines.length}</p>
+                    <p className="text-2xl font-bold text-green-600">{deadlineValue ?? `${onTrackDeadlines}/${deadlines.length}`}</p>
                   </div>
-                  <CheckCircle2 className="h-8 w-8 text-green-200" />
+                  {deadlineAttr && <AttributeStatusBadge availability={deadlineAttr.availability} />}
                 </div>
                 {(liveData.metrics.atRiskProjects || atRiskDeadlines) > 0 && (
                   <p className="text-xs text-red-600 mt-2">{liveData.metrics.atRiskProjects || atRiskDeadlines} at risk</p>
@@ -352,9 +367,9 @@ export default function PlanningDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Active Projects</p>
-                    <p className="text-2xl font-bold text-purple-600">{liveData.metrics.totalProjects || inProgressProjects}</p>
+                    <p className="text-2xl font-bold text-purple-600">{projectCountValue ?? (liveData.metrics.totalProjects || inProgressProjects)}</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-purple-200" />
+                  {projectCountAttr && <AttributeStatusBadge availability={projectCountAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">across group functions</p>
               </CardContent>
@@ -362,10 +377,6 @@ export default function PlanningDashboard() {
           </div>
 
           <div className="mb-8">
-          <div className="mb-8">
-            <AgentActionQueue />
-          </div>
-
             <AIRecommendations agentType="planning" />
           </div>
 

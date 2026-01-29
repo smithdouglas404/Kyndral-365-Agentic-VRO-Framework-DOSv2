@@ -91,11 +91,16 @@ export default function LoginPage() {
 
       // Store demo access token
       localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('auth_token', data.accessToken);
       localStorage.setItem('demoMode', 'true');
       localStorage.setItem('auth_user', JSON.stringify(data.user));
 
-      // Navigate to dashboard with demo flag
-      navigate('/dashboard?demo=true');
+      // Navigate based on approval status
+      if (data.isApproved) {
+        navigate('/dashboard?demo=true');
+      } else {
+        navigate('/demo/pending');
+      }
     } catch (err: any) {
       setDemoError(err.message || 'Demo login failed');
     } finally {

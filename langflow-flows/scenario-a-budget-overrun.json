@@ -1,0 +1,215 @@
+{
+  "name": "Scenario A: Budget Overrun",
+  "description": "Auto-response when project exceeds allocated budget (FinOps ↔ PMO ↔ VRO) - Gate D",
+  "data": {
+    "nodes": [
+      {
+        "id": "input-1",
+        "type": "ChatInput",
+        "position": { "x": 100, "y": 100 },
+        "data": {
+          "type": "ChatInput",
+          "node": {
+            "template": {
+              "input_value": {
+                "type": "str",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "",
+                "name": "input_value"
+              }
+            },
+            "description": "Receive trigger payload from Logic Gate D (Budget Overrun Circuit Breaker)",
+            "base_classes": ["Message"],
+            "display_name": "Gate Trigger Input"
+          }
+        }
+      },
+      {
+        "id": "http-pmo-1",
+        "type": "CustomComponent",
+        "position": { "x": 400, "y": 200 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "template": {
+              "url": {
+                "value": "http://localhost:5000/api/agent-actions/pmo/set-flow-status",
+                "name": "url"
+              },
+              "method": {
+                "value": "POST",
+                "name": "method"
+              },
+              "headers": {
+                "value": "{\"Content-Type\": \"application/json\"}",
+                "name": "headers"
+              },
+              "body": {
+                "value": "{ \"projectId\": \"{{projectId}}\", \"epicId\": \"{{epicId}}\", \"flowStatus\": \"Blocked\", \"reason\": \"Budget overrun detected - actual spend exceeds allocated budget\" }",
+                "name": "body"
+              }
+            },
+            "description": "Block PMO Epic - set flow_status to 'Blocked'",
+            "base_classes": ["Data"],
+            "display_name": "Block PMO Epic"
+          }
+        }
+      },
+      {
+        "id": "http-vro-1",
+        "type": "CustomComponent",
+        "position": { "x": 400, "y": 350 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "template": {
+              "url": {
+                "value": "http://localhost:5000/api/agent-actions/vro/recalculate-roi",
+                "name": "url"
+              },
+              "method": {
+                "value": "POST",
+                "name": "method"
+              },
+              "headers": {
+                "value": "{\"Content-Type\": \"application/json\"}",
+                "name": "headers"
+              },
+              "body": {
+                "value": "{ \"projectId\": \"{{projectId}}\", \"actualSpend\": \"{{actualSpend}}\", \"allocatedBudget\": \"{{allocatedBudget}}\" }",
+                "name": "body"
+              }
+            },
+            "description": "Trigger VRO to recalculate ROI based on new actuals",
+            "base_classes": ["Data"],
+            "display_name": "Recalculate VRO ROI"
+          }
+        }
+      },
+      {
+        "id": "http-jira-1",
+        "type": "CustomComponent",
+        "position": { "x": 400, "y": 500 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "template": {
+              "url": {
+                "value": "http://localhost:5000/api/agent-actions/jira/create-issue",
+                "name": "url"
+              },
+              "method": {
+                "value": "POST",
+                "name": "method"
+              },
+              "headers": {
+                "value": "{\"Content-Type\": \"application/json\"}",
+                "name": "headers"
+              },
+              "body": {
+                "value": "{ \"projectKey\": \"PMO\", \"summary\": \"Budget Overrun - Epic Blocked\", \"description\": \"Budget exceeded: {{actualSpend}} > {{allocatedBudget}}\", \"priority\": \"Critical\", \"issuetype\": \"Task\", \"agentId\": \"finops\" }",
+                "name": "body"
+              }
+            },
+            "description": "Create Critical Jira ticket (optional - degrades gracefully if not configured)",
+            "base_classes": ["Data"],
+            "display_name": "Create Jira Ticket"
+          }
+        }
+      },
+      {
+        "id": "http-slack-1",
+        "type": "CustomComponent",
+        "position": { "x": 400, "y": 650 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "template": {
+              "url": {
+                "value": "http://localhost:5000/api/agent-actions/slack/notify",
+                "name": "url"
+              },
+              "method": {
+                "value": "POST",
+                "name": "method"
+              },
+              "headers": {
+                "value": "{\"Content-Type\": \"application/json\"}",
+                "name": "headers"
+              },
+              "body": {
+                "value": "{ \"channel\": \"#budget-alerts\", \"text\": \"@channel CRITICAL: Budget overrun detected on project {{projectId}} - Epic blocked\", \"agentId\": \"finops\" }",
+                "name": "body"
+              }
+            },
+            "description": "Send Slack notification (optional - degrades gracefully if not configured)",
+            "base_classes": ["Data"],
+            "display_name": "Send Slack Alert"
+          }
+        }
+      },
+      {
+        "id": "output-1",
+        "type": "ChatOutput",
+        "position": { "x": 700, "y": 400 },
+        "data": {
+          "type": "ChatOutput",
+          "node": {
+            "template": {
+              "input_value": {
+                "type": "str",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "Budget overrun scenario completed: Epic blocked, ROI recalculated, stakeholders notified",
+                "name": "input_value"
+              }
+            },
+            "description": "Return success status",
+            "base_classes": ["Message"],
+            "display_name": "Response"
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "input-1",
+        "target": "http-pmo-1",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "source": "http-pmo-1",
+        "target": "http-vro-1",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "source": "http-vro-1",
+        "target": "http-jira-1",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "source": "http-jira-1",
+        "target": "http-slack-1",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "source": "http-slack-1",
+        "target": "output-1",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      }
+    ]
+  },
+  "is_component": false
+}

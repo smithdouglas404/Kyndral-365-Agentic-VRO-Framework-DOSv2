@@ -99,7 +99,7 @@ export function AIExecutiveInsights() {
   
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerEntity, setDrawerEntity] = useState<{ type: string; id: string } | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const openDrilldown = (type: string, id: string) => {
     setDrawerEntity({ type, id });
@@ -109,8 +109,9 @@ export function AIExecutiveInsights() {
   const { data: insights, isLoading, error } = useQuery<ExecutiveInsight>({
     queryKey: ['executive-insights'],
     queryFn: fetchExecutiveInsights,
-    staleTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false
+    staleTime: 60 * 1000,
+    refetchInterval: 60 * 1000,
+    refetchOnWindowFocus: true
   });
 
   const refreshMutation = useMutation({
@@ -216,6 +217,7 @@ export function AIExecutiveInsights() {
   }
 
   const health = healthColors[insights.portfolioHealth];
+  const generatedTime = new Date(insights.generatedAt).toLocaleTimeString();
 
   return (
     <motion.div
@@ -224,12 +226,8 @@ export function AIExecutiveInsights() {
       transition={{ duration: 0.5 }}
       className="mb-6"
     >
-      <Card className={`border-2 ${health.border} bg-gradient-to-br from-slate-50 to-white shadow-lg`}>
-        <CardHeader 
-          className="pb-3 cursor-pointer hover:bg-gray-50/50 transition-colors"
-          onClick={() => setIsExpanded(!isExpanded)}
-          data-testid="accordion-ai-insights-header"
-        >
+      <Card className={`border-2 ${health.border} bg-white shadow-lg`}>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`p-2 rounded-lg ${health.light}`}>
@@ -245,28 +243,38 @@ export function AIExecutiveInsights() {
                 </CardTitle>
                 <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                   <Clock className="h-3 w-3" />
-                  Generated {new Date(insights.generatedAt).toLocaleTimeString()}
-                  {!isExpanded && <span className="ml-2 text-blue-500">Click to expand</span>}
+                  Generated {generatedTime}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1" />
+                LIVE
+              </Badge>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => { e.stopPropagation(); refreshMutation.mutate(); }}
+                onClick={() => refreshMutation.mutate()}
                 disabled={refreshMutation.isPending}
                 className="text-gray-500 hover:text-blue-600"
                 data-testid="button-refresh-insights"
               >
                 <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
               </Button>
-              <motion.div
-                animate={{ rotate: isExpanded ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-gray-500 hover:text-blue-600"
               >
-                <ChevronDown className={`h-5 w-5 ${health.text}`} />
-              </motion.div>
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className={`h-5 w-5 ${health.text}`} />
+                </motion.div>
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -281,132 +289,137 @@ export function AIExecutiveInsights() {
               style={{ overflow: "hidden" }}
             >
               <CardContent className="space-y-5">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={`p-4 rounded-lg ${health.light} border ${health.border}`}
-          >
-            <h3 className={`text-lg font-semibold ${health.text} mb-2`}>
-              {insights.headline}
-            </h3>
-            <p className="text-sm text-gray-700">{insights.healthSummary}</p>
-          </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className={`p-4 rounded-lg ${health.light} border ${health.border}`}
+                >
+                  <h3 className={`text-lg font-semibold ${health.text} mb-2`}>
+                    {insights.headline}
+                  </h3>
+                  <p className="text-sm text-gray-700">{insights.healthSummary}</p>
+                </motion.div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {kpiHighlights.map((kpi, i) => (
-              <motion.div
-                key={kpi.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className={`flex-shrink-0 px-3 py-2 rounded-lg ${kpiStatusColors[kpi.status]} border`}
-                data-testid={`kpi-highlight-${i}`}
-              >
-                <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="text-sm font-medium">{kpi.name}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {kpiHighlights.map((kpi, i) => (
+                    <motion.div
+                      key={kpi.name}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="p-3 rounded-lg bg-white border border-gray-200"
+                      data-testid={`kpi-highlight-${i}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-500">{kpi.name}</span>
+                        <Badge className={`text-[10px] ${kpiStatusColors[kpi.status]} border`}>
+                          {kpi.status.replace('-', ' ')}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-gray-900 flex items-center gap-1">
+                        <BarChart3 className="h-4 w-4 text-gray-400" />
+                        {kpi.delta}
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-                <p className="text-xs mt-1">{kpi.delta}</p>
-              </motion.div>
-            ))}
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-red-700">
-                <AlertTriangle className="h-4 w-4" />
-                <h4 className="font-semibold text-sm">Key Risks</h4>
-              </div>
-              {keyRisks.map((risk, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm transition-all cursor-pointer"
-                  onClick={() => handleRiskClick(risk)}
-                  data-testid={`risk-card-${i}`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900">{risk.title}</span>
-                    <Badge className={`text-xs ${severityColors[risk.severity]} border`}>
-                      {risk.severity}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-red-600 font-medium mb-1">{risk.impact}</p>
-                  <p className="text-xs text-gray-600">{risk.mitigation}</p>
-                  {risk.linkedEntity && (
-                    <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                      <Shield className="h-3 w-3" />
-                      {risk.linkedEntity}
-                    </p>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-emerald-700">
-                <Lightbulb className="h-4 w-4" />
-                <h4 className="font-semibold text-sm">Opportunities</h4>
-              </div>
-              {opportunities.map((opp, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-emerald-300 hover:shadow-sm transition-all cursor-pointer"
-                  onClick={() => handleOpportunityClick(opp)}
-                  data-testid={`opportunity-card-${i}`}
-                >
-                  <span className="text-sm font-medium text-gray-900">{opp.title}</span>
-                  <p className="text-xs text-emerald-600 font-medium mt-1">{opp.potentialValue}</p>
-                  <p className="text-xs text-gray-600 mt-1">{opp.action}</p>
-                  {opp.linkedEntity && (
-                    <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                      <Target className="h-3 w-3" />
-                      {opp.linkedEntity}
-                    </p>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-blue-700">
-                <Zap className="h-4 w-4" />
-                <h4 className="font-semibold text-sm">Recommended Actions</h4>
-              </div>
-              {recommendations.map((rec, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.1 }}
-                  className="p-3 rounded-lg bg-white border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group"
-                  onClick={() => handleActionClick(rec.actionRef, rec.action)}
-                  data-testid={`recommendation-card-${i}`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900 group-hover:text-blue-700 transition-colors">
-                      {rec.action}
-                    </span>
-                    <Badge className={`text-xs ${priorityColors[rec.priority]} shrink-0`}>
-                      {rec.priority}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-gray-600">{rec.rationale}</p>
-                  {rec.actionRef && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowUpRight className="h-3 w-3" />
-                      <span>Click to navigate</span>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-red-700">
+                      <AlertTriangle className="h-4 w-4" />
+                      <h4 className="font-semibold text-sm">Key Risks</h4>
                     </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
+                    {keyRisks.map((risk, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 + i * 0.05 }}
+                        className="p-3 rounded-lg bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm transition-all cursor-pointer"
+                        onClick={() => handleRiskClick(risk)}
+                        data-testid={`risk-card-${i}`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-900">{risk.title}</span>
+                          <Badge className={`text-xs ${severityColors[risk.severity]} border`}>
+                            {risk.severity}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-red-600 font-medium mb-1">{risk.impact}</p>
+                        <p className="text-xs text-gray-600">{risk.mitigation}</p>
+                        {risk.linkedEntity && (
+                          <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                            <Shield className="h-3 w-3" />
+                            {risk.linkedEntity}
+                          </p>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-emerald-700">
+                      <Lightbulb className="h-4 w-4" />
+                      <h4 className="font-semibold text-sm">Opportunities</h4>
+                    </div>
+                    {opportunities.map((opp, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25 + i * 0.05 }}
+                        className="p-3 rounded-lg bg-white border border-gray-200 hover:border-emerald-300 hover:shadow-sm transition-all cursor-pointer"
+                        onClick={() => handleOpportunityClick(opp)}
+                        data-testid={`opportunity-card-${i}`}
+                      >
+                        <span className="text-sm font-medium text-gray-900">{opp.title}</span>
+                        <p className="text-xs text-emerald-600 font-medium mt-1">{opp.potentialValue}</p>
+                        <p className="text-xs text-gray-600 mt-1">{opp.action}</p>
+                        {opp.linkedEntity && (
+                          <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                            <Target className="h-3 w-3" />
+                            {opp.linkedEntity}
+                          </p>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-blue-700">
+                      <Zap className="h-4 w-4" />
+                      <h4 className="font-semibold text-sm">Recommended Actions</h4>
+                    </div>
+                    {recommendations.map((rec, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + i * 0.05 }}
+                        className="p-3 rounded-lg bg-white border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group"
+                        onClick={() => handleActionClick(rec.actionRef, rec.action)}
+                        data-testid={`recommendation-card-${i}`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-900 group-hover:text-blue-700 transition-colors">
+                            {rec.action}
+                          </span>
+                          <Badge className={`text-xs ${priorityColors[rec.priority]} shrink-0`}>
+                            {rec.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600">{rec.rationale}</p>
+                        {rec.actionRef && (
+                          <div className="flex items-center gap-1 mt-2 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <ArrowUpRight className="h-3 w-3" />
+                            <span>Click to navigate</span>
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </motion.div>
           )}

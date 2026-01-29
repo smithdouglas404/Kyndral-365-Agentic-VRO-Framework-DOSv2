@@ -1,6 +1,7 @@
 /**
  * ACME Demo Data API Routes
  * Endpoints for loading industry-specific demo data
+ * ONLY AVAILABLE IN DEMO MODE
  */
 
 import type { Express, Request, Response } from "express";
@@ -11,6 +12,7 @@ import { db } from '../db';
 import { demoRequests } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth } from '../lib/auth';
+import { isDemoMode, requireProduction } from '../lib/isDemoMode';
 
 // Handle both ESM and CommonJS builds
 const __filename = typeof import.meta !== 'undefined' && import.meta.url
@@ -45,9 +47,18 @@ export function registerDemoRoutes(app: Express) {
   /**
    * GET /api/demo/industries
    * Returns list of available ACME industries for demo mode
+   * ONLY AVAILABLE IN DEMO MODE
    */
   app.get("/api/demo/industries", async (req: Request, res: Response) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo endpoints are not available in production mode',
+          hint: 'Set DEMO_MODE=true in .env to enable demo features'
+        });
+      }
+
       const seedData = loadSeedData();
       const industries = seedData.companies.map((company: any) => ({
         id: company.industryId,
@@ -68,9 +79,17 @@ export function registerDemoRoutes(app: Express) {
    * POST /api/demo/activate/:industryId
    * Activates demo mode for specified industry
    * Sets session cookie to enable demo data serving
+   * ONLY AVAILABLE IN DEMO MODE
    */
   app.post("/api/demo/activate/:industryId", async (req: Request, res: Response) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo endpoints are not available in production mode'
+        });
+      }
+
       const { industryId } = req.params;
       const seedData = loadSeedData();
 

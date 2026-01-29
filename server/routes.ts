@@ -23,8 +23,12 @@ import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerOrchestratorRoutes, setBootstrapGetter } from "./routes/admin/orchestrator.js";
 import { registerLangflowRoutes } from "./routes/langflow.js";
 import langflowSyncRouter from "./routes/langflow-sync.js";
+import { registerLangflowIntegrationRoutes } from "./routes/langflow-integration.js";
+import { registerAgentObjectRoutes } from "./routes/agent-objects.js";
+import langflowAttributeSyncRouter from "./routes/langflow-attribute-sync.js";
 import { registerAgentModelRoutes } from "./routes/agent-model.js";
 import { registerAgentActionRoutes } from "./routes/agent-actions.js";
+import { registerLogicGatesRoutes } from "./routes/logic-gates.js";
 import mem0ApiRouter from "./routes/mem0-api.js";
 import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
 import ontologyApiRouter from "./routes/ontology-api.js";
@@ -37,8 +41,10 @@ import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
 import { registerDatabaseManagementRoutes } from "./routes/admin/database-management.js";
 import { registerCustomAttributesRoutes } from "./routes/custom-attributes.js";
+import { registerAgentAttributeRoutes } from "./routes/agent-attributes.js";
 import { registerAgentRulesRoutes } from "./routes/agent-rules.js";
 import { registerPolicyAsCodeRoutes } from "./routes/policy-as-code.js";
+import { registerPolicyMCPRoutes } from "./routes/policy-mcp.js";
 import ruleExecutionHistoryRouter from "./routes/rule-execution-history.js";
 import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
 import { registerOKRRuleMappingRoutes } from "./routes/okr-rule-mappings.js";
@@ -75,6 +81,7 @@ import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
+import { isDemoMode } from "./lib/isDemoMode.js";
 import { z } from "zod";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
@@ -193,8 +200,20 @@ export async function registerRoutes(
   // Register Langflow Sync routes (Bidirectional sync between DB rules and Langflow flows)
   app.use('/api/langflow-sync', langflowSyncRouter);
 
+  // Register Langflow Attribute Sync routes (Bidirectional sync between DB attributes and Langflow flows)
+  app.use('/api/langflow-attribute-sync', langflowAttributeSyncRouter);
+
   // Register Agent Action routes (Server endpoints for Langflow flows to call MCP integrations)
   registerAgentActionRoutes(app);
+
+  // Register Logic Gates routes (Autonomous agent collaboration via Logic Gates)
+  registerLogicGatesRoutes(app);
+
+  // Register Langflow Integration routes (Mem0, WebSocket, A2A, DB persistence for Langflow components)
+  registerLangflowIntegrationRoutes(app);
+
+  // Register Agent Objects routes (Query agent attributes via Langflow MCP)
+  registerAgentObjectRoutes(app);
 
   // Register Mem0 API routes (Expose Mem0 fact operations to Langflow flows)
   app.use('/api/mem0', mem0ApiRouter);
@@ -254,12 +273,17 @@ export async function registerRoutes(
 
   // Register Custom Attributes routes (ADMIN - Custom agent attributes exposed via MCP)
   registerCustomAttributesRoutes(app);
+  // Register Agent Attribute Registry routes (live agent attributes for dashboards)
+  registerAgentAttributeRoutes(app);
 
   // Register Agent Rules routes (CRUD - Agent-specific collaboration rules)
   registerAgentRulesRoutes(app);
 
   // Register Policy-as-Code routes (LLM extraction + HITL approval workflow)
   registerPolicyAsCodeRoutes(app);
+
+  // Register Policy-as-Code MCP Server routes (MCP tools for all agents to query compliance/regulatory/SOPs)
+  registerPolicyMCPRoutes(app, storage);
 
   // Register Rule Execution History routes (MONITORING - Audit trail of rule executions)
   app.use("/api/rules", ruleExecutionHistoryRouter);
@@ -1653,8 +1677,16 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // Reset demo data for presentations - clears EVERYTHING
+  // ONLY AVAILABLE IN DEMO MODE
   app.post("/api/demo/reset", async (_req, res) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo reset is not available in production mode'
+        });
+      }
+
       // Clear ALL interventions and activity logs
       await storage.clearInterventions();
       await storage.clearAgentActivityLog();
@@ -1670,8 +1702,16 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // Full reset - clears and reseeds divisions with correct IDs
+  // ONLY AVAILABLE IN DEMO MODE
   app.post("/api/demo/reset-divisions", async (_req, res) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo reset is not available in production mode'
+        });
+      }
+
       await storage.forceSeedDivisions();
       
       res.json({ 
@@ -1685,8 +1725,16 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // Seed all projects from templates
+  // ONLY AVAILABLE IN DEMO MODE
   app.post("/api/demo/seed-projects", async (_req, res) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo seed is not available in production mode'
+        });
+      }
+
       const existingProjects = await storage.getProjects();
       if (existingProjects.length > 5) {
         return res.json({ success: true, message: `${existingProjects.length} projects already exist, skipping seed.` });
@@ -1787,8 +1835,15 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // Seed demo data with autonomy labels AND projects from templates
+  // ONLY AVAILABLE IN DEMO MODE
   app.post("/api/demo/seed", async (_req, res) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo seed is not available in production mode'
+        });
+      }
       // Seed projects from templates first
       let projectsCreated = 0;
       const templates = await storage.getProjectTemplates();
@@ -1893,8 +1948,15 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // Seed agent discussions and task queue
+  // ONLY AVAILABLE IN DEMO MODE
   app.post("/api/demo/seed-agent-data", async (_req, res) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo seed is not available in production mode'
+        });
+      }
       // @ts-ignore - using internal seed methods
       if (typeof storage.seedAgentDiscussions === 'function') {
         await storage.seedAgentDiscussions();
@@ -1962,8 +2024,15 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // ONLY AVAILABLE IN DEMO MODE
   app.post("/api/demo/seed-alerts", async (_req, res) => {
     try {
+      // Gate: Only allow in demo mode
+      if (!isDemoMode()) {
+        return res.status(403).json({
+          error: 'Demo seed is not available in production mode'
+        });
+      }
       const demoAlerts = [
         {
           title: 'Budget Threshold Exceeded',
@@ -3055,31 +3124,65 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   });
 
   // ============================================================================
-  // FINOPS API - Cost Categories and Savings Opportunities (DB-backed)
+  // FINOPS API - Cost Categories and Savings Opportunities (Agent-powered)
   // ============================================================================
 
   app.get("/api/finops/cost-categories", async (_req, res) => {
     try {
       const divisions = await storage.getDivisions();
 
-      const costCategories = divisions.map((div: any) => {
-        const budget = 100;
-        const spent = Math.round(budget * 0.75);
-        const forecast = Math.round(budget * 0.96);
-        const variance = ((forecast - budget) / budget) * 100;
-        const savings = Math.round(budget * 0.08);
+      // Get real financial data from agent insights
+      const financialResponse = await fetch('http://localhost:5000/api/agent-insights/financial');
+      let agentData: any = null;
+      if (financialResponse.ok) {
+        agentData = await financialResponse.json();
+      }
+
+      const costCategories = await Promise.all(divisions.map(async (div: any) => {
+        // Get projects for this division
+        const divisionProjects = await storage.getProjectsByDivision(div.id);
+
+        // Calculate real budget, spent, and forecast from EVM
+        let budget = 0;
+        let spent = 0;
+        let forecast = 0;
+
+        if (agentData?.calculations) {
+          const relevantCalcs = agentData.calculations.filter((c: any) =>
+            divisionProjects.some(p => p.id === c.projectId)
+          );
+
+          budget = relevantCalcs.reduce((sum: number, c: any) => sum + (c.evm?.bac || 0), 0);
+          spent = relevantCalcs.reduce((sum: number, c: any) => sum + (c.evm?.ac || 0), 0);
+          forecast = relevantCalcs.reduce((sum: number, c: any) => sum + (c.evm?.eac || 0), 0);
+        } else {
+          // Fallback to project budgets if agent data unavailable
+          for (const project of divisionProjects) {
+            const projectBudget = parseFloat(project.budget || '0') || 0;
+            budget += projectBudget;
+            spent += projectBudget * (parseFloat(project.progressPercentage || project.progress || '0') / 100 || 0);
+            forecast += projectBudget * 1.05; // Conservative 5% overrun estimate
+          }
+        }
+
+        const variance = budget > 0 ? ((forecast - budget) / budget) * 100 : 0;
+        const savings = Math.max(0, budget - forecast); // Actual savings if under budget
 
         return {
           name: div.name || 'Unknown Division',
-          budget,
-          spent,
-          forecast,
+          budget: Math.round(budget / 1000000 * 10) / 10, // Convert to millions
+          spent: Math.round(spent / 1000000 * 10) / 10,
+          forecast: Math.round(forecast / 1000000 * 10) / 10,
           variance: Math.round(variance * 10) / 10,
           division: div.owner || 'Unassigned',
-          savings,
-          aiInsight: `AI analysis identified $${savings}M optimization opportunities`
+          savings: Math.round(savings / 1000000 * 10) / 10,
+          aiInsight: savings > 0
+            ? `FinOps Agent identified $${Math.round(savings / 1000000 * 10) / 10}M in cost savings opportunities through EVM analysis`
+            : forecast > budget
+              ? `Risk of $${Math.round((forecast - budget) / 1000000 * 10) / 10}M budget overrun detected`
+              : `Division on track with budget`
         };
-      });
+      }));
 
       res.json(costCategories);
     } catch (error: any) {
@@ -3092,28 +3195,96 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     try {
       const projects = await storage.getProjects();
 
-      const opportunities = projects.slice(0, 6).map((project: any, i: number) => {
-        const roi = 5 + i * 2;
-        const confidence = project.status === 'completed' ? 90 : project.status === 'in-progress' ? 70 : 50;
-        const statusMap: Record<string, string> = {
-          'completed': 'validated',
-          'in-progress': 'in-progress',
-          'planning': 'pending'
-        };
+      // Get real financial and value insights from agents
+      const financialResponse = await fetch('http://localhost:5000/api/agent-insights/financial');
+      const valueResponse = await fetch('http://localhost:5000/api/agent-insights/value');
 
-        return {
-          area: project.name || 'Unknown Project',
-          potential: roi,
-          confidence,
-          status: statusMap[project.status] || 'pending',
-          aiInsight: `Estimated ROI of $${roi}M with ${confidence}% confidence`,
-          division: project.owner || 'Unassigned',
-          roi,
-          paybackMonths: 12
-        };
-      });
+      let financialData: any = null;
+      let valueData: any = null;
 
-      res.json(opportunities);
+      if (financialResponse.ok) {
+        financialData = await financialResponse.json();
+      }
+      if (valueResponse.ok) {
+        valueData = await valueResponse.json();
+      }
+
+      // Build opportunities from real agent analysis
+      const opportunities = [];
+
+      // 1. Projects with budget savings (CPI > 1.0)
+      if (financialData?.calculations) {
+        for (const calc of financialData.calculations) {
+          if (calc.evm.cpi > 1.0) {
+            const project = await storage.getProject(calc.projectId);
+            const potentialSavings = calc.evm.bac - calc.evm.eac; // Budget - Forecast
+
+            if (potentialSavings > 100000) { // Only show if > $100k
+              opportunities.push({
+                area: `Cost Optimization: ${project?.name || 'Unknown Project'}`,
+                potential: Math.round(potentialSavings / 1000000 * 10) / 10,
+                confidence: Math.min(95, Math.round(calc.evm.cpi * 85)),
+                status: calc.evm.cpi > 1.1 ? 'validated' : 'in-progress',
+                aiInsight: `FinOps Agent detected CPI of ${calc.evm.cpi.toFixed(2)}, indicating $${Math.round(potentialSavings / 1000000 * 10) / 10}M in potential budget savings`,
+                division: project?.owner || 'Unassigned',
+                roi: Math.round((potentialSavings / calc.evm.bac) * 100) / 10,
+                paybackMonths: 0 // Immediate savings
+              });
+            }
+          }
+        }
+      }
+
+      // 2. Value realization opportunities
+      if (valueData?.analysis) {
+        for (const analysis of valueData.analysis) {
+          if (analysis.valueLeakage > 50000) { // Value leakage > $50k
+            opportunities.push({
+              area: `Value Recovery: ${analysis.projectName}`,
+              potential: Math.round(analysis.valueLeakage / 1000000 * 10) / 10,
+              confidence: 70,
+              status: analysis.status === 'high_risk' ? 'pending' : 'in-progress',
+              aiInsight: `VRO Agent identified ${Math.round(analysis.realizationRate)}% realization rate with $${Math.round(analysis.valueLeakage / 1000000 * 10) / 10}M value at risk`,
+              division: 'Portfolio',
+              roi: Math.round((analysis.valueLeakage / analysis.plannedValue) * 100) / 10,
+              paybackMonths: 6
+            });
+          }
+        }
+      }
+
+      // 3. Fallback to project-based opportunities if no agent data
+      if (opportunities.length === 0) {
+        const activeProjects = projects.filter(p => p.status === 'active' || p.status === 'in-progress').slice(0, 6);
+
+        for (const project of activeProjects) {
+          const projectBudget = parseFloat(project.budget || '0') || 0;
+          const progress = parseFloat(project.progressPercentage || project.progress || '0') || 0;
+
+          // Estimate potential savings at 5-15% of remaining budget
+          const remainingBudget = projectBudget * (1 - progress / 100);
+          const potentialSavings = remainingBudget * 0.10;
+
+          if (potentialSavings > 50000) {
+            opportunities.push({
+              area: `Process Optimization: ${project.name}`,
+              potential: Math.round(potentialSavings / 1000000 * 10) / 10,
+              confidence: 60,
+              status: 'pending',
+              aiInsight: `Potential 10% efficiency gain on remaining budget`,
+              division: project.owner || 'Unassigned',
+              roi: 2.5,
+              paybackMonths: 12
+            });
+          }
+        }
+      }
+
+      // Sort by potential savings (highest first) and limit to top 8
+      opportunities.sort((a, b) => b.potential - a.potential);
+      const topOpportunities = opportunities.slice(0, 8);
+
+      res.json(topOpportunities);
     } catch (error: any) {
       console.error("Get savings opportunities error:", error);
       res.status(500).json({ error: "Failed to get savings opportunities" });

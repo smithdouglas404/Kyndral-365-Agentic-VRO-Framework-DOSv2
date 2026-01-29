@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // Simulation engine removed - no longer needed
 import { PageContextProvider } from "@/contexts/PageContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
-import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
+import { CompanyProfileProvider, useCompanyProfile } from "@/contexts/CompanyProfileContext";
 import { DemoModeBanner } from "@/components/DemoModeBanner";
 import { DemoModeActiveBanner } from "@/components/DemoModeActiveBanner";
 import { FloatingAlertBanner } from "@/components/FloatingAlertBanner";
@@ -90,6 +90,7 @@ import CustomAttributes from "@/pages/admin/CustomAttributes";
 import PolicyAsCode from "@/pages/admin/PolicyAsCode";
 import AgentMemoryViewer from "@/pages/admin/AgentMemoryViewer";
 import VoiceBriefings from "@/pages/admin/VoiceBriefings";
+import AgentAttributeAdmin from "@/pages/admin/AgentAttributeAdmin";
 import CompanyProfile from "@/pages/admin/CompanyProfile";
 import ApprovalCenter from "@/pages/admin/ApprovalCenter";
 import ApprovalRequests from "@/pages/admin/ApprovalRequests";
@@ -107,6 +108,13 @@ import AdminWorkspace from "@/pages/workspaces/AdminWorkspace";
 import DemoPage from "@/pages/DemoPage";
 import DemoShowcase from "@/pages/DemoShowcase";
 import PendingApprovalPage from "@/pages/PendingApprovalPage";
+import PortfolioDashboard from "@/pages/PortfolioDashboard";
+import ARTDashboard from "@/pages/ARTDashboard";
+import ValueStreamDashboard from "@/pages/ValueStreamDashboard";
+import MCPDashboard from "@/pages/MCPDashboard";
+import PredictionHubDashboard from "@/pages/PredictionHubDashboard";
+import DependencyMapDashboard from "@/pages/DependencyMapDashboard";
+import DecisionBoardDashboard from "@/pages/DecisionBoardDashboard";
 
 function Router() {
   return (
@@ -136,6 +144,13 @@ function Router() {
       {/* Legacy Routes (kept for backwards compatibility) */}
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/pmo" component={Dashboard} />
+      <Route path="/dashboard/portfolio" component={PortfolioDashboard} />
+      <Route path="/dashboard/art" component={ARTDashboard} />
+      <Route path="/dashboard/value-stream" component={ValueStreamDashboard} />
+      <Route path="/dashboard/mcp" component={MCPDashboard} />
+      <Route path="/dashboard/predictions" component={PredictionHubDashboard} />
+      <Route path="/dashboard/dependencies" component={DependencyMapDashboard} />
+      <Route path="/dashboard/decisions" component={DecisionBoardDashboard} />
       <Route path="/cop" component={COPDashboard} />
       <Route path="/dashboard/tmo" component={TMODashboard} />
       <Route path="/dashboard/finops" component={FinOpsDashboard} />
@@ -205,10 +220,34 @@ function Router() {
       <Route path="/admin/custom-attributes" component={CustomAttributes} />
       <Route path="/admin/policies" component={PolicyAsCode} />
       <Route path="/admin/agent-memory" component={AgentMemoryViewer} />
+      <Route path="/admin/agent-attributes" component={AgentAttributeAdmin} />
       <Route path="/admin/voice-briefings" component={VoiceBriefings} />
       <Route component={NotFound} />
     </Switch>
   );
+}
+
+function DemoApprovalGate() {
+  const [location, setLocation] = useLocation();
+  const { isDemoUser, isDemoApproved, isLoading } = useCompanyProfile();
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!isDemoUser || isDemoApproved) {
+      return;
+    }
+
+    if (location.startsWith('/demo')) {
+      return;
+    }
+
+    setLocation('/demo/pending');
+  }, [isLoading, isDemoUser, isDemoApproved, location, setLocation]);
+
+  return null;
 }
 
 function GlobalAIOverlay() {
@@ -356,6 +395,7 @@ function App() {
                 <FloatingAlertBanner />
                 {/* DEPRECATED: GlobalAIOverlay replaced by UnifiedNotification system with GlobalNotificationBell in headers */}
                 {/* <GlobalAIOverlay /> */}
+                <DemoApprovalGate />
                 <AskPMChat />
                 <Router />
               </TooltipProvider>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { ChevronDown, Activity, User, Settings, LogOut, Menu } from 'lucide-react';
+import { ChevronDown, Activity, User, Settings, LogOut, Menu, LayoutDashboard } from 'lucide-react';
 import { GlobalNotificationBell } from './GlobalNotificationBell';
 import { ConnectionIndicator } from './RealTimeNotifications';
 import { useUnifiedNotifications } from '@/contexts/UnifiedNotificationContext';
@@ -48,6 +48,16 @@ const WORKSPACES = [
   { id: 'governance', label: 'Governance', path: '/workspace/governance', icon: '⚖️' },
   { id: 'ocm', label: 'Change Management', path: '/workspace/ocm', icon: '🔄' },
   { id: 'admin', label: 'Administration', path: '/workspace/admin', icon: '⚙️' },
+];
+
+const DASHBOARD_SHORTCUTS = [
+  { id: 'portfolio', label: 'Portfolio Dashboard', path: '/dashboard/portfolio' },
+  { id: 'art', label: 'ART Dashboard', path: '/dashboard/art' },
+  { id: 'value-stream', label: 'Value Stream Dashboard', path: '/dashboard/value-stream' },
+  { id: 'prediction', label: 'Prediction Hub', path: '/dashboard/predictions' },
+  { id: 'dependency', label: 'Dependency Map', path: '/dashboard/dependencies' },
+  { id: 'decision', label: 'Decision Board', path: '/dashboard/decisions' },
+  { id: 'mcp', label: 'MCP Management', path: '/dashboard/mcp' },
 ];
 
 const LEGACY_ROUTES = [
@@ -118,7 +128,7 @@ export function GlobalHeader({
 
         {/* Center: Workspace Switcher */}
         {showWorkspaceSwitcher && (
-          <div className="hidden lg:flex items-center">
+          <div className="hidden lg:flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
@@ -143,6 +153,31 @@ export function GlobalHeader({
                   >
                     <span className="mr-2 text-base">{workspace.icon}</span>
                     <span>{workspace.label}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span className="hidden xl:inline">Dashboards</span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-56">
+                <DropdownMenuLabel>Dashboards</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {DASHBOARD_SHORTCUTS.map((dashboard) => (
+                  <DropdownMenuItem
+                    key={dashboard.id}
+                    onClick={() => navigate(dashboard.path)}
+                    className={cn(
+                      'cursor-pointer',
+                      location.startsWith(dashboard.path) && 'bg-accent'
+                    )}
+                  >
+                    <span>{dashboard.label}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -217,7 +252,7 @@ export function GlobalHeader({
       {/* Mobile Workspace Menu */}
       {mobileMenuOpen && showWorkspaceSwitcher && (
         <div className="lg:hidden border-t bg-background p-4">
-          <div className="space-y-1">
+          <div className="space-y-4">
             <p className="text-sm font-medium mb-2">Workspaces</p>
             {WORKSPACES.map((workspace) => (
               <Button
@@ -231,6 +266,22 @@ export function GlobalHeader({
               >
                 <span className="mr-2">{workspace.icon}</span>
                 <span>{workspace.label}</span>
+              </Button>
+            ))}
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium mb-2">Dashboards</p>
+            {DASHBOARD_SHORTCUTS.map((dashboard) => (
+              <Button
+                key={dashboard.id}
+                variant={location.startsWith(dashboard.path) ? 'secondary' : 'ghost'}
+                className="w-full justify-start"
+                onClick={() => {
+                  navigate(dashboard.path);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <span>{dashboard.label}</span>
               </Button>
             ))}
           </div>

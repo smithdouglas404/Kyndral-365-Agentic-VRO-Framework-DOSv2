@@ -1,4 +1,9 @@
-# MASTER TODO - Complete Agent Attribute Expansion & Dashboard Build
+# MASTER_TODO (RECONCILED SUPPLEMENT)
+
+**Status**: Reconciled with `MASTER_TODO_EXACT_ATTRIBUTES.md` and `MASTER_ARCHITECTURE.md` on 2026-01-29.  
+**Authority**: `MASTER_ARCHITECTURE.md` is the source of truth. This file remains as a supplemental execution tracker and historical research record.
+
+---
 
 **Created**: 2026-01-27
 **Status**: Foundation Complete (60%) - Attributes & Dashboards Remaining (40%)

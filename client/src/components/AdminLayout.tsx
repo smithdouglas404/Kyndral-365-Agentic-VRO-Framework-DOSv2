@@ -54,6 +54,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/policies', icon: Shield, label: 'Policy as Code' },
     { path: '/admin/agents', icon: Activity, label: 'Agents' },
     { path: '/admin/agent-memory', icon: Brain, label: 'Agent Memory' },
+    { path: '/admin/agent-attributes', icon: Sliders, label: 'Agent Attributes' },
     { path: '/admin/voice-briefings', icon: Mic, label: 'Voice Briefings' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },

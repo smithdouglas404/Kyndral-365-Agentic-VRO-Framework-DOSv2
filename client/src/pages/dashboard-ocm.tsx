@@ -17,6 +17,8 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { useAgentData } from '@/hooks/useAgentData';
+import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
+import { getAttributeMap, parseAttributeNumber, parseAttributeText, useAgentAttributes } from '@/hooks/useAgentAttributes';
 import { 
   getTrainingProgramsFromOKRs,
   getCompanyMetrics,
@@ -26,7 +28,6 @@ import {
   type TransformedTrainingProgram
 } from '@/lib/agentDataTransformers';
 import { AIRecommendations } from "@/components/AIRecommendations";
-import AgentActionQueue from "@/components/AgentActionQueue";
 
 function NavBar() {
   return (
@@ -244,6 +245,8 @@ export default function OCMDashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('ocm');
+  const { data: ocmAttributes } = useAgentAttributes('ocm');
+  const { data: companyAttributes } = useAgentAttributes('company');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -265,12 +268,27 @@ export default function OCMDashboard() {
   const trainingPrograms = getTrainingProgramsFromOKRs(dataMode);
   const companyMetrics = getCompanyMetrics();
   
+  const ocmMap = getAttributeMap(ocmAttributes?.attributes || []);
+  const companyMap = getAttributeMap(companyAttributes?.attributes || []);
+
   const avgReadiness = Math.round(readinessMetrics.reduce((sum, m) => sum + m.score, 0) / readinessMetrics.length);
   const totalCompleted = trainingPrograms.reduce((sum, p) => sum + p.completed, 0);
   const totalEnrolled = trainingPrograms.reduce((sum, p) => sum + p.enrolled, 0);
   const avgSatisfaction = (trainingPrograms.reduce((sum, p) => sum + p.satisfaction, 0) / trainingPrograms.length).toFixed(1);
-  
+
   const positiveStakeholders = stakeholderGroups.filter(g => g.sentiment === 'positive').length;
+
+  const readinessAttr = ocmMap.stakeholderReadinessScore;
+  const trainingAttr = ocmMap.trainingCompletionRate;
+  const sentimentAttr = ocmMap.sentiment_trend;
+  const supportAttr = ocmMap.impactedUsersSupportLevel;
+  const employeeAttr = companyMap.employee_count;
+
+  const readinessValue = parseAttributeNumber(readinessAttr?.value);
+  const trainingValue = parseAttributeNumber(trainingAttr?.value);
+  const sentimentValue = parseAttributeText(sentimentAttr?.value);
+  const supportValue = parseAttributeNumber(supportAttr?.value);
+  const employeeValue = parseAttributeNumber(employeeAttr?.value);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -327,9 +345,9 @@ export default function OCMDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Change Readiness</p>
-                    <p className="text-2xl font-bold text-pink-600">{liveData.metrics.avgConfidence || avgReadiness}%</p>
+                    <p className="text-2xl font-bold text-pink-600">{readinessValue ?? (liveData.metrics.avgConfidence || avgReadiness)}%</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-pink-200" />
+                  {readinessAttr && <AttributeStatusBadge availability={readinessAttr.availability} />}
                 </div>
                 <Progress value={liveData.metrics.avgConfidence || avgReadiness} className="h-1.5 mt-2" />
               </CardContent>
@@ -339,9 +357,9 @@ export default function OCMDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Training Completion</p>
-                    <p className="text-2xl font-bold text-blue-600">{Math.round((totalCompleted / totalEnrolled) * 100)}%</p>
+                    <p className="text-2xl font-bold text-blue-600">{trainingValue ?? Math.round((totalCompleted / totalEnrolled) * 100)}%</p>
                   </div>
-                  <BookOpen className="h-8 w-8 text-blue-200" />
+                  {trainingAttr && <AttributeStatusBadge availability={trainingAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{totalCompleted.toLocaleString()} completed</p>
               </CardContent>
@@ -354,9 +372,9 @@ export default function OCMDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Stakeholder Sentiment</p>
-                    <p className="text-2xl font-bold text-green-600">{positiveStakeholders}/{stakeholderGroups.length}</p>
+                    <p className="text-2xl font-bold text-green-600">{sentimentValue ?? `${positiveStakeholders}/${stakeholderGroups.length}`}</p>
                   </div>
-                  <MessageSquare className="h-8 w-8 text-green-200" />
+                  {sentimentAttr && <AttributeStatusBadge availability={sentimentAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">positive groups</p>
               </CardContent>
@@ -366,9 +384,9 @@ export default function OCMDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Avg Satisfaction</p>
-                    <p className="text-2xl font-bold text-amber-600">{avgSatisfaction}/5</p>
+                    <p className="text-2xl font-bold text-amber-600">{supportValue ?? avgSatisfaction}/5</p>
                   </div>
-                  <Award className="h-8 w-8 text-amber-200" />
+                  {supportAttr && <AttributeStatusBadge availability={supportAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">training rating</p>
               </CardContent>
@@ -378,9 +396,9 @@ export default function OCMDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Impacted Staff</p>
-                    <p className="text-2xl font-bold text-purple-600">{companyMetrics.totalEmployees.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-purple-600">{employeeValue?.toLocaleString() || companyMetrics.totalEmployees.toLocaleString()}</p>
                   </div>
-                  <Building2 className="h-8 w-8 text-purple-200" />
+                  {employeeAttr && <AttributeStatusBadge availability={employeeAttr.availability} />}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">Enterprise employees</p>
               </CardContent>
@@ -388,10 +406,6 @@ export default function OCMDashboard() {
           </div>
 
           <div className="mb-8">
-          <div className="mb-8">
-            <AgentActionQueue />
-          </div>
-
             <AIRecommendations agentType="ocm" />
           </div>
 

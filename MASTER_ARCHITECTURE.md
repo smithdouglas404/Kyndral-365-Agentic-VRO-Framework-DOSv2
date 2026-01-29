@@ -5095,6 +5095,373 @@ LANGFLOW_PROJECT_ID=af409213-2d71-4e92-be62-f5f055bd1f35
 - Component interaction diagram
 - Performance characteristics table
 
+## 5.3B MCP Pre-Attachment Strategy and Implementation
+
+### Overview
+
+Each agent type has specific MCP adapters pre-attached based on their domain expertise. This ensures agents have access to relevant data sources without requiring manual configuration for every project. MCPs are connected via Langflow's built-in MCP marketplace, enabling client self-service.
+
+### MCP Pre-Attachment Configuration Per Agent
+
+#### PMO Agent Object
+**Domain**: Project management, delivery tracking, team velocity
+
+**Pre-Attached MCPs:**
+- **Jira** (Primary) - Sprint tracking, story points, issue status, WIP age
+- **Azure DevOps** - Work items, board status, velocity tracking
+- **Monday.com** - Project tracking (alternative)
+- **Smartsheet** - Gantt charts, dependencies (alternative)
+- **Policy MCP** - Compliance and regulatory rules
+
+**Recommended Langflow MCP Configuration:**
+```json
+{
+  "agent_type": "pmo",
+  "mcp_connections": [
+    {
+      "mcp_id": "jira",
+      "priority": "primary",
+      "sync_interval": "realtime",
+      "required_permissions": ["issues:read", "sprints:read", "boards:read"]
+    },
+    {
+      "mcp_id": "azure-devops",
+      "priority": "secondary",
+      "sync_interval": "realtime",
+      "required_permissions": ["work-items:read", "boards:read"]
+    },
+    {
+      "mcp_id": "policy-mcp",
+      "priority": "required",
+      "endpoint": "/api/policy-mcp",
+      "tools": ["queryPolicies", "checkCompliance", "getRulesForAgent"]
+    }
+  ],
+  "attribute_mappings": {
+    "feature_uuid": "jira.issue.key",
+    "story_points": "jira.issue.storyPoints",
+    "flow_status": "jira.issue.status",
+    "wip_age": "calculated:daysInStatus('In Progress')"
+  }
+}
+```
+
+#### FinOps Agent Object
+**Domain**: Financial tracking, budget management, cost forecasting
+
+**Pre-Attached MCPs:**
+- **SAP** (Primary) - ERP data, budget, actuals, forecasts
+- **Coupa** - Procurement and spend management
+- **NetSuite** - Financial data (alternative)
+- **Workday** - HCM and financial planning
+- **Anaplan** - Budget planning and forecasting
+- **Policy MCP** - Financial compliance rules
+
+**Recommended Langflow MCP Configuration:**
+```json
+{
+  "agent_type": "finops",
+  "mcp_connections": [
+    {
+      "mcp_id": "sap",
+      "priority": "primary",
+      "sync_interval": "hourly",
+      "required_permissions": ["financial:read", "projects:read"]
+    },
+    {
+      "mcp_id": "anaplan",
+      "priority": "high",
+      "sync_interval": "daily",
+      "required_permissions": ["models:read", "scenarios:read"]
+    },
+    {
+      "mcp_id": "policy-mcp",
+      "priority": "required",
+      "endpoint": "/api/policy-mcp",
+      "tools": ["queryPolicies", "checkCompliance", "getRulesForAgent"]
+    }
+  ],
+  "attribute_mappings": {
+    "budget_allocated": "sap.project.budget",
+    "actual_cost": "sap.project.actuals",
+    "budget_variance": "calculated:actualCost - budgetAllocated",
+    "forecast_eac": "anaplan.project.eac"
+  }
+}
+```
+
+#### VRO Agent Object
+**Domain**: Value realization, customer success, outcome tracking
+
+**Pre-Attached MCPs:**
+- **Salesforce** (Primary) - CRM data, customer outcomes
+- **Gainsight** - Customer success metrics
+- **Mixpanel** - Product analytics
+- **Amplitude** - User behavior analytics
+- **Policy MCP** - Value realization policies
+
+**Recommended Langflow MCP Configuration:**
+```json
+{
+  "agent_type": "vro",
+  "mcp_connections": [
+    {
+      "mcp_id": "salesforce",
+      "priority": "primary",
+      "sync_interval": "realtime",
+      "required_permissions": ["opportunities:read", "accounts:read", "cases:read"]
+    },
+    {
+      "mcp_id": "gainsight",
+      "priority": "high",
+      "sync_interval": "daily",
+      "required_permissions": ["health-scores:read", "surveys:read"]
+    },
+    {
+      "mcp_id": "policy-mcp",
+      "priority": "required",
+      "endpoint": "/api/policy-mcp",
+      "tools": ["queryPolicies", "getApplicablePolicies"]
+    }
+  ]
+}
+```
+
+#### Planning Agent Object
+**Domain**: Strategic planning, dependency management, roadmap coordination
+
+**Pre-Attached MCPs:**
+- **Jira** - Dependency tracking, epic relationships
+- **Planview** - Portfolio planning and capacity
+- **ServiceNow** - Change management and scheduling
+- **Microsoft Project** - Schedule management
+- **Policy MCP** - Planning and governance rules
+
+#### OCM Agent Object
+**Domain**: Organizational change management, team communication, sentiment
+
+**Pre-Attached MCPs:**
+- **Slack** (Primary) - Team communication patterns
+- **Microsoft Teams** - Collaboration metrics
+- **SurveyMonkey** - Sentiment surveys
+- **Culture Amp** - Employee feedback
+- **Policy MCP** - Change management policies
+
+#### Risk Agent Object
+**Domain**: Risk identification, mitigation tracking, impact analysis
+
+**Pre-Attached MCPs:**
+- **Palantir** - Data correlation and analytics
+- **Archer** - GRC and risk management
+- **ServiceNow GRC** - Risk and compliance tracking
+- **LogicGate** - Risk quantification
+- **Policy MCP** - Risk policies and thresholds
+
+#### Governance Agent Object
+**Domain**: Compliance, audit trails, policy enforcement
+
+**Pre-Attached MCPs:**
+- **Archer** (Primary) - Compliance tracking
+- **ServiceNow GRC** - Audit trails and evidence
+- **Ragie** - Document retrieval and policy search
+- **Policy MCP** (Required) - All compliance and regulatory rules
+- **Responsible AI MCP** - AI governance and validation
+
+**Special Note:** Governance agent has **mandatory** Policy MCP connection for all compliance checks.
+
+#### TMO Agent Object
+**Domain**: Technical management, code quality, DevOps metrics
+
+**Pre-Attached MCPs:**
+- **Jira** - Team velocity and cycle time
+- **GitHub** (Primary) - Code commits, PRs, code quality
+- **GitLab** - DevOps metrics (alternative)
+- **SonarQube** - Code health and technical debt
+- **Policy MCP** - Technical standards and policies
+
+#### Company Agent Object
+**Domain**: Company-wide context, strategic alignment, portfolio view
+
+**Pre-Attached MCPs:**
+- **All agent MCPs** (read-only access)
+- **Palantir** - Cross-portfolio analytics
+- **Celonis** - Process mining across initiatives
+- **Policy MCP** - Enterprise-wide policies
+
+### Implementation: Langflow Flow Templates
+
+Each agent has a template flow in Langflow that includes:
+
+1. **MCP Tools Component** - Pre-configured with agent-specific MCPs
+2. **Attribute Mapper Component** - Maps MCP data to agent attributes
+3. **Mem0 Writer Component** - Caches attributes with 5-min TTL
+4. **Threshold Evaluator Component** - Checks for threshold breaches
+5. **Signal Router** - Routes to WebSocket/A2A/DB based on severity
+
+**Example: PMO Agent Template Flow**
+```
+┌─────────────────────────────────────────────────────────┐
+│ MCP Tools (Jira)                                         │
+│ • Fetch issues from Jira board                          │
+│ • Input: project_key, board_id                          │
+│ • Output: issues array                                  │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ Attribute Mapper (PMO)                                   │
+│ • Maps Jira data to PMO attributes                      │
+│ • feature_uuid ← issue.key                              │
+│ • story_points ← issue.fields.customfield_10016        │
+│ • flow_status ← issue.fields.status.name               │
+│ • wip_age ← daysInStatus('In Progress')                │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ Mem0 Writer                                              │
+│ • Write each attribute to Mem0 cache                    │
+│ • TTL: 300 seconds (5 minutes)                          │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ Threshold Evaluator                                      │
+│ • Check: wip_age > 10 days                              │
+│ • If true → fire_signal = true                          │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ [Conditional Router]                                     │
+│ If fire_signal:                                          │
+│   ├─→ WebSocket Broadcaster (notify dashboards)        │
+│   ├─→ A2A Message Sender (notify Planning agent)       │
+│   └─→ DB Persister (store in PostgreSQL)               │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Policy-as-Code MCP Server
+
+**Special MCP Server**: All agents connect to Policy MCP Server for compliance/regulatory/SOP enforcement.
+
+**Location:** `server/mcp/PolicyMCPServer.ts`
+**Routes:** `server/routes/policy-mcp.ts`
+**Base URL:** `/api/policy-mcp`
+
+**Available Tools:**
+```typescript
+// Query policies by framework/type/status
+POST /api/policy-mcp/query
+Body: { status, complianceFramework, documentType, searchTerm }
+Returns: Array of policies
+
+// Get detailed policy with full code
+GET /api/policy-mcp/:policyId
+Returns: Policy details + associated rules + attributes
+
+// Check compliance for entity/action
+POST /api/policy-mcp/check-compliance
+Body: { entity, entityType, action, context }
+Returns: { compliant, violatedPolicies, applicableRules, recommendations }
+
+// Get all rules for agent type
+GET /api/policy-mcp/agent/:agentType/rules
+Returns: Array of active rules for agent
+
+// Get policies applicable to domain
+GET /api/policy-mcp/applicable/:domain
+Params: domain, entityType (optional)
+Returns: Array of applicable policies
+
+// Get policy system statistics
+GET /api/policy-mcp/stats
+Returns: Policy counts, frameworks, confidence metrics
+
+// Health check
+GET /api/policy-mcp/health
+Returns: MCP server health + metrics
+```
+
+**Usage in Langflow:**
+1. Add "HTTP API" tool in Langflow
+2. Configure base URL: `https://your-server.com/api/policy-mcp`
+3. Create tool for each endpoint (queryPolicies, checkCompliance, etc.)
+4. Use in flows to validate compliance before actions
+
+**Example Flow with Policy Check:**
+```
+[MCP Tools - Jira] → Create new project
+    ↓
+[Policy MCP] → checkCompliance({ entity: "project-123", action: "create_project" })
+    ↓
+[Conditional Router]
+    ├─ If compliant → [Continue with project creation]
+    └─ If not compliant → [A2A Message to Governance] → [Block action]
+```
+
+### Client Onboarding: Adding MCP Connections
+
+**Step 1: Access Langflow UI**
+- Navigate to Langflow instance
+- Login with admin credentials
+
+**Step 2: Add MCP Connections**
+- Go to "Settings" → "MCP Connections"
+- Click "Add New Connection"
+- Select MCP from marketplace (e.g., "Jira Cloud")
+
+**Step 3: Configure Credentials**
+- Enter MCP credentials (API keys, tokens, etc.)
+- Test connection
+- Save configuration
+
+**Step 4: Attach MCPs to Agent Flows**
+- Open agent template flow (e.g., "PMO Agent - Jira Sync")
+- Select "MCP Tools" component
+- Choose configured MCP from dropdown
+- Configure query parameters
+- Save flow
+
+**Step 5: Test and Deploy**
+- Run flow in test mode
+- Verify attribute mapping works correctly
+- Deploy flow to production
+
+**No Code Required** - Entire process is self-service via Langflow UI.
+
+### Benefits of MCP Pre-Attachment Strategy
+
+1. **Domain-Specific Data Access**
+   - Each agent only connects to relevant data sources
+   - Reduces noise and improves signal quality
+   - Optimizes API quota usage
+
+2. **Client Self-Service**
+   - Clients add MCPs via Langflow UI
+   - No developer intervention needed
+   - Faster onboarding (hours vs weeks)
+
+3. **Flexible Configuration**
+   - Clients can add/remove MCPs as needed
+   - Support for multiple PMO tools (Jira OR Azure DevOps OR both)
+   - Easy to swap providers (Jira → Linear)
+
+4. **Centralized Policy Enforcement**
+   - All agents connect to Policy MCP
+   - Consistent compliance checking
+   - Single source of truth for rules
+
+5. **Scalable Architecture**
+   - MCPs scale independently
+   - Langflow handles orchestration complexity
+   - Mem0 cache reduces external API calls
+
+### Next Implementation Steps
+
+1. ✅ Create Policy MCP Server (completed)
+2. ✅ Register Policy MCP routes (completed)
+3. 🔄 Create template Langflow flows for each agent
+4. 🔄 Document MCP connection guide for clients
+5. 🔄 Test Policy MCP integration in sample flow
+6. 🔄 Add Policy MCP health monitoring to admin dashboard
+
 ## 5.4 Memory Architecture
 
 ### Mem0: Shared Fact Ledger

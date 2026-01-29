@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { TrendingUp, TrendingDown, BarChart3, Clock, Zap, Target, Activity } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useVroMetrics, usePmoMetrics } from "@/hooks/useVroMetrics";
+import { AttributeStatusBadge } from "@/components/AttributeStatusBadge";
+import { getAttributeMap, parseAttributeNumber, parseAttributeText, useAgentAttributes } from "@/hooks/useAgentAttributes";
 
 interface PMOMetric {
   id: string;
@@ -68,14 +71,18 @@ function MetricCard({
   metric, 
   isPulsing = false,
   domain,
-  onClick
+  onClick,
+  availability
 }: { 
-  metric: { id: string; name: string; value: number; target: number; unit: string; trend?: string; source?: string };
+  metric: { id: string; name: string; value: number | string | null; target: number; unit: string; trend?: string; source?: string };
   isPulsing?: boolean;
   domain: 'VRO' | 'PMO';
   onClick?: () => void;
+  availability?: 'available' | 'admin_required' | 'mcp_required' | 'missing';
 }) {
-  const progress = Math.min(100, (metric.value / metric.target) * 100);
+  const numericValue = typeof metric.value === 'number' ? metric.value : Number(metric.value);
+  const hasNumber = Number.isFinite(numericValue);
+  const progress = hasNumber ? Math.min(100, (numericValue / metric.target) * 100) : 0;
   const isOnTrack = progress >= 90;
   const trendIcon = metric.trend === 'up' ? TrendingUp : metric.trend === 'down' ? TrendingDown : Activity;
   const TrendIcon = trendIcon;
@@ -102,10 +109,14 @@ function MetricCard({
     >
       <div className="flex items-start justify-between mb-2">
         <span className="text-xs font-medium text-gray-500">{metric.name}</span>
-        <TrendIcon className={cn(
-          "h-4 w-4",
-          metric.trend === 'up' ? 'text-green-500' : metric.trend === 'down' ? 'text-amber-500' : 'text-gray-400'
-        )} />
+        {availability ? (
+          <AttributeStatusBadge availability={availability} />
+        ) : (
+          <TrendIcon className={cn(
+            "h-4 w-4",
+            metric.trend === 'up' ? 'text-green-500' : metric.trend === 'down' ? 'text-amber-500' : 'text-gray-400'
+          )} />
+        )}
       </div>
       
       <div className="flex items-baseline gap-1 mb-2">
@@ -113,7 +124,7 @@ function MetricCard({
           className={cn("text-2xl font-bold", isOnTrack ? "text-green-600" : "text-amber-600")}
           animate={isPulsing ? { scale: [1, 1.1, 1] } : {}}
         >
-          {metric.value}
+          {metric.value === null || metric.value === undefined || (typeof metric.value === 'number' && !Number.isFinite(metric.value)) ? '--' : metric.value}
         </motion.span>
         <span className="text-sm text-gray-500">{metric.unit}</span>
       </div>
@@ -144,36 +155,68 @@ interface UnifiedMetricsSectionProps {
 export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProps) {
   const { data: vroMetricsData = [], isLoading: vroLoading } = useVroMetrics();
   const { data: pmoMetricsData = [], isLoading: pmoLoading } = usePmoMetrics();
+  const { data: vroAttributes } = useAgentAttributes('vro');
+  const { data: pmoAttributes } = useAgentAttributes('pmo');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  // Convert VroMetric to display format
-  const vroMetrics = vroMetricsData
-    .filter(m => m.isActive !== false)
-    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-    .map(m => ({
-      id: m.id,
-      name: m.label,
-      value: parseFloat(m.value) || 0,
-      target: 100, // Default target, could be added to DB
-      unit: m.unit || '',
+  useEffect(() => {
+    if (!vroLoading && !pmoLoading) {
+      setLastUpdated(new Date());
+    }
+  }, [vroLoading, pmoLoading, vroMetricsData, pmoMetricsData]);
+
+  const vroMap = getAttributeMap(vroAttributes?.attributes || []);
+  const pmoMap = getAttributeMap(pmoAttributes?.attributes || []);
+
+  const vroMetricDefs = [
+    { attr: 'valueScore', label: 'Strategic ROI', target: 85 },
+    { attr: 'strategicAlignmentScore', label: 'Delivery Predictability', target: 90 },
+    { attr: 'benefitsRealizationRate', label: 'OKR Achievement', target: 80 },
+    { attr: 'business_value_score', label: 'Delivery Success Rate', target: 85 },
+    { attr: 'time_to_value', label: 'Portfolio Velocity', target: 55 },
+  ];
+
+  const pmoMetricDefs = [
+    { attr: 'cycle_time_avg', label: 'Cycle Time', target: 10 },
+    { attr: 'flow_efficiency', label: 'Flow Efficiency', target: 50 },
+    { attr: 'team_velocity_current', label: 'Throughput', target: 25 },
+    { attr: 'wip_age', label: 'WIP Items', target: 8 },
+  ];
+
+  const vroMetrics = vroMetricDefs.map((def) => {
+    const attr = vroMap[def.attr];
+    const value = parseAttributeNumber(attr?.value) ?? parseAttributeText(attr?.value);
+    return {
+      id: def.attr,
+      name: def.label,
+      value,
+      target: def.target,
+      unit: attr?.unit || (def.attr === 'time_to_value' ? 'days' : '%'),
       trend: 'up' as const,
-      source: m.source || 'VRO Analytics'
-    }));
+      source: attr?.displayName || 'VRO Analytics',
+      availability: attr?.availability || 'missing',
+    };
+  });
 
-  const pmoMetrics = pmoMetricsData
-    .filter(m => m.isActive !== false)
-    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-    .map(m => ({
-      id: m.id,
-      name: m.label,
-      value: parseFloat(m.value) || 0,
-      target: 100,
-      unit: m.unit || '',
+  const pmoMetrics = pmoMetricDefs.map((def) => {
+    const attr = pmoMap[def.attr];
+    const value = parseAttributeNumber(attr?.value) ?? parseAttributeText(attr?.value);
+    return {
+      id: def.attr,
+      name: def.label,
+      value,
+      target: def.target,
+      unit: attr?.unit || (def.attr === 'cycle_time_avg' ? 'days' : '%'),
       trend: 'up' as const,
-      source: m.source || 'PMO Analytics'
-    }));
+      source: attr?.displayName || 'PMO Analytics',
+      availability: attr?.availability || 'missing',
+    };
+  });
 
-  // Fallback to static PMO metrics if no data
-  const displayPmoMetrics = pmoMetrics.length > 0 ? pmoMetrics : PMO_METRICS;
+  const displayPmoMetrics = pmoMetrics.length > 0 ? pmoMetrics : PMO_METRICS.map((metric) => ({
+    ...metric,
+    availability: 'missing' as const,
+  }));
 
   return (
     <div className="space-y-6">
@@ -189,8 +232,16 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!vroLoading && !pmoLoading && (
+            <span className="text-xs text-emerald-600 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              LIVE
+            </span>
+          )}
           <span className="text-xs text-gray-400">
-            {vroLoading || pmoLoading ? 'Loading...' : 'Live from database'}
+            {vroLoading || pmoLoading
+              ? 'Loading...'
+              : `Updated: ${lastUpdated?.toLocaleTimeString() || '—'}`}
           </span>
         </div>
       </div>
@@ -212,6 +263,7 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
                   metric={metric}
                   isPulsing={false}
                   domain="VRO"
+                  availability={metric.availability}
                   onClick={() => onDrillDown?.('metric', metric.id)}
                 />
               );
@@ -243,6 +295,7 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
                   }}
                   isPulsing={false}
                   domain="PMO"
+                  availability={'availability' in metric ? metric.availability : undefined}
                   onClick={() => onDrillDown?.('metric', metric.id)}
                 />
               );

@@ -22,6 +22,9 @@ import {
   DollarSign,
   AlertTriangle,
   Target,
+  LayoutDashboard,
+  Route,
+  Network,
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -111,6 +114,76 @@ export default function LandingPage() {
             <CardContent className="pt-6 text-center">
               <div className="text-3xl font-bold text-blue-600">40%</div>
               <p className="text-sm text-gray-600 mt-1">Time Savings</p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Dashboard Preview */}
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <div className="text-center mb-10">
+          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+            <LayoutDashboard className="w-3 h-3 mr-1" />
+            Dashboard Suite
+          </Badge>
+          <h2 className="text-3xl font-bold text-gray-900 mt-4">Explore the dashboards</h2>
+          <p className="text-gray-600 mt-2">Portfolio, ART, and Value Stream views built on the ontology-first model.</p>
+        </div>
+        <div className="grid md:grid-cols-4 gap-4">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <LayoutDashboard className="h-5 w-5 text-blue-600" />
+                Portfolio
+              </CardTitle>
+              <CardDescription>Lean portfolio KPIs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/portfolio')}>
+                Open
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Target className="h-5 w-5 text-emerald-600" />
+                ART
+              </CardTitle>
+              <CardDescription>PI delivery & flow</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/art')}>
+                Open
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Route className="h-5 w-5 text-indigo-600" />
+                Value Stream
+              </CardTitle>
+              <CardDescription>Lead time & efficiency</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/value-stream')}>
+                Open
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Network className="h-5 w-5 text-purple-600" />
+                MCP Management
+              </CardTitle>
+              <CardDescription>Agent integrations</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/mcp')}>
+                Open
+              </Button>
             </CardContent>
           </Card>
         </div>

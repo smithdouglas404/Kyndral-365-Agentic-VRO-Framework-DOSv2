@@ -291,6 +291,141 @@ export class LangflowService {
       return 'unknown';
     }
   }
+
+  /**
+   * Get flow by ID
+   */
+  async getFlowById(flowId: string): Promise<any> {
+    try {
+      const headers: Record<string, string> = {
+        'x-api-key': this.config.apiKey,
+      };
+
+      if (this.config.orgId) {
+        headers['X-DataStax-Current-Org'] = this.config.orgId;
+      }
+
+      const response = await fetch(`${this.baseUrl}/flows/${flowId}`, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get flow: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error: any) {
+      console.error(`[Langflow] Failed to get flow ${flowId}:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Update flow
+   */
+  async updateFlow(flowId: string, updates: any): Promise<any> {
+    try {
+      const headers: Record<string, string> = {
+        'x-api-key': this.config.apiKey,
+        'Content-Type': 'application/json',
+      };
+
+      if (this.config.orgId) {
+        headers['X-DataStax-Current-Org'] = this.config.orgId;
+      }
+
+      const response = await fetch(`${this.baseUrl}/flows/${flowId}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update flow: ${response.status}`);
+      }
+
+      console.log(`[Langflow] Flow ${flowId} updated successfully`);
+      return await response.json();
+    } catch (error: any) {
+      console.error(`[Langflow] Failed to update flow:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Upload custom component
+   */
+  async uploadCustomComponent(code: string, name: string): Promise<any> {
+    try {
+      const headers: Record<string, string> = {
+        'x-api-key': this.config.apiKey,
+        'Content-Type': 'application/json',
+      };
+
+      if (this.config.orgId) {
+        headers['X-DataStax-Current-Org'] = this.config.orgId;
+      }
+
+      const response = await fetch(`${this.baseUrl}/custom_component`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          code,
+          name,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to upload component: ${response.status} - ${errorText}`);
+      }
+
+      console.log(`[Langflow] Custom component '${name}' uploaded successfully`);
+      return await response.json();
+    } catch (error: any) {
+      console.error(`[Langflow] Failed to upload component:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Upload flow from JSON
+   */
+  async uploadFlowFromJSON(flowJSON: any, folderId?: string): Promise<any> {
+    try {
+      const headers: Record<string, string> = {
+        'x-api-key': this.config.apiKey,
+        'Content-Type': 'application/json',
+      };
+
+      if (this.config.orgId) {
+        headers['X-DataStax-Current-Org'] = this.config.orgId;
+      }
+
+      let url = `${this.baseUrl}/flows/upload/`;
+      if (folderId) {
+        url += `?folder_id=${folderId}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(flowJSON),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to upload flow: ${response.status} - ${errorText}`);
+      }
+
+      console.log(`[Langflow] Flow uploaded successfully`);
+      return await response.json();
+    } catch (error: any) {
+      console.error(`[Langflow] Failed to upload flow:`, error.message);
+      return null;
+    }
+  }
 }
 
 /**
