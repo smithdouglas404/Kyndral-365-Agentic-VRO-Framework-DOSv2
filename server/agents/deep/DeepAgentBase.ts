@@ -82,9 +82,10 @@ export interface DeepAgentConfig {
 export abstract class DeepAgentBase {
   protected config: DeepAgentConfig;
   protected storage: IStorage;
-  protected model: ChatAnthropic;
-  protected plannerModel: ChatAnthropic;
-  protected reflectorModel: ChatAnthropic;
+  protected model: BaseChatModel | null = null;
+  protected plannerModel: BaseChatModel | null = null;
+  protected reflectorModel: BaseChatModel | null = null;
+  protected aiEnabled: boolean = false;
 
   protected tracingEnabled: boolean;
   protected enableKnowledgeEnrichment: boolean;
@@ -109,6 +110,26 @@ export abstract class DeepAgentBase {
     };
     this.storage = storage;
 
+    // CRITICAL: Check if AI agents are enabled BEFORE creating any models
+    // This is the master switch that prevents ALL token consumption
+    const smartRouter = getSmartRouter();
+    this.aiEnabled = smartRouter.isAIEnabled();
+    
+    if (!this.aiEnabled) {
+      console.log(`[${config.agentName}] ⛔ AI DISABLED - Agent created in dormant mode (zero token consumption)`);
+      // Initialize minimal memory layers without AI
+      this.mem0 = getMem0Service();
+      this.memory = createAgentMemory(config.agentName.toLowerCase());
+      this.conversationMemory = createMemoryManager(config.agentName.toLowerCase(), {
+        contextWindowSize: 10,
+        maxHistorySize: 100
+      });
+      this.memoryInitPromise = Promise.resolve(); // No-op when AI disabled
+      this.tracingEnabled = false;
+      this.enableKnowledgeEnrichment = false;
+      return; // EXIT EARLY - No ChatAnthropic instances created!
+    }
+
     // Initialize tracing (disabled for now)
     this.tracingEnabled = false;
 
@@ -132,49 +153,34 @@ export abstract class DeepAgentBase {
     // Subscribe to relevant facts from other agents
     this.subscribeToFacts();
 
-    // Initialize models with different temperatures for different purposes
-    const callbacks: any[] = [];
-
-    // Main execution model
-    this.model = new ChatAnthropic({
-      modelName: "claude-sonnet-4-5-20250929",
-      temperature: 0.7,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks,
-      metadata: {
-        layer: "deep-agent",
-        agent_type: config.agentName.toLowerCase(),
-        system: "deep-agent-architecture",
-      },
+    // Use SmartModelRouter for ALL model creation - routes through OpenRouter when available
+    // This ensures cost optimization and respects the ENABLE_AI_AGENTS setting
+    this.model = smartRouter.getModel(ModelTier.CHEAP, {
+      layer: "deep-agent",
+      agent_type: config.agentName.toLowerCase(),
+      system: "deep-agent-architecture",
     });
 
-    // Planner model (lower temperature for more structured thinking)
-    this.plannerModel = new ChatAnthropic({
-      modelName: "claude-sonnet-4-5-20250929",
-      temperature: 0.3,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks,
-      metadata: {
-        layer: "deep-agent-planning",
-        agent_type: config.agentName.toLowerCase(),
-        component: "planner",
-      },
+    this.plannerModel = smartRouter.getModel(ModelTier.CHEAP, {
+      layer: "deep-agent-planning",
+      agent_type: config.agentName.toLowerCase(),
+      component: "planner",
     });
 
-    // Reflector model (balanced temperature for evaluation)
-    this.reflectorModel = new ChatAnthropic({
-      modelName: "claude-sonnet-4-5-20250929",
-      temperature: 0.5,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks,
-      metadata: {
-        layer: "deep-agent-reflection",
-        agent_type: config.agentName.toLowerCase(),
-        component: "reflector",
-      },
+    this.reflectorModel = smartRouter.getModel(ModelTier.CHEAP, {
+      layer: "deep-agent-reflection",
+      agent_type: config.agentName.toLowerCase(),
+      component: "reflector",
     });
 
     console.log(`[${config.agentName}] Deep Agent initialized with planning=${this.config.enablePlanning}, reflection=${this.config.enableReflection}`);
+  }
+
+  /**
+   * Check if this agent is enabled and can perform AI operations
+   */
+  isEnabled(): boolean {
+    return this.aiEnabled && this.model !== null;
   }
 
   /**
@@ -583,6 +589,9 @@ Example: If context has projectId: "proj_123", use {{"projectId": "proj_123"}} a
 Create a plan to achieve this goal. Consider the prior knowledge when planning to avoid duplicate work.`],
     ]);
 
+    if (!this.plannerModel) {
+      throw new Error(`[${this.config.agentName}] AI is disabled - cannot create plan`);
+    }
     const chain = planningPrompt.pipe(this.plannerModel);
     const response = await chain.invoke({
       goal,
@@ -779,6 +788,9 @@ Context: {context}
 Provide the result of executing this step.`],
     ]);
 
+    if (!this.model) {
+      throw new Error(`[${this.config.agentName}] AI is disabled - cannot execute step`);
+    }
     const chain = prompt.pipe(this.model);
     const response = await chain.invoke({
       description: step.description,
@@ -845,6 +857,9 @@ Actual outcome: {outcome}
 Reflect on this action.`],
     ]);
 
+    if (!this.reflectorModel) {
+      throw new Error(`[${this.config.agentName}] AI is disabled - cannot reflect`);
+    }
     const chain = reflectionPrompt.pipe(this.reflectorModel);
     const sanitizedOutcome = sanitizeOutcome(outcome);
     const response = await chain.invoke({
@@ -1046,6 +1061,9 @@ Reflection history: {reflectionHistory}
 Provide a summary of what was learned and how to improve next time.`],
     ]);
 
+    if (!this.reflectorModel) {
+      throw new Error(`[${this.config.agentName}] AI is disabled - cannot synthesize plan`);
+    }
     const chain = prompt.pipe(this.reflectorModel);
     const response = await chain.invoke({
       goal: plan.goal,

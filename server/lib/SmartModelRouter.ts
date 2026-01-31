@@ -80,10 +80,20 @@ export class SmartModelRouter {
   private openRouterKey: string | undefined;
   private anthropicKey: string | undefined;
   private summaryStore: Map<string, string> = new Map();
+  private aiEnabled: boolean = false;
 
   constructor() {
     this.openRouterKey = process.env.OPENROUTER_API_KEY;
     this.anthropicKey = process.env.ANTHROPIC_API_KEY;
+    
+    // CRITICAL: Check if AI agents are enabled - this is the MASTER SWITCH
+    // When disabled, ALL model requests return null, preventing any token consumption
+    this.aiEnabled = process.env.ENABLE_AI_AGENTS !== 'false';
+    
+    if (!this.aiEnabled) {
+      console.log('[SmartModelRouter] ⛔ AI AGENTS DISABLED - No models will be created, zero token consumption');
+      return;
+    }
     
     if (this.openRouterKey) {
       console.log('[SmartModelRouter] OpenRouter available - cost optimization enabled');
@@ -93,11 +103,24 @@ export class SmartModelRouter {
   }
 
   /**
+   * Check if AI agents are enabled
+   */
+  isAIEnabled(): boolean {
+    return this.aiEnabled;
+  }
+
+  /**
    * Get the appropriate model for a task based on complexity
    * ALL tiers now route through OpenRouter when available (including Claude)
    * OpenRouter tracking: You'll see all requests in your OpenRouter dashboard
    */
-  getModel(tier: ModelTier, metadata?: Record<string, any>): BaseChatModel {
+  getModel(tier: ModelTier, metadata?: Record<string, any>): BaseChatModel | null {
+    // CRITICAL: If AI is disabled, return null - prevents ALL token consumption
+    if (!this.aiEnabled) {
+      console.log('[SmartModelRouter] ⛔ Model request blocked - AI agents disabled');
+      return null;
+    }
+    
     // Route ALL tiers through OpenRouter when available (including premium Claude)
     if (this.openRouterKey) {
       const modelName = TIER_MODELS[tier][0];
