@@ -13,6 +13,7 @@ import type { Express, Request, Response } from 'express';
 import { authenticate } from '../auth/authMiddleware.js';
 import type { IStorage } from '../storage.js';
 import { DeepAgentBootstrap } from '../agents/DeepAgentBootstrap.js';
+import { getSmartRouter } from '../lib/SmartModelRouter.js';
 
 let bootstrapInstance: DeepAgentBootstrap | null = null;
 
@@ -45,9 +46,29 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
 
       const engine = bootstrapInstance.getOrchestrationEngine();
       const status = engine.getEnhancedStatus();
-      res.json(status);
+      const router = getSmartRouter();
+      res.json({ ...status, modelRouter: router.getStats() });
     } catch (error: any) {
       console.error('[Orchestration] Status error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/orchestration/router-stats', authenticate, async (req: Request, res: Response) => {
+    try {
+      const router = getSmartRouter();
+      res.json({
+        aiEnabled: router.isAIEnabled(),
+        ...router.getStats(),
+        version: '4.0',
+        tiers: {
+          tier0: 'Deterministic heuristics (zero cost)',
+          tier1: 'Cheap models via OpenRouter ($0.10-0.50/M tokens)',
+          tier2: 'Premium Claude (critical only, $3-15/M tokens)',
+        },
+      });
+    } catch (error: any) {
+      console.error('[Orchestration] Router stats error:', error);
       res.status(500).json({ error: error.message });
     }
   });

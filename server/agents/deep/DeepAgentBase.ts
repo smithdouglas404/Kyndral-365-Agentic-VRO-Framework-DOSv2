@@ -895,7 +895,7 @@ Reflect on this action.`;
 
       // Check if we can skip analysis (cached result)
       if (classification.skipAnalysis && classification.cachedResult) {
-        console.log(`[${this.config.agentName}] Using cached result (saving API costs)`);
+        console.log(`[${this.config.agentName}] ✅ CACHE HIT - zero API cost`);
         return {
           cached: true,
           result: classification.cachedResult,
@@ -904,11 +904,39 @@ Reflect on this action.`;
         };
       }
 
+      // TIER 0: Check if heuristics can handle this without any LLM call
+      if (classification.tier === ModelTier.HEURISTIC && classification.heuristicResult) {
+        const heuristicResponse = router.formatHeuristicResponse(
+          classification.heuristicResult,
+          this.config.agentName
+        );
+        console.log(`[${this.config.agentName}] ✅ TIER 0 HEURISTIC - zero API cost (${classification.heuristicResult.findings.length} metrics evaluated)`);
+
+        // Cache the heuristic result
+        const projectId = context.projectData?.id || context.projectId;
+        if (projectId) {
+          router.cacheResult(this.config.agentType, context.projectData || context, this.config.agentName, heuristicResponse.content, ModelTier.HEURISTIC);
+          router.storeSummary(this.config.agentName, projectId, classification.heuristicResult.summary);
+        }
+
+        return {
+          cached: false,
+          heuristic: true,
+          result: heuristicResponse.content,
+          tier: ModelTier.HEURISTIC,
+          reason: classification.reason,
+          findings: classification.heuristicResult.findings,
+          riskLevel: classification.heuristicResult.riskLevel,
+          recommendations: classification.heuristicResult.recommendations,
+          costSaved: heuristicResponse.costSaved,
+        };
+      }
+
       // Get other agents' summaries for context
       const projectId = context.projectData?.id || context.projectId;
       const otherSummaries = projectId ? router.getAllSummaries(projectId) : {};
       
-      console.log(`[${this.config.agentName}] Using ${classification.tier} tier model (${classification.reason})`);
+      console.log(`[${this.config.agentName}] Using TIER ${classification.tier === ModelTier.PREMIUM ? '2 PREMIUM' : '1 CHEAP'} model (${classification.reason})`);
 
       // PHASE 0A: Load conversation context (new unified memory)
       const conversationContext = await this.loadConversationContext(goal);

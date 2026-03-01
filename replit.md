@@ -1,19 +1,27 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.2.0  
+**Version:** 2.3.0  
 **Updated:** 2026-03-01
 
 ## Recent Changes
 
+### March 1, 2026 - SmartModelRouter v4.0: 3-Tier Intelligent Layer (v2.3.0)
+- **Tier 0 HEURISTIC** (zero cost): Deterministic rule-based engine evaluates CPI, SPI, budget utilization, risk scores, compliance, adoption rates, stakeholder satisfaction — no API call needed
+- **Tier 1 CHEAP** ($0.10-0.50/M tokens): Llama 3.1 8B / GPT-4o-mini via OpenRouter for routine language generation
+- **Tier 2 PREMIUM** ($3-15/M tokens): Claude Sonnet for critical/complex decisions only
+- `DeepAgentBase.run()` short-circuits to heuristic results when Tier 0 is sufficient — caches result and stores summary
+- New `GET /api/orchestration/router-stats` endpoint exposes tier breakdown, savings, and cache hit rates
+- Heuristic engine covers: FinOps (CPI, budget utilization), TMO (SPI, schedule variance), Risk (risk score, open risks, status), PMO (health status, completion), VRO (ROI tracking), Governance (compliance score, pending approvals), OCM (adoption rate, stakeholder satisfaction)
+- Stats accounting: totalCalls tracked at classifyTask level, heuristicCalls/cheapCalls/premiumCalls tracked at resolution point — no double-counting
+
 ### March 1, 2026 - Complete LangChain Removal (v2.2.0)
-- **ALL 6 LangChain packages removed** from package.json: `@langchain/anthropic`, `@langchain/community`, `@langchain/core`, `@langchain/google-genai`, `@langchain/langgraph`, `langchain`
+- **ALL 6 LangChain packages removed** from package.json
 - All LLM calls go through `OpenRouterClient.callLLM()` via `SmartModelRouter.callModel()`
 - `DynamicStructuredTool` replaced with custom `AgentTool` class (`server/lib/AgentTool.ts`)
 - `PostgresChatMessageHistory` replaced with direct Postgres queries in `MemoryManager`
 - `ChatPromptTemplate` replaced with template literals in `DeepAgentWithRAG` and `DependencyCollaborationAgent`
-- All 15 agent files updated: DeepAgentBase, AgentBase, all 10 Deep*Agent subclasses, AgentOrchestrator, DependencyCollaborationAgent, DeepAgentWithRAG
+- All 15 agent files updated
 - AI kill switch (`ENABLE_AI_AGENTS=false`) verified working - zero token consumption
-- Transitive deps `uuid` and `@google/generative-ai` installed directly since they were previously pulled in by LangChain
 
 ### January 29, 2026 - Demo Approval Workflow
 - Demo requests now require admin approval before users can access dashboard
@@ -25,11 +33,12 @@
 
 Kyndryl Clarity is a Level 4 fully autonomous, self-learning multi-agent platform for enterprise transformation management. The system implements 10 specialized Deep Agents that continuously monitor, learn, communicate, and take action without human intervention.
 
-Key Architecture (v2.0.1):
-- **Cost Optimization Flow** (2 tiers only):
-  1. Cache check - Hash comparison, skip if unchanged (no API cost)
-  2. OpenRouter CHEAP tier - Llama 3.1 8B, GPT-4o-mini, Mixtral ($0.10-0.50/1M tokens)
-  3. Claude PREMIUM tier - Only for critical/complex decisions ($3-15/1M tokens)
+Key Architecture (v2.3.0):
+- **Cost Optimization Flow** (3 tiers):
+  0. Cache check - Hash comparison, skip if unchanged (no API cost)
+  1. Tier 0 HEURISTIC - Deterministic rule engine, zero cost, handles ~60-70% of routine work
+  2. Tier 1 CHEAP - Llama 3.1 8B, GPT-4o-mini via OpenRouter ($0.10-0.50/1M tokens)
+  3. Tier 2 PREMIUM - Claude Sonnet for critical/complex only ($3-15/1M tokens)
 - **Full Portfolio Scanning**: Agents scan ALL projects each cycle (not sampled)
 - **Admin Control**: Orchestrator OFF by default, persisted setting survives restarts
 - **Self-Learning**: Agents query their own Mem0 risks each cycle
