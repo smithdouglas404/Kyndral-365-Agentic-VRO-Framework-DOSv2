@@ -308,6 +308,12 @@ export class ContinuousOrchestrator {
   private a2aBus: A2AMessageBus;
   private mcpHandler: MCPProtocolHandler;
 
+  private projectSnapshots: Map<string, string> = new Map();
+  private agentLastScan: Map<string, Map<string, number>> = new Map();
+  private static SCAN_COOLDOWN_MS = 5 * 60 * 1000;
+  private skippedScans: number = 0;
+  private totalScans: number = 0;
+
   /**
    * Helper to safely get agent config (handles agents without getConfig method)
    */
@@ -412,6 +418,71 @@ export class ContinuousOrchestrator {
     console.log(`[ContinuousOrchestrator] A2A listeners setup for ${this.agents.size} agents`);
   }
 
+  private fingerprint(project: any): string {
+    const key = [
+      project.id,
+      project.budget,
+      project.actualCost,
+      project.spent,
+      project.progress,
+      project.status,
+      project.health,
+      project.spiValue,
+      project.cpiValue,
+      project.riskScore,
+      project.complianceScore,
+      project.adoptionRate,
+      project.predictability,
+      project.startDate,
+      project.endDate,
+      project.milestoneCount,
+      project.openRisks,
+      project.staffingLevel,
+      project.stakeholderSatisfaction,
+      project.roi,
+      project.updatedAt || project.updated_at,
+    ].join('|');
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      const chr = key.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0;
+    }
+    return hash.toString(36);
+  }
+
+  private hasProjectChanged(project: any): boolean {
+    const fp = this.fingerprint(project);
+    const prev = this.projectSnapshots.get(project.id);
+    if (prev === fp) return false;
+    this.projectSnapshots.set(project.id, fp);
+    return true;
+  }
+
+  private isOnCooldown(agentId: string, projectId: string): boolean {
+    const agentScans = this.agentLastScan.get(agentId);
+    if (!agentScans) return false;
+    const lastScan = agentScans.get(projectId);
+    if (!lastScan) return false;
+    return (Date.now() - lastScan) < ContinuousOrchestrator.SCAN_COOLDOWN_MS;
+  }
+
+  private recordScan(agentId: string, projectId: string): void {
+    if (!this.agentLastScan.has(agentId)) {
+      this.agentLastScan.set(agentId, new Map());
+    }
+    this.agentLastScan.get(agentId)!.set(projectId, Date.now());
+  }
+
+  getScanEfficiency(): { totalScans: number; skippedScans: number; skipRate: string } {
+    const total = this.totalScans || 1;
+    return {
+      totalScans: this.totalScans,
+      skippedScans: this.skippedScans,
+      skipRate: ((this.skippedScans / total) * 100).toFixed(1) + '%',
+    };
+  }
+
   /**
    * Start 24x7 continuous orchestration
    */
@@ -504,9 +575,9 @@ export class ContinuousOrchestrator {
         await agent.clearMemory();
       }
 
-      // Phase 7: Log coordination activity
       const executionTime = Date.now() - startTime;
-      console.log(`[ContinuousOrchestrator] Cycle ${this.cycleCount} completed in ${executionTime}ms\n`);
+      const eff = this.getScanEfficiency();
+      console.log(`[ContinuousOrchestrator] Cycle ${this.cycleCount} completed in ${executionTime}ms (scan skip rate: ${eff.skipRate})\n`);
 
       // Reset error counter on successful cycle
       this.state.errorCount = 0;
@@ -575,7 +646,6 @@ export class ContinuousOrchestrator {
 
       const findings: any[] = [];
 
-      // Process any pending Mem0 risks first (autonomous self-learning)
       for (const risk of mem0Risks) {
         findings.push({
           projectId: risk.projectId,
@@ -588,10 +658,24 @@ export class ContinuousOrchestrator {
         });
       }
 
-      // Each agent uses its tools to analyze ALL projects
-      // COST FLOW: Cache check → OpenRouter (cheap) → Claude (complex only)
+      let scanned = 0;
+      let skipped = 0;
+
       for (const project of allProjects) {
-        // Check if project has issues in agent's domain
+        this.totalScans++;
+
+        const changed = this.hasProjectChanged(project);
+        const onCooldown = this.isOnCooldown(agentId, project.id);
+
+        if (!changed || onCooldown) {
+          this.skippedScans++;
+          skipped++;
+          continue;
+        }
+
+        scanned++;
+        this.recordScan(agentId, project.id);
+
         const issue = await this.detectIssue(agent, agentId, project);
         if (issue) {
           findings.push({
@@ -603,6 +687,10 @@ export class ContinuousOrchestrator {
             recommendedAction: issue.action,
           });
         }
+      }
+
+      if (skipped > 0) {
+        console.log(`[ContinuousOrchestrator] ${config.agentName}: scanned ${scanned}/${allProjects.length} projects (${skipped} unchanged, skipped)`);
       }
 
       return { findings };
@@ -967,31 +1055,52 @@ export class ContinuousOrchestrator {
 
         const severityLabel = request.severity || 'medium';
 
-        const prompt = `Another agent (${fromConfig?.agentName}) is requesting your input on a ${severityLabel} severity issue:
+        console.log(`[ContinuousOrchestrator] ${config.agentName} responding to collaboration request from ${fromConfig?.agentName}...`);
 
-Project: ${request.projectId || 'N/A'}
-Issue: ${issueContent}
-
-From your domain expertise in ${config.focus}, provide:
-1. Your assessment of the situation
-2. How this impacts your domain
-3. Your recommended action (if any)
-
-You have access to external MCP services if needed:
-${this.mcpHandler.getServices().map(s => `- ${s.name}: ${s.capabilities.join(', ')}`).join('\n')}
-
-Keep response brief and actionable.`;
-
-        console.log(`[ContinuousOrchestrator] ${config.agentName} analyzing request from ${fromConfig?.agentName}...`);
-
-        // Try agent.run() for Deep Agents, fall back to agent.execute() for standard agents
         let result;
-        if (typeof agent.run === 'function') {
-          result = await agent.run(prompt, { projectId: request.projectId });
-        } else if (typeof agent.execute === 'function') {
-          result = await agent.execute(prompt, { projectId: request.projectId });
-        } else {
-          throw new Error(`Agent ${config.agentName} has no run() or execute() method`);
+        try {
+          const { getSmartRouter, ModelTier } = await import('../lib/SmartModelRouter.js');
+          const router = getSmartRouter();
+
+          let projectData: any = null;
+          if (request.projectId) {
+            const projects = await this.storage.getProjects();
+            projectData = projects.find(p => p.id === request.projectId);
+          }
+
+          if (projectData) {
+            const classification = router.classifyTask(
+              config.agentId || agentId,
+              projectData,
+              config.agentName
+            );
+
+            if (classification.tier === ModelTier.HEURISTIC && classification.heuristicResult) {
+              const heuristicResponse = router.formatHeuristicResponse(
+                classification.heuristicResult,
+                config.agentName
+              );
+              console.log(`[ContinuousOrchestrator] ${config.agentName} collaboration response via HEURISTIC (zero cost)`);
+              result = { output: heuristicResponse.content };
+            } else if (classification.skipAnalysis && classification.cachedResult) {
+              console.log(`[ContinuousOrchestrator] ${config.agentName} collaboration response via CACHE (zero cost)`);
+              result = { output: classification.cachedResult };
+            }
+          }
+
+          if (!result) {
+            const collaborationPrompt = `Briefly assess this ${severityLabel} issue from ${fromConfig?.agentName} on project ${request.projectId || 'N/A'}: ${issueContent}. Focus on your ${config.focus} perspective. 2-3 sentences max.`;
+            if (typeof agent.run === 'function') {
+              result = await agent.run(collaborationPrompt, { projectId: request.projectId, projectData, isCollaboration: true });
+            } else if (typeof agent.execute === 'function') {
+              result = await agent.execute(collaborationPrompt, { projectId: request.projectId });
+            } else {
+              result = { output: `${config.agentName}: Acknowledged ${severityLabel} issue. Will monitor from ${config.focus} perspective.` };
+            }
+          }
+        } catch (collaborationError) {
+          console.error(`[ContinuousOrchestrator] Collaboration response error for ${config.agentName}:`, collaborationError);
+          result = { output: `${config.agentName}: Acknowledged ${severityLabel} issue. Will monitor from ${config.focus} perspective.` };
         }
 
         // Send response via A2A message bus

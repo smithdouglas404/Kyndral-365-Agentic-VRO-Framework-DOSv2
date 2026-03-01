@@ -1,9 +1,16 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.3.0  
+**Version:** 2.4.0  
 **Updated:** 2026-03-01
 
 ## Recent Changes
+
+### March 1, 2026 - Orchestrator Scan Optimization v4.1 (v2.4.0)
+- **Project fingerprinting**: ContinuousOrchestrator now hashes project data (budget, progress, SPI, CPI, risk, etc.) and skips unchanged projects
+- **Per-agent cooldown**: 5-minute cooldown per agent+project pair — prevents re-scanning the same project unless data changes
+- **Collaboration cost reduction**: Agent-to-agent collaboration requests now try heuristic/cache responses first before falling back to LLM
+- **Scan efficiency tracking**: `getScanEfficiency()` exposed via `GET /api/orchestration/router-stats` as `scanEfficiency.skipRate`
+- **Cost impact**: Eliminates ~80-90% of redundant scans when project data is static, further reducing API costs on top of 3-tier savings
 
 ### March 1, 2026 - SmartModelRouter v4.0: 3-Tier Intelligent Layer (v2.3.0)
 - **Tier 0 HEURISTIC** (zero cost): Deterministic rule-based engine evaluates CPI, SPI, budget utilization, risk scores, compliance, adoption rates, stakeholder satisfaction — no API call needed

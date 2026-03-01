@@ -60,10 +60,13 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
   app.get('/api/orchestration/router-stats', authenticate, async (req: Request, res: Response) => {
     try {
       const router = getSmartRouter();
+      const orchestrator = bootstrapInstance?.getOrchestrator?.();
+      const scanEfficiency = orchestrator?.getScanEfficiency?.() || { totalScans: 0, skippedScans: 0, skipRate: '0.0%' };
       res.json({
         aiEnabled: router.isAIEnabled(),
         ...router.getStats(),
-        version: '4.0',
+        scanEfficiency,
+        version: '4.1',
         tiers: {
           tier0: 'Deterministic heuristics (zero cost)',
           tier1: 'Cheap models via OpenRouter ($0.10-0.50/M tokens)',
