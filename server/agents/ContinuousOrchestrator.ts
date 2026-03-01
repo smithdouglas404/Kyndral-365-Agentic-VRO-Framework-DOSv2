@@ -486,7 +486,7 @@ export class ContinuousOrchestrator {
   /**
    * Start 24x7 continuous orchestration
    */
-  async start(intervalMs: number = 15000): Promise<void> {
+  async start(intervalMs: number = 600000): Promise<void> {
     if (this.isRunning) {
       console.log('[ContinuousOrchestrator] Already running');
       return;

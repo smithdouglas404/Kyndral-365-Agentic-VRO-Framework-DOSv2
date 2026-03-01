@@ -126,8 +126,8 @@ export class AgentScheduler {
         const settings = await getOrchestratorSettings();
         
         if (settings.enabled) {
-          await this.orchestrator.start(settings.interval || 15000);
-          console.log(`[AgentScheduler] ✅ Continuous orchestration started (${(settings.interval || 15000) / 1000}s interval)`);
+          await this.orchestrator.start(settings.interval || 600000);
+          console.log(`[AgentScheduler] ✅ Continuous orchestration started (${(settings.interval || 600000) / 1000}s interval)`);
         } else {
           console.log('[AgentScheduler] ⚠️  Continuous orchestration OFF - respecting admin setting');
           console.log('[AgentScheduler] 💡 Enable via Admin > Settings > Orchestrator');

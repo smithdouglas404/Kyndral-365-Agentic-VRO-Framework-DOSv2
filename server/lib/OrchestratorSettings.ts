@@ -40,14 +40,14 @@ export async function getOrchestratorSettings(): Promise<OrchestratorSettings> {
 
     return {
       enabled: enabledRow?.configValue === 'true',
-      interval: intervalRow ? parseInt(intervalRow.configValue) : 60000,
+      interval: intervalRow ? parseInt(intervalRow.configValue) : 600000,
       openRouterConfigured: !!process.env.OPENROUTER_API_KEY,
     };
   } catch (error) {
     console.error('[OrchestratorSettings] Error getting settings:', error);
     return {
       enabled: false, // Default OFF
-      interval: 60000,
+      interval: 600000,
       openRouterConfigured: !!process.env.OPENROUTER_API_KEY,
     };
   }

@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function AdminDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedInterval, setSelectedInterval] = useState('60000');
+  const [selectedInterval, setSelectedInterval] = useState('600000');
   const [selectedAgent, setSelectedAgent] = useState('');
 
   const { data: stats } = useQuery({
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                   Continuous Orchestrator
                 </CardTitle>
                 <CardDescription>
-                  Control the AI agent continuous analysis loop. This uses your Anthropic API credits.
+                  Control the AI agent continuous analysis loop. Default: every 10 minutes. Adjust to balance cost vs responsiveness.
                 </CardDescription>
               </div>
               <Badge variant={isRunning ? 'default' : 'secondary'} className={isRunning ? 'bg-green-500' : ''}>
@@ -169,11 +169,12 @@ export default function AdminDashboard() {
                       <SelectValue placeholder="Select interval" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="30000">30 seconds (high credit usage)</SelectItem>
-                      <SelectItem value="60000">1 minute</SelectItem>
+                      <SelectItem value="60000">1 minute (high credit usage)</SelectItem>
                       <SelectItem value="120000">2 minutes</SelectItem>
-                      <SelectItem value="300000">5 minutes (recommended)</SelectItem>
-                      <SelectItem value="600000">10 minutes (low credit usage)</SelectItem>
+                      <SelectItem value="300000">5 minutes</SelectItem>
+                      <SelectItem value="600000">10 minutes (recommended)</SelectItem>
+                      <SelectItem value="900000">15 minutes</SelectItem>
+                      <SelectItem value="1800000">30 minutes (minimal credit usage)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
