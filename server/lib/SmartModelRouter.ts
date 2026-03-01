@@ -115,12 +115,25 @@ interface TierStats {
   totalCalls: number;
 }
 
+export type TierOverride = 'auto' | 'heuristic' | 'cheap' | 'premium';
+
+export interface AgentTierConfig {
+  agentId: string;
+  minimumTier: TierOverride;
+  reason?: string;
+  updatedBy?: string;
+  updatedAt?: Date;
+}
+
 export class SmartModelRouter {
   private cache: Map<string, CacheEntry> = new Map();
   private cacheTTL: number = 30 * 60 * 1000;
   private pendingChanges: Map<string, ProjectChangeEvent[]> = new Map();
   private summaryStore: Map<string, string> = new Map();
   private aiEnabled: boolean = false;
+  private agentTierOverrides: Map<string, TierOverride> = new Map();
+  private projectTierOverrides: Map<string, TierOverride> = new Map();
+  private globalMinimumTier: TierOverride = 'auto';
   private tierStats: TierStats = {
     heuristicCalls: 0,
     cheapCalls: 0,
@@ -154,6 +167,37 @@ export class SmartModelRouter {
 
   isAIEnabled(): boolean {
     return this.aiEnabled;
+  }
+
+  async loadPersistedOverrides(): Promise<void> {
+    try {
+      const { db } = await import('../db.js');
+      const { appConfig } = await import('../../shared/schema.js');
+      const { like } = await import('drizzle-orm');
+
+      const rows = await db.select().from(appConfig).where(like(appConfig.configKey, 'agent_tier_override_%'));
+      for (const row of rows) {
+        const agentId = row.configKey.replace('agent_tier_override_', '');
+        const tier = row.configValue as TierOverride;
+        if (['auto', 'heuristic', 'cheap', 'premium'].includes(tier) && tier !== 'auto') {
+          this.agentTierOverrides.set(agentId, tier);
+        }
+      }
+
+      const [globalRow] = await db.select().from(appConfig).where(
+        (await import('drizzle-orm')).eq(appConfig.configKey, 'global_minimum_tier')
+      ).limit(1);
+      if (globalRow && ['auto', 'heuristic', 'cheap', 'premium'].includes(globalRow.configValue)) {
+        this.globalMinimumTier = globalRow.configValue as TierOverride;
+      }
+
+      const agentCount = this.agentTierOverrides.size;
+      if (agentCount > 0 || this.globalMinimumTier !== 'auto') {
+        console.log(`[SmartModelRouter] Loaded persisted tier overrides: ${agentCount} agent(s), global=${this.globalMinimumTier}`);
+      }
+    } catch (error) {
+      console.log('[SmartModelRouter] No persisted tier overrides found (first run)');
+    }
   }
 
   /**
@@ -478,6 +522,88 @@ export class SmartModelRouter {
    * 4. Critical changes? → PREMIUM tier (high cost, justified)
    * 5. Default → CHEAP tier
    */
+  private getTierRank(tier: ModelTier | TierOverride): number {
+    const ranks: Record<string, number> = {
+      'auto': -1,
+      'heuristic': 0,
+      'cheap': 1,
+      'premium': 2,
+    };
+    return ranks[tier] ?? -1;
+  }
+
+  private overrideToModelTier(override: TierOverride): ModelTier {
+    const map: Record<TierOverride, ModelTier> = {
+      'auto': ModelTier.HEURISTIC,
+      'heuristic': ModelTier.HEURISTIC,
+      'cheap': ModelTier.CHEAP,
+      'premium': ModelTier.PREMIUM,
+    };
+    return map[override];
+  }
+
+  private getEffectiveMinimumTier(agentType: string, projectId?: string): TierOverride {
+    const agentOverride = this.agentTierOverrides.get(agentType.toLowerCase());
+    const projectOverride = projectId ? this.projectTierOverrides.get(projectId) : undefined;
+
+    const candidates: TierOverride[] = [this.globalMinimumTier];
+    if (agentOverride) candidates.push(agentOverride);
+    if (projectOverride) candidates.push(projectOverride);
+
+    let highest: TierOverride = 'auto';
+    for (const c of candidates) {
+      if (this.getTierRank(c) > this.getTierRank(highest)) highest = c;
+    }
+    return highest;
+  }
+
+  setAgentTierOverride(agentId: string, minimumTier: TierOverride): void {
+    if (minimumTier === 'auto') {
+      this.agentTierOverrides.delete(agentId.toLowerCase());
+    } else {
+      this.agentTierOverrides.set(agentId.toLowerCase(), minimumTier);
+    }
+    console.log(`[SmartModelRouter] Agent ${agentId} minimum tier set to: ${minimumTier}`);
+  }
+
+  setProjectTierOverride(projectId: string, minimumTier: TierOverride): void {
+    if (minimumTier === 'auto') {
+      this.projectTierOverrides.delete(projectId);
+    } else {
+      this.projectTierOverrides.set(projectId, minimumTier);
+    }
+    console.log(`[SmartModelRouter] Project ${projectId} minimum tier set to: ${minimumTier}`);
+  }
+
+  setGlobalMinimumTier(minimumTier: TierOverride): void {
+    this.globalMinimumTier = minimumTier;
+    console.log(`[SmartModelRouter] Global minimum tier set to: ${minimumTier}`);
+  }
+
+  getAgentTierOverride(agentId: string): TierOverride {
+    return this.agentTierOverrides.get(agentId.toLowerCase()) || 'auto';
+  }
+
+  getProjectTierOverride(projectId: string): TierOverride {
+    return this.projectTierOverrides.get(projectId) || 'auto';
+  }
+
+  getGlobalMinimumTier(): TierOverride {
+    return this.globalMinimumTier;
+  }
+
+  getAllTierOverrides(): {
+    global: TierOverride;
+    agents: Record<string, TierOverride>;
+    projects: Record<string, TierOverride>;
+  } {
+    return {
+      global: this.globalMinimumTier,
+      agents: Object.fromEntries(this.agentTierOverrides),
+      projects: Object.fromEntries(this.projectTierOverrides),
+    };
+  }
+
   classifyTask(
     taskType: string,
     projectData: any,
@@ -498,23 +624,38 @@ export class SmartModelRouter {
       };
     }
 
+    const projectId = projectData?.id || projectData?.projectId;
+    const minimumTier = this.getEffectiveMinimumTier(agentType, projectId);
+
     const heuristic = this.runHeuristics(agentType, projectData);
 
     if (heuristic.applicable && !heuristic.needsLLM) {
-      this.tierStats.heuristicCalls++;
-      this.tierStats.heuristicSavings++;
+      if (minimumTier === 'auto' || minimumTier === 'heuristic') {
+        this.tierStats.heuristicCalls++;
+        this.tierStats.heuristicSavings++;
+        return {
+          tier: ModelTier.HEURISTIC,
+          reason: `Tier 0 heuristic: ${heuristic.findings.length} metrics evaluated deterministically`,
+          skipAnalysis: true,
+          heuristicResult: heuristic,
+        };
+      }
       return {
-        tier: ModelTier.HEURISTIC,
-        reason: `Tier 0 heuristic: ${heuristic.findings.length} metrics evaluated deterministically`,
-        skipAnalysis: true,
+        tier: this.overrideToModelTier(minimumTier),
+        reason: `Admin override: minimum tier set to ${minimumTier} (heuristic would have sufficed)`,
+        skipAnalysis: false,
         heuristicResult: heuristic,
       };
     }
 
     const changes = this.pendingChanges.get(projectData?.id);
     if (!changes || changes.length === 0) {
+      const naturalTier = heuristic.suggestedTier || ModelTier.CHEAP;
+      const effectiveTier = this.getTierRank(minimumTier) > this.getTierRank(naturalTier)
+        ? this.overrideToModelTier(minimumTier)
+        : naturalTier;
       return {
-        tier: heuristic.suggestedTier || ModelTier.CHEAP,
+        tier: effectiveTier,
         reason: heuristic.applicable
           ? `Heuristic found issues requiring LLM analysis: ${heuristic.summary}`
           : 'No changes detected - routine check',
@@ -535,8 +676,13 @@ export class SmartModelRouter {
       };
     }
 
+    const naturalTier = ModelTier.CHEAP;
+    const effectiveTier = this.getTierRank(minimumTier) > this.getTierRank(naturalTier)
+      ? this.overrideToModelTier(minimumTier)
+      : naturalTier;
+
     return {
-      tier: ModelTier.CHEAP,
+      tier: effectiveTier,
       reason: hasHigh ? `High-priority changes: ${changes.filter(c => c.severity === 'high').map(c => c.changeType).join(', ')}` : 'Low/medium changes only',
       skipAnalysis: false,
       heuristicResult: heuristic.applicable ? heuristic : undefined,
@@ -668,10 +814,15 @@ Format: [FINDING] ... [RISK: level] [ACTION: ...]
 }
 
 let routerInstance: SmartModelRouter | null = null;
+let overridesLoaded = false;
 
 export function getSmartRouter(): SmartModelRouter {
   if (!routerInstance) {
     routerInstance = new SmartModelRouter();
+    if (!overridesLoaded) {
+      overridesLoaded = true;
+      routerInstance.loadPersistedOverrides().catch(() => {});
+    }
   }
   return routerInstance;
 }

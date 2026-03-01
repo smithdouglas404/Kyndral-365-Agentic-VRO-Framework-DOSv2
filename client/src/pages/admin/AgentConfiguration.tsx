@@ -45,6 +45,8 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { AgentConfigModal } from '@/components/AgentConfigModal';
 
+type TierOverride = 'auto' | 'heuristic' | 'cheap' | 'premium';
+
 interface AgentConfig {
   id: string;
   name: string;
@@ -235,6 +237,16 @@ export default function AgentConfiguration() {
     },
   });
 
+  // Fetch tier overrides
+  const { data: tierOverrides } = useQuery({
+    queryKey: ['tier-overrides'],
+    queryFn: async () => {
+      const res = await fetch('/api/orchestration/tier-overrides');
+      if (!res.ok) return { global: 'auto', agents: {}, projects: {} };
+      return res.json();
+    },
+  });
+
   // Update agent configuration
   const updateMutation = useMutation({
     mutationFn: async ({ agentId, updates }: { agentId: string; updates: Partial<AgentConfig> }) => {
@@ -251,6 +263,22 @@ export default function AgentConfiguration() {
     },
   });
 
+  // Update tier override for an agent
+  const tierMutation = useMutation({
+    mutationFn: async ({ agentId, minimumTier }: { agentId: string; minimumTier: TierOverride }) => {
+      const res = await fetch(`/api/orchestration/tier-overrides/agent/${agentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minimumTier }),
+      });
+      if (!res.ok) throw new Error('Failed to update tier override');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tier-overrides'] });
+    },
+  });
+
   const handleToggleAgent = (agentId: string, enabled: boolean) => {
     updateMutation.mutate({ agentId, updates: { enabled } });
   };
@@ -263,8 +291,16 @@ export default function AgentConfiguration() {
     updateMutation.mutate({ agentId, updates: { autonomyLevel } });
   };
 
+  const handleUpdateTier = (agentId: string, minimumTier: TierOverride) => {
+    tierMutation.mutate({ agentId, minimumTier });
+  };
+
   const getAgentConfig = (agentId: string): AgentConfig | undefined => {
     return configs?.agents?.find((a: AgentConfig) => a.id === agentId);
+  };
+
+  const getAgentTier = (agentId: string): TierOverride => {
+    return tierOverrides?.agents?.[agentId] || 'auto';
   };
 
   return (
@@ -373,9 +409,11 @@ export default function AgentConfiguration() {
                   agent={agent}
                   config={config}
                   Icon={Icon}
+                  minimumTier={getAgentTier(agent.id)}
                   onToggle={(enabled) => handleToggleAgent(agent.id, enabled)}
                   onUpdateInterval={(interval) => handleUpdateInterval(agent.id, interval)}
                   onUpdateAutonomy={(level) => handleUpdateAutonomy(agent.id, level)}
+                  onUpdateTier={(tier) => handleUpdateTier(agent.id, tier)}
                   onConfigure={() => setConfiguringAgent(agent)}
                 />
               );
@@ -403,13 +441,22 @@ export default function AgentConfiguration() {
   );
 }
 
+const tierOptions: { value: TierOverride; label: string; description: string; color: string }[] = [
+  { value: 'auto', label: 'Auto (Smart)', description: 'System decides based on data', color: 'text-gray-600' },
+  { value: 'heuristic', label: 'Tier 0: Rules Only', description: 'Deterministic rules, zero cost', color: 'text-green-600' },
+  { value: 'cheap', label: 'Tier 1: Cheap AI', description: 'Llama/GPT-4o-mini ($0.10-0.50/M)', color: 'text-blue-600' },
+  { value: 'premium', label: 'Tier 2: Premium AI', description: 'Claude Sonnet ($3-15/M)', color: 'text-purple-600' },
+];
+
 interface AgentCardProps {
   agent: typeof agentDefinitions[0];
   config?: AgentConfig;
   Icon: any;
+  minimumTier: TierOverride;
   onToggle: (enabled: boolean) => void;
   onUpdateInterval: (interval: number) => void;
   onUpdateAutonomy: (level: 'full' | 'supervised') => void;
+  onUpdateTier: (tier: TierOverride) => void;
   onConfigure: () => void;
 }
 
@@ -417,9 +464,11 @@ function AgentCard({
   agent,
   config,
   Icon,
+  minimumTier,
   onToggle,
   onUpdateInterval,
   onUpdateAutonomy,
+  onUpdateTier,
   onConfigure,
 }: AgentCardProps) {
   const isEnabled = config?.enabled ?? true;
@@ -428,8 +477,10 @@ function AgentCard({
   const status = config?.status ?? 'idle';
   const lastRun = config?.lastRun;
 
+  const tierInfo = tierOptions.find(t => t.value === minimumTier) || tierOptions[0];
+
   return (
-    <Card className={cn('hover:shadow-lg transition-shadow', !isEnabled && 'opacity-60')}>
+    <Card className={cn('hover:shadow-lg transition-shadow', !isEnabled && 'opacity-60')} data-testid={`card-agent-${agent.id}`}>
       <CardHeader>
         <div className="flex items-start justify-between mb-3">
           <div className={cn('p-3 rounded-lg', agent.bgColor)}>
@@ -437,7 +488,7 @@ function AgentCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <Switch checked={isEnabled} onCheckedChange={onToggle} />
+            <Switch checked={isEnabled} onCheckedChange={onToggle} data-testid={`switch-agent-${agent.id}`} />
             {status === 'running' && (
               <Badge variant="default" className="bg-blue-600">
                 <Activity className="w-3 h-3 mr-1 animate-pulse" />
@@ -452,6 +503,32 @@ function AgentCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Model Tier */}
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">MINIMUM MODEL TIER</Label>
+          <Select
+            value={minimumTier}
+            onValueChange={(value: TierOverride) => onUpdateTier(value)}
+            disabled={!isEnabled}
+          >
+            <SelectTrigger data-testid={`select-tier-${agent.id}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {tierOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  <div className="flex items-center gap-2">
+                    <span className={cn('font-medium', option.color)}>{option.label}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {tierInfo.description}
+          </p>
+        </div>
+
         {/* Scan Interval */}
         <div className="space-y-2">
           <Label className="text-xs font-medium text-muted-foreground">SCAN INTERVAL</Label>
@@ -523,6 +600,7 @@ function AgentCard({
           className="w-full gap-2"
           onClick={onConfigure}
           disabled={!isEnabled}
+          data-testid={`button-configure-${agent.id}`}
         >
           <Sliders className="w-4 h-4" />
           Configure Thresholds

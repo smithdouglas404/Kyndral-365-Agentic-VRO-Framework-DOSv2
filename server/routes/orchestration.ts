@@ -13,7 +13,10 @@ import type { Express, Request, Response } from 'express';
 import { authenticate } from '../auth/authMiddleware.js';
 import type { IStorage } from '../storage.js';
 import { DeepAgentBootstrap } from '../agents/DeepAgentBootstrap.js';
-import { getSmartRouter } from '../lib/SmartModelRouter.js';
+import { getSmartRouter, type TierOverride } from '../lib/SmartModelRouter.js';
+import { db } from '../db.js';
+import { appConfig } from '../../shared/schema.js';
+import { eq } from 'drizzle-orm';
 
 let bootstrapInstance: DeepAgentBootstrap | null = null;
 
@@ -69,6 +72,88 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
       });
     } catch (error: any) {
       console.error('[Orchestration] Router stats error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/orchestration/tier-overrides', authenticate, async (req: Request, res: Response) => {
+    try {
+      const router = getSmartRouter();
+      res.json(router.getAllTierOverrides());
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.put('/api/orchestration/tier-overrides/agent/:agentId', authenticate, async (req: Request, res: Response) => {
+    try {
+      if (req.user?.role !== 'system_admin') {
+        return res.status(403).json({ error: 'Only system administrators can change tier overrides' });
+      }
+
+      const { agentId } = req.params;
+      const { minimumTier } = req.body as { minimumTier: TierOverride };
+
+      if (!['auto', 'heuristic', 'cheap', 'premium'].includes(minimumTier)) {
+        return res.status(400).json({ error: 'Invalid tier. Must be: auto, heuristic, cheap, or premium' });
+      }
+
+      const router = getSmartRouter();
+      router.setAgentTierOverride(agentId, minimumTier);
+
+      const configKey = `agent_tier_override_${agentId.toLowerCase()}`;
+      const [existing] = await db.select().from(appConfig).where(eq(appConfig.configKey, configKey)).limit(1);
+
+      if (existing) {
+        await db.update(appConfig).set({ configValue: minimumTier, updatedAt: new Date() }).where(eq(appConfig.configKey, configKey));
+      } else {
+        await db.insert(appConfig).values({
+          configKey,
+          configValue: minimumTier,
+          description: `Minimum model tier for ${agentId} agent`,
+          category: 'model_routing',
+        });
+      }
+
+      res.json({ success: true, agentId, minimumTier, overrides: router.getAllTierOverrides() });
+    } catch (error: any) {
+      console.error('[Orchestration] Set agent tier error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.put('/api/orchestration/tier-overrides/global', authenticate, async (req: Request, res: Response) => {
+    try {
+      if (req.user?.role !== 'system_admin') {
+        return res.status(403).json({ error: 'Only system administrators can change tier overrides' });
+      }
+
+      const { minimumTier } = req.body as { minimumTier: TierOverride };
+
+      if (!['auto', 'heuristic', 'cheap', 'premium'].includes(minimumTier)) {
+        return res.status(400).json({ error: 'Invalid tier. Must be: auto, heuristic, cheap, or premium' });
+      }
+
+      const router = getSmartRouter();
+      router.setGlobalMinimumTier(minimumTier);
+
+      const configKey = 'global_minimum_tier';
+      const [existing] = await db.select().from(appConfig).where(eq(appConfig.configKey, configKey)).limit(1);
+
+      if (existing) {
+        await db.update(appConfig).set({ configValue: minimumTier, updatedAt: new Date() }).where(eq(appConfig.configKey, configKey));
+      } else {
+        await db.insert(appConfig).values({
+          configKey,
+          configValue: minimumTier,
+          description: 'Global minimum model tier for all agents',
+          category: 'model_routing',
+        });
+      }
+
+      res.json({ success: true, minimumTier, overrides: router.getAllTierOverrides() });
+    } catch (error: any) {
+      console.error('[Orchestration] Set global tier error:', error);
       res.status(500).json({ error: error.message });
     }
   });
