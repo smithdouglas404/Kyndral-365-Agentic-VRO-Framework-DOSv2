@@ -7,7 +7,7 @@
  * - Multi-step reasoning for capacity planning
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -36,9 +36,9 @@ export class DeepPlanningAgent extends DeepAgentBase {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_dependencies",
         description: "Analyze project dependencies for conflicts and blockers",
         schema: z.object({
@@ -141,7 +141,7 @@ export class DeepPlanningAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "check_resource_capacity",
         description: "Check resource allocation and capacity across teams",
         schema: z.object({
@@ -229,7 +229,7 @@ export class DeepPlanningAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "identify_roadmap_conflicts",
         description: "Identify scheduling conflicts and roadmap alignment issues",
         schema: z.object({
@@ -328,7 +328,7 @@ export class DeepPlanningAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "get_blocked_work_items",
         description: "Get work items that are blocked and need attention",
         schema: z.object({

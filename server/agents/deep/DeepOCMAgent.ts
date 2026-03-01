@@ -7,7 +7,7 @@
  * - Multi-step reasoning for complex change scenarios
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -58,9 +58,9 @@ Use your tools to assess change impact, map stakeholders, track adoption metrics
 When you identify resistance or adoption issues, recommend collaboration with PMO (project coordination) or Planning (strategic alignment) agents.`;
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "assess_change_impact",
         description: "Analyzes how changes affect teams, processes, and systems across the organization",
         schema: z.object({
@@ -207,7 +207,7 @@ When you identify resistance or adoption issues, recommend collaboration with PM
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "map_stakeholders",
         description: "Identifies stakeholders, their influence levels, and potential resistance points",
         schema: z.object({
@@ -352,7 +352,7 @@ When you identify resistance or adoption issues, recommend collaboration with PM
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "measure_adoption",
         description: "Tracks user adoption metrics, training completion, and active usage patterns",
         schema: z.object({
@@ -444,7 +444,7 @@ When you identify resistance or adoption issues, recommend collaboration with PM
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "recommend_interventions",
         description: "Suggests targeted communications, training, and support actions based on current state",
         schema: z.object({
@@ -597,7 +597,7 @@ When you identify resistance or adoption issues, recommend collaboration with PM
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "forecast_resistance",
         description: "Predicts change resistance hotspots based on historical patterns and current indicators",
         schema: z.object({

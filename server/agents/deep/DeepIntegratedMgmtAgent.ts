@@ -7,7 +7,7 @@
  * - Multi-step reasoning for release readiness
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -35,9 +35,9 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "query_quality_metrics",
         description: "Query quality metrics for projects including status and milestone completion",
         schema: z.object({
@@ -113,7 +113,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "check_milestone_health",
         description: "Check milestone status and identify overdue or at-risk milestones",
         schema: z.object({
@@ -193,7 +193,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_velocity_trends",
         description: "Analyze team velocity and predictability trends",
         schema: z.object({
@@ -263,7 +263,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "get_release_readiness",
         description: "Assess release readiness for projects nearing completion",
         schema: z.object({

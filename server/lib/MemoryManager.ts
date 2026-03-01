@@ -4,23 +4,23 @@
  * The "Central Nervous System" for Deep Agents
  *
  * Two-Layer Architecture:
- * 1. Short-Term: Recent conversation history (PostgresChatMessageHistory)
+ * 1. Short-Term: Recent conversation history (direct Postgres queries)
  * 2. Long-Term: Semantic facts learned over time (agent_memories with pgvector)
  *
  * This replaces unbounded in-memory arrays with Postgres-backed storage,
  * reducing Node.js RAM usage from 790MB → ~100MB
+ *
+ * NO LANGCHAIN DEPENDENCY - uses direct SQL for message history.
  */
 
-import { PostgresChatMessageHistory } from "@langchain/community/stores/message/postgres";
-import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import { db, pool } from '../db.js';
 import { sql } from 'drizzle-orm';
 import OpenAI from 'openai';
 
 interface MemoryManagerConfig {
   agentId: string;
-  contextWindowSize?: number; // How many recent messages to load (default: 10)
-  maxHistorySize?: number;    // Max messages to keep in Postgres (default: 100)
+  contextWindowSize?: number;
+  maxHistorySize?: number;
 }
 
 interface SemanticFact {
@@ -30,26 +30,23 @@ interface SemanticFact {
   similarity: number;
 }
 
+export interface ChatMessage {
+  role: 'human' | 'ai';
+  content: string;
+}
+
 export class MemoryManager {
   private agentId: string;
   private contextWindowSize: number;
   private maxHistorySize: number;
-  private shortTermHistory: PostgresChatMessageHistory;
   private openai: OpenAI;
+  private tableInitialized: boolean = false;
 
   constructor(config: MemoryManagerConfig) {
     this.agentId = config.agentId;
     this.contextWindowSize = config.contextWindowSize || 10;
     this.maxHistorySize = config.maxHistorySize || 100;
 
-    // Initialize short-term message history (LangChain)
-    this.shortTermHistory = new PostgresChatMessageHistory({
-      pool: pool,
-      sessionId: this.agentId,
-      tableName: "agent_message_history",
-    });
-
-    // Initialize OpenAI for embeddings
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -57,22 +54,34 @@ export class MemoryManager {
     console.log(`[MemoryManager] Initialized for agent: ${this.agentId}`);
   }
 
-  /**
-   * Get context for the agent's next "thought"
-   * Fetches limited context window to prevent RAM bloat
-   */
+  private async ensureTable(): Promise<void> {
+    if (this.tableInitialized) return;
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS agent_message_history (
+          id SERIAL PRIMARY KEY,
+          session_id TEXT NOT NULL,
+          role TEXT NOT NULL,
+          content TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      this.tableInitialized = true;
+    } catch {
+      this.tableInitialized = true;
+    }
+  }
+
   async getContextForThought(userQuery: string): Promise<{
-    history: BaseMessage[];
+    history: ChatMessage[];
     knowledge: string;
     fullPrompt: string;
   }> {
-    // Parallel fetch for speed
     const [recentMessages, relevantFacts] = await Promise.all([
       this.getRecentMessages(),
       this.searchSemanticFacts(userQuery, 5)
     ]);
 
-    // Format semantic facts into knowledge block
     const knowledgeBlock = relevantFacts.length > 0
       ? relevantFacts.map(f => `- ${f.content} (confidence: ${f.similarity.toFixed(2)})`).join('\n')
       : 'No relevant prior knowledge found.';
@@ -86,30 +95,42 @@ export class MemoryManager {
     };
   }
 
-  /**
-   * Get recent messages with context window limit
-   * CRITICAL: Only loads last N messages to prevent RAM bloat
-   */
-  private async getRecentMessages(): Promise<BaseMessage[]> {
-    const allMessages = await this.shortTermHistory.getMessages();
+  private async getRecentMessages(): Promise<ChatMessage[]> {
+    await this.ensureTable();
+    try {
+      const result = await db.execute(sql`
+        SELECT role, content FROM agent_message_history
+        WHERE session_id = ${this.agentId}
+        ORDER BY id DESC
+        LIMIT ${this.contextWindowSize}
+      `);
 
-    // CONTEXT WINDOW: Only keep last N messages in RAM
-    const recentMessages = allMessages.slice(-this.contextWindowSize);
+      const messages = result.rows.map((row: any) => ({
+        role: row.role as 'human' | 'ai',
+        content: row.content,
+      }));
 
-    console.log(`[MemoryManager] Loaded ${recentMessages.length}/${allMessages.length} messages for ${this.agentId}`);
+      messages.reverse();
 
-    return recentMessages;
+      const totalResult = await db.execute(sql`
+        SELECT COUNT(*) as total FROM agent_message_history
+        WHERE session_id = ${this.agentId}
+      `);
+      const total = parseInt((totalResult.rows[0] as any)?.total || '0');
+
+      console.log(`[MemoryManager] Loaded ${messages.length}/${total} messages for ${this.agentId}`);
+
+      return messages;
+    } catch (error) {
+      console.error(`[MemoryManager] Failed to load messages:`, error);
+      return [];
+    }
   }
 
-  /**
-   * Search for semantically similar facts using pgvector
-   */
   private async searchSemanticFacts(query: string, limit: number = 5): Promise<SemanticFact[]> {
     try {
-      // Generate embedding for the query
       const embedding = await this.generateEmbedding(query);
 
-      // Search using vector similarity (cosine distance)
       const result = await db.execute(sql`
         SELECT
           id::text,
@@ -135,35 +156,30 @@ export class MemoryManager {
     }
   }
 
-  /**
-   * Record an interaction (user input + agent output)
-   * Saves to short-term history AND triggers long-term learning
-   */
   async recordInteraction(userInput: string, agentOutput: string): Promise<void> {
-    // Save to short-term history
-    await this.shortTermHistory.addMessage(new HumanMessage(userInput));
-    await this.shortTermHistory.addMessage(new AIMessage(agentOutput));
+    await this.ensureTable();
 
-    // Extract and save facts to long-term memory (async, don't wait)
+    await db.execute(sql`
+      INSERT INTO agent_message_history (session_id, role, content)
+      VALUES (${this.agentId}, 'human', ${userInput})
+    `);
+    await db.execute(sql`
+      INSERT INTO agent_message_history (session_id, role, content)
+      VALUES (${this.agentId}, 'ai', ${agentOutput})
+    `);
+
     this.learnFromInteraction(userInput, agentOutput).catch(err => {
       console.error(`[MemoryManager] Learning failed:`, err);
     });
 
-    // Cleanup old messages if needed
     await this.cleanupOldMessages();
   }
 
-  /**
-   * Extract facts from interaction and save to long-term memory
-   */
   private async learnFromInteraction(userInput: string, agentOutput: string): Promise<void> {
-    // Combine input and output for fact extraction
     const content = `User: ${userInput}\nAgent: ${agentOutput}`;
 
-    // Generate embedding
     const embedding = await this.generateEmbedding(content);
 
-    // Save to agent_memories
     await db.execute(sql`
       INSERT INTO agent_memories (agent_id, content, embedding, metadata)
       VALUES (
@@ -177,9 +193,6 @@ export class MemoryManager {
     console.log(`[MemoryManager] Learned new fact for ${this.agentId}`);
   }
 
-  /**
-   * Generate OpenAI embedding for text
-   */
   private async generateEmbedding(text: string): Promise<number[]> {
     const response = await this.openai.embeddings.create({
       model: "text-embedding-3-small",
@@ -190,35 +203,33 @@ export class MemoryManager {
     return response.data[0].embedding;
   }
 
-  /**
-   * Cleanup old messages to prevent Postgres bloat
-   * Keeps only the most recent maxHistorySize messages
-   */
   private async cleanupOldMessages(): Promise<void> {
     try {
-      const allMessages = await this.shortTermHistory.getMessages();
+      const countResult = await db.execute(sql`
+        SELECT COUNT(*) as total FROM agent_message_history
+        WHERE session_id = ${this.agentId}
+      `);
+      const total = parseInt((countResult.rows[0] as any)?.total || '0');
 
-      if (allMessages.length > this.maxHistorySize) {
-        console.log(`[MemoryManager] Cleaning up ${allMessages.length - this.maxHistorySize} old messages for ${this.agentId}`);
+      if (total > this.maxHistorySize) {
+        const excess = total - this.maxHistorySize;
+        console.log(`[MemoryManager] Cleaning up ${excess} old messages for ${this.agentId}`);
 
-        // Clear all messages
-        await this.shortTermHistory.clear();
-
-        // Re-add only the most recent ones
-        const messagesToKeep = allMessages.slice(-this.maxHistorySize);
-        for (const msg of messagesToKeep) {
-          await this.shortTermHistory.addMessage(msg);
-        }
+        await db.execute(sql`
+          DELETE FROM agent_message_history
+          WHERE id IN (
+            SELECT id FROM agent_message_history
+            WHERE session_id = ${this.agentId}
+            ORDER BY id ASC
+            LIMIT ${excess}
+          )
+        `);
       }
     } catch (error) {
       console.error(`[MemoryManager] Cleanup failed:`, error);
     }
   }
 
-  /**
-   * Save a fact directly to long-term memory
-   * Used when agents explicitly learn something
-   */
   async saveFact(content: string, metadata: Record<string, any> = {}): Promise<void> {
     const embedding = await this.generateEmbedding(content);
 
@@ -235,12 +246,13 @@ export class MemoryManager {
     console.log(`[MemoryManager] Saved fact for ${this.agentId}: ${content.substring(0, 50)}...`);
   }
 
-  /**
-   * Clear all memory (both short-term and long-term)
-   * Use with caution!
-   */
   async clearAll(): Promise<void> {
-    await this.shortTermHistory.clear();
+    await this.ensureTable();
+
+    await db.execute(sql`
+      DELETE FROM agent_message_history
+      WHERE session_id = ${this.agentId}
+    `);
 
     await db.execute(sql`
       DELETE FROM agent_memories
@@ -250,16 +262,18 @@ export class MemoryManager {
     console.log(`[MemoryManager] Cleared all memory for ${this.agentId}`);
   }
 
-  /**
-   * Get memory statistics
-   */
   async getStats(): Promise<{
     shortTermMessages: number;
     longTermFacts: number;
     oldestFact: Date | null;
     newestFact: Date | null;
   }> {
-    const messages = await this.shortTermHistory.getMessages();
+    await this.ensureTable();
+
+    const msgResult = await db.execute(sql`
+      SELECT COUNT(*) as total FROM agent_message_history
+      WHERE session_id = ${this.agentId}
+    `);
 
     const result = await db.execute(sql`
       SELECT
@@ -273,7 +287,7 @@ export class MemoryManager {
     const row = result.rows[0] as any;
 
     return {
-      shortTermMessages: messages.length,
+      shortTermMessages: parseInt((msgResult.rows[0] as any)?.total || '0'),
       longTermFacts: parseInt(row.total || '0'),
       oldestFact: row.oldest ? new Date(row.oldest) : null,
       newestFact: row.newest ? new Date(row.newest) : null,
@@ -281,9 +295,6 @@ export class MemoryManager {
   }
 }
 
-/**
- * Factory function to create a MemoryManager instance
- */
 export function createMemoryManager(agentId: string, config?: Partial<MemoryManagerConfig>): MemoryManager {
   return new MemoryManager({
     agentId,

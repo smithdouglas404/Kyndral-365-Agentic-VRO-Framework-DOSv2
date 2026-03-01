@@ -7,7 +7,7 @@
  * - Multi-step reasoning for complex project scenarios
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -137,9 +137,9 @@ Use your tools to monitor project health, track milestones, optimize resources, 
 When you identify critical issues, recommend collaboration with FinOps (budget), TMO (schedule), or Risk (threats) agents.`;
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_project_health",
         description: "Scans all projects for schedule/budget/scope variance and calculates overall health score",
         schema: z.object({
@@ -253,7 +253,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "track_milestones",
         description: "Monitors milestone completion, predicts delays, and identifies at-risk deliverables",
         schema: z.object({
@@ -327,7 +327,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "optimize_resources",
         description: "Identifies over/under-allocated resources across portfolio and recommends rebalancing",
         schema: z.object({
@@ -423,7 +423,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "enforce_governance",
         description: "Checks compliance with PMO standards, gates, and approvals for projects",
         schema: z.object({
@@ -500,7 +500,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "generate_status_report",
         description: "Creates executive dashboards and status summaries for projects or portfolio",
         schema: z.object({

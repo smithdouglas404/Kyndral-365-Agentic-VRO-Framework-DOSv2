@@ -15,9 +15,8 @@
 import { DeepAgentWithRAG } from "./deep/DeepAgentWithRAG.js";
 import { DeepAgentConfig } from "./deep/DeepAgentBase.js";
 import type { IStorage } from "../storage.js";
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../lib/AgentTool.js";
 import { z } from "zod";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 interface DependencyRisk {
   blockingProject: {
@@ -67,9 +66,9 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_dependency_graph",
         description: "Analyze all project dependencies and identify blocking/blocked relationships",
         schema: z.object({
@@ -102,7 +101,7 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "detect_blocking_risks",
         description: "Identify projects that are blocking others due to delays",
         schema: z.object({
@@ -201,7 +200,7 @@ export class DependencyCollaborationAgent extends DeepAgentWithRAG {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "create_collaboration_intervention",
         description: "Create HITL intervention to facilitate cross-team collaboration",
         schema: z.object({
@@ -300,8 +299,9 @@ When you detect a dependency risk, you:
     risk: DependencyRisk,
     knowledge: any[]
   ): Promise<string> {
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", `Generate a detailed HITL intervention narrative for this cross-project dependency risk.
+    const { ModelTier } = await import("../lib/SmartModelRouter.js");
+
+    const collabSystemPrompt = `Generate a detailed HITL intervention narrative for this cross-project dependency risk.
 
 Structure:
 1. SITUATION: Explain the dependency issue clearly with quantified impact
@@ -312,35 +312,25 @@ Structure:
 6. STAKEHOLDERS: Who needs to be involved
 7. EXPECTED OUTCOME: What happens if actions are approved
 
-Make it DETAILED, PREDICTIVE, and ACTIONABLE.`],
-      ["human", `Blocking Project: {blockingProjectName} ({delayDays} days delayed, status: {status})
-Blocked Projects: {blockedProjects}
-Risk Level: {riskLevel}
+Make it DETAILED, PREDICTIVE, and ACTIONABLE.`;
 
-Historical Pattern: {historicalPattern}
+    const collabUserPrompt = `Blocking Project: ${risk.blockingProject.name} (${risk.blockingProject.delayDays} days delayed, status: ${risk.blockingProject.status})
+Blocked Projects: ${risk.blockedProjects.map(p => `${p.name} (waiting for: ${p.waitingFor})`).join(', ')}
+Risk Level: ${risk.riskLevel.toUpperCase()}
+
+Historical Pattern: ${risk.historicalPattern
+      ? JSON.stringify(risk.historicalPattern, null, 2)
+      : 'No historical pattern match found'}
 
 Knowledge Base References:
-{knowledge}
+${knowledge.length > 0
+      ? knowledge.map(k => `${k.title}: ${k.content.substring(0, 200)}...`).join('\n')
+      : 'No specific knowledge articles found'}
 
-Generate the collaboration intervention narrative.`],
-    ]);
+Generate the collaboration intervention narrative.`;
 
-    const chain = prompt.pipe(this.model);
-    const response = await chain.invoke({
-      blockingProjectName: risk.blockingProject.name,
-      delayDays: risk.blockingProject.delayDays,
-      status: risk.blockingProject.status,
-      blockedProjects: risk.blockedProjects.map(p => `${p.name} (waiting for: ${p.waitingFor})`).join(', '),
-      riskLevel: risk.riskLevel.toUpperCase(),
-      historicalPattern: risk.historicalPattern
-        ? JSON.stringify(risk.historicalPattern, null, 2)
-        : 'No historical pattern match found',
-      knowledge: knowledge.length > 0
-        ? knowledge.map(k => `${k.title}: ${k.content.substring(0, 200)}...`).join('\n')
-        : 'No specific knowledge articles found',
-    });
-
-    return response.content.toString();
+    const response = await this.router.callModel(ModelTier.PREMIUM, collabSystemPrompt, collabUserPrompt);
+    return response.content;
   }
 
   /**

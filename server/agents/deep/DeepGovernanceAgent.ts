@@ -7,7 +7,7 @@
  * - Multi-step reasoning for policy enforcement
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -36,9 +36,9 @@ export class DeepGovernanceAgent extends DeepAgentBase {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "check_compliance_status",
         description: "Check compliance status for all projects or a specific project",
         schema: z.object({
@@ -137,7 +137,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "check_stage_gate_approvals",
         description: "Check if projects have proper stage-gate approvals for their current phase",
         schema: z.object({
@@ -212,7 +212,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "audit_policy_violations",
         description: "Audit projects for policy violations such as missing documentation, unapproved changes",
         schema: z.object({
@@ -289,7 +289,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "get_pending_escalations",
         description: "Get pending escalations and interventions awaiting approval",
         schema: z.object({

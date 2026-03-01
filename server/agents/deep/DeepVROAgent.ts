@@ -10,7 +10,7 @@
  * - Strategic alignment assessment
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import type { IStorage } from "../../storage.js";
 import { DeepAgentBase } from "./DeepAgentBase.js";
@@ -67,10 +67,10 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
   /**
    * Define Deep VRO Agent tools
    */
-  defineTools(): DynamicStructuredTool[] {
+  defineTools(): AgentTool[] {
     return [
       // Tool 1: Track Value Delivery
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "track_value_delivery",
         description:
           "Track actual value delivered against planned benefits and business case projections",
@@ -256,7 +256,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
       }),
 
       // Tool 2: Calculate ROI and Business Value
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "calculate_roi_business_value",
         description:
           "Calculate ROI, NPV, payback period, and other business value metrics for investment analysis",
@@ -381,7 +381,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
       }),
 
       // Tool 3: Assess Strategic Alignment
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "assess_strategic_alignment",
         description:
           "Assess how well a project aligns with organizational strategic objectives and priorities",
@@ -540,7 +540,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
       }),
 
       // Tool 4: Forecast Value Trajectory
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "forecast_value_trajectory",
         description:
           "Forecast future value delivery trajectory based on current performance and trends",
@@ -691,7 +691,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
       }),
 
       // Tool 5: Optimize Value Delivery
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "optimize_value_delivery",
         description:
           "Analyze current approach and recommend optimizations to maximize value delivery",

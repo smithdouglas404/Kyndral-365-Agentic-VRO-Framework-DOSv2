@@ -7,7 +7,7 @@
  * - Multi-step reasoning for complex scenarios
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -39,9 +39,9 @@ export class DeepFinOpsAgent extends DeepAgentBase {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_budget_variance",
         description: "Analyze budget variance for a project. Returns detailed budget vs actual comparison.",
         schema: z.object({
@@ -136,7 +136,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "calculate_evm_metrics",
         description: "Calculate Earned Value Management metrics (CPI, SPI, EAC, ETC)",
         schema: z.object({
@@ -236,7 +236,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "forecast_burn_rate",
         description: "Forecast budget burn rate and estimate runway",
         schema: z.object({
@@ -276,7 +276,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "recommend_cost_optimization",
         description: "Analyze project and recommend cost optimization strategies",
         schema: z.object({

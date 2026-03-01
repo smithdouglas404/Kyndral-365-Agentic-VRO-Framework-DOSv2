@@ -7,7 +7,7 @@
  * - Multi-step reasoning for strategic alignment
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -55,9 +55,9 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "assess_data_completeness",
         description: "Assess data completeness for all projects and calculate completeness scores",
         schema: z.object({
@@ -174,7 +174,7 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "infer_okr_linkage",
         description: "Infer OKR linkage for projects missing explicit strategic alignment using fuzzy matching and pattern recognition",
         schema: z.object({
@@ -381,7 +381,7 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "batch_infer_okrs",
         description: "Infer OKR linkages for multiple projects in batch (prioritizes high-value projects with missing OKRs)",
         schema: z.object({

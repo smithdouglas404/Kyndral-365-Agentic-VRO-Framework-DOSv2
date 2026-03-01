@@ -10,7 +10,7 @@
  * - Response recommendations
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import type { IStorage } from "../../storage.js";
 import { DeepAgentBase } from "./DeepAgentBase.js";
@@ -67,10 +67,10 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
   /**
    * Define Deep Risk Agent tools
    */
-  defineTools(): DynamicStructuredTool[] {
+  defineTools(): AgentTool[] {
     return [
       // Tool 1: Analyze Risk Probability
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_risk_probability",
         description:
           "Analyze the probability/likelihood of a risk occurring based on historical data and current conditions",
@@ -173,7 +173,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
       }),
 
       // Tool 2: Calculate Risk Impact
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "calculate_risk_impact",
         description:
           "Calculate the potential impact of a risk if it materializes, considering schedule, cost, and quality dimensions",
@@ -342,7 +342,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
       }),
 
       // Tool 3: Assess Risk Mitigation
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "assess_risk_mitigation",
         description:
           "Evaluate the effectiveness of current risk mitigation strategies and identify gaps",
@@ -484,7 +484,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
       }),
 
       // Tool 4: Forecast Risk Trends
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "forecast_risk_trends",
         description:
           "Forecast how risk levels are trending over time and predict future risk exposure",
@@ -639,7 +639,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
       }),
 
       // Tool 5: Recommend Risk Response
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "recommend_risk_response",
         description:
           "Recommend appropriate risk response strategies (avoid, mitigate, transfer, accept) based on risk profile",

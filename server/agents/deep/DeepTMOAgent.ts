@@ -7,7 +7,7 @@
  * - Multi-step reasoning for complex schedule scenarios
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
@@ -39,9 +39,9 @@ export class DeepTMOAgent extends DeepAgentBase {
     super(config, storage);
   }
 
-  protected defineTools(): DynamicStructuredTool[] {
+  protected defineTools(): AgentTool[] {
     return [
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "analyze_schedule_variance",
         description: "Analyze schedule variance and identify delays. Returns detailed timeline comparison.",
         schema: z.object({
@@ -151,7 +151,7 @@ export class DeepTMOAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "identify_critical_path",
         description: "Identify critical path and high-risk dependencies",
         schema: z.object({
@@ -200,7 +200,7 @@ export class DeepTMOAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "detect_resource_bottlenecks",
         description: "Detect resource allocation bottlenecks affecting schedule",
         schema: z.object({
@@ -262,7 +262,7 @@ export class DeepTMOAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "forecast_completion_date",
         description: "Forecast project completion date based on current velocity",
         schema: z.object({
@@ -348,7 +348,7 @@ export class DeepTMOAgent extends DeepAgentBase {
         },
       }),
 
-      new DynamicStructuredTool({
+      new AgentTool({
         name: "recommend_schedule_recovery",
         description: "Recommend actions to recover delayed schedule",
         schema: z.object({

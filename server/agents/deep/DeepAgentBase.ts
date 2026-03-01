@@ -9,10 +9,10 @@
  *
  * NO LANGCHAIN DEPENDENCY for LLM calls.
  * Uses SmartModelRouter -> OpenRouterClient for all AI calls.
- * DynamicStructuredTool kept for local tool definitions only (no API cost).
+ * AgentTool used for local tool definitions only (no API cost, no LangChain).
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import type { IStorage } from "../../storage.js";
 import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
 import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
@@ -167,7 +167,7 @@ export abstract class DeepAgentBase {
    * Define agent-specific tools
    * Subclasses must implement this
    */
-  protected abstract defineTools(): DynamicStructuredTool[];
+  protected abstract defineTools(): AgentTool[];
 
   /**
    * Get agent system prompt

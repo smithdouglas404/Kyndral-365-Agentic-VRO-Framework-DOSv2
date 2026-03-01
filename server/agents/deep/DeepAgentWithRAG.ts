@@ -12,7 +12,7 @@
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import { AgentRAGService } from "../../lib/AgentRAGService.js";
 import type { IStorage } from "../../storage.js";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ModelTier } from "../../lib/SmartModelRouter.js";
 
 interface PredictiveForecast {
   alertType: string;
@@ -187,8 +187,7 @@ export abstract class DeepAgentWithRAG extends DeepAgentBase {
     similarDecisions: any[],
     patterns: any[]
   ): Promise<PredictiveForecast> {
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", `You are a predictive forecasting engine for ${this.config.agentName}.
+    const systemPrompt = `You are a predictive forecasting engine for ${this.config.agentName}.
 
 Your role: Generate FORWARD-LOOKING forecasts, not current state descriptions.
 
@@ -199,15 +198,24 @@ Based on:
 - ${similarDecisions.length} similar historical decisions with outcomes
 - ${patterns.length} pattern matches from portfolio history
 
-Generate a JSON forecast with week-by-week predictions.`],
-      ["human", `Project: {projectName}
-Current State: {currentState}
+Generate a JSON forecast with week-by-week predictions.`;
+
+    const userPrompt = `Project: ${project.name}
+Current State: ${JSON.stringify(this.createProjectSignature(project), null, 2)}
 
 Similar Historical Decisions (with outcomes):
-{similarDecisions}
+${JSON.stringify(similarDecisions.slice(0, 5).map(d => ({
+  recommendation: d.recommendation,
+  outcome: d.outcome,
+  similarity: d.similarity,
+})), null, 2)}
 
 Pattern Matches from Portfolio History:
-{patterns}
+${JSON.stringify(patterns.map(p => ({
+  patternName: p.patternName,
+  typicalOutcome: p.typicalOutcome,
+  successRate: p.successRate,
+})), null, 2)}
 
 Generate a predictive forecast for the next 8-12 weeks showing:
 1. What will happen each week (not what is happening now)
@@ -216,36 +224,20 @@ Generate a predictive forecast for the next 8-12 weeks showing:
 4. Financial/schedule impact forecasts
 
 Respond with JSON only:
-{{
+{
   "alertType": "budget_overrun_trajectory" | "schedule_delay_forecast" | "risk_escalation_prediction",
   "confidence": 0.85,
   "reasoning": "Why this forecast is likely based on historical patterns",
   "predictions": [
-    {{"week": 2, "metric": "CPI", "predictedValue": 0.80, "confidence": 0.82}},
-    {{"week": 4, "metric": "CPI", "predictedValue": 0.79, "confidence": 0.78}},
-    {{"week": 8, "metric": "overrunAmount", "predictedValue": 420000, "confidence": 0.75}}
+    {"week": 2, "metric": "CPI", "predictedValue": 0.80, "confidence": 0.82},
+    {"week": 4, "metric": "CPI", "predictedValue": 0.79, "confidence": 0.78},
+    {"week": 8, "metric": "overrunAmount", "predictedValue": 420000, "confidence": 0.75}
   ],
-  "criticalMilestone": {{"week": 6, "event": "Budget overrun becomes visible to executives"}}
-}}`],
-    ]);
+  "criticalMilestone": {"week": 6, "event": "Budget overrun becomes visible to executives"}
+}`;
 
-    const chain = prompt.pipe(this.model);
-    const response = await chain.invoke({
-      projectName: project.name,
-      currentState: JSON.stringify(this.createProjectSignature(project), null, 2),
-      similarDecisions: JSON.stringify(similarDecisions.slice(0, 5).map(d => ({
-        recommendation: d.recommendation,
-        outcome: d.outcome,
-        similarity: d.similarity,
-      })), null, 2),
-      patterns: JSON.stringify(patterns.map(p => ({
-        patternName: p.patternName,
-        typicalOutcome: p.typicalOutcome,
-        successRate: p.successRate,
-      })), null, 2),
-    });
-
-    const forecastText = response.content.toString();
+    const response = await this.router.callModel(ModelTier.PREMIUM, systemPrompt, userPrompt);
+    const forecastText = response.content;
     try {
       const jsonMatch = forecastText.match(/```json\s*([\s\S]*?)\s*```/) || forecastText.match(/\{[\s\S]*\}/);
       const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : forecastText;
@@ -279,8 +271,7 @@ Respond with JSON only:
     patterns: any[],
     knowledge: any[]
   ): Promise<string> {
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", `You are ${this.config.agentName}, an expert narrative generator.
+    const narrativeSystemPrompt = `You are ${this.config.agentName}, an expert narrative generator.
 
 Generate a DETAILED, PREDICTIVE narrative following this structure:
 
@@ -308,49 +299,40 @@ CRITICAL REQUIREMENTS:
 - Reference SPECIFIC projects by name
 - Provide WEEK-BY-WEEK forecast
 - Include SUCCESS RATES from history
+- Be PREDICTIVE (future-looking, not current state)`;
 
-- Be PREDICTIVE (future-looking, not current state)`],
-      ["human", `Project: {projectName}
+    const narrativeUserPrompt = `Project: ${project.name}
 
 Forecast:
-{forecast}
+${JSON.stringify(forecast, null, 2)}
 
 Similar Historical Decisions:
-{similarDecisions}
+${JSON.stringify(similarDecisions.slice(0, 5).map(d => ({
+  recommendation: d.recommendation,
+  reasoning: d.reasoning,
+  outcome: d.outcome,
+  similarity: d.similarity,
+})), null, 2)}
 
 Pattern Matches:
-{patterns}
+${JSON.stringify(patterns.map(p => ({
+  patternName: p.patternName,
+  typicalOutcome: p.typicalOutcome,
+  successInterventions: p.successInterventions,
+  successRate: p.successRate,
+})), null, 2)}
 
 Knowledge Base:
-{knowledge}
+${JSON.stringify(knowledge.map(k => ({
+  title: k.title,
+  content: k.content.substring(0, 300),
+  source: k.source,
+})), null, 2)}
 
-Generate the detailed predictive narrative following the structure above.`],
-    ]);
+Generate the detailed predictive narrative following the structure above.`;
 
-    const chain = prompt.pipe(this.model);
-    const response = await chain.invoke({
-      projectName: project.name,
-      forecast: JSON.stringify(forecast, null, 2),
-      similarDecisions: JSON.stringify(similarDecisions.slice(0, 5).map(d => ({
-        recommendation: d.recommendation,
-        reasoning: d.reasoning,
-        outcome: d.outcome,
-        similarity: d.similarity,
-      })), null, 2),
-      patterns: JSON.stringify(patterns.map(p => ({
-        patternName: p.patternName,
-        typicalOutcome: p.typicalOutcome,
-        successInterventions: p.successInterventions,
-        successRate: p.successRate,
-      })), null, 2),
-      knowledge: JSON.stringify(knowledge.map(k => ({
-        title: k.title,
-        content: k.content.substring(0, 300),
-        source: k.source,
-      })), null, 2),
-    });
-
-    return response.content.toString();
+    const narrativeResponse = await this.router.callModel(ModelTier.PREMIUM, narrativeSystemPrompt, narrativeUserPrompt);
+    return narrativeResponse.content;
   }
 
   /**

@@ -1,17 +1,19 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.1.0  
+**Version:** 2.2.0  
 **Updated:** 2026-03-01
 
 ## Recent Changes
 
-### March 1, 2026 - LangChain LLM Removal (v2.1.0)
-- Removed all LangChain LLM wrappers (ChatAnthropic, ChatOpenAI, ChatGoogleGenerativeAI) from agent code
-- All LLM calls now go through `OpenRouterClient.callLLM()` via `SmartModelRouter.callModel()`
-- `DeepAgentBase`, `AgentBase`, `AgentOrchestrator`, `LLMRouter`, `EnhancedLLMRouter`, `okr-kpi.ts` all updated
-- `@langchain/core/tools` (DynamicStructuredTool) kept for local tool definitions only (no API cost)
+### March 1, 2026 - Complete LangChain Removal (v2.2.0)
+- **ALL 6 LangChain packages removed** from package.json: `@langchain/anthropic`, `@langchain/community`, `@langchain/core`, `@langchain/google-genai`, `@langchain/langgraph`, `langchain`
+- All LLM calls go through `OpenRouterClient.callLLM()` via `SmartModelRouter.callModel()`
+- `DynamicStructuredTool` replaced with custom `AgentTool` class (`server/lib/AgentTool.ts`)
+- `PostgresChatMessageHistory` replaced with direct Postgres queries in `MemoryManager`
+- `ChatPromptTemplate` replaced with template literals in `DeepAgentWithRAG` and `DependencyCollaborationAgent`
+- All 15 agent files updated: DeepAgentBase, AgentBase, all 10 Deep*Agent subclasses, AgentOrchestrator, DependencyCollaborationAgent, DeepAgentWithRAG
 - AI kill switch (`ENABLE_AI_AGENTS=false`) verified working - zero token consumption
-- OpenRouterClient Anthropic fallback now respects requested model via `mapToAnthropicModel()`
+- Transitive deps `uuid` and `@google/generative-ai` installed directly since they were previously pulled in by LangChain
 
 ### January 29, 2026 - Demo Approval Workflow
 - Demo requests now require admin approval before users can access dashboard
@@ -50,12 +52,11 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript with ESM modules
-- **AI Integration**: Multi-model architecture via LangChain with:
-  - Anthropic Claude (primary)
-  - OpenAI GPT-4
-  - Google Gemini
-  - OpenRouter for cost-optimized routing
-- **Agent Framework**: LangGraph for multi-agent orchestration
+- **AI Integration**: Multi-model architecture via direct API calls:
+  - OpenRouterClient → OpenRouter (primary, cost-optimized)
+  - Anthropic Claude (fallback via direct API)
+  - SmartModelRouter for CHEAP/PREMIUM tier routing
+- **Agent Framework**: Custom orchestration (no LangChain/LangGraph)
 - **Process Management**: PM2 for production deployment
 
 ### Multi-Agent System
@@ -93,10 +94,10 @@ The system implements 10 specialized agents:
 ## External Dependencies
 
 ### AI/ML Services
-- **Anthropic Claude**: Primary LLM via `@anthropic-ai/sdk` and `@langchain/anthropic`
+- **Anthropic Claude**: Primary LLM via `@anthropic-ai/sdk` (direct API, no LangChain)
 - **OpenRouter**: Cost-optimized model routing with failover chains
-- **Google Gemini**: Alternative LLM via `@langchain/google-genai`
-- **LangChain/LangGraph**: Agent orchestration framework
+- **Google Gemini**: Alternative LLM via `@google/generative-ai` (direct API)
+- **OpenRouterClient**: Unified LLM client with SmartModelRouter for CHEAP/PREMIUM tier routing
 
 ### Database & Storage
 - **PostgreSQL**: Primary relational database (via `DATABASE_URL`)

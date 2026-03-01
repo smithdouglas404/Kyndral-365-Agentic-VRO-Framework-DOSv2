@@ -2,10 +2,10 @@
  * AgentBase v3.0 - No LangChain LLM dependency
  * 
  * Uses SmartModelRouter -> OpenRouterClient for all AI calls.
- * DynamicStructuredTool kept for local tool definitions only.
+ * AgentTool used for local tool definitions only (no LangChain).
  */
 
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { AgentTool } from "../../lib/AgentTool.js";
 import type { IStorage } from "../../storage.js";
 import type { InsertAgentActivityLog, InsertIntervention } from "@shared/schema";
 import { getSmartRouter, SmartModelRouter, ModelTier } from "../../lib/SmartModelRouter.js";
@@ -22,7 +22,7 @@ export interface AgentConfig {
 export abstract class AgentBase {
   protected config: AgentConfig;
   protected router: SmartModelRouter;
-  protected tools: DynamicStructuredTool[];
+  protected tools: AgentTool[];
   protected storage: IStorage;
   protected tracingEnabled: boolean = false;
   protected conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [];
@@ -41,7 +41,7 @@ export abstract class AgentBase {
     console.log(`[${config.agentName}] Agent initialized with ${this.tools.length} tools (direct API, no LangChain)`);
   }
 
-  protected abstract defineTools(): DynamicStructuredTool[];
+  protected abstract defineTools(): AgentTool[];
   protected abstract getSystemPrompt(): string;
 
   async execute(input: string, context?: Record<string, any>): Promise<{
