@@ -1,9 +1,17 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.0.2  
-**Updated:** 2026-01-29
+**Version:** 2.1.0  
+**Updated:** 2026-03-01
 
 ## Recent Changes
+
+### March 1, 2026 - LangChain LLM Removal (v2.1.0)
+- Removed all LangChain LLM wrappers (ChatAnthropic, ChatOpenAI, ChatGoogleGenerativeAI) from agent code
+- All LLM calls now go through `OpenRouterClient.callLLM()` via `SmartModelRouter.callModel()`
+- `DeepAgentBase`, `AgentBase`, `AgentOrchestrator`, `LLMRouter`, `EnhancedLLMRouter`, `okr-kpi.ts` all updated
+- `@langchain/core/tools` (DynamicStructuredTool) kept for local tool definitions only (no API cost)
+- AI kill switch (`ENABLE_AI_AGENTS=false`) verified working - zero token consumption
+- OpenRouterClient Anthropic fallback now respects requested model via `mapToAnthropicModel()`
 
 ### January 29, 2026 - Demo Approval Workflow
 - Demo requests now require admin approval before users can access dashboard

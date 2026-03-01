@@ -177,10 +177,10 @@ class OpenRouterClient {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: this.mapToAnthropicModel(options.model),
           max_tokens: maxTokens,
           temperature,
-          system: systemMessage?.content,
+          system: systemMessage?.content || 'You are a helpful assistant.',
           messages: userMessages.map(m => ({
             role: m.role,
             content: m.content,
@@ -205,6 +205,21 @@ class OpenRouterClient {
       console.error('[OpenRouterClient] Anthropic fallback failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Map OpenRouter model IDs to Anthropic model IDs for direct fallback
+   */
+  private mapToAnthropicModel(openRouterModel: string): string {
+    const mapping: Record<string, string> = {
+      'anthropic/claude-sonnet-4-20250514': 'claude-sonnet-4-20250514',
+      'anthropic/claude-3.5-sonnet': 'claude-sonnet-4-20250514',
+      'anthropic/claude-3-haiku': 'claude-3-haiku-20240307',
+      'meta-llama/llama-3.1-8b-instruct': 'claude-sonnet-4-20250514',
+      'mistralai/mixtral-8x7b-instruct': 'claude-sonnet-4-20250514',
+      'openai/gpt-4o-mini': 'claude-sonnet-4-20250514',
+    };
+    return mapping[openRouterModel] || 'claude-sonnet-4-20250514';
   }
 
   /**

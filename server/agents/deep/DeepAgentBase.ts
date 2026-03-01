@@ -1,5 +1,5 @@
 /**
- * DEEP AGENT BASE
+ * DEEP AGENT BASE v3.0
  *
  * Enhanced agent with Deep Agent capabilities:
  * - Planning: Think before acting
@@ -7,18 +7,17 @@
  * - Multi-step reasoning: Break down complex tasks
  * - Memory: Maintain context across interactions
  *
- * Based on LangChain Deep Agents pattern
+ * NO LANGCHAIN DEPENDENCY for LLM calls.
+ * Uses SmartModelRouter -> OpenRouterClient for all AI calls.
+ * DynamicStructuredTool kept for local tool definitions only (no API cost).
  */
 
-import { ChatAnthropic } from "@langchain/anthropic";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { IStorage } from "../../storage.js";
 import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
 import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
 import { createMemoryManager, type MemoryManager } from "../../lib/MemoryManager.js";
-import { getSmartRouter, ModelTier, type ProjectChangeEvent } from "../../lib/SmartModelRouter.js";
+import { getSmartRouter, SmartModelRouter, ModelTier, type ProjectChangeEvent } from "../../lib/SmartModelRouter.js";
 type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
 
 /**
@@ -82,9 +81,7 @@ export interface DeepAgentConfig {
 export abstract class DeepAgentBase {
   protected config: DeepAgentConfig;
   protected storage: IStorage;
-  protected model: BaseChatModel | null = null;
-  protected plannerModel: BaseChatModel | null = null;
-  protected reflectorModel: BaseChatModel | null = null;
+  protected router: SmartModelRouter;
   protected aiEnabled: boolean = false;
 
   protected tracingEnabled: boolean;
@@ -94,11 +91,10 @@ export abstract class DeepAgentBase {
   protected reflectionHistory: ActionReflection[] = [];
   protected actionCount: number = 0;
 
-  // Memory layers (Unified Memory Architecture)
-  protected mem0: ReturnType<typeof getMem0Service>; // Shared facts with other agents
-  protected memory: LettaAgentMemory; // Private self-editing memory (persona, policies, learned facts)
-  protected conversationMemory: MemoryManager; // Conversation history + semantic search
-  private memoryInitPromise: Promise<void>; // Ensure memory is ready before use
+  protected mem0: ReturnType<typeof getMem0Service>;
+  protected memory: LettaAgentMemory;
+  protected conversationMemory: MemoryManager;
+  private memoryInitPromise: Promise<void>;
 
   constructor(config: DeepAgentConfig, storage: IStorage) {
     this.config = {
@@ -110,77 +106,45 @@ export abstract class DeepAgentBase {
     };
     this.storage = storage;
 
-    // CRITICAL: Check if AI agents are enabled BEFORE creating any models
-    // This is the master switch that prevents ALL token consumption
-    const smartRouter = getSmartRouter();
-    this.aiEnabled = smartRouter.isAIEnabled();
+    this.router = getSmartRouter();
+    this.aiEnabled = this.router.isAIEnabled();
     
     if (!this.aiEnabled) {
       console.log(`[${config.agentName}] ⛔ AI DISABLED - Agent created in dormant mode (zero token consumption)`);
-      // Initialize minimal memory layers without AI
       this.mem0 = getMem0Service();
       this.memory = createAgentMemory(config.agentName.toLowerCase());
       this.conversationMemory = createMemoryManager(config.agentName.toLowerCase(), {
         contextWindowSize: 10,
         maxHistorySize: 100
       });
-      this.memoryInitPromise = Promise.resolve(); // No-op when AI disabled
+      this.memoryInitPromise = Promise.resolve();
       this.tracingEnabled = false;
       this.enableKnowledgeEnrichment = false;
-      return; // EXIT EARLY - No ChatAnthropic instances created!
+      return;
     }
 
-    // Initialize tracing (disabled for now)
     this.tracingEnabled = false;
+    this.enableKnowledgeEnrichment = false;
 
-    // Enable knowledge enrichment if Retool Vectors MCP is configured
-    this.enableKnowledgeEnrichment = false; // Disabled: RetoolVectorsMCP removed
-
-    // Initialize memory layers (Unified Memory Architecture)
-    this.mem0 = getMem0Service(); // Shared facts
-    this.memory = createAgentMemory(config.agentName.toLowerCase()); // Core memory (persona, policies)
+    this.mem0 = getMem0Service();
+    this.memory = createAgentMemory(config.agentName.toLowerCase());
     this.conversationMemory = createMemoryManager(config.agentName.toLowerCase(), {
-      contextWindowSize: 10, // Last 10 messages
-      maxHistorySize: 100    // Keep max 100 messages in Postgres
-    }); // Conversation history + semantic search
+      contextWindowSize: 10,
+      maxHistorySize: 100
+    });
 
-    // Initialize agent's core memory with persona - MUST complete before agent works
     this.memoryInitPromise = this.memory.initialize(`I am the ${config.agentName} agent responsible for ${config.description}`).catch((error) => {
       console.error(`[${config.agentName}] CRITICAL: Failed to initialize memory:`, error);
-      throw error; // Fail fast if memory can't initialize
+      throw error;
     });
 
-    // Subscribe to relevant facts from other agents
     this.subscribeToFacts();
-
-    // Use SmartModelRouter for ALL model creation - routes through OpenRouter when available
-    // This ensures cost optimization and respects the ENABLE_AI_AGENTS setting
-    this.model = smartRouter.getModel(ModelTier.CHEAP, {
-      layer: "deep-agent",
-      agent_type: config.agentName.toLowerCase(),
-      system: "deep-agent-architecture",
-    });
-
-    this.plannerModel = smartRouter.getModel(ModelTier.CHEAP, {
-      layer: "deep-agent-planning",
-      agent_type: config.agentName.toLowerCase(),
-      component: "planner",
-    });
-
-    this.reflectorModel = smartRouter.getModel(ModelTier.CHEAP, {
-      layer: "deep-agent-reflection",
-      agent_type: config.agentName.toLowerCase(),
-      component: "reflector",
-    });
 
     console.log(`[${config.agentName}] Deep Agent initialized with planning=${this.config.enablePlanning}, reflection=${this.config.enableReflection}`);
   }
 
-  /**
-   * Check if this agent is enabled and can perform AI operations
-   */
   isEnabled(): boolean {
-    return this.aiEnabled && this.model !== null;
+    return this.aiEnabled;
   }
 
   /**
@@ -544,8 +508,7 @@ export abstract class DeepAgentBase {
     const tools = this.defineTools();
     const toolDescriptions = tools.map(t => `- ${t.name}: ${t.description}`).join('\n');
 
-    const planningPrompt = ChatPromptTemplate.fromMessages([
-      ["system", `You are a planning expert for ${this.config.agentName}.
+    const systemPrompt = `You are a planning expert for ${this.config.agentName}.
 
 Your role: Analyze the goal and create a detailed, step-by-step plan.
 
@@ -560,47 +523,38 @@ Create a plan with these characteristics:
 5. Determine if collaboration with other agents is needed
 
 Return a JSON plan with this structure:
-{{{{
+{
   "reasoning": "Why this approach?",
   "estimatedComplexity": "low|medium|high",
   "requiresCollaboration": true|false,
   "steps": [
-    {{{{
+    {
       "step": 1,
       "description": "What to do",
       "tool": "tool_name or null",
-      "toolInput": {{"param1": "value1"}},
+      "toolInput": {"param1": "value1"},
       "expectedOutcome": "What we expect",
       "dependencies": []
-    }}}}
+    }
   ]
-}}}}
+}
 
 IMPORTANT: When specifying toolInput, extract the required parameters from the context (e.g., projectId, changeId, etc.).
-Example: If context has projectId: "proj_123", use {{"projectId": "proj_123"}} as toolInput.`],
-      ["human", `{priorKnowledge}
+Example: If context has projectId: "proj_123", use {"projectId": "proj_123"} as toolInput.`;
+
+    const priorKnowledge = enrichedContext.priorKnowledge || '## Prior Knowledge\nNo prior observations for this entity.';
+    const userPrompt = `${priorKnowledge}
 
 ## Current Goal
-{goal}
+${goal}
 
 ## Additional Context
-{context}
+${JSON.stringify(enrichedContext, null, 2)}
 
-Create a plan to achieve this goal. Consider the prior knowledge when planning to avoid duplicate work.`],
-    ]);
+Create a plan to achieve this goal. Consider the prior knowledge when planning to avoid duplicate work.`;
 
-    if (!this.plannerModel) {
-      throw new Error(`[${this.config.agentName}] AI is disabled - cannot create plan`);
-    }
-    const chain = planningPrompt.pipe(this.plannerModel);
-    const response = await chain.invoke({
-      goal,
-      priorKnowledge: enrichedContext.priorKnowledge || '## Prior Knowledge\nNo prior observations for this entity.',
-      context: JSON.stringify(enrichedContext, null, 2),
-    });
-
-    // Parse the plan from response
-    const planText = response.content.toString();
+    const response = await this.router.callModel(ModelTier.CHEAP, systemPrompt, userPrompt);
+    const planText = response.content;
     let parsedPlan;
 
     try {
@@ -777,30 +731,18 @@ Previous results: ${serializedPreviousResults}`;
       }
     }
 
-    // Otherwise, use LLM to execute step
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", this.getSystemPrompt()],
-      ["human", `Execute this step:
-Description: {description}
-Expected outcome: {expectedOutcome}
-Context: {context}
+    const execUserPrompt = `Execute this step:
+Description: ${step.description}
+Expected outcome: ${step.expectedOutcome}
+Context: ${contextString}
 
-Provide the result of executing this step.`],
-    ]);
+Provide the result of executing this step.`;
 
-    if (!this.model) {
-      throw new Error(`[${this.config.agentName}] AI is disabled - cannot execute step`);
-    }
-    const chain = prompt.pipe(this.model);
-    const response = await chain.invoke({
-      description: step.description,
-      expectedOutcome: step.expectedOutcome,
-      context: contextString,
-    });
+    const response = await this.router.callModel(ModelTier.CHEAP, this.getSystemPrompt(), execUserPrompt);
 
     return {
-      stepResult: response.content.toString(),
-      summary: response.content.toString().substring(0, 200),
+      stepResult: response.content,
+      summary: response.content.substring(0, 200),
     };
   }
 
@@ -836,8 +778,7 @@ Provide the result of executing this step.`],
       return sanitized;
     };
 
-    const reflectionPrompt = ChatPromptTemplate.fromMessages([
-      ["system", `You are a reflection expert for ${this.config.agentName}.
+    const reflectSystemPrompt = `You are a reflection expert for ${this.config.agentName}.
 
 Analyze the action and its outcome. Provide:
 1. Was it successful?
@@ -845,32 +786,24 @@ Analyze the action and its outcome. Provide:
 3. What adjustments should we make?
 
 Return JSON:
-{{{{
+{
   "success": true|false,
   "learnings": ["learning 1", "learning 2"],
   "adjustments": ["adjustment 1", "adjustment 2"]
-}}}}`],
-      ["human", `Action: {action}
-Expected: {expected}
-Actual outcome: {outcome}
+}`;
 
-Reflect on this action.`],
-    ]);
-
-    if (!this.reflectorModel) {
-      throw new Error(`[${this.config.agentName}] AI is disabled - cannot reflect`);
-    }
-    const chain = reflectionPrompt.pipe(this.reflectorModel);
     const sanitizedOutcome = sanitizeOutcome(outcome);
-    const response = await chain.invoke({
-      action: step.description,
-      expected: step.expectedOutcome,
-      outcome: JSON.stringify(sanitizedOutcome, null, 2),
-    });
+    const reflectUserPrompt = `Action: ${step.description}
+Expected: ${step.expectedOutcome}
+Actual outcome: ${JSON.stringify(sanitizedOutcome, null, 2)}
+
+Reflect on this action.`;
+
+    const response = await this.router.callModel(ModelTier.CHEAP, reflectSystemPrompt, reflectUserPrompt);
 
     let reflection;
     try {
-      const reflectionText = response.content.toString();
+      const reflectionText = response.content;
       const jsonMatch = reflectionText.match(/```json\s*([\s\S]*?)\s*```/) || reflectionText.match(/```\s*([\s\S]*?)\s*```/);
       const jsonText = jsonMatch ? jsonMatch[1] : reflectionText;
       reflection = JSON.parse(jsonText);
@@ -1050,29 +983,16 @@ Reflect on this action.`],
    * Reflect on entire plan execution
    */
   protected async reflectOnPlan(plan: AgentPlan, result: any): Promise<string> {
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", `Reflect on the entire plan execution for ${this.config.agentName}.
-Summarize learnings and future improvements.`],
-      ["human", `Plan goal: {goal}
-Steps: {steps}
-Result: {result}
-Reflection history: {reflectionHistory}
+    const planSystemPrompt = `Reflect on the entire plan execution for ${this.config.agentName}. Summarize learnings and future improvements.`;
+    const planUserPrompt = `Plan goal: ${plan.goal}
+Steps: ${JSON.stringify(plan.steps, null, 2)}
+Result: ${JSON.stringify(result, null, 2)}
+Reflection history: ${JSON.stringify(this.reflectionHistory, null, 2)}
 
-Provide a summary of what was learned and how to improve next time.`],
-    ]);
+Provide a summary of what was learned and how to improve next time.`;
 
-    if (!this.reflectorModel) {
-      throw new Error(`[${this.config.agentName}] AI is disabled - cannot synthesize plan`);
-    }
-    const chain = prompt.pipe(this.reflectorModel);
-    const response = await chain.invoke({
-      goal: plan.goal,
-      steps: JSON.stringify(plan.steps, null, 2),
-      result: JSON.stringify(result, null, 2),
-      reflectionHistory: JSON.stringify(this.reflectionHistory, null, 2),
-    });
-
-    return response.content.toString();
+    const response = await this.router.callModel(ModelTier.CHEAP, planSystemPrompt, planUserPrompt);
+    return response.content;
   }
 
   /**

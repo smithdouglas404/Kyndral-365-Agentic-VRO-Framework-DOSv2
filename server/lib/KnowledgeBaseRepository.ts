@@ -20,7 +20,7 @@
  */
 
 import type { IStorage } from "../storage.js";
-import { getLLMRouter } from "./LLMRouter.js";
+
 import OpenAI from "openai";
 
 export type KnowledgeCategory =

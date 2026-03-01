@@ -1,53 +1,49 @@
 /**
- * SMART MODEL ROUTER
+ * SMART MODEL ROUTER v3.0
  * 
- * Intelligent model routing for cost optimization:
+ * Direct API calls - NO LangChain dependency.
+ * Uses OpenRouterClient for all LLM interactions.
+ * 
+ * Architecture:
  * 1. Tiered routing - cheap models for routine, Claude for complex
  * 2. Caching - skip unchanged analysis
  * 3. Event-driven - analyze on change, not timer
- * 4. Summarization - compact agent communication
+ * 4. AI kill switch - ENABLE_AI_AGENTS=false blocks ALL calls
  */
 
-import { ChatOpenAI } from '@langchain/openai';
-import { ChatAnthropic } from '@langchain/anthropic';
-import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import crypto from 'crypto';
+import { callLLM, openRouterClient, type OpenRouterOptions } from './OpenRouterClient.js';
 
-// Model tiers for different task complexity
-// DESIGN: Only 2 tiers - cheap for routine, Claude for complex only
 export enum ModelTier {
-  CHEAP = 'cheap',      // Routine monitoring via OpenRouter (Llama, GPT-4o-mini, Mixtral)
-  PREMIUM = 'premium',   // Complex reasoning, critical decisions (Claude only)
+  CHEAP = 'cheap',
+  PREMIUM = 'premium',
 }
 
-// Cost per 1M tokens (input/output average)
 const MODEL_COSTS: Record<string, number> = {
-  'meta-llama/llama-3.2-3b-instruct': 0.06,
   'meta-llama/llama-3.1-8b-instruct': 0.10,
   'mistralai/mixtral-8x7b-instruct': 0.27,
-  'anthropic/claude-3-haiku': 0.25,
-  'anthropic/claude-3.5-sonnet': 3.00,
-  'anthropic/claude-sonnet-4': 3.00,
   'openai/gpt-4o-mini': 0.15,
   'openai/gpt-4o': 5.00,
+  'anthropic/claude-3.5-sonnet': 3.00,
+  'anthropic/claude-sonnet-4': 3.00,
 };
 
-// Tier to model mapping
-// CHEAP: OpenRouter models ($0.10-0.50/1M tokens)
-// PREMIUM: Claude only for complex decisions ($3-15/1M tokens)
-const TIER_MODELS: Record<ModelTier, string[]> = {
-  [ModelTier.CHEAP]: [
-    'meta-llama/llama-3.1-8b-instruct',
-    'openai/gpt-4o-mini',
-    'mistralai/mixtral-8x7b-instruct',
-  ],
-  [ModelTier.PREMIUM]: [
-    'anthropic/claude-3.5-sonnet',
-    'anthropic/claude-sonnet-4',
-  ],
+const TIER_MODELS: Record<ModelTier, string> = {
+  [ModelTier.CHEAP]: 'meta-llama/llama-3.1-8b-instruct',
+  [ModelTier.PREMIUM]: 'anthropic/claude-sonnet-4-20250514',
 };
 
-// Task complexity classification
+const TIER_TEMPERATURES: Record<ModelTier, number> = {
+  [ModelTier.CHEAP]: 0.3,
+  [ModelTier.PREMIUM]: 0.7,
+};
+
+export interface AIResponse {
+  content: string;
+  model: string;
+  tier: ModelTier;
+}
+
 interface TaskClassification {
   tier: ModelTier;
   reason: string;
@@ -55,7 +51,6 @@ interface TaskClassification {
   cachedResult?: string;
 }
 
-// Analysis cache entry
 interface CacheEntry {
   hash: string;
   result: string;
@@ -63,7 +58,6 @@ interface CacheEntry {
   tier: ModelTier;
 }
 
-// Project change event
 export interface ProjectChangeEvent {
   projectId: string;
   changeType: 'budget' | 'schedule' | 'risk' | 'status' | 'resource' | 'milestone';
@@ -75,103 +69,86 @@ export interface ProjectChangeEvent {
 
 export class SmartModelRouter {
   private cache: Map<string, CacheEntry> = new Map();
-  private cacheTTL: number = 30 * 60 * 1000; // 30 minutes default
+  private cacheTTL: number = 30 * 60 * 1000;
   private pendingChanges: Map<string, ProjectChangeEvent[]> = new Map();
-  private openRouterKey: string | undefined;
-  private anthropicKey: string | undefined;
   private summaryStore: Map<string, string> = new Map();
   private aiEnabled: boolean = false;
 
   constructor() {
-    this.openRouterKey = process.env.OPENROUTER_API_KEY;
-    this.anthropicKey = process.env.ANTHROPIC_API_KEY;
-    
-    // CRITICAL: Check if AI agents are enabled - this is the MASTER SWITCH
-    // When disabled, ALL model requests return null, preventing any token consumption
     this.aiEnabled = process.env.ENABLE_AI_AGENTS !== 'false';
     
     if (!this.aiEnabled) {
       console.log('[SmartModelRouter] ⛔ AI AGENTS DISABLED - No models will be created, zero token consumption');
       return;
     }
-    
-    if (this.openRouterKey) {
+
+    if (openRouterClient.isAvailable) {
       console.log('[SmartModelRouter] OpenRouter available - cost optimization enabled');
+    } else if (openRouterClient.hasAnthropicFallback) {
+      console.log('[SmartModelRouter] Using direct Anthropic (OpenRouter not configured)');
     } else {
-      console.log('[SmartModelRouter] OpenRouter not configured - using Anthropic only');
+      console.log('[SmartModelRouter] ⚠️ No API keys configured - AI calls will fail');
     }
   }
 
-  /**
-   * Check if AI agents are enabled
-   */
   isAIEnabled(): boolean {
     return this.aiEnabled;
   }
 
-  /**
-   * Get the appropriate model for a task based on complexity
-   * ALL tiers now route through OpenRouter when available (including Claude)
-   * OpenRouter tracking: You'll see all requests in your OpenRouter dashboard
-   */
-  getModel(tier: ModelTier, metadata?: Record<string, any>): BaseChatModel | null {
-    // CRITICAL: If AI is disabled, return null - prevents ALL token consumption
+  async callModel(
+    tier: ModelTier,
+    systemPrompt: string,
+    userPrompt: string,
+    options?: { maxTokens?: number; temperature?: number }
+  ): Promise<AIResponse> {
     if (!this.aiEnabled) {
-      console.log('[SmartModelRouter] ⛔ Model request blocked - AI agents disabled');
-      return null;
-    }
-    
-    // Route ALL tiers through OpenRouter when available (including premium Claude)
-    if (this.openRouterKey) {
-      const modelName = TIER_MODELS[tier][0];
-      console.log(`[SmartModelRouter] Using OpenRouter: ${modelName} (${tier} tier)`);
-      
-      // Add tracking headers for OpenRouter dashboard visibility
-      const trackingMetadata = {
-        ...metadata,
-        'HTTP-Referer': 'https://kyndryl365.ai',
-        'X-Title': 'Kyndryl Clarity - Agent Orchestration',
-      };
-      
-      return new ChatOpenAI({
-        modelName,
-        temperature: tier === ModelTier.CHEAP ? 0.3 : 0.7,
-        openAIApiKey: this.openRouterKey,
-        configuration: {
-          baseURL: 'https://openrouter.ai/api/v1',
-          defaultHeaders: {
-            'HTTP-Referer': 'https://kyndryl365.ai',
-            'X-Title': 'Kyndryl Clarity',
-          },
-        },
-        modelKwargs: trackingMetadata,
-      });
+      throw new Error('[SmartModelRouter] AI agents disabled - callModel blocked');
     }
 
-    // Fallback to direct Anthropic ONLY if OpenRouter not configured
-    console.log(`[SmartModelRouter] Fallback to direct Anthropic Claude (${tier} tier)`);
-    return new ChatAnthropic({
-      modelName: 'claude-sonnet-4-5-20250929',
-      temperature: tier === ModelTier.CHEAP ? 0.3 : 0.7,
-      anthropicApiKey: this.anthropicKey,
-      metadata,
+    const model = TIER_MODELS[tier];
+    const temperature = options?.temperature ?? TIER_TEMPERATURES[tier];
+    const maxTokens = options?.maxTokens ?? 4096;
+
+    const content = await callLLM(systemPrompt, userPrompt, {
+      model,
+      temperature,
+      maxTokens,
     });
+
+    return { content, model, tier };
   }
 
-  /**
-   * Classify task complexity to determine model tier
-   */
+  async callModelWithMessages(
+    tier: ModelTier,
+    messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+    options?: { maxTokens?: number; temperature?: number }
+  ): Promise<AIResponse> {
+    if (!this.aiEnabled) {
+      throw new Error('[SmartModelRouter] AI agents disabled - callModel blocked');
+    }
+
+    const model = TIER_MODELS[tier];
+    const temperature = options?.temperature ?? TIER_TEMPERATURES[tier];
+    const maxTokens = options?.maxTokens ?? 4096;
+
+    const content = await openRouterClient.chat(messages, {
+      model,
+      temperature,
+      maxTokens,
+    });
+
+    return { content, model, tier };
+  }
+
   classifyTask(
     taskType: string,
     projectData: any,
     agentType: string
   ): TaskClassification {
-    // Check cache first
     const cacheKey = this.generateCacheKey(taskType, projectData, agentType);
     const cached = this.cache.get(cacheKey);
     
     if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
-      console.log(`[SmartModelRouter] Cache hit for ${agentType}:${taskType}`);
       return {
         tier: cached.tier,
         reason: 'Cached result available',
@@ -180,10 +157,8 @@ export class SmartModelRouter {
       };
     }
 
-    // Check if there are pending changes that require analysis
     const changes = this.pendingChanges.get(projectData?.id);
     if (!changes || changes.length === 0) {
-      // No changes detected - use cheap model for quick check
       return {
         tier: ModelTier.CHEAP,
         reason: 'No changes detected - routine check',
@@ -191,11 +166,9 @@ export class SmartModelRouter {
       };
     }
 
-    // Determine tier based on change severity
     const hasCritical = changes.some(c => c.severity === 'critical');
     const hasHigh = changes.some(c => c.severity === 'high');
     
-    // PREMIUM tier: Only for critical changes (Claude)
     if (hasCritical) {
       return {
         tier: ModelTier.PREMIUM,
@@ -204,7 +177,6 @@ export class SmartModelRouter {
       };
     }
 
-    // CHEAP tier: All other changes use OpenRouter models
     return {
       tier: ModelTier.CHEAP,
       reason: hasHigh ? `High-priority changes: ${changes.filter(c => c.severity === 'high').map(c => c.changeType).join(', ')}` : 'Low/medium changes only',
@@ -212,42 +184,25 @@ export class SmartModelRouter {
     };
   }
 
-  /**
-   * Register a project change event (for event-driven analysis)
-   */
   registerChange(event: ProjectChangeEvent): void {
     const existing = this.pendingChanges.get(event.projectId) || [];
     existing.push(event);
     this.pendingChanges.set(event.projectId, existing);
-    
-    console.log(`[SmartModelRouter] Change registered: ${event.projectId} - ${event.changeType} (${event.severity})`);
   }
 
-  /**
-   * Clear processed changes for a project
-   */
   clearChanges(projectId: string): void {
     this.pendingChanges.delete(projectId);
   }
 
-  /**
-   * Get projects that have pending changes (for event-driven orchestration)
-   */
   getProjectsWithChanges(): string[] {
     return Array.from(this.pendingChanges.keys());
   }
 
-  /**
-   * Check if a project needs analysis
-   */
   needsAnalysis(projectId: string): boolean {
     const changes = this.pendingChanges.get(projectId);
     return changes !== undefined && changes.length > 0;
   }
 
-  /**
-   * Cache an analysis result
-   */
   cacheResult(
     taskType: string,
     projectData: any,
@@ -263,44 +218,29 @@ export class SmartModelRouter {
       tier,
     });
     
-    // Clear pending changes after caching
     if (projectData?.id) {
       this.clearChanges(projectData.id);
     }
   }
 
-  /**
-   * Store agent summary for cross-agent communication
-   */
   storeSummary(agentId: string, projectId: string, summary: string): void {
-    const key = `${agentId}:${projectId}`;
-    this.summaryStore.set(key, summary);
+    this.summaryStore.set(`${agentId}:${projectId}`, summary);
   }
 
-  /**
-   * Get summary from another agent
-   */
   getSummary(agentId: string, projectId: string): string | undefined {
     return this.summaryStore.get(`${agentId}:${projectId}`);
   }
 
-  /**
-   * Get all summaries for a project (for agent collaboration)
-   */
   getAllSummaries(projectId: string): Record<string, string> {
     const summaries: Record<string, string> = {};
     for (const [key, value] of this.summaryStore.entries()) {
       if (key.endsWith(`:${projectId}`)) {
-        const agentId = key.split(':')[0];
-        summaries[agentId] = value;
+        summaries[key.split(':')[0]] = value;
       }
     }
     return summaries;
   }
 
-  /**
-   * Generate a compact summary prompt
-   */
   getSummaryPrompt(): string {
     return `
 After your analysis, provide a compact summary (max 100 words) that includes:
@@ -312,73 +252,49 @@ Format: [FINDING] ... [RISK: level] [ACTION: ...]
 `;
   }
 
-  /**
-   * Get estimated cost for a model tier
-   */
   getEstimatedCost(tier: ModelTier, tokenCount: number = 1000): number {
-    const modelName = TIER_MODELS[tier][0];
+    const modelName = TIER_MODELS[tier];
     const costPer1M = MODEL_COSTS[modelName] || 1.0;
     return (tokenCount / 1000000) * costPer1M;
   }
 
-  /**
-   * Get router statistics
-   */
-  getStats(): {
-    cacheSize: number;
-    cacheHitRate: number;
-    pendingChanges: number;
-    summaryCount: number;
-    openRouterEnabled: boolean;
-  } {
+  getStats() {
     return {
       cacheSize: this.cache.size,
-      cacheHitRate: 0, // TODO: track hits/misses
+      cacheHitRate: 0,
       pendingChanges: Array.from(this.pendingChanges.values()).reduce((sum, arr) => sum + arr.length, 0),
       summaryCount: this.summaryStore.size,
-      openRouterEnabled: !!this.openRouterKey,
+      openRouterEnabled: openRouterClient.isAvailable,
     };
   }
 
-  /**
-   * Clear expired cache entries
-   */
   pruneCache(): number {
     const now = Date.now();
     let pruned = 0;
-    
     for (const [key, entry] of this.cache.entries()) {
       if (now - entry.timestamp > this.cacheTTL) {
         this.cache.delete(key);
         pruned++;
       }
     }
-    
     if (pruned > 0) {
       console.log(`[SmartModelRouter] Pruned ${pruned} expired cache entries`);
     }
-    
     return pruned;
   }
 
-  /**
-   * Set cache TTL
-   */
   setCacheTTL(ttlMs: number): void {
     this.cacheTTL = ttlMs;
-    console.log(`[SmartModelRouter] Cache TTL set to ${ttlMs}ms`);
   }
 
   private generateCacheKey(taskType: string, projectData: any, agentType: string): string {
-    const dataHash = crypto
+    return crypto
       .createHash('md5')
       .update(JSON.stringify({ taskType, projectData, agentType }))
       .digest('hex');
-    return dataHash;
   }
 }
 
-// Singleton instance
 let routerInstance: SmartModelRouter | null = null;
 
 export function getSmartRouter(): SmartModelRouter {

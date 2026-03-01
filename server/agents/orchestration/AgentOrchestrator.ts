@@ -14,8 +14,7 @@
  */
 
 import type { IStorage } from '../../storage.js';
-import { ChatAnthropic } from "@langchain/anthropic";
-import { LangChainTracer } from "langchain/callbacks";
+import { getSmartRouter, ModelTier } from '../../lib/SmartModelRouter.js';
 
 export interface CollaborationEvent {
   triggeredBy: string; // Agent ID that triggered collaboration
@@ -47,34 +46,12 @@ export interface CollaborationResult {
 export class AgentOrchestrator {
   private storage: IStorage;
   private agents: Map<string, any>;
-  private model: ChatAnthropic;
+  private router = getSmartRouter();
   private collaborationThreshold: { [key: string]: any };
 
   constructor(storage: IStorage, agents: Map<string, any>) {
     this.storage = storage;
     this.agents = agents;
-
-    // Initialize coordinator LLM
-    const callbacks = [];
-    if (process.env.LANGCHAIN_API_KEY && process.env.LANGCHAIN_TRACING_V2?.toLowerCase() === 'true') {
-      const tracer = new LangChainTracer({
-        projectName: process.env.LANGCHAIN_PROJECT || "nexus-ppm",
-        client: undefined,
-      });
-      callbacks.push(tracer);
-    }
-
-    this.model = new ChatAnthropic({
-      modelName: "claude-sonnet-4-5-20250929",
-      temperature: 0.7,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-      callbacks,
-      metadata: {
-        layer: "orchestration",
-        component: "coordinator",
-        system: "multi-agent-orchestration",
-      },
-    });
 
     // Define when collaboration is needed
     this.collaborationThreshold = {
@@ -302,8 +279,12 @@ Respond in JSON format:
 }`;
 
     try {
-      const response = await this.model.invoke(synthesisPrompt);
-      const content = response.content.toString();
+      const response = await this.router.callModel(
+        ModelTier.PREMIUM,
+        'You are a coordinator synthesizing insights from multiple AI agents analyzing a project issue. Respond in JSON format.',
+        synthesisPrompt
+      );
+      const content = response.content;
 
       // Parse JSON response
       const jsonMatch = content.match(/\{[\s\S]*\}/);

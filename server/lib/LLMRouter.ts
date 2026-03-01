@@ -17,10 +17,7 @@
  * - Performance metrics
  */
 
-import { ChatAnthropic } from "@langchain/anthropic";
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { callLLM } from "./OpenRouterClient.js";
 import type { IStorage } from "../storage.js";
 
 export type LLMProvider =
@@ -108,7 +105,6 @@ export interface ModelCapabilities {
 export class LLMRouter {
   private storage: IStorage;
   private defaultConfig: LLMConfig;
-  private modelCache: Map<string, BaseChatModel> = new Map();
   private metrics: Map<string, LLMMetrics> = new Map();
 
   // Model capabilities database
@@ -195,127 +191,42 @@ export class LLMRouter {
   }
 
   /**
-   * Get a chat model instance (cached)
+   * Call the LLM with system and user prompts via OpenRouterClient
    */
-  async getModel(config?: Partial<LLMConfig>): Promise<BaseChatModel> {
+  async chat(
+    systemPrompt: string,
+    userPrompt: string,
+    config?: Partial<LLMConfig>
+  ): Promise<string> {
     const finalConfig = { ...this.defaultConfig, ...config };
-    const cacheKey = this.getCacheKey(finalConfig);
+    const modelName = this.mapModelToOpenRouter(finalConfig.provider, finalConfig.model);
 
-    // Return cached model if available
-    if (this.modelCache.has(cacheKey)) {
-      return this.modelCache.get(cacheKey)!;
-    }
-
-    // Create new model instance
-    const model = await this.createModel(finalConfig);
-    this.modelCache.set(cacheKey, model);
-
-    return model;
+    return callLLM(systemPrompt, userPrompt, {
+      model: modelName,
+      temperature: finalConfig.temperature ?? 0.7,
+      maxTokens: finalConfig.maxTokens ?? 4096,
+    });
   }
 
   /**
-   * Create a new chat model instance
+   * Map provider/model to OpenRouter model string
    */
-  private async createModel(config: LLMConfig): Promise<BaseChatModel> {
-    const apiKey = config.apiKey || this.getAPIKeyFromEnv(config.provider);
-
-    switch (config.provider) {
-      case "anthropic":
-        return new ChatAnthropic({
-          model: this.mapAnthropicModel(config.model as AnthropicModel),
-          apiKey,
-          temperature: config.temperature ?? 0.7,
-          maxTokens: config.maxTokens ?? 4096,
-          streaming: config.streaming ?? false,
-        });
-
-      case "openai":
-        return new ChatOpenAI({
-          model: config.model,
-          apiKey,
-          temperature: config.temperature ?? 0.7,
-          maxTokens: config.maxTokens ?? 4096,
-          streaming: config.streaming ?? false,
-        });
-
-      case "google":
-        return new ChatGoogleGenerativeAI({
-          model: config.model,
-          apiKey,
-          temperature: config.temperature ?? 0.7,
-          maxOutputTokens: config.maxTokens ?? 4096,
-          streaming: config.streaming ?? false,
-        });
-
-      case "ollama":
-        // Local Ollama instance
-        return new ChatOpenAI({
-          model: config.model,
-          temperature: config.temperature ?? 0.7,
-          maxTokens: config.maxTokens ?? 4096,
-          configuration: {
-            baseURL: config.baseURL || "http://localhost:11434/v1",
-          },
-        });
-
-      case "custom":
-        // Custom OpenAI-compatible endpoint
-        return new ChatOpenAI({
-          model: config.model,
-          apiKey: apiKey || "dummy",
-          temperature: config.temperature ?? 0.7,
-          maxTokens: config.maxTokens ?? 4096,
-          configuration: {
-            baseURL: config.baseURL || "http://localhost:8000/v1",
-          },
-        });
-
-      default:
-        throw new Error(`Unsupported LLM provider: ${config.provider}`);
-    }
-  }
-
-  /**
-   * Map friendly model names to actual model IDs
-   */
-  private mapAnthropicModel(model: AnthropicModel): string {
-    const mapping: Record<AnthropicModel, string> = {
-      "claude-sonnet-4.5": "claude-sonnet-4-20250514",
-      "claude-opus-4.5": "claude-opus-4-20250514",
-      "claude-haiku-4": "claude-haiku-4-20250312",
-    };
-    return mapping[model] || model;
-  }
-
-  /**
-   * Get API key from environment variables
-   */
-  private getAPIKeyFromEnv(provider: LLMProvider): string {
-    const envVarMap: Record<LLMProvider, string> = {
-      anthropic: "ANTHROPIC_API_KEY",
-      openai: "OPENAI_API_KEY",
-      google: "GOOGLE_API_KEY",
-      mistral: "MISTRAL_API_KEY",
-      ollama: "",
-      custom: "",
+  private mapModelToOpenRouter(provider: LLMProvider, model: ModelName): string {
+    const mapping: Record<string, string> = {
+      "claude-sonnet-4.5": "anthropic/claude-sonnet-4-20250514",
+      "claude-opus-4.5": "anthropic/claude-opus-4-20250514",
+      "claude-haiku-4": "anthropic/claude-haiku-4-20250514",
+      "gpt-4": "openai/gpt-4",
+      "gpt-4-turbo": "openai/gpt-4-turbo",
+      "gpt-3.5-turbo": "openai/gpt-3.5-turbo",
+      "gemini-pro": "google/gemini-pro",
+      "gemini-ultra": "google/gemini-ultra",
+      "gemini-flash": "google/gemini-flash",
     };
 
-    const envVar = envVarMap[provider];
-    if (!envVar) return "";
-
-    const apiKey = process.env[envVar];
-    if (!apiKey && provider !== "ollama" && provider !== "custom") {
-      throw new Error(`Missing API key: ${envVar} not set in environment`);
-    }
-
-    return apiKey || "";
-  }
-
-  /**
-   * Generate cache key for model instances
-   */
-  private getCacheKey(config: LLMConfig): string {
-    return `${config.provider}:${config.model}:${config.temperature}:${config.maxTokens}`;
+    if (mapping[model]) return mapping[model];
+    if (model.includes('/')) return model;
+    return `${provider}/${model}`;
   }
 
   /**
@@ -510,10 +421,9 @@ export class LLMRouter {
   }
 
   /**
-   * Clear model cache (useful when configuration changes)
+   * Clear cache (no-op, kept for API compatibility)
    */
   clearCache(): void {
-    this.modelCache.clear();
   }
 
   /**

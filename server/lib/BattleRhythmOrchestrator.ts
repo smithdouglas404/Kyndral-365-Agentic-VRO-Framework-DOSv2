@@ -14,7 +14,7 @@
 
 import type { IStorage } from "../storage.js";
 import { pool } from "../db.js";
-import { getLLMRouter } from "./LLMRouter.js";
+
 import { getKnowledgeBaseRepository } from "./KnowledgeBaseRepository.js";
 import { broadcastNotification } from "../websocket.js";
 

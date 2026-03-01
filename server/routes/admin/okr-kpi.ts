@@ -12,7 +12,7 @@ import { eq, and, desc } from 'drizzle-orm';
 import { authenticate } from '../../auth/authMiddleware.js';
 import { seedDefaultOKRs } from '../../scripts/seed-default-okrs.js';
 import multer from 'multer';
-import { ChatOpenAI } from '@langchain/openai';
+import { callLLM } from '../../lib/OpenRouterClient.js';
 
 interface AuthRequest extends Request {
   user?: {
@@ -539,13 +539,7 @@ async function extractFromDocument(req: AuthRequest, res: Response) {
       });
     }
 
-    // Use AI to extract OKRs
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-4',
-      temperature: 0.3,
-    });
-
-    const extractionPrompt = `You are an expert at extracting OKRs (Objectives and Key Results) from strategy documents.
+    const systemPrompt = `You are an expert at extracting OKRs (Objectives and Key Results) from strategy documents.
 
 Analyze the following document and extract all OKRs. For each OKR, provide:
 - title: The objective statement
@@ -556,15 +550,13 @@ Analyze the following document and extract all OKRs. For each OKR, provide:
 - endDate: End date in YYYY-MM-DD format (estimate current quarter end if not specified)
 - status: "active"
 
-Return ONLY a valid JSON array of OKRs, with no additional text or explanation.
+Return ONLY a valid JSON array of OKRs, with no additional text or explanation.`;
 
-Document content:
-${textContent}
+    const userPrompt = `Document content:\n${textContent}\n\nJSON array of OKRs:`;
 
-JSON array of OKRs:`;
-
-    const result = await llm.invoke(extractionPrompt);
-    const content = typeof result.content === 'string' ? result.content : JSON.stringify(result.content);
+    const content = await callLLM(systemPrompt, userPrompt, {
+      temperature: 0.3,
+    });
 
     // Parse the AI response
     let extractedOKRs;

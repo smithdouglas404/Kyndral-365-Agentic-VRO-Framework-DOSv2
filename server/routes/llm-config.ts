@@ -261,15 +261,18 @@ export function createLLMConfigRoutes(storage: IStorage): Router {
       const config: Partial<LLMConfig> = req.body;
 
       const startTime = Date.now();
-      const model = await llmRouter.getModel(config);
 
-      const response = await model.invoke("Say 'Hello, I am working correctly!' and nothing else.");
+      const response = await llmRouter.chat(
+        "You are a helpful assistant.",
+        "Say 'Hello, I am working correctly!' and nothing else.",
+        config
+      );
 
       const latency = Date.now() - startTime;
 
       res.json({
         success: true,
-        response: response.content.toString(),
+        response,
         latency,
         message: "LLM configuration test successful"
       });
