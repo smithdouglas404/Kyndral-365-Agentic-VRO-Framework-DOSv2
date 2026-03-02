@@ -204,11 +204,15 @@ export class DeepNotificationAgent extends DeepAgentBase {
     const { actionType, payload } = action;
 
     const palantirActionMap: Record<string, string> = {
+      alert: "sendNotification",
       risk_alert: "createRiskAlert",
       escalation: "escalateIssue",
       budget_alert: "createBudgetAlert",
       schedule_alert: "createScheduleAlert",
       compliance_alert: "createComplianceAlert",
+      health_alert: "createHealthAlert",
+      change_impact: "createChangeAlert",
+      dependency_alert: "createDependencyAlert",
       notification: "sendNotification",
       action_request: "executeAction",
     };
