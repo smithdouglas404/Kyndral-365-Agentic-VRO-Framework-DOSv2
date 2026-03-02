@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { LogIn, Loader2, Sparkles, Zap } from 'lucide-react';
+import { setTokens, setAuthUser, setAuthTenant, setDemoMode } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,11 +46,10 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Store JWT tokens
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
-      localStorage.setItem('auth_tenant', JSON.stringify(data.tenant));
+      // Store JWT tokens using centralized auth
+      setTokens(data.accessToken, data.refreshToken);
+      setAuthUser(data.user);
+      setAuthTenant(data.tenant);
 
       // Route based on role
       if (data.user.isSystemAdmin) {
@@ -89,11 +89,10 @@ export default function LoginPage() {
         throw new Error(data.error || 'Demo login failed');
       }
 
-      // Store demo access token
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('auth_token', data.accessToken);
-      localStorage.setItem('demoMode', 'true');
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      // Store demo access token using centralized auth
+      setTokens(data.accessToken);
+      setDemoMode(true);
+      setAuthUser(data.user);
 
       // Navigate based on approval status
       if (data.isApproved) {
@@ -284,14 +283,22 @@ export default function LoginPage() {
           </TabsContent>
         </Tabs>
 
-        {/* Additional Info */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600">
-            New customer?{' '}
-            <a href="mailto:sales@nexusppm.com" className="text-blue-600 hover:underline">
-              Contact sales
-            </a>
-            {' '}for tenant provisioning
+        {/* Signup CTA */}
+        <div className="mt-8 text-center space-y-4">
+          <div className="border-t pt-6">
+            <p className="text-sm text-gray-600 mb-3">
+              Don't have an account yet?
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/signup')}
+              className="w-full"
+            >
+              Start Your Free Trial
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500">
+            14-day free trial • No credit card required
           </p>
         </div>
       </div>

@@ -46,8 +46,10 @@ import LiquidIntelligencePage from "@/pages/LiquidIntelligencePage";
 import OrchestrationMonitoringPage from "@/pages/OrchestrationMonitoringPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import SignupPage from "@/pages/SignupPage";
+import EmailVerificationPage from "@/pages/EmailVerificationPage";
+import PasswordResetRequestPage from "@/pages/PasswordResetRequestPage";
 import PasswordResetPage from "@/pages/PasswordResetPage";
-import PasswordResetConfirmPage from "@/pages/PasswordResetConfirmPage";
 import IssueManagement from "@/pages/IssueManagement";
 import DeepAgentMonitoring from "@/pages/DeepAgentMonitoring";
 import ChangeRequestManagement from "@/pages/ChangeRequestManagement";
@@ -72,21 +74,14 @@ import WorkflowBuilder from "@/pages/admin/WorkflowBuilder";
 import MCPMarketplace from "@/pages/admin/MCPMarketplace";
 import ActiveIntegrations from "@/pages/admin/ActiveIntegrations";
 import DatabaseManagement from "@/pages/admin/DatabaseManagement";
-import ThresholdSettings from "@/pages/admin/ThresholdSettings";
+import AgentRules from "@/pages/admin/AgentRules";
+import AgentManagement from "@/pages/admin/AgentManagement";
 import OKRManagement from "@/pages/admin/OKRManagement";
 import UserPermissions from "@/pages/admin/UserPermissions";
 import CamundaRulesEngine from "@/pages/admin/CamundaRulesEngine";
 import KnowledgeBaseManagement from "@/pages/admin/KnowledgeBaseManagement";
 import RuleExecutionHistory from "@/pages/admin/RuleExecutionHistory";
 import AgentCollaborationMatrix from "@/pages/admin/AgentCollaborationMatrix";
-import FinOpsRules from "@/pages/admin/rules/FinOpsRules";
-import TMORules from "@/pages/admin/rules/TMORules";
-import RiskRules from "@/pages/admin/rules/RiskRules";
-import VRORules from "@/pages/admin/rules/VRORules";
-import PMORules from "@/pages/admin/rules/PMORules";
-import OCMRules from "@/pages/admin/rules/OCMRules";
-import GovernanceRules from "@/pages/admin/rules/GovernanceRules";
-import RulebricksIntegration from "@/pages/admin/RulebricksIntegration";
 import CustomAttributes from "@/pages/admin/CustomAttributes";
 import PolicyAsCode from "@/pages/admin/PolicyAsCode";
 import AgentMemoryViewer from "@/pages/admin/AgentMemoryViewer";
@@ -107,6 +102,12 @@ import GovernanceWorkspace from "@/pages/workspaces/GovernanceWorkspace";
 import OCMWorkspace from "@/pages/workspaces/OCMWorkspace";
 import AdminWorkspace from "@/pages/workspaces/AdminWorkspace";
 import AgentMCPManager from "@/pages/admin/AgentMCPManager";
+import PalantirSyncManager from "@/pages/admin/PalantirSyncManager";
+import HITLApprovalCenter from "@/pages/admin/HITLApprovalCenter";
+import PalantirRulesEngine from "@/pages/admin/PalantirRulesEngine";
+import OntologyExplorer from "@/pages/admin/OntologyExplorer";
+import RealTimeSubscriptions from "@/pages/admin/RealTimeSubscriptions";
+import WorkflowAutomation from "@/pages/admin/WorkflowAutomation";
 import DemoPage from "@/pages/DemoPage";
 import DemoShowcase from "@/pages/DemoShowcase";
 import PendingApprovalPage from "@/pages/PendingApprovalPage";
@@ -189,43 +190,44 @@ function Router() {
       <Route path="/financial-advanced" component={AdvancedFinancialManagement} />
       <Route path="/report-builder" component={CustomReportBuilder} />
       <Route path="/register" component={RegisterPage} />
-      <Route path="/password-reset" component={PasswordResetPage} />
-      <Route path="/password-reset/confirm" component={PasswordResetConfirmPage} />
+      <Route path="/signup" component={SignupPage} />
+      <Route path="/verify-email/:token" component={EmailVerificationPage} />
+      <Route path="/password-reset" component={PasswordResetRequestPage} />
+      <Route path="/password-reset/:token" component={PasswordResetPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/company-profile" component={CompanyProfile} />
       <Route path="/admin/approval-center" component={ApprovalCenter} />
+      <Route path="/admin/hitl" component={HITLApprovalCenter} />
       <Route path="/admin/approval-requests" component={ApprovalRequests} />
       <Route path="/admin/users" component={UserManagement} />
       <Route path="/admin/integrations" component={IntegrationManagement} />
       <Route path="/admin/settings" component={SystemSettings} />
       <Route path="/admin/agents" component={AgentConfiguration} />
+      <Route path="/admin/agent-management" component={AgentManagement} />
       <Route path="/admin/system-config" component={SystemConfiguration} />
       <Route path="/admin/custom-fields" component={CustomFieldManagement} />
       <Route path="/admin/workflows" component={WorkflowBuilder} />
       <Route path="/admin/mcp-marketplace" component={MCPMarketplace} />
       <Route path="/admin/active-integrations" component={ActiveIntegrations} />
       <Route path="/admin/database-management" component={DatabaseManagement} />
-      <Route path="/admin/thresholds" component={ThresholdSettings} />
+      <Route path="/admin/rules" component={AgentRules} />
       <Route path="/admin/okrs" component={OKRManagement} />
       <Route path="/admin/permissions" component={UserPermissions} />
       <Route path="/admin/rules-engine" component={CamundaRulesEngine} />
       <Route path="/admin/knowledge-base" component={KnowledgeBaseManagement} />
       <Route path="/admin/rule-execution-history" component={RuleExecutionHistory} />
       <Route path="/admin/agent-collaboration-matrix" component={AgentCollaborationMatrix} />
-      <Route path="/admin/rules/finops" component={FinOpsRules} />
-      <Route path="/admin/rules/tmo" component={TMORules} />
-      <Route path="/admin/rules/risk" component={RiskRules} />
-      <Route path="/admin/rules/vro" component={VRORules} />
-      <Route path="/admin/rules/pmo" component={PMORules} />
-      <Route path="/admin/rules/ocm" component={OCMRules} />
-      <Route path="/admin/rules/governance" component={GovernanceRules} />
-      <Route path="/admin/rulebricks" component={RulebricksIntegration} />
       <Route path="/admin/custom-attributes" component={CustomAttributes} />
       <Route path="/admin/policies" component={PolicyAsCode} />
       <Route path="/admin/agent-memory" component={AgentMemoryViewer} />
       <Route path="/admin/agent-attributes" component={AgentAttributeAdmin} />
       <Route path="/admin/voice-briefings" component={VoiceBriefings} />
       <Route path="/admin/agent-mcp" component={AgentMCPManager} />
+      <Route path="/admin/palantir-sync" component={PalantirSyncManager} />
+      <Route path="/admin/palantir-rules" component={PalantirRulesEngine} />
+      <Route path="/admin/ontology-explorer" component={OntologyExplorer} />
+      <Route path="/admin/subscriptions" component={RealTimeSubscriptions} />
+      <Route path="/admin/workflow-automation" component={WorkflowAutomation} />
       <Route component={NotFound} />
     </Switch>
   );

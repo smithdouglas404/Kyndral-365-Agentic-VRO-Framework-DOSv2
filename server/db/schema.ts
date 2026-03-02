@@ -30,6 +30,7 @@ export const tenants = pgTable('tenants', {
   id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
+  industry: varchar('industry', { length: 100 }), // Industry slug from ontology (e.g., 'energy-utilities', 'technology')
   status: tenantStatusEnum('status').default('trial').notNull(),
   subscriptionTier: subscriptionTierEnum('subscription_tier').default('demo').notNull(),
   provisionedBy: varchar('provisioned_by'),
@@ -92,6 +93,26 @@ export const userSessions = pgTable('user_sessions', {
   ipAddress: varchar('ip_address', { length: 45 }),
   userAgent: text('user_agent'),
   expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// Password Reset Tokens
+export const passwordResetTokens = pgTable('password_reset_tokens', {
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
+  userId: varchar('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  usedAt: timestamp('used_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// Email Verification Tokens
+export const emailVerificationTokens = pgTable('email_verification_tokens', {
+  id: varchar('id').default('gen_random_uuid()::text').primaryKey(),
+  userId: varchar('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  verifiedAt: timestamp('verified_at'),
   createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
