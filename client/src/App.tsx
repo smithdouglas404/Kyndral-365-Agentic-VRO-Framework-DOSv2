@@ -105,6 +105,7 @@ import PlanningWorkspace from "@/pages/workspaces/PlanningWorkspace";
 import GovernanceWorkspace from "@/pages/workspaces/GovernanceWorkspace";
 import OCMWorkspace from "@/pages/workspaces/OCMWorkspace";
 import AdminWorkspace from "@/pages/workspaces/AdminWorkspace";
+import AgentMCPManager from "@/pages/admin/AgentMCPManager";
 import DemoPage from "@/pages/DemoPage";
 import DemoShowcase from "@/pages/DemoShowcase";
 import PendingApprovalPage from "@/pages/PendingApprovalPage";
@@ -222,6 +223,7 @@ function Router() {
       <Route path="/admin/agent-memory" component={AgentMemoryViewer} />
       <Route path="/admin/agent-attributes" component={AgentAttributeAdmin} />
       <Route path="/admin/voice-briefings" component={VoiceBriefings} />
+      <Route path="/admin/agent-mcp" component={AgentMCPManager} />
       <Route component={NotFound} />
     </Switch>
   );

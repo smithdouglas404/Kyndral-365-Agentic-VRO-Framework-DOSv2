@@ -23,6 +23,7 @@ import {
   Shield,
   Brain,
   Mic,
+  Plug,
 } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ConfigurationStatus } from './ConfigurationStatus';
@@ -53,6 +54,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/workflows', icon: GitBranch, label: 'Workflows' },
     { path: '/admin/policies', icon: Shield, label: 'Policy as Code' },
     { path: '/admin/agents', icon: Activity, label: 'Agents' },
+    { path: '/admin/agent-mcp', icon: Plug, label: 'Agent MCP Manager' },
     { path: '/admin/agent-memory', icon: Brain, label: 'Agent Memory' },
     { path: '/admin/agent-attributes', icon: Sliders, label: 'Agent Attributes' },
     { path: '/admin/voice-briefings', icon: Mic, label: 'Voice Briefings' },

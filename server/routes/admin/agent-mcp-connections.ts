@@ -420,6 +420,109 @@ router.get('/stats', (async (req, res) => {
   }
 }) as RequestHandler);
 
+router.get('/:connectionId/ontology-mappings', (async (req, res) => {
+  try {
+    const { connectionId } = req.params;
+
+    const result = await db.execute(sql`
+      SELECT amc.id, amc.config, md.name as mcp_name, md.display_name
+      FROM ${agentMcpConnections} amc
+      JOIN ${mcpDefinitions} md ON amc.mcp_id = md.id
+      WHERE amc.id = ${connectionId}
+    `);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Connection not found' });
+    }
+
+    const conn = result.rows[0] as any;
+    let config: any = {};
+    try { config = conn.config ? JSON.parse(conn.config) : {}; } catch {}
+
+    const { ontologyService } = await import('../../ontology/index.js');
+    const source = conn.mcp_name;
+
+    const defaultMappings: Record<string, string> = {};
+    const commonFields = ['status', 'assignee', 'priority', 'duedate', 'budget', 'effort', 'name', 'title'];
+    for (const field of commonFields) {
+      defaultMappings[field] = ontologyService.reconcileField(field, source);
+    }
+
+    res.json({
+      success: true,
+      connectionId,
+      mcpName: conn.mcp_name,
+      mcpDisplayName: conn.display_name,
+      ontologyMappings: config.ontologyMappings || {},
+      defaultMappings,
+    });
+  } catch (error: any) {
+    console.error('[AgentMCP] Get ontology mappings error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+router.put('/:connectionId/ontology-mappings', (async (req, res) => {
+  try {
+    const { connectionId } = req.params;
+    const { ontologyMappings } = req.body;
+
+    if (!ontologyMappings || typeof ontologyMappings !== 'object') {
+      return res.status(400).json({ success: false, error: 'ontologyMappings must be an object' });
+    }
+
+    const existing = await db.execute(sql`
+      SELECT config FROM ${agentMcpConnections} WHERE id = ${connectionId}
+    `);
+
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Connection not found' });
+    }
+
+    let config: any = {};
+    try { config = (existing.rows[0] as any).config ? JSON.parse((existing.rows[0] as any).config) : {}; } catch {}
+    config.ontologyMappings = ontologyMappings;
+
+    await db.execute(sql`
+      UPDATE ${agentMcpConnections}
+      SET config = ${JSON.stringify(config)}, updated_at = NOW()
+      WHERE id = ${connectionId}
+    `);
+
+    res.json({ success: true, ontologyMappings });
+  } catch (error: any) {
+    console.error('[AgentMCP] Update ontology mappings error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+router.get('/all-connections', (async (_req, res) => {
+  try {
+    const result = await db.execute(sql`
+      SELECT
+        amc.agent_id,
+        amc.enabled,
+        md.name as mcp_name,
+        md.display_name as mcp_display_name,
+        md.type as mcp_type,
+        md.category as mcp_category
+      FROM ${agentMcpConnections} amc
+      JOIN ${mcpDefinitions} md ON amc.mcp_id = md.id
+      ORDER BY amc.agent_id, amc.priority
+    `);
+
+    const byAgent: Record<string, any[]> = {};
+    for (const row of result.rows as any[]) {
+      if (!byAgent[row.agent_id]) byAgent[row.agent_id] = [];
+      byAgent[row.agent_id].push(row);
+    }
+
+    res.json({ success: true, connections: byAgent });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
 export function registerAgentMcpConnectionRoutes(app: express.Application): void {
   app.use('/api/admin/agent-mcp-connections', router);
 }
