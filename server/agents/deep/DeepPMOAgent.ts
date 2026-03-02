@@ -71,14 +71,13 @@ export class DeepPMOAgent extends DeepAgentBase {
         sourceAgent: fact.sourceAgent,
       });
 
-      // TODO: Create 'health-alert' rule in Rulebricks
-      // await this.checkRule('health-alert', {
-      //   projectId: fact.entity.replace('project_', ''),
-      //   projectName: fact.entity,
-      //   healthScore: 3,
-      //   issues: [`${Math.abs(fact.value)} days schedule delay`],
-      //   severity: 'critical',
-      // });
+      await this.checkRule('health-alert', {
+        projectId: fact.entity.replace('project_', ''),
+        projectName: fact.entity,
+        healthScore: 3,
+        scheduleVariance: fact.value,
+        severity: 'critical',
+      });
 
       // Archive the context
       await this.archiveContext(

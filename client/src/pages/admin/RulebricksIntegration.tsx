@@ -61,6 +61,34 @@ const AGENT_RULES: {
     trigger: "Warning <0.95, Critical <0.85",
   },
   {
+    agent: "Risk",
+    slug: "risk-alert",
+    description: "Risk Alert",
+    color: "bg-red-500",
+    trigger: "Warning >=6, Critical >=9",
+  },
+  {
+    agent: "PMO",
+    slug: "health-alert",
+    description: "Health Alert",
+    color: "bg-amber-500",
+    trigger: "Schedule variance < -5 days",
+  },
+  {
+    agent: "VRO",
+    slug: "agent-tool-rules-vro",
+    description: "VRO Agent Tool Rules",
+    color: "bg-cyan-500",
+    trigger: "Tool execution sequence",
+  },
+  {
+    agent: "OCM",
+    slug: "change-impact",
+    description: "Change Impact",
+    color: "bg-pink-500",
+    trigger: "High organizational impact",
+  },
+  {
     agent: "Governance",
     slug: "gdpr-article-5",
     description: "GDPR Article 5: Principles",
@@ -82,11 +110,11 @@ const AGENT_RULES: {
     trigger: "Tool execution sequence",
   },
   {
-    agent: "VRO",
-    slug: "agent-tool-rules-vro",
-    description: "VRO Agent Tool Rules",
-    color: "bg-cyan-500",
-    trigger: "Tool execution sequence",
+    agent: "Planning",
+    slug: "dependency-alert",
+    description: "Dependency Alert",
+    color: "bg-indigo-500",
+    trigger: ">5 blocked dependencies",
   },
 ];
 

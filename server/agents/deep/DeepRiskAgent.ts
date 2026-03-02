@@ -792,15 +792,14 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
             if (riskLevel === 'extreme' || riskLevel === 'high') {
               console.log(`[DeepRisk] ⚠️  ${riskLevel.toUpperCase()} ${riskType} risk for ${project.name} (score: ${riskScore}, strategy: ${primaryStrategy})`);
 
-              // TODO: Create 'risk-alert' rule in Rulebricks
-              // await this.checkRule('risk-alert', {
-              //   projectId,
-              //   projectName: project.name,
-              //   riskScore,
-              //   riskCategory: riskType,
-              //   impact,
-              //   severity: riskLevel,
-              // });
+              await this.checkRule('risk-alert', {
+                projectId,
+                projectName: project.name,
+                riskScore,
+                riskCategory: riskType,
+                impact,
+                severity: riskLevel,
+              });
             }
 
             return {
