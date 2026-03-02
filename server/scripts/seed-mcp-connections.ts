@@ -228,36 +228,44 @@ const AGENT_MCP_MAPPINGS: AgentMapping[] = [
 export async function seedMcpConnections() {
   console.log('[Seed] Starting MCP definitions and agent connections seed...');
 
-  const existingMcps = await db.execute(sql`SELECT count(*) as cnt FROM mcp_definitions`);
-  if (Number((existingMcps.rows[0] as any).cnt) > 0) {
-    console.log('[Seed] MCP definitions already seeded, skipping...');
-    return;
-  }
-
   const mcpIdMap = new Map<string, string>();
+  let mcpCreated = 0;
+  let mcpExisted = 0;
 
   for (const mcp of MCP_DEFINITIONS) {
-    const result = await db.execute(sql`
-      INSERT INTO mcp_definitions (name, display_name, type, category, description, capabilities, enabled)
-      VALUES (
-        ${mcp.name},
-        ${mcp.displayName},
-        ${mcp.type},
-        ${mcp.category},
-        ${mcp.description},
-        ${JSON.stringify(mcp.capabilities)},
-        true
-      )
-      RETURNING id
+    const existing = await db.execute(sql`
+      SELECT id FROM mcp_definitions WHERE name = ${mcp.name} LIMIT 1
     `);
-    const id = (result.rows[0] as any).id;
-    mcpIdMap.set(mcp.name, id);
-    console.log(`[Seed] Created MCP: ${mcp.displayName} (${mcp.type}) → ${id}`);
+
+    if (existing.rows.length > 0) {
+      mcpIdMap.set(mcp.name, (existing.rows[0] as any).id);
+      mcpExisted++;
+    } else {
+      const result = await db.execute(sql`
+        INSERT INTO mcp_definitions (name, display_name, type, category, description, capabilities, enabled)
+        VALUES (
+          ${mcp.name},
+          ${mcp.displayName},
+          ${mcp.type},
+          ${mcp.category},
+          ${mcp.description},
+          ${JSON.stringify(mcp.capabilities)},
+          true
+        )
+        RETURNING id
+      `);
+      const id = (result.rows[0] as any).id;
+      mcpIdMap.set(mcp.name, id);
+      mcpCreated++;
+      console.log(`[Seed] Created MCP: ${mcp.displayName} (${mcp.type}) → ${id}`);
+    }
   }
 
-  console.log(`[Seed] Created ${mcpIdMap.size} MCP definitions`);
+  console.log(`[Seed] MCP definitions: ${mcpCreated} created, ${mcpExisted} already existed`);
 
-  let connectionCount = 0;
+  let connectionCreated = 0;
+  let connectionExisted = 0;
+
   for (const mapping of AGENT_MCP_MAPPINGS) {
     for (let i = 0; i < mapping.mcpNames.length; i++) {
       const mcpName = mapping.mcpNames[i];
@@ -267,16 +275,27 @@ export async function seedMcpConnections() {
         continue;
       }
 
+      const existingConn = await db.execute(sql`
+        SELECT id FROM agent_mcp_connections
+        WHERE agent_id = ${mapping.agentId} AND mcp_id = ${mcpId}
+        LIMIT 1
+      `);
+
+      if (existingConn.rows.length > 0) {
+        connectionExisted++;
+        continue;
+      }
+
       await db.execute(sql`
         INSERT INTO agent_mcp_connections (agent_id, mcp_id, enabled, priority)
         VALUES (${mapping.agentId}, ${mcpId}, true, ${i + 1})
       `);
-      connectionCount++;
+      connectionCreated++;
     }
-    console.log(`[Seed] ${mapping.agentId}: connected ${mapping.mcpNames.length} MCPs`);
+    console.log(`[Seed] ${mapping.agentId}: ${mapping.mcpNames.length} MCPs processed`);
   }
 
-  console.log(`[Seed] Created ${connectionCount} agent-MCP connections`);
+  console.log(`[Seed] Agent connections: ${connectionCreated} created, ${connectionExisted} already existed`);
   console.log('[Seed] MCP seed complete!');
 }
 
