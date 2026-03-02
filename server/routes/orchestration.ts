@@ -466,6 +466,59 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
       res.status(500).json({ error: error.message });
     }
   });
+
+  app.get('/api/mcp/status', authenticate, async (_req: Request, res: Response) => {
+    try {
+      const { getConfiguredServices, getMCPService } = await import('../mcp/MCPServiceFactory.js');
+      const configuredServices = getConfiguredServices();
+
+      const serviceStatuses = await Promise.all(
+        configuredServices.map(async (name) => {
+          const service = await getMCPService(name);
+          let connected = false;
+          let details: any = null;
+          let error: string | null = null;
+
+          if (service && name === 'monday') {
+            try {
+              const boards = await service.executeAction('getBoards', { limit: 3 });
+              connected = true;
+              details = { boardCount: boards.length, boards: boards.map((b: any) => ({ id: b.id, name: b.name, items_count: b.items_count })) };
+            } catch (e: any) {
+              error = e.message;
+            }
+          }
+
+          return { name, initialized: !!service, connected, details, error };
+        })
+      );
+
+      const { MCP_SERVER_REGISTRY } = await import('../mcp/MCPServerRegistry.js');
+      const registeredCount = Object.keys(MCP_SERVER_REGISTRY).length;
+      const availableCount = Object.values(MCP_SERVER_REGISTRY).filter((s: any) => s.status === 'available').length;
+
+      res.json({
+        summary: {
+          registered: registeredCount,
+          available: availableCount,
+          configured: configuredServices.length,
+          connected: serviceStatuses.filter(s => s.connected).length,
+        },
+        services: serviceStatuses,
+        unconfigured: Object.entries(MCP_SERVER_REGISTRY)
+          .filter(([id]) => !configuredServices.includes(id))
+          .filter(([, s]: [string, any]) => s.status === 'available')
+          .map(([id, s]: [string, any]) => ({
+            name: id,
+            description: s.description,
+            requiredEnvVars: s.configFields?.map((f: any) => f.name) || [],
+          }))
+          .slice(0, 10),
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 }
 
 /**

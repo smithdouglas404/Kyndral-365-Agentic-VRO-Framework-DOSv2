@@ -59,6 +59,33 @@ export class MondayService {
     return data.data;
   }
 
+  async getBoards(limit: number = 10): Promise<any> {
+    const query = `
+      query ($limit: Int!) {
+        boards (limit: $limit) {
+          id
+          name
+          state
+          board_kind
+          items_count
+          columns {
+            id
+            title
+            type
+          }
+          groups {
+            id
+            title
+          }
+        }
+      }
+    `;
+
+    const data = await this.executeQuery(query, { limit });
+    console.log(`[Monday.com] Retrieved ${data.boards?.length || 0} boards`);
+    return data.boards || [];
+  }
+
   /**
    * Create a new Monday.com item
    */

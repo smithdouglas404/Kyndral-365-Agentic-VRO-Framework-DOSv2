@@ -163,6 +163,11 @@ class MondayMCPService implements IMCPService {
       case 'archive':
         return await this.monday.archiveItem(params.itemId);
 
+      case 'getBoards':
+      case 'get_boards':
+      case 'list_boards':
+        return await this.monday.getBoards(params.limit || 10);
+
       default:
         throw new Error(`Unknown Monday.com action: ${action}`);
     }
@@ -197,9 +202,9 @@ function loadMCPConfig(): MCPServiceConfig {
     };
   }
 
-  if (process.env.MONDAY_API_TOKEN) {
+  if (process.env.MONDAY_API_KEY || process.env.MONDAY_API_TOKEN) {
     config.monday = {
-      apiToken: process.env.MONDAY_API_TOKEN,
+      apiToken: (process.env.MONDAY_API_KEY || process.env.MONDAY_API_TOKEN)!,
     };
   }
 
