@@ -1,9 +1,26 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.4.0  
-**Updated:** 2026-03-01
+**Version:** 2.5.0  
+**Updated:** 2026-03-02
 
 ## Recent Changes
+
+### March 2, 2026 - Palantir AIP Super-MCP Integration (v2.5.0)
+- **Palantir AIP connected** as super-MCP (Option B architecture): agents pull pre-reconciled enterprise data from Palantir's Ontology SDK v2
+- **Auto-ontology discovery**: PalantirAIPService auto-selects the ontology with data (skips empty default ontology)
+- **PalantirDataProvider**: Domain-specific data mapping — each agent gets only its relevant Atlas object types:
+  - FinOps → AtlasBudget, AtlasFinancialRecord, AtlasKpi (59 objects)
+  - TMO → AtlasProject, AtlasDependency, AtlasTeam (26 objects)
+  - Risk → AtlasRisk, AtlasInsight, AtlasProject (32 objects)
+  - PMO → AtlasProject, AtlasGovernanceCheckpoint, AtlasTransformation (23 objects)
+  - Governance → AtlasGovernanceCheckpoint, AtlasInsight, AtlasProject (32 objects)
+  - VRO → AtlasKpi, AtlasObjective, AtlasKeyResult (34 objects)
+  - OCM → AtlasReadinessMetric, AtlasTeam, AtlasPerson (52 objects)
+- **Scan cycle integration**: ContinuousOrchestrator enriches agent context with Palantir data before each agent scan
+- **5-min TTL cache**: Palantir data cached per object type to minimize API calls
+- **API endpoints**: `/api/palantir/status`, `/api/palantir/agent-data/:agentId`, `/api/palantir/project-summary/:projectId`, `/api/palantir/cache-stats`
+- **Files**: `server/mcp/PalantirAIPService.ts`, `server/mcp/PalantirDataProvider.ts`, `server/routes/palantir.ts`
+- **Env vars**: `PALANTIR_HOSTNAME`, `PALANTIR_TOKEN`, `PALANTIR_ONTOLOGY_RID` (optional, auto-discovered)
 
 ### March 1, 2026 - Orchestrator Scan Optimization v4.1 (v2.4.0)
 - **Project fingerprinting**: ContinuousOrchestrator now hashes project data (budget, progress, SPI, CPI, risk, etc.) and skips unchanged projects

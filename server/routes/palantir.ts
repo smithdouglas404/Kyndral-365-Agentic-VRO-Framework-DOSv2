@@ -158,6 +158,63 @@ router.get('/ontologies/:rid/metadata', (async (req, res) => {
   }
 }) as RequestHandler);
 
+router.get('/project-summary/:projectId', (async (req, res) => {
+  try {
+    const { getPalantirDataProvider } = await import('../mcp/PalantirDataProvider.js');
+    const provider = getPalantirDataProvider();
+    if (!provider.isAvailable()) {
+      return res.status(503).json({ error: 'Palantir AIP not configured' });
+    }
+    const summary = await provider.getSummaryForProject(req.params.projectId);
+    res.json({ success: true, summary });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+router.get('/agent-data/:agentId', (async (req, res) => {
+  try {
+    const { getPalantirDataProvider } = await import('../mcp/PalantirDataProvider.js');
+    const provider = getPalantirDataProvider();
+    if (!provider.isAvailable()) {
+      return res.status(503).json({ error: 'Palantir AIP not configured' });
+    }
+    const projectId = req.query.projectId as string | undefined;
+    const data = await provider.fetchForAgent(req.params.agentId, projectId);
+    const totalObjects = Object.values(data).reduce((sum, arr) => sum + arr.length, 0);
+    res.json({
+      success: true,
+      agentId: req.params.agentId,
+      objectTypes: Object.keys(data),
+      totalObjects,
+      data,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+router.get('/cache-stats', (async (_req, res) => {
+  try {
+    const { getPalantirDataProvider } = await import('../mcp/PalantirDataProvider.js');
+    const provider = getPalantirDataProvider();
+    res.json({ success: true, available: provider.isAvailable(), ...provider.getCacheStats() });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+router.post('/cache/clear', (async (_req, res) => {
+  try {
+    const { getPalantirDataProvider } = await import('../mcp/PalantirDataProvider.js');
+    const provider = getPalantirDataProvider();
+    provider.clearCache();
+    res.json({ success: true, message: 'Cache cleared' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
 export function registerPalantirRoutes(app: express.Application): void {
   app.use('/api/palantir', router);
 }

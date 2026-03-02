@@ -21,6 +21,7 @@ import type { InsertAgentActivityLog, InsertIntervention } from '@shared/schema'
 import { EventEmitter } from 'events';
 import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } from '../websocket.js';
 import { MCP_SERVER_REGISTRY } from '../mcp/MCPServerRegistry.js';
+import { getPalantirDataProvider } from '../mcp/PalantirDataProvider.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -750,7 +751,16 @@ export class ContinuousOrchestrator {
 
         console.log(`[ContinuousOrchestrator] ${config.agentName} running deep analysis on ${project.name}...`);
 
-        const result = await agent.run(goal, { projectId: project.id, project });
+        let agentContext: any = { projectId: project.id, project };
+        const palantirProvider = getPalantirDataProvider();
+        if (palantirProvider.isAvailable()) {
+          agentContext = await palantirProvider.enrichAgentContext(agentId, agentContext);
+          if (agentContext.palantirSummary) {
+            console.log(`[ContinuousOrchestrator] ${config.agentName} enriched with ${agentContext.palantirSummary.totalObjects} Palantir objects (${agentContext.palantirSummary.label})`);
+          }
+        }
+
+        const result = await agent.run(goal, agentContext);
 
         // Extract findings from Deep Agent result
         if (result && result.success && result.steps) {

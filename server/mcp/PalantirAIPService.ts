@@ -181,15 +181,12 @@ export class PalantirAIPService {
       const ontologies = await this.listOntologies();
       let objectTypeCount = 0;
 
-      if (ontologies.length > 0) {
-        const ontRid = ontologies[0].rid || ontologies[0].apiName;
-        this.defaultOntology = ontRid;
-        try {
-          const objectTypes = await this.listObjectTypes(ontRid);
-          objectTypeCount = objectTypes.length;
-        } catch (e: any) {
-          console.warn(`[Palantir] Could not list object types: ${e.message}`);
-        }
+      const resolvedRid = await this.resolveOntology();
+      try {
+        const objectTypes = await this.listObjectTypes(resolvedRid);
+        objectTypeCount = objectTypes.length;
+      } catch (e: any) {
+        console.warn(`[Palantir] Could not list object types: ${e.message}`);
       }
 
       return {
@@ -215,6 +212,23 @@ export class PalantirAIPService {
     if (this.defaultOntology) return this.defaultOntology;
     const ontologies = await this.listOntologies();
     if (ontologies.length === 0) throw new Error('No ontologies found in Palantir instance');
+
+    if (ontologies.length > 1) {
+      for (const ont of ontologies) {
+        const rid = ont.rid || ont.apiName;
+        if (rid === 'ri.ontology.main.ontology.00000000-0000-0000-0000-000000000000') continue;
+        if (ont.apiName === 'default' && ont.displayName === 'Ontology') continue;
+        try {
+          const types = await this.request('GET', `/ontologies/${rid}/objectTypes`);
+          if (types.data && types.data.length > 0) {
+            console.log(`[Palantir] Auto-selected ontology "${ont.displayName}" (${rid}) with ${types.data.length} object types`);
+            this.defaultOntology = rid;
+            return this.defaultOntology;
+          }
+        } catch {}
+      }
+    }
+
     this.defaultOntology = ontologies[0].rid || ontologies[0].apiName;
     return this.defaultOntology;
   }
