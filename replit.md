@@ -1,9 +1,24 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.5.0  
+**Version:** 2.6.0  
 **Updated:** 2026-03-02
 
 ## Recent Changes
+
+### March 2, 2026 - Notification Agent + Agent-MCP Manager (v2.6.0)
+- **11th Agent**: DeepNotificationAgent — central gateway for all Palantir actions, HITL approvals, and signal broadcasting
+  - All 10 domain agents subscribe via A2A; Notification Agent writes facts to Mem0 so all agents see signal outcomes
+  - HITL workflow: actions flagged as critical/approval-required are queued for admin approval before execution
+  - Palantir action mapping: risk_alert, budget_alert, schedule_alert, compliance_alert, escalation → Palantir actions
+  - API: `/api/notification-agent/status`, `/api/notification-agent/signal`, `/api/notification-agent/approve`, `/api/notification-agent/reject`
+  - File: `server/agents/deep/DeepNotificationAgent.ts`
+- **Agent-MCP Connection Seeding**: 20 MCP definitions (16 knowledge + 4 governance) with 11 agent mappings including Notification Agent
+  - Notification Agent → Palantir AIP, Slack, Teams, ServiceNow, Responsible AI, Audit Trail
+  - Seed script: `server/scripts/seed-mcp-connections.ts`
+- **Agent MCP Manager UI**: Full admin page at `/admin/agent-mcp` — select agent, view/add/remove MCPs, toggle enabled, filter by type
+- **Ontology Field Mapping**: Per-connection ontology mappings via `GET/PUT /api/admin/agent-mcp-connections/:connectionId/ontology-mappings`
+- **PalantirDataProvider**: Notification Agent mapped to AtlasAgent, AtlasInsight, AtlasProject, AtlasRisk, AtlasPerson
+- **Bootstrap**: Global reference `__deepAgentBootstrap` for API route access to agents
 
 ### March 2, 2026 - Palantir AIP Super-MCP Integration (v2.5.0)
 - **Palantir AIP connected** as super-MCP (Option B architecture): agents pull pre-reconciled enterprise data from Palantir's Ontology SDK v2

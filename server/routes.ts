@@ -243,6 +243,74 @@ export async function registerRoutes(
   // Palantir AIP super-MCP routes
   registerPalantirRoutes(app);
 
+  // Notification Agent API (11th agent — Palantir gateway, HITL approvals, signal broadcast)
+  app.get('/api/notification-agent/status', (_req, res) => {
+    try {
+      const bootstrap = (global as any).__deepAgentBootstrap;
+      const notificationAgent = bootstrap?.getAgent?.('notification');
+      if (!notificationAgent) {
+        return res.json({ success: true, status: { agentId: 'notification', initialized: false } });
+      }
+      res.json({ success: true, status: notificationAgent.getStatus() });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post('/api/notification-agent/signal', async (req, res) => {
+    try {
+      const { sourceAgentId, actionType, payload, hitlRequired } = req.body;
+      if (!sourceAgentId || !actionType) {
+        return res.status(400).json({ success: false, error: 'sourceAgentId and actionType required' });
+      }
+      const bootstrap = (global as any).__deepAgentBootstrap;
+      const notificationAgent = bootstrap?.getAgent?.('notification');
+      if (!notificationAgent) {
+        return res.status(503).json({ success: false, error: 'Notification agent not initialized' });
+      }
+      const result = await notificationAgent.sendSignal(sourceAgentId, actionType, payload || {}, hitlRequired || false);
+      res.json({ success: true, ...result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post('/api/notification-agent/approve', async (req, res) => {
+    try {
+      const { actionId, approvedBy } = req.body;
+      if (!actionId) {
+        return res.status(400).json({ success: false, error: 'actionId required' });
+      }
+      const bootstrap = (global as any).__deepAgentBootstrap;
+      const notificationAgent = bootstrap?.getAgent?.('notification');
+      if (!notificationAgent) {
+        return res.status(503).json({ success: false, error: 'Notification agent not initialized' });
+      }
+      const result = await notificationAgent.approveHITLAction(actionId, approvedBy || 'admin');
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post('/api/notification-agent/reject', async (req, res) => {
+    try {
+      const { actionId, rejectedBy, reason } = req.body;
+      if (!actionId) {
+        return res.status(400).json({ success: false, error: 'actionId required' });
+      }
+      const bootstrap = (global as any).__deepAgentBootstrap;
+      const notificationAgent = bootstrap?.getAgent?.('notification');
+      if (!notificationAgent) {
+        return res.status(503).json({ success: false, error: 'Notification agent not initialized' });
+      }
+      const result = await notificationAgent.rejectHITLAction(actionId, rejectedBy || 'admin', reason || 'Rejected');
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Initialize A2A bus getter for API routes
   setA2ABusGetter(() => {
     const { createAgentScheduler } = require("./agents/AgentScheduler.js");

@@ -85,6 +85,14 @@ const AGENT_PALANTIR_MAPPING: Record<string, {
     objectTypes: ['AtlasProject', 'AtlasTransformation', 'AtlasInsight', 'AtlasAgent'],
     label: 'Cross-domain data',
   },
+  notification: {
+    objectTypes: ['AtlasAgent', 'AtlasInsight', 'AtlasProject', 'AtlasRisk', 'AtlasPerson'],
+    label: 'Notification & action gateway data',
+  },
+  deepnotification: {
+    objectTypes: ['AtlasAgent', 'AtlasInsight', 'AtlasProject', 'AtlasRisk', 'AtlasPerson'],
+    label: 'Notification & action gateway data',
+  },
 };
 
 const palantirCache: Map<string, { data: any; timestamp: number }> = new Map();

@@ -219,6 +219,10 @@ const AGENT_MCP_MAPPINGS: AgentMapping[] = [
     agentId: 'integrated',
     mcpNames: ['palantir-aip', 'responsible-ai', 'policy-enforcement', 'quality-assurance', 'audit-trail'],
   },
+  {
+    agentId: 'notification',
+    mcpNames: ['palantir-aip', 'slack', 'teams', 'servicenow', 'responsible-ai', 'audit-trail'],
+  },
 ];
 
 export async function seedMcpConnections() {

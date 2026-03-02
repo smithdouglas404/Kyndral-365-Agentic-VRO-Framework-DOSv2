@@ -79,6 +79,7 @@ const AGENTS = [
   { id: 'planning', name: 'DeepPlanning', domain: 'Project Planning', icon: Calendar, color: 'text-indigo-500' },
   { id: 'okr', name: 'OKR Agent', domain: 'OKR & KPI Tracking', icon: Target, color: 'text-orange-500' },
   { id: 'integrated', name: 'Integrated Mgmt', domain: 'Cross-Agent Coordination', icon: Network, color: 'text-pink-500' },
+  { id: 'notification', name: 'Notification Agent', domain: 'Palantir Gateway & HITL', icon: Cpu, color: 'text-rose-500' },
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {

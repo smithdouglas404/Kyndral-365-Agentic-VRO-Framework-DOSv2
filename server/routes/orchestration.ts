@@ -31,6 +31,7 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
   // Initialize deep agent bootstrap
   if (!bootstrapInstance) {
     bootstrapInstance = new DeepAgentBootstrap(storage);
+    (global as any).__deepAgentBootstrap = bootstrapInstance;
     bootstrapInstance.initialize().catch((error) => {
       console.error('[DeepAgentBootstrap] Initialization failed:', error);
     });
