@@ -36,6 +36,7 @@ import agentSchemasRouter from "./routes/agent-schemas.js";
 import llmCalculatorRouter from "./routes/llm-calculator.js";
 import agentMcpRouter from "./routes/agent-mcp.js";
 import { registerAgentMcpConnectionRoutes } from "./routes/admin/agent-mcp-connections.js";
+import { registerPalantirRoutes } from "./routes/palantir.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
@@ -238,6 +239,9 @@ export async function registerRoutes(
 
   // Register Agent-MCP Connection Management routes (ADMIN - Manage MCP connections to agents)
   registerAgentMcpConnectionRoutes(app);
+
+  // Palantir AIP super-MCP routes
+  registerPalantirRoutes(app);
 
   // Initialize A2A bus getter for API routes
   setA2ABusGetter(() => {

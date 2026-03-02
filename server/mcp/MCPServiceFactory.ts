@@ -6,6 +6,7 @@
 import { JiraService } from './JiraService.js';
 import { ServiceNowService } from './ServiceNowService.js';
 import { MondayService } from './MondayService.js';
+import { PalantirAIPService } from './PalantirAIPService.js';
 
 interface MCPServiceConfig {
   jira?: {
@@ -20,6 +21,11 @@ interface MCPServiceConfig {
   };
   monday?: {
     apiToken: string;
+  };
+  palantir?: {
+    hostname: string;
+    token: string;
+    ontologyRid?: string;
   };
 }
 
@@ -174,9 +180,89 @@ class MondayMCPService implements IMCPService {
   }
 }
 
-/**
- * Service registry - holds initialized services
- */
+class PalantirMCPService implements IMCPService {
+  private palantir: PalantirAIPService;
+
+  constructor(config: NonNullable<MCPServiceConfig['palantir']>) {
+    this.palantir = new PalantirAIPService(config);
+  }
+
+  getService(): PalantirAIPService {
+    return this.palantir;
+  }
+
+  async executeAction(action: string, params: any): Promise<any> {
+    switch (action) {
+      case 'testConnection':
+      case 'test_connection':
+        return await this.palantir.testConnection();
+
+      case 'listOntologies':
+      case 'list_ontologies':
+        return await this.palantir.listOntologies();
+
+      case 'getOntology':
+      case 'get_ontology':
+        return await this.palantir.getOntology(params.ontologyRid);
+
+      case 'getOntologyFullMetadata':
+      case 'get_full_metadata':
+        return await this.palantir.getOntologyFullMetadata(params.ontologyRid);
+
+      case 'listObjectTypes':
+      case 'list_object_types':
+        return await this.palantir.listObjectTypes(params.ontologyRid);
+
+      case 'getObjectType':
+      case 'get_object_type':
+        return await this.palantir.getObjectType(params.objectType, params.ontologyRid);
+
+      case 'listObjects':
+      case 'list_objects':
+        return await this.palantir.listObjects(params.objectType, {
+          pageSize: params.pageSize,
+          pageToken: params.pageToken,
+          orderBy: params.orderBy,
+          select: params.select,
+          ontologyRid: params.ontologyRid,
+        });
+
+      case 'getObject':
+      case 'get_object':
+        return await this.palantir.getObject(params.objectType, params.primaryKey, {
+          select: params.select,
+          ontologyRid: params.ontologyRid,
+        });
+
+      case 'searchObjects':
+      case 'search_objects':
+      case 'search':
+        return await this.palantir.searchObjects(params.objectType, params.filter || params.where, {
+          pageSize: params.pageSize,
+          pageToken: params.pageToken,
+          orderBy: params.orderBy,
+          select: params.select,
+          ontologyRid: params.ontologyRid,
+        });
+
+      case 'applyAction':
+      case 'apply_action':
+        return await this.palantir.applyAction(params.actionApiName, params.parameters, params.ontologyRid);
+
+      case 'executeQuery':
+      case 'execute_query':
+        return await this.palantir.executeQuery(params.queryApiName, params.parameters, params.ontologyRid);
+
+      case 'listQueryTypes':
+      case 'list_query_types':
+        return await this.palantir.listQueryTypes(params.ontologyRid);
+
+      default:
+        throw new Error(`Unknown Palantir AIP action: ${action}`);
+    }
+  }
+}
+
 const serviceRegistry: Map<string, IMCPService> = new Map();
 
 /**
@@ -208,6 +294,14 @@ function loadMCPConfig(): MCPServiceConfig {
     };
   }
 
+  if (process.env.PALANTIR_HOSTNAME && process.env.PALANTIR_TOKEN) {
+    config.palantir = {
+      hostname: process.env.PALANTIR_HOSTNAME,
+      token: process.env.PALANTIR_TOKEN,
+      ontologyRid: process.env.PALANTIR_ONTOLOGY_RID || undefined,
+    };
+  }
+
   return config;
 }
 
@@ -230,6 +324,11 @@ export function initializeMCPServices(): void {
   if (config.monday) {
     serviceRegistry.set('monday', new MondayMCPService(config.monday));
     console.log('[MCP] Monday.com service initialized');
+  }
+
+  if (config.palantir) {
+    serviceRegistry.set('palantir', new PalantirMCPService(config.palantir));
+    console.log('[MCP] Palantir AIP service initialized');
   }
 
   if (serviceRegistry.size === 0) {
@@ -262,4 +361,15 @@ export function getConfiguredServices(): string[] {
     initializeMCPServices();
   }
   return Array.from(serviceRegistry.keys());
+}
+
+export function getPalantirService(): PalantirAIPService | null {
+  if (serviceRegistry.size === 0) {
+    initializeMCPServices();
+  }
+  const svc = serviceRegistry.get('palantir');
+  if (svc && svc instanceof PalantirMCPService) {
+    return (svc as PalantirMCPService).getService();
+  }
+  return null;
 }
