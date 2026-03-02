@@ -2,10 +2,11 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { createAgentObject, createAgentObjects } from '../lib/agent-objects/index.js';
 import { isAgentType, type AgentType } from '../lib/AgentAttributeRegistry.js';
+import { getPalantirRulesService } from '../lib/PalantirRulesService.js';
 
 export function registerAgentObjectRoutes(app: Router) {
 
-  const rulesService = (globalThis as any).__rulebricksService || undefined;
+  const rulesService = getPalantirRulesService() || undefined;
 
   /**
    * GET /api/agent-objects/:agentType/:entityId/attributes/:attributeName

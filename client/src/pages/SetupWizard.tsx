@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 export interface CompanyCandidate {
   legalName: string;
   doingBusinessAs?: string;
+  businessSummary?: string;
   headquarters: {
     city: string;
     state?: string;
@@ -43,6 +44,7 @@ export interface CompanyCandidate {
 }
 
 export interface CompanyProfile extends CompanyCandidate {
+  company: CompanyCandidate;
   latestAnnualReport?: {
     url: string;
     date: string;

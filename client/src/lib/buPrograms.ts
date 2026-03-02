@@ -136,9 +136,11 @@ export interface VROProgram {
 
 export interface RiskIssue {
   id: string;
+  name?: string;
   project: string;
   bu: string;
   type: "technical" | "financial" | "operational" | "compliance" | "strategic";
+  category?: string;
   severity: "critical" | "high" | "medium" | "low";
   description: string;
   impact: string;
@@ -151,7 +153,10 @@ export interface RiskIssue {
 }
 
 export interface BUPortfolio {
+  id: string;
+  name: string;
   bu: string;
+  description?: string;
   totalProjects: number;
   totalBudget: { value: number; unit: string };
   onTrack: number;
@@ -161,6 +166,15 @@ export interface BUPortfolio {
   topAISignal: AISignal;
   topAction: ProactiveAction;
   okrs: { objective: string; progress: number; status: string }[];
+  // Added for component compatibility
+  healthScore?: number;
+  valueRealized?: number;
+  programCount?: number;
+  projectCount?: number;
+  predictability?: number;
+  activeEpics?: number;
+  velocity?: number;
+  currentPI?: string;
 }
 
 // ============================================================================
@@ -213,3 +227,21 @@ export const vroSummary = calculateVROSummary(vroPrograms);
 
 // DEPRECATED: Use calculateRiskSummary(risks) instead
 export const riskSummary = calculateRiskSummary(riskIssues);
+
+// PMO Summary - calculate from API data
+export function calculatePMOSummary(projects: PMOProject[]) {
+  return {
+    totalProjects: projects.length,
+    green: projects.filter(p => p.status === "green").length,
+    amber: projects.filter(p => p.status === "amber").length,
+    red: projects.filter(p => p.status === "red").length,
+    totalBudget: projects.reduce((sum, p) => sum + p.budget.total, 0),
+    totalSpent: projects.reduce((sum, p) => sum + p.budget.spent, 0),
+    avgDeliverableProgress: projects.length > 0
+      ? Math.round(projects.reduce((sum, p) => sum + (p.deliverables.completed / p.deliverables.total * 100 || 0), 0) / projects.length)
+      : 0
+  };
+}
+
+// DEPRECATED: Use calculatePMOSummary(projects) instead
+export const pmoSummary = calculatePMOSummary(pmoProjects);

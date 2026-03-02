@@ -82,7 +82,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
         }),
         func: async ({ projectId, riskCategory }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -188,7 +188,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
         }),
         func: async ({ projectId, riskType, severity = "moderate" }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -354,7 +354,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
         }),
         func: async ({ projectId, evaluateCoverage = true }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -496,7 +496,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
         }),
         func: async ({ projectId, forecastHorizon = 30 }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -662,7 +662,7 @@ When you detect high-probability, high-impact risks, recommend collaboration wit
         }),
         func: async ({ projectId, riskType, probability, impact }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }

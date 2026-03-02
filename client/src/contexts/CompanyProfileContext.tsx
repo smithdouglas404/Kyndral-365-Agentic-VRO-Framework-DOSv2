@@ -9,6 +9,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { getAccessToken } from '@/lib/auth';
 
 interface CompanyInfo {
   id: string;
@@ -135,12 +136,12 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
   const { data: demoSessionStatus, isLoading: isLoadingDemoSession } = useQuery<DemoSessionStatus>({
     queryKey: ['demo-session-status'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch('/api/demo/status', { headers });
       if (!response.ok) {
         return { active: false };
@@ -156,11 +157,11 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
     queryKey: ['demo-request-status'],
     queryFn: async () => {
       // Only check if we have an auth token
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       if (!token) {
         return { isDemoUser: false };
       }
-      
+
       const response = await fetch('/api/tenant-auth/demo-status', {
         headers: {
           'Authorization': `Bearer ${token}`,

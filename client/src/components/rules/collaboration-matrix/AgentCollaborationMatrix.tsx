@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAgentMappings, useAgentMetadata } from '@/hooks/useAgentRegistry';
 
 interface CollaborationMatrixProps {
   className?: string;
@@ -34,35 +35,13 @@ interface MatrixData {
   totalInteractions: number;
 }
 
-const AGENT_NAMES: Record<string, string> = {
-  finops: 'FinOps',
-  tmo: 'TMO',
-  risk: 'Risk',
-  vro: 'VRO',
-  pmo: 'PMO',
-  ocm: 'OCM',
-};
-
-const AGENT_COLORS: Record<string, string> = {
-  finops: '#10b981',
-  tmo: '#3b82f6',
-  risk: '#ef4444',
-  vro: '#8b5cf6',
-  pmo: '#f97316',
-  ocm: '#06b6d4',
-};
-
-const AGENT_ICONS: Record<string, string> = {
-  finops: '💰',
-  tmo: '⏰',
-  risk: '⚠️',
-  vro: '💎',
-  pmo: '📊',
-  ocm: '🔄',
-};
-
 export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps) {
   const [timeframe, setTimeframe] = useState('7days');
+
+  // Load agents from database
+  const { data: agentMetadata = [] } = useAgentMetadata();
+  const { getName, getColor, getEmoji } = useAgentMappings();
+  const agentIds = useMemo(() => agentMetadata.map(a => a.id), [agentMetadata]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['collaboration-matrix', timeframe],
@@ -103,7 +82,7 @@ export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps
   const totalInteractions = data?.totalInteractions || 0;
 
   // Build agent-to-agent grid
-  const agents = ['finops', 'tmo', 'risk', 'vro', 'pmo', 'ocm'];
+  const agents = agentIds.length > 0 ? agentIds : ['finops', 'tmo', 'risk', 'vro', 'pmo', 'ocm'];
 
   // Calculate total collaborations per agent
   const agentTotals: Record<string, number> = {};
@@ -181,8 +160,8 @@ export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps
                     className="w-24 text-center text-sm font-medium text-gray-600 py-2"
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-2xl">{AGENT_ICONS[agent]}</span>
-                      <span>{AGENT_NAMES[agent]}</span>
+                      <span className="text-2xl">{getEmoji(agent)}</span>
+                      <span>{getName(agent)}</span>
                     </div>
                   </div>
                 ))}
@@ -193,8 +172,8 @@ export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps
                 <div key={fromAgent} className="flex">
                   {/* Row Label */}
                   <div className="w-32 flex items-center gap-2 py-3 px-4 font-medium">
-                    <span className="text-2xl">{AGENT_ICONS[fromAgent]}</span>
-                    <span>{AGENT_NAMES[fromAgent]}</span>
+                    <span className="text-2xl">{getEmoji(fromAgent)}</span>
+                    <span>{getName(fromAgent)}</span>
                   </div>
 
                   {/* Cells */}
@@ -215,10 +194,10 @@ export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps
                         <div
                           className="h-16 rounded-lg flex items-center justify-center cursor-pointer transition-all hover:shadow-lg relative"
                           style={{
-                            backgroundColor: AGENT_COLORS[fromAgent],
+                            backgroundColor: getColor(fromAgent),
                             opacity: opacity,
                           }}
-                          title={`${AGENT_NAMES[fromAgent]} → ${AGENT_NAMES[toAgent]}: ${count} interactions`}
+                          title={`${getName(fromAgent)} → ${getName(toAgent)}: ${count} interactions`}
                         >
                           {count > 0 && (
                             <>
@@ -284,32 +263,32 @@ export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="border-l-4" style={{ borderLeftColor: AGENT_COLORS[collab.from] }}>
+                  <Card className="border-l-4" style={{ borderLeftColor: getColor(collab.from) }}>
                     <CardContent className="pt-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{AGENT_ICONS[collab.from]}</span>
+                          <span className="text-2xl">{getEmoji(collab.from)}</span>
                           <Badge
                             variant="outline"
                             style={{
-                              backgroundColor: `${AGENT_COLORS[collab.from]}20`,
-                              color: AGENT_COLORS[collab.from],
-                              borderColor: AGENT_COLORS[collab.from],
+                              backgroundColor: `${getColor(collab.from)}20`,
+                              color: getColor(collab.from),
+                              borderColor: getColor(collab.from),
                             }}
                           >
-                            {AGENT_NAMES[collab.from]}
+                            {getName(collab.from)}
                           </Badge>
                           <ArrowRight size={20} className="text-gray-400" />
-                          <span className="text-2xl">{AGENT_ICONS[collab.to]}</span>
+                          <span className="text-2xl">{getEmoji(collab.to)}</span>
                           <Badge
                             variant="outline"
                             style={{
-                              backgroundColor: `${AGENT_COLORS[collab.to]}20`,
-                              color: AGENT_COLORS[collab.to],
-                              borderColor: AGENT_COLORS[collab.to],
+                              backgroundColor: `${getColor(collab.to)}20`,
+                              color: getColor(collab.to),
+                              borderColor: getColor(collab.to),
                             }}
                           >
-                            {AGENT_NAMES[collab.to]}
+                            {getName(collab.to)}
                           </Badge>
                         </div>
                         <Badge className="bg-indigo-600 text-white">
@@ -349,15 +328,15 @@ export function AgentCollaborationMatrix({ className }: CollaborationMatrixProps
             {agents
               .sort((a, b) => (agentTotals[b] || 0) - (agentTotals[a] || 0))
               .map((agent) => (
-                <Card key={agent} className="border-l-4" style={{ borderLeftColor: AGENT_COLORS[agent] }}>
+                <Card key={agent} className="border-l-4" style={{ borderLeftColor: getColor(agent) }}>
                   <CardContent className="pt-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{AGENT_ICONS[agent]}</span>
-                        <span className="font-semibold">{AGENT_NAMES[agent]}</span>
+                        <span className="text-2xl">{getEmoji(agent)}</span>
+                        <span className="font-semibold">{getName(agent)}</span>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold" style={{ color: AGENT_COLORS[agent] }}>
+                        <p className="text-2xl font-bold" style={{ color: getColor(agent) }}>
                           {agentTotals[agent] || 0}
                         </p>
                         <p className="text-xs text-gray-500">interactions</p>

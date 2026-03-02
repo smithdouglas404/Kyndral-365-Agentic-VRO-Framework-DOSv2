@@ -308,7 +308,7 @@ export function MultiAgentDiscussion() {
                     ))}
                   </AnimatePresence>
 
-                  {isPlaying && currentIndex < simulatedDiscussion.length && (
+                  {isPlaying && currentIndex < apiMessages.length && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -323,7 +323,7 @@ export function MultiAgentDiscussion() {
                     </motion.div>
                   )}
 
-                  {currentIndex >= simulatedDiscussion.length && (
+                  {currentIndex >= apiMessages.length && apiMessages.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

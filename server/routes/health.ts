@@ -323,8 +323,15 @@ async function checkAgents(storage: IStorage): Promise<{
   individual: Record<string, AgentHealth>;
 }> {
   try {
-    const { getAgentScheduler } = await import('../agents/AgentScheduler.js');
-    const scheduler = getAgentScheduler(storage);
+    const { getAgentSchedulerInstance } = await import('../agents/AgentScheduler.js');
+    const scheduler = getAgentSchedulerInstance();
+
+    if (!scheduler) {
+      return {
+        scheduler: { status: 'degraded', details: 'Agent scheduler not initialized' },
+        individual: {},
+      };
+    }
 
     const status = scheduler.getStatus();
 

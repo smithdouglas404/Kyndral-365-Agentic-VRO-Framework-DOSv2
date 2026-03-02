@@ -53,7 +53,7 @@ export abstract class DeepAgentWithRAG extends DeepAgentBase {
     console.log(`[${this.config.agentName}] Generating predictive narrative for ${projectId}`);
 
     // 1. Get current project state
-    const project = await this.storage.getProject(projectId);
+    const project = await this.getProject(projectId);
     if (!project) {
       throw new Error(`Project ${projectId} not found`);
     }

@@ -13,6 +13,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, AtSign, Activity, Users, FileText, CheckSquare } from 'lucide-react';
+import { getAccessToken } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ export default function CollaborationHub() {
   const { data: activities = [] } = useQuery({
     queryKey: ['activity-feed'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/activity-feed', {
         headers: { 'Authorization': `Bearer ${token}` }
       });

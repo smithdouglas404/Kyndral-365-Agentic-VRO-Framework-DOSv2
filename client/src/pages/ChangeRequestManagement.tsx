@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Filter, FileEdit, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { getAccessToken } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +69,7 @@ export default function ChangeRequestManagement() {
       if (selectedProject !== 'all') params.set('projectId', selectedProject);
       if (selectedStatus !== 'all') params.set('status', selectedStatus);
 
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/change-requests?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -82,7 +83,7 @@ export default function ChangeRequestManagement() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/projects', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -94,7 +95,7 @@ export default function ChangeRequestManagement() {
   // Create change request mutation
   const createMutation = useMutation({
     mutationFn: async (data: Partial<ChangeRequest>) => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/change-requests', {
         method: 'POST',
         headers: {
@@ -119,7 +120,7 @@ export default function ChangeRequestManagement() {
   // Approve mutation
   const approveMutation = useMutation({
     mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/change-requests/${id}/approve`, {
         method: 'POST',
         headers: {
@@ -140,7 +141,7 @@ export default function ChangeRequestManagement() {
   // Reject mutation
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/change-requests/${id}/reject`, {
         method: 'POST',
         headers: {

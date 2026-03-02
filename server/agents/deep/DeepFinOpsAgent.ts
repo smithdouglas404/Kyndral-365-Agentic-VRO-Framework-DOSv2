@@ -48,7 +48,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           threshold: z.number().optional().describe("Variance threshold percentage (default 10%)"),
         }),
         func: async ({ projectId, threshold = 10 }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -126,7 +126,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           projectId: z.string().describe("Project ID"),
         }),
         func: async ({ projectId }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -227,7 +227,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           timeframeDays: z.number().optional().describe("Forecast timeframe in days (default 30)"),
         }),
         func: async ({ projectId, timeframeDays = 30 }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -266,7 +266,7 @@ export class DeepFinOpsAgent extends DeepAgentBase {
           projectId: z.string().describe("Project ID"),
         }),
         func: async ({ projectId }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }

@@ -20,7 +20,15 @@ import { sql } from 'drizzle-orm';
 // AGENT TYPES
 // ============================================================================
 
-export type AgentType = 
+/**
+ * AgentType - dynamic string to allow new agents without code changes
+ * Known agents: company, pmo, finops, tmo, risk, vro, ocm, governance, planning, integrated, okr, notification
+ * New agents can be added via Admin UI without modifying this type
+ */
+export type AgentType = string;
+
+// Legacy type for backward compatibility with existing code
+export type KnownAgentType =
   | 'company'      // Root agent - company context
   | 'pmo'          // Project Management Office
   | 'finops'       // Financial Operations
@@ -566,19 +574,40 @@ export const AGENT_TEMPLATES: Record<AgentType, AgentDefinition> = {
 };
 
 // ============================================================================
+// DEFAULT AGENT TEMPLATE (for dynamically added agents)
+// ============================================================================
+
+function createDefaultAgentDefinition(agentType: string): AgentDefinition {
+  return {
+    type: agentType,
+    displayName: `${agentType.charAt(0).toUpperCase() + agentType.slice(1)} Agent`,
+    description: `${agentType.charAt(0).toUpperCase() + agentType.slice(1)} Agent - dynamically created`,
+    icon: 'bot',
+    color: '#6366f1',
+    attributes: [],
+    functions: [],
+    connections: [],
+    mem0Patterns: [`${agentType}:*`],
+    lettaArchive: [`${agentType} decisions`],
+  };
+}
+
+// ============================================================================
 // AGENT OBJECT MODEL SERVICE
 // ============================================================================
 
 export class AgentObjectModelService {
   /**
    * Get agent definition by type
+   * Returns a default template for unknown agents
    */
   getAgentDefinition(agentType: AgentType): AgentDefinition {
-    return AGENT_TEMPLATES[agentType];
+    return AGENT_TEMPLATES[agentType] || createDefaultAgentDefinition(agentType);
   }
 
   /**
-   * Get all agent definitions
+   * Get all agent definitions (known templates only)
+   * For all agents including dynamic ones, use AgentRegistryService
    */
   getAllAgentDefinitions(): AgentDefinition[] {
     return Object.values(AGENT_TEMPLATES);
@@ -588,9 +617,9 @@ export class AgentObjectModelService {
    * Get attributes that an agent depends on from other agents
    */
   getDependencyAttributes(agentType: AgentType): { source: AgentType; attributes: string[] }[] {
-    const agent = AGENT_TEMPLATES[agentType];
+    const agent = this.getAgentDefinition(agentType);
     const dependencies: { source: AgentType; attributes: string[] }[] = [];
-    
+
     // From connections (subscribes_to)
     for (const conn of agent.connections) {
       if (conn.connectionType === 'subscribes_to') {
@@ -600,7 +629,7 @@ export class AgentObjectModelService {
         });
       }
     }
-    
+
     // From attributes with source
     const sourcedAttrs = agent.attributes.filter(a => a.source);
     for (const attr of sourcedAttrs) {
@@ -614,7 +643,7 @@ export class AgentObjectModelService {
         });
       }
     }
-    
+
     return dependencies;
   }
 
@@ -622,14 +651,14 @@ export class AgentObjectModelService {
    * Get Mem0 subscription patterns for an agent
    */
   getMem0Patterns(agentType: AgentType): string[] {
-    return AGENT_TEMPLATES[agentType].mem0Patterns;
+    return this.getAgentDefinition(agentType).mem0Patterns;
   }
 
   /**
    * Get Letta archive topics for an agent
    */
   getLettaArchiveTopics(agentType: AgentType): string[] {
-    return AGENT_TEMPLATES[agentType].lettaArchive;
+    return this.getAgentDefinition(agentType).lettaArchive;
   }
 
   /**
@@ -647,7 +676,7 @@ export class AgentObjectModelService {
    * Get signal-triggering attributes (for broadcast system)
    */
   getSignalTriggeringAttributes(agentType: AgentType): AgentAttribute[] {
-    return AGENT_TEMPLATES[agentType].attributes.filter(a => a.triggerSignal);
+    return this.getAgentDefinition(agentType).attributes.filter(a => a.triggerSignal);
   }
 }
 

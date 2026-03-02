@@ -66,6 +66,8 @@ export interface ThresholdBreach {
 
 const AGENT_NAMES: Record<AgentType, string> = {
   'integrated-management': 'Integrated Management',
+  vro: 'Value Realization Office',
+  pmo: 'Project Management Office',
   tmo: 'TMO',
   finops: 'FinOps',
   okr: 'OKR Mapping',
@@ -76,6 +78,8 @@ const AGENT_NAMES: Record<AgentType, string> = {
 
 const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
   'integrated-management': ['escalate', 'notify', 'investigate', 'accelerate', 'mitigate', 'update-status', 'create-task', 'reassign', 'defer'],
+  vro: ['escalate', 'notify', 'investigate', 'accelerate', 'mitigate', 'update-status'],
+  pmo: ['escalate', 'notify', 'investigate', 'create-task', 'reassign', 'defer', 'update-status'],
   tmo: ['notify', 'investigate', 'create-task', 'accelerate'],
   finops: ['escalate', 'notify', 'investigate', 'approve', 'reject', 'mitigate'],
   okr: ['notify', 'update-status', 'investigate'],
@@ -85,7 +89,9 @@ const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
 };
 
 const AGENT_SUBSCRIPTIONS: Record<AgentType, AgentType[]> = {
-  'integrated-management': ['finops', 'governance', 'tmo', 'planning'],
+  'integrated-management': ['finops', 'governance', 'tmo', 'planning', 'vro', 'pmo'],
+  vro: ['integrated-management', 'finops', 'okr'],
+  pmo: ['integrated-management', 'planning', 'tmo'],
   tmo: ['integrated-management', 'ocm'],
   finops: ['integrated-management', 'governance'],
   okr: ['integrated-management'],

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { getAccessToken } from '@/lib/auth';
 
 export type AttributeAvailability = 'available' | 'admin_required' | 'mcp_required' | 'missing';
 
@@ -21,7 +22,7 @@ export function useAgentAttributes(agentType: string, includeValues = true) {
   return useQuery({
     queryKey: ['agent-attributes', agentType, includeValues ? 'values' : 'meta'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/agents/${agentType}/attributes?includeValues=${includeValues}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });

@@ -5,6 +5,7 @@ export interface Alert {
   type: string | null;
   severity: string | null;
   title: string;
+  message?: string;
   description: string | null;
   source: string | null;
   projectId: string | null;

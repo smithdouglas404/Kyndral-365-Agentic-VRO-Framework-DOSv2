@@ -111,7 +111,12 @@
       "WebFetch(domain:docs.rulebricks.com)",
       "Bash(npm ls:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git checkout:*)",
+      "Bash(source .env)",
+      "Bash(git -C /home/runner/workspace log --oneline)",
+      "Bash(timeout 120 npx vite build:*)",
+      "Bash(gh auth status:*)"
     ]
   }
 }

@@ -9,8 +9,10 @@ import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
 import { BattleRhythmTaskProcessor } from "./lib/BattleRhythmTaskProcessor.js";
-import { initializeRulebricksService, type RulebricksService } from "./lib/RulebricksService.js";
-import { initializeMCPServices } from "./mcp/MCPServiceFactory.js";
+import { initializeMCPServices, getPalantirService } from "./mcp/MCPServiceFactory.js";
+import { OntologyDataProvider } from "./services/OntologyDataProvider.js";
+import { PalantirSyncService } from "./services/PalantirSyncService.js";
+import { startPalantirSyncScheduler, stopPalantirSyncScheduler } from "./services/PalantirSyncScheduler.js";
 import { initializeFirebaseAuthService } from "./auth/firebaseAdmin.js";
 import { startSyncScheduler } from "./syncScheduler";
 import { storage } from "./storage";
@@ -47,8 +49,6 @@ export let battleRhythmOrchestrator: BattleRhythmOrchestrator | null = null;
 // Export Battle Rhythm task processor (processes Sunday Recon tasks)
 export let battleRhythmTaskProcessor: BattleRhythmTaskProcessor | null = null;
 
-// Export Rulebricks service (rules engine for all agents)
-export let rulebricksService: RulebricksService | null = null;
 
 const app = express();
 const httpServer = createServer(app);
@@ -197,25 +197,23 @@ app.use((req, res, next) => {
       log("✅ MCP Services initialized - Real API integrations ready");
 
       // ===================================================================
-      // Initialize Rulebricks Service (Rules Engine for All Agents)
+      // Initialize Palantir Ontology Services (ONTOLOGY-FIRST ARCHITECTURE)
+      // All data flows through Palantir Foundry as source of truth
+      // External systems (Jira, OpenProject, Monday) sync TO Palantir
       // ===================================================================
-      log("📐 Initializing Rulebricks Service...");
-      rulebricksService = initializeRulebricksService();
-      if (rulebricksService) {
-        const connected = await rulebricksService.testConnection();
-        if (connected) {
-          log("✅ Rulebricks connected — rules engine ready for all agents");
-          const rules = await rulebricksService.listRules();
-          log(`📋 Rulebricks: ${rules.length} rules available`);
-          for (const rule of rules.slice(0, 10)) {
-            log(`   - ${rule.name || rule.slug}`);
-          }
-          (global as any).__rulebricksService = rulebricksService;
+      try {
+        const palantirService = getPalantirService();
+        if (palantirService) {
+          log("🎯 Initializing Ontology Data Provider (Palantir-first)...");
+          await OntologyDataProvider.initialize(palantirService);
+          PalantirSyncService.initialize(palantirService);
+          log("✅ Ontology Data Provider initialized - Palantir is source of truth");
         } else {
-          log("⚠️  Rulebricks connection test failed");
+          log("⚠️  Palantir service not configured - ontology features disabled");
+          log("   Set PALANTIR_HOSTNAME and PALANTIR_TOKEN to enable");
         }
-      } else {
-        log("⚠️  Rulebricks not configured — set RULEBRICKS_API_KEY");
+      } catch (error: any) {
+        log(`⚠️  Ontology Data Provider initialization failed: ${error.message}`);
       }
 
       // ===================================================================
@@ -245,9 +243,14 @@ app.use((req, res, next) => {
         console.error("Failed to start sync scheduler:", err);
       });
 
-      // DISABLED: SyncScheduler and MCPSyncScheduler files removed
-      // Automatic sync functionality should be implemented via MCP registry
-      console.log("[Server] Automatic data sync schedulers disabled");
+      // ===================================================================
+      // Start Palantir Sync Scheduler
+      // Syncs external systems (Jira, OpenProject, Monday) TO Palantir
+      // Configured via environment variables (JIRA_SYNC_ENABLED, etc.)
+      // ===================================================================
+      log("📡 Initializing Palantir Sync Scheduler...");
+      startPalantirSyncScheduler();
+      log("✅ Palantir Sync Scheduler started - External system sync jobs active");
 
       // ===================================================================
       // Setup Process Management & Graceful Shutdown
@@ -269,6 +272,12 @@ app.use((req, res, next) => {
           battleRhythmTaskProcessor?.stop();
         });
       }
+
+      // Add Palantir Sync Scheduler cleanup
+      cleanupCallbacks.push(async () => {
+        console.log('[Cleanup] Stopping Palantir Sync Scheduler...');
+        stopPalantirSyncScheduler();
+      });
 
       setupProcessHandlers(httpServer, cleanupCallbacks, {
         gracefulShutdownTimeout: 30000, // 30 seconds

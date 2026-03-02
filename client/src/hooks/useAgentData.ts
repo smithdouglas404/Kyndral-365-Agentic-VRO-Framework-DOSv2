@@ -37,7 +37,7 @@ export function useCrossAgentFeed(): CrossAgentMessage[] {
 }
 
 // Hook to get summary metrics for all agents
-export function useAllAgentsSummary(): Record<AgentType, AgentMetrics> {
+export function useAllAgentsSummary() {
   return useMemo(() => {
     return getAllAgentsSummary();
   }, []);
@@ -68,22 +68,13 @@ export function useLiveMetrics() {
   return useMemo(() => {
     const allSummary = getAllAgentsSummary();
 
-    // Aggregate metrics from integrated management agent
-    const integ = allSummary['integrated-management'];
-    const agentCount = Object.keys(allSummary).length;
-    const totalProjects = Object.values(allSummary).reduce((sum, a) => sum + (a?.totalProjects || 0), 0) / agentCount;
-    const totalValue = integ?.totalValue || 0;
-    const realizedValue = integ?.realizedValue || 0;
-    const activeAlerts = 0; // Simulation removed
-    const avgConfidence = Object.values(allSummary).reduce((sum, a) => sum + (a?.avgConfidence || 0), 0) / agentCount;
-    
     return {
-      totalProjects: Math.round(totalProjects),
-      totalValue,
-      realizedValue,
-      activeAlerts,
-      avgConfidence: Math.round(avgConfidence),
-      pendingActions: Object.values(allSummary).reduce((sum, a) => sum + (a?.pendingActions || 0), 0),
+      totalProjects: allSummary.totalProjects || 0,
+      totalValue: 0,
+      realizedValue: 0,
+      activeAlerts: allSummary.totalAlerts || 0,
+      avgConfidence: allSummary.avgConfidence || 0,
+      pendingActions: 0,
     };
   }, []);
 }

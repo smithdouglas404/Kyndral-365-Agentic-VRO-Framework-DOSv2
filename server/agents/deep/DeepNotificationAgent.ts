@@ -2,6 +2,7 @@ import { DeepAgentBase, type DeepAgentConfig } from "./DeepAgentBase.js";
 import { AgentTool } from "../../lib/AgentTool.js";
 import type { IStorage } from "../../storage.js";
 import { z } from "zod";
+import { getPalantirActionsService } from "../../services/PalantirActionsService.js";
 
 interface PendingAction {
   id: string;
@@ -202,49 +203,116 @@ export class DeepNotificationAgent extends DeepAgentBase {
     action: PendingAction
   ): Promise<any> {
     const { actionType, payload } = action;
+    const actionsService = getPalantirActionsService();
 
-    const palantirActionMap: Record<string, string> = {
-      alert: "sendNotification",
-      risk_alert: "createRiskAlert",
-      escalation: "escalateIssue",
-      budget_alert: "createBudgetAlert",
-      schedule_alert: "createScheduleAlert",
-      compliance_alert: "createComplianceAlert",
-      health_alert: "createHealthAlert",
-      change_impact: "createChangeAlert",
-      dependency_alert: "createDependencyAlert",
-      notification: "sendNotification",
-      action_request: "executeAction",
-    };
+    // Map action types to PalantirActionsService methods
+    const alertTypes = [
+      "alert", "risk_alert", "budget_alert", "schedule_alert",
+      "compliance_alert", "health_alert", "change_impact",
+      "dependency_alert", "notification"
+    ];
 
-    const palantirAction = palantirActionMap[actionType];
+    const escalationTypes = ["escalation", "hitl_request", "approval_request"];
 
-    if (palantirAction) {
-      try {
-        const result = await palantir.applyAction(palantirAction, {
+    try {
+      // Handle alert-type actions - create Alert in Palantir
+      if (alertTypes.includes(actionType)) {
+        const result = await actionsService.createAlert({
+          title: payload.title || payload.message || `${actionType} from ${action.sourceAgentId}`,
+          message: payload.message || payload.description || JSON.stringify(payload),
+          alertType: actionType,
+          severity: payload.severity || "medium",
+          agentSource: action.sourceAgentId,
+          projectId: payload.projectId,
+          entityType: payload.entityType,
+          entityId: payload.entityId,
+          notifyRoles: payload.notifyRoles,
+          notifyUsers: payload.notifyUsers,
+          actionRequired: payload.actionRequired ?? false,
+          metadata: {
+            originalPayload: payload,
+            actionId: action.id,
+          },
+        });
+
+        return {
+          palantirAction: "createAlert",
+          alertId: result.objectRid,
+          executed: result.success,
+          error: result.error,
+        };
+      }
+
+      // Handle escalation/HITL actions - create Intervention in Palantir
+      if (escalationTypes.includes(actionType)) {
+        const result = await actionsService.createIntervention({
+          title: payload.title || `Escalation from ${action.sourceAgentId}`,
+          description: payload.description || payload.message || JSON.stringify(payload),
+          interventionType: actionType,
+          severity: payload.severity || "high",
+          agentSource: action.sourceAgentId,
+          projectId: payload.projectId,
+          entityType: payload.entityType,
+          entityId: payload.entityId,
+          recommendation: payload.recommendation || payload.action || "Review required",
+          estimatedImpact: payload.estimatedImpact,
+          requiredApprovers: payload.requiredApprovers || payload.notifyRoles,
+          autoApproveAfterHours: payload.autoApproveAfterHours,
+          metadata: {
+            originalPayload: payload,
+            actionId: action.id,
+            functionName: payload.functionName,
+            ruleResult: payload.ruleResult,
+          },
+        });
+
+        return {
+          palantirAction: "createIntervention",
+          interventionId: result.objectRid,
+          executed: result.success,
+          error: result.error,
+          hitlRequired: true,
+        };
+      }
+
+      // Handle generic action requests via legacy applyAction
+      if (actionType === "action_request" && palantir) {
+        const result = await palantir.applyAction(payload.actionName || "executeAction", {
           sourceAgent: action.sourceAgentId,
           ...payload,
           timestamp: action.createdAt,
         });
-        return { palantirAction, result, executed: true };
-      } catch (error: any) {
-        return {
-          palantirAction,
-          executed: false,
-          error: error.message,
-          fallback: "logged_to_letta",
-        };
+        return { palantirAction: payload.actionName, result, executed: true };
       }
-    }
 
-    return {
-      executed: false,
-      reason: `No Palantir action mapped for ${actionType}`,
-      fallback: "logged_to_letta",
-    };
+      // Fallback: create alert for unmapped action types
+      const result = await actionsService.createAlert({
+        title: `${actionType} from ${action.sourceAgentId}`,
+        message: JSON.stringify(payload),
+        alertType: actionType,
+        severity: payload.severity || "low",
+        agentSource: action.sourceAgentId,
+        actionRequired: false,
+        metadata: { originalPayload: payload },
+      });
+
+      return {
+        palantirAction: "createAlert",
+        alertId: result.objectRid,
+        executed: result.success,
+        note: `Unmapped action type '${actionType}' stored as alert`,
+      };
+
+    } catch (error: any) {
+      return {
+        executed: false,
+        error: error.message,
+        fallback: "logged_to_letta",
+      };
+    }
   }
 
-  async approveHITLAction(actionId: string, approvedBy: string): Promise<any> {
+  async approveHITLAction(actionId: string, approvedBy: string, notes?: string): Promise<any> {
     const action = this.actionQueue.find(
       (a) => a.id === actionId && a.status === "awaiting_approval"
     );
@@ -252,8 +320,16 @@ export class DeepNotificationAgent extends DeepAgentBase {
       return { success: false, error: "Action not found or not awaiting approval" };
     }
 
+    // Approve in Palantir if there's an intervention ID
+    const interventionId = action.result?.interventionId;
+    if (interventionId) {
+      const actionsService = getPalantirActionsService();
+      await actionsService.approveIntervention(interventionId, approvedBy, notes);
+    }
+
     await this.learn(`hitl_approved_${actionId}`, {
       approvedBy,
+      notes,
       actionType: action.actionType,
       sourceAgent: action.sourceAgentId,
       approvedAt: new Date().toISOString(),
@@ -264,6 +340,7 @@ export class DeepNotificationAgent extends DeepAgentBase {
     return {
       success: true,
       actionId,
+      interventionId,
       status: action.status,
       result: action.result,
     };
@@ -279,6 +356,13 @@ export class DeepNotificationAgent extends DeepAgentBase {
     );
     if (!action) {
       return { success: false, error: "Action not found or not awaiting approval" };
+    }
+
+    // Reject in Palantir if there's an intervention ID
+    const interventionId = action.result?.interventionId;
+    if (interventionId) {
+      const actionsService = getPalantirActionsService();
+      await actionsService.rejectIntervention(interventionId, rejectedBy, reason);
     }
 
     action.status = "failed";
@@ -297,6 +381,7 @@ export class DeepNotificationAgent extends DeepAgentBase {
       attribute: `action_result_${action.actionType}`,
       value: {
         actionId,
+        interventionId,
         sourceAgent: action.sourceAgentId,
         status: "rejected",
         rejectedBy,
@@ -310,7 +395,7 @@ export class DeepNotificationAgent extends DeepAgentBase {
     this.actionLog.push({ ...action });
     this.actionQueue = this.actionQueue.filter((a) => a.id !== actionId);
 
-    return { success: true, actionId, status: "rejected", reason };
+    return { success: true, actionId, interventionId, status: "rejected", reason };
   }
 
   async sendSignal(

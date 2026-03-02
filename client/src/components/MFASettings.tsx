@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, CheckCircle, XCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { MFASetupModal } from '@/components/MFASetupModal';
 import { toast } from 'sonner';
+import { getAccessToken } from '@/lib/auth';
 
 export function MFASettings() {
   const [mfaEnabled, setMfaEnabled] = useState(false);
@@ -25,7 +26,7 @@ export function MFASettings() {
   const fetchMFAStatus = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const response = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -51,7 +52,7 @@ export function MFASettings() {
 
     setDisabling(true);
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const response = await fetch('/api/auth/mfa/disable', {
         method: 'POST',
         headers: {

@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Filter, Search, AlertTriangle, CheckCircle, Clock, Ban, Circle } from 'lucide-react';
+import { getAccessToken } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -73,7 +74,7 @@ export default function IssueManagement() {
       if (selectedStatus !== 'all') params.set('status', selectedStatus);
       if (selectedPriority !== 'all') params.set('priority', selectedPriority);
 
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/issues?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -87,7 +88,7 @@ export default function IssueManagement() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/projects', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -100,7 +101,7 @@ export default function IssueManagement() {
   // Create issue mutation
   const createIssueMutation = useMutation({
     mutationFn: async (issueData: Partial<Issue>) => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/issues', {
         method: 'POST',
         headers: {
@@ -125,7 +126,7 @@ export default function IssueManagement() {
   // Update issue mutation
   const updateIssueMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Issue> }) => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/issues/${id}`, {
         method: 'PATCH',
         headers: {

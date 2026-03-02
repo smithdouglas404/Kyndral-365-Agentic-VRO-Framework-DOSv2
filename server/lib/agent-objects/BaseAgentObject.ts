@@ -8,7 +8,7 @@
 import type { AgentType, AgentAttributeRegistryEntry } from '../AgentAttributeRegistry.js';
 
 export interface RulesService {
-  solveRule(slug: string, input: Record<string, any>): Promise<any>;
+  checkRule(functionName: string, input: Record<string, any>, metadata?: any): Promise<any>;
 }
 import { getDefaultAttributes } from '../AgentAttributeRegistry.js';
 
@@ -163,15 +163,17 @@ export class BaseAgentObject {
   }
 
   private async triggerAttributeCalculation(attributeName: string): Promise<any> {
-    const ruleSlug = `${this.agentType}-attribute-sync`;
+    const functionName = `calculate${this.agentType.charAt(0).toUpperCase() + this.agentType.slice(1)}Attribute`;
 
     try {
-      const service = this.rulesService || (globalThis as any).__rulebricksService;
+      // Try to get PalantirRulesService dynamically
+      const { getPalantirRulesService } = await import('../PalantirRulesService.js');
+      const service = this.rulesService || getPalantirRulesService();
       if (!service) {
-        throw new Error('Rulebricks service not available');
+        throw new Error('Palantir Rules service not available');
       }
 
-      const result = await service.solveRule(ruleSlug, {
+      const result = await service.checkRule(functionName, {
         agent_type: this.agentType,
         entity_id: this.entityId,
         attribute: attributeName,
@@ -188,7 +190,7 @@ export class BaseAgentObject {
         };
       }
 
-      throw new Error(`Rule evaluation failed for ${ruleSlug}`);
+      throw new Error(`Rule evaluation failed for ${functionName}`);
 
     } catch (error: any) {
       console.error(`[AgentObject] Rule evaluation error:`, error.message);

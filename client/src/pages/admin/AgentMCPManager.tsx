@@ -68,19 +68,28 @@ interface AgentConnection {
   last_used: string | null;
 }
 
-const AGENTS = [
-  { id: 'finops', name: 'DeepFinOps', domain: 'Financial Operations', icon: DollarSign, color: 'text-green-500' },
-  { id: 'tmo', name: 'DeepTMO', domain: 'Transformation Management', icon: Clock, color: 'text-blue-500' },
-  { id: 'risk', name: 'DeepRisk', domain: 'Risk Management', icon: Shield, color: 'text-red-500' },
-  { id: 'pmo', name: 'DeepPMO', domain: 'Portfolio Management', icon: Brain, color: 'text-purple-500' },
-  { id: 'governance', name: 'DeepGovernance', domain: 'Governance & Compliance', icon: Lock, color: 'text-amber-500' },
-  { id: 'vro', name: 'DeepVRO', domain: 'Value Realization', icon: TrendingUp, color: 'text-emerald-500' },
-  { id: 'ocm', name: 'DeepOCM', domain: 'Change Management', icon: Users, color: 'text-cyan-500' },
-  { id: 'planning', name: 'DeepPlanning', domain: 'Project Planning', icon: Calendar, color: 'text-indigo-500' },
-  { id: 'okr', name: 'OKR Agent', domain: 'OKR & KPI Tracking', icon: Target, color: 'text-orange-500' },
-  { id: 'integrated', name: 'Integrated Mgmt', domain: 'Cross-Agent Coordination', icon: Network, color: 'text-pink-500' },
-  { id: 'notification', name: 'Notification Agent', domain: 'Palantir Gateway & HITL', icon: Cpu, color: 'text-rose-500' },
-];
+interface AgentDefinition {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  color?: string;
+  icon?: string;
+  enabled: boolean;
+}
+
+// Map icon names to components
+const ICON_MAP: Record<string, any> = {
+  DollarSign, Clock, Shield, Brain, Lock, TrendingUp,
+  Users, Calendar, Target, Network, Cpu, Layers,
+};
+
+// Default colors based on category
+const CATEGORY_COLORS: Record<string, string> = {
+  domain: 'text-blue-500',
+  orchestration: 'text-purple-500',
+  utility: 'text-green-500',
+};
 
 const CATEGORY_LABELS: Record<string, string> = {
   agile_ppm: 'Agile PPM',
@@ -103,11 +112,36 @@ function parseCapabilities(cap: string | null): string[] {
 }
 
 export default function AgentMCPManager() {
-  const [selectedAgent, setSelectedAgent] = useState<string>('finops');
+  const [selectedAgent, setSelectedAgent] = useState<string>('');
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch agents from API
+  const { data: agentsData, isLoading: agentsLoading } = useQuery<{ agents: AgentDefinition[] }>({
+    queryKey: ['agents-enabled'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/agents?enabled=true');
+      if (!res.ok) throw new Error('Failed to fetch agents');
+      return res.json();
+    },
+  });
+
+  const AGENTS = (agentsData?.agents || []).map((agent) => ({
+    id: agent.id,
+    name: agent.name,
+    domain: agent.description || agent.category,
+    icon: ICON_MAP[agent.icon || 'Brain'] || Brain,
+    color: agent.color ? `text-[${agent.color}]` : CATEGORY_COLORS[agent.category] || 'text-blue-500',
+  }));
+
+  // Set first agent as selected when agents load
+  useState(() => {
+    if (AGENTS.length > 0 && !selectedAgent) {
+      setSelectedAgent(AGENTS[0].id);
+    }
+  });
 
   const { data: allMcps } = useQuery<McpDefinition[]>({
     queryKey: ['mcp-definitions'],
@@ -137,7 +171,7 @@ export default function AgentMCPManager() {
   });
 
   const { data: allAgentCounts } = useQuery<Record<string, number>>({
-    queryKey: ['agent-mcp-counts'],
+    queryKey: ['agent-mcp-counts', AGENTS.length],
     queryFn: async () => {
       const counts: Record<string, number> = {};
       for (const agent of AGENTS) {
@@ -147,6 +181,7 @@ export default function AgentMCPManager() {
       }
       return counts;
     },
+    enabled: AGENTS.length > 0,
   });
 
   const connectMcp = useMutation({
@@ -199,13 +234,25 @@ export default function AgentMCPManager() {
     m.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedAgentInfo = AGENTS.find(a => a.id === selectedAgent)!;
+  const selectedAgentInfo = AGENTS.find(a => a.id === selectedAgent) || AGENTS[0];
+
+  // Set first agent as selected when agents load
+  if (AGENTS.length > 0 && !selectedAgent) {
+    setSelectedAgent(AGENTS[0].id);
+  }
+
+  if (agentsLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">Loading agents...</div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
-    <AdminLayout
-      title="Agent MCP Manager"
-      description="Map data sources and governance MCPs to each agent. Each agent owns its domain-specific connections."
-    >
+    <AdminLayout>
       <div className="grid grid-cols-12 gap-6" data-testid="agent-mcp-manager">
         <div className="col-span-4 space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Agents</h3>

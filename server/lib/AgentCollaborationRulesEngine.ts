@@ -366,15 +366,16 @@ export class AgentCollaborationRulesEngine {
       case 'trigger_workflow':
         console.log(`[RulesEngine] Triggering workflow: ${action.parameters?.workflowId}`);
         try {
-          const rulebricks = (globalThis as any).__rulebricksService;
-          if (rulebricks) {
-            const result = await rulebricks.solveRule(
+          const { getPalantirRulesService } = await import('./PalantirRulesService.js');
+          const palantirRules = getPalantirRulesService();
+          if (palantirRules) {
+            const result = await palantirRules.checkRule(
               action.parameters?.workflowId || 'workflow-trigger',
               { ...facts, triggeredBy: 'rules_engine', ruleId: action.parameters?.ruleId }
             );
-            console.log(`[RulesEngine] ✅ Rulebricks workflow rule evaluated`, result);
+            console.log(`[RulesEngine] ✅ Palantir workflow rule evaluated`, result);
           } else {
-            console.warn(`[RulesEngine] Rulebricks service not available`);
+            console.warn(`[RulesEngine] Palantir Rules service not available`);
           }
         } catch (error: any) {
           console.warn(`[RulesEngine] Workflow trigger skipped:`, error.message);

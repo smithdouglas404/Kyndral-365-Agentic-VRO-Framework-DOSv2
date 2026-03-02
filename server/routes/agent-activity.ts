@@ -1,39 +1,43 @@
 /**
  * AGENT ACTIVITY API
  * Real-time agent activity logs, A2A messages, and collaboration events
+ *
+ * 🔄 MIGRATED TO DATABASE-DRIVEN (2026-03-02) - Agents loaded from AgentRegistryService
  */
 
 import type { Express } from 'express';
-import type { IStorage } from '../storage.js';
+import { db } from '../db.js';
 import { desc, eq, and, gte, sql } from 'drizzle-orm';
 import { agentActivityLog, agentCollaborationRules } from '@shared/schema';
+import { getAgentRegistry } from '../services/AgentRegistryService.js';
 
-export function registerAgentActivityRoutes(app: Express, storage: IStorage): void {
+export function registerAgentActivityRoutes(app: Express): void {
   /**
    * GET /api/agent-activity/agents
-   * Get list of all agents with metadata (no hardcoding in frontend)
+   * Get list of all agents with metadata from database
+   * 🔄 DATABASE-DRIVEN - Uses AgentRegistryService
    */
   app.get('/api/agent-activity/agents', async (req, res) => {
     try {
-      // Define agent metadata (single source of truth)
-      const agents = [
-        { id: 'finops', name: 'FinOps', type: 'deep', color: '#10b981', icon: '💰', description: 'Financial operations and budget monitoring' },
-        { id: 'tmo', name: 'TMO', type: 'deep', color: '#3b82f6', icon: '📊', description: 'Transformation management' },
-        { id: 'risk', name: 'Risk', type: 'deep', color: '#ef4444', icon: '⚠️', description: 'Risk detection and mitigation' },
-        { id: 'vro', name: 'VRO', type: 'deep', color: '#8b5cf6', icon: '🔄', description: 'Value realization' },
-        { id: 'pmo', name: 'PMO', type: 'deep', color: '#f59e0b', icon: '📋', description: 'Project management office' },
-        { id: 'ocm', name: 'OCM', type: 'deep', color: '#06b6d4', icon: '👥', description: 'Organizational change management' },
-        { id: 'governance', name: 'Governance', type: 'deep', color: '#6366f1', icon: '⚖️', description: 'Governance and compliance' },
-        { id: 'planning', name: 'Planning', type: 'deep', color: '#ec4899', icon: '🎯', description: 'Strategic planning' },
-        { id: 'integrated', name: 'Integrated', type: 'deep', color: '#14b8a6', icon: '🔗', description: 'Integrated management' },
-        { id: 'okr', name: 'OKR', type: 'deep', color: '#f97316', icon: '📈', description: 'OKR inference and tracking' },
-      ];
+      // Load agents from database via registry
+      const registry = getAgentRegistry();
+      const metadata = await registry.getAllAgentMetadata();
+
+      // Map to expected format
+      const agents = metadata.map(agent => ({
+        id: agent.id,
+        name: agent.name,
+        type: 'deep',
+        color: agent.color,
+        icon: getAgentEmoji(agent.icon),
+        description: agent.description || `${agent.name} agent`,
+      }));
 
       // Get activity status for each agent (last 5 minutes)
       const fiveMinutesAgo = new Date();
       fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
 
-      const recentActivity = await storage.db
+      const recentActivity = await db
         .select({ agentId: agentActivityLog.primaryAgentId })
         .from(agentActivityLog)
         .where(gte(agentActivityLog.createdAt, fiveMinutesAgo));
@@ -57,6 +61,27 @@ export function registerAgentActivityRoutes(app: Express, storage: IStorage): vo
     }
   });
 
+  // Helper: Convert Lucide icon names to emojis for backward compatibility
+  function getAgentEmoji(iconName?: string): string {
+    const iconMap: Record<string, string> = {
+      'DollarSign': '💰',
+      'Repeat': '🔄',
+      'AlertTriangle': '⚠️',
+      'TrendingUp': '📈',
+      'Briefcase': '📋',
+      'Users': '👥',
+      'Scale': '⚖️',
+      'Map': '🎯',
+      'Layers': '🔗',
+      'Target': '📈',
+      'Bell': '🔔',
+      'Bot': '🤖',
+      'Building': '🏢',
+      'Shield': '🛡️',
+    };
+    return iconMap[iconName || ''] || '🤖';
+  }
+
   /**
    * GET /api/agent-activity/recent
    * Get recent agent activity (last 100 events)
@@ -66,7 +91,7 @@ export function registerAgentActivityRoutes(app: Express, storage: IStorage): vo
       const limit = parseInt(req.query.limit as string) || 100;
       const agentId = req.query.agentId as string;
 
-      let query = storage.db
+      let query = db
         .select()
         .from(agentActivityLog)
         .orderBy(desc(agentActivityLog.createdAt))
@@ -103,7 +128,7 @@ export function registerAgentActivityRoutes(app: Express, storage: IStorage): vo
       const since = new Date();
       since.setHours(since.getHours() - hours);
 
-      const messages = await storage.db
+      const messages = await db
         .select()
         .from(agentActivityLog)
         .where(
@@ -139,7 +164,7 @@ export function registerAgentActivityRoutes(app: Express, storage: IStorage): vo
       since.setHours(since.getHours() - hours);
 
       // Get recent A2A messages
-      const messages = await storage.db
+      const messages = await db
         .select({
           source: agentActivityLog.primaryAgentId,
           target: agentActivityLog.secondaryAgentId,
@@ -189,13 +214,13 @@ export function registerAgentActivityRoutes(app: Express, storage: IStorage): vo
       since.setHours(since.getHours() - hours);
 
       // Total activity count
-      const [totalCount] = await storage.db
+      const [totalCount] = await db
         .select({ count: sql<number>`count(*)` })
         .from(agentActivityLog)
         .where(gte(agentActivityLog.createdAt, since));
 
       // A2A message count
-      const [a2aCount] = await storage.db
+      const [a2aCount] = await db
         .select({ count: sql<number>`count(*)` })
         .from(agentActivityLog)
         .where(
@@ -206,14 +231,14 @@ export function registerAgentActivityRoutes(app: Express, storage: IStorage): vo
         );
 
       // Active agents count
-      const activeAgents = await storage.db
+      const activeAgents = await db
         .select({ agentId: agentActivityLog.primaryAgentId })
         .from(agentActivityLog)
         .where(gte(agentActivityLog.createdAt, since))
         .groupBy(agentActivityLog.primaryAgentId);
 
       // Active collaboration rules
-      const [rulesCount] = await storage.db
+      const [rulesCount] = await db
         .select({ count: sql<number>`count(*)` })
         .from(agentCollaborationRules)
         .where(eq(agentCollaborationRules.enabled, true));

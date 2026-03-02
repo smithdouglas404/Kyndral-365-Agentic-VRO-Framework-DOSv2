@@ -81,19 +81,23 @@ const STATUS_CONFIG = {
   },
 };
 
-const AVAILABLE_AGENTS = [
-  { id: 'deep-finops', name: 'FinOps Agent' },
-  { id: 'deep-tmo', name: 'TMO Agent' },
-  { id: 'deep-risk', name: 'Risk Agent' },
-  { id: 'deep-vro', name: 'VRO Agent' },
-  { id: 'deep-pmo', name: 'PMO Agent' },
-  { id: 'deep-ocm', name: 'OCM Agent' },
-  { id: 'governance', name: 'Governance Agent' },
-  { id: 'planning', name: 'Planning Agent' },
-  { id: 'okr', name: 'OKR Agent' },
-];
+interface Agent {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
 
 export default function RuleExecutionHistory() {
+  // Fetch agents from API
+  const { data: agentsData } = useQuery<{ agents: Agent[] }>({
+    queryKey: ['agents-enabled'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/agents?enabled=true');
+      if (!res.ok) throw new Error('Failed to fetch agents');
+      return res.json();
+    },
+  });
+  const availableAgents = agentsData?.agents || [];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgent, setSelectedAgent] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -278,7 +282,7 @@ export default function RuleExecutionHistory() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Agents</SelectItem>
-                    {AVAILABLE_AGENTS.map((agent) => (
+                    {availableAgents.map((agent) => (
                       <SelectItem key={agent.id} value={agent.id}>
                         {agent.name}
                       </SelectItem>

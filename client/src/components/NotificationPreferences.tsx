@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { showSuccess } from '@/lib/errorHandling';
+import { useAgentMetadata } from '@/hooks/useAgentRegistry';
 
 /**
  * NOTIFICATION PREFERENCES
@@ -15,6 +16,8 @@ import { showSuccess } from '@/lib/errorHandling';
  * - Desktop notifications
  * - Severity filters
  * - Agent-specific preferences
+ *
+ * Agents are loaded from database via useAgentMetadata hook
  */
 
 interface NotificationPreferences {
@@ -33,18 +36,13 @@ const DEFAULT_PREFERENCES: NotificationPreferences = {
   soundVolume: 0.5,
 };
 
-const AGENTS = [
-  { id: 'finops', label: 'FinOps Agent' },
-  { id: 'tmo', label: 'TMO Agent' },
-  { id: 'risk', label: 'Risk Agent' },
-  { id: 'vro', label: 'VRO Agent' },
-  { id: 'pmo', label: 'PMO Agent' },
-  { id: 'ocm', label: 'OCM Agent' },
-];
-
 export function NotificationPreferences() {
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Load agents from database
+  const { data: agentMetadata = [] } = useAgentMetadata();
+  const agents = agentMetadata.map(a => ({ id: a.id, label: a.name }));
 
   // Load preferences from localStorage
   useEffect(() => {
@@ -224,7 +222,7 @@ export function NotificationPreferences() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {AGENTS.map((agent) => (
+          {agents.map((agent) => (
             <div key={agent.id} className="flex items-center justify-between">
               <Label htmlFor={`agent-${agent.id}`}>{agent.label}</Label>
               <Switch
@@ -236,7 +234,7 @@ export function NotificationPreferences() {
                 onCheckedChange={(checked) => {
                   if (preferences.notifyAgents.length === 0) {
                     // If all agents enabled, disable this one
-                    const updated = AGENTS.filter((a) => a.id !== agent.id).map((a) => a.id);
+                    const updated = agents.filter((a) => a.id !== agent.id).map((a) => a.id);
                     updatePreference('notifyAgents', updated);
                   } else {
                     const updated = checked
@@ -244,7 +242,7 @@ export function NotificationPreferences() {
                       : preferences.notifyAgents.filter((id) => id !== agent.id);
 
                     // If all agents selected, clear array (meaning "all")
-                    if (updated.length === AGENTS.length) {
+                    if (updated.length === agents.length) {
                       updatePreference('notifyAgents', []);
                     } else {
                       updatePreference('notifyAgents', updated);

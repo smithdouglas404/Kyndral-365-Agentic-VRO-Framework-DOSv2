@@ -11,6 +11,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Brain, Activity, MessageSquare, TrendingUp, CheckCircle, Clock, AlertCircle, Play } from 'lucide-react';
+import { getAccessToken } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export default function DeepAgentMonitoring() {
   const { data: agentsData } = useQuery({
     queryKey: ['deep-agents'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/deep-agents', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -46,7 +47,7 @@ export default function DeepAgentMonitoring() {
   const { data: statsData } = useQuery({
     queryKey: ['deep-agent-collaboration-stats'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/deep-agents/collaboration-stats', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -60,7 +61,7 @@ export default function DeepAgentMonitoring() {
   const { data: messagesData } = useQuery({
     queryKey: ['deep-agent-messages', selectedAgent],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const params = selectedAgent !== 'all' ? `?agent=${selectedAgent}` : '';
       const res = await fetch(`/api/deep-agents/messages${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -74,7 +75,7 @@ export default function DeepAgentMonitoring() {
   // Run deep agent mutation
   const runAgentMutation = useMutation({
     mutationFn: async (config: { agentName: string; goal: string; context: any }) => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/deep-agents/run', {
         method: 'POST',
         headers: {

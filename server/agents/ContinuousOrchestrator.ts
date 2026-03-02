@@ -22,7 +22,7 @@ import { EventEmitter } from 'events';
 import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } from '../websocket.js';
 import { MCP_SERVER_REGISTRY } from '../mcp/MCPServerRegistry.js';
 import { getPalantirDataProvider } from '../mcp/PalantirDataProvider.js';
-import { getRulebricksService, type RuleDefinition, type FlowExecutionResult } from '../lib/RulebricksService.js';
+import { getPalantirRulesService, type RuleResult } from '../lib/PalantirRulesService.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -206,56 +206,56 @@ export class MCPProtocolHandler {
   }
 
   /**
-   * Execute a Rulebricks rule via the orchestrator
+   * Execute a Palantir Function via the orchestrator
    *
    * Agents can call business rules through the MCP protocol handler.
    *
-   * @param ruleSlug - The Rulebricks rule slug
-   * @param input - Input data for the rule
+   * @param functionName - The Palantir Function name
+   * @param input - Input data for the function
    * @param agentId - Agent making the call (for tracking)
    */
-  async executeRule(ruleSlug: string, input: any, agentId?: string): Promise<any> {
-    console.log(`[Rulebricks] ${agentId || 'system'} → ${ruleSlug}`);
+  async executeRule(functionName: string, input: any, agentId?: string): Promise<any> {
+    console.log(`[PalantirRules] ${agentId || 'system'} → ${functionName}`);
 
     try {
-      const rb = getRulebricksService();
+      const rules = getPalantirRulesService();
 
-      if (!rb) {
-        console.warn('[Rulebricks] Service not configured');
+      if (!rules) {
+        console.warn('[PalantirRules] Service not configured');
         return {
           success: false,
-          error: 'Rulebricks not configured',
-          slug: ruleSlug,
+          error: 'Palantir Rules not configured',
+          functionName,
         };
       }
 
-      const result = await rb.solveRule(ruleSlug, input);
+      const result = await rules.checkRule(functionName, input, { agentId });
 
       if (!result.success) {
-        console.error(`[Rulebricks] Rule ${ruleSlug} failed:`, result.error);
+        console.error(`[PalantirRules] Function ${functionName} failed:`, result.error);
         return {
           success: false,
-          slug: ruleSlug,
+          functionName,
           error: result.error,
           agentId,
         };
       }
 
-      console.log(`[Rulebricks] Rule ${ruleSlug} completed in ${result.executionTime}ms`);
+      console.log(`[PalantirRules] Function ${functionName} completed in ${result.executionTime}ms`);
 
       return {
         success: true,
-        slug: ruleSlug,
+        functionName,
         result: result.result,
         executionTime: result.executionTime,
         agentId,
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
-      console.error(`[Rulebricks] Rule execution failed for ${ruleSlug}:`, error.message);
+      console.error(`[PalantirRules] Function execution failed for ${functionName}:`, error.message);
       return {
         success: false,
-        slug: ruleSlug,
+        functionName,
         error: error.message,
         agentId,
       };
@@ -263,44 +263,49 @@ export class MCPProtocolHandler {
   }
 
   /**
-   * Execute a Rulebricks flow (multi-rule workflow)
+   * Execute a Palantir Action (workflow trigger)
    *
-   * Flows chain multiple rules together for complex agent workflows.
+   * Actions execute multi-step workflows in Palantir.
    *
-   * @param flowSlug - The flow slug to execute
-   * @param input - Input data for the flow
-   * @param agentId - Agent initiating the flow (for tracking)
+   * @param actionName - The action name to execute
+   * @param input - Input data for the action
+   * @param agentId - Agent initiating the action (for tracking)
    */
-  async executeFlow(flowSlug: string, input: any, agentId?: string): Promise<FlowExecutionResult> {
-    console.log(`[Rulebricks Flow] ${agentId || 'system'} → ${flowSlug}`);
+  async executeFlow(actionName: string, input: any, agentId?: string): Promise<{ success: boolean; outputs: Record<string, any>; executionTime: number; error?: string }> {
+    console.log(`[PalantirAction] ${agentId || 'system'} → ${actionName}`);
 
     try {
-      const rb = getRulebricksService();
+      const rules = getPalantirRulesService();
 
-      if (!rb) {
-        console.warn('[Rulebricks] Service not configured');
+      if (!rules) {
+        console.warn('[PalantirRules] Service not configured');
         return {
-          flowSlug,
           success: false,
           outputs: {},
           executionTime: 0,
-          error: 'Rulebricks not configured',
+          error: 'Palantir Rules not configured',
         };
       }
 
-      const result = await rb.executeFlow(flowSlug, input);
+      const startTime = Date.now();
+      const result = await rules.executeAction(actionName, input);
+      const executionTime = Date.now() - startTime;
 
       if (!result.success) {
-        console.error(`[Rulebricks Flow] ${flowSlug} failed:`, result.error);
+        console.error(`[PalantirAction] ${actionName} failed:`, result.error);
       } else {
-        console.log(`[Rulebricks Flow] ${flowSlug} completed in ${result.executionTime}ms`);
+        console.log(`[PalantirAction] ${actionName} completed in ${executionTime}ms`);
       }
 
-      return result;
-    } catch (error: any) {
-      console.error(`[Rulebricks Flow] Execution failed for ${flowSlug}:`, error.message);
       return {
-        flowSlug,
+        success: result.success,
+        outputs: result.result || {},
+        executionTime,
+        error: result.error,
+      };
+    } catch (error: any) {
+      console.error(`[PalantirAction] Execution failed for ${actionName}:`, error.message);
+      return {
         success: false,
         outputs: {},
         executionTime: 0,
@@ -359,9 +364,8 @@ export class ContinuousOrchestrator {
   private skippedScans: number = 0;
   private totalScans: number = 0;
 
-  // Rulebricks rule tracking
-  private cachedRules: RuleDefinition[] = [];
-  private ruleFingerprints: Map<string, string> = new Map();
+  // Palantir Rules tracking
+  private rulesServiceAvailable: boolean = false;
   private static RULE_CHECK_INTERVAL = 10; // Check rules every N cycles
 
   /**
@@ -409,41 +413,65 @@ export class ContinuousOrchestrator {
 
   /**
    * Register external MCP services
-   * Registers ALL 31+ available MCP services from the complete registry
+   * Only registers ACTIVE services with configured credentials:
+   * - Palantir (ontology source of truth)
+   * - Jira (external project sync)
+   * - OpenProject (external project sync)
+   * - Monday.com (external project sync)
    */
   private registerMCPServicesSync(): void {
     const services: MCPService[] = [];
 
-    // Convert all available MCP servers to service definitions
-    for (const [id, server] of Object.entries(MCP_SERVER_REGISTRY)) {
-      // Only register services that are available (not coming_soon or enterprise_only without config)
-      if (server.status !== 'available') continue;
+    // Only register services that are actually configured with credentials
+    const activeServices = ['palantir', 'jira', 'openproject', 'monday'];
 
-      // Map protocol based on category
+    for (const id of activeServices) {
+      const server = MCP_SERVER_REGISTRY[id];
+
+      // Build endpoint from environment
+      let endpoint = '';
       let protocol: 'http' | 'websocket' | 'grpc' = 'http';
-      if (id === 'slack') protocol = 'websocket';
 
-      // Get endpoint from environment or use placeholder
-      const envKey = `${id.toUpperCase().replace(/-/g, '_')}_URL`;
-      const endpoint = process.env[envKey] ||
-        server.configFields.find((f: any) => f.type === 'url')?.placeholder ||
-        `https://${id}.example.com`;
+      switch (id) {
+        case 'palantir':
+          endpoint = process.env.PALANTIR_HOSTNAME
+            ? `https://${process.env.PALANTIR_HOSTNAME}`
+            : 'https://palantir.example.com';
+          break;
+        case 'jira':
+          endpoint = process.env.JIRA_DOMAIN
+            ? `https://${process.env.JIRA_DOMAIN}`
+            : 'https://jira.example.com';
+          break;
+        case 'openproject':
+          endpoint = process.env.OPENPROJECT_URL || 'https://openproject.example.com';
+          break;
+        case 'monday':
+          endpoint = 'https://api.monday.com/v2';
+          break;
+      }
+
+      const capabilities = server?.capabilities || [
+        'Project sync',
+        'Data integration',
+        'Ontology access'
+      ];
 
       services.push({
         name: id,
         protocol,
         endpoint,
-        capabilities: server.capabilities,
+        capabilities,
       });
     }
 
-    // Register all services
+    // Register active services
     for (const service of services) {
       this.mcpHandler.registerService(service);
     }
 
-    console.log(`[ContinuousOrchestrator] ✅ Registered ${services.length} MCP services from registry`);
-    console.log(`[ContinuousOrchestrator] Services: ${services.map(s => s.name).slice(0, 10).join(', ')}...`);
+    console.log(`[ContinuousOrchestrator] ✅ Registered ${services.length} active MCP services`);
+    console.log(`[ContinuousOrchestrator] Services: ${services.map(s => s.name).join(', ')}`);
   }
 
   /**
@@ -534,43 +562,39 @@ export class ContinuousOrchestrator {
   }
 
   /**
-   * Initialize Rulebricks - load rules and create initial fingerprints
+   * Initialize Palantir Rules Service
    */
-  private async initializeRulebricks(): Promise<void> {
-    const rb = getRulebricksService();
-    if (!rb) {
-      console.log('[ContinuousOrchestrator] Rulebricks not configured - skipping rule sync');
+  private async initializePalantirRules(): Promise<void> {
+    const rules = getPalantirRulesService();
+    if (!rules) {
+      console.log('[ContinuousOrchestrator] Palantir Rules not configured - using local thresholds');
+      this.rulesServiceAvailable = false;
       return;
     }
 
     try {
-      this.cachedRules = await rb.listRules();
+      const connected = await rules.testConnection();
+      this.rulesServiceAvailable = connected;
 
-      // Create initial fingerprints
-      for (const rule of this.cachedRules) {
-        const fingerprint = this.computeRuleFingerprint(rule);
-        this.ruleFingerprints.set(rule.slug, fingerprint);
-      }
+      if (connected) {
+        console.log('[ContinuousOrchestrator] ✅ Palantir Rules connected - using Palantir Functions');
 
-      console.log(`[ContinuousOrchestrator] ✅ Rulebricks initialized: ${this.cachedRules.length} rules loaded`);
-
-      // Notify all agents of available rules
-      for (const rule of this.cachedRules) {
-        const owningAgentId = ContinuousOrchestrator.RULE_TO_AGENT_MAP[rule.slug];
-        if (owningAgentId) {
-          const agent = this.agents.get(owningAgentId);
-          if (agent && typeof agent.learn === 'function') {
-            await agent.learn(`rule_${rule.slug}`, {
-              slug: rule.slug,
-              name: rule.name,
-              description: rule.description,
+        // Notify all agents of available functions
+        for (const [agentId, agent] of this.agents) {
+          const functions = rules.getFunctionsForAgent(agentId);
+          if (functions.length > 0 && typeof agent.learn === 'function') {
+            await agent.learn('palantir_functions', {
+              functions,
               loadedAt: new Date().toISOString(),
             });
           }
         }
+      } else {
+        console.log('[ContinuousOrchestrator] Palantir not reachable - using local threshold fallbacks');
       }
     } catch (error: any) {
-      console.warn(`[ContinuousOrchestrator] Failed to initialize Rulebricks: ${error.message}`);
+      console.warn(`[ContinuousOrchestrator] Palantir Rules initialization failed: ${error.message}`);
+      this.rulesServiceAvailable = false;
     }
   }
 
@@ -589,127 +613,76 @@ export class ContinuousOrchestrator {
   };
 
   /**
-   * Check Rulebricks for rule changes and notify affected agents
+   * Check Palantir Rules connection and notify agents
    */
-  private async checkRulebricksChanges(): Promise<void> {
-    const rb = getRulebricksService();
-    if (!rb) return;
+  private async checkPalantirConnection(): Promise<void> {
+    const rules = getPalantirRulesService();
+    if (!rules) return;
 
     try {
-      const currentRules = await rb.listRules();
-      const changedRules: RuleDefinition[] = [];
-
-      for (const rule of currentRules) {
-        const fingerprint = this.computeRuleFingerprint(rule);
-        const previousFingerprint = this.ruleFingerprints.get(rule.slug);
-
-        if (previousFingerprint && previousFingerprint !== fingerprint) {
-          changedRules.push(rule);
-          console.log(`[Rulebricks] Rule changed: ${rule.slug}`);
-        }
-
-        this.ruleFingerprints.set(rule.slug, fingerprint);
-      }
-
-      // Check for new rules
-      for (const rule of currentRules) {
-        const existingRule = this.cachedRules.find(r => r.slug === rule.slug);
-        if (!existingRule) {
-          changedRules.push(rule);
-          console.log(`[Rulebricks] New rule detected: ${rule.slug}`);
-        }
-      }
-
-      this.cachedRules = currentRules;
-
-      // Broadcast changes to affected agents
-      if (changedRules.length > 0) {
-        await this.broadcastRuleChanges(changedRules);
+      const connected = await rules.testConnection();
+      if (connected !== this.rulesServiceAvailable) {
+        this.rulesServiceAvailable = connected;
+        console.log(`[PalantirRules] Connection status changed: ${connected ? 'connected' : 'disconnected'}`);
       }
     } catch (error: any) {
-      console.warn(`[Rulebricks] Failed to check for rule changes: ${error.message}`);
+      console.warn(`[PalantirRules] Connection check failed: ${error.message}`);
+      this.rulesServiceAvailable = false;
     }
   }
 
   /**
-   * Compute a fingerprint for a rule to detect changes
+   * Broadcast threshold changes to affected agents via A2A
    */
-  private computeRuleFingerprint(rule: RuleDefinition): string {
-    const key = `${rule.id}|${rule.slug}|${rule.name}|${rule.description || ''}`;
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      const chr = key.charCodeAt(i);
-      hash = ((hash << 5) - hash) + chr;
-      hash |= 0;
-    }
-    return hash.toString(36);
-  }
+  private async broadcastThresholdChanges(changes: Array<{ agentType: string; thresholdType: string; newValue: number }>): Promise<void> {
+    for (const change of changes) {
+      const agentId = change.agentType;
 
-  /**
-   * Broadcast rule changes to affected agents via A2A
-   */
-  private async broadcastRuleChanges(changedRules: RuleDefinition[]): Promise<void> {
-    for (const rule of changedRules) {
-      const owningAgentId = ContinuousOrchestrator.RULE_TO_AGENT_MAP[rule.slug];
-
-      if (owningAgentId && this.agents.has(owningAgentId)) {
+      if (this.agents.has(agentId)) {
         const message: AgentMessage = {
           from: 'orchestrator',
-          to: owningAgentId,
+          to: agentId,
           type: 'alert',
-          content: `Rule "${rule.slug}" has been updated. Refresh your rule cache.`,
-          severity: 'medium',
+          content: `Threshold "${change.thresholdType}" has been updated to ${change.newValue}.`,
+          severity: 'low',
         };
 
         await this.a2aBus.send(message);
 
         // Also store in agent's Letta memory via learn()
-        const agent = this.agents.get(owningAgentId);
+        const agent = this.agents.get(agentId);
         if (agent && typeof agent.learn === 'function') {
-          await agent.learn(`rule_update_${rule.slug}`, {
-            slug: rule.slug,
-            name: rule.name,
-            description: rule.description,
+          await agent.learn(`threshold_update_${change.thresholdType}`, {
+            thresholdType: change.thresholdType,
+            newValue: change.newValue,
             updatedAt: new Date().toISOString(),
           });
         }
 
-        console.log(`[Rulebricks] Notified ${owningAgentId} agent of rule change: ${rule.slug}`);
-      }
-
-      // Broadcast to all agents for rules that affect multiple domains
-      if (!owningAgentId) {
-        const allAgentIds = Array.from(this.agents.keys());
-        await this.a2aBus.broadcast(
-          {
-            from: 'orchestrator',
-            type: 'alert',
-            content: `Global rule "${rule.slug}" has been updated.`,
-            severity: 'low',
-          },
-          allAgentIds
-        );
+        console.log(`[PalantirRules] Notified ${agentId} agent of threshold change: ${change.thresholdType}`);
       }
     }
 
-    // Log rule sync activity
-    await this.storage.createAgentActivityLog({
-      eventType: 'autonomous_action',
-      primaryAgentId: 'orchestrator',
-      primaryAgentName: 'Orchestrator',
-      summary: `[Rulebricks] ${changedRules.length} rule(s) updated and synced to agents`,
-      details: JSON.stringify({
-        rules: changedRules.map(r => r.slug),
-        timestamp: new Date().toISOString(),
-      }),
-    });
+    // Log threshold sync activity
+    if (changes.length > 0) {
+      await this.storage.createAgentActivityLog({
+        eventType: 'autonomous_action',
+        primaryAgentId: 'orchestrator',
+        primaryAgentName: 'Orchestrator',
+        summary: `[PalantirRules] ${changes.length} threshold(s) updated and synced to agents`,
+        details: JSON.stringify({
+          changes,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    }
   }
 
   /**
-   * Get current cached rules
+   * Check if Palantir Rules service is available
    */
-  getCachedRules(): RuleDefinition[] {
-    return this.cachedRules;
+  isRulesServiceAvailable(): boolean {
+    return this.rulesServiceAvailable;
   }
 
   // ============ Agent Workflow Flows ============
@@ -743,9 +716,9 @@ export class ContinuousOrchestrator {
   /**
    * Trigger an agent workflow flow
    *
-   * This executes a Rulebricks flow and coordinates the involved agents.
+   * This executes a Palantir Action and coordinates the involved agents.
    *
-   * @param workflowSlug - The workflow/flow slug to execute
+   * @param workflowSlug - The workflow/action slug to execute
    * @param input - Input data for the workflow
    * @param triggeringAgentId - Agent that triggered the workflow
    */
@@ -764,7 +737,7 @@ export class ContinuousOrchestrator {
     console.log(`[Orchestrator] Triggering workflow "${workflowSlug}" by ${triggeringAgentId || 'system'}`);
     console.log(`[Orchestrator] Workflow involves agents: ${workflow.agents.join(' → ')}`);
 
-    // Execute the Rulebricks flow
+    // Execute the Palantir Action
     const flowResult = await this.mcpHandler.executeFlow(workflowSlug, input, triggeringAgentId);
 
     if (!flowResult.success) {
@@ -851,8 +824,8 @@ export class ContinuousOrchestrator {
     this.isRunning = true;
     console.log(`[ContinuousOrchestrator] Starting 24x7 coordination (interval: ${intervalMs}ms)`);
 
-    // Load initial rules from Rulebricks
-    await this.initializeRulebricks();
+    // Initialize Palantir Rules Service
+    await this.initializePalantirRules();
 
     // Run first cycle immediately
     await this.orchestrationCycle();
@@ -885,9 +858,9 @@ export class ContinuousOrchestrator {
     try {
       console.log(`\n[ContinuousOrchestrator] === Cycle ${this.cycleCount} ===`);
 
-      // Check for Rulebricks rule changes periodically
+      // Check Palantir Rules connection periodically
       if (this.cycleCount % ContinuousOrchestrator.RULE_CHECK_INTERVAL === 0) {
-        await this.checkRulebricksChanges();
+        await this.checkPalantirConnection();
       }
 
       // Phase 1: Select active agent for this cycle (round-robin)
@@ -1799,7 +1772,7 @@ export class ContinuousOrchestrator {
   getStatus() {
     const a2aStatus = this.a2aBus.getStatus();
     const mcpServices = this.mcpHandler.getServices();
-    const rb = getRulebricksService();
+    const rules = getPalantirRulesService();
 
     return {
       isRunning: this.isRunning,
@@ -1815,11 +1788,10 @@ export class ContinuousOrchestrator {
         servicesRegistered: mcpServices.length,
         services: mcpServices.map(s => s.name),
       },
-      rulebricks: {
-        configured: rb !== null,
-        cachedRules: this.cachedRules.length,
-        trackedRules: this.ruleFingerprints.size,
-        ruleCheckInterval: ContinuousOrchestrator.RULE_CHECK_INTERVAL,
+      palantirRules: {
+        configured: rules !== null,
+        connected: this.rulesServiceAvailable,
+        checkInterval: ContinuousOrchestrator.RULE_CHECK_INTERVAL,
       },
     };
   }

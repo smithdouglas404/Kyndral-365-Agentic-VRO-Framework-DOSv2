@@ -46,7 +46,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         }),
         func: async ({ projectId, limit }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (projectId) {
               projects = projects.filter(p => p.id === projectId);
@@ -55,7 +55,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
             const qualityData = [];
 
             for (const project of projects.slice(0, limit)) {
-              const milestones = await this.storage.getMilestones(project.id);
+              const milestones = await this.getMilestones(project.id);
               const completedMilestones = milestones.filter(m => m.status === 'completed').length;
               const totalMilestones = milestones.length;
 
@@ -121,7 +121,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         }),
         func: async ({ projectId }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (projectId) {
               projects = projects.filter(p => p.id === projectId);
@@ -130,7 +130,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
             const milestoneIssues: any[] = [];
 
             for (const project of projects) {
-              const milestones = await this.storage.getMilestones(project.id);
+              const milestones = await this.getMilestones(project.id);
 
               for (const milestone of milestones) {
                 if (!milestone.targetDate) continue;
@@ -201,7 +201,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         }),
         func: async ({ artId }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (artId) {
               projects = projects.filter(p => p.artId === artId);
@@ -271,7 +271,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
         }),
         func: async ({ daysToRelease }) => {
           try {
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
             const now = new Date();
             const cutoffDate = new Date(now.getTime() + daysToRelease * 24 * 60 * 60 * 1000);
 
@@ -281,7 +281,7 @@ export class DeepIntegratedMgmtAgent extends DeepAgentBase {
               const endDate = project.endDate ? new Date(project.endDate) : null;
 
               if (endDate && endDate <= cutoffDate && endDate >= now) {
-                const milestones = await this.storage.getMilestones(project.id);
+                const milestones = await this.getMilestones(project.id);
                 const completedMilestones = milestones.filter(m => m.status === 'completed').length;
                 const predictability = parseInt(project.predictability || '0');
 

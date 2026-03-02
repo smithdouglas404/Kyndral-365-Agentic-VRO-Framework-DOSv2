@@ -129,6 +129,8 @@ const ACTION_SEVERITY: Record<string, 'critical' | 'warning' | 'info'> = {
 const DEMO_SCENARIOS = ['budget-breach', 'critical-project', 'value-at-risk'];
 const AGENT_DISPLAY_NAMES: Record<AgentType, string> = {
   'integrated-management': 'Integrated Management Agent',
+  vro: 'VRO Agent',
+  pmo: 'PMO Agent',
   tmo: 'TMO Agent',
   finops: 'FinOps Agent',
   okr: 'OKR Agent',

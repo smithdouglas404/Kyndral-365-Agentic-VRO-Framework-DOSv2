@@ -57,19 +57,41 @@ interface AgentPairDetails {
   }[];
 }
 
-const AGENT_LIST = [
-  { id: 'deep-finops', name: 'FinOps', shortName: 'FO', color: 'bg-green-500' },
-  { id: 'deep-tmo', name: 'TMO', shortName: 'TM', color: 'bg-purple-500' },
-  { id: 'deep-risk', name: 'Risk', shortName: 'RK', color: 'bg-red-500' },
-  { id: 'deep-vro', name: 'VRO', shortName: 'VR', color: 'bg-orange-500' },
-  { id: 'deep-pmo', name: 'PMO', shortName: 'PM', color: 'bg-teal-500' },
-  { id: 'deep-ocm', name: 'OCM', shortName: 'OC', color: 'bg-pink-500' },
-  { id: 'governance', name: 'Governance', shortName: 'GV', color: 'bg-blue-500' },
-  { id: 'planning', name: 'Planning', shortName: 'PL', color: 'bg-indigo-500' },
-  { id: 'okr', name: 'OKR', shortName: 'OK', color: 'bg-yellow-500' },
+interface Agent {
+  id: string;
+  name: string;
+  color?: string;
+  enabled: boolean;
+}
+
+// Helper to generate short name from agent name
+function getShortName(name: string): string {
+  return name.split(' ')[0].substring(0, 2).toUpperCase();
+}
+
+// Default colors for agents that don't have one
+const DEFAULT_COLORS = [
+  'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-orange-500',
+  'bg-teal-500', 'bg-pink-500', 'bg-blue-500', 'bg-indigo-500', 'bg-yellow-500',
 ];
 
 export default function AgentCollaborationMatrix() {
+  // Fetch agents from API
+  const { data: agentsData } = useQuery<{ agents: Agent[] }>({
+    queryKey: ['agents-enabled'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/agents?enabled=true');
+      if (!res.ok) throw new Error('Failed to fetch agents');
+      return res.json();
+    },
+  });
+
+  const AGENT_LIST = (agentsData?.agents || []).map((agent, index) => ({
+    id: agent.id,
+    name: agent.name,
+    shortName: getShortName(agent.name),
+    color: agent.color ? `bg-[${agent.color}]` : DEFAULT_COLORS[index % DEFAULT_COLORS.length],
+  }));
   const [dateRange, setDateRange] = useState<string>('7days');
   const [selectedPair, setSelectedPair] = useState<{ from: string; to: string } | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);

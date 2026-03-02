@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Shield, TrendingUp, Grid, FileText, Map, Brain } from 'lucide-react';
 import { useRiskInsights } from '@/hooks/useAgentInsights';
+import { getAccessToken } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ export default function RiskManagement() {
       const params = new URLSearchParams();
       if (selectedProject !== 'all') params.set('projectId', selectedProject);
 
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch(`/api/risks?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -47,7 +48,7 @@ export default function RiskManagement() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const res = await fetch('/api/projects', {
         headers: { 'Authorization': `Bearer ${token}` }
       });

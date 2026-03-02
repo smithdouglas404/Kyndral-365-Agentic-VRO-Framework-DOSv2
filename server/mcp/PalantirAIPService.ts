@@ -158,6 +158,68 @@ export class PalantirAIPService {
     return this.request('POST', `/ontologies/${rid}/actions/${actionApiName}/apply`, { parameters });
   }
 
+  /**
+   * Execute an action by RID (alias for applyAction with RID support)
+   */
+  async executeAction(ontologyRid: string, actionRid: string, parameters: Record<string, any>): Promise<any> {
+    // Extract action API name from RID if needed
+    const actionName = actionRid.includes('.action.')
+      ? actionRid.split('.action.')[1]
+      : actionRid;
+    return this.request('POST', `/ontologies/${ontologyRid}/actions/${actionName}/apply`, { parameters });
+  }
+
+  /**
+   * Validate action parameters before execution
+   */
+  async validateAction(ontologyRid: string, actionRid: string, parameters: Record<string, any>): Promise<{
+    valid: boolean;
+    errors?: Array<{ parameter: string; message: string; code: string }>;
+  }> {
+    try {
+      const actionName = actionRid.includes('.action.')
+        ? actionRid.split('.action.')[1]
+        : actionRid;
+      const result = await this.request('POST', `/ontologies/${ontologyRid}/actions/${actionName}/validate`, { parameters });
+      return { valid: true, errors: [] };
+    } catch (error: any) {
+      return {
+        valid: false,
+        errors: [{ parameter: '', message: error.message, code: 'VALIDATION_ERROR' }],
+      };
+    }
+  }
+
+  /**
+   * List all available actions in the ontology
+   */
+  async listActions(ontologyRid?: string): Promise<Array<{
+    rid: string;
+    apiName: string;
+    displayName: string;
+    description?: string;
+    parameters: Array<{ name: string; type: string; required: boolean }>;
+  }>> {
+    const rid = ontologyRid || await this.resolveOntology();
+    try {
+      const data = await this.request('GET', `/ontologies/${rid}/actionTypes`);
+      return (data.data || []).map((action: any) => ({
+        rid: action.rid || action.apiName,
+        apiName: action.apiName,
+        displayName: action.displayName || action.apiName,
+        description: action.description,
+        parameters: (action.parameters || []).map((p: any) => ({
+          name: p.name || p.id,
+          type: p.dataType?.type || 'string',
+          required: p.required ?? true,
+        })),
+      }));
+    } catch (error: any) {
+      console.warn(`[Palantir] Could not list actions: ${error.message}`);
+      return [];
+    }
+  }
+
   async executeQuery(queryApiName: string, parameters: Record<string, any>, ontologyRid?: string): Promise<any> {
     const rid = ontologyRid || await this.resolveOntology();
     return this.request('POST', `/ontologies/${rid}/queries/${queryApiName}/execute`, { parameters });

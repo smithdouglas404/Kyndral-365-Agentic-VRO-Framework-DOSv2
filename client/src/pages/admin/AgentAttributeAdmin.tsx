@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,20 +10,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
 import { useAgentAttributes } from '@/hooks/useAgentAttributes';
 
-const AGENTS = [
-  { id: 'pmo', label: 'PMO' },
-  { id: 'finops', label: 'FinOps' },
-  { id: 'vro', label: 'VRO' },
-  { id: 'planning', label: 'Planning' },
-  { id: 'ocm', label: 'OCM' },
-  { id: 'risk', label: 'Risk' },
-  { id: 'governance', label: 'Governance' },
-  { id: 'tmo', label: 'TMO' },
-  { id: 'company', label: 'Company' },
-];
+interface Agent {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
 
 export default function AgentAttributeAdmin() {
-  const [selectedAgent, setSelectedAgent] = useState('ocm');
+  // Fetch agents from API
+  const { data: agentsData, isLoading: agentsLoading } = useQuery<{ agents: Agent[] }>({
+    queryKey: ['agents-enabled'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/agents?enabled=true');
+      if (!res.ok) throw new Error('Failed to fetch agents');
+      return res.json();
+    },
+  });
+  const AGENTS = (agentsData?.agents || []).map(a => ({ id: a.id, label: a.name }));
+  const [selectedAgent, setSelectedAgent] = useState('');
+
+  // Set first agent as selected when agents load
+  if (AGENTS.length > 0 && !selectedAgent) {
+    setSelectedAgent(AGENTS[0].id);
+  }
   const [selectedAttribute, setSelectedAttribute] = useState('');
   const [value, setValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'admin_required' | 'mcp_required' | 'missing' | 'available'>('all');

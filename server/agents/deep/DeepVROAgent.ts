@@ -82,7 +82,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
         }),
         func: async ({ projectId, valueMetrics }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -255,7 +255,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
         }),
         func: async ({ projectId, includeProjections = true }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -390,7 +390,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
         }),
         func: async ({ projectId, strategicPriorities }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -539,7 +539,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
         }),
         func: async ({ projectId, forecastMonths = 12 }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }
@@ -690,7 +690,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
         }),
         func: async ({ projectId, optimizationFocus }) => {
           try {
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found", projectId };
             }

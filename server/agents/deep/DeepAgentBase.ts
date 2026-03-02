@@ -1,11 +1,15 @@
 /**
- * DEEP AGENT BASE v3.0
+ * DEEP AGENT BASE v4.0 - PALANTIR ONTOLOGY FIRST
  *
  * Enhanced agent with Deep Agent capabilities:
  * - Planning: Think before acting
  * - Reflection: Evaluate outcomes and adjust
  * - Multi-step reasoning: Break down complex tasks
  * - Memory: Maintain context across interactions
+ *
+ * DATA SOURCE: Palantir Foundry Ontology (via OntologyDataProvider)
+ * - All data reads from Palantir as single source of truth
+ * - PostgreSQL is NOT used for primary data
  *
  * NO LANGCHAIN DEPENDENCY for LLM calls.
  * Uses SmartModelRouter -> OpenRouterClient for all AI calls.
@@ -18,6 +22,8 @@ import { getMem0Service, type Fact } from "../../lib/Mem0Service.js";
 import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMemory.js";
 import { createMemoryManager, type MemoryManager } from "../../lib/MemoryManager.js";
 import { getSmartRouter, SmartModelRouter, ModelTier, type ProjectChangeEvent } from "../../lib/SmartModelRouter.js";
+import { OntologyDataProvider, type QueryOptions, type QueryFilter } from "../../services/OntologyDataProvider.js";
+import { getPalantirActionsService, type CreateInterventionParams, type CreateAlertParams } from "../../services/PalantirActionsService.js";
 type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
 
 /**
@@ -146,6 +152,376 @@ export abstract class DeepAgentBase {
   isEnabled(): boolean {
     return this.aiEnabled;
   }
+
+  // ============================================================================
+  // PALANTIR ONTOLOGY DATA ACCESS METHODS
+  // All data reads go through OntologyDataProvider -> Palantir Foundry
+  // ============================================================================
+
+  /**
+   * Get a single project from Palantir Ontology
+   */
+  protected async getProject(projectId: string): Promise<any | null> {
+    try {
+      const result = await OntologyDataProvider.query('Project', {
+        filters: [{ field: 'projectId', operator: 'eq', value: projectId }],
+        pageSize: 1
+      });
+      return result.data[0] || null;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get project from Palantir:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Get all projects from Palantir Ontology
+   */
+  protected async getProjects(options?: QueryOptions): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Project', {
+        pageSize: 100,
+        ...options
+      });
+      console.log(`[${this.config.agentName}] Retrieved ${result.data.length} projects from Palantir (source: ${result.source})`);
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get projects from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get risks from Palantir Ontology
+   */
+  protected async getRisks(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Risk', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get risks from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get risks for a specific project
+   */
+  protected async getProjectRisks(projectId: string): Promise<any[]> {
+    return this.getRisks([{ field: 'projectId', operator: 'eq', value: projectId }]);
+  }
+
+  /**
+   * Get budgets from Palantir Ontology
+   */
+  protected async getBudgets(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Budget', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get budgets from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get budget for a specific project
+   */
+  protected async getProjectBudget(projectId: string): Promise<any | null> {
+    const budgets = await this.getBudgets([{ field: 'projectId', operator: 'eq', value: projectId }]);
+    return budgets[0] || null;
+  }
+
+  /**
+   * Get objectives (OKRs) from Palantir Ontology
+   */
+  protected async getObjectives(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Objective', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get objectives from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get key results from Palantir Ontology
+   */
+  protected async getKeyResults(objectiveId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = objectiveId
+        ? [{ field: 'objectiveId', operator: 'eq', value: objectiveId }]
+        : [];
+      const result = await OntologyDataProvider.query('KeyResult', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get key results from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get metrics/KPIs from Palantir Ontology
+   */
+  protected async getMetrics(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Metric', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get metrics from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get teams from Palantir Ontology
+   */
+  protected async getTeams(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Team', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get teams from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get dependencies from Palantir Ontology
+   */
+  protected async getDependencies(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'sourceProjectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('Dependency', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get dependencies from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get milestones from Palantir Ontology
+   */
+  protected async getMilestones(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('Milestone', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get milestones from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get governance checkpoints from Palantir Ontology
+   */
+  protected async getGovernanceCheckpoints(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('ComplianceCheck', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get governance checkpoints from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get change initiatives (OCM) from Palantir Ontology
+   */
+  protected async getChangeInitiatives(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('ChangeInitiative', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get change initiatives from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get dashboard metrics aggregated from Palantir
+   */
+  protected async getDashboardMetrics(): Promise<any> {
+    try {
+      return await OntologyDataProvider.getDashboardMetrics();
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get dashboard metrics from Palantir:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Query any Palantir object type with custom filters
+   */
+  protected async queryOntology(objectType: string, options?: QueryOptions): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query(objectType, options);
+      console.log(`[${this.config.agentName}] Queried ${result.data.length} ${objectType} objects from Palantir`);
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to query ${objectType} from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get work items (tasks/stories) from Palantir Ontology
+   */
+  protected async getTasks(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('WorkItem', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get tasks from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get stories by project from Palantir Ontology
+   */
+  protected async getStoriesByProject(projectId: string): Promise<any[]> {
+    return this.getTasks(projectId);
+  }
+
+  /**
+   * Get interventions from Palantir Ontology
+   */
+  protected async getInterventions(filters?: QueryFilter[]): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Intervention', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get interventions from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get OKRs for a division from Palantir Ontology
+   */
+  protected async getDivisionOkrs(divisionId: string): Promise<any[]> {
+    try {
+      const result = await OntologyDataProvider.query('Objective', {
+        filters: [{ field: 'businessUnitId', operator: 'eq', value: divisionId }],
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get division OKRs from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get issues from Palantir Ontology
+   */
+  protected async getIssues(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('Issue', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get issues from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get change requests from Palantir Ontology
+   */
+  protected async getChangeRequests(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('ChangeRequest', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get change requests from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get resource allocations from Palantir Ontology
+   */
+  protected async getResourceAllocations(projectId?: string): Promise<any[]> {
+    try {
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query('ResourceAllocation', {
+        filters,
+        pageSize: 100
+      });
+      return result.data;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Failed to get resource allocations from Palantir:`, error.message);
+      return [];
+    }
+  }
+
+  // ============================================================================
+  // END PALANTIR DATA ACCESS METHODS
+  // ============================================================================
 
   /**
    * Get agent configuration
@@ -298,12 +674,23 @@ export abstract class DeepAgentBase {
 
   /**
    * Create intervention with automatic duplicate checking
+   * Creates intervention in Palantir Foundry for HITL approval workflow
    * Returns intervention ID if created, null if duplicate detected
    */
   protected async createInterventionIfNew(
     entityId: string,
     interventionType: string,
-    interventionData: any,
+    interventionData: {
+      title: string;
+      description: string;
+      recommendation: string;
+      severity?: "critical" | "high" | "medium" | "low";
+      projectId?: string;
+      estimatedImpact?: string;
+      requiredApprovers?: string[];
+      autoApproveAfterHours?: number;
+      metadata?: Record<string, unknown>;
+    },
     withinHours: number = 24
   ): Promise<string | null> {
     // Check for recent duplicate
@@ -314,34 +701,136 @@ export abstract class DeepAgentBase {
       return null;
     }
 
-    // Create the intervention (agents must implement this)
-    const interventionId = `intervention_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Create the intervention in Palantir Foundry (HITL workflow)
+    const actionsService = getPalantirActionsService();
+    const result = await actionsService.createIntervention({
+      title: interventionData.title,
+      description: interventionData.description,
+      interventionType,
+      severity: interventionData.severity || "medium",
+      agentSource: this.config.agentName,
+      projectId: interventionData.projectId,
+      entityType: "project", // or derive from entityId
+      entityId,
+      recommendation: interventionData.recommendation,
+      estimatedImpact: interventionData.estimatedImpact,
+      requiredApprovers: interventionData.requiredApprovers,
+      autoApproveAfterHours: interventionData.autoApproveAfterHours,
+      metadata: {
+        ...interventionData.metadata,
+        agentType: this.config.agentType,
+        capabilities: this.config.capabilities,
+      },
+    });
 
-    // Log intervention creation
-    console.log(`[${this.config.agentName}] ✅ Creating ${interventionType} intervention for ${entityId}: ${interventionId}`);
+    if (!result.success) {
+      console.error(`[${this.config.agentName}] ❌ Failed to create intervention in Palantir: ${result.error}`);
+      return null;
+    }
 
-    // Record that we issued this intervention
+    const interventionId = result.objectRid || `int_${Date.now()}`;
+    console.log(`[${this.config.agentName}] ✅ Created intervention in Palantir: ${interventionId}`);
+
+    // Record that we issued this intervention (for duplicate detection)
     await this.recordIntervention(entityId, interventionType, interventionId);
+
+    // Also create an alert to notify relevant parties
+    await this.createAlert({
+      title: `Intervention Required: ${interventionData.title}`,
+      message: interventionData.recommendation,
+      alertType: "intervention_created",
+      severity: interventionData.severity || "medium",
+      projectId: interventionData.projectId,
+      entityId,
+      actionRequired: true,
+      relatedInterventionId: interventionId,
+    });
 
     return interventionId;
   }
 
   /**
-   * Check a Rulebricks rule — all agents can call business logic / threshold checks
-   * Returns the rule result, or null if Rulebricks is not configured
-   * Automatically logs execution with agent metadata for DDQL queries
+   * Create an alert in Palantir Foundry
+   * Palantir handles notification delivery based on severity and notifyRoles
+   */
+  protected async createAlert(params: {
+    title: string;
+    message: string;
+    alertType: string;
+    severity: "critical" | "high" | "medium" | "low";
+    projectId?: string;
+    entityType?: string;
+    entityId?: string;
+    notifyRoles?: string[];
+    notifyUsers?: string[];
+    actionRequired?: boolean;
+    relatedInterventionId?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<string | null> {
+    const actionsService = getPalantirActionsService();
+    const result = await actionsService.createAlert({
+      title: params.title,
+      message: params.message,
+      alertType: params.alertType,
+      severity: params.severity,
+      agentSource: this.config.agentName,
+      projectId: params.projectId,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      notifyRoles: params.notifyRoles || this.getDefaultNotifyRoles(params.severity),
+      notifyUsers: params.notifyUsers,
+      actionRequired: params.actionRequired ?? false,
+      relatedInterventionId: params.relatedInterventionId,
+      metadata: {
+        ...params.metadata,
+        agentType: this.config.agentType,
+      },
+    });
+
+    if (!result.success) {
+      console.error(`[${this.config.agentName}] ❌ Failed to create alert in Palantir: ${result.error}`);
+      return null;
+    }
+
+    const alertId = result.objectRid || `alert_${Date.now()}`;
+    console.log(`[${this.config.agentName}] 🔔 Created alert in Palantir: ${alertId} (${params.severity})`);
+    return alertId;
+  }
+
+  /**
+   * Get default notification roles based on severity
+   */
+  private getDefaultNotifyRoles(severity: "critical" | "high" | "medium" | "low"): string[] {
+    switch (severity) {
+      case "critical":
+        return ["executive", "portfolio_manager", "project_manager"];
+      case "high":
+        return ["portfolio_manager", "project_manager"];
+      case "medium":
+        return ["project_manager", "team_lead"];
+      case "low":
+        return ["team_lead"];
+      default:
+        return ["project_manager"];
+    }
+  }
+
+  /**
+   * Check a Palantir Function — all agents can call business logic / threshold checks
+   * Returns the rule result, or null if Palantir is not configured
+   * Automatically logs execution with agent metadata
    * Auto-notifies Notification Agent when rule result has notify=true or escalate=true
    */
-  protected async checkRule(slug: string, input: Record<string, any>, projectId?: string): Promise<any> {
+  protected async checkRule(functionName: string, input: Record<string, any>, projectId?: string): Promise<any> {
     try {
-      const { getRulebricksService } = await import('../../lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        console.log(`[${this.config.agentName}] Rulebricks not configured — skipping rule check: ${slug}`);
+      const { getPalantirRulesService } = await import('../../lib/PalantirRulesService.js');
+      const rules = getPalantirRulesService();
+      if (!rules) {
+        console.log(`[${this.config.agentName}] Palantir Rules not configured — skipping check: ${functionName}`);
         return null;
       }
 
-      // Pass agent metadata for execution logging / DDQL queries
+      // Pass agent metadata for execution logging
       const agentId = this.config.agentName.toLowerCase().replace(/deep|agent/g, '').trim() || this.config.agentType;
       const metadata = {
         agentId,
@@ -349,18 +838,18 @@ export abstract class DeepAgentBase {
         tags: [this.config.agentType, 'agent-rule-check'],
       };
 
-      const result = await rb.solveRule(slug, input, metadata);
+      const result = await rules.checkRule(functionName, input, metadata);
       if (result.success) {
-        console.log(`[${this.config.agentName}] Rule "${slug}" checked (${result.executionTime}ms) [logged for ${agentId}]`);
+        console.log(`[${this.config.agentName}] Function "${functionName}" checked (${result.executionTime}ms)`);
 
         // Store in short-term context
         await this.memory.appendContext(
-          `Rule check "${slug}": ${JSON.stringify(result.result)}`
+          `Rule check "${functionName}": ${JSON.stringify(result.result)}`
         );
 
         // Store in persistent Letta memory for learning
-        await this.learn(`rule_result_${slug}`, {
-          slug,
+        await this.learn(`rule_result_${functionName}`, {
+          functionName,
           input,
           result: result.result,
           executionTime: result.executionTime,
@@ -371,16 +860,16 @@ export abstract class DeepAgentBase {
         const ruleResult = result.result || {};
         if (ruleResult.notify === true || ruleResult.escalate === true) {
           const severity = ruleResult.severity || input.severity || 'medium';
-          const message = ruleResult.message || `Rule "${slug}" triggered: ${ruleResult.action || 'alert'}`;
+          const message = ruleResult.message || `Function "${functionName}" triggered: ${ruleResult.action || 'alert'}`;
 
-          console.log(`[${this.config.agentName}] 🔔 Auto-notifying: ${slug} (escalate=${ruleResult.escalate}, severity=${severity})`);
+          console.log(`[${this.config.agentName}] 🔔 Auto-notifying: ${functionName} (escalate=${ruleResult.escalate}, severity=${severity})`);
 
           // Broadcast to Notification Agent via fact (it subscribes to *:alert, *:escalation)
           await this.broadcastFact(
             projectId || input.projectId || 'system',
             ruleResult.escalate ? 'escalation' : 'alert',
             {
-              ruleSlug: slug,
+              functionName,
               sourceAgent: agentId,
               message,
               severity,
@@ -396,11 +885,65 @@ export abstract class DeepAgentBase {
 
         return result.result;
       } else {
-        console.warn(`[${this.config.agentName}] Rule "${slug}" failed: ${result.error}`);
+        console.warn(`[${this.config.agentName}] Function "${functionName}" failed: ${result.error}`);
         return null;
       }
     } catch (error: any) {
       console.error(`[${this.config.agentName}] Rule check error: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Check a threshold using Palantir Rules Service
+   * Returns structured threshold result with severity and actions
+   */
+  protected async checkThreshold(
+    thresholdType: string,
+    currentValue: number,
+    context?: Record<string, any>
+  ): Promise<any> {
+    try {
+      const { getPalantirRulesService } = await import('../../lib/PalantirRulesService.js');
+      const rules = getPalantirRulesService();
+      if (!rules) {
+        console.log(`[${this.config.agentName}] Palantir Rules not configured — using default thresholds`);
+        return null;
+      }
+
+      const result = await rules.checkThreshold(
+        this.config.agentType,
+        thresholdType,
+        currentValue,
+        context
+      );
+
+      if (result.triggered) {
+        console.log(`[${this.config.agentName}] ⚠️ Threshold "${thresholdType}" breached: ${result.message}`);
+
+        // Auto-broadcast if notification required
+        if (result.notify || result.escalate) {
+          await this.broadcastFact(
+            context?.projectId || 'system',
+            result.escalate ? 'escalation' : 'alert',
+            {
+              thresholdType,
+              currentValue,
+              severity: result.severity,
+              message: result.message,
+              action: result.action,
+              notifyRoles: result.notifyRoles,
+              sourceAgent: this.config.agentName.toLowerCase(),
+              triggeredAt: new Date().toISOString(),
+            },
+            1.0
+          );
+        }
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Threshold check error: ${error.message}`);
       return null;
     }
   }
@@ -418,7 +961,8 @@ export abstract class DeepAgentBase {
   }
 
   /**
-   * Enrich context with knowledge from Retool Vectors (RAG)
+   * Enrich context with knowledge from Palantir Ontology
+   * Queries relevant data based on agent type and context
    */
   protected async enrichContextWithKnowledge(goal: string, context: any): Promise<any> {
     if (!this.enableKnowledgeEnrichment) {
@@ -426,40 +970,15 @@ export abstract class DeepAgentBase {
     }
 
     try {
-      // Disabled: RetoolVectorsMCP removed
-      const vectorsMCP = null;
-      if (!vectorsMCP) {
-        return context;
+      // Get relevant data from Palantir based on agent type
+      const dashboardMetrics = await this.getDashboardMetrics();
+      if (dashboardMetrics) {
+        return {
+          ...context,
+          palantirMetrics: dashboardMetrics,
+        };
       }
-
-      console.log(`[${this.config.agentName}] Enriching context with knowledge base via MCP`);
-
-      // Query relevant documents (unreachable code - vectorsMCP is null)
-      const relevantDocs: any[] = await vectorsMCP.query({
-        text: goal,
-        topK: 3,
-        filter: {
-          domain: this.config.agentType, // Filter by agent domain
-        },
-      });
-
-      if (relevantDocs.length === 0) {
-        console.log(`[${this.config.agentName}] No relevant documents found`);
-        return context;
-      }
-
-      console.log(`[${this.config.agentName}] Found ${relevantDocs.length} relevant documents`);
-
-      // Add knowledge context
-      return {
-        ...context,
-        knowledgeContext: relevantDocs.map((doc: any) => ({
-          content: doc.content,
-          source: doc.metadata.source,
-          relevance: doc.score,
-        })),
-        documentSources: relevantDocs.map((doc: any) => doc.metadata.source),
-      };
+      return context;
     } catch (error: any) {
       console.warn(`[${this.config.agentName}] Knowledge enrichment failed:`, error.message);
       return context;
@@ -1130,43 +1649,47 @@ Provide a summary of what was learned and how to improve next time.`;
   /**
    * Scheduled scan entry point for AgentScheduler
    * This method is called periodically by the scheduler
+   * DATA SOURCE: Palantir Foundry Ontology (NOT PostgreSQL)
    */
   async runScheduledScan(): Promise<void> {
-    console.log(`[${this.config.agentName}] Starting scheduled scan...`);
+    console.log(`[${this.config.agentName}] Starting scheduled scan (Palantir source)...`);
 
     try {
-      // Get all projects to analyze
-      const projects = await this.storage.getProjects();
+      // Get all projects from Palantir Ontology
+      const projects = await this.getProjects();
 
       if (projects.length === 0) {
-        console.log(`[${this.config.agentName}] No projects found to analyze`);
+        console.log(`[${this.config.agentName}] No projects found in Palantir Ontology`);
         return;
       }
 
-      console.log(`[${this.config.agentName}] Found ${projects.length} projects to analyze`);
+      console.log(`[${this.config.agentName}] Found ${projects.length} projects in Palantir to analyze`);
 
       // Analyze each project
       for (const project of projects) {
         try {
-          const goal = `Analyze project "${project.name}" (${project.id}) for ${this.config.agentType} concerns`;
+          const projectId = project.projectId || project.id;
+          const projectName = project.name || project.title || projectId;
 
-          console.log(`[${this.config.agentName}] Analyzing project: ${project.name}`);
+          const goal = `Analyze project "${projectName}" (${projectId}) for ${this.config.agentType} concerns`;
 
-          // Call the main run method with enrichContextWithFacts enabled
+          console.log(`[${this.config.agentName}] Analyzing project: ${projectName}`);
+
+          // Call the main run method with Palantir project data
           await this.run(goal, {
-            projectId: project.id,
-            projectName: project.name,
-            projectType: project.type,
+            projectId,
+            projectName,
+            projectData: project, // Full Palantir object
             scheduledScan: true,
           });
 
-          console.log(`[${this.config.agentName}] ✅ Completed analysis of ${project.name}`);
+          console.log(`[${this.config.agentName}] ✅ Completed analysis of ${projectName}`);
         } catch (error: any) {
-          console.error(`[${this.config.agentName}] Error analyzing project ${project.name}:`, error.message);
+          console.error(`[${this.config.agentName}] Error analyzing project:`, error.message);
         }
       }
 
-      console.log(`[${this.config.agentName}] Scheduled scan complete`);
+      console.log(`[${this.config.agentName}] Scheduled scan complete (Palantir source)`);
     } catch (error: any) {
       console.error(`[${this.config.agentName}] Scheduled scan failed:`, error.message);
       throw error;

@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, CheckCircle, Building2, Mail, RefreshCw } from 'lucide-react';
+import { getAccessToken } from '@/lib/auth';
 
 interface DemoStatusResponse {
   isDemoUser: boolean;
@@ -31,11 +32,11 @@ export default function PendingApprovalPage() {
   const { data: demoStatus, isLoading, refetch } = useQuery<DemoStatusResponse>({
     queryKey: ['demo-request-status'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       if (!token) {
         return { isDemoUser: false };
       }
-      
+
       const response = await fetch('/api/tenant-auth/demo-status', {
         headers: {
           'Authorization': `Bearer ${token}`,

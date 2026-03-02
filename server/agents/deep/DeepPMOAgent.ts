@@ -1,10 +1,12 @@
 /**
- * DEEP PMO AGENT
+ * DEEP PMO AGENT v4.0 - PALANTIR ONTOLOGY FIRST
  *
  * Enhanced Project Management Office agent with Deep Agent capabilities
  * - Plans project health analysis approaches
  * - Reflects on portfolio governance recommendations
  * - Multi-step reasoning for complex project scenarios
+ *
+ * DATA SOURCE: Palantir Foundry Ontology (NOT PostgreSQL)
  */
 
 import { AgentTool } from "../../lib/AgentTool.js";
@@ -132,7 +134,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         func: async ({ projectId, includeMetrics = true }) => {
           if (projectId) {
             // Analyze single project
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found" };
             }
@@ -201,7 +203,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             };
           } else {
             // Analyze all projects
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
             const healthScores = projects.map((p: any) => {
               const budget = parseFloat(p.budget || '0');
               const actualCost = parseFloat(p.actualCost || '0');
@@ -244,7 +246,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           predictDelays: z.boolean().optional().describe("Enable delay prediction (default true)"),
         }),
         func: async ({ projectId, predictDelays = true }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -318,7 +320,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           threshold: z.number().optional().describe("Allocation threshold percentage (default 80)"),
         }),
         func: async ({ portfolioView = true, threshold = 80 }) => {
-          const projects = await this.storage.getProjects();
+          const projects = await this.getProjects();
 
           // Mock resource allocation data - in production, would query resource management system
           const resources = [
@@ -414,7 +416,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           gateType: z.enum(['planning', 'execution', 'closure']).optional().describe("Specific gate to check"),
         }),
         func: async ({ projectId, gateType }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -493,7 +495,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         func: async ({ projectId, format = 'summary' }) => {
           if (projectId) {
             // Single project status report
-            const project = await this.storage.getProject(projectId);
+            const project = await this.getProject(projectId);
             if (!project) {
               return { error: "Project not found" };
             }
@@ -531,7 +533,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             return summary;
           } else {
             // Portfolio status report
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
             const totalBudget = projects.reduce((sum, p) => sum + parseFloat(p.budget || '0'), 0);
             const totalActual = projects.reduce((sum, p) => sum + parseFloat(p.actualCost || '0'), 0);
             const avgProgress = projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length;

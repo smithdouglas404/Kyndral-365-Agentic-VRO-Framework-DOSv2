@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAgentMetadata } from '@/hooks/useAgentRegistry';
 
 interface CustomAttribute {
   id: string;
@@ -36,20 +37,21 @@ interface CustomAttribute {
   updatedAt: string;
 }
 
-const AGENT_TYPES = [
-  { id: 'finops', label: 'FinOps', color: '#10b981' },
-  { id: 'tmo', label: 'TMO', color: '#3b82f6' },
-  { id: 'risk', label: 'Risk', color: '#ef4444' },
-  { id: 'vro', label: 'VRO', color: '#a855f7' },
-  { id: 'pmo', label: 'PMO', color: '#6366f1' },
-  { id: 'ocm', label: 'OCM', color: '#f43f5e' },
-  { id: 'governance', label: 'Governance', color: '#64748b' },
-];
-
 export function CustomAttributeBuilder() {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState<CustomAttribute | null>(null);
+
+  // Load agents from database
+  const { data: agentMetadata = [] } = useAgentMetadata();
+  const agentTypes = useMemo(() =>
+    agentMetadata.map(a => ({
+      id: a.id,
+      label: a.shortName || a.name.replace(' Agent', ''),
+      color: a.color,
+    })),
+    [agentMetadata]
+  );
 
   // Form state
   const [formData, setFormData] = useState<Partial<CustomAttribute>>({
@@ -329,7 +331,7 @@ export function CustomAttributeBuilder() {
                       <SelectValue placeholder="Select owner agent" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AGENT_TYPES.map((agent) => (
+                      {agentTypes.map((agent) => (
                         <SelectItem key={agent.id} value={agent.id}>
                           <div className="flex items-center gap-2">
                             <div
@@ -351,7 +353,7 @@ export function CustomAttributeBuilder() {
                     Visible To (select agents that can use this attribute in rules)
                   </Label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {AGENT_TYPES.map((agent) => {
+                    {agentTypes.map((agent) => {
                       const isVisible = formData.visibleTo?.includes(agent.id);
                       const isOwner = formData.ownerAgent === agent.id;
 
@@ -452,7 +454,7 @@ export function CustomAttributeBuilder() {
           ) : (
             <div className="space-y-3">
               {attributes.map((attribute) => {
-                const ownerAgent = AGENT_TYPES.find((a) => a.id === attribute.ownerAgent);
+                const ownerAgent = agentTypes.find((a) => a.id === attribute.ownerAgent);
 
                 return (
                   <Card key={attribute.id} className="bg-white transition-all hover:shadow-md">
@@ -498,7 +500,7 @@ export function CustomAttributeBuilder() {
                               Owner: {ownerAgent?.label}
                             </Badge>
                             {attribute.visibleTo.map((agentId) => {
-                              const agent = AGENT_TYPES.find((a) => a.id === agentId);
+                              const agent = agentTypes.find((a) => a.id === agentId);
                               return (
                                 <Badge
                                   key={agentId}

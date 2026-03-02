@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Sparkles, Loader2, ArrowRight, CheckCircle2, Building2, Phone, Mail, User } from 'lucide-react';
+import { setTokens, setAuthUser, setDemoMode } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -64,11 +65,10 @@ export default function DemoRequestPage() {
         throw new Error(data.error || 'Failed to submit demo request');
       }
 
-      // Store demo access token
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('auth_token', data.accessToken);
-      localStorage.setItem('demoMode', 'true');
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      // Store demo access token using centralized auth
+      setTokens(data.accessToken);
+      setDemoMode(true);
+      setAuthUser(data.user);
 
       setSuccess(true);
 

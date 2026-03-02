@@ -24,11 +24,18 @@ import {
   Brain,
   Mic,
   Plug,
+  Bot,
+  Cloud,
+  Code,
+  Layers,
+  Radio,
+  Workflow,
 } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ConfigurationStatus } from './ConfigurationStatus';
 import { GlobalNotificationBell } from './GlobalNotificationBell';
 import { ConnectionIndicator } from './RealTimeNotifications';
+import { clearAuth } from '@/lib/auth';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -38,13 +45,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [location, navigate] = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    clearAuth();
     navigate('/login');
   };
 
   const navItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/hitl', icon: Shield, label: 'HITL Approvals' },
     { path: '/admin/users', icon: Users, label: 'Users' },
     { path: '/admin/integrations', icon: Database, label: 'Integrations' },
     { path: '/admin/mcp-marketplace', icon: Store, label: 'MCP Marketplace' },
@@ -54,7 +61,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/workflows', icon: GitBranch, label: 'Workflows' },
     { path: '/admin/policies', icon: Shield, label: 'Policy as Code' },
     { path: '/admin/agents', icon: Activity, label: 'Agents' },
+    { path: '/admin/agent-management', icon: Bot, label: 'Agent Registry' },
+    { path: '/admin/rules', icon: Zap, label: 'Agent Rules' },
     { path: '/admin/agent-mcp', icon: Plug, label: 'Agent MCP Manager' },
+    { path: '/admin/palantir-sync', icon: Cloud, label: 'Palantir Ontology' },
+    { path: '/admin/palantir-rules', icon: Code, label: 'Rules Engine' },
+    { path: '/admin/ontology-explorer', icon: Layers, label: 'Ontology Explorer' },
+    { path: '/admin/subscriptions', icon: Radio, label: 'Real-Time Subscriptions' },
+    { path: '/admin/workflow-automation', icon: Workflow, label: 'Workflow Automation' },
     { path: '/admin/agent-memory', icon: Brain, label: 'Agent Memory' },
     { path: '/admin/agent-attributes', icon: Sliders, label: 'Agent Attributes' },
     { path: '/admin/voice-briefings', icon: Mic, label: 'Voice Briefings' },

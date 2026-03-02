@@ -48,7 +48,7 @@ export class DeepTMOAgent extends DeepAgentBase {
           threshold: z.number().optional().describe("Variance threshold in days (default 7)"),
         }),
         func: async ({ projectId, threshold = 7 }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -143,7 +143,7 @@ export class DeepTMOAgent extends DeepAgentBase {
           projectId: z.string().describe("Project ID"),
         }),
         func: async ({ projectId }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -192,7 +192,7 @@ export class DeepTMOAgent extends DeepAgentBase {
           projectId: z.string().describe("Project ID"),
         }),
         func: async ({ projectId }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -254,7 +254,7 @@ export class DeepTMOAgent extends DeepAgentBase {
           projectId: z.string().describe("Project ID"),
         }),
         func: async ({ projectId }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }
@@ -341,7 +341,7 @@ export class DeepTMOAgent extends DeepAgentBase {
           delayDays: z.number().describe("Number of days behind schedule"),
         }),
         func: async ({ projectId, delayDays }) => {
-          const project = await this.storage.getProject(projectId);
+          const project = await this.getProject(projectId);
           if (!project) {
             return { error: "Project not found" };
           }

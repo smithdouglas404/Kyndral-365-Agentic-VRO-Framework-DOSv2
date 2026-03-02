@@ -66,21 +66,26 @@ const DOCUMENT_TYPES = [
   { value: 'policy', label: 'Policy', description: 'Organizational policies' },
 ];
 
-const AVAILABLE_AGENTS = [
-  { id: 'governance', name: 'Governance Agent', color: 'blue' },
-  { id: 'risk', name: 'Risk Agent', color: 'red' },
-  { id: 'finops', name: 'FinOps Agent', color: 'green' },
-  { id: 'tmo', name: 'TMO Agent', color: 'purple' },
-  { id: 'vro', name: 'VRO Agent', color: 'orange' },
-  { id: 'planning', name: 'Planning Agent', color: 'indigo' },
-  { id: 'ocm', name: 'OCM Agent', color: 'pink' },
-  { id: 'pmo', name: 'PMO Agent', color: 'teal' },
-  { id: 'okr', name: 'OKR Agent', color: 'yellow' },
-];
+interface AgentOption {
+  id: string;
+  name: string;
+  color?: string;
+}
 
 export default function KnowledgeBaseManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch agents from API
+  const { data: agentsData } = useQuery<{ agents: AgentOption[] }>({
+    queryKey: ['agents-enabled'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/agents?enabled=true');
+      if (!res.ok) throw new Error('Failed to fetch agents');
+      return res.json();
+    },
+  });
+  const AVAILABLE_AGENTS = agentsData?.agents || [];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [showUploadDialog, setShowUploadDialog] = useState(false);

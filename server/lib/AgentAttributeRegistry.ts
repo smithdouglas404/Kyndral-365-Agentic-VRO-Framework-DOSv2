@@ -8,8 +8,16 @@ import { GOVERNANCE_DEFAULT_ATTRIBUTES } from '../agents/attributes/GovernanceAg
 import { TMO_DEFAULT_ATTRIBUTES } from '../agents/attributes/TMOAgentAttributes.js';
 import { COMPANY_DEFAULT_ATTRIBUTES } from '../agents/attributes/CompanyAgentAttributes.js';
 import type { AttributeDefinition } from '../agents/attributes/FinOpsAgentAttributes.js';
+import { getAgentRegistry } from '../services/AgentRegistryService.js';
 
-export type AgentType = 'pmo' | 'finops' | 'vro' | 'planning' | 'ocm' | 'risk' | 'governance' | 'tmo' | 'company';
+/**
+ * AgentType - now accepts any string to allow dynamic agent creation
+ * Use isKnownAgentType() to check if agent has custom attributes defined
+ */
+export type AgentType = string;
+
+// Known agents with custom attribute definitions
+export type KnownAgentType = 'pmo' | 'finops' | 'vro' | 'planning' | 'ocm' | 'risk' | 'governance' | 'tmo' | 'company';
 
 export interface AgentAttributeRegistryEntry extends AttributeDefinition {
   ownerAgent: AgentType;
@@ -17,7 +25,11 @@ export interface AgentAttributeRegistryEntry extends AttributeDefinition {
   endpoint: string;
 }
 
-const DEFAULT_REGISTRY: Record<AgentType, Record<string, AttributeDefinition>> = {
+/**
+ * Default attribute definitions for known agents
+ * New agents can use empty attributes or define custom ones
+ */
+const DEFAULT_REGISTRY: Record<string, Record<string, AttributeDefinition>> = {
   pmo: PMO_DEFAULT_ATTRIBUTES,
   finops: FINOPS_DEFAULT_ATTRIBUTES,
   vro: VRO_DEFAULT_ATTRIBUTES,
@@ -29,7 +41,8 @@ const DEFAULT_REGISTRY: Record<AgentType, Record<string, AttributeDefinition>> =
   company: COMPANY_DEFAULT_ATTRIBUTES,
 };
 
-export const AGENT_TYPES: AgentType[] = [
+// Known agents with custom attributes (static list for backward compatibility)
+const KNOWN_AGENT_TYPES: KnownAgentType[] = [
   'pmo',
   'finops',
   'vro',
@@ -41,10 +54,39 @@ export const AGENT_TYPES: AgentType[] = [
   'company',
 ];
 
-export function isAgentType(value: string): value is AgentType {
-  return AGENT_TYPES.includes(value as AgentType);
+/**
+ * Get agent types from database (async)
+ * For sync access, use getKnownAgentTypes()
+ */
+export async function getAgentTypesAsync(): Promise<string[]> {
+  const registry = getAgentRegistry();
+  return registry.getAgentIds();
 }
 
+/**
+ * Get known agent types (sync - agents with custom attributes)
+ */
+export function getKnownAgentTypes(): KnownAgentType[] {
+  return KNOWN_AGENT_TYPES;
+}
+
+/**
+ * @deprecated Use getAgentTypesAsync() or getKnownAgentTypes() instead
+ */
+export const AGENT_TYPES = KNOWN_AGENT_TYPES;
+
+export function isAgentType(value: string): boolean {
+  return true; // All strings are valid agent types now
+}
+
+export function isKnownAgentType(value: string): value is KnownAgentType {
+  return KNOWN_AGENT_TYPES.includes(value as KnownAgentType);
+}
+
+/**
+ * Get default attributes for an agent
+ * Returns empty array for agents without custom attribute definitions
+ */
 export function getDefaultAttributes(agentType: AgentType): AgentAttributeRegistryEntry[] {
   const attributes = DEFAULT_REGISTRY[agentType] || {};
 

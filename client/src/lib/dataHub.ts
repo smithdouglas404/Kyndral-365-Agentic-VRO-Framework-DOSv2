@@ -5,7 +5,19 @@
 
 import type { PMOProject, VROProgram, RiskIssue, BUPortfolio } from './buPrograms';
 
-export type AgentType = 'integrated-management' | 'vro' | 'pmo' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm';
+/**
+ * AgentType - Agent identifier
+ *
+ * This is a string to allow dynamic agent creation without code changes.
+ * New agents can be added via the Admin UI and will work automatically.
+ *
+ * Known agent IDs: finops, tmo, risk, pmo, governance, vro, ocm, planning, okr, integrated, notification
+ * But any string is valid for new agents added to the database.
+ */
+export type AgentType = string;
+
+// Legacy type alias for backward compatibility
+export type KnownAgentType = 'integrated-management' | 'integrated' | 'vro' | 'pmo' | 'tmo' | 'finops' | 'okr' | 'governance' | 'planning' | 'ocm' | 'risk' | 'notification';
 
 export interface AgentDataSlice {
   agentId: AgentType;
@@ -51,16 +63,25 @@ export interface EntityDrilldown {
   actions: { id: string; label: string; type: string }[];
   history: { timestamp: Date; action: string; agent: AgentType }[];
   relatedEntities?: { type: string; id: string; name: string }[];
+  events?: Array<{ id: string; type: string; timestamp: Date; description: string }>;
   aiInsight?: string;
   summary?: string;
 }
 
-// Agent configuration with data mappings
-const AGENT_CONFIG: Record<AgentType, { name: string; category: string; focusAreas: string[] }> = {
+/**
+ * Legacy agent configuration - for backward compatibility
+ * For new code, use useAgentRegistry hook to fetch agent data from API
+ */
+const AGENT_CONFIG: Record<string, { name: string; category: string; focusAreas: string[] }> = {
   'integrated-management': {
     name: 'Integrated Management Agent',
     category: 'Value & Delivery Management',
     focusAreas: ['ROI', 'value', 'strategic alignment', 'benefits', 'timeline', 'budget', 'deliverables', 'milestones']
+  },
+  'integrated': {
+    name: 'Integrated Agent',
+    category: 'Cross-functional Coordination',
+    focusAreas: ['synthesis', 'coordination', 'portfolio', 'executive']
   },
   tmo: {
     name: 'TMO Transformation Agent',
@@ -82,6 +103,11 @@ const AGENT_CONFIG: Record<AgentType, { name: string; category: string; focusAre
     category: 'Governance',
     focusAreas: ['risk', 'compliance', 'regulatory', 'audit']
   },
+  risk: {
+    name: 'Risk Agent',
+    category: 'Risk Management',
+    focusAreas: ['risk', 'mitigation', 'assessment', 'monitoring']
+  },
   planning: {
     name: 'Strategic Planning Agent',
     category: 'Planning',
@@ -101,12 +127,21 @@ const AGENT_CONFIG: Record<AgentType, { name: string; category: string; focusAre
     name: 'PMO Agent',
     category: 'Project Management',
     focusAreas: ['delivery', 'schedule', 'quality', 'execution']
+  },
+  notification: {
+    name: 'Notification Agent',
+    category: 'Utility',
+    focusAreas: ['alerts', 'notifications', 'escalation', 'routing']
   }
 };
 
+/**
+ * Get agent config - handles unknown agents gracefully
+ * For new code, prefer using useAgentRegistry hook
+ */
 export function getAgentConfig(agentId: AgentType) {
   return AGENT_CONFIG[agentId] || {
-    name: 'Unknown Agent',
+    name: agentId.charAt(0).toUpperCase() + agentId.slice(1) + ' Agent',
     category: 'General',
     focusAreas: []
   };

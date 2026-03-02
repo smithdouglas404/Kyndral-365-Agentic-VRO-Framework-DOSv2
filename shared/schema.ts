@@ -42,6 +42,220 @@ export type InsertBusinessUnit = z.infer<typeof insertBusinessUnitSchema>;
 export type BusinessUnit = typeof businessUnits.$inferSelect;
 
 // ============================================================================
+// AGENTS - Core agent definitions (database-driven)
+// ============================================================================
+
+export const agents = pgTable("agents", {
+  id: varchar("id").primaryKey(), // e.g., 'finops', 'tmo', 'risk'
+  name: text("name").notNull(), // Display name e.g., 'FinOps Agent'
+  description: text("description"),
+  category: text("category").notNull(), // 'domain', 'orchestration', 'utility'
+  enabled: boolean("enabled").default(true),
+
+  // Configuration
+  capabilities: text("capabilities"), // JSON array of capability strings
+  defaultPriority: integer("default_priority").default(5), // 1-10 for rule evaluation order
+
+  // Ownership
+  ownerUserId: varchar("owner_user_id"), // Who owns/manages this agent
+  ownerTeam: text("owner_team"), // Team responsible for the agent
+
+  // Integration
+  palantirObjectTypes: text("palantir_object_types"), // JSON array of Palantir object types this agent works with
+  mcpConnections: text("mcp_connections"), // JSON array of MCP connection IDs
+
+  // Metadata
+  icon: text("icon"), // Icon name from lucide-react
+  color: text("color"), // Hex color for UI
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAgentSchema = createInsertSchema(agents).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAgent = z.infer<typeof insertAgentSchema>;
+export type Agent = typeof agents.$inferSelect;
+
+// ============================================================================
+// AGENT ATTRIBUTES - Dynamic attributes for agents (widget data sources)
+// Every widget on the UI is backed by an agent attribute
+// ============================================================================
+
+export const agentAttributes = pgTable("agent_attributes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(), // FK to agents table
+
+  // Attribute Definition
+  name: text("name").notNull(), // e.g., 'total_budget_variance'
+  displayName: text("display_name").notNull(), // e.g., 'Total Budget Variance'
+  description: text("description"),
+  category: text("category").notNull(), // e.g., 'financial', 'schedule', 'risk', 'quality'
+
+  // Data Type & Format
+  dataType: text("data_type").notNull().default("number"), // number, percentage, currency, text, boolean, date, array
+  unit: text("unit"), // e.g., '$', '%', 'days', 'points'
+  format: text("format"), // e.g., 'currency', 'decimal:2', 'percentage'
+
+  // Value Source
+  valueSource: text("value_source").notNull().default("calculated"), // 'static', 'calculated', 'aggregated', 'external'
+  calculationRule: text("calculation_rule"), // Rulebricks rule ID or formula
+  aggregationMethod: text("aggregation_method"), // 'sum', 'avg', 'min', 'max', 'count', 'latest'
+  sourceQuery: text("source_query"), // SQL or ontology query for aggregated values
+
+  // Current Value (cached)
+  currentValue: text("current_value"), // JSON-encoded current value
+  previousValue: text("previous_value"), // For trend calculation
+  targetValue: text("target_value"), // Target/goal value
+  thresholds: text("thresholds"), // JSON: { warning: 80, critical: 90 }
+
+  // Metadata
+  refreshInterval: integer("refresh_interval").default(300), // Seconds between refreshes
+  lastCalculatedAt: timestamp("last_calculated_at"),
+  palantirPropertyName: text("palantir_property_name"), // Mapped Palantir ontology property
+  externalSystemMapping: text("external_system_mapping"), // JSON: { jira: 'customfield_10001', monday: 'column_id' }
+
+  // UI Hints
+  defaultWidgetType: text("default_widget_type").default("stat-card"), // stat-card, chart, gauge, table, progress
+  chartConfig: text("chart_config"), // JSON config for chart widgets
+
+  // Permissions
+  visibility: text("visibility").default("all"), // all, admin, owner
+  isEditable: boolean("is_editable").default(false),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAgentAttributeSchema = createInsertSchema(agentAttributes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAgentAttribute = z.infer<typeof insertAgentAttributeSchema>;
+export type AgentAttribute = typeof agentAttributes.$inferSelect;
+
+// ============================================================================
+// WIDGET DEFINITIONS - Dashboard widget configurations
+// Maps agent attributes to UI widgets for the "liquid" dashboard experience
+// ============================================================================
+
+export const widgetDefinitions = pgTable("widget_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+
+  // Widget Identity
+  name: text("name").notNull(), // e.g., 'Budget Health Card'
+  slug: text("slug").notNull(), // URL-friendly: 'budget-health-card'
+  description: text("description"),
+
+  // Widget Type & Display
+  widgetType: text("widget_type").notNull(), // stat-card, line-chart, bar-chart, pie-chart, gauge, table, kanban, timeline
+  size: text("size").default("medium"), // small, medium, large, full
+  defaultWidth: integer("default_width").default(1), // Grid columns (1-4)
+  defaultHeight: integer("default_height").default(1), // Grid rows (1-4)
+
+  // Data Binding
+  primaryAttributeId: varchar("primary_attribute_id"), // Main attribute to display
+  secondaryAttributeIds: text("secondary_attribute_ids"), // JSON array of supporting attribute IDs
+  agentId: varchar("agent_id"), // Which agent owns this widget
+
+  // Visualization Config
+  config: text("config"), // JSON: { chartType, colors, labels, axes, etc. }
+  drilldownConfig: text("drilldown_config"), // JSON: where to navigate on click
+
+  // Conditional Display
+  showConditions: text("show_conditions"), // JSON: rules for when to show/hide
+  highlightConditions: text("highlight_conditions"), // JSON: rules for visual emphasis
+
+  // Layout & Grouping
+  category: text("category"), // e.g., 'financial', 'delivery', 'risk'
+  tags: text("tags"), // JSON array for filtering
+  sortOrder: integer("sort_order").default(0),
+
+  // Permissions
+  roles: text("roles"), // JSON array: which roles can see this widget
+  isDefault: boolean("is_default").default(false), // Show by default on dashboards
+  isCustomizable: boolean("is_customizable").default(true), // Can users modify
+
+  // Palantir Integration
+  palantirObjectType: text("palantir_object_type"), // Maps to Palantir object type
+  palantirQuery: text("palantir_query"), // Ontology query for data
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWidgetDefinitionSchema = createInsertSchema(widgetDefinitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWidgetDefinition = z.infer<typeof insertWidgetDefinitionSchema>;
+export type WidgetDefinition = typeof widgetDefinitions.$inferSelect;
+
+// ============================================================================
+// USER DASHBOARD LAYOUTS - User-specific widget arrangements
+// ============================================================================
+
+export const userDashboardLayouts = pgTable("user_dashboard_layouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  dashboardId: varchar("dashboard_id").notNull(), // e.g., 'executive', 'finops', 'pmo'
+
+  // Layout Configuration
+  layout: text("layout").notNull(), // JSON: grid positions for each widget
+  hiddenWidgets: text("hidden_widgets"), // JSON array of widget IDs to hide
+  customWidgets: text("custom_widgets"), // JSON array of user-created widget configs
+
+  // Filters & Preferences
+  defaultFilters: text("default_filters"), // JSON: saved filter state
+  refreshInterval: integer("refresh_interval").default(60),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserDashboardLayoutSchema = createInsertSchema(userDashboardLayouts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserDashboardLayout = z.infer<typeof insertUserDashboardLayoutSchema>;
+export type UserDashboardLayout = typeof userDashboardLayouts.$inferSelect;
+
+// ============================================================================
+// ATTRIBUTE VALUES HISTORY - Time series of attribute values for trending
+// ============================================================================
+
+export const attributeValueHistory = pgTable("attribute_value_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  attributeId: varchar("attribute_id").notNull(),
+
+  value: text("value").notNull(), // JSON-encoded value
+  calculatedAt: timestamp("calculated_at").notNull(),
+
+  // Context
+  triggeredBy: text("triggered_by"), // 'scheduled', 'manual', 'rule', 'sync'
+  metadata: text("metadata"), // JSON: additional context
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAttributeValueHistorySchema = createInsertSchema(attributeValueHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAttributeValueHistory = z.infer<typeof insertAttributeValueHistorySchema>;
+export type AttributeValueHistory = typeof attributeValueHistory.$inferSelect;
+
+// ============================================================================
 // COMPANIES - Top-level legal entities (for multi-company support)
 // ============================================================================
 
@@ -69,6 +283,8 @@ export type Company = typeof companies.$inferSelect;
 
 // ============================================================================
 // DIVISIONS - Business Segments
+// @deprecated - Now sourced from Palantir Foundry BusinessUnit objects
+// Table will be dropped. Keep types for backward compatibility during migration.
 // ============================================================================
 
 export const divisions = pgTable("divisions", {
@@ -95,6 +311,7 @@ export type InsertDivision = z.infer<typeof insertDivisionSchema>;
 export type Division = typeof divisions.$inferSelect;
 
 // Division KPIs - Key Performance Indicators by division
+// @deprecated - Now sourced from Palantir Foundry Metric objects
 export const divisionKpis = pgTable("division_kpis", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   divisionId: varchar("division_id").notNull().references(() => divisions.id),
@@ -117,6 +334,7 @@ export type InsertDivisionKpi = z.infer<typeof insertDivisionKpiSchema>;
 export type DivisionKpi = typeof divisionKpis.$inferSelect;
 
 // Division OKRs - Objectives & Key Results by division
+// @deprecated - Now sourced from Palantir Foundry Objective/KeyResult objects
 export const divisionOkrs = pgTable("division_okrs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   divisionId: varchar("division_id").notNull().references(() => divisions.id),
@@ -184,6 +402,7 @@ export type InsertBenefitsRealization = z.infer<typeof insertBenefitsRealization
 export type BenefitsRealization = typeof benefitsRealization.$inferSelect;
 
 // Division Risks - Risk registry by division
+// @deprecated - Now sourced from Palantir Foundry Risk objects
 export const divisionRisks = pgTable("division_risks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   divisionId: varchar("division_id").notNull().references(() => divisions.id),
@@ -243,6 +462,7 @@ export type CompanyOverview = typeof companyOverview.$inferSelect;
 
 // ============================================================================
 // CLIMATE DATA - Sustainability & Environmental Metrics (from official filings)
+// @deprecated - Now sourced from Palantir Foundry Metric objects
 // ============================================================================
 
 export const climateMetrics = pgTable("climate_metrics", {
@@ -270,6 +490,7 @@ export type ClimateMetric = typeof climateMetrics.$inferSelect;
 
 // ============================================================================
 // ENTERPRISE RISKS - Corporate Risk Registry (from official filings)
+// @deprecated - Now sourced from Palantir Foundry Risk objects
 // ============================================================================
 
 export const enterpriseRiskCategories = pgTable("enterprise_risk_categories", {
@@ -306,6 +527,7 @@ export const insertEnterpriseRiskSchema = createInsertSchema(enterpriseRisks).om
 export type InsertEnterpriseRisk = z.infer<typeof insertEnterpriseRiskSchema>;
 export type EnterpriseRisk = typeof enterpriseRisks.$inferSelect;
 
+// @deprecated - Now sourced from Palantir Foundry Project objects
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -392,6 +614,7 @@ export const insertProjectTemplateSchema = createInsertSchema(projectTemplates).
 export type InsertProjectTemplate = z.infer<typeof insertProjectTemplateSchema>;
 export type ProjectTemplate = typeof projectTemplates.$inferSelect;
 
+// @deprecated - Now sourced from Palantir Foundry WorkItem (Feature) objects
 export const features = pgTable("features", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   projectId: varchar("project_id").notNull(),
@@ -415,6 +638,7 @@ export const insertFeatureSchema = createInsertSchema(features).omit({
 export type InsertFeature = z.infer<typeof insertFeatureSchema>;
 export type Feature = typeof features.$inferSelect;
 
+// @deprecated - Now sourced from Palantir Foundry WorkItem (Story) objects
 export const stories = pgTable("stories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   featureId: varchar("feature_id").notNull(),
@@ -437,6 +661,7 @@ export const insertStorySchema = createInsertSchema(stories).omit({
 export type InsertStory = z.infer<typeof insertStorySchema>;
 export type Story = typeof stories.$inferSelect;
 
+// @deprecated - Now sourced from Palantir Foundry WorkItem (Task) objects
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   storyId: varchar("story_id").notNull(),
@@ -1461,6 +1686,8 @@ export type InsertProjectMetric = z.infer<typeof insertProjectMetricSchema>;
 export type ProjectMetric = typeof projectMetrics.$inferSelect;
 
 // Risk Interventions - AI-detected risks requiring human decision
+// @deprecated - Now handled by Palantir Foundry Intervention objects with HITL workflow
+// Use PalantirActionsService.createIntervention() instead
 export const interventions = pgTable("interventions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   type: text("type").notNull(), // dependency, budget, timeline, resource, quality
@@ -1838,6 +2065,8 @@ export type InsertAgentFactSubscription = z.infer<typeof insertAgentFactSubscrip
 export type AgentFactSubscription = typeof agentFactSubscriptions.$inferSelect;
 
 // Alerts - System alerts and notifications from agents and integrations
+// @deprecated - Now handled by Palantir Foundry Alert objects with native notifications
+// Use PalantirActionsService.createAlert() instead
 export const alerts = pgTable("alerts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -1902,6 +2131,7 @@ export type InsertStrategicTheme = z.infer<typeof insertStrategicThemeSchema>;
 export type StrategicTheme = typeof strategicThemes.$inferSelect;
 
 // Portfolios - Top level of SAFe hierarchy
+// @deprecated - Now sourced from Palantir Foundry Portfolio objects
 export const portfolios = pgTable("portfolios", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -1935,6 +2165,7 @@ export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
 export type Portfolio = typeof portfolios.$inferSelect;
 
 // Value Streams - Flow of value through the portfolio
+// @deprecated - Now sourced from Palantir Foundry ValueStream objects
 export const valueStreams = pgTable("value_streams", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   portfolioId: varchar("portfolio_id").references(() => portfolios.id),
@@ -1968,6 +2199,7 @@ export type InsertValueStream = z.infer<typeof insertValueStreamSchema>;
 export type ValueStream = typeof valueStreams.$inferSelect;
 
 // Agile Release Trains (ARTs) - Long-lived team of agile teams
+// @deprecated - Now sourced from Palantir Foundry ART objects
 export const arts = pgTable("arts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   valueStreamId: varchar("value_stream_id").references(() => valueStreams.id),
@@ -2039,6 +2271,7 @@ export type InsertTeam = z.infer<typeof insertTeamSchema>;
 export type Team = typeof teams.$inferSelect;
 
 // Program Increments (PIs) - Planning and execution timebox
+// @deprecated - Now sourced from Palantir Foundry ProgramIncrement objects
 export const programIncrements = pgTable("program_increments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   artId: varchar("art_id").references(() => arts.id),
@@ -2076,6 +2309,7 @@ export type InsertProgramIncrement = z.infer<typeof insertProgramIncrementSchema
 export type ProgramIncrement = typeof programIncrements.$inferSelect;
 
 // Epics - Large initiatives spanning multiple PIs
+// @deprecated - Now sourced from Palantir Foundry Epic objects
 export const epics = pgTable("epics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   portfolioId: varchar("portfolio_id").references(() => portfolios.id),
@@ -2119,6 +2353,7 @@ export type InsertEpic = z.infer<typeof insertEpicSchema>;
 export type Epic = typeof epics.$inferSelect;
 
 // Capabilities - Large solution-level behaviors (Solution Train level)
+// @deprecated - Now sourced from Palantir Foundry Capability objects
 export const capabilities = pgTable("capabilities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   epicId: varchar("epic_id").references(() => epics.id),
@@ -2154,6 +2389,7 @@ export type InsertCapability = z.infer<typeof insertCapabilitySchema>;
 export type Capability = typeof capabilities.$inferSelect;
 
 // Sprints/Iterations - Time-boxed development cycles
+// @deprecated - Now sourced from Palantir Foundry Sprint objects
 export const sprints = pgTable("sprints", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   programIncrementId: varchar("program_increment_id").references(() => programIncrements.id),
@@ -2193,6 +2429,7 @@ export type Sprint = typeof sprints.$inferSelect;
 // ============================================================================
 
 // Source Systems - External PPM tools that can sync with our ontology
+// @deprecated - Sync now handled by Palantir Foundry connectors
 export const sourceSystems = pgTable("source_systems", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(), // e.g., "Corporate Jira", "Azure DevOps Prod"
@@ -2249,6 +2486,7 @@ export type InsertMcpAdapter = z.infer<typeof insertMcpAdapterSchema>;
 export type McpAdapter = typeof mcpAdapters.$inferSelect;
 
 // Field Mappings - Map external fields to SAFe ontology
+// @deprecated - Field mappings now handled in Palantir Foundry connectors
 export const fieldMappings = pgTable("field_mappings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sourceSystemId: varchar("source_system_id").references(() => sourceSystems.id),
@@ -2277,6 +2515,7 @@ export type InsertFieldMapping = z.infer<typeof insertFieldMappingSchema>;
 export type FieldMapping = typeof fieldMappings.$inferSelect;
 
 // Ingestion Jobs - Track data import/sync operations
+// @deprecated - Ingestion now handled by Palantir Foundry pipelines
 export const ingestionJobs = pgTable("ingestion_jobs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sourceSystemId: varchar("source_system_id").references(() => sourceSystems.id),
@@ -2307,6 +2546,7 @@ export type InsertIngestionJob = z.infer<typeof insertIngestionJobSchema>;
 export type IngestionJob = typeof ingestionJobs.$inferSelect;
 
 // Staging Table - Temporary storage for uploaded/imported data before mapping
+// @deprecated - Staging now handled by Palantir Foundry pipelines
 export const stagingRecords = pgTable("staging_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   ingestionJobId: varchar("ingestion_job_id").references(() => ingestionJobs.id),

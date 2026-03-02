@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { Sparkles, Loader2, UserPlus, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { setTokens, setAuthUser } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -107,10 +108,9 @@ export default function InvitationAcceptPage() {
         throw new Error(data.error || 'Failed to accept invitation');
       }
 
-      // Store JWT tokens
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      // Store JWT tokens using centralized auth
+      setTokens(data.accessToken, data.refreshToken);
+      setAuthUser(data.user);
 
       setSuccess(true);
 

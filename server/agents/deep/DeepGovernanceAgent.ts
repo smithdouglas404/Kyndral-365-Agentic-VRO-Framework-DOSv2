@@ -46,7 +46,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         }),
         func: async ({ projectId, limit }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (projectId) {
               projects = projects.filter(p => p.id === projectId);
@@ -134,7 +134,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         }),
         func: async ({ portfolioId }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (portfolioId) {
               projects = projects.filter(p => p.portfolioId === portfolioId);
@@ -143,7 +143,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
             const stageGateIssues: any[] = [];
 
             for (const project of projects) {
-              const milestones = await this.storage.getMilestones(project.id);
+              const milestones = await this.getMilestones(project.id);
               const overdueMilestones = milestones.filter((m: any) => {
                 if (!m.targetDate) return false;
                 const targetDate = new Date(m.targetDate);
@@ -209,7 +209,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         }),
         func: async ({ projectId }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (projectId) {
               projects = projects.filter(p => p.id === projectId);
@@ -286,7 +286,7 @@ export class DeepGovernanceAgent extends DeepAgentBase {
         }),
         func: async ({ limit }) => {
           try {
-            const interventions = await this.storage.getInterventions();
+            const interventions = await this.getInterventions();
 
             const pending = interventions
               .filter(i => i.status === 'pending' && !i.selfApproved)

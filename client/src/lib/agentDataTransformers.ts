@@ -12,8 +12,6 @@ export interface SimulationMultipliers {
   confidenceLevel: number;
 }
 
-export type { DataMode, SimulationMultipliers };
-
 // DEPRECATED: Fetch from API
 export function getMultipliers(mode: DataMode): SimulationMultipliers {
   return {

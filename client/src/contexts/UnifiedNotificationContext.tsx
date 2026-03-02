@@ -259,30 +259,30 @@ export function UnifiedNotificationProvider({ children }: { children: ReactNode 
   }, [lastMessage]);
 
   // ============================================================================
-  // POLLING FALLBACK - For interventions (until WebSocket fully implemented)
+  // POLLING FALLBACK - For HITL interventions from Palantir
   // ============================================================================
 
   useEffect(() => {
-    const fetchInterventions = async () => {
+    const fetchHITLInterventions = async () => {
       try {
-        const response = await fetch('/api/interventions');
+        // Fetch from Palantir HITL endpoint
+        const response = await fetch('/api/hitl/interventions/pending?limit=20');
         if (response.ok) {
           const data = await response.json();
-          const interventions: any[] = data.interventions || [];
+          const hitlInterventions: any[] = data.interventions || [];
 
-          // Only add NEW critical pending interventions
+          // Only add NEW critical/high pending interventions
           const existingIds = new Set(notifications.map(n => n.id));
-          const newInterventions = interventions
+          const newInterventions = hitlInterventions
             .filter(i =>
-              i.status === 'pending' &&
-              i.severity === 'critical' &&
-              !existingIds.has(i.id)
+              !existingIds.has(i.interventionId) &&
+              (i.severity === 'critical' || i.severity === 'high')
             )
-            .slice(0, 3); // Limit to 3 newest to avoid spam
+            .slice(0, 5); // Limit to 5 newest
 
           newInterventions.forEach(i => {
             const intervention: Intervention = {
-              id: i.id,
+              id: i.interventionId,
               timestamp: new Date(i.createdAt),
               read: false,
               dismissed: false,
@@ -292,11 +292,11 @@ export function UnifiedNotificationProvider({ children }: { children: ReactNode 
               agentName: i.agentSource || 'System',
               title: i.title,
               description: i.description,
-              suggestedAction: i.suggestedAction,
-              impact: i.impact,
-              confidence: i.confidence,
+              suggestedAction: i.recommendation,
+              impact: i.estimatedImpact,
+              confidence: String(i.metadata?.confidence || '0.85'),
               projectId: i.projectId,
-              projectName: i.projectName,
+              projectName: i.projectId, // Use projectId as name fallback
               status: i.status,
             };
             addNotification(intervention);
@@ -308,10 +308,10 @@ export function UnifiedNotificationProvider({ children }: { children: ReactNode 
     };
 
     // Initial fetch
-    fetchInterventions();
+    fetchHITLInterventions();
 
-    // Poll every 3 minutes as fallback
-    const interval = setInterval(fetchInterventions, 180000);
+    // Poll every 30 seconds for HITL (more responsive for approvals)
+    const interval = setInterval(fetchHITLInterventions, 30000);
     return () => clearInterval(interval);
   }, []); // Empty deps - we check existing notifications inside
 

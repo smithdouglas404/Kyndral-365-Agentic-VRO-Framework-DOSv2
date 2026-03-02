@@ -32,7 +32,9 @@ import agentSchemasRouter from "./routes/agent-schemas.js";
 import llmCalculatorRouter from "./routes/llm-calculator.js";
 import agentMcpRouter from "./routes/agent-mcp.js";
 import { registerAgentMcpConnectionRoutes } from "./routes/admin/agent-mcp-connections.js";
+import { registerAgentAdminRoutes } from "./routes/admin/agents.js";
 import { registerPalantirRoutes } from "./routes/palantir.js";
+import palantirSyncRouter from "./routes/palantir-sync.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
 import { registerCollaborationRulesRoutes } from "./routes/admin/collaboration-rules.js";
@@ -43,6 +45,12 @@ import { registerAgentRulesRoutes } from "./routes/agent-rules.js";
 import { registerPolicyAsCodeRoutes } from "./routes/policy-as-code.js";
 import { registerPolicyMCPRoutes } from "./routes/policy-mcp.js";
 import ruleExecutionHistoryRouter from "./routes/rule-execution-history.js";
+import hitlRouter from "./routes/hitl.js";
+import palantirRulesRouter from "./routes/palantir-rules.js";
+import ontologyExplorerRouter from "./routes/ontology-explorer.js";
+import ontologySubscriptionsRouter from "./routes/ontology-subscriptions.js";
+import workflowAutomationRouter from "./routes/workflow-automation.js";
+import agentRegistryRouter from "./routes/agent-registry.js";
 import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
 import { registerOKRRuleMappingRoutes } from "./routes/okr-rule-mappings.js";
 import { registerPermissionRoutes } from "./routes/admin/permissions.js";
@@ -212,485 +220,6 @@ export async function registerRoutes(
   // Register Ontology API routes (Ontology operations for agents)
   app.use('/api/ontology', ontologyApiRouter);
 
-  // Rulebricks Rules Engine API (all agents check thresholds/business logic)
-  app.get('/api/rulebricks/status', async (_req, res) => {
-    try {
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.json({ success: true, configured: false, message: 'Rulebricks not configured' });
-      }
-      const connected = await rb.testConnection();
-      const rules = connected ? await rb.listRules() : [];
-      res.json({ success: true, configured: true, connected, ruleCount: rules.length, rules });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  app.post('/api/rulebricks/solve', async (req, res) => {
-    try {
-      const { slug, request: ruleInput } = req.body;
-      if (!slug) {
-        return res.status(400).json({ success: false, error: 'slug is required' });
-      }
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const result = await rb.solveRule(slug, ruleInput || {});
-      res.json({ success: true, ...result });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  app.post('/api/rulebricks/bulk-solve', async (req, res) => {
-    try {
-      const { slug, requests } = req.body;
-      if (!slug || !Array.isArray(requests)) {
-        return res.status(400).json({ success: false, error: 'slug and requests[] are required' });
-      }
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const results = await rb.bulkSolve(slug, requests);
-      res.json({ success: true, results });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get specific rule details
-  app.get('/api/rulebricks/rules/:slug', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const rule = await rb.getRule(slug);
-      if (!rule) {
-        return res.status(404).json({ success: false, error: 'Rule not found' });
-      }
-      res.json({ success: true, rule });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get Rulebricks dashboard URL
-  app.get('/api/rulebricks/dashboard-url', async (_req, res) => {
-    const apiUrl = process.env.RULEBRICKS_API_URL || 'https://rulebricks.com/api/v1';
-    // Dashboard is typically at the root domain
-    const dashboardUrl = apiUrl.replace('/api/v1', '').replace('/api', '');
-    res.json({ success: true, url: dashboardUrl });
-  });
-
-  // ============ Rulebricks Dynamic Values API ============
-
-  // List all dynamic values
-  app.get('/api/rulebricks/values', async (_req, res) => {
-    try {
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const values = await rb.listValues();
-      res.json({ success: true, values });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get a specific value
-  app.get('/api/rulebricks/values/:key', async (req, res) => {
-    try {
-      const { key } = req.params;
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const value = await rb.getValue(key);
-      if (!value) {
-        return res.status(404).json({ success: false, error: 'Value not found' });
-      }
-      res.json({ success: true, value });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Create a new value
-  app.post('/api/rulebricks/values', async (req, res) => {
-    try {
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const value = await rb.createValue(req.body);
-      if (!value) {
-        return res.status(400).json({ success: false, error: 'Failed to create value' });
-      }
-      res.json({ success: true, value });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Update a value
-  app.put('/api/rulebricks/values/:key', async (req, res) => {
-    try {
-      const { key } = req.params;
-      const { value } = req.body;
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const updated = await rb.updateValue(key, value);
-      if (!updated) {
-        return res.status(400).json({ success: false, error: 'Failed to update value' });
-      }
-      res.json({ success: true, value: updated });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Delete a value
-  app.delete('/api/rulebricks/values/:key', async (req, res) => {
-    try {
-      const { key } = req.params;
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const deleted = await rb.deleteValue(key);
-      res.json({ success: deleted, message: deleted ? 'Value deleted' : 'Failed to delete' });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // ============ Threshold Sync with Rulebricks ============
-
-  // Get thresholds from Rulebricks
-  app.get('/api/rulebricks/thresholds', async (_req, res) => {
-    try {
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const thresholds = await rb.getThresholds();
-      res.json({ success: true, thresholds });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Sync thresholds to Rulebricks
-  app.post('/api/rulebricks/thresholds/sync', async (req, res) => {
-    try {
-      const { thresholds } = req.body;
-      if (!thresholds) {
-        return res.status(400).json({ success: false, error: 'thresholds object required' });
-      }
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const synced = await rb.syncThresholds(thresholds);
-      res.json({ success: synced, message: synced ? 'Thresholds synced to Rulebricks' : 'Sync failed' });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // ============ Rulebricks Rule Flows API ============
-
-  // List all flows
-  app.get('/api/rulebricks/flows', async (_req, res) => {
-    try {
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const flows = await rb.listFlows();
-      res.json({ success: true, flows });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get a specific flow
-  app.get('/api/rulebricks/flows/:slug', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const flow = await rb.getFlow(slug);
-      if (!flow) {
-        return res.status(404).json({ success: false, error: 'Flow not found' });
-      }
-      res.json({ success: true, flow });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Execute a flow
-  app.post('/api/rulebricks/flows/:slug/execute', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const input = req.body;
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const result = await rb.executeFlow(slug, input);
-      res.json(result);
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Bulk execute a flow
-  app.post('/api/rulebricks/flows/:slug/bulk-execute', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { inputs } = req.body;
-      if (!Array.isArray(inputs)) {
-        return res.status(400).json({ success: false, error: 'inputs array required' });
-      }
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-      const results = await rb.executeFlowBulk(slug, inputs);
-      res.json({ success: true, results });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // ============ Agent Workflow Triggers ============
-
-  // Get available agent workflows
-  app.get('/api/rulebricks/workflows', async (_req, res) => {
-    try {
-      // Import orchestrator to get available workflows
-      const { orchestrator } = await import('./index.js');
-      if (!orchestrator) {
-        // Return static workflow definitions if orchestrator not running
-        const workflows = {
-          'budget-escalation': {
-            agents: ['finops', 'pmo', 'notification'],
-            description: 'Budget breach detection → PMO review → Stakeholder notification',
-          },
-          'risk-mitigation': {
-            agents: ['risk', 'governance', 'notification'],
-            description: 'Risk detection → Governance approval → Action notification',
-          },
-          'schedule-recovery': {
-            agents: ['tmo', 'planning', 'pmo'],
-            description: 'Schedule variance → Dependency analysis → Recovery plan',
-          },
-          'change-approval': {
-            agents: ['ocm', 'governance', 'notification'],
-            description: 'Change impact → Governance review → Stakeholder comms',
-          },
-          'value-realization': {
-            agents: ['vro', 'finops', 'pmo'],
-            description: 'Value tracking → ROI analysis → Portfolio review',
-          },
-        };
-        return res.json({ success: true, workflows });
-      }
-      const workflows = orchestrator.getAvailableWorkflows();
-      res.json({ success: true, workflows });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Trigger an agent workflow
-  app.post('/api/rulebricks/workflows/:slug/trigger', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { input, agentId } = req.body;
-
-      const { orchestrator } = await import('./index.js');
-      if (!orchestrator) {
-        return res.status(503).json({ success: false, error: 'Orchestrator not running' });
-      }
-
-      const result = await orchestrator.triggerAgentWorkflow(slug, input || {}, agentId);
-      res.json(result);
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // ============ Rulebricks Execution Logging (DDQL) ============
-
-  // Query execution logs
-  app.get('/api/rulebricks/logs', async (req, res) => {
-    try {
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const params = {
-        query: req.query.query as string,
-        ruleSlug: req.query.rule as string,
-        flowSlug: req.query.flow as string,
-        status: req.query.status as 'success' | 'error',
-        agentId: req.query.agent as string,
-        startDate: req.query.start as string,
-        endDate: req.query.end as string,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
-      };
-
-      const result = await rb.queryLogs(params);
-      res.json({ success: true, ...result });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Execute DDQL query
-  app.post('/api/rulebricks/logs/query', async (req, res) => {
-    try {
-      const { query } = req.body;
-      if (!query) {
-        return res.status(400).json({ success: false, error: 'query string required' });
-      }
-
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const result = await rb.executeDDQL(query);
-      res.json({ success: true, ...result });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get execution statistics
-  app.get('/api/rulebricks/logs/stats', async (req, res) => {
-    try {
-      const period = (req.query.period as '24h' | '7d' | '30d' | '90d') || '7d';
-
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const stats = await rb.getLogStats(period);
-      res.json({ success: true, stats });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get metrics by rule
-  app.get('/api/rulebricks/logs/metrics/by-rule', async (req, res) => {
-    try {
-      const period = (req.query.period as '24h' | '7d' | '30d') || '7d';
-
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const metrics = await rb.getMetricsByRule(period);
-      res.json({ success: true, metrics });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get execution timeline
-  app.get('/api/rulebricks/logs/timeline', async (req, res) => {
-    try {
-      const period = (req.query.period as '24h' | '7d' | '30d') || '7d';
-      const granularity = (req.query.granularity as 'hour' | 'day') || 'hour';
-
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const timeline = await rb.getExecutionTimeline(period, granularity);
-      res.json({ success: true, timeline });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get logs for a specific rule
-  app.get('/api/rulebricks/rules/:slug/logs', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
-
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const logs = await rb.getRuleLogs(slug, limit);
-      res.json({ success: true, logs });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  // Get logs for a specific flow
-  app.get('/api/rulebricks/flows/:slug/logs', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
-
-      const { getRulebricksService } = await import('./lib/RulebricksService.js');
-      const rb = getRulebricksService();
-      if (!rb) {
-        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
-      }
-
-      const logs = await rb.getFlowLogs(slug, limit);
-      res.json({ success: true, logs });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
 
   // Register Agent Schemas routes (Predefined agent attributes and relationships)
   app.use('/api/agent-schemas', agentSchemasRouter);
@@ -704,8 +233,14 @@ export async function registerRoutes(
   // Register Agent-MCP Connection Management routes (ADMIN - Manage MCP connections to agents)
   registerAgentMcpConnectionRoutes(app);
 
+  // Register Agent Admin routes (ADMIN - CRUD for agent definitions)
+  registerAgentAdminRoutes(app);
+
   // Palantir AIP super-MCP routes
   registerPalantirRoutes(app);
+
+  // Palantir Sync & Ontology Data Provider routes (ontology-first architecture)
+  app.use('/api/palantir', palantirSyncRouter);
 
   // Notification Agent API (11th agent — Palantir gateway, HITL approvals, signal broadcast)
   app.get('/api/notification-agent/status', (_req, res) => {
@@ -815,6 +350,7 @@ export async function registerRoutes(
   // Register Agent Rules routes (CRUD - Agent-specific collaboration rules)
   registerAgentRulesRoutes(app);
 
+
   // Register Policy-as-Code routes (LLM extraction + HITL approval workflow)
   registerPolicyAsCodeRoutes(app);
 
@@ -823,6 +359,12 @@ export async function registerRoutes(
 
   // Register Rule Execution History routes (MONITORING - Audit trail of rule executions)
   app.use("/api/rules", ruleExecutionHistoryRouter);
+  app.use("/api/hitl", hitlRouter);
+  app.use("/api/palantir-rules", palantirRulesRouter);
+  app.use("/api/ontology-explorer", ontologyExplorerRouter);
+  app.use("/api/ontology-subscriptions", ontologySubscriptionsRouter);
+  app.use("/api/workflow-automation", workflowAutomationRouter);
+  app.use("/api/agent-registry", agentRegistryRouter);
 
   // Register OKR/KPI Management routes (ADMIN - Objectives, Key Results, and KPIs)
   registerOkrKpiRoutes(app);
@@ -867,7 +409,7 @@ export async function registerRoutes(
   registerAgentInsightsRoutes(app, storage);
 
   // Register Agent Activity routes (Real-time A2A messages and activity logs)
-  registerAgentActivityRoutes(app, storage);
+  registerAgentActivityRoutes(app);
 
   // Register Governance routes (Risk framework and compliance data)
   registerGovernanceRoutes(app, storage);

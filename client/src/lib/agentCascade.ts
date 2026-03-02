@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import { notifyAction } from './backgroundAgentMonitor';
 import { recordMemory } from './agentOrchestrator';
 import type { AgentType } from './dataHub';
+import { getFallbackEmoji, getFallbackName } from '../hooks/useAgentRegistry';
 
 export interface CascadeAction {
   agentId: AgentType;
@@ -19,25 +20,21 @@ export interface ActionScenario {
   actions: CascadeAction[];
 }
 
-const AGENT_ICONS: Record<AgentType, string> = {
-  'integrated-management': '🎛️',
-  tmo: '🔧',
-  finops: '💰',
-  okr: '🎯',
-  governance: '🛡️',
-  planning: '📅',
-  ocm: '👥'
-};
+/**
+ * Get agent icon emoji
+ * Uses centralized registry fallback - no hardcoded values
+ */
+export function getAgentIcon(agentId: string): string {
+  return getFallbackEmoji(agentId);
+}
 
-const AGENT_NAMES: Record<AgentType, string> = {
-  'integrated-management': 'Integrated Management',
-  tmo: 'Delivery Agent',
-  finops: 'Finance Agent',
-  okr: 'OKR Agent',
-  governance: 'Governance Agent',
-  planning: 'Planning Agent',
-  ocm: 'OCM Agent'
-};
+/**
+ * Get agent display name
+ * Uses centralized registry fallback - no hardcoded values
+ */
+export function getAgentName(agentId: string): string {
+  return getFallbackName(agentId);
+}
 
 export const SCENARIO_TEMPLATES: Record<string, (params: Record<string, string>) => ActionScenario> = {
   reduceBudget: (params) => ({

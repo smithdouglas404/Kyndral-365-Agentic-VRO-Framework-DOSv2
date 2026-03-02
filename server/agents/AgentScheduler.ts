@@ -1,4 +1,6 @@
 // 🔄 MIGRATED TO DEEP AGENTS (2026-01-27) - ALL AGENTS NOW DEEP
+// 🔄 MIGRATED TO DATABASE-DRIVEN (2026-03-02) - Agents loaded from database
+// 🔄 MIGRATED TO GENERIC AGENTS (2026-03-02) - New agents use GenericDeepAgent
 import { DeepFinOpsAgent } from './deep/DeepFinOpsAgent.js';
 import { DeepTMOAgent } from './deep/DeepTMOAgent.js';
 import { DeepRiskAgent } from './deep/DeepRiskAgent.js';
@@ -9,8 +11,39 @@ import { DeepGovernanceAgent } from './deep/DeepGovernanceAgent.js';
 import { DeepPlanningAgent } from './deep/DeepPlanningAgent.js';
 import { DeepIntegratedMgmtAgent } from './deep/DeepIntegratedMgmtAgent.js';
 import { DeepOKRInferenceAgent } from './deep/DeepOKRInferenceAgent.js';
+import { DeepNotificationAgent } from './deep/DeepNotificationAgent.js';
+import { createGenericAgent } from './deep/GenericDeepAgent.js';
 import { ContinuousOrchestrator } from './ContinuousOrchestrator.js';
+import { getAgentRegistry, type AgentDefinition } from '../services/AgentRegistryService.js';
 import type { IStorage } from '../storage.js';
+
+/**
+ * AGENT CLASS REGISTRY - CUSTOM IMPLEMENTATIONS ONLY
+ *
+ * Maps agent IDs to custom implementation classes.
+ * Only add agents here if they need specialized logic that GenericDeepAgent can't handle.
+ *
+ * For most agents: Just add to database via Admin UI - they'll use GenericDeepAgent automatically!
+ *
+ * Only use custom classes for:
+ * - Complex domain-specific logic
+ * - Custom integrations that need specialized code
+ * - Agents with unique execution patterns
+ */
+const CUSTOM_AGENT_CLASSES: Record<string, new (storage: IStorage) => any> = {
+  'finops': DeepFinOpsAgent,
+  'tmo': DeepTMOAgent,
+  'risk': DeepRiskAgent,
+  'vro': DeepVROAgent,
+  'pmo': DeepPMOAgent,
+  'ocm': DeepOCMAgent,
+  'governance': DeepGovernanceAgent,
+  'planning': DeepPlanningAgent,
+  'integrated': DeepIntegratedMgmtAgent,
+  'okr': DeepOKRInferenceAgent,
+  'okr-inference': DeepOKRInferenceAgent, // Alias for compatibility
+  'notification': DeepNotificationAgent,
+};
 
 /**
  * AgentScheduler - Dual-Mode Agent System
@@ -40,50 +73,108 @@ export class AgentScheduler {
   private isRunning: boolean = false;
   private orchestrator: ContinuousOrchestrator | null = null;
 
+  private agentsInitialized: boolean = false;
+
   constructor(storage: IStorage) {
     this.storage = storage;
     this.agents = new Map();
     this.scheduledJobs = new Map();
+    this.orchestrator = null;
 
-    // Initialize all 9 agents (7 PMO + 1 VRO + 1 Inference)
-    this.initializeAgents();
-
-    // Initialize continuous orchestrator with A2A and MCP support
-    this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
-    console.log('[AgentScheduler] Continuous orchestrator initialized with A2A and MCP protocols');
+    // Agents will be initialized asynchronously when startAll() is called
+    // This ensures database is ready before loading agent configurations
+    console.log('[AgentScheduler] Created - agents will be loaded from database on start');
   }
 
   /**
-   * Initialize all agents with proper configuration
-   * 🔄 ALL DEEP AGENTS - RAG, Mem0, Letta, Rules Engine, Policy-as-Code, Planning, Reflection
+   * Initialize agents and orchestrator (called from startAll)
    */
-  private initializeAgents() {
-    console.log('[AgentScheduler] Initializing ALL Deep LangChain agents...');
+  private async initialize(): Promise<void> {
+    if (this.agentsInitialized) return;
+
+    // Load agents from database
+    await this.initializeAgentsFromDatabase();
+
+    // Initialize continuous orchestrator with loaded agents
+    this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
+    console.log('[AgentScheduler] Continuous orchestrator initialized with A2A and MCP protocols');
+
+    this.agentsInitialized = true;
+  }
+
+  /**
+   * Initialize agents from database
+   * 🔄 FULLY DATABASE-DRIVEN - All agents loaded from database
+   *
+   * Agent instantiation:
+   * 1. If agent has a custom class in CUSTOM_AGENT_CLASSES → use custom class
+   * 2. Otherwise → use GenericDeepAgent (works for any agent from database)
+   *
+   * To add a new agent: Just add to database via Admin UI!
+   * No code changes needed unless you need specialized logic.
+   */
+  private async initializeAgentsFromDatabase(): Promise<void> {
+    console.log('[AgentScheduler] Loading agents from database...');
 
     try {
-      // ALL DEEP AGENTS - Full autonomy + advanced capabilities
-      this.agents.set('finops', new DeepFinOpsAgent(this.storage));
-      this.agents.set('tmo', new DeepTMOAgent(this.storage));
-      this.agents.set('risk', new DeepRiskAgent(this.storage));
-      this.agents.set('vro', new DeepVROAgent(this.storage));
-      this.agents.set('pmo', new DeepPMOAgent(this.storage));
-      this.agents.set('ocm', new DeepOCMAgent(this.storage));
-      this.agents.set('governance', new DeepGovernanceAgent(this.storage));
-      this.agents.set('planning', new DeepPlanningAgent(this.storage));
-      this.agents.set('integrated', new DeepIntegratedMgmtAgent(this.storage));
-      this.agents.set('okr-inference', new DeepOKRInferenceAgent(this.storage));
+      const registry = getAgentRegistry();
+      const dbAgents = await registry.getEnabledAgents();
 
-      console.log(`[AgentScheduler] Initialized ${this.agents.size} Deep agents with planning and reflection`);
+      console.log(`[AgentScheduler] Found ${dbAgents.length} enabled agents in database`);
 
-      // Log agent configurations
-      for (const [id, agent] of Array.from(this.agents.entries())) {
-        const config = agent.config || { agentName: id };
-        console.log(`  - ${config.agentName || id}`);
+      let customCount = 0;
+      let genericCount = 0;
+
+      for (const agentDef of dbAgents) {
+        try {
+          // Check if agent has a custom implementation
+          const CustomAgentClass = CUSTOM_AGENT_CLASSES[agentDef.id];
+
+          if (CustomAgentClass) {
+            // Use custom implementation
+            const agent = new CustomAgentClass(this.storage);
+            this.agents.set(agentDef.id, agent);
+            customCount++;
+            console.log(`  ✓ ${agentDef.name} (${agentDef.id}) - custom class, priority ${agentDef.defaultPriority}`);
+          } else {
+            // Use GenericDeepAgent for all other agents
+            const agent = createGenericAgent(this.storage, agentDef);
+            this.agents.set(agentDef.id, agent);
+            genericCount++;
+            console.log(`  ✓ ${agentDef.name} (${agentDef.id}) - generic agent, priority ${agentDef.defaultPriority}`);
+          }
+        } catch (err) {
+          console.error(`[AgentScheduler] Failed to instantiate ${agentDef.id}:`, err);
+        }
       }
+
+      console.log(`[AgentScheduler] Initialized ${this.agents.size} agents (${customCount} custom, ${genericCount} generic)`);
     } catch (error) {
-      console.error('[AgentScheduler] Failed to initialize agents:', error);
-      throw error;
+      console.error('[AgentScheduler] Database load failed, falling back to defaults:', error);
+      this.initializeDefaultAgents();
     }
+  }
+
+  /**
+   * Fallback: Initialize custom agents if database fails
+   * Used only if database is unavailable during startup
+   * Only initializes agents with custom implementations
+   */
+  private initializeDefaultAgents() {
+    console.log('[AgentScheduler] Initializing custom agents (fallback - database unavailable)...');
+
+    // Only agents with custom implementations can be used as fallback
+    // Generic agents require database definitions
+    for (const [agentId, AgentClass] of Object.entries(CUSTOM_AGENT_CLASSES)) {
+      try {
+        this.agents.set(agentId, new AgentClass(this.storage));
+        console.log(`  ✓ ${agentId}`);
+      } catch (err) {
+        console.error(`[AgentScheduler] Failed to instantiate ${agentId}:`, err);
+      }
+    }
+
+    console.log(`[AgentScheduler] Initialized ${this.agents.size} fallback agents`);
   }
 
   /**
@@ -112,6 +203,9 @@ export class AgentScheduler {
       console.log('[AgentScheduler] Already running');
       return;
     }
+
+    // Initialize agents from database first
+    await this.initialize();
 
     this.isRunning = true;
     console.log('[AgentScheduler] Starting DUAL-MODE agent system...');
@@ -156,62 +250,39 @@ export class AgentScheduler {
       return; // Default to OFF if settings can't be loaded
     }
 
-    // FinOps Agent: Every 30 minutes
-    this.schedule('finops', 30 * 60 * 1000, async () => {
-      const agent = this.agents.get('finops');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
+    // Schedule all loaded agents based on their priority
+    // Priority determines scan frequency: higher priority = more frequent scans
+    // Priority 1-3: Every 20 minutes (critical)
+    // Priority 4-6: Every 45 minutes (standard)
+    // Priority 7-10: Every 90 minutes (low frequency)
+    const registry = getAgentRegistry();
+    const dbAgents = await registry.getEnabledAgents();
 
-    // TMO Agent: Every 20 minutes
-    this.schedule('tmo', 20 * 60 * 1000, async () => {
-      const agent = this.agents.get('tmo');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
+    for (const agentDef of dbAgents) {
+      const agent = this.agents.get(agentDef.id);
+      if (!agent || typeof agent.runScheduledScan !== 'function') continue;
 
-    // Risk Agent: Every 60 minutes
-    this.schedule('risk', 60 * 60 * 1000, async () => {
-      const agent = this.agents.get('risk');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
+      // Calculate interval based on priority (database-driven)
+      const priority = agentDef.defaultPriority || 5;
+      let intervalMs: number;
+      if (priority <= 3) {
+        intervalMs = 20 * 60 * 1000; // 20 minutes for high priority
+      } else if (priority <= 6) {
+        intervalMs = 45 * 60 * 1000; // 45 minutes for medium priority
+      } else {
+        intervalMs = 90 * 60 * 1000; // 90 minutes for low priority
+      }
 
-    // Governance Agent: Every 2 hours
-    this.schedule('governance', 120 * 60 * 1000, async () => {
-      const agent = this.agents.get('governance');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
+      this.schedule(agentDef.id, intervalMs, async () => {
+        const agentInstance = this.agents.get(agentDef.id);
+        if (agentInstance && typeof agentInstance.runScheduledScan === 'function') {
+          await agentInstance.runScheduledScan();
+        }
+      });
+    }
 
-    // Planning Agent: Every 30 minutes
-    this.schedule('planning', 30 * 60 * 1000, async () => {
-      const agent = this.agents.get('planning');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
-
-    // OCM Agent: Every 45 minutes
-    this.schedule('ocm', 45 * 60 * 1000, async () => {
-      const agent = this.agents.get('ocm');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
-
-    // Integrated Management Agent: Every 45 minutes
-    this.schedule('integrated', 45 * 60 * 1000, async () => {
-      const agent = this.agents.get('integrated');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
-
-    // VRO Agent: Every 60 minutes (strategic value realization tracking)
-    this.schedule('vro', 60 * 60 * 1000, async () => {
-      const agent = this.agents.get('vro');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
-
-    // OKR Inference Agent: Every 2 hours (data quality assessment + OKR mapping)
-    this.schedule('okr-inference', 120 * 60 * 1000, async () => {
-      const agent = this.agents.get('okr-inference');
-      if (agent && typeof agent.runScheduledScan === 'function') await agent.runScheduledScan();
-    });
-
-    console.log('[AgentScheduler] ✅ All 10 Deep agents scheduled and running');
-    console.log('[AgentScheduler] 🎯 NO MORE FAKE DATA - All agents use real analysis with planning & reflection');
+    console.log(`[AgentScheduler] ✅ ${this.agents.size} agents scheduled from database`);
+    console.log('[AgentScheduler] 🎯 Database-driven agent configuration - Add agents via Admin UI');
 
     // Run an initial scan immediately (optional - can remove if not desired)
     console.log('[AgentScheduler] Running initial scans...');
@@ -244,12 +315,20 @@ export class AgentScheduler {
   }
 
   /**
-   * Run initial scans for all agents (optional)
+   * Run initial scans for high-priority agents (optional)
    * This runs once at startup to populate initial insights
+   * Only runs agents with priority 1-4 (critical agents)
    */
   private async runInitialScans() {
-    // Run only critical agents initially to avoid overwhelming the system
-    const criticalAgents = ['finops', 'tmo', 'risk', 'vro', 'okr-inference'];
+    const registry = getAgentRegistry();
+    const dbAgents = await registry.getEnabledAgents();
+
+    // Get high-priority agents (priority 1-4)
+    const criticalAgents = dbAgents
+      .filter(a => (a.defaultPriority || 5) <= 4)
+      .map(a => a.id);
+
+    console.log(`[AgentScheduler] Running initial scans for ${criticalAgents.length} high-priority agents...`);
 
     for (const agentId of criticalAgents) {
       const agent = this.agents.get(agentId);

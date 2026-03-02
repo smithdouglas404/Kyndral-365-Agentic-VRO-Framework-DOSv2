@@ -66,7 +66,7 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
         }),
         func: async ({ minCompletenessThreshold = 0, prioritizeHighValue = true }) => {
           try {
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
 
             const assessments = projects.map(p => {
               const dataCompleteness = {
@@ -182,7 +182,7 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
         }),
         func: async ({ projectId }) => {
           try {
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
             const project = projects.find(p => p.id === projectId);
 
             if (!project) {
@@ -205,7 +205,7 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
 
             // Get division OKRs for matching
             const divisionOkrs = project.divisionId
-              ? await this.storage.getDivisionOkrs(project.divisionId)
+              ? await this.getDivisionOkrs(project.divisionId)
               : [];
 
             // Inference logic based on available data
@@ -390,7 +390,7 @@ export class DeepOKRInferenceAgent extends DeepAgentBase {
         }),
         func: async ({ limit = 20, minConfidence = 0.5 }) => {
           try {
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
 
             // Filter projects needing OKR inference
             const projectsNeedingOKR = projects.filter(p => !p.okrObjective);

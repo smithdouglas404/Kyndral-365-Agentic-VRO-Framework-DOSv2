@@ -7,7 +7,7 @@
  * Flow: Agent OKR → Threshold → Camunda Rule → Trigger → Notification
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Link2,
@@ -34,6 +34,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { useAgentMetadata } from '@/hooks/useAgentRegistry';
 
 interface OKRRuleMapping {
   id: string;
@@ -61,17 +62,8 @@ interface Props {
   okrId?: string;
 }
 
-const AGENTS = [
-  { id: 'governance', name: 'Governance', color: 'blue' },
-  { id: 'risk', name: 'Risk', color: 'red' },
-  { id: 'finops', name: 'FinOps', color: 'green' },
-  { id: 'tmo', name: 'TMO', color: 'purple' },
-  { id: 'vro', name: 'VRO', color: 'orange' },
-  { id: 'planning', name: 'Planning', color: 'indigo' },
-  { id: 'ocm', name: 'OCM', color: 'pink' },
-  { id: 'pmo', name: 'PMO', color: 'teal' },
-  { id: 'okr', name: 'OKR', color: 'yellow' },
-];
+// Tailwind color mapping for dynamic agents
+const TAILWIND_COLORS = ['blue', 'red', 'green', 'purple', 'orange', 'indigo', 'pink', 'teal', 'yellow', 'cyan', 'rose', 'amber'];
 
 const METRICS = [
   { value: 'cpi', label: 'CPI (Cost Performance Index)', unit: 'ratio' },
@@ -131,6 +123,17 @@ export function RuleToOKRMapper({ agentId, okrId }: Props) {
   const queryClient = useQueryClient();
   const [showMappingDialog, setShowMappingDialog] = useState(false);
   const [editingMapping, setEditingMapping] = useState<OKRRuleMapping | null>(null);
+
+  // Load agents from database
+  const { data: agentMetadata = [] } = useAgentMetadata();
+  const agents = useMemo(() =>
+    agentMetadata.map((a, i) => ({
+      id: a.id,
+      name: a.shortName || a.name.replace(' Agent', ''),
+      color: TAILWIND_COLORS[i % TAILWIND_COLORS.length],
+    })),
+    [agentMetadata]
+  );
 
   // Form state
   const [mappingForm, setMappingForm] = useState<Partial<OKRRuleMapping>>({
@@ -228,7 +231,7 @@ export function RuleToOKRMapper({ agentId, okrId }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {AGENTS.map((agent) => (
+                {agents.map((agent) => (
                   <SelectItem key={agent.id} value={agent.id}>
                     {agent.name} Agent
                   </SelectItem>

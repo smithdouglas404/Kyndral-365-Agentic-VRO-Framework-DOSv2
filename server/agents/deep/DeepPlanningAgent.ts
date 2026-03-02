@@ -46,13 +46,13 @@ export class DeepPlanningAgent extends DeepAgentBase {
         }),
         func: async ({ projectId, limit }) => {
           try {
-            const projects = await this.storage.getProjects();
+            const projects = await this.getProjects();
             let allDependencies: any[] = [];
 
             const targetProjects = projectId ? projects.filter(p => p.id === projectId) : projects;
 
             for (const proj of targetProjects) {
-              const deps = await this.storage.getDependencies(proj.id);
+              const deps = await this.getDependencies(proj.id);
               allDependencies = allDependencies.concat(deps);
             }
 
@@ -131,7 +131,7 @@ export class DeepPlanningAgent extends DeepAgentBase {
         }),
         func: async ({ teamId }) => {
           try {
-            let teams = await this.storage.getTeams();
+            let teams = await this.getTeams();
 
             if (teamId) {
               teams = teams.filter(t => t.id === teamId);
@@ -219,7 +219,7 @@ export class DeepPlanningAgent extends DeepAgentBase {
         }),
         func: async ({ portfolioId }) => {
           try {
-            let projects = await this.storage.getProjects();
+            let projects = await this.getProjects();
 
             if (portfolioId) {
               projects = projects.filter(p => p.portfolioId === portfolioId);
@@ -319,10 +319,10 @@ export class DeepPlanningAgent extends DeepAgentBase {
         }),
         func: async ({ projectId, limit }) => {
           try {
-            let tasks = await this.storage.getTasks();
+            let tasks = await this.getTasks();
 
             if (projectId) {
-              const stories = await this.storage.getStoriesByProject(projectId);
+              const stories = await this.getStoriesByProject(projectId);
               const storyIds = stories.map(s => s.id);
               tasks = tasks.filter(t => storyIds.includes(t.storyId));
             }

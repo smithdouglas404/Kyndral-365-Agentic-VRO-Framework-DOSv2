@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Copy, Shield, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getAccessToken } from '@/lib/auth';
 
 interface MFASetupModalProps {
   open: boolean;
@@ -41,7 +42,7 @@ export function MFASetupModal({ open, onOpenChange, onSuccess }: MFASetupModalPr
     setError('');
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const response = await fetch('/api/auth/mfa/enable', {
         method: 'POST',
         headers: {
@@ -82,7 +83,7 @@ export function MFASetupModal({ open, onOpenChange, onSuccess }: MFASetupModalPr
     setError('');
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAccessToken();
       const response = await fetch('/api/auth/mfa/verify', {
         method: 'POST',
         headers: {

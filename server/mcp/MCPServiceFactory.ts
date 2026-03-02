@@ -6,6 +6,7 @@
 import { JiraService } from './JiraService.js';
 import { ServiceNowService } from './ServiceNowService.js';
 import { MondayService } from './MondayService.js';
+import { OpenProjectService } from './OpenProjectService.js';
 import { PalantirAIPService } from './PalantirAIPService.js';
 
 interface MCPServiceConfig {
@@ -21,6 +22,10 @@ interface MCPServiceConfig {
   };
   monday?: {
     apiToken: string;
+  };
+  openproject?: {
+    baseUrl: string;
+    apiKey: string;
   };
   palantir?: {
     hostname: string;
@@ -44,6 +49,10 @@ class JiraMCPService implements IMCPService {
 
   constructor(config: NonNullable<MCPServiceConfig['jira']>) {
     this.jira = new JiraService(config);
+  }
+
+  getService(): JiraService {
+    return this.jira;
   }
 
   async executeAction(action: string, params: any): Promise<any> {
@@ -138,6 +147,10 @@ class MondayMCPService implements IMCPService {
     this.monday = new MondayService(config);
   }
 
+  getService(): MondayService {
+    return this.monday;
+  }
+
   async executeAction(action: string, params: any): Promise<any> {
     switch (action) {
       case 'createItem':
@@ -176,6 +189,79 @@ class MondayMCPService implements IMCPService {
 
       default:
         throw new Error(`Unknown Monday.com action: ${action}`);
+    }
+  }
+}
+
+/**
+ * Wrapper for OpenProject Service
+ */
+class OpenProjectMCPService implements IMCPService {
+  private openproject: OpenProjectService;
+
+  constructor(config: NonNullable<MCPServiceConfig['openproject']>) {
+    this.openproject = new OpenProjectService(config);
+  }
+
+  getService(): OpenProjectService {
+    return this.openproject;
+  }
+
+  async executeAction(action: string, params: any): Promise<any> {
+    switch (action) {
+      case 'testConnection':
+      case 'test_connection':
+        return await this.openproject.testConnection();
+
+      case 'listProjects':
+      case 'list_projects':
+        return await this.openproject.listProjects(params.filters);
+
+      case 'getProject':
+      case 'get_project':
+        return await this.openproject.getProject(params.projectId);
+
+      case 'listWorkPackages':
+      case 'list_work_packages':
+      case 'search':
+        return await this.openproject.listWorkPackages({
+          projectId: params.projectId,
+          type: params.type,
+          status: params.status,
+          pageSize: params.pageSize,
+          offset: params.offset,
+        });
+
+      case 'getWorkPackage':
+      case 'get_work_package':
+        return await this.openproject.getWorkPackage(params.workPackageId);
+
+      case 'createWorkPackage':
+      case 'create_work_package':
+        return await this.openproject.createWorkPackage(params.projectId, params.workPackage || params);
+
+      case 'updateWorkPackage':
+      case 'update_work_package':
+        return await this.openproject.updateWorkPackage(params.workPackageId, params.updates || params);
+
+      case 'deleteWorkPackage':
+      case 'delete_work_package':
+        return await this.openproject.deleteWorkPackage(params.workPackageId);
+
+      case 'listStatuses':
+      case 'list_statuses':
+        return await this.openproject.listStatuses();
+
+      case 'listTypes':
+      case 'list_types':
+        return await this.openproject.listTypes();
+
+      case 'listPriorities':
+      case 'list_priorities':
+        return await this.openproject.listPriorities();
+
+      default:
+        throw new Error(`Unknown OpenProject action: ${action}`);
     }
   }
 }
@@ -294,6 +380,13 @@ function loadMCPConfig(): MCPServiceConfig {
     };
   }
 
+  if (process.env.OPENPROJECT_URL && process.env.OPENPROJECT_API_KEY) {
+    config.openproject = {
+      baseUrl: process.env.OPENPROJECT_URL,
+      apiKey: process.env.OPENPROJECT_API_KEY,
+    };
+  }
+
   if (process.env.PALANTIR_HOSTNAME && process.env.PALANTIR_TOKEN) {
     config.palantir = {
       hostname: process.env.PALANTIR_HOSTNAME,
@@ -324,6 +417,11 @@ export function initializeMCPServices(): void {
   if (config.monday) {
     serviceRegistry.set('monday', new MondayMCPService(config.monday));
     console.log('[MCP] Monday.com service initialized');
+  }
+
+  if (config.openproject) {
+    serviceRegistry.set('openproject', new OpenProjectMCPService(config.openproject));
+    console.log('[MCP] OpenProject service initialized');
   }
 
   if (config.palantir) {
@@ -373,3 +471,42 @@ export function getPalantirService(): PalantirAIPService | null {
   }
   return null;
 }
+
+export function getJiraService(): JiraService | null {
+  if (serviceRegistry.size === 0) {
+    initializeMCPServices();
+  }
+  const svc = serviceRegistry.get('jira');
+  if (svc && svc instanceof JiraMCPService) {
+    return (svc as JiraMCPService).getService();
+  }
+  return null;
+}
+
+export function getMondayService(): MondayService | null {
+  if (serviceRegistry.size === 0) {
+    initializeMCPServices();
+  }
+  const svc = serviceRegistry.get('monday');
+  if (svc && svc instanceof MondayMCPService) {
+    return (svc as MondayMCPService).getService();
+  }
+  return null;
+}
+
+export function getOpenProjectService(): OpenProjectService | null {
+  if (serviceRegistry.size === 0) {
+    initializeMCPServices();
+  }
+  const svc = serviceRegistry.get('openproject');
+  if (svc && svc instanceof OpenProjectMCPService) {
+    return (svc as OpenProjectMCPService).getService();
+  }
+  return null;
+}
+
+// Re-export service types for external use
+export { PalantirAIPService } from './PalantirAIPService.js';
+export { JiraService } from './JiraService.js';
+export { MondayService } from './MondayService.js';
+export { OpenProjectService } from './OpenProjectService.js';

@@ -5,13 +5,16 @@
 
 ## Recent Changes
 
-### March 2, 2026 - Complete Langflow Removal + Rulebricks (v2.7.0)
-- **Langflow fully removed**: All imports, service files, route files, script files, and sync code deleted
-- **Rulebricks replaces Langflow**: All 8 agent files now use `this.checkRule()` via Rulebricks instead of `executeLangflowFlow()`
-- **AgentCollaborationRulesEngine**: trigger_workflow action now routes through Rulebricks; Langflow sync code removed
-- **Agent Objects**: `LangflowService` type replaced with `RulesService` interface; attribute calculation uses Rulebricks
-- **Deleted files**: `server/lib/Langflow*.ts` (6 files), `server/routes/langflow*.ts` (4 files), `server/scripts/*langflow*.ts` (5 files)
-- **Rule slugs**: budget-alert, schedule-alert, risk-alert, compliance-alert, health-alert, change-impact, value-gap, dependency-alert
+### March 2, 2026 - Full Palantir AIP Integration (v2.7.0)
+- **100% Palantir-native**: All rule evaluation, threshold checks, and workflow actions routed through Palantir Functions/Actions
+- **PalantirRulesService**: Replaced Rulebricks with enterprise-grade Palantir integration
+  - `checkRule(functionName, input)` - Evaluates Palantir Functions for business rules
+  - `checkThreshold(agentType, thresholdType, value)` - Threshold evaluation with local fallbacks
+  - `executeAction(actionName, params)` - Triggers Palantir Actions for workflow orchestration
+- **DeepAgentBase.checkRule()**: All 11 agents now route through PalantirRulesService with auto-notification
+- **Local threshold fallbacks**: When Palantir unavailable, local threshold definitions ensure continuity
+- **Deleted**: Rulebricks SDK, routes, admin pages, rule editors, Langflow components
+- **Enterprise Ontology**: 18 object types across 8 domains (see docs/ENTERPRISE_ONTOLOGY_MODEL.md)
 
 ### March 2, 2026 - Notification Agent + Agent-MCP Manager (v2.6.0)
 - **11th Agent**: DeepNotificationAgent — central gateway for all Palantir actions, HITL approvals, and signal broadcasting
@@ -170,12 +173,12 @@ The system implements 10 specialized agents:
   - Smartsheet, Planview
 
 ### Workflow & Rules
+- **Palantir Functions**: Enterprise business rule evaluation via AIP
+  - All 11 agents check rules via `this.checkRule(functionName, input)` from DeepAgentBase
+  - `this.checkThreshold(type, value)` for threshold evaluation with auto-notification
+- **Palantir Actions**: Workflow orchestration and external system integration
 - **Camunda 8**: BPMN/DMN workflow and decision engine
-- **Retool**: External rule editor interfaces (8 domain-specific apps)
-- **Rulebricks**: Cloud rules engine for agent business rules
-  - All 11 agents check rules via `this.checkRule(slug, input)` from DeepAgentBase
-  - Rule slugs: budget-alert, schedule-alert, risk-alert, compliance-alert, health-alert, change-impact, value-gap, dependency-alert
-  - API: `/api/rulebricks/status`, `/api/rulebricks/solve`, `/api/rulebricks/bulk-solve`
+- **Local Thresholds**: Fallback threshold definitions when Palantir unavailable
 
 ### Notifications
 - **Email**: SendGrid, Mailgun, AWS SES, SMTP support

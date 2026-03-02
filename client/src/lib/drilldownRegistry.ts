@@ -647,6 +647,42 @@ export const agentDossiers: Record<AgentType, DrilldownContent> = {
     ],
     aiInsight: 'Integrated Management Agent is operating at optimal capacity with 87% average confidence on recommendations.'
   },
+  'vro': {
+    title: 'VRO Agent',
+    subtitle: 'Value Realization Office',
+    description: 'Monitors value delivery, ROI tracking, and strategic benefit realization.',
+    level: 2,
+    entityType: 'agent',
+    entityId: 'vro',
+    metrics: [
+      { label: 'Value Streams', value: '8', trend: 'stable' },
+      { label: 'ROI Tracking', value: '92%', trend: 'up' },
+      { label: 'Benefits Realized', value: '$4.2M', trend: 'up' }
+    ],
+    relatedItems: [
+      { id: 'cap-1', name: 'Investigate', type: 'Capability', entityType: 'capability', entityId: 'investigate' },
+      { id: 'cap-2', name: 'Accelerate', type: 'Capability', entityType: 'capability', entityId: 'accelerate' },
+      { id: 'cap-3', name: 'Escalate', type: 'Capability', entityType: 'capability', entityId: 'escalate' }
+    ]
+  },
+  'pmo': {
+    title: 'PMO Agent',
+    subtitle: 'Project Management Office',
+    description: 'Oversees project delivery, timeline management, and resource coordination.',
+    level: 2,
+    entityType: 'agent',
+    entityId: 'pmo',
+    metrics: [
+      { label: 'Active Projects', value: '24', trend: 'stable' },
+      { label: 'On-Time Delivery', value: '85%', trend: 'up' },
+      { label: 'Budget Variance', value: '+2%', trend: 'down' }
+    ],
+    relatedItems: [
+      { id: 'cap-1', name: 'Create Task', type: 'Capability', entityType: 'capability', entityId: 'create-task' },
+      { id: 'cap-2', name: 'Reassign', type: 'Capability', entityType: 'capability', entityId: 'reassign' },
+      { id: 'cap-3', name: 'Escalate', type: 'Capability', entityType: 'capability', entityId: 'escalate' }
+    ]
+  },
   'tmo': {
     title: 'TMO Agent',
     subtitle: 'Transformation Management Office',

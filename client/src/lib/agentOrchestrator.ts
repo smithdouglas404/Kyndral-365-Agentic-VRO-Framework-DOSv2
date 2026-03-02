@@ -47,6 +47,8 @@ export interface LearnedPattern {
 
 const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
   'integrated-management': ['investigate', 'accelerate', 'escalate', 'notify', 'update-status', 'create-task', 'reassign'],
+  vro: ['investigate', 'accelerate', 'escalate', 'notify', 'update-status'],
+  pmo: ['investigate', 'create-task', 'notify', 'escalate', 'update-status', 'reassign'],
   tmo: ['investigate', 'create-task', 'notify', 'accelerate'],
   finops: ['investigate', 'mitigate', 'notify', 'escalate'],
   okr: ['investigate', 'notify', 'update-status'],
@@ -58,6 +60,8 @@ const AGENT_CAPABILITIES: Record<AgentType, ActionType[]> = {
 const AGENT_PRIORITIES: Record<AgentType, number> = {
   'integrated-management': 100,
   governance: 95,
+  vro: 90,
+  pmo: 88,
   finops: 85,
   tmo: 80,
   okr: 75,
