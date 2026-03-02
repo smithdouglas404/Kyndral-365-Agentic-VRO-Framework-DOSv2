@@ -1,9 +1,17 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.6.0  
+**Version:** 2.7.0  
 **Updated:** 2026-03-02
 
 ## Recent Changes
+
+### March 2, 2026 - Complete Langflow Removal + Rulebricks (v2.7.0)
+- **Langflow fully removed**: All imports, service files, route files, script files, and sync code deleted
+- **Rulebricks replaces Langflow**: All 8 agent files now use `this.checkRule()` via Rulebricks instead of `executeLangflowFlow()`
+- **AgentCollaborationRulesEngine**: trigger_workflow action now routes through Rulebricks; Langflow sync code removed
+- **Agent Objects**: `LangflowService` type replaced with `RulesService` interface; attribute calculation uses Rulebricks
+- **Deleted files**: `server/lib/Langflow*.ts` (6 files), `server/routes/langflow*.ts` (4 files), `server/scripts/*langflow*.ts` (5 files)
+- **Rule slugs**: budget-alert, schedule-alert, risk-alert, compliance-alert, health-alert, change-impact, value-gap, dependency-alert
 
 ### March 2, 2026 - Notification Agent + Agent-MCP Manager (v2.6.0)
 - **11th Agent**: DeepNotificationAgent — central gateway for all Palantir actions, HITL approvals, and signal broadcasting
@@ -164,10 +172,10 @@ The system implements 10 specialized agents:
 ### Workflow & Rules
 - **Camunda 8**: BPMN/DMN workflow and decision engine
 - **Retool**: External rule editor interfaces (8 domain-specific apps)
-- **Langflow**: Visual workflow builder via MCP integration
-  - **Sync**: Bidirectional mapping between PostgreSQL rules and Langflow flows
-  - **API**: `/api/langflow/sync/*` endpoints for rule-flow synchronization
-  - **Webhook**: Secure webhook at `/api/langflow/webhook` (Bearer token auth)
+- **Rulebricks**: Cloud rules engine for agent business rules
+  - All 11 agents check rules via `this.checkRule(slug, input)` from DeepAgentBase
+  - Rule slugs: budget-alert, schedule-alert, risk-alert, compliance-alert, health-alert, change-impact, value-gap, dependency-alert
+  - API: `/api/rulebricks/status`, `/api/rulebricks/solve`, `/api/rulebricks/bulk-solve`
 
 ### Notifications
 - **Email**: SendGrid, Mailgun, AWS SES, SMTP support

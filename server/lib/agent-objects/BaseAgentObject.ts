@@ -5,8 +5,11 @@
  * Agents are objects with callable attributes that query via Langflow MCP
  */
 
-import type { LangflowService } from '../LangflowService.js';
 import type { AgentType, AgentAttributeRegistryEntry } from '../AgentAttributeRegistry.js';
+
+export interface RulesService {
+  solveRule(slug: string, input: Record<string, any>): Promise<any>;
+}
 import { getDefaultAttributes } from '../AgentAttributeRegistry.js';
 
 export interface AttributeValue {
@@ -23,21 +26,21 @@ export interface AttributeValue {
 export interface AgentObjectConfig {
   agentType: AgentType;
   entityId: string;
-  langflowService: LangflowService;
+  rulesService?: RulesService;
   mem0Endpoint?: string;
 }
 
-export abstract class BaseAgentObject {
+export class BaseAgentObject {
   protected agentType: AgentType;
   protected entityId: string;
-  protected langflowService: LangflowService;
+  protected rulesService?: RulesService;
   protected mem0Endpoint: string;
   protected attributes: Map<string, AgentAttributeRegistryEntry>;
 
   constructor(config: AgentObjectConfig) {
     this.agentType = config.agentType;
     this.entityId = config.entityId;
-    this.langflowService = config.langflowService;
+    this.rulesService = config.rulesService;
     this.mem0Endpoint = config.mem0Endpoint || 'http://localhost:5000/api/mem0';
 
     // Load attributes from registry
@@ -159,41 +162,36 @@ export abstract class BaseAgentObject {
     }
   }
 
-  /**
-   * Trigger Langflow flow to calculate attribute
-   * (Flow will: read MCP data → calculate → write to Mem0 → return value)
-   */
   private async triggerAttributeCalculation(attributeName: string): Promise<any> {
-    // Construct flow ID based on agent type
-    // Pattern: {agentType}-attribute-sync (e.g., "pmo-attribute-sync")
-    const flowId = `${this.agentType}-attribute-sync`;
+    const ruleSlug = `${this.agentType}-attribute-sync`;
 
     try {
-      const result = await this.langflowService.executeFlow(flowId, {
+      const service = this.rulesService || (globalThis as any).__rulebricksService;
+      if (!service) {
+        throw new Error('Rulebricks service not available');
+      }
+
+      const result = await service.solveRule(ruleSlug, {
         agent_type: this.agentType,
         entity_id: this.entityId,
         attribute: attributeName,
         operation: 'calculate'
       });
 
-      if (result.status === 'success' && result.outputs) {
-        // Extract value from Langflow output
-        const output = result.outputs[0]?.outputs?.[0];
-        if (output) {
-          return {
-            value: output.value,
-            narrative: output.narrative,
-            reasoning: output.reasoning,
-            sources: output.sources,
-            confidence: output.confidence || 1.0
-          };
-        }
+      if (result) {
+        return {
+          value: result.value ?? result,
+          narrative: result.narrative,
+          reasoning: result.reasoning,
+          sources: result.sources,
+          confidence: result.confidence || 1.0
+        };
       }
 
-      throw new Error(`Langflow flow execution failed: ${result.error || 'Unknown error'}`);
+      throw new Error(`Rule evaluation failed for ${ruleSlug}`);
 
     } catch (error: any) {
-      console.error(`[AgentObject] Langflow execution error:`, error.message);
+      console.error(`[AgentObject] Rule evaluation error:`, error.message);
       throw error;
     }
   }

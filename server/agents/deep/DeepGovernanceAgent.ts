@@ -11,7 +11,6 @@ import { AgentTool } from "../../lib/AgentTool.js";
 import { z } from "zod";
 import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
-import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepGovernanceAgent extends DeepAgentBase {
   constructor(storage: IStorage) {
@@ -91,28 +90,14 @@ export class DeepGovernanceAgent extends DeepAgentBase {
                 detectedAt: new Date(),
               });
 
-              // Execute Langflow workflow for compliance alert
-              try {
-                const flowResult = await executeLangflowFlow(
-                  'new_flow',
-                  {
-                    input_value: JSON.stringify({
-                      projectId: 'portfolio',
-                      violationType: 'multiple_projects_at_risk',
-                      severity: 'critical',
-                      policyId: 'portfolio_compliance',
-                      message: `${atRisk} projects at compliance risk, ${reviewNeeded} need review`,
-                    })
-                  },
-                  'governance'
-                );
-
-                if (flowResult.success) {
-                  console.log(`[DeepGovernance] ✅ Langflow workflow executed`);
-                }
-              } catch (error: any) {
-                console.warn(`[DeepGovernance] Langflow skipped:`, error.message);
-              }
+              await this.checkRule('compliance-alert', {
+                projectId: 'portfolio',
+                violationType: 'multiple_projects_at_risk',
+                severity: 'critical',
+                policyId: 'portfolio_compliance',
+                atRiskCount: atRisk,
+                reviewNeededCount: reviewNeeded,
+              });
 
               await this.archiveContext(
                 `Portfolio compliance alert: ${atRisk} projects at risk, ${reviewNeeded} need review`,

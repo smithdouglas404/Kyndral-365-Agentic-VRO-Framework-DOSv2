@@ -21,11 +21,7 @@ import { registerMCPServerRoutes } from "./routes/admin/mcp-servers.js";
 import { registerCustomMCPPresetRoutes } from "./routes/admin/custom-mcp-presets.js";
 import { registerAgentConfigRoutes } from "./routes/admin/agent-config.js";
 import { registerOrchestratorRoutes, setBootstrapGetter } from "./routes/admin/orchestrator.js";
-import { registerLangflowRoutes } from "./routes/langflow.js";
-import langflowSyncRouter from "./routes/langflow-sync.js";
-import { registerLangflowIntegrationRoutes } from "./routes/langflow-integration.js";
 import { registerAgentObjectRoutes } from "./routes/agent-objects.js";
-import langflowAttributeSyncRouter from "./routes/langflow-attribute-sync.js";
 import { registerAgentModelRoutes } from "./routes/agent-model.js";
 import { registerAgentActionRoutes } from "./routes/agent-actions.js";
 import { registerLogicGatesRoutes } from "./routes/logic-gates.js";
@@ -195,38 +191,78 @@ export async function registerRoutes(
   // Register Custom MCP Preset Management routes (ADMIN - Custom integration builder)
   registerCustomMCPPresetRoutes(app);
 
-  // Register Langflow routes (Visual workflow orchestration)
-  registerLangflowRoutes(app);
-
-  // Register Langflow Sync routes (Bidirectional sync between DB rules and Langflow flows)
-  app.use('/api/langflow-sync', langflowSyncRouter);
-
-  // Register Langflow Attribute Sync routes (Bidirectional sync between DB attributes and Langflow flows)
-  app.use('/api/langflow-attribute-sync', langflowAttributeSyncRouter);
-
-  // Register Agent Action routes (Server endpoints for Langflow flows to call MCP integrations)
+  // Register Agent Action routes (Server endpoints for agent MCP integrations)
   registerAgentActionRoutes(app);
 
   // Register Logic Gates routes (Autonomous agent collaboration via Logic Gates)
   registerLogicGatesRoutes(app);
 
-  // Register Langflow Integration routes (Mem0, WebSocket, A2A, DB persistence for Langflow components)
-  registerLangflowIntegrationRoutes(app);
-
-  // Register Agent Objects routes (Query agent attributes via Langflow MCP)
+  // Register Agent Objects routes (Query agent attributes)
   registerAgentObjectRoutes(app);
 
-  // Register Mem0 API routes (Expose Mem0 fact operations to Langflow flows)
+  // Register Mem0 API routes (Mem0 fact operations for agents)
   app.use('/api/mem0', mem0ApiRouter);
 
-  // Register A2A API routes (Expose Agent-to-Agent messaging to Langflow flows)
+  // Register A2A API routes (Agent-to-Agent messaging)
   app.use('/api/a2a', a2aApiRouter);
 
   // Register Agent Object Model routes (Agent definitions, attributes, signals)
   registerAgentModelRoutes(app);
 
-  // Register Ontology API routes (Expose ontology operations to Langflow flows)
+  // Register Ontology API routes (Ontology operations for agents)
   app.use('/api/ontology', ontologyApiRouter);
+
+  // Rulebricks Rules Engine API (all agents check thresholds/business logic)
+  app.get('/api/rulebricks/status', async (_req, res) => {
+    try {
+      const { getRulebricksService } = await import('./lib/RulebricksService.js');
+      const rb = getRulebricksService();
+      if (!rb) {
+        return res.json({ success: true, configured: false, message: 'Rulebricks not configured' });
+      }
+      const connected = await rb.testConnection();
+      const rules = connected ? await rb.listRules() : [];
+      res.json({ success: true, configured: true, connected, ruleCount: rules.length, rules });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post('/api/rulebricks/solve', async (req, res) => {
+    try {
+      const { slug, request: ruleInput } = req.body;
+      if (!slug) {
+        return res.status(400).json({ success: false, error: 'slug is required' });
+      }
+      const { getRulebricksService } = await import('./lib/RulebricksService.js');
+      const rb = getRulebricksService();
+      if (!rb) {
+        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
+      }
+      const result = await rb.solveRule(slug, ruleInput || {});
+      res.json({ success: true, ...result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post('/api/rulebricks/bulk-solve', async (req, res) => {
+    try {
+      const { slug, requests } = req.body;
+      if (!slug || !Array.isArray(requests)) {
+        return res.status(400).json({ success: false, error: 'slug and requests[] are required' });
+      }
+      const { getRulebricksService } = await import('./lib/RulebricksService.js');
+      const rb = getRulebricksService();
+      if (!rb) {
+        return res.status(503).json({ success: false, error: 'Rulebricks not configured' });
+      }
+      const results = await rb.bulkSolve(slug, requests);
+      res.json({ success: true, results });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
 
   // Register Agent Schemas routes (Predefined agent attributes and relationships)
   app.use('/api/agent-schemas', agentSchemasRouter);

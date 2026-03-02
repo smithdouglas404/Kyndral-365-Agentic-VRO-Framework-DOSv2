@@ -176,52 +176,60 @@ const MCP_DEFINITIONS: McpDef[] = [
     description: 'Records all agent decisions, data access, and actions for compliance audit trail',
     capabilities: ['Decision Logging', 'Access Tracking', 'Action History', 'Compliance Reporting'],
   },
+  {
+    name: 'rulebricks',
+    displayName: 'Rulebricks',
+    type: 'governance',
+    category: 'rules_engine',
+    description: 'No-code decision rules engine for business logic, threshold checks, and automated decisions',
+    capabilities: ['Decision Tables', 'Threshold Rules', 'Business Logic', 'Bulk Solve', 'Version Control'],
+  },
 ];
 
 const AGENT_MCP_MAPPINGS: AgentMapping[] = [
   {
     agentId: 'finops',
-    mcpNames: ['sap', 'monday', 'quickbooks', 'palantir-aip', 'responsible-ai', 'quality-assurance', 'audit-trail'],
+    mcpNames: ['sap', 'monday', 'quickbooks', 'palantir-aip', 'responsible-ai', 'quality-assurance', 'audit-trail', 'rulebricks'],
   },
   {
     agentId: 'tmo',
-    mcpNames: ['jira', 'azure-devops', 'ms-project', 'responsible-ai', 'quality-assurance'],
+    mcpNames: ['jira', 'azure-devops', 'ms-project', 'responsible-ai', 'quality-assurance', 'rulebricks'],
   },
   {
     agentId: 'risk',
-    mcpNames: ['servicenow', 'jira', 'palantir-aip', 'responsible-ai', 'policy-enforcement', 'quality-assurance'],
+    mcpNames: ['servicenow', 'jira', 'palantir-aip', 'responsible-ai', 'policy-enforcement', 'quality-assurance', 'rulebricks'],
   },
   {
     agentId: 'pmo',
-    mcpNames: ['jira', 'azure-devops', 'smartsheet', 'planview', 'responsible-ai', 'audit-trail'],
+    mcpNames: ['jira', 'azure-devops', 'smartsheet', 'planview', 'responsible-ai', 'audit-trail', 'rulebricks'],
   },
   {
     agentId: 'governance',
-    mcpNames: ['servicenow', 'responsible-ai', 'policy-enforcement', 'quality-assurance', 'audit-trail'],
+    mcpNames: ['servicenow', 'responsible-ai', 'policy-enforcement', 'quality-assurance', 'audit-trail', 'rulebricks'],
   },
   {
     agentId: 'vro',
-    mcpNames: ['planview', 'salesforce', 'sap', 'responsible-ai', 'quality-assurance'],
+    mcpNames: ['planview', 'salesforce', 'sap', 'responsible-ai', 'quality-assurance', 'rulebricks'],
   },
   {
     agentId: 'ocm',
-    mcpNames: ['slack', 'teams', 'workday', 'responsible-ai', 'quality-assurance'],
+    mcpNames: ['slack', 'teams', 'workday', 'responsible-ai', 'quality-assurance', 'rulebricks'],
   },
   {
     agentId: 'planning',
-    mcpNames: ['jira', 'github', 'azure-devops', 'ms-project', 'responsible-ai', 'quality-assurance'],
+    mcpNames: ['jira', 'github', 'azure-devops', 'ms-project', 'responsible-ai', 'quality-assurance', 'rulebricks'],
   },
   {
     agentId: 'okr',
-    mcpNames: ['monday', 'jira', 'planview', 'responsible-ai', 'policy-enforcement'],
+    mcpNames: ['monday', 'jira', 'planview', 'responsible-ai', 'policy-enforcement', 'rulebricks'],
   },
   {
     agentId: 'integrated',
-    mcpNames: ['palantir-aip', 'responsible-ai', 'policy-enforcement', 'quality-assurance', 'audit-trail'],
+    mcpNames: ['palantir-aip', 'responsible-ai', 'policy-enforcement', 'quality-assurance', 'audit-trail', 'rulebricks'],
   },
   {
     agentId: 'notification',
-    mcpNames: ['palantir-aip', 'slack', 'teams', 'servicenow', 'responsible-ai', 'audit-trail'],
+    mcpNames: ['palantir-aip', 'slack', 'teams', 'servicenow', 'responsible-ai', 'audit-trail', 'rulebricks'],
   },
 ];
 

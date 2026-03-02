@@ -14,7 +14,6 @@ import type { IStorage } from "../../storage.js";
 import type { Fact } from "../../lib/Mem0Service.js";
 import { PMO_DEFAULT_RULES, PMO_DEFAULT_ATTRIBUTES } from "../attributes/PMOAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/PMOAgentAttributes.js";
-import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepPMOAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = PMO_DEFAULT_RULES;
@@ -72,29 +71,13 @@ export class DeepPMOAgent extends DeepAgentBase {
         sourceAgent: fact.sourceAgent,
       });
 
-      // Execute Langflow workflow for health alert
-      try {
-        const flowResult = await executeLangflowFlow(
-          'new_flow',
-          {
-            input_value: JSON.stringify({
-              projectId: fact.entity.replace('project_', ''),
-              projectName: fact.entity,
-              healthScore: 3,
-              issues: [`${Math.abs(fact.value)} days schedule delay`],
-              severity: 'critical',
-              message: `Critical health alert: ${Math.abs(fact.value)} days behind`,
-            })
-          },
-          'pmo'
-        );
-
-        if (flowResult.success) {
-          console.log(`[DeepPMO] ✅ Langflow workflow executed`);
-        }
-      } catch (error: any) {
-        console.warn(`[DeepPMO] Langflow skipped:`, error.message);
-      }
+      await this.checkRule('health-alert', {
+        projectId: fact.entity.replace('project_', ''),
+        projectName: fact.entity,
+        healthScore: 3,
+        issues: [`${Math.abs(fact.value)} days schedule delay`],
+        severity: 'critical',
+      });
 
       // Archive the context
       await this.archiveContext(

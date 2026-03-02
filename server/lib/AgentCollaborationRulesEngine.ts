@@ -19,7 +19,7 @@ import { Engine, Rule } from 'json-rules-engine';
 import { db } from '../db.js';
 import { sql } from 'drizzle-orm';
 import { ruleExecutionHistory } from '../../shared/schema.js';
-import { getLangflowRuleSyncService } from './LangflowRuleSyncService.js';
+
 import { getMem0Service } from './Mem0Service.js';
 
 // ============================================================================
@@ -280,7 +280,7 @@ export class AgentCollaborationRulesEngine {
           hasFailures,
         });
 
-        // Write rule outcome to Mem0 (memory layer for Langflow and agents)
+        // Write rule outcome to Mem0 (memory layer for agents)
         try {
           const mem0 = getMem0Service();
           const entity = facts.projectId || `agent_${facts.agentId}`;
@@ -366,23 +366,15 @@ export class AgentCollaborationRulesEngine {
       case 'trigger_workflow':
         console.log(`[RulesEngine] Triggering workflow: ${action.parameters?.workflowId}`);
         try {
-          const { executeLangflowFlow } = await import('./LangflowMCPClient.js');
-          const result = await executeLangflowFlow(
-            action.parameters?.workflowId || 'new_flow',
-            {
-              input_value: JSON.stringify({
-                ...facts,
-                triggeredBy: 'rules_engine',
-                ruleId: action.parameters?.ruleId
-              })
-            },
-            facts.agentId
-          );
-
-          if (result.success) {
-            console.log(`[RulesEngine] ✅ Workflow executed successfully`);
+          const rulebricks = (globalThis as any).__rulebricksService;
+          if (rulebricks) {
+            const result = await rulebricks.solveRule(
+              action.parameters?.workflowId || 'workflow-trigger',
+              { ...facts, triggeredBy: 'rules_engine', ruleId: action.parameters?.ruleId }
+            );
+            console.log(`[RulesEngine] ✅ Rulebricks workflow rule evaluated`, result);
           } else {
-            console.error(`[RulesEngine] ❌ Workflow failed:`, result.error);
+            console.warn(`[RulesEngine] Rulebricks service not available`);
           }
         } catch (error: any) {
           console.warn(`[RulesEngine] Workflow trigger skipped:`, error.message);
@@ -524,14 +516,6 @@ export class AgentCollaborationRulesEngine {
 
     console.log(`[RulesEngine] Created rule: ${newRule.name}`);
 
-    // Auto-sync to Langflow if rule has trigger_workflow action
-    try {
-      const syncService = getLangflowRuleSyncService();
-      await syncService.syncRuleToFlow(newRule);
-    } catch (syncError) {
-      console.warn(`[RulesEngine] Langflow sync skipped:`, syncError);
-    }
-
     return newRule;
   }
 
@@ -588,16 +572,6 @@ export class AgentCollaborationRulesEngine {
 
     console.log(`[RulesEngine] Updated rule: ${ruleId}`);
 
-    // Re-sync to Langflow if rule has trigger_workflow action
-    try {
-      const updatedRule = await this.getRule(ruleId);
-      if (updatedRule) {
-        const syncService = getLangflowRuleSyncService();
-        await syncService.syncRuleToFlow(updatedRule);
-      }
-    } catch (syncError) {
-      console.warn(`[RulesEngine] Langflow sync skipped:`, syncError);
-    }
   }
 
   /**
@@ -613,13 +587,6 @@ export class AgentCollaborationRulesEngine {
 
     console.log(`[RulesEngine] Deleted rule: ${ruleId}`);
 
-    // Unlink from Langflow
-    try {
-      const syncService = getLangflowRuleSyncService();
-      await syncService.unlinkRule(ruleId);
-    } catch (syncError) {
-      console.warn(`[RulesEngine] Langflow unlink skipped:`, syncError);
-    }
   }
 
   /**

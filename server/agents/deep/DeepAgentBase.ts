@@ -327,6 +327,36 @@ export abstract class DeepAgentBase {
   }
 
   /**
+   * Check a Rulebricks rule — all agents can call business logic / threshold checks
+   * Returns the rule result, or null if Rulebricks is not configured
+   */
+  protected async checkRule(slug: string, input: Record<string, any>): Promise<any> {
+    try {
+      const { getRulebricksService } = await import('../../lib/RulebricksService.js');
+      const rb = getRulebricksService();
+      if (!rb) {
+        console.log(`[${this.config.agentName}] Rulebricks not configured — skipping rule check: ${slug}`);
+        return null;
+      }
+
+      const result = await rb.solveRule(slug, input);
+      if (result.success) {
+        console.log(`[${this.config.agentName}] Rule "${slug}" checked (${result.executionTime}ms)`);
+        await this.memory.appendContext(
+          `Rule check "${slug}": ${JSON.stringify(result.result)}`
+        );
+        return result.result;
+      } else {
+        console.warn(`[${this.config.agentName}] Rule "${slug}" failed: ${result.error}`);
+        return null;
+      }
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Rule check error: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
    * Archive important context to long-term memory
    */
   protected async archiveContext(content: string, metadata: Record<string, any> = {}): Promise<void> {

@@ -1,25 +1,11 @@
-/**
- * AGENT OBJECTS API ROUTES
- *
- * API endpoints for querying agent attributes via agent-as-object architecture
- * Agents query attributes via Langflow MCP (Mem0 cache first, then Langflow if needed)
- */
-
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { createAgentObject, createAgentObjects } from '../lib/agent-objects/index.js';
 import { isAgentType, type AgentType } from '../lib/AgentAttributeRegistry.js';
-import { LangflowService } from '../lib/LangflowService.js';
 
 export function registerAgentObjectRoutes(app: Router) {
 
-  // Initialize Langflow service
-  const langflowService = new LangflowService({
-    apiUrl: process.env.LANGFLOW_API_URL || '',
-    apiKey: process.env.LANGFLOW_API_KEY || '',
-    orgId: process.env.LANGFLOW_ORG_ID,
-    projectId: process.env.LANGFLOW_PROJECT_ID
-  });
+  const rulesService = (globalThis as any).__rulebricksService || undefined;
 
   /**
    * GET /api/agent-objects/:agentType/:entityId/attributes/:attributeName
@@ -37,7 +23,7 @@ export function registerAgentObjectRoutes(app: Router) {
       }
 
       // Create agent object
-      const agentObject = createAgentObject(agentType as AgentType, entityId, langflowService);
+      const agentObject = createAgentObject(agentType as AgentType, entityId, rulesService);
 
       // Get attribute (checks Mem0 cache first, triggers Langflow if not cached)
       const attributeValue = await agentObject.getAttribute(attributeName);
@@ -84,7 +70,7 @@ export function registerAgentObjectRoutes(app: Router) {
       }
 
       // Create agent object
-      const agentObject = createAgentObject(agentType as AgentType, entityId, langflowService);
+      const agentObject = createAgentObject(agentType as AgentType, entityId, rulesService);
 
       // If specific attributes requested, get those. Otherwise get entity state (all cached)
       let attributes: Record<string, any>;
@@ -130,7 +116,7 @@ export function registerAgentObjectRoutes(app: Router) {
       }
 
       // Create agent object
-      const agentObject = createAgentObject(agentType as AgentType, entityId, langflowService);
+      const agentObject = createAgentObject(agentType as AgentType, entityId, rulesService);
 
       // Get attribute definitions
       const attributes = agentObject.listAttributes();
@@ -177,7 +163,7 @@ export function registerAgentObjectRoutes(app: Router) {
       }
 
       // Create agent object
-      const agentObject = createAgentObject(agentType as AgentType, entityId, langflowService);
+      const agentObject = createAgentObject(agentType as AgentType, entityId, rulesService);
 
       // Refresh attribute (bypass cache)
       const attributeValue = await agentObject.refreshAttribute(attributeName);
@@ -214,7 +200,7 @@ export function registerAgentObjectRoutes(app: Router) {
       const { entityId } = req.params;
 
       // Create all agent objects for the entity
-      const agents = createAgentObjects(entityId, langflowService);
+      const agents = createAgentObjects(entityId, rulesService);
 
       // Get entity state from each agent
       const perspectives: Record<string, any> = {};
@@ -247,7 +233,7 @@ export function registerAgentObjectRoutes(app: Router) {
     try {
       const { entityId } = req.params;
 
-      const pmoAgent = createAgentObject('pmo', entityId, langflowService);
+      const pmoAgent = createAgentObject('pmo', entityId, rulesService);
 
       // Use typed method if available
       if ('getHealthReport' in pmoAgent && typeof pmoAgent.getHealthReport === 'function') {
@@ -280,7 +266,7 @@ export function registerAgentObjectRoutes(app: Router) {
     try {
       const { entityId } = req.params;
 
-      const finopsAgent = createAgentObject('finops', entityId, langflowService);
+      const finopsAgent = createAgentObject('finops', entityId, rulesService);
 
       // Use typed method if available
       if ('getFinancialReport' in finopsAgent && typeof finopsAgent.getFinancialReport === 'function') {

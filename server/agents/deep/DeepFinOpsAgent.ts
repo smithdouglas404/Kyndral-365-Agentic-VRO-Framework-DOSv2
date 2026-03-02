@@ -13,7 +13,6 @@ import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
 import { FINOPS_DEFAULT_RULES, FINOPS_DEFAULT_ATTRIBUTES } from "../attributes/FinOpsAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
-import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepFinOpsAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = FINOPS_DEFAULT_RULES;
@@ -86,32 +85,14 @@ export class DeepFinOpsAgent extends DeepAgentBase {
               detectedAt: new Date(),
             });
 
-            // Execute Langflow workflow for budget alert orchestration
-            try {
-              const flowResult = await executeLangflowFlow(
-                'new_flow',
-                {
-                  input_value: JSON.stringify({
-                    projectId,
-                    projectName: project.name,
-                    budgetVariance: variance / 100,
-                    currentBudget: budget,
-                    actualSpent: actualCost,
-                    severity: variance > 30 ? 'critical' : 'high',
-                    message: `Budget overrun detected: ${project.name} is ${variance.toFixed(1)}% over budget`,
-                  })
-                },
-                'finops'
-              );
-
-              if (flowResult.success) {
-                console.log(`[DeepFinOps] ✅ Langflow workflow executed successfully`);
-              } else {
-                console.warn(`[DeepFinOps] Langflow workflow not executed:`, flowResult.error);
-              }
-            } catch (error: any) {
-              console.warn(`[DeepFinOps] Langflow execution skipped:`, error.message);
-            }
+            await this.checkRule('budget-alert', {
+              projectId,
+              projectName: project.name,
+              budgetVariance: variance / 100,
+              currentBudget: budget,
+              actualSpent: actualCost,
+              severity: variance > 30 ? 'critical' : 'high',
+            });
 
             await this.archiveContext(
               `Project ${project.name} detected with ${variance.toFixed(1)}% budget overrun (critical threshold exceeded)`,

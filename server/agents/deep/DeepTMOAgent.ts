@@ -13,7 +13,6 @@ import { DeepAgentBase, DeepAgentConfig } from "./DeepAgentBase.js";
 import type { IStorage } from "../../storage.js";
 import { TMO_DEFAULT_RULES, TMO_DEFAULT_ATTRIBUTES } from "../attributes/TMOAgentAttributes.js";
 import type { RuleDefinition } from "../attributes/FinOpsAgentAttributes.js";
-import { executeLangflowFlow } from "../../lib/LangflowMCPClient.js";
 
 export class DeepTMOAgent extends DeepAgentBase {
   private rules: RuleDefinition[] = TMO_DEFAULT_RULES;
@@ -102,32 +101,14 @@ export class DeepTMOAgent extends DeepAgentBase {
               detectedAt: new Date(),
             });
 
-            // Execute Langflow workflow for schedule delay response
-            try {
-              const flowResult = await executeLangflowFlow(
-                'new_flow',  // Use the available Langflow tool
-                {
-                  input_value: JSON.stringify({
-                    projectId,
-                    projectName: project.name,
-                    delayDays: Math.abs(varianceDays),
-                    criticalPath: true,
-                    scheduledDate: project.endDate?.toISOString().split('T')[0] || 'N/A',
-                    severity: 'critical',
-                    message: `Schedule delay detected: ${project.name} is ${Math.abs(varianceDays)} days behind`,
-                  })
-                },
-                'tmo'
-              );
-
-              if (flowResult.success) {
-                console.log(`[DeepTMO] ✅ Langflow workflow executed successfully`);
-              } else {
-                console.warn(`[DeepTMO] Langflow workflow not executed:`, flowResult.error);
-              }
-            } catch (error: any) {
-              console.warn(`[DeepTMO] Langflow execution skipped:`, error.message);
-            }
+            await this.checkRule('schedule-alert', {
+              projectId,
+              projectName: project.name,
+              delayDays: Math.abs(varianceDays),
+              criticalPath: true,
+              scheduledDate: project.endDate?.toISOString().split('T')[0] || 'N/A',
+              severity: 'critical',
+            });
 
             await this.archiveContext(
               `Project ${project.name} detected with ${Math.abs(varianceDays)} days schedule delay - critical threshold exceeded`,

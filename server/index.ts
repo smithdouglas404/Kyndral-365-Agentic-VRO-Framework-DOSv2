@@ -9,8 +9,7 @@ import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
 import { BattleRhythmTaskProcessor } from "./lib/BattleRhythmTaskProcessor.js";
-import { initializeLangflowService, type LangflowService } from "./lib/LangflowService.js";
-import { LangflowFlowGenerator } from "./lib/LangflowFlowGenerator.js";
+import { initializeRulebricksService, type RulebricksService } from "./lib/RulebricksService.js";
 import { initializeMCPServices } from "./mcp/MCPServiceFactory.js";
 import { initializeFirebaseAuthService } from "./auth/firebaseAdmin.js";
 import { startSyncScheduler } from "./syncScheduler";
@@ -48,8 +47,8 @@ export let battleRhythmOrchestrator: BattleRhythmOrchestrator | null = null;
 // Export Battle Rhythm task processor (processes Sunday Recon tasks)
 export let battleRhythmTaskProcessor: BattleRhythmTaskProcessor | null = null;
 
-// Export Langflow service (visual workflow orchestration)
-export let langflowService: LangflowService | null = null;
+// Export Rulebricks service (rules engine for all agents)
+export let rulebricksService: RulebricksService | null = null;
 
 const app = express();
 const httpServer = createServer(app);
@@ -198,38 +197,25 @@ app.use((req, res, next) => {
       log("✅ MCP Services initialized - Real API integrations ready");
 
       // ===================================================================
-      // Initialize Langflow Service (Visual Workflow Orchestration)
+      // Initialize Rulebricks Service (Rules Engine for All Agents)
       // ===================================================================
-      log("🎨 Initializing Langflow Service...");
-      langflowService = initializeLangflowService();
-      if (langflowService) {
-        const connected = await langflowService.testConnection();
+      log("📐 Initializing Rulebricks Service...");
+      rulebricksService = initializeRulebricksService();
+      if (rulebricksService) {
+        const connected = await rulebricksService.testConnection();
         if (connected) {
-          log("✅ Langflow connected - Visual workflow orchestration ready");
-          const flows = await langflowService.listFlows();
-          log(`📋 Langflow: ${flows.length} flows available`);
-
-          // ===================================================================
-          // Auto-Generate Agent Flows (Programmatic Flow Creation)
-          // ===================================================================
-          log("🤖 Generating Langflow flows for all Deep Agents...");
-          const flowGenerator = new LangflowFlowGenerator(langflowService);
-          try {
-            const generatedFlows = await flowGenerator.generateAllAgentFlows();
-            log(`✅ Generated ${generatedFlows.size} agent flows programmatically`);
-
-            // Log flow IDs
-            for (const [agent, flowId] of generatedFlows.entries()) {
-              log(`   - ${agent}: ${flowId}`);
-            }
-          } catch (error: any) {
-            log(`⚠️  Flow generation failed: ${error.message}`);
+          log("✅ Rulebricks connected — rules engine ready for all agents");
+          const rules = await rulebricksService.listRules();
+          log(`📋 Rulebricks: ${rules.length} rules available`);
+          for (const rule of rules.slice(0, 10)) {
+            log(`   - ${rule.name || rule.slug}`);
           }
+          (global as any).__rulebricksService = rulebricksService;
         } else {
-          log("⚠️  Langflow connection test failed");
+          log("⚠️  Rulebricks connection test failed");
         }
       } else {
-        log("⚠️  Langflow not configured - set LANGFLOW_API_URL and LANGFLOW_API_KEY");
+        log("⚠️  Rulebricks not configured — set RULEBRICKS_API_KEY");
       }
 
       // ===================================================================
