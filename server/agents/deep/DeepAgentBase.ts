@@ -330,6 +330,7 @@ export abstract class DeepAgentBase {
    * Check a Rulebricks rule — all agents can call business logic / threshold checks
    * Returns the rule result, or null if Rulebricks is not configured
    * Automatically logs execution with agent metadata for DDQL queries
+   * Auto-notifies Notification Agent when rule result has notify=true or escalate=true
    */
   protected async checkRule(slug: string, input: Record<string, any>, projectId?: string): Promise<any> {
     try {
@@ -365,6 +366,33 @@ export abstract class DeepAgentBase {
           executionTime: result.executionTime,
           checkedAt: new Date().toISOString(),
         });
+
+        // Auto-notify Notification Agent if rule says to escalate or notify
+        const ruleResult = result.result || {};
+        if (ruleResult.notify === true || ruleResult.escalate === true) {
+          const severity = ruleResult.severity || input.severity || 'medium';
+          const message = ruleResult.message || `Rule "${slug}" triggered: ${ruleResult.action || 'alert'}`;
+
+          console.log(`[${this.config.agentName}] 🔔 Auto-notifying: ${slug} (escalate=${ruleResult.escalate}, severity=${severity})`);
+
+          // Broadcast to Notification Agent via fact (it subscribes to *:alert, *:escalation)
+          await this.broadcastFact(
+            projectId || input.projectId || 'system',
+            ruleResult.escalate ? 'escalation' : 'alert',
+            {
+              ruleSlug: slug,
+              sourceAgent: agentId,
+              message,
+              severity,
+              action: ruleResult.action,
+              notifyRoles: ruleResult.notifyRoles,
+              input,
+              ruleResult,
+              triggeredAt: new Date().toISOString(),
+            },
+            1.0
+          );
+        }
 
         return result.result;
       } else {
