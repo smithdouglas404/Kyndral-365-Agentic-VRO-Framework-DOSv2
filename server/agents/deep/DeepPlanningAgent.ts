@@ -94,14 +94,15 @@ export class DeepPlanningAgent extends DeepAgentBase {
                 detectedAt: new Date(),
               });
 
-              await this.checkRule('dependency-alert', {
-                projectId: 'portfolio',
-                alignmentScore: 40,
-                strategicGoals: ['dependency_resolution'],
-                blockedCount: blocked.length,
-                atRiskCount: atRisk.length,
-                severity: 'critical',
-              });
+              // TODO: Create 'dependency-alert' rule in Rulebricks
+              // await this.checkRule('dependency-alert', {
+              //   projectId: 'portfolio',
+              //   alignmentScore: 40,
+              //   strategicGoals: ['dependency_resolution'],
+              //   blockedCount: blocked.length,
+              //   atRiskCount: atRisk.length,
+              //   severity: 'critical',
+              // });
 
               await this.archiveContext(
                 `Critical dependency situation: ${blocked.length} blocked, ${atRisk.length} at risk`,

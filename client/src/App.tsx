@@ -86,6 +86,7 @@ import VRORules from "@/pages/admin/rules/VRORules";
 import PMORules from "@/pages/admin/rules/PMORules";
 import OCMRules from "@/pages/admin/rules/OCMRules";
 import GovernanceRules from "@/pages/admin/rules/GovernanceRules";
+import RulebricksIntegration from "@/pages/admin/RulebricksIntegration";
 import CustomAttributes from "@/pages/admin/CustomAttributes";
 import PolicyAsCode from "@/pages/admin/PolicyAsCode";
 import AgentMemoryViewer from "@/pages/admin/AgentMemoryViewer";
@@ -218,6 +219,7 @@ function Router() {
       <Route path="/admin/rules/pmo" component={PMORules} />
       <Route path="/admin/rules/ocm" component={OCMRules} />
       <Route path="/admin/rules/governance" component={GovernanceRules} />
+      <Route path="/admin/rulebricks" component={RulebricksIntegration} />
       <Route path="/admin/custom-attributes" component={CustomAttributes} />
       <Route path="/admin/policies" component={PolicyAsCode} />
       <Route path="/admin/agent-memory" component={AgentMemoryViewer} />

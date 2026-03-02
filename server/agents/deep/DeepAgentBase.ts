@@ -329,8 +329,9 @@ export abstract class DeepAgentBase {
   /**
    * Check a Rulebricks rule — all agents can call business logic / threshold checks
    * Returns the rule result, or null if Rulebricks is not configured
+   * Automatically logs execution with agent metadata for DDQL queries
    */
-  protected async checkRule(slug: string, input: Record<string, any>): Promise<any> {
+  protected async checkRule(slug: string, input: Record<string, any>, projectId?: string): Promise<any> {
     try {
       const { getRulebricksService } = await import('../../lib/RulebricksService.js');
       const rb = getRulebricksService();
@@ -339,12 +340,32 @@ export abstract class DeepAgentBase {
         return null;
       }
 
-      const result = await rb.solveRule(slug, input);
+      // Pass agent metadata for execution logging / DDQL queries
+      const agentId = this.config.agentName.toLowerCase().replace(/deep|agent/g, '').trim() || this.config.agentType;
+      const metadata = {
+        agentId,
+        projectId,
+        tags: [this.config.agentType, 'agent-rule-check'],
+      };
+
+      const result = await rb.solveRule(slug, input, metadata);
       if (result.success) {
-        console.log(`[${this.config.agentName}] Rule "${slug}" checked (${result.executionTime}ms)`);
+        console.log(`[${this.config.agentName}] Rule "${slug}" checked (${result.executionTime}ms) [logged for ${agentId}]`);
+
+        // Store in short-term context
         await this.memory.appendContext(
           `Rule check "${slug}": ${JSON.stringify(result.result)}`
         );
+
+        // Store in persistent Letta memory for learning
+        await this.learn(`rule_result_${slug}`, {
+          slug,
+          input,
+          result: result.result,
+          executionTime: result.executionTime,
+          checkedAt: new Date().toISOString(),
+        });
+
         return result.result;
       } else {
         console.warn(`[${this.config.agentName}] Rule "${slug}" failed: ${result.error}`);

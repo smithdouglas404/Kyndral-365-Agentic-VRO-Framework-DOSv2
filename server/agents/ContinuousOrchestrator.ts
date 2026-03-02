@@ -22,6 +22,7 @@ import { EventEmitter } from 'events';
 import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } from '../websocket.js';
 import { MCP_SERVER_REGISTRY } from '../mcp/MCPServerRegistry.js';
 import { getPalantirDataProvider } from '../mcp/PalantirDataProvider.js';
+import { getRulebricksService, type RuleDefinition, type FlowExecutionResult } from '../lib/RulebricksService.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -205,62 +206,105 @@ export class MCPProtocolHandler {
   }
 
   /**
-   * Execute a Langflow flow (visual workflow orchestration)
+   * Execute a Rulebricks rule via the orchestrator
    *
-   * This replaces hardcoded MCP calls with visual, configurable workflows.
-   * Agents can call Langflow flows instead of direct MCP service calls.
+   * Agents can call business rules through the MCP protocol handler.
    *
-   * @param flowId - The Langflow flow ID or name
-   * @param input - Input data for the flow
+   * @param ruleSlug - The Rulebricks rule slug
+   * @param input - Input data for the rule
    * @param agentId - Agent making the call (for tracking)
    */
-  async executeLangflowFlow(flowId: string, input: any, agentId?: string): Promise<any> {
-    console.log(`[Langflow] ${agentId || 'system'} → ${flowId}`);
+  async executeRule(ruleSlug: string, input: any, agentId?: string): Promise<any> {
+    console.log(`[Rulebricks] ${agentId || 'system'} → ${ruleSlug}`);
 
     try {
-      // Get Langflow service from server instance
-      const { langflowService } = await import('../index.js');
+      const rb = getRulebricksService();
 
-      if (!langflowService) {
-        console.warn('[Langflow] Service not initialized - falling back to direct MCP calls');
+      if (!rb) {
+        console.warn('[Rulebricks] Service not configured');
         return {
           success: false,
-          error: 'Langflow not configured',
-          _fallback: true,
+          error: 'Rulebricks not configured',
+          slug: ruleSlug,
         };
       }
 
-      // Execute the flow
-      const result = await langflowService.executeFlow(flowId, input);
+      const result = await rb.solveRule(ruleSlug, input);
 
-      if (result.status === 'error') {
-        console.error(`[Langflow] Flow ${flowId} failed:`, result.error);
+      if (!result.success) {
+        console.error(`[Rulebricks] Rule ${ruleSlug} failed:`, result.error);
         return {
           success: false,
-          flowId,
+          slug: ruleSlug,
           error: result.error,
           agentId,
         };
       }
 
-      console.log(`[Langflow] Flow ${flowId} completed in ${result.executionTime}ms`);
+      console.log(`[Rulebricks] Rule ${ruleSlug} completed in ${result.executionTime}ms`);
 
       return {
         success: true,
-        flowId,
-        runId: result.runId,
-        outputs: result.outputs,
+        slug: ruleSlug,
+        result: result.result,
         executionTime: result.executionTime,
         agentId,
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
-      console.error(`[Langflow] Flow execution failed for ${flowId}:`, error.message);
+      console.error(`[Rulebricks] Rule execution failed for ${ruleSlug}:`, error.message);
       return {
         success: false,
-        flowId,
+        slug: ruleSlug,
         error: error.message,
         agentId,
+      };
+    }
+  }
+
+  /**
+   * Execute a Rulebricks flow (multi-rule workflow)
+   *
+   * Flows chain multiple rules together for complex agent workflows.
+   *
+   * @param flowSlug - The flow slug to execute
+   * @param input - Input data for the flow
+   * @param agentId - Agent initiating the flow (for tracking)
+   */
+  async executeFlow(flowSlug: string, input: any, agentId?: string): Promise<FlowExecutionResult> {
+    console.log(`[Rulebricks Flow] ${agentId || 'system'} → ${flowSlug}`);
+
+    try {
+      const rb = getRulebricksService();
+
+      if (!rb) {
+        console.warn('[Rulebricks] Service not configured');
+        return {
+          flowSlug,
+          success: false,
+          outputs: {},
+          executionTime: 0,
+          error: 'Rulebricks not configured',
+        };
+      }
+
+      const result = await rb.executeFlow(flowSlug, input);
+
+      if (!result.success) {
+        console.error(`[Rulebricks Flow] ${flowSlug} failed:`, result.error);
+      } else {
+        console.log(`[Rulebricks Flow] ${flowSlug} completed in ${result.executionTime}ms`);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error(`[Rulebricks Flow] Execution failed for ${flowSlug}:`, error.message);
+      return {
+        flowSlug,
+        success: false,
+        outputs: {},
+        executionTime: 0,
+        error: error.message,
       };
     }
   }
@@ -314,6 +358,11 @@ export class ContinuousOrchestrator {
   private static SCAN_COOLDOWN_MS = 5 * 60 * 1000;
   private skippedScans: number = 0;
   private totalScans: number = 0;
+
+  // Rulebricks rule tracking
+  private cachedRules: RuleDefinition[] = [];
+  private ruleFingerprints: Map<string, string> = new Map();
+  private static RULE_CHECK_INTERVAL = 10; // Check rules every N cycles
 
   /**
    * Helper to safely get agent config (handles agents without getConfig method)
@@ -485,6 +534,312 @@ export class ContinuousOrchestrator {
   }
 
   /**
+   * Initialize Rulebricks - load rules and create initial fingerprints
+   */
+  private async initializeRulebricks(): Promise<void> {
+    const rb = getRulebricksService();
+    if (!rb) {
+      console.log('[ContinuousOrchestrator] Rulebricks not configured - skipping rule sync');
+      return;
+    }
+
+    try {
+      this.cachedRules = await rb.listRules();
+
+      // Create initial fingerprints
+      for (const rule of this.cachedRules) {
+        const fingerprint = this.computeRuleFingerprint(rule);
+        this.ruleFingerprints.set(rule.slug, fingerprint);
+      }
+
+      console.log(`[ContinuousOrchestrator] ✅ Rulebricks initialized: ${this.cachedRules.length} rules loaded`);
+
+      // Notify all agents of available rules
+      for (const rule of this.cachedRules) {
+        const owningAgentId = ContinuousOrchestrator.RULE_TO_AGENT_MAP[rule.slug];
+        if (owningAgentId) {
+          const agent = this.agents.get(owningAgentId);
+          if (agent && typeof agent.learn === 'function') {
+            await agent.learn(`rule_${rule.slug}`, {
+              slug: rule.slug,
+              name: rule.name,
+              description: rule.description,
+              loadedAt: new Date().toISOString(),
+            });
+          }
+        }
+      }
+    } catch (error: any) {
+      console.warn(`[ContinuousOrchestrator] Failed to initialize Rulebricks: ${error.message}`);
+    }
+  }
+
+  /**
+   * Map rule slugs to their owning agents
+   */
+  private static RULE_TO_AGENT_MAP: Record<string, string> = {
+    'budget-alert': 'finops',
+    'schedule-alert': 'tmo',
+    'risk-alert': 'risk',
+    'compliance-alert': 'governance',
+    'health-alert': 'pmo',
+    'value-gap': 'vro',
+    'change-impact': 'ocm',
+    'dependency-alert': 'planning',
+  };
+
+  /**
+   * Check Rulebricks for rule changes and notify affected agents
+   */
+  private async checkRulebricksChanges(): Promise<void> {
+    const rb = getRulebricksService();
+    if (!rb) return;
+
+    try {
+      const currentRules = await rb.listRules();
+      const changedRules: RuleDefinition[] = [];
+
+      for (const rule of currentRules) {
+        const fingerprint = this.computeRuleFingerprint(rule);
+        const previousFingerprint = this.ruleFingerprints.get(rule.slug);
+
+        if (previousFingerprint && previousFingerprint !== fingerprint) {
+          changedRules.push(rule);
+          console.log(`[Rulebricks] Rule changed: ${rule.slug}`);
+        }
+
+        this.ruleFingerprints.set(rule.slug, fingerprint);
+      }
+
+      // Check for new rules
+      for (const rule of currentRules) {
+        const existingRule = this.cachedRules.find(r => r.slug === rule.slug);
+        if (!existingRule) {
+          changedRules.push(rule);
+          console.log(`[Rulebricks] New rule detected: ${rule.slug}`);
+        }
+      }
+
+      this.cachedRules = currentRules;
+
+      // Broadcast changes to affected agents
+      if (changedRules.length > 0) {
+        await this.broadcastRuleChanges(changedRules);
+      }
+    } catch (error: any) {
+      console.warn(`[Rulebricks] Failed to check for rule changes: ${error.message}`);
+    }
+  }
+
+  /**
+   * Compute a fingerprint for a rule to detect changes
+   */
+  private computeRuleFingerprint(rule: RuleDefinition): string {
+    const key = `${rule.id}|${rule.slug}|${rule.name}|${rule.description || ''}`;
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      const chr = key.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0;
+    }
+    return hash.toString(36);
+  }
+
+  /**
+   * Broadcast rule changes to affected agents via A2A
+   */
+  private async broadcastRuleChanges(changedRules: RuleDefinition[]): Promise<void> {
+    for (const rule of changedRules) {
+      const owningAgentId = ContinuousOrchestrator.RULE_TO_AGENT_MAP[rule.slug];
+
+      if (owningAgentId && this.agents.has(owningAgentId)) {
+        const message: AgentMessage = {
+          from: 'orchestrator',
+          to: owningAgentId,
+          type: 'alert',
+          content: `Rule "${rule.slug}" has been updated. Refresh your rule cache.`,
+          severity: 'medium',
+        };
+
+        await this.a2aBus.send(message);
+
+        // Also store in agent's Letta memory via learn()
+        const agent = this.agents.get(owningAgentId);
+        if (agent && typeof agent.learn === 'function') {
+          await agent.learn(`rule_update_${rule.slug}`, {
+            slug: rule.slug,
+            name: rule.name,
+            description: rule.description,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+
+        console.log(`[Rulebricks] Notified ${owningAgentId} agent of rule change: ${rule.slug}`);
+      }
+
+      // Broadcast to all agents for rules that affect multiple domains
+      if (!owningAgentId) {
+        const allAgentIds = Array.from(this.agents.keys());
+        await this.a2aBus.broadcast(
+          {
+            from: 'orchestrator',
+            type: 'alert',
+            content: `Global rule "${rule.slug}" has been updated.`,
+            severity: 'low',
+          },
+          allAgentIds
+        );
+      }
+    }
+
+    // Log rule sync activity
+    await this.storage.createAgentActivityLog({
+      eventType: 'autonomous_action',
+      primaryAgentId: 'orchestrator',
+      primaryAgentName: 'Orchestrator',
+      summary: `[Rulebricks] ${changedRules.length} rule(s) updated and synced to agents`,
+      details: JSON.stringify({
+        rules: changedRules.map(r => r.slug),
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  }
+
+  /**
+   * Get current cached rules
+   */
+  getCachedRules(): RuleDefinition[] {
+    return this.cachedRules;
+  }
+
+  // ============ Agent Workflow Flows ============
+
+  /**
+   * Map of predefined agent workflow flows
+   */
+  private static AGENT_WORKFLOW_FLOWS: Record<string, { agents: string[]; description: string }> = {
+    'budget-escalation': {
+      agents: ['finops', 'pmo', 'notification'],
+      description: 'Budget breach detection → PMO review → Stakeholder notification',
+    },
+    'risk-mitigation': {
+      agents: ['risk', 'governance', 'notification'],
+      description: 'Risk detection → Governance approval → Action notification',
+    },
+    'schedule-recovery': {
+      agents: ['tmo', 'planning', 'pmo'],
+      description: 'Schedule variance → Dependency analysis → Recovery plan',
+    },
+    'change-approval': {
+      agents: ['ocm', 'governance', 'notification'],
+      description: 'Change impact → Governance review → Stakeholder comms',
+    },
+    'value-realization': {
+      agents: ['vro', 'finops', 'pmo'],
+      description: 'Value tracking → ROI analysis → Portfolio review',
+    },
+  };
+
+  /**
+   * Trigger an agent workflow flow
+   *
+   * This executes a Rulebricks flow and coordinates the involved agents.
+   *
+   * @param workflowSlug - The workflow/flow slug to execute
+   * @param input - Input data for the workflow
+   * @param triggeringAgentId - Agent that triggered the workflow
+   */
+  async triggerAgentWorkflow(
+    workflowSlug: string,
+    input: Record<string, any>,
+    triggeringAgentId?: string
+  ): Promise<{ success: boolean; result?: any; error?: string }> {
+    const workflow = ContinuousOrchestrator.AGENT_WORKFLOW_FLOWS[workflowSlug];
+
+    if (!workflow) {
+      console.warn(`[Orchestrator] Unknown workflow: ${workflowSlug}`);
+      return { success: false, error: `Unknown workflow: ${workflowSlug}` };
+    }
+
+    console.log(`[Orchestrator] Triggering workflow "${workflowSlug}" by ${triggeringAgentId || 'system'}`);
+    console.log(`[Orchestrator] Workflow involves agents: ${workflow.agents.join(' → ')}`);
+
+    // Execute the Rulebricks flow
+    const flowResult = await this.mcpHandler.executeFlow(workflowSlug, input, triggeringAgentId);
+
+    if (!flowResult.success) {
+      // Log failure
+      await this.storage.createAgentActivityLog({
+        eventType: 'autonomous_action',
+        primaryAgentId: triggeringAgentId || 'orchestrator',
+        primaryAgentName: triggeringAgentId || 'Orchestrator',
+        summary: `[Workflow] "${workflowSlug}" failed: ${flowResult.error}`,
+        details: JSON.stringify({ workflowSlug, input, error: flowResult.error }),
+      });
+
+      return { success: false, error: flowResult.error };
+    }
+
+    // Notify all involved agents via A2A
+    for (const agentId of workflow.agents) {
+      if (this.agents.has(agentId)) {
+        const message: AgentMessage = {
+          from: triggeringAgentId || 'orchestrator',
+          to: agentId,
+          type: 'collaboration_request',
+          content: `Workflow "${workflowSlug}" executed. Review outputs and take action.`,
+          payload: {
+            workflowSlug,
+            outputs: flowResult.outputs,
+            executionTime: flowResult.executionTime,
+          },
+          severity: 'medium',
+        };
+
+        await this.a2aBus.send(message);
+
+        // Store workflow result in agent's Letta memory
+        const agent = this.agents.get(agentId);
+        if (agent && typeof agent.learn === 'function') {
+          await agent.learn(`workflow_${workflowSlug}`, {
+            slug: workflowSlug,
+            triggeredBy: triggeringAgentId,
+            outputs: flowResult.outputs,
+            executionTime: flowResult.executionTime,
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+    }
+
+    // Log success
+    await this.storage.createAgentActivityLog({
+      eventType: 'agent_collaboration',
+      primaryAgentId: triggeringAgentId || 'orchestrator',
+      primaryAgentName: triggeringAgentId || 'Orchestrator',
+      collaboratingAgentIds: workflow.agents,
+      summary: `[Workflow] "${workflowSlug}" completed in ${flowResult.executionTime}ms`,
+      details: JSON.stringify({
+        workflowSlug,
+        agents: workflow.agents,
+        outputs: flowResult.outputs,
+        executionTime: flowResult.executionTime,
+      }),
+    });
+
+    console.log(`[Orchestrator] Workflow "${workflowSlug}" completed, notified ${workflow.agents.length} agents`);
+
+    return { success: true, result: flowResult.outputs };
+  }
+
+  /**
+   * Get available agent workflows
+   */
+  getAvailableWorkflows(): Record<string, { agents: string[]; description: string }> {
+    return ContinuousOrchestrator.AGENT_WORKFLOW_FLOWS;
+  }
+
+  /**
    * Start 24x7 continuous orchestration
    */
   async start(intervalMs: number = 600000): Promise<void> {
@@ -495,6 +850,9 @@ export class ContinuousOrchestrator {
 
     this.isRunning = true;
     console.log(`[ContinuousOrchestrator] Starting 24x7 coordination (interval: ${intervalMs}ms)`);
+
+    // Load initial rules from Rulebricks
+    await this.initializeRulebricks();
 
     // Run first cycle immediately
     await this.orchestrationCycle();
@@ -526,6 +884,11 @@ export class ContinuousOrchestrator {
 
     try {
       console.log(`\n[ContinuousOrchestrator] === Cycle ${this.cycleCount} ===`);
+
+      // Check for Rulebricks rule changes periodically
+      if (this.cycleCount % ContinuousOrchestrator.RULE_CHECK_INTERVAL === 0) {
+        await this.checkRulebricksChanges();
+      }
 
       // Phase 1: Select active agent for this cycle (round-robin)
       const agentId = this.selectAgentForCycle();
@@ -1436,6 +1799,7 @@ export class ContinuousOrchestrator {
   getStatus() {
     const a2aStatus = this.a2aBus.getStatus();
     const mcpServices = this.mcpHandler.getServices();
+    const rb = getRulebricksService();
 
     return {
       isRunning: this.isRunning,
@@ -1450,6 +1814,12 @@ export class ContinuousOrchestrator {
       mcp: {
         servicesRegistered: mcpServices.length,
         services: mcpServices.map(s => s.name),
+      },
+      rulebricks: {
+        configured: rb !== null,
+        cachedRules: this.cachedRules.length,
+        trackedRules: this.ruleFingerprints.size,
+        ruleCheckInterval: ContinuousOrchestrator.RULE_CHECK_INTERVAL,
       },
     };
   }

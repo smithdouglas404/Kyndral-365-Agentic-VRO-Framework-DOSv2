@@ -90,13 +90,17 @@ export class DeepGovernanceAgent extends DeepAgentBase {
                 detectedAt: new Date(),
               });
 
-              await this.checkRule('compliance-alert', {
+              // Check GDPR Article 5 compliance (data processing principles)
+              await this.checkRule('gdpr-article-5', {
                 projectId: 'portfolio',
                 violationType: 'multiple_projects_at_risk',
                 severity: 'critical',
-                policyId: 'portfolio_compliance',
+                policyId: 'gdpr_compliance',
                 atRiskCount: atRisk,
                 reviewNeededCount: reviewNeeded,
+                dataProcessingLawful: atRisk === 0,
+                dataProcessingFair: reviewNeeded < 3,
+                dataProcessingTransparent: true,
               });
 
               await this.archiveContext(

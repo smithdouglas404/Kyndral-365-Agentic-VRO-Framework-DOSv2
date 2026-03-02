@@ -170,9 +170,11 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               });
 
               if (overallStatus === "critical") {
-                await this.checkRule('value-gap', {
+                // Check VRO agent tool rules for proper execution sequence
+                await this.checkRule('agent-tool-rules-vro', {
                   projectId,
                   projectName: project.name,
+                  action: 'value_gap_detected',
                   valueGap: Math.round(plannedValue - actualValue),
                   expectedValue: plannedValue,
                   actualValue,

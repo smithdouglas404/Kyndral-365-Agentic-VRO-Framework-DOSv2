@@ -85,13 +85,15 @@ export class DeepFinOpsAgent extends DeepAgentBase {
               detectedAt: new Date(),
             });
 
-            await this.checkRule('budget-alert', {
+            // Check budget utilization rule (Warning 85%, Critical 95%)
+            const utilization = (actualCost / budget) * 100;
+            await this.checkRule('threshold-budget-utilization', {
               projectId,
               projectName: project.name,
-              budgetVariance: variance / 100,
+              budgetUtilization: utilization,
               currentBudget: budget,
               actualSpent: actualCost,
-              severity: variance > 30 ? 'critical' : 'high',
+              severity: utilization > 95 ? 'critical' : utilization > 85 ? 'warning' : 'normal',
             });
 
             await this.archiveContext(

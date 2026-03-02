@@ -156,13 +156,14 @@ When you identify resistance or adoption issues, recommend collaboration with PM
               detectedAt: new Date(),
             });
 
-            await this.checkRule('change-impact', {
-              changeId,
-              changeType: change.type || 'organizational',
-              impact: overallImpact,
-              stakeholders: ['leadership', 'managers', 'employees'],
-              severity: 'high',
-            });
+            // TODO: Create 'change-impact' rule in Rulebricks
+            // await this.checkRule('change-impact', {
+            //   changeId,
+            //   changeType: change.type || 'organizational',
+            //   impact: overallImpact,
+            //   stakeholders: ['leadership', 'managers', 'employees'],
+            //   severity: 'high',
+            // });
 
             await this.archiveContext(
               `Change ${change.name} identified with high organizational impact (${highImpacts} high-impact areas) requiring comprehensive change management`,

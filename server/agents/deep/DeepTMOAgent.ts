@@ -101,13 +101,17 @@ export class DeepTMOAgent extends DeepAgentBase {
               detectedAt: new Date(),
             });
 
-            await this.checkRule('schedule-alert', {
+            // Check SPI threshold rule (Warning <0.95, Critical <0.85)
+            // SPI = Earned Value / Planned Value = progress / expectedProgress
+            const spi = expectedProgress > 0 ? progress / expectedProgress : 1;
+            await this.checkRule('threshold-spi', {
               projectId,
               projectName: project.name,
+              spi: spi,
+              progress,
+              expectedProgress,
               delayDays: Math.abs(varianceDays),
-              criticalPath: true,
-              scheduledDate: project.endDate?.toISOString().split('T')[0] || 'N/A',
-              severity: 'critical',
+              severity: spi < 0.85 ? 'critical' : spi < 0.95 ? 'warning' : 'normal',
             });
 
             await this.archiveContext(
