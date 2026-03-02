@@ -752,12 +752,17 @@ export class ContinuousOrchestrator {
         console.log(`[ContinuousOrchestrator] ${config.agentName} running deep analysis on ${project.name}...`);
 
         let agentContext: any = { projectId: project.id, project };
-        const palantirProvider = getPalantirDataProvider();
-        if (palantirProvider.isAvailable()) {
-          agentContext = await palantirProvider.enrichAgentContext(agentId, agentContext);
-          if (agentContext.palantirSummary) {
-            console.log(`[ContinuousOrchestrator] ${config.agentName} enriched with ${agentContext.palantirSummary.totalObjects} Palantir objects (${agentContext.palantirSummary.label})`);
+
+        try {
+          const palantirProvider = getPalantirDataProvider();
+          if (palantirProvider.isAvailable()) {
+            agentContext = await palantirProvider.enrichAgentContext(agentId, agentContext);
+            if (agentContext.palantirSummary) {
+              console.log(`[ContinuousOrchestrator] ${config.agentName} enriched with ${agentContext.palantirSummary.totalObjects} Palantir objects (${agentContext.palantirSummary.label})`);
+            }
           }
+        } catch (enrichError: any) {
+          console.warn(`[ContinuousOrchestrator] ${config.agentName} Palantir enrichment failed: ${enrichError.message}`);
         }
 
         const result = await agent.run(goal, agentContext);

@@ -19,6 +19,7 @@ import {
   type AgentMcpConnection
 } from '../../shared/schema.js';
 import { getMem0Service } from './Mem0Service.js';
+import { getMCPService } from '../mcp/MCPServiceFactory.js';
 
 export interface McpQueryRequest {
   agentId: string;
@@ -436,31 +437,112 @@ export class AgentMcpService {
   }
 
   /**
-   * Query MCP server
+   * Query MCP server — routes to real service implementations
    */
   private async queryMcpServer(mcp: any, operation: string, input: any, context: any): Promise<any> {
-    // TODO: Implement actual MCP server communication
-    // For now, return mock data based on MCP category
-    if (mcp.mcp_category === 'ppm') {
-      return {
-        source: 'jira',
-        issues: [
-          { key: 'PROJ-123', status: 'In Progress', priority: 'High' },
-          { key: 'PROJ-124', status: 'To Do', priority: 'Medium' }
-        ]
-      };
-    } else if (mcp.mcp_category === 'erp') {
-      return {
-        source: 'sap',
-        budgetData: {
-          allocated: 1000000,
-          spent: 750000,
-          remaining: 250000
-        }
-      };
+    const mcpName = (mcp.mcp_name || '').toLowerCase().replace(/[^a-z]/g, '');
+
+    const liveService = await getMCPService(mcpName);
+    if (liveService) {
+      console.log(`[AgentMCP] Live service call: ${mcp.mcp_display_name} → ${operation}`);
+      const action = this.mapOperationToAction(mcpName, operation, input);
+      return await liveService.executeAction(action, input);
     }
 
-    return { data: 'Mock MCP response' };
+    if (mcpName === 'palantiraip' || mcpName === 'palantir') {
+      const palantirSvc = await getMCPService('palantir');
+      if (palantirSvc) {
+        console.log(`[AgentMCP] Palantir AIP call for ${mcp.mcp_display_name}`);
+        return await palantirSvc.executeAction(operation || 'listObjectTypes', input);
+      }
+    }
+
+    console.log(`[AgentMCP] No live service for ${mcp.mcp_display_name} (${mcpName}), returning empty`);
+    return { source: mcp.mcp_display_name, configured: false, data: null };
+  }
+
+  private mapOperationToAction(mcpName: string, operation: string, input: any): string {
+    if (operation === 'query' || operation === 'search') {
+      switch (mcpName) {
+        case 'monday':
+        case 'mondaycom':
+          return input.boardId ? 'searchItems' : 'getBoards';
+        case 'jira':
+        case 'jiracloud':
+          return input.jql ? 'searchIssues' : 'search';
+        case 'servicenow':
+        case 'servicenowspm':
+          return 'searchIncidents';
+        case 'palantir':
+          return input.objectType ? 'listObjects' : 'listObjectTypes';
+        default:
+          return 'search';
+      }
+    }
+    return operation;
+  }
+
+  async fetchAllKnowledgeForAgent(agentId: string, projectContext?: any): Promise<Record<string, any>> {
+    const { knowledge } = await this.getAgentMcps(agentId);
+    const results: Record<string, any> = {};
+
+    for (const mcp of knowledge) {
+      const mcpName = (mcp.mcp_name || '').toLowerCase().replace(/[^a-z]/g, '');
+      try {
+        const liveService = await getMCPService(mcpName);
+        if (!liveService) {
+          if (mcpName === 'palantiraip' || mcpName === 'palantir') {
+            const palantirSvc = await getMCPService('palantir');
+            if (palantirSvc) {
+              results[mcp.mcp_display_name] = { source: 'palantir', note: 'Handled by PalantirDataProvider' };
+            }
+          }
+          continue;
+        }
+
+        let data: any;
+        switch (mcpName) {
+          case 'monday':
+          case 'mondaycom':
+            data = await liveService.executeAction('getBoards', { limit: 10 });
+            break;
+          case 'jira':
+          case 'jiracloud':
+            const projectName = projectContext?.project?.name || '';
+            data = await liveService.executeAction('search', {
+              jql: projectName ? `project = "${projectName}" ORDER BY updated DESC` : 'ORDER BY updated DESC',
+              maxResults: 20,
+            });
+            break;
+          case 'servicenow':
+          case 'servicenowspm':
+            data = await liveService.executeAction('search', { limit: 20 });
+            break;
+          default:
+            data = await liveService.executeAction('search', { limit: 20 });
+            break;
+        }
+
+        results[mcp.mcp_display_name] = {
+          source: mcp.mcp_display_name,
+          configured: true,
+          data,
+        };
+
+        await db.execute(sql`
+          UPDATE ${agentMcpConnections}
+          SET last_used = NOW(), usage_count = usage_count + 1
+          WHERE agent_id = ${agentId} AND mcp_id = ${mcp.mcp_id}
+        `);
+
+        console.log(`[AgentMCP] ${agentId} ← ${mcp.mcp_display_name}: fetched data`);
+      } catch (error: any) {
+        console.warn(`[AgentMCP] ${agentId} ← ${mcp.mcp_display_name}: ${error.message}`);
+        results[mcp.mcp_display_name] = { source: mcp.mcp_display_name, error: error.message };
+      }
+    }
+
+    return results;
   }
 
   /**

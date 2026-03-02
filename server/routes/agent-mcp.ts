@@ -70,4 +70,25 @@ router.get('/agent/:agentId/mcps', (async (req, res) => {
   }
 }) as RequestHandler);
 
+router.get('/agent/:agentId/fetch-all', (async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const data = await mcpService.fetchAllKnowledgeForAgent(agentId);
+    const sources = Object.keys(data);
+    const liveSources = Object.entries(data).filter(([_, v]: [string, any]) => v.configured || v.data);
+
+    res.json({
+      success: true,
+      agentId,
+      totalSources: sources.length,
+      liveSources: liveSources.length,
+      sources,
+      data,
+    });
+  } catch (error: any) {
+    console.error('[AgentMCP API] Fetch all error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
 export default router;
