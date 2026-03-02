@@ -105,7 +105,13 @@
       "Bash(export LANGFLOW_ORG_ID=\"bb2651ac-a433-47d3-92a6-0967f6c50f69\")",
       "Bash(export:*)",
       "Bash(TOKEN=\"AstraCS:TLrCOFGSpOpMPEkxlfSMygCv:c783562db6624407c04bfcb741a81872add115f8b0e05f7f2e74291ddac25c6d\" ORG_ID=\"bb2651ac-a433-47d3-92a6-0967f6c50f69\" curl -s \"https://aws-us-east-2.langflow.datastax.com/lf/ed39ba15-ded9-4b54-9389-4f58e97b6a57/api/v1/flows\" -H \"Authorization: Bearer $TOKEN\" -H \"X-DataStax-Current-Org: $ORG_ID\")",
-      "Bash(docker --version:*)"
+      "Bash(docker --version:*)",
+      "WebFetch(domain:rulebricks.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.rulebricks.com)",
+      "Bash(npm ls:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git push)"
     ]
   }
 }
