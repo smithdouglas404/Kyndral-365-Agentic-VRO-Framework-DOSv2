@@ -87,11 +87,12 @@ export function configureSecurityHeaders(app: Express): void {
         directives: {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // unsafe-eval needed for Vite HMR
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
           imgSrc: ["'self'", "data:", "https:", "blob:"],
           fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
           connectSrc: ["'self'", "https://api.anthropic.com", "https://api.smith.langchain.com", "wss:", "ws:"],
           frameSrc: ["'self'"],
+          frameAncestors: ["'self'", "https://*.replit.dev", "https://*.replit.app", "https://*.repl.co"],
           objectSrc: ["'none'"],
           upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
         },
@@ -104,10 +105,10 @@ export function configureSecurityHeaders(app: Express): void {
         preload: true,
       },
 
-      // Prevent clickjacking
-      frameguard: {
-        action: 'deny',
-      },
+      crossOriginOpenerPolicy: false,
+      crossOriginResourcePolicy: false,
+
+      frameguard: false,
 
       // Prevent MIME type sniffing
       noSniff: true,
