@@ -213,10 +213,10 @@ export function setupProcessHandlers(
     });
   }, finalConfig.healthCheckInterval);
 
-  // Hanging process detection
-  hangingProcessCheckInterval = setInterval(() => {
-    checkForHangingProcess(finalConfig.hangingProcessTimeout);
-  }, 60000); // Check every minute
+  // Hanging process detection disabled - an idle web server is not hanging
+  // hangingProcessCheckInterval = setInterval(() => {
+  //   checkForHangingProcess(finalConfig.hangingProcessTimeout);
+  // }, 60000);
 
   logger.info('Process handlers initialized successfully');
 }
