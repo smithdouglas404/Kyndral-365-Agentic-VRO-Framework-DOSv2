@@ -6,7 +6,17 @@ let wss: WebSocketServer | null = null;
 const clients = new Set<WebSocket>();
 
 export function setupWebSocket(server: Server) {
-  wss = new WebSocketServer({ server, path: '/ws' });
+  wss = new WebSocketServer({ noServer: true });
+
+  server.on('upgrade', (req, socket, head) => {
+    const url = req.url || '/';
+    const { pathname } = new URL(url, `http://${req.headers.host}`);
+    if (pathname === '/ws') {
+      wss!.handleUpgrade(req, socket, head, (ws) => {
+        wss!.emit('connection', ws, req);
+      });
+    }
+  });
 
   wss.on('connection', (ws) => {
     clients.add(ws);

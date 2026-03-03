@@ -11,8 +11,9 @@ const viteLogger = createLogger();
 export async function setupVite(server: Server, app: Express) {
   const serverOptions = {
     middlewareMode: true,
-    hmr: { server, path: "/vite-hmr", overlay: false },
+    hmr: { server, path: "/vite-hmr" },
     allowedHosts: true as const,
+    host: "0.0.0.0",
   };
 
   const vite = await createViteServer({
@@ -28,37 +29,6 @@ export async function setupVite(server: Server, app: Express) {
     appType: "custom",
   });
 
-  app.use("/@vite/client", async (_req, res, next) => {
-    try {
-      const result = await vite.transformRequest("/@vite/client");
-      if (!result) return next();
-
-      let code = result.code;
-      code = code.replace(
-        /transport\.connect\(createHMRHandler\(handleMessage\)\)/,
-        "/* transport.connect disabled for Replit */"
-      );
-      code = code.replace(
-        /console\.debug\(\s*\"\[vite\] connecting\.\.\.\"\s*\)/,
-        '/* vite connecting disabled */'
-      );
-      code = code.replace(
-        /new WebSocket\([^)]+\)/g,
-        '((() => { const ws = new EventTarget(); ws.readyState = 3; ws.send = () => {}; ws.close = () => {}; return ws; })())'
-      );
-      code = code.replace(
-        /await wsTransport\.connect\(handlers\)/g,
-        '/* wsTransport.connect disabled for Replit */'
-      );
-      res.status(200).set({
-        "Content-Type": "application/javascript",
-        "Cache-Control": "no-cache",
-      }).end(code);
-    } catch {
-      next();
-    }
-  });
-
   app.use(vite.middlewares);
 
   app.use("*", async (req, res, next) => {
@@ -72,6 +42,7 @@ export async function setupVite(server: Server, app: Express) {
         "index.html",
       );
 
+      // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
