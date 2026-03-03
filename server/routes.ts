@@ -34,6 +34,7 @@ import agentMcpRouter from "./routes/agent-mcp.js";
 import { registerAgentMcpConnectionRoutes } from "./routes/admin/agent-mcp-connections.js";
 import { registerAgentAdminRoutes } from "./routes/admin/agents.js";
 import { registerPalantirRoutes } from "./routes/palantir.js";
+import { registerPalantirOntologyRoutes } from "./routes/palantir-ontology.js";
 import palantirSyncRouter from "./routes/palantir-sync.js";
 import { registerAgentSetupRoutes } from "./routes/admin/agent-setup.js";
 import { createAgentMemoryRoutes } from "./routes/admin/agent-memory.js";
@@ -238,6 +239,9 @@ export async function registerRoutes(
 
   // Palantir AIP super-MCP routes
   registerPalantirRoutes(app);
+
+  // Palantir Ontology API routes (serves dashboard data from Palantir)
+  registerPalantirOntologyRoutes(app);
 
   // Palantir Sync & Ontology Data Provider routes (ontology-first architecture)
   app.use('/api/palantir', palantirSyncRouter);

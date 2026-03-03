@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
-import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap, Brain } from "lucide-react";
+import { ArrowRight, ChevronRight, BarChart3, ShieldCheck, Zap, Brain, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@assets/generated_images/florida_clean_energy_landscape.png";
-import nexteraLogo from "@assets/nextera_logo.png";
+import { useCompanyName, useCompanyProfile } from "@/contexts/CompanyProfileContext";
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const companyName = useCompanyName();
+  const { isDemoMode } = useCompanyProfile();
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -14,7 +16,17 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 h-16 border-b border-border bg-white flex items-center px-8 justify-between z-50">
         <div className="flex items-center gap-8">
           <Link href="/">
-            <img src={nexteraLogo} alt="Enterprise" className="h-10 cursor-pointer" />
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <span className="font-bold text-gray-900 leading-tight">{companyName}</span>
+                {isDemoMode && (
+                  <span className="text-xs text-orange-600 font-medium ml-2">Demo</span>
+                )}
+              </div>
+            </div>
           </Link>
         </div>
       </header>

@@ -50,13 +50,13 @@
 }
 
 :root {
-  /* NextEra Energy Enterprise Transformation Team - 2026 Edition */
-  
-  /* NextEra Blue (Primary): #0072CE - HSL(205, 100%, 40%) */
-  /* NextEra Green (Success): #00A651 - HSL(152, 100%, 33%) */
+  /* Kyndryl Clarity - Enterprise Portfolio Intelligence Platform */
+
+  /* Primary Blue: #0072CE - HSL(205, 100%, 40%) */
+  /* Success Green: #00A651 - HSL(152, 100%, 33%) */
   /* Alert Red: #D50032 - HSL(346, 100%, 42%) */
   /* Accent Yellow: #FFD700 - HSL(51, 100%, 50%) */
-  
+
   /* Neutral White: #FFFFFF */
   /* Neutral Black: #000000 */
   /* Grey-100: #F5F5F5 - HSL(0, 0%, 96%) */
@@ -73,29 +73,29 @@
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 0%;
 
-  --primary: 205 100% 40%; /* NextEra Blue #0072CE */
+  --primary: 205 100% 40%; /* Primary Blue #0072CE */
   --primary-foreground: 0 0% 100%; /* White */
 
   --secondary: 0 0% 100%; /* White button with blue text */
-  --secondary-foreground: 205 100% 40%; /* NextEra Blue */
+  --secondary-foreground: 205 100% 40%; /* Primary Blue */
 
   --muted: 0 0% 96%; /* Grey-100 */
   --muted-foreground: 0 0% 46%; /* Grey-500 */
 
   --accent: 0 0% 96%; /* Grey-100 used for subtle highlights */
-  --accent-foreground: 205 100% 40%; /* NextEra Blue */
+  --accent-foreground: 205 100% 40%; /* Primary Blue */
 
-  --destructive: 346 100% 42%; /* Brand Red */
+  --destructive: 346 100% 42%; /* Alert Red */
   --destructive-foreground: 0 0% 100%;
 
   --border: 0 0% 88%; /* Grey-300 */
   --input: 0 0% 88%; /* Grey-300 */
-  --ring: 205 100% 40%; /* NextEra Blue */
+  --ring: 205 100% 40%; /* Primary Blue */
 
   /* Chart Colors */
-  --chart-1: 205 100% 40%; /* NextEra Blue */
-  --chart-2: 152 100% 33%; /* NextEra Green */
-  --chart-3: 346 100% 42%; /* Brand Red */
+  --chart-1: 205 100% 40%; /* Primary Blue */
+  --chart-2: 152 100% 33%; /* Success Green */
+  --chart-3: 346 100% 42%; /* Alert Red */
   --chart-4: 51 100% 50%; /* Accent Yellow */
   --chart-5: 0 0% 46%; /* Grey-500 */
 
@@ -103,7 +103,7 @@
 }
 
 .dark {
-  /* Dark mode mappings - NextEra Energy colors */
+  /* Dark mode mappings */
   --background: 0 0% 10%;
   --foreground: 0 0% 96%;
 
@@ -113,7 +113,7 @@
   --popover: 0 0% 15%;
   --popover-foreground: 0 0% 96%;
 
-  --primary: 205 100% 55%; /* NextEra Blue lighter for dark mode */
+  --primary: 205 100% 55%; /* Primary Blue lighter for dark mode */
   --primary-foreground: 0 0% 100%;
 
   --secondary: 0 0% 20%;
@@ -132,8 +132,8 @@
   --input: 0 0% 30%;
   --ring: 205 100% 55%;
 
-  --chart-1: 205 100% 55%; /* NextEra Blue */
-  --chart-2: 152 100% 45%; /* NextEra Green */
+  --chart-1: 205 100% 55%; /* Primary Blue */
+  --chart-2: 152 100% 45%; /* Success Green */
   --chart-3: 346 100% 60%;
   --chart-4: 51 100% 50%;
   --chart-5: 0 0% 60%;

@@ -27,8 +27,7 @@ import { AgentCommandCenter } from "@/components/AgentCommandCenter";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { CrossAgentCollaboration } from "@/components/CrossAgentCollaboration";
 import AgentActionQueue from "@/components/AgentActionQueue";
-import { useDivisions } from "@/hooks/useNexteraData";
-import { useVroMetrics, usePmoMetrics } from "@/hooks/useVroMetrics";
+import { useDashboardMetrics, useOntologyProjects } from "@/hooks/usePalantirOntology";
 import { useDemoMode, useToggleDemoMode } from "@/hooks/useAppConfig";
 import { useCompanyName, useCompanyProfile } from "@/contexts/CompanyProfileContext";
 import { formatMoney } from "@/lib/formatters";
@@ -45,8 +44,8 @@ import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleComm
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { HelpMenu } from "@/components/HelpMenu";
 
-// Enterprise Design System Colors (Enterprise Transformation Team 2026)
-const NEE = {
+// Design System Colors
+const brandColors = {
   blue: colors.brand.blue,      // #0072CE - Primary actions, links, navigation
   teal: colors.brand.teal,      // #00A651 - Positive trends, success states
   red: colors.brand.red,        // #D50032 - Alerts, errors, negative trends
@@ -56,71 +55,16 @@ const NEE = {
 };
 
 
-// VRO_METRICS_DATA is now loaded from database via useVroMetrics hook
-
-// VRO Metrics Summary - Simulation removed
-// TODO: Wire to real VRO metrics from backend
-function VROMetricsSummaryLive() {
-  return (
-    <div className="mt-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-[#0072CE]" />
-          <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
-        </div>
-        <span className="text-xs text-gray-400">No metrics available</span>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {[].map((metric: any, i) => {
-          const isPulsing = false;
-          const isOnTarget = metric.currentValue >= metric.targetValue * 0.9;
-          
-          return (
-            <motion.div
-              key={metric.id}
-              animate={isPulsing ? { scale: [1, 1.02, 1], backgroundColor: ['rgba(59, 130, 246, 0)', 'rgba(59, 130, 246, 0.1)', 'rgba(59, 130, 246, 0)'] } : {}}
-              transition={{ duration: 0.5 }}
-              className={cn(
-                "bg-blue-50 border border-blue-200 rounded-[4px] p-3 flex flex-col transition-all",
-                isPulsing && "ring-2 ring-blue-400 ring-opacity-50"
-              )}
-              data-testid={`vro-stat-${metric.id}`}
-            >
-              <span className="text-xs font-medium text-gray-500 mb-1 truncate">{metric.name}</span>
-              <div className="flex items-baseline gap-1">
-                <motion.span 
-                  className={cn("text-xl font-bold", isOnTarget ? "text-green-600" : "text-amber-600")}
-                  animate={isPulsing ? { scale: [1, 1.1, 1] } : {}}
-                >
-                  {metric.currentValue}
-                </motion.span>
-                <span className="text-sm text-gray-500">{metric.unit}</span>
-              </div>
-              <Progress 
-                value={Math.min(100, (metric.currentValue / metric.targetValue) * 100)} 
-                className="h-1 mt-2"
-              />
-              <div className="mt-1 text-[10px] text-gray-400">
-                Target: {metric.targetValue}{metric.unit}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// Database-driven VRO Metrics Summary (fallback for static mode)
+// Palantir-driven VRO Metrics Summary
 function VROMetricsSummary() {
-  const { data: vroMetrics, isLoading } = useVroMetrics();
-  
+  const { data: metrics, isLoading } = useDashboardMetrics();
+
   if (isLoading) {
     return (
       <div className="mt-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="h-4 w-4 text-[#0072CE]" />
-          <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
+          <span className="text-sm font-medium text-gray-600">Portfolio Metrics from Palantir</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1,2,3,4].map(i => (
@@ -130,25 +74,78 @@ function VROMetricsSummary() {
       </div>
     );
   }
-  
-  const metricsToDisplay = vroMetrics || [];
-  
+
+  if (!metrics || metrics.totalProjects === 0) {
+    return (
+      <div className="mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <TrendingUp className="h-4 w-4 text-[#0072CE]" />
+          <span className="text-sm font-medium text-gray-600">Portfolio Metrics from Palantir</span>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 border-dashed rounded-lg p-8 text-center">
+          <BarChart3 className="h-12 w-12 text-blue-400 mx-auto mb-3" />
+          <h4 className="font-semibold text-gray-700 mb-2">Connecting to Palantir</h4>
+          <p className="text-sm text-gray-500 max-w-md mx-auto">
+            Loading portfolio data from Palantir Foundry ontology...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Transform Palantir metrics for display
+  const displayMetrics = [
+    {
+      id: 'total-projects',
+      label: 'Total Projects',
+      value: metrics.totalProjects.toString(),
+      unit: 'projects',
+      color: 'text-[#0072CE]',
+      source: 'Palantir Ontology',
+    },
+    {
+      id: 'active-projects',
+      label: 'Active Projects',
+      value: metrics.activeProjects.toString(),
+      unit: 'in progress',
+      color: 'text-[#00A651]',
+      source: 'Palantir Ontology',
+    },
+    {
+      id: 'budget-utilization',
+      label: 'Budget Utilization',
+      value: metrics.totalBudget > 0 ? `${Math.round((metrics.spentBudget / metrics.totalBudget) * 100)}` : '0',
+      unit: '%',
+      color: metrics.spentBudget / metrics.totalBudget > 0.9 ? 'text-red-600' : 'text-[#0072CE]',
+      source: 'Palantir Ontology',
+    },
+    {
+      id: 'risk-items',
+      label: 'Risk Items',
+      value: metrics.totalRisks.toString(),
+      unit: `(${metrics.criticalRisks} critical)`,
+      color: metrics.criticalRisks > 0 ? 'text-red-600' : 'text-[#00A651]',
+      source: 'Palantir Ontology',
+    },
+  ];
+
   return (
     <div className="mt-4">
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="h-4 w-4 text-[#0072CE]" />
-        <span className="text-sm font-medium text-gray-600">VRO Stats (PMO Rolls Up)</span>
+        <span className="text-sm font-medium text-gray-600">Portfolio Metrics from Palantir</span>
+        <Badge variant="outline" className="text-xs bg-purple-50">Live</Badge>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {metricsToDisplay.map((kpi) => (
+        {displayMetrics.map((kpi) => (
           <div
             key={kpi.id}
             className="bg-blue-50 border border-blue-200 rounded-[4px] p-4 flex flex-col"
-            data-testid={`vro-stat-${kpi.metricKey}`}
+            data-testid={`vro-stat-${kpi.id}`}
           >
             <span className="text-xs font-medium text-gray-500 mb-1">{kpi.label}</span>
             <div className="flex items-baseline gap-1">
-              <span className={cn("text-2xl font-bold", kpi.color || "text-[#0072CE]")}>{kpi.value}</span>
+              <span className={cn("text-2xl font-bold", kpi.color)}>{kpi.value}</span>
               <span className="text-sm text-gray-500">{kpi.unit}</span>
             </div>
             <div className="mt-2 pt-2 border-t border-blue-200">
@@ -194,12 +191,8 @@ function LiveIndicatorButton({ isLive, onToggle }: { isLive: boolean; onToggle: 
 }
 
 function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown?: (type: string, id: string) => void }) {
-  // Fetch metrics from API based on mode
-  const { data: vroMetrics, isLoading: vroLoading } = useVroMetrics();
-  const { data: pmoMetrics, isLoading: pmoLoading } = usePmoMetrics();
-
-  const isLoading = mode === "VRO" ? vroLoading : pmoLoading;
-  const apiMetrics = mode === "VRO" ? vroMetrics : pmoMetrics;
+  // Fetch metrics from Palantir
+  const { data: metrics, isLoading } = useDashboardMetrics();
 
   // Map icon names to icon components
   const iconMap: Record<string, any> = {
@@ -208,25 +201,110 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
     TrendingUp,
     Target,
     TrendingDown,
+    Building2,
   };
 
-  // Transform API metrics to component format
-  const stats = apiMetrics?.map(metric => ({
-    id: metric.metricKey,
-    label: metric.label,
-    value: metric.value,
-    unit: metric.unit || "",
-    icon: iconMap[metric.metricKey.includes('time') ? 'Clock' :
-                    metric.metricKey.includes('efficiency') ? 'Activity' :
-                    metric.metricKey.includes('throughput') || metric.metricKey.includes('roi') ? 'TrendingUp' :
-                    'Target'],
-    color: metric.color || "text-[#0072CE]",
-    source: metric.source || "",
-    progress: 75,
-    baseline: "",
-    target: "",
-    delta: "",
-  })) || [];
+  // Transform Palantir metrics to component format based on mode
+  const stats = metrics ? (mode === "VRO" ? [
+    {
+      id: 'total-projects',
+      label: 'Portfolio Projects',
+      value: metrics.totalProjects.toString(),
+      unit: '',
+      icon: Building2,
+      color: 'text-[#0072CE]',
+      source: 'Palantir Ontology',
+      progress: Math.round((metrics.activeProjects / Math.max(metrics.totalProjects, 1)) * 100),
+      baseline: `${metrics.projectsByStatus.red} at risk`,
+      target: `${metrics.projectsByStatus.green} on track`,
+    },
+    {
+      id: 'budget-total',
+      label: 'Total Budget',
+      value: `$${(metrics.totalBudget / 1000000).toFixed(1)}M`,
+      unit: '',
+      icon: TrendingUp,
+      color: 'text-[#0072CE]',
+      source: 'Palantir Ontology',
+      progress: Math.round((metrics.spentBudget / Math.max(metrics.totalBudget, 1)) * 100),
+      baseline: `$${(metrics.spentBudget / 1000000).toFixed(1)}M spent`,
+      target: `$${((metrics.totalBudget - metrics.spentBudget) / 1000000).toFixed(1)}M remaining`,
+    },
+    {
+      id: 'okr-progress',
+      label: 'OKR Progress',
+      value: `${Math.round(metrics.okrProgress)}`,
+      unit: '%',
+      icon: Target,
+      color: metrics.okrProgress >= 70 ? 'text-[#00A651]' : 'text-amber-600',
+      source: 'Palantir Ontology',
+      progress: Math.round(metrics.okrProgress),
+      baseline: 'Current quarter',
+      target: '100% target',
+    },
+    {
+      id: 'risk-count',
+      label: 'Active Risks',
+      value: metrics.totalRisks.toString(),
+      unit: '',
+      icon: Activity,
+      color: metrics.criticalRisks > 0 ? 'text-red-600' : 'text-[#00A651]',
+      source: 'Palantir Ontology',
+      progress: Math.round((1 - metrics.criticalRisks / Math.max(metrics.totalRisks, 1)) * 100),
+      baseline: `${metrics.criticalRisks} critical`,
+      target: '0 critical',
+    },
+  ] : [
+    // PMO mode metrics
+    {
+      id: 'active-projects',
+      label: 'Active Projects',
+      value: metrics.activeProjects.toString(),
+      unit: '',
+      icon: Activity,
+      color: 'text-[#0072CE]',
+      source: 'Palantir Ontology',
+      progress: Math.round((metrics.projectsByStatus.green / Math.max(metrics.activeProjects, 1)) * 100),
+      baseline: `${metrics.projectsByStatus.amber} at risk`,
+      target: 'All on track',
+    },
+    {
+      id: 'green-status',
+      label: 'On Track',
+      value: metrics.projectsByStatus.green.toString(),
+      unit: 'projects',
+      icon: TrendingUp,
+      color: 'text-[#00A651]',
+      source: 'Palantir Ontology',
+      progress: Math.round((metrics.projectsByStatus.green / Math.max(metrics.totalProjects, 1)) * 100),
+      baseline: '',
+      target: '',
+    },
+    {
+      id: 'amber-status',
+      label: 'At Risk',
+      value: metrics.projectsByStatus.amber.toString(),
+      unit: 'projects',
+      icon: Clock,
+      color: 'text-amber-600',
+      source: 'Palantir Ontology',
+      progress: 50,
+      baseline: '',
+      target: '',
+    },
+    {
+      id: 'red-status',
+      label: 'Critical',
+      value: metrics.projectsByStatus.red.toString(),
+      unit: 'projects',
+      icon: TrendingDown,
+      color: 'text-red-600',
+      source: 'Palantir Ontology',
+      progress: 25,
+      baseline: '',
+      target: '',
+    },
+  ]) : [];
 
   // Show loading state
   if (isLoading) {
@@ -261,7 +339,7 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
               <Icon className={stat.color} size={20} strokeWidth={1.5} />
             </div>
             <div className="flex items-baseline gap-1 w-full">
-              <motion.span 
+              <motion.span
                 key={`${mode}-${stat.label}`}
                 initial={{ scale: 1.1, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -273,8 +351,8 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
             </div>
             <div className="w-full mt-3">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">2024: {stat.baseline}</span>
-                <span className="font-medium text-[#00A651]">2026: {stat.target}</span>
+                <span className="text-muted-foreground">{stat.baseline}</span>
+                <span className="font-medium text-[#00A651]">{stat.target}</span>
               </div>
               <Progress value={stat.progress} className="h-2" />
               <div className="text-xs text-right mt-1 font-medium" style={{ color: mode === "VRO" ? "#00A651" : "#757575" }}>
@@ -291,16 +369,25 @@ function LGReportStats({ mode, onDrillDown }: { mode: "VRO" | "PMO"; onDrillDown
   );
 }
 
-import nexteraLogo from "@assets/nextera_logo.png";
-
 function NavBar() {
   const companyName = useCompanyName();
+  const { profile, isDemoMode } = useCompanyProfile();
 
   return (
     <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between sticky top-0 z-50">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <img src={nexteraLogo} alt={companyName} className="h-10 cursor-pointer" data-testid="link-home" />
+          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" data-testid="link-home">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div className="hidden md:block">
+              <h1 className="text-lg font-bold text-gray-900 leading-tight">{companyName}</h1>
+              {isDemoMode && (
+                <span className="text-xs text-orange-600 font-medium">Demo Mode</span>
+              )}
+            </div>
+          </div>
         </Link>
       </div>
       <div className="flex items-center gap-2">
@@ -332,8 +419,8 @@ function DashboardContent() {
   const companyName = useCompanyName();
   const { profile } = useCompanyProfile();
 
-  // Fetch divisions from API (DB-backed)
-  const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
+  // Fetch projects from Palantir ontology
+  const { data: projects = [], isLoading: projectsLoading } = useOntologyProjects();
 
   // Fetch agent-calculated value insights
   const { data: valueInsights, isLoading: valueInsightsLoading } = useValueInsights();
@@ -443,6 +530,36 @@ function DashboardContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
+            {/* Palantir Portfolio Summary - Direct from Ontology */}
+            <Card className="border-purple-300 bg-gradient-to-r from-purple-50 to-blue-50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-purple-600" />
+                  Portfolio from Palantir Ontology
+                  <Badge className="bg-purple-600">{projects.length} Projects</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {projectsLoading ? (
+                  <div className="text-center py-4">Loading from Palantir...</div>
+                ) : projects.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">No projects found in Palantir</div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {projects.slice(0, 8).map((p) => (
+                      <div key={p.id} className={`p-3 rounded-lg border-l-4 bg-white ${
+                        p.status === 'green' ? 'border-green-500' :
+                        p.status === 'red' ? 'border-red-500' : 'border-amber-500'
+                      }`}>
+                        <p className="font-medium text-sm truncate">{p.name}</p>
+                        <p className="text-xs text-gray-500">{p.priority} priority</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* AI Executive Intelligence - Portfolio-level insights and recommendations */}
             <AIExecutiveInsights />
 
@@ -543,42 +660,61 @@ function DashboardContent() {
             {/* AI Executive Intelligence - Portfolio-level insights */}
             <AIExecutiveInsights />
 
-            {/* Reportable Segments & Corporate Functions Overview */}
+            {/* Portfolio Projects from Palantir */}
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-purple-600" />
-                  Reportable Segments & Corporate Functions
+                  Portfolio Projects
+                  <Badge variant="outline" className="ml-2 text-xs bg-purple-50">
+                    From Palantir Ontology
+                  </Badge>
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Click any segment to view detailed projects and metrics
+                  Click any project to view detailed metrics and status
                 </p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                {divisionsLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {projectsLoading ? (
                   <div className="col-span-3 flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
                   </div>
-                ) : divisions.map((segment) => (
-                <div 
-                  key={segment.id}
-                  className="p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group"
-                  style={{ borderLeftColor: segment.color || '#666', borderLeftWidth: '4px' }}
-                  data-testid={`card-segment-${segment.id}`}
-                  onClick={() => handleDrillDown("segment", segment.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500">{segment.name}</p>
-                      <p className="text-lg font-bold" style={{ color: segment.color || '#333' }}>{formatMoney(segment.profit2024 ?? 0)}</p>
-                      <Badge variant={(segment.changePercent ?? 0) >= 0 ? "default" : "destructive"} className="text-xs mt-1">
-                        {(segment.changePercent ?? 0) >= 0 ? "+" : ""}{segment.changePercent ?? 0}%
-                      </Badge>
+                ) : projects.slice(0, 12).map((project) => {
+                  const statusColors = {
+                    green: { border: '#00A651', bg: 'bg-green-50', text: 'text-green-700' },
+                    amber: { border: '#FFA500', bg: 'bg-amber-50', text: 'text-amber-700' },
+                    red: { border: '#D50032', bg: 'bg-red-50', text: 'text-red-700' },
+                  };
+                  const colors = statusColors[project.status] || statusColors.amber;
+                  return (
+                    <div
+                      key={project.id}
+                      className={`p-3 rounded-lg border bg-white hover:shadow-md transition-all cursor-pointer group ${colors.bg}`}
+                      style={{ borderLeftColor: colors.border, borderLeftWidth: '4px' }}
+                      data-testid={`card-project-${project.id}`}
+                      onClick={() => handleDrillDown("project", project.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 truncate">{project.businessUnit}</p>
+                          <p className={`text-sm font-bold truncate ${colors.text}`}>{project.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge
+                              variant={project.priority === 'critical' ? 'destructive' : project.priority === 'high' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {project.priority}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              {Math.round((project.milestoneProgress || 0) * 100)}% complete
+                            </span>
+                          </div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
+                      </div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
               
               <div 
                 className="p-3 rounded-lg border border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer group" 

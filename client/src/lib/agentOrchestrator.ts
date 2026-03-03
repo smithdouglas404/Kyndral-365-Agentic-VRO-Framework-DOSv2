@@ -408,7 +408,7 @@ function runContinuousAgentActivity(): void {
         );
       }
     }
-  } else {
+  } else if (EXPANDED_PMO_PROJECTS.length > 0) {
     const pmoAction = PMO_MICRO_ACTIONS[Math.floor(Math.random() * PMO_MICRO_ACTIONS.length)];
     
     const randomProject = EXPANDED_PMO_PROJECTS[Math.floor(Math.random() * EXPANDED_PMO_PROJECTS.length)];
@@ -516,7 +516,7 @@ async function maybeEmitAgentIntervention(): Promise<void> {
   const now = Date.now();
   
   // Only emit if enough time has passed and random chance (30% per cycle)
-  if (now - lastInterventionEmitTime > INTERVENTION_EMIT_INTERVAL && Math.random() < 0.3) {
+  if (now - lastInterventionEmitTime > INTERVENTION_EMIT_INTERVAL && Math.random() < 0.3 && EXPANDED_PMO_PROJECTS.length > 0) {
     const scenario = AGENT_INTERVENTION_SCENARIOS[Math.floor(Math.random() * AGENT_INTERVENTION_SCENARIOS.length)];
     const randomProject = EXPANDED_PMO_PROJECTS[Math.floor(Math.random() * EXPANDED_PMO_PROJECTS.length)];
     

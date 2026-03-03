@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, BarChart3, Clock, Zap, Target, Activity } fro
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useVroMetrics, usePmoMetrics } from "@/hooks/useVroMetrics";
+import { useDashboardMetrics } from "@/hooks/usePalantirOntology";
 import { AttributeStatusBadge } from "@/components/AttributeStatusBadge";
 import { getAttributeMap, parseAttributeNumber, parseAttributeText, useAgentAttributes } from "@/hooks/useAgentAttributes";
 
@@ -153,17 +153,16 @@ interface UnifiedMetricsSectionProps {
 }
 
 export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProps) {
-  const { data: vroMetricsData = [], isLoading: vroLoading } = useVroMetrics();
-  const { data: pmoMetricsData = [], isLoading: pmoLoading } = usePmoMetrics();
+  const { data: palantirMetrics, isLoading } = useDashboardMetrics();
   const { data: vroAttributes } = useAgentAttributes('vro');
   const { data: pmoAttributes } = useAgentAttributes('pmo');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (!vroLoading && !pmoLoading) {
+    if (!isLoading && palantirMetrics) {
       setLastUpdated(new Date());
     }
-  }, [vroLoading, pmoLoading, vroMetricsData, pmoMetricsData]);
+  }, [isLoading, palantirMetrics]);
 
   const vroMap = getAttributeMap(vroAttributes?.attributes || []);
   const pmoMap = getAttributeMap(pmoAttributes?.attributes || []);

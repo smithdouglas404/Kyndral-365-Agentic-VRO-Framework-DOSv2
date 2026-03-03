@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
+import {
   ArrowLeft, Settings, Link2, FileJson, ShieldCheck, Activity,
   RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle,
   Play, Pause, Database, GitBranch, Loader2, Brain, Sparkles,
@@ -19,8 +19,8 @@ import {
   Send, Gauge, Shield, Workflow, Search, FileSearch, Zap, BarChart3,
   History, AlertCircle, Wrench
 } from 'lucide-react';
-import nexteraLogo from "@assets/nextera_logo.png";
 import { toast } from 'sonner';
+import { useCompanyName, useCompanyProfile } from '@/contexts/CompanyProfileContext';
 
 interface SourceSystem {
   id: string;
@@ -399,6 +399,8 @@ export default function MCPConfigPage() {
   const [connectionCredentials, setConnectionCredentials] = useState({ apiKey: '', username: '', password: '' });
   const [isConnecting, setIsConnecting] = useState(false);
   const queryClient = useQueryClient();
+  const companyName = useCompanyName();
+  const { isDemoMode } = useCompanyProfile();
 
   const { data: sourceSystems } = useQuery<{ sourceSystems: SourceSystem[] }>({
     queryKey: ['source-systems'],
@@ -552,7 +554,17 @@ export default function MCPConfigPage() {
       <header className="fixed top-0 left-0 right-0 h-16 border-b border-gray-200 bg-white flex items-center px-8 justify-between z-50">
         <div className="flex items-center gap-4">
           <Link href="/">
-            <img src={nexteraLogo} alt="Enterprise" className="h-10 cursor-pointer" />
+            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <span className="font-bold text-gray-900 leading-tight">{companyName}</span>
+                {isDemoMode && (
+                  <span className="text-xs text-orange-600 font-medium ml-2">Demo</span>
+                )}
+              </div>
+            </div>
           </Link>
           <div className="h-8 w-px bg-gray-200" />
           <div className="flex items-center gap-2">

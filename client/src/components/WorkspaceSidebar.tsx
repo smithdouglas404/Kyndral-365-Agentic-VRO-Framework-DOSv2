@@ -1,12 +1,11 @@
 import { Link, useLocation } from 'wouter';
 import {
   TrendingUp, FolderKanban, DollarSign, RefreshCw,
-  Calendar, Shield, Users, Settings, Bot, Activity
+  Calendar, Shield, Users, Settings, Bot, Activity, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRoleBasedAccess, UserRole } from '@/hooks/useRoleBasedAccess';
-import { useCompanyName } from '@/contexts/CompanyProfileContext';
-import nexteraLogo from "@assets/nextera_logo.png";
+import { useCompanyName, useCompanyProfile } from '@/contexts/CompanyProfileContext';
 
 interface WorkspaceNavItem {
   id: string;
@@ -92,6 +91,7 @@ export function WorkspaceSidebar({ userRole = 'pm' }: WorkspaceSidebarProps) {
   const [location] = useLocation();
   const { role, canAccessPage } = useRoleBasedAccess(userRole);
   const companyName = useCompanyName();
+  const { isDemoMode } = useCompanyProfile();
 
   // Filter workspaces based on user role
   const visibleWorkspaces = workspaces.filter(workspace =>
@@ -103,7 +103,17 @@ export function WorkspaceSidebar({ userRole = 'pm' }: WorkspaceSidebarProps) {
       {/* Logo / Header */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200">
         <Link href="/">
-          <img src={nexteraLogo} alt={companyName} className="h-10 cursor-pointer" />
+          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <span className="font-bold text-gray-900 text-sm leading-tight block">{companyName}</span>
+              {isDemoMode && (
+                <span className="text-xs text-orange-600 font-medium">Demo</span>
+              )}
+            </div>
+          </div>
         </Link>
       </div>
 

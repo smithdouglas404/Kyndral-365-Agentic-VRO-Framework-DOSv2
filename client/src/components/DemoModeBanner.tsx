@@ -15,11 +15,12 @@ import { useCompanyProfile } from '@/contexts/CompanyProfileContext';
 import { Button } from '@/components/ui/button';
 
 export function DemoModeBanner() {
-  const { isDemoMode, isLoading } = useCompanyProfile();
+  const { isDemoMode, isDemoUser, isLoading } = useCompanyProfile();
   const [, setLocation] = useLocation();
 
   // Don't show if loading or not in demo mode
-  if (isLoading || !isDemoMode) {
+  // Also don't show for demo users - they use DemoModeActiveBanner instead
+  if (isLoading || !isDemoMode || isDemoUser) {
     return null;
   }
 

@@ -509,52 +509,10 @@ export function registerCompanyProfileRoutes(app: Router) {
   });
 
   /**
-   * GET /api/company-profile/:id
-   * Get company profile
-   */
-  router.get('/:id', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-
-      const [company] = await db.select()
-        .from(companies)
-        .where(eq(companies.id, id));
-
-      if (!company) {
-        return res.status(404).json({ error: 'Company not found' });
-      }
-
-      // Get organizational units
-      const units = await db.select()
-        .from(organizationalUnits)
-        .where(eq(organizationalUnits.companyId, id));
-
-      // Get metrics
-      const metrics = await db.select()
-        .from(metricDefinitions)
-        .where(eq(metricDefinitions.companyId, id));
-
-      // Get objectives
-      const objectives = await db.select()
-        .from(strategicObjectives)
-        .where(eq(strategicObjectives.companyId, id));
-
-      res.json({
-        ...company,
-        organizationalUnits: units,
-        metrics,
-        strategicObjectives: objectives
-      });
-    } catch (error: any) {
-      console.error('Company fetch error:', error);
-      res.status(500).json({ error: error.message || 'Failed to fetch company' });
-    }
-  });
-
-  /**
    * GET /api/company-profile/active
    * Get the active company profile with all related data
    * This replaces hardcoded Enterprise references with dynamic company data
+   * NOTE: This route MUST be defined BEFORE /:id to avoid "active" being treated as an ID
    */
   router.get('/active', async (req: Request, res: Response) => {
     try {
@@ -658,6 +616,54 @@ export function registerCompanyProfileRoutes(app: Router) {
     } catch (error: any) {
       console.error('Error fetching active company:', error);
       res.status(500).json({ error: error.message || 'Failed to fetch active company profile' });
+    }
+  });
+
+  /**
+   * GET /api/company-profile/:id
+   * Get company profile by ID
+   */
+  router.get('/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id)) {
+        return res.status(404).json({ error: 'Company not found' });
+      }
+
+      const [company] = await db.select()
+        .from(companies)
+        .where(eq(companies.id, id));
+
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found' });
+      }
+
+      // Get organizational units
+      const units = await db.select()
+        .from(organizationalUnits)
+        .where(eq(organizationalUnits.companyId, id));
+
+      // Get metrics
+      const metrics = await db.select()
+        .from(metricDefinitions)
+        .where(eq(metricDefinitions.companyId, id));
+
+      // Get objectives
+      const objectives = await db.select()
+        .from(strategicObjectives)
+        .where(eq(strategicObjectives.companyId, id));
+
+      res.json({
+        ...company,
+        organizationalUnits: units,
+        metrics,
+        strategicObjectives: objectives
+      });
+    } catch (error: any) {
+      console.error('Company fetch error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch company' });
     }
   });
 

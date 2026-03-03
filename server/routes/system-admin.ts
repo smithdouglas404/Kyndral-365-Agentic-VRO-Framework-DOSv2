@@ -5,7 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { db } from '../db';
-import { users, tenants, demoRequests, tenantInvitations } from '../db/schema';
+import { users, tenants, demoRequests, tenantInvitations, auditLogs, companies } from '../db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import {
   requireAuth,
@@ -234,6 +234,92 @@ router.patch('/tenants/:id', async (req: Request, res: Response) => {
 });
 
 // ============================================================================
+// DELETE /api/system-admin/tenants/:id
+// Delete a tenant and all associated data
+// ============================================================================
+router.delete('/tenants/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Get tenant first
+    const [tenant] = await db
+      .select()
+      .from(tenants)
+      .where(eq(tenants.id, id))
+      .limit(1);
+
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+
+    // Prevent deletion of system tenant
+    if (tenant.slug === 'system') {
+      return res.status(403).json({ error: 'Cannot delete the system tenant' });
+    }
+
+    // Delete in order of foreign key dependencies
+    // 1. Delete audit logs for this tenant
+    const deletedAuditLogs = await db
+      .delete(auditLogs)
+      .where(eq(auditLogs.tenantId, id))
+      .returning();
+
+    // 2. Delete companies for this tenant
+    const deletedCompanies = await db
+      .delete(companies)
+      .where(eq(companies.tenantId, id))
+      .returning();
+
+    // 3. Delete all invitations for this tenant
+    const deletedInvitations = await db
+      .delete(tenantInvitations)
+      .where(eq(tenantInvitations.tenantId, id))
+      .returning();
+
+    // 4. Delete all users for this tenant
+    const deletedUsers = await db
+      .delete(users)
+      .where(eq(users.tenantId, id))
+      .returning();
+
+    // 5. Delete the tenant
+    const [deletedTenant] = await db
+      .delete(tenants)
+      .where(eq(tenants.id, id))
+      .returning();
+
+    if (!deletedTenant) {
+      return res.status(404).json({ error: 'Tenant not found or already deleted' });
+    }
+
+    console.log('\n🗑️ TENANT DELETED:');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`Tenant: ${deletedTenant.name} (${deletedTenant.slug})`);
+    console.log(`Users deleted: ${deletedUsers.length}`);
+    console.log(`Invitations deleted: ${deletedInvitations.length}`);
+    console.log(`Companies deleted: ${deletedCompanies.length}`);
+    console.log(`Audit logs deleted: ${deletedAuditLogs.length}`);
+    console.log(`Deleted by: ${req.user!.email}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    res.json({
+      success: true,
+      message: `Tenant "${deletedTenant.name}" and all associated data deleted`,
+      deleted: {
+        tenant: deletedTenant,
+        usersCount: deletedUsers.length,
+        invitationsCount: deletedInvitations.length,
+        companiesCount: deletedCompanies.length,
+        auditLogsCount: deletedAuditLogs.length,
+      },
+    });
+  } catch (error: any) {
+    console.error('Delete tenant error:', error);
+    res.status(500).json({ error: error.message || 'Failed to delete tenant' });
+  }
+});
+
+// ============================================================================
 // GET /api/system-admin/demo-requests
 // List all demo requests
 // ============================================================================
@@ -442,6 +528,7 @@ console.log('  - GET    /api/system-admin/tenants');
 console.log('  - POST   /api/system-admin/tenants');
 console.log('  - GET    /api/system-admin/tenants/:id');
 console.log('  - PATCH  /api/system-admin/tenants/:id');
+console.log('  - DELETE /api/system-admin/tenants/:id');
 console.log('  - GET    /api/system-admin/demo-requests');
 console.log('  - POST   /api/system-admin/demo-requests/:id/convert');
 console.log('  - PATCH  /api/system-admin/demo-requests/:id');

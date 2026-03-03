@@ -19,6 +19,8 @@ import {
   XCircle,
   Shield,
   LogOut,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +42,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
@@ -49,7 +52,9 @@ export default function SystemAdminPage() {
   const queryClient = useQueryClient();
   const [showProvisionDialog, setShowProvisionDialog] = useState(false);
   const [showConvertDialog, setShowConvertDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedDemoRequest, setSelectedDemoRequest] = useState<any>(null);
+  const [tenantToDelete, setTenantToDelete] = useState<any>(null);
 
   // Provision tenant form
   const [provisionForm, setProvisionForm] = useState({
@@ -178,6 +183,76 @@ export default function SystemAdminPage() {
     onError: (error: Error) => {
       toast({
         title: 'Conversion Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Approve demo request mutation
+  const approveDemoMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`/api/system-admin/demo-requests/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update demo request');
+      }
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      toast({
+        title: variables.status === 'demo_active' ? 'Demo Approved' : 'Status Updated',
+        description: variables.status === 'demo_active'
+          ? 'User can now access the demo.'
+          : `Status changed to ${variables.status}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['system-admin'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Update Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Delete tenant mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (tenantId: string) => {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`/api/system-admin/tenants/${tenantId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to delete tenant');
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: 'Tenant Deleted',
+        description: data.message,
+      });
+      setShowDeleteDialog(false);
+      setTenantToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ['system-admin'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Delete Failed',
         description: error.message,
         variant: 'destructive',
       });
@@ -367,7 +442,7 @@ export default function SystemAdminPage() {
                 ) : (
                   <div className="space-y-4">
                     {tenants?.map((item: any) => (
-                      <div key={item.tenant.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div key={item.tenant.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                         <div className="flex items-center gap-4">
                           <Building2 className="w-5 h-5 text-gray-400" />
                           <div>
@@ -385,6 +460,19 @@ export default function SystemAdminPage() {
                           </Badge>
                           <Badge variant="outline">{item.tenant.subscriptionTier}</Badge>
                           <div className="text-sm text-gray-500">{formatDate(item.tenant.createdAt)}</div>
+                          {item.tenant.slug !== 'system' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => {
+                                setTenantToDelete(item.tenant);
+                                setShowDeleteDialog(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -396,20 +484,60 @@ export default function SystemAdminPage() {
 
           {/* Demo Requests Tab */}
           <TabsContent value="demo-requests" className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="bg-yellow-50 border-yellow-200">
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-yellow-700">
+                    {demoRequests?.filter((d: any) => d.status === 'requested').length || 0}
+                  </div>
+                  <div className="text-sm text-yellow-600">Pending Approval</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-green-700">
+                    {demoRequests?.filter((d: any) => d.status === 'demo_active').length || 0}
+                  </div>
+                  <div className="text-sm text-green-600">Active Demos</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {demoRequests?.filter((d: any) => d.status === 'converted').length || 0}
+                  </div>
+                  <div className="text-sm text-blue-600">Converted to Tenant</div>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Demo Requests</CardTitle>
-                <CardDescription>Leads from demo request form</CardDescription>
+                <CardDescription>
+                  Approve requests to give users access to the demo environment with sample data
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingDemoRequests ? (
                   <div className="text-center py-8 text-gray-500">Loading demo requests...</div>
+                ) : demoRequests?.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">No demo requests yet</div>
                 ) : (
                   <div className="space-y-4">
                     {demoRequests?.map((demo: any) => (
-                      <div key={demo.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div
+                        key={demo.id}
+                        className={`flex items-center justify-between p-4 border rounded-lg ${
+                          demo.status === 'requested' ? 'bg-yellow-50 border-yellow-200' : ''
+                        }`}
+                      >
                         <div className="flex items-center gap-4">
-                          <Sparkles className="w-5 h-5 text-orange-500" />
+                          <Sparkles className={`w-5 h-5 ${
+                            demo.status === 'requested' ? 'text-yellow-500' :
+                            demo.status === 'demo_active' ? 'text-green-500' : 'text-gray-400'
+                          }`} />
                           <div>
                             <div className="font-semibold">
                               {demo.firstName} {demo.lastName}
@@ -424,7 +552,7 @@ export default function SystemAdminPage() {
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           <Badge
                             variant={
                               demo.status === 'converted'
@@ -433,11 +561,41 @@ export default function SystemAdminPage() {
                                 ? 'secondary'
                                 : 'outline'
                             }
+                            className={demo.status === 'requested' ? 'bg-yellow-100 text-yellow-800' : ''}
                           >
-                            {demo.status}
+                            {demo.status === 'requested' ? 'Pending' :
+                             demo.status === 'demo_active' ? 'Approved' :
+                             demo.status === 'converted' ? 'Converted' : demo.status}
                           </Badge>
                           <div className="text-sm text-gray-500">{formatDate(demo.createdAt)}</div>
-                          {demo.status !== 'converted' && (
+
+                          {/* Action buttons based on status */}
+                          {demo.status === 'requested' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => approveDemoMutation.mutate({ id: demo.id, status: 'demo_active' })}
+                                disabled={approveDemoMutation.isPending}
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                onClick={() => approveDemoMutation.mutate({ id: demo.id, status: 'rejected' })}
+                                disabled={approveDemoMutation.isPending}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+
+                          {demo.status === 'demo_active' && (
                             <Button
                               size="sm"
                               onClick={() => {
@@ -623,6 +781,56 @@ export default function SystemAdminPage() {
               {convertMutation.isPending ? 'Converting...' : 'Convert to Tenant'}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Tenant Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Tenant
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{tenantToDelete?.name}</strong>?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Alert variant="destructive">
+              <AlertTriangle className="w-4 h-4" />
+              <AlertDescription>
+                This action cannot be undone. This will permanently delete:
+                <ul className="mt-2 list-disc list-inside text-sm">
+                  <li>The tenant organization</li>
+                  <li>All users associated with this tenant</li>
+                  <li>All pending invitations</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setTenantToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (tenantToDelete) {
+                  deleteMutation.mutate(tenantToDelete.id);
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete Tenant'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

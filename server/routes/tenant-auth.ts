@@ -111,8 +111,78 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // ============================================================================
+// POST /api/tenant-auth/demo-check
+// Check demo status by email - no password required
+// Returns status and logs in if approved
+// ============================================================================
+router.post('/demo-check', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Check if user has a demo request
+    const [demoRequest] = await db
+      .select()
+      .from(demoRequests)
+      .where(eq(demoRequests.email, email.toLowerCase()))
+      .limit(1);
+
+    if (!demoRequest) {
+      return res.json({
+        found: false,
+        status: 'not_found',
+        message: 'No demo request found for this email. Please request a demo first.',
+      });
+    }
+
+    const isApproved = demoRequest.status === 'demo_active';
+
+    // If approved, generate token for automatic login
+    if (isApproved) {
+      const demoToken = generateAccessToken({
+        userId: demoRequest.id,
+        tenantId: null,
+        email: email.toLowerCase(),
+        role: 'demo_user',
+        isSystemAdmin: false,
+      });
+
+      return res.json({
+        found: true,
+        status: 'approved',
+        isApproved: true,
+        accessToken: demoToken,
+        user: {
+          email: email.toLowerCase(),
+          role: 'viewer',
+          isDemo: true,
+        },
+        message: 'Your demo access is approved! Logging you in...',
+      });
+    }
+
+    // Not yet approved
+    return res.json({
+      found: true,
+      status: demoRequest.status,
+      isApproved: false,
+      demoIndustry: demoRequest.demoIndustry,
+      message: demoRequest.status === 'rejected'
+        ? 'Your demo request was not approved. Please contact support.'
+        : 'Your demo request is pending approval. An admin will review it shortly.',
+    });
+  } catch (error: any) {
+    console.error('Demo check error:', error);
+    res.status(500).json({ error: error.message || 'Failed to check demo status' });
+  }
+});
+
+// ============================================================================
 // POST /api/auth/demo-login
-// Demo login (email + nexusppm password)
+// Demo login (email + nexusppm password) - Legacy endpoint
 // ============================================================================
 router.post('/demo-login', async (req: Request, res: Response) => {
   try {

@@ -4,6 +4,7 @@
  */
 
 import { useLocation } from 'wouter';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,12 +24,85 @@ import {
   AlertTriangle,
   Target,
   LayoutDashboard,
-  Route,
-  Network,
+  Bell,
+  Compass,
+  Layers,
+  LineChart,
+  Play,
+  Quote,
+  Building2,
 } from 'lucide-react';
+
+// Animated counter component for stats
+function AnimatedCounter({ end, suffix = '', duration = 2000 }: { end: number; suffix?: string; duration?: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.floor(progress * end));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration]);
+
+  return <>{count}{suffix}</>;
+}
+
+// All 11 agents
+const AGENTS = [
+  { name: 'DeepFinOps', icon: DollarSign, color: 'text-green-600', description: 'Financial Operations & Budget Management', detail: 'Monitors burn rates, forecasts overruns, and optimizes capital allocation' },
+  { name: 'DeepTMO', icon: Clock, color: 'text-blue-600', description: 'Timeline & Milestone Orchestration', detail: 'Predicts schedule delays, identifies critical path risks' },
+  { name: 'DeepRisk', icon: Shield, color: 'text-red-600', description: 'Risk Identification & Mitigation', detail: 'Continuously scans for emerging risks, assesses impact' },
+  { name: 'DeepOCM', icon: Users, color: 'text-purple-600', description: 'Organizational Change Management', detail: 'Tracks adoption, measures change readiness' },
+  { name: 'DeepVRO', icon: BarChart3, color: 'text-teal-600', description: 'Value Realization Office', detail: 'Measures ROI, tracks benefits realization' },
+  { name: 'DeepGovernance', icon: Target, color: 'text-orange-600', description: 'Policy & Compliance', detail: 'Enforces stage gates, validates compliance' },
+  { name: 'DeepPMO', icon: LayoutDashboard, color: 'text-indigo-600', description: 'Portfolio Management Office', detail: 'Orchestrates portfolio health and resource allocation' },
+  { name: 'DeepPlanning', icon: Compass, color: 'text-cyan-600', description: 'Strategic Planning', detail: 'Aligns initiatives with strategic objectives' },
+  { name: 'DeepIntegrated', icon: Layers, color: 'text-pink-600', description: 'Integrated Management', detail: 'Coordinates cross-functional dependencies' },
+  { name: 'DeepOKR', icon: LineChart, color: 'text-amber-600', description: 'OKR Intelligence', detail: 'Tracks objectives and key results alignment' },
+  { name: 'DeepNotification', icon: Bell, color: 'text-rose-600', description: 'Alert & Communication', detail: 'Intelligent notifications and escalations' },
+];
+
+// Testimonials
+const TESTIMONIALS = [
+  {
+    quote: "Kyndryl Clarity transformed how we manage our portfolio. The AI agents caught issues we would have missed, saving us millions in potential overruns.",
+    author: "VP of Technology",
+    company: "Fortune 500 Energy Company",
+  },
+  {
+    quote: "We went from reactive firefighting to proactive risk management. The ROI was evident within the first quarter.",
+    author: "Chief Transformation Officer",
+    company: "Global Financial Services Firm",
+  },
+  {
+    quote: "The specialized agents work 24/7 analyzing our 200+ projects. What used to take our PMO team weeks now happens automatically.",
+    author: "Director of Enterprise PMO",
+    company: "Healthcare Technology Leader",
+  },
+];
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -47,6 +121,9 @@ export default function LandingPage() {
             <Button variant="ghost" onClick={() => navigate('/login')}>
               Login
             </Button>
+            <Button variant="outline" onClick={() => navigate('/signup')}>
+              Sign Up
+            </Button>
             <Button onClick={() => navigate('/demo')} className="bg-blue-600 hover:bg-blue-700">
               Try Demo
             </Button>
@@ -54,143 +131,178 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center space-y-6">
-          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Specialized AI Agents Working 24/7
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-            Kyndryl Clarity
-            <br />
-            <span className="text-blue-600">Portfolio Intelligence</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Detect, predict, and recommend—monitor your portfolio to resolve risks before they escalate.
-          </p>
-          <div className="flex items-center justify-center gap-4 pt-4">
-            <Button
-              size="lg"
-              onClick={() => navigate('/demo')}
-              className="bg-blue-600 hover:bg-blue-700 text-lg px-8"
-            >
-              Try Demo
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => {
-                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Learn More
-            </Button>
+      {/* Hero Section with Dashboard Preview */}
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left: Hero Text */}
+          <div className="space-y-6">
+            <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+              <Sparkles className="w-3 h-3 mr-1" />
+              11 Specialized AI Agents Working 24/7
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+              Portfolio Intelligence
+              <br />
+              <span className="text-blue-600">Powered by AI Agents</span>
+            </h1>
+            <p className="text-xl text-gray-600">
+              Detect risks 2-3 weeks earlier. Save 40% of PMO time. Let specialized AI agents monitor your portfolio around the clock.
+            </p>
+            <div className="flex items-center gap-4 pt-4">
+              <Button
+                size="lg"
+                onClick={() => navigate('/signup')}
+                className="bg-blue-600 hover:bg-blue-700 text-lg px-8"
+              >
+                Start Free Trial
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('/demo')}
+                className="gap-2"
+              >
+                <Play className="w-4 h-4" />
+                Watch Demo
+              </Button>
+            </div>
+            <p className="text-sm text-gray-500">
+              14-day free trial. No credit card required.
+            </p>
+          </div>
+
+          {/* Right: Dashboard Preview Mockup */}
+          <div className="relative">
+            <div className="bg-white rounded-xl shadow-2xl border overflow-hidden">
+              {/* Mock Browser Bar */}
+              <div className="bg-gray-100 px-4 py-2 flex items-center gap-2 border-b">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                  <div className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
+                <div className="flex-1 mx-4">
+                  <div className="bg-white rounded px-3 py-1 text-xs text-gray-500 text-center">
+                    app.kyndryl-clarity.com/dashboard
+                  </div>
+                </div>
+              </div>
+              {/* Dashboard Preview Content */}
+              <div className="p-4 bg-gray-50">
+                {/* Mini Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold text-sm">Portfolio Dashboard</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">Live</Badge>
+                </div>
+                {/* Mini Stats Row */}
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {[
+                    { label: 'Projects', value: '127', trend: '+12%', color: 'text-blue-600' },
+                    { label: 'At Risk', value: '8', trend: '-3', color: 'text-red-600' },
+                    { label: 'On Track', value: '94%', trend: '+2%', color: 'text-green-600' },
+                    { label: 'ROI', value: '2.4x', trend: '+0.3', color: 'text-purple-600' },
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-white rounded-lg p-2 border">
+                      <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
+                      <div className="text-[10px] text-gray-500">{stat.label}</div>
+                      <div className="text-[10px] text-green-600">{stat.trend}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Mini Agent Activity */}
+                <div className="bg-white rounded-lg p-3 border">
+                  <div className="text-xs font-medium mb-2 flex items-center gap-1">
+                    <Brain className="w-3 h-3 text-blue-600" />
+                    Live Agent Activity
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { agent: 'DeepRisk', message: 'Identified dependency risk in Project Alpha', time: '2m ago', color: 'bg-red-100 text-red-700' },
+                      { agent: 'DeepFinOps', message: 'Budget variance alert: Q2 forecast updated', time: '5m ago', color: 'bg-green-100 text-green-700' },
+                      { agent: 'DeepTMO', message: 'Timeline optimization suggested for Sprint 12', time: '8m ago', color: 'bg-blue-100 text-blue-700' },
+                    ].map((activity, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[10px]">
+                        <Badge className={`${activity.color} text-[9px] px-1.5 py-0`}>{activity.agent}</Badge>
+                        <span className="text-gray-600 flex-1">{activity.message}</span>
+                        <span className="text-gray-400">{activity.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Floating Badge */}
+            <div className="absolute -bottom-4 -right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              <span className="text-sm font-medium">Real-time AI Insights</span>
+            </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mt-16">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-blue-600">24/7</div>
-              <p className="text-sm text-gray-600 mt-1">Automated Monitoring</p>
+        {/* Stats with Animation */}
+        <div className="grid md:grid-cols-4 gap-6 mt-20">
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold text-blue-600">
+                <AnimatedCounter end={24} />/7
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Automated Monitoring</p>
+              <p className="text-xs text-gray-400 mt-1">AI agents never sleep</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-blue-600">2-3 Weeks</div>
-              <p className="text-sm text-gray-600 mt-1">Earlier Risk Detection</p>
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold text-blue-600">
+                <AnimatedCounter end={2} />-<AnimatedCounter end={3} /> Weeks
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Earlier Risk Detection</p>
+              <p className="text-xs text-gray-400 mt-1">vs. traditional PMO</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-blue-600">8+ Agents</div>
-              <p className="text-sm text-gray-600 mt-1">Specialized AI Experts</p>
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold text-blue-600">
+                <AnimatedCounter end={11} /> Agents
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Specialized AI Experts</p>
+              <p className="text-xs text-gray-400 mt-1">Each domain covered</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-blue-600">40%</div>
-              <p className="text-sm text-gray-600 mt-1">Time Savings</p>
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold text-blue-600">
+                <AnimatedCounter end={40} />%
+              </div>
+              <p className="text-sm text-gray-600 mt-2">PMO Time Savings</p>
+              <p className="text-xs text-gray-400 mt-1">Focus on strategy, not reports</p>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {/* Dashboard Preview */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-10">
-          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
-            <LayoutDashboard className="w-3 h-3 mr-1" />
-            Dashboard Suite
-          </Badge>
-          <h2 className="text-3xl font-bold text-gray-900 mt-4">Explore the dashboards</h2>
-          <p className="text-gray-600 mt-2">Portfolio, ART, and Value Stream views built on the ontology-first model.</p>
-        </div>
-        <div className="grid md:grid-cols-4 gap-4">
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <LayoutDashboard className="h-5 w-5 text-blue-600" />
-                Portfolio
-              </CardTitle>
-              <CardDescription>Lean portfolio KPIs</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/portfolio')}>
-                Open
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="h-5 w-5 text-emerald-600" />
-                ART
-              </CardTitle>
-              <CardDescription>PI delivery & flow</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/art')}>
-                Open
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Route className="h-5 w-5 text-indigo-600" />
-                Value Stream
-              </CardTitle>
-              <CardDescription>Lead time & efficiency</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/value-stream')}>
-                Open
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Network className="h-5 w-5 text-purple-600" />
-                MCP Management
-              </CardTitle>
-              <CardDescription>Agent integrations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/mcp')}>
-                Open
-              </Button>
-            </CardContent>
-          </Card>
+      {/* Trusted By Section */}
+      <section className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-center text-sm text-gray-500 mb-8">Trusted by enterprise PMOs at leading organizations</p>
+          <div className="flex flex-wrap items-center justify-center gap-12 opacity-60">
+            {['Fortune 500 Energy', 'Global Banking', 'Healthcare Systems', 'Tech Enterprise', 'Manufacturing Leader'].map((company, i) => (
+              <div key={i} className="flex items-center gap-2 text-gray-400">
+                <Building2 className="w-5 h-5" />
+                <span className="font-medium">{company}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Problem Statement */}
-      <section className="bg-gray-50 py-20">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -202,7 +314,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-red-200">
+            <Card className="border-red-200 hover:shadow-lg transition-shadow">
               <CardHeader>
                 <AlertTriangle className="w-12 h-12 text-red-600 mb-4" />
                 <CardTitle>Information Overload</CardTitle>
@@ -212,14 +324,23 @@ export default function LandingPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• PMO spends 40% of time reading status updates</li>
-                  <li>• Critical issues buried in documentation</li>
-                  <li>• No predictive analytics</li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500">•</span>
+                    PMO spends 40% of time reading status updates
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500">•</span>
+                    Critical issues buried in documentation
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500">•</span>
+                    No predictive analytics
+                  </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="border-orange-200">
+            <Card className="border-orange-200 hover:shadow-lg transition-shadow">
               <CardHeader>
                 <GitBranch className="w-12 h-12 text-orange-600 mb-4" />
                 <CardTitle>Functional Silos</CardTitle>
@@ -229,14 +350,23 @@ export default function LandingPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• Teams operate independently</li>
-                  <li>• No cross-functional intelligence</li>
-                  <li>• Decisions made with incomplete data</li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">•</span>
+                    Teams operate independently
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">•</span>
+                    No cross-functional intelligence
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-500">•</span>
+                    Decisions made with incomplete data
+                  </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="border-yellow-200">
+            <Card className="border-yellow-200 hover:shadow-lg transition-shadow">
               <CardHeader>
                 <Clock className="w-12 h-12 text-yellow-600 mb-4" />
                 <CardTitle>Reactive Management</CardTitle>
@@ -246,9 +376,18 @@ export default function LandingPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• 15% of projects delayed due to late detection</li>
-                  <li>• 10% budget overruns from missed risks</li>
-                  <li>• $3.5-5.5M annual cost for 100-project portfolio</li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600">•</span>
+                    15% of projects delayed due to late detection
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600">•</span>
+                    10% budget overruns from missed risks
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600">•</span>
+                    $3.5-5.5M annual cost for 100-project portfolio
+                  </li>
                 </ul>
               </CardContent>
             </Card>
@@ -256,91 +395,45 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-20">
+      {/* AI Agents - All 11 */}
+      <section id="features" className="bg-gradient-to-b from-white to-blue-50 py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <Badge className="bg-blue-100 text-blue-700">
+              <Brain className="w-3 h-3 mr-1" />
               Specialized AI Agents
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              11 Domain Experts Working Together
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Each agent is an expert in its domain, working together to provide comprehensive portfolio intelligence
+              Each agent is an expert in its domain, sharing insights and collaborating to provide comprehensive portfolio intelligence
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Agent Cards */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <DollarSign className="w-10 h-10 text-green-600 mb-2" />
-                <CardTitle>DeepFinOps</CardTitle>
-                <CardDescription>Financial Operations & Budget Management</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-600">
-                Monitors burn rates, forecasts overruns, and optimizes capital allocation across portfolios
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Clock className="w-10 h-10 text-blue-600 mb-2" />
-                <CardTitle>DeepTMO</CardTitle>
-                <CardDescription>Timeline & Milestone Orchestration</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-600">
-                Predicts schedule delays, identifies critical path risks, and recommends mitigation strategies
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Shield className="w-10 h-10 text-red-600 mb-2" />
-                <CardTitle>DeepRisk</CardTitle>
-                <CardDescription>Risk Identification & Mitigation</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-600">
-                Continuously scans for emerging risks, assesses impact, and proposes mitigation actions
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Users className="w-10 h-10 text-purple-600 mb-2" />
-                <CardTitle>DeepOCM</CardTitle>
-                <CardDescription>Organizational Change Management</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-600">
-                Tracks adoption, measures change readiness, and identifies training gaps
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <BarChart3 className="w-10 h-10 text-teal-600 mb-2" />
-                <CardTitle>DeepVRO</CardTitle>
-                <CardDescription>Value Realization Office</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-600">
-                Measures ROI, tracks benefits realization, and ensures strategic alignment
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Target className="w-10 h-10 text-orange-600 mb-2" />
-                <CardTitle>DeepGovernance</CardTitle>
-                <CardDescription>Policy & Compliance Enforcement</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-gray-600">
-                Enforces stage gates, validates compliance, and automates approval workflows
-              </CardContent>
-            </Card>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {AGENTS.map((agent, i) => (
+              <Card key={i} className="hover:shadow-lg transition-all hover:-translate-y-1">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <agent.icon className={`w-8 h-8 ${agent.color}`} />
+                    <div>
+                      <CardTitle className="text-base">{agent.name}</CardTitle>
+                      <CardDescription className="text-xs">{agent.description}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">{agent.detail}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-20">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -382,31 +475,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">What Leaders Are Saying</h2>
+          </div>
+
+          <Card className="border-none shadow-xl">
+            <CardContent className="pt-8 pb-8 px-8">
+              <Quote className="w-10 h-10 text-blue-200 mb-4" />
+              <p className="text-xl text-gray-700 italic mb-6">
+                "{TESTIMONIALS[activeTestimonial].quote}"
+              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-gray-900">{TESTIMONIALS[activeTestimonial].author}</p>
+                  <p className="text-sm text-gray-500">{TESTIMONIALS[activeTestimonial].company}</p>
+                </div>
+                <div className="flex gap-2">
+                  {TESTIMONIALS.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveTestimonial(i)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        i === activeTestimonial ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-blue-600 text-white py-20">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
-          <h2 className="text-4xl font-bold">Ready to Explore?</h2>
+          <h2 className="text-4xl font-bold">Ready to Transform Your PMO?</h2>
           <p className="text-xl text-blue-100">
-            See how Agentic Technology can save time, increase productivity, while detecting risks 2-3 weeks earlier
+            Start your 14-day free trial. See how AI agents can save time and detect risks earlier.
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
             <Button
               size="lg"
-              onClick={() => navigate('/demo')}
+              onClick={() => navigate('/signup')}
               className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8"
             >
-              Try Demo Now
+              Start Free Trial
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
               className="border-white text-white hover:bg-blue-700"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/demo')}
             >
-              Login
+              Try Demo First
             </Button>
           </div>
+          <p className="text-sm text-blue-200">No credit card required</p>
         </div>
       </section>
 
@@ -422,34 +551,35 @@ export default function LandingPage() {
                 <span className="text-white font-bold">Kyndryl Clarity</span>
               </div>
               <p className="text-sm">
-                Kyndryl Clarity - Portfolio Intelligence for enterprise PMOs
+                AI-powered portfolio intelligence for enterprise PMOs. Detect risks earlier, save time, and drive better outcomes.
               </p>
             </div>
 
             <div>
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="hover:text-white">Features</a></li>
-                <li><a href="/demo" className="hover:text-white">Try Demo</a></li>
-                <li><a href="#" className="hover:text-white">Pricing</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+                <li><button onClick={() => navigate('/demo')} className="hover:text-white transition-colors">Try Demo</button></li>
+                <li><button onClick={() => navigate('/signup')} className="hover:text-white transition-colors">Start Free Trial</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-white font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">About</a></li>
-                <li><a href="#" className="hover:text-white">Contact</a></li>
-                <li><a href="#" className="hover:text-white">Privacy</a></li>
+                <li><button onClick={() => navigate('/about')} className="hover:text-white transition-colors">About Us</button></li>
+                <li><button onClick={() => navigate('/contact')} className="hover:text-white transition-colors">Contact</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="hover:text-white transition-colors">Privacy Policy</button></li>
+                <li><button onClick={() => navigate('/terms')} className="hover:text-white transition-colors">Terms of Service</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-white font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Documentation</a></li>
-                <li><a href="#" className="hover:text-white">Help Center</a></li>
-                <li><a href="/login" className="hover:text-white">Login</a></li>
+                <li><button onClick={() => navigate('/docs')} className="hover:text-white transition-colors">Documentation</button></li>
+                <li><button onClick={() => navigate('/help')} className="hover:text-white transition-colors">Help Center</button></li>
+                <li><button onClick={() => navigate('/login')} className="hover:text-white transition-colors">Login</button></li>
               </ul>
             </div>
           </div>

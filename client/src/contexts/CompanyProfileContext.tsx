@@ -153,8 +153,10 @@ export function CompanyProfileProvider({ children }: { children: ReactNode }) {
   });
 
   // Check demo request status (new approval-based flow)
+  // Include token in query key so cache invalidates when token changes
+  const currentToken = getAccessToken();
   const { data: demoRequestStatus, isLoading: isLoadingDemoRequest, refetch: refetchDemoStatus } = useQuery<DemoRequestStatus>({
-    queryKey: ['demo-request-status'],
+    queryKey: ['demo-request-status', currentToken ? 'authenticated' : 'anonymous'],
     queryFn: async () => {
       // Only check if we have an auth token
       const token = getAccessToken();
