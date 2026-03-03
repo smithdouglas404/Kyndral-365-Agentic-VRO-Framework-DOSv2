@@ -117,16 +117,68 @@ export const segments: SegmentData[] = [];
 export const divisions = segments;
 
 // DEPRECATED: Use useClimateMetrics() hook
-export const climateData = {
+export const climateData: {
+  emissionsReduction: { target2030: number; current: number; unit: string };
+  renewableCapacity: { target2030: number; current: number; unit: string };
+  carbonIntensity: { target: number; current: number; unit: string };
+  categories: Array<{ name: string; value: number }>;
+} = {
   emissionsReduction: { target2030: 0, current: 0, unit: "%" },
   renewableCapacity: { target2030: 0, current: 0, unit: "GW" },
   carbonIntensity: { target: 0, current: 0, unit: "kg CO2/MWh" },
   categories: []
 };
 
+// Types for risk data
+interface SubRisk {
+  name: string;
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+}
+
+interface RiskCategory {
+  id: string;
+  name: string;
+  color: string;
+  subtitle?: string;
+  subRisks: SubRisk[];
+}
+
+interface EmergingRisk {
+  name: string;
+  impact: 'low' | 'medium' | 'high';
+  probability: 'low' | 'medium' | 'high';
+  horizon: string;
+}
+
+interface ThreeLinesItem {
+  line: string;
+  description: string;
+}
+
+interface RiskData {
+  categories: RiskCategory[];
+  overview?: {
+    cro?: string;
+    largestExposures?: string[];
+  };
+  emergingRisks?: {
+    keyEmergingRisks: EmergingRisk[];
+  };
+  threeLines?: ThreeLinesItem[];
+}
+
 // DEPRECATED: Use useRisks() hook
-export const riskData = {
-  categories: []
+export const riskData: RiskData = {
+  categories: [],
+  overview: {
+    cro: 'Chief Risk Officer',
+    largestExposures: []
+  },
+  emergingRisks: {
+    keyEmergingRisks: []
+  },
+  threeLines: []
 };
 
 // DEPRECATED: Use useAlerts() hook from @/hooks/useAlerts

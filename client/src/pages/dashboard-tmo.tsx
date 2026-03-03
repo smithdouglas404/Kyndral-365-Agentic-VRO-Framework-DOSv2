@@ -173,11 +173,11 @@ function InitiativeCard({ initiative, mode }: { initiative: any, mode: DataMode 
                     OKR Mappings
                   </h4>
                   <div className="space-y-3">
-                    {initiative.okrMappings.map((okr, i) => (
+                    {initiative.okrMappings.map((okr: any, i: number) => (
                       <div key={i} className="p-2 bg-orange-50 rounded border border-orange-100">
                         <p className="font-medium text-sm text-orange-800">{okr.objectiveName}</p>
                         <div className="mt-2 space-y-1">
-                          {okr.keyResults.map((kr, j) => (
+                          {okr.keyResults.map((kr: any, j: number) => (
                             <div key={j} className="flex items-center justify-between text-xs">
                               <span className="text-gray-600">{kr.name}</span>
                               <span className="font-bold text-orange-600">+{kr.contribution}%</span>
@@ -196,7 +196,7 @@ function InitiativeCard({ initiative, mode }: { initiative: any, mode: DataMode 
                     Collaborating Agents
                   </h4>
                   <div className="space-y-2">
-                    {initiative.collaboratingAgents.map((agent, i) => (
+                    {initiative.collaboratingAgents.map((agent: any, i: number) => (
                       <div key={i} className="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
                         <div>
                           <p className="font-medium text-sm text-purple-800">{agent.agentName}</p>
@@ -224,7 +224,7 @@ function InitiativeCard({ initiative, mode }: { initiative: any, mode: DataMode 
                     Milestones
                   </h4>
                   <div className="space-y-2">
-                    {initiative.milestones.map((milestone, i) => (
+                    {initiative.milestones.map((milestone: any, i: number) => (
                       <div key={i} className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${
                           milestone.status === 'complete' ? 'bg-green-500' :
@@ -249,7 +249,7 @@ function InitiativeCard({ initiative, mode }: { initiative: any, mode: DataMode 
                     Risks & Mitigations
                   </h4>
                   <div className="space-y-2">
-                    {initiative.risks.map((risk, i) => (
+                    {initiative.risks.map((risk: any, i: number) => (
                       <div key={i} className="p-2 bg-red-50 rounded border border-red-100">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm text-red-800">{risk.description}</span>
@@ -313,10 +313,10 @@ export default function TMODashboard() {
   const { data: initiatives = [], isLoading: initiativesLoading } = useTMOInitiatives();
   const companyMetrics = getCompanyMetrics();
   
-  const avgAdoption = Math.round(adoptionMetrics.reduce((sum, m) => sum + m.adoption, 0) / adoptionMetrics.length);
-  const totalUsers = adoptionMetrics.reduce((sum, m) => sum + m.users, 0);
-  const completeInitiatives = initiatives.filter(i => i.status === 'complete').length;
-  const atRiskInitiatives = initiatives.filter(i => i.status === 'at-risk').length;
+  const avgAdoption = adoptionMetrics.length > 0 ? Math.round(adoptionMetrics.reduce((sum: number, m: any) => sum + m.adoption, 0) / adoptionMetrics.length) : 0;
+  const totalUsers = adoptionMetrics.reduce((sum: number, m: any) => sum + m.users, 0);
+  const completeInitiatives = initiatives.filter((i: any) => i.status === 'complete').length;
+  const atRiskInitiatives = initiatives.filter((i: any) => i.status === 'at-risk').length;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -454,7 +454,7 @@ export default function TMODashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {adoptionMetrics.map((metric, i) => (
+                  {adoptionMetrics.map((metric: any, i: number) => (
                     <AdoptionMetricCard key={i} metric={metric} mode={dataMode} />
                   ))}
                 </div>

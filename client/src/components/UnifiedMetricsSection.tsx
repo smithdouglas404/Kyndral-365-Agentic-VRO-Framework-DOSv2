@@ -231,14 +231,14 @@ export function UnifiedMetricsSection({ onDrillDown }: UnifiedMetricsSectionProp
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!vroLoading && !pmoLoading && (
+          {!isLoading && (
             <span className="text-xs text-emerald-600 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               LIVE
             </span>
           )}
           <span className="text-xs text-gray-400">
-            {vroLoading || pmoLoading
+            {isLoading
               ? 'Loading...'
               : `Updated: ${lastUpdated?.toLocaleTimeString() || '—'}`}
           </span>

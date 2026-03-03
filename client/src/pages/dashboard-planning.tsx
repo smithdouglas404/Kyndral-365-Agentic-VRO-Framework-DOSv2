@@ -58,8 +58,8 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
     }
   };
 
-  const budgetVariance = milestone.budget.actual > 0 
-    ? ((milestone.budget.actual - milestone.budget.planned) / milestone.budget.planned) * 100 
+  const budgetVariance = milestone.budget && milestone.budget.actual > 0
+    ? ((milestone.budget.actual - milestone.budget.planned) / milestone.budget.planned) * 100
     : 0;
 
   return (
@@ -67,13 +67,13 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
       <div 
         className="p-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
-        data-testid={`milestone-${milestone.name.toLowerCase().replace(/\s+/g, '-')}`}
+        data-testid={`milestone-${(milestone.name || milestone.milestone || 'unknown').toLowerCase().replace(/\s+/g, '-')}`}
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
             <div className={`w-3 h-3 rounded-full ${getStatusColor(milestone.status)}`} />
-            <span className="font-semibold">{milestone.name}</span>
+            <span className="font-semibold">{milestone.name || milestone.milestone}</span>
           </div>
           <Badge variant={
             milestone.status === 'complete' ? 'default' :
@@ -84,10 +84,10 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
           </Badge>
         </div>
         <div className="flex items-center justify-between text-xs text-gray-500 ml-7 mb-2">
-          <span>{milestone.startDate} → {milestone.endDate}</span>
-          <span className="font-bold text-indigo-600">{milestone.progress}%</span>
+          <span>{milestone.startDate || 'TBD'} → {milestone.endDate || 'TBD'}</span>
+          <span className="font-bold text-indigo-600">{milestone.progress || 0}%</span>
         </div>
-        <Progress value={milestone.progress} className="h-2 ml-7" />
+        <Progress value={milestone.progress || 0} className="h-2 ml-7" />
       </div>
 
       <AnimatePresence>
@@ -103,7 +103,7 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
               <div className="mb-4">
                 <h4 className="font-semibold text-sm mb-2">Deliverables</h4>
                 <div className="flex flex-wrap gap-2">
-                  {milestone.deliverables.map((d, i) => (
+                  {(milestone.deliverables || []).map((d: string, i: number) => (
                     <Badge key={i} variant="outline" className="text-xs">{d}</Badge>
                   ))}
                 </div>
@@ -112,13 +112,13 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500">Planned Budget</p>
-                  <p className="font-bold text-blue-600">${milestone.budget.planned}M</p>
+                  <p className="font-bold text-blue-600">${milestone.budget?.planned || 0}M</p>
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500">Actual Spend</p>
                   <p className={`font-bold ${budgetVariance > 10 ? 'text-red-600' : budgetVariance < 0 ? 'text-green-600' : 'text-blue-600'}`}>
-                    ${milestone.budget.actual.toFixed(1)}M
-                    {milestone.budget.actual > 0 && (
+                    ${(milestone.budget?.actual || 0).toFixed(1)}M
+                    {milestone.budget && milestone.budget.actual > 0 && (
                       <span className="text-xs ml-1">
                         ({budgetVariance > 0 ? '+' : ''}{budgetVariance.toFixed(0)}%)
                       </span>
@@ -127,7 +127,7 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
                 </div>
                 <div className="bg-white p-3 rounded-lg border">
                   <p className="text-xs text-gray-500">Reportable Segment</p>
-                  <p className="font-bold text-gray-700">{milestone.division}</p>
+                  <p className="font-bold text-gray-700">{milestone.division || milestone.project}</p>
                 </div>
               </div>
 
@@ -136,7 +136,7 @@ function MilestoneCard({ milestone, mode }: { milestone: TransformedMilestone, m
                   <Bot className={`h-4 w-4 ${mode === 'VRO' ? 'text-purple-500' : 'text-gray-400'}`} />
                   {mode === 'VRO' ? 'AI Insight' : 'Status Update'}
                 </h4>
-                <p className="text-sm text-gray-700">{milestone.aiInsight}</p>
+                <p className="text-sm text-gray-700">{milestone.aiInsight || 'No AI insight available.'}</p>
               </div>
             </div>
           </motion.div>
@@ -343,7 +343,7 @@ export default function PlanningDashboard() {
                   </div>
                   {phaseAttr && <AttributeStatusBadge availability={phaseAttr.availability} />}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">{currentPhase?.name.replace('Phase ', '').split(':')[1]?.trim() || 'Development'}</p>
+                <p className="text-xs text-gray-500 mt-2">{(currentPhase?.name || currentPhase?.milestone || 'Development').replace('Phase ', '').split(':')[1]?.trim() || 'Development'}</p>
               </CardContent>
             </Card>
             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-progress')} data-testid="metric-progress">
@@ -445,20 +445,22 @@ export default function PlanningDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {projects.map((segment) => {
+                {projects.map((segment, idx) => {
                   const segmentProjects = allProjects.filter((p: any) => p.businessUnitId === segment.id);
                   const activeProjects = segmentProjects.filter((p: any) => p.status === 'active');
                   const highPriProjects = segmentProjects.filter((p: any) => p.priority === 'high');
+                  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899', '#84CC16'];
+                  const segmentColor = colors[idx % colors.length];
 
                   return (
                   <Link key={segment.id} href={`/segment/${segment.id}`}>
                     <div
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                      style={{ borderLeftColor: segment.color || '#666', borderLeftWidth: '4px' }}
+                      style={{ borderLeftColor: segmentColor, borderLeftWidth: '4px' }}
                     >
                       <p className="text-sm font-medium text-gray-500">{segment.name}</p>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-2xl font-bold" style={{ color: segment.color || '#333' }}>
+                        <span className="text-2xl font-bold" style={{ color: segmentColor }}>
                           {segmentProjects.length}
                         </span>
                         <span className="text-sm text-gray-500">projects</span>

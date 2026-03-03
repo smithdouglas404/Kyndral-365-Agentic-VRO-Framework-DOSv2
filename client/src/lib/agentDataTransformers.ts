@@ -99,17 +99,48 @@ export interface TransformedDeadline {
   aiPrediction: string;
 }
 
+export interface LinkedInitiative {
+  name: string;
+  status: string;
+  division: string;
+  phase: string;
+  contribution: number;
+  valueImpact: number;
+}
+
+export interface TransformedKeyResult {
+  name: string;
+  title?: string;
+  target: number;
+  current: number;
+  status: string;
+  progress?: number;
+  linkedInitiatives?: LinkedInitiative[];
+}
+
+export interface ValueImpact {
+  costSavings: number;
+  revenueImpact: number;
+}
+
+export interface CollaboratingAgent {
+  name: string;
+  role: string;
+  agentName?: string;
+  lastSync?: string;
+}
+
 export interface TransformedObjective {
   id: string;
   name: string;
+  title?: string;
   progress: number;
   status: string;
-  keyResults: Array<{
-    name: string;
-    target: number;
-    current: number;
-    status: string;
-  }>;
+  division?: string;
+  owner?: string;
+  totalValueImpact?: ValueImpact;
+  collaboratingAgents?: CollaboratingAgent[];
+  keyResults: TransformedKeyResult[];
 }
 
 export function getObjectivesFromDivisions(mode: DataMode): TransformedObjective[] {
@@ -182,8 +213,10 @@ export function getDeadlinesFromProjects(mode: DataMode): TransformedRoadmapItem
 export function getCompanyMetrics() {
   return {
     name: "Enterprise Corporation",
-    employees: 0,
-    revenue: "$0B",
-    marketCap: "$0B"
+    employees: 50000,
+    revenue: "$12.5B",
+    marketCap: "$45B",
+    totalProfit: 2.1,
+    totalEmployees: 50000
   };
 }

@@ -42,6 +42,14 @@ export async function setupVite(server: Server, app: Express) {
         /console\.debug\(\s*\"\[vite\] connecting\.\.\.\"\s*\)/,
         '/* vite connecting disabled */'
       );
+      code = code.replace(
+        /new WebSocket\([^)]+\)/g,
+        '((() => { const ws = new EventTarget(); ws.readyState = 3; ws.send = () => {}; ws.close = () => {}; return ws; })())'
+      );
+      code = code.replace(
+        /await wsTransport\.connect\(handlers\)/g,
+        '/* wsTransport.connect disabled for Replit */'
+      );
       res.status(200).set({
         "Content-Type": "application/javascript",
         "Cache-Control": "no-cache",
