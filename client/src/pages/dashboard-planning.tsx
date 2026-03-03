@@ -261,9 +261,9 @@ export default function PlanningDashboard() {
   
   const completedPhases = milestones.filter(m => m.status === 'complete').length;
   const currentPhase = milestones.find(m => m.status === 'in-progress');
-  const overallProgress = Math.round(milestones.reduce((sum, m) => sum + m.progress, 0) / milestones.length);
-  const totalBudget = milestones.reduce((sum, m) => sum + m.budget.planned, 0);
-  const totalSpent = milestones.reduce((sum, m) => sum + m.budget.actual, 0);
+  const overallProgress = milestones.length > 0 ? Math.round(milestones.reduce((sum: number, m) => sum + (m.progress || 0), 0) / milestones.length) : 0;
+  const totalBudget = milestones.reduce((sum: number, m) => sum + (m.budget?.planned || 0), 0);
+  const totalSpent = milestones.reduce((sum: number, m) => sum + (m.budget?.actual || 0), 0);
   
   const onTrackDeadlines = deadlines.filter(d => d.status === 'on-track' || d.status === 'complete').length;
   const atRiskDeadlines = deadlines.filter(d => d.status === 'at-risk').length;
