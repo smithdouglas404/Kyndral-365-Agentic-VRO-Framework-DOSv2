@@ -1,35 +1,11 @@
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
 
-function replitHmrFix(): Plugin {
-  return {
-    name: "replit-hmr-fix",
-    enforce: "pre",
-    resolveId(id) {
-      if (id === "/@vite/client" || id === "@vite/client") {
-        return "\0vite-client-stub";
-      }
-    },
-    load(id) {
-      if (id === "\0vite-client-stub") {
-        return `
-          export function createHotContext() { return { accept() {}, dispose() {}, prune() {}, invalidate() {}, on() {}, send() {}, data: {} }; }
-          export function updateStyle() {}
-          export function removeStyle() {}
-          export function injectQuery() { return ""; }
-          console.debug("[vite] HMR disabled in Replit environment");
-        `;
-      }
-    },
-  };
-}
-
 export default defineConfig({
   plugins: [
-    replitHmrFix(),
     react(),
     tailwindcss(),
     metaImagesPlugin(),

@@ -8,6 +8,13 @@ import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
 
+const VITE_CLIENT_STUB = `
+export function createHotContext() { return { accept() {}, dispose() {}, prune() {}, invalidate() {}, on() {}, send() {}, data: {} }; }
+export function updateStyle() {}
+export function removeStyle() {}
+export function injectQuery(url) { return url; }
+`;
+
 export async function setupVite(server: Server, app: Express) {
   const serverOptions = {
     middlewareMode: true,
@@ -26,6 +33,10 @@ export async function setupVite(server: Server, app: Express) {
     },
     server: serverOptions,
     appType: "custom",
+  });
+
+  app.use("/@vite/client", (_req, res) => {
+    res.status(200).set({ "Content-Type": "application/javascript" }).end(VITE_CLIENT_STUB);
   });
 
   app.use(vite.middlewares);
