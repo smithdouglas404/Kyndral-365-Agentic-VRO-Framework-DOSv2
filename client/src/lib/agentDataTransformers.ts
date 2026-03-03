@@ -80,6 +80,40 @@ export interface TransformedMilestone {
   milestone: string;
   dueDate: string;
   status: string;
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+  progress?: number;
+  budget?: { planned: number; actual: number };
+  deliverables?: string[];
+  division?: string;
+  aiInsight?: string;
+}
+
+export interface TransformedDeadline {
+  task: string;
+  date: string;
+  status: string;
+  owner: string;
+  division: string;
+  aiPrediction: string;
+}
+
+export interface TransformedObjective {
+  id: string;
+  name: string;
+  progress: number;
+  status: string;
+  keyResults: Array<{
+    name: string;
+    target: number;
+    current: number;
+    status: string;
+  }>;
+}
+
+export function getObjectivesFromDivisions(mode: DataMode): TransformedObjective[] {
+  return [];
 }
 
 export interface TransformedRoadmapItem {

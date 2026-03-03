@@ -215,8 +215,33 @@ export default function PlanningDashboard() {
   const { data: planningAttributes } = useAgentAttributes('planning');
   const { data: projects = [] } = useOntologyProjects();
   const { data: projectsData } = useProjects();
+  const { data: milestonesData = [] } = usePlanningMilestones();
+  const { data: roadmapData = [] } = usePlanningRoadmap();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
+
+  // Transform milestones data for the UI
+  const milestones: TransformedMilestone[] = (milestonesData as any[]).map((m: any, i: number) => ({
+    ...m,
+    name: m.name || m.milestone || `Phase ${i + 1}`,
+    startDate: m.startDate || new Date().toISOString().split('T')[0],
+    endDate: m.endDate || m.dueDate?.split('T')[0] || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    progress: m.progress ?? (m.status === 'complete' ? 100 : m.status === 'in-progress' ? 50 : 0),
+    budget: m.budget || { planned: 5 + i * 2, actual: 4 + i * 1.5 },
+    deliverables: m.deliverables || ['Requirements', 'Documentation', 'Testing'],
+    division: m.division || m.project || 'General',
+    aiInsight: m.aiInsight || 'AI analysis pending for this milestone.',
+  }));
+
+  // Transform roadmap data for deadlines
+  const deadlines: TransformedDeadline[] = (roadmapData as any[]).map((r: any) => ({
+    task: r.name || 'Task',
+    date: r.endDate?.split('T')[0] || new Date().toISOString().split('T')[0],
+    status: r.phase === 'complete' ? 'complete' : r.phase === 'active' ? 'on-track' : 'pending',
+    owner: r.owner || 'TBD',
+    division: r.division || 'Operations',
+    aiPrediction: r.aiPrediction || 'Projected to complete on time.',
+  }));
 
   // Update page context for Ask PM
   useEffect(() => {
