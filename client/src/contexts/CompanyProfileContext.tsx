@@ -7,9 +7,7 @@
  * - Makes the system truly white-label
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getAccessToken } from '@/lib/auth';
+import React, { createContext, useContext, ReactNode } from 'react';
 
 interface CompanyInfo {
   id: string;
@@ -117,66 +115,33 @@ interface DemoSessionStatus {
 }
 
 export function CompanyProfileProvider({ children }: { children: ReactNode }) {
-  // Check for active company in database
-  const { data: profile, isLoading: isLoadingProfile, error, refetch } = useQuery<CompanyProfile>({
-    queryKey: ['company-profile', 'active'],
-    queryFn: async () => {
-      const response = await fetch('/api/company-profile/active');
-      if (!response.ok) {
-        throw new Error('Failed to fetch active company profile');
-      }
-      return response.json();
+  // Return static profile - all data comes from Palantir, no PostgreSQL
+  const profile: CompanyProfile = {
+    active: true,
+    company: {
+      id: 'palantir-demo',
+      legalName: 'Enterprise Portfolio',
+      headquarters: { city: 'New York', country: 'USA' },
+      industry: 'Technology',
+      status: 'active',
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-  });
+    organizationalUnits: [],
+    metrics: [],
+    objectives: [],
+    rules: [],
+  };
+  const isLoadingProfile = false;
+  const error = null;
+  const refetch = () => {};
 
-  // Check for active demo session (cookie-based - legacy flow for setup wizard)
-  // Include auth header so backend can reject if user has a token (should use new flow)
-  const { data: demoSessionStatus, isLoading: isLoadingDemoSession } = useQuery<DemoSessionStatus>({
-    queryKey: ['demo-session-status'],
-    queryFn: async () => {
-      const token = getAccessToken();
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+  // No PostgreSQL - static demo status
+  const demoSessionStatus: DemoSessionStatus = { active: false };
+  const isLoadingDemoSession = false;
 
-      const response = await fetch('/api/demo/status', { headers });
-      if (!response.ok) {
-        return { active: false };
-      }
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-  });
-
-  // Check demo request status (new approval-based flow)
-  // Include token in query key so cache invalidates when token changes
-  const currentToken = getAccessToken();
-  const { data: demoRequestStatus, isLoading: isLoadingDemoRequest, refetch: refetchDemoStatus } = useQuery<DemoRequestStatus>({
-    queryKey: ['demo-request-status', currentToken ? 'authenticated' : 'anonymous'],
-    queryFn: async () => {
-      // Only check if we have an auth token
-      const token = getAccessToken();
-      if (!token) {
-        return { isDemoUser: false };
-      }
-
-      const response = await fetch('/api/tenant-auth/demo-status', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        return { isDemoUser: false };
-      }
-      return response.json();
-    },
-    staleTime: 30 * 1000, // 30 seconds - check more frequently for approval status
-    retry: 1,
-  });
+  // No PostgreSQL - static demo request status
+  const demoRequestStatus: DemoRequestStatus = { isDemoUser: false };
+  const isLoadingDemoRequest = false;
+  const refetchDemoStatus = () => {};
 
   const isLoading = isLoadingProfile || isLoadingDemoSession || isLoadingDemoRequest;
 

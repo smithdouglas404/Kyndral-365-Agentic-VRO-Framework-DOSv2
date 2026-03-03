@@ -16,7 +16,7 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import AgentActionQueue from '@/components/AgentActionQueue';
-import { useDivisions } from '@/hooks/useNexteraData';
+import { useOntologyProjects } from '@/hooks/usePalantirOntology';
 import { formatMoney } from '@/lib/formatters';
 import { useAgentData } from '@/hooks/useAgentData';
 import {
@@ -201,7 +201,7 @@ export default function FinOpsDashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('finops');
-  const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
+  const { data: projects = [], isLoading: projectsLoading } = useOntologyProjects();
   const { data: financialInsights, isLoading: insightsLoading } = useFinancialInsights();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
@@ -483,13 +483,13 @@ export default function FinOpsDashboard() {
               <CardTitle className="text-lg">Reportable Segments Financial Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              {divisionsLoading ? (
+              {projectsLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
                 </div>
               ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {divisions.map((segment) => (
+                {projects.map((segment) => (
                   <Link key={segment.id} href={`/segment/${segment.id}`}>
                     <div
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"

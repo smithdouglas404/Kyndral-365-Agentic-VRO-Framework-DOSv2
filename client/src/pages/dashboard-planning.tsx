@@ -16,7 +16,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useDivisions } from '@/hooks/useNexteraData';
+import { useOntologyProjects } from '@/hooks/usePalantirOntology';
 import { useProjects } from '@/hooks/useDashboardData';
 import { useAgentData } from '@/hooks/useAgentData';
 import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
@@ -213,7 +213,7 @@ export default function PlanningDashboard() {
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('planning');
   const { data: planningAttributes } = useAgentAttributes('planning');
-  const { data: divisions = [] } = useDivisions();
+  const { data: projects = [] } = useOntologyProjects();
   const { data: projectsData } = useProjects();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
@@ -420,7 +420,7 @@ export default function PlanningDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {divisions.map((segment) => {
+                {projects.map((segment) => {
                   const segmentProjects = allProjects.filter((p: any) => p.businessUnitId === segment.id);
                   const activeProjects = segmentProjects.filter((p: any) => p.status === 'active');
                   const highPriProjects = segmentProjects.filter((p: any) => p.priority === 'high');

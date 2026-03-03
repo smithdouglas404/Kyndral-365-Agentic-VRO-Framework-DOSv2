@@ -17,7 +17,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useDivisions } from '@/hooks/useNexteraData';
+import { useOntologyProjects } from '@/hooks/usePalantirOntology';
 import { useAgentData } from '@/hooks/useAgentData';
 import { 
   getObjectivesFromDivisions,
@@ -204,7 +204,7 @@ export default function OKRDashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('okr');
-  const { data: divisions = [], isLoading: divisionsLoading } = useDivisions();
+  const { data: projects = [], isLoading: projectsLoading } = useOntologyProjects();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -384,13 +384,13 @@ export default function OKRDashboard() {
               <CardTitle className="text-lg">Reportable Segments OKRs Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              {divisionsLoading ? (
+              {projectsLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
                 </div>
               ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {divisions.slice(0, 4).map((segment) => (
+                {projects.slice(0, 4).map((segment) => (
                   <Link key={segment.id} href={`/segment/${segment.id}`}>
                     <div
                       className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"

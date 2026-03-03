@@ -435,7 +435,7 @@ export abstract class DeepAgentBase {
    */
   protected async getInterventions(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Intervention', {
+      const result = await OntologyDataProvider.query('AtlasInsight', {
         filters,
         pageSize: 100
       });

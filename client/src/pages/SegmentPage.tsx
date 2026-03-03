@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { aiAlerts, industryBenchmarks } from "@/lib/lgData";
-import { useFullDivision } from "@/hooks/useNexteraData";
+import { useOntologyProject } from "@/hooks/usePalantirOntology";
 import { formatMoney, formatValueWithUnit } from "@/lib/formatters";
 import { getSafeStages, getStageLabel, type EnrichedProject, getProjectFeatureCount, getProjectStoryCount, getProjectTaskCount } from "@/lib/projects";
 import { useEnrichedProjects } from "@/hooks/useProjects";
@@ -102,7 +102,7 @@ export default function SegmentPage() {
   const resolvedId = params.id || '';
 
   // Fetch division from database API
-  const { data: fullDivisionData, isLoading: isLoadingDivision } = useFullDivision(resolvedId);
+  const { data: fullDivisionData, isLoading: isLoadingDivision } = useOntologyProject(resolvedId);
   const division = fullDivisionData?.division;
   const divisionKpis = fullDivisionData?.kpis || [];
   const divisionOkrs = fullDivisionData?.okrs || [];

@@ -15,7 +15,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useDivisions } from '@/hooks/useNexteraData';
+import { useOntologyProjects } from '@/hooks/usePalantirOntology';
 import { useAgentData } from '@/hooks/useAgentData';
 import {
   getCompanyMetrics,
@@ -290,7 +290,7 @@ export default function TMODashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('tmo');
-  const { data: divisions = [] } = useDivisions();
+  const { data: projects = [] } = useOntologyProjects();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -389,7 +389,7 @@ export default function TMODashboard() {
                   </div>
                   <Building2 className="h-8 w-8 text-blue-200" />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">across {divisions.length} divisions</p>
+                <p className="text-xs text-gray-500 mt-2">across {projects.length} projects</p>
               </CardContent>
             </Card>
             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'tmo-initiatives')} data-testid="metric-initiatives">

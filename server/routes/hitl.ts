@@ -32,7 +32,7 @@ router.get("/interventions", async (req, res) => {
     if (agentSource) filters.push({ field: "agentSource", operator: "eq", value: agentSource });
     if (projectId) filters.push({ field: "projectId", operator: "eq", value: projectId });
 
-    const result = await OntologyDataProvider.query("Intervention", {
+    const result = await OntologyDataProvider.query("AtlasInsight", {
       filters,
       pageSize: Number(limit),
       orderBy: [{ field: "createdAt", direction: "desc" }],
@@ -64,7 +64,7 @@ router.get("/interventions/pending", async (req, res) => {
     if (severity) filters.push({ field: "severity", operator: "eq", value: severity });
     if (agentSource) filters.push({ field: "agentSource", operator: "eq", value: agentSource });
 
-    const result = await OntologyDataProvider.query("Intervention", {
+    const result = await OntologyDataProvider.query("AtlasInsight", {
       filters,
       pageSize: Number(limit),
       orderBy: [
@@ -102,7 +102,7 @@ router.get("/interventions/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await OntologyDataProvider.query("Intervention", {
+    const result = await OntologyDataProvider.query("AtlasInsight", {
       filters: [{ field: "interventionId", operator: "eq", value: id }],
       pageSize: 1,
     });
@@ -244,7 +244,7 @@ router.get("/alerts", async (req, res) => {
     if (severity) filters.push({ field: "severity", operator: "eq", value: severity });
     if (alertType) filters.push({ field: "alertType", operator: "eq", value: alertType });
 
-    const result = await OntologyDataProvider.query("Alert", {
+    const result = await OntologyDataProvider.query("AtlasRisk", {
       filters,
       pageSize: Number(limit),
       orderBy: [{ field: "createdAt", direction: "desc" }],
@@ -275,7 +275,7 @@ router.get("/alerts/active", async (req, res) => {
     ];
     if (severity) filters.push({ field: "severity", operator: "eq", value: severity });
 
-    const result = await OntologyDataProvider.query("Alert", {
+    const result = await OntologyDataProvider.query("AtlasRisk", {
       filters,
       pageSize: Number(limit),
       orderBy: [
@@ -378,13 +378,13 @@ router.post("/alerts/:id/dismiss", async (req, res) => {
 router.get("/summary", async (req, res) => {
   try {
     // Get pending interventions count by severity
-    const pendingInterventions = await OntologyDataProvider.query("Intervention", {
+    const pendingInterventions = await OntologyDataProvider.query("AtlasInsight", {
       filters: [{ field: "status", operator: "eq", value: "pending" }],
       pageSize: 100,
     });
 
     // Get active alerts count by severity
-    const activeAlerts = await OntologyDataProvider.query("Alert", {
+    const activeAlerts = await OntologyDataProvider.query("AtlasRisk", {
       filters: [{ field: "status", operator: "eq", value: "active" }],
       pageSize: 100,
     });
