@@ -107,7 +107,6 @@ export function configureSecurityHeaders(app: Express): void {
 
       crossOriginOpenerPolicy: false,
       crossOriginResourcePolicy: false,
-
       frameguard: false,
 
       // Prevent MIME type sniffing
