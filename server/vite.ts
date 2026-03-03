@@ -8,13 +8,6 @@ import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
 
-const VITE_CLIENT_STUB = `
-export function createHotContext() { return { accept() {}, dispose() {}, prune() {}, invalidate() {}, on() {}, send() {}, data: {} }; }
-export function updateStyle() {}
-export function removeStyle() {}
-export function injectQuery(url) { return url; }
-`;
-
 export async function setupVite(server: Server, app: Express) {
   const serverOptions = {
     middlewareMode: true,
@@ -35,8 +28,27 @@ export async function setupVite(server: Server, app: Express) {
     appType: "custom",
   });
 
-  app.use("/@vite/client", (_req, res) => {
-    res.status(200).set({ "Content-Type": "application/javascript" }).end(VITE_CLIENT_STUB);
+  app.use("/@vite/client", async (_req, res, next) => {
+    try {
+      const result = await vite.transformRequest("/@vite/client");
+      if (!result) return next();
+
+      let code = result.code;
+      code = code.replace(
+        /transport\.connect\(createHMRHandler\(handleMessage\)\)/,
+        "/* transport.connect disabled for Replit */"
+      );
+      code = code.replace(
+        /console\.debug\(\s*\"\[vite\] connecting\.\.\.\"\s*\)/,
+        '/* vite connecting disabled */'
+      );
+      res.status(200).set({
+        "Content-Type": "application/javascript",
+        "Cache-Control": "no-cache",
+      }).end(code);
+    } catch {
+      next();
+    }
   });
 
   app.use(vite.middlewares);
