@@ -80,8 +80,7 @@ export const apiRateLimiter = rateLimit({
  * Configure security headers using Helmet
  */
 export function configureSecurityHeaders(app: Express): void {
-  app.use(
-    helmet({
+  const helmetMiddleware = helmet({
       // Content Security Policy
       contentSecurityPolicy: {
         directives: {
@@ -122,8 +121,26 @@ export function configureSecurityHeaders(app: Express): void {
       referrerPolicy: {
         policy: 'strict-origin-when-cross-origin',
       },
-    })
-  );
+    });
+
+  app.use((req, res, next) => {
+    const p = req.path;
+    if (
+      p.startsWith('/@') ||
+      p.startsWith('/src/') ||
+      p.startsWith('/node_modules/') ||
+      p.startsWith('/vite-hmr') ||
+      p.endsWith('.ts') ||
+      p.endsWith('.tsx') ||
+      p.endsWith('.js') ||
+      p.endsWith('.jsx') ||
+      p.endsWith('.css') ||
+      p.endsWith('.map')
+    ) {
+      return next();
+    }
+    helmetMiddleware(req, res, next);
+  });
 
   console.log('[Security] Security headers configured with Helmet');
 }
