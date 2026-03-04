@@ -63,15 +63,23 @@ export function registerOrchestrationRoutes(app: Express, storage: IStorage): vo
       const router = getSmartRouter();
       const orchestrator = bootstrapInstance?.getOrchestrator?.();
       const scanEfficiency = orchestrator?.getScanEfficiency?.() || { totalScans: 0, skippedScans: 0, skipRate: '0.0%' };
+      const { openRouterClient } = await import('../lib/OpenRouterClient.js');
       res.json({
         aiEnabled: router.isAIEnabled(),
         ...router.getStats(),
         scanEfficiency,
-        version: '4.1',
+        spending: openRouterClient.getSpendingStats(),
+        costProtection: {
+          directAnthropicBlocked: true,
+          dailyCostCap: '$5.00',
+          dailyTokenCap: '500,000',
+          heuristicFirstPolicy: true,
+        },
+        version: '4.2',
         tiers: {
           tier0: 'Deterministic heuristics (zero cost)',
           tier1: 'Cheap models via OpenRouter ($0.10-0.50/M tokens)',
-          tier2: 'Premium Claude (critical only, $3-15/M tokens)',
+          tier2: 'Premium Claude via OpenRouter only ($3-15/M tokens)',
         },
       });
     } catch (error: any) {

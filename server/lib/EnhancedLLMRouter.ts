@@ -19,7 +19,6 @@
  * - Direct Anthropic fallback
  */
 
-import { Anthropic } from '@anthropic-ai/sdk';
 import type { IStorage } from '../storage.js';
 
 // ============================================================================
@@ -395,7 +394,6 @@ export class EnhancedLLMRouter {
   private storage: IStorage;
   private openrouterApiKey: string;
   private anthropicApiKey: string;
-  private anthropicClient: Anthropic | null = null;
   private modelStrategy: AgentTaskStrategy;
   private usageMetrics: LLMUsageMetrics[] = [];
   private activeABTests: ABTest[] = [];
@@ -422,12 +420,7 @@ export class EnhancedLLMRouter {
       ...config.costLimits,
     };
 
-    // Initialize Anthropic client for fallback
-    if (this.anthropicApiKey) {
-      this.anthropicClient = new Anthropic({ apiKey: this.anthropicApiKey });
-    }
-
-    console.log('[EnhancedLLMRouter] Initialized with OpenRouter + Anthropic fallback');
+    console.log('[EnhancedLLMRouter] Initialized with OpenRouter only (direct Anthropic fallback disabled for cost safety)');
   }
 
   /**
@@ -540,12 +533,12 @@ export class EnhancedLLMRouter {
     model: string;
     usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    // If using direct Anthropic (claude-* models without provider prefix)
     if (model.startsWith('claude-') && !model.includes('/')) {
-      return this.callAnthropicDirect(model, params);
+      console.log(`[EnhancedLLMRouter] Routing ${model} through OpenRouter (direct Anthropic blocked)`);
+      const openRouterModel = `anthropic/${model}`;
+      return this.callOpenRouter(openRouterModel, params, timeout);
     }
 
-    // Otherwise use OpenRouter
     return this.callOpenRouter(model, params, timeout);
   }
 
@@ -608,52 +601,6 @@ export class EnhancedLLMRouter {
       if (timeoutId) clearTimeout(timeoutId);
       throw error;
     }
-  }
-
-  /**
-   * Call Anthropic API directly (fallback)
-   */
-  private async callAnthropicDirect(
-    model: string,
-    params: {
-      messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
-      temperature?: number;
-      maxTokens?: number;
-    }
-  ): Promise<{
-    content: string;
-    model: string;
-    usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
-  }> {
-    if (!this.anthropicClient) {
-      throw new Error('Anthropic client not initialized');
-    }
-
-    // Map model names
-    const modelMap: Record<string, string> = {
-      'claude-opus-4': 'claude-opus-4-20250514',
-      'claude-sonnet-4.5': 'claude-sonnet-4-20250514',
-      'claude-haiku-4': 'claude-haiku-4-20250514',
-    };
-
-    const anthropicModel = modelMap[model] || model;
-
-    const response = await this.anthropicClient.messages.create({
-      model: anthropicModel,
-      max_tokens: params.maxTokens ?? 4096,
-      temperature: params.temperature ?? 0.7,
-      messages: params.messages as any,
-    });
-
-    return {
-      content: response.content[0].type === 'text' ? response.content[0].text : '',
-      model: anthropicModel,
-      usage: {
-        prompt_tokens: response.usage.input_tokens,
-        completion_tokens: response.usage.output_tokens,
-        total_tokens: response.usage.input_tokens + response.usage.output_tokens,
-      },
-    };
   }
 
   /**

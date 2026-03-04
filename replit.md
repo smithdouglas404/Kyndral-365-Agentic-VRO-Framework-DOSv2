@@ -1,9 +1,24 @@
 # Kyndryl Clarity - Level 4 Autonomous System
 
-**Version:** 2.7.0  
-**Updated:** 2026-03-02
+**Version:** 2.8.0  
+**Updated:** 2026-03-04
 
 ## Recent Changes
+
+### March 4, 2026 - Cost Protection v4.2 (v2.8.0)
+- **Direct Anthropic API calls REMOVED**: All 3 direct paths to `api.anthropic.com` eliminated
+  - `OpenRouterClient.ts`: `callAnthropicDirect()` method deleted, fallback to Anthropic removed
+  - `EnhancedLLMRouter.ts`: `new Anthropic()` client removed, `callAnthropicDirect()` deleted, bare `claude-*` models rerouted through OpenRouter
+  - `routes.ts`: `/api/ai/check-key` no longer creates Anthropic SDK client or makes test API call
+- **Daily spending cap**: $5/day and 500K tokens/day hard limits built into OpenRouterClient
+  - `checkSpendingCap()` runs before every LLM call
+  - `trackUsage()` logs token count and estimated cost per call
+  - 80% threshold warning in server logs
+  - Auto-resets at midnight UTC
+- **All LLM calls route through OpenRouter only**: Cost-controlled, rate-limited, with model-level spending visibility
+- **`ENABLE_AI_AGENTS=false`**: Kill switch confirmed active — zero token consumption when disabled
+- **Stats endpoint**: `GET /api/orchestration/router-stats` now includes `spending` and `costProtection` objects
+- **Files changed**: `server/lib/OpenRouterClient.ts`, `server/lib/EnhancedLLMRouter.ts`, `server/routes.ts`, `server/routes/orchestration.ts`
 
 ### March 2, 2026 - Full Palantir AIP Integration (v2.7.0)
 - **100% Palantir-native**: All rule evaluation, threshold checks, and workflow actions routed through Palantir Functions/Actions

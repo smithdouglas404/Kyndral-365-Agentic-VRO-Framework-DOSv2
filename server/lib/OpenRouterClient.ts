@@ -46,12 +46,16 @@ const FALLBACK_MODEL = 'anthropic/claude-3.5-sonnet';
 
 class OpenRouterClient {
   private apiKey: string | undefined;
-  private anthropicKey: string | undefined;
   private baseUrl = 'https://openrouter.ai/api/v1';
+  private dailyTokenCount: number = 0;
+  private dailyTokenResetDate: string = '';
+  private dailyTokenLimit: number = 500_000;
+  private dailyCostEstimate: number = 0;
+  private dailyCostLimit: number = 5.00;
 
   constructor() {
     this.apiKey = process.env.OPENROUTER_API_KEY;
-    this.anthropicKey = process.env.ANTHROPIC_API_KEY;
+    this.resetDailyCountersIfNeeded();
   }
 
   get isAvailable(): boolean {
@@ -59,13 +63,57 @@ class OpenRouterClient {
   }
 
   get hasAnthropicFallback(): boolean {
-    return !!this.anthropicKey;
+    return false;
   }
 
-  /**
-   * Create a chat completion through OpenRouter
-   * Falls back to direct Anthropic if OpenRouter unavailable
-   */
+  private resetDailyCountersIfNeeded(): void {
+    const today = new Date().toISOString().slice(0, 10);
+    if (this.dailyTokenResetDate !== today) {
+      this.dailyTokenCount = 0;
+      this.dailyCostEstimate = 0;
+      this.dailyTokenResetDate = today;
+    }
+  }
+
+  private checkSpendingCap(): void {
+    this.resetDailyCountersIfNeeded();
+    if (this.dailyCostEstimate >= this.dailyCostLimit) {
+      throw new Error(`[OpenRouterClient] Daily spending cap reached ($${this.dailyCostEstimate.toFixed(2)}/$${this.dailyCostLimit.toFixed(2)}). All LLM calls blocked until tomorrow.`);
+    }
+    if (this.dailyTokenCount >= this.dailyTokenLimit) {
+      throw new Error(`[OpenRouterClient] Daily token limit reached (${this.dailyTokenCount}/${this.dailyTokenLimit}). All LLM calls blocked until tomorrow.`);
+    }
+  }
+
+  private trackUsage(tokens: number, model: string): void {
+    this.dailyTokenCount += tokens;
+    const costPer1M: Record<string, number> = {
+      'meta-llama/llama-3.1-8b-instruct': 0.10,
+      'mistralai/mixtral-8x7b-instruct': 0.27,
+      'openai/gpt-4o-mini': 0.15,
+      'openai/gpt-4o': 5.00,
+      'anthropic/claude-3.5-sonnet': 3.00,
+      'anthropic/claude-sonnet-4-20250514': 3.00,
+    };
+    const rate = costPer1M[model] || 3.00;
+    this.dailyCostEstimate += (tokens / 1_000_000) * rate;
+
+    if (this.dailyCostEstimate >= this.dailyCostLimit * 0.8) {
+      console.warn(`[OpenRouterClient] ⚠️ Daily spend at $${this.dailyCostEstimate.toFixed(2)}/$${this.dailyCostLimit.toFixed(2)} (${((this.dailyCostEstimate / this.dailyCostLimit) * 100).toFixed(0)}%)`);
+    }
+  }
+
+  getSpendingStats(): { dailyTokens: number; dailyCost: number; dailyTokenLimit: number; dailyCostLimit: number; date: string } {
+    this.resetDailyCountersIfNeeded();
+    return {
+      dailyTokens: this.dailyTokenCount,
+      dailyCost: this.dailyCostEstimate,
+      dailyTokenLimit: this.dailyTokenLimit,
+      dailyCostLimit: this.dailyCostLimit,
+      date: this.dailyTokenResetDate,
+    };
+  }
+
   async chat(
     messages: OpenRouterMessage[],
     options: OpenRouterOptions = {}
@@ -76,18 +124,13 @@ class OpenRouterClient {
       temperature = 0.7,
     } = options;
 
-    // Route through OpenRouter if available
+    this.checkSpendingCap();
+
     if (this.apiKey) {
       return this.callOpenRouter(messages, { model, maxTokens, temperature });
     }
 
-    // Fallback to direct Anthropic
-    if (this.anthropicKey) {
-      console.log('[OpenRouterClient] Falling back to direct Anthropic');
-      return this.callAnthropicDirect(messages, { model, maxTokens, temperature });
-    }
-
-    throw new Error('No API keys configured. Set OPENROUTER_API_KEY or ANTHROPIC_API_KEY');
+    throw new Error('[OpenRouterClient] No OPENROUTER_API_KEY configured. Direct Anthropic fallback is disabled for cost safety.');
   }
 
   /**
@@ -136,87 +179,28 @@ class OpenRouterClient {
         throw new Error('Empty response from OpenRouter');
       }
 
-      // Log usage for cost tracking
       if (data.usage) {
-        console.log(`[OpenRouterClient] ${model}: ${data.usage.total_tokens} tokens`);
+        this.trackUsage(data.usage.total_tokens, model);
+        console.log(`[OpenRouterClient] ${model}: ${data.usage.total_tokens} tokens | Daily: $${this.dailyCostEstimate.toFixed(3)}`);
       }
 
       return content;
     } catch (error) {
       console.error('[OpenRouterClient] Request failed:', error);
-      
-      // Fall back to direct Anthropic if available
-      if (this.anthropicKey) {
-        console.log('[OpenRouterClient] Falling back to direct Anthropic');
-        return this.callAnthropicDirect(messages, options);
-      }
-      
       throw error;
     }
   }
 
   /**
-   * Direct Anthropic API call (fallback)
-   */
-  private async callAnthropicDirect(
-    messages: OpenRouterMessage[],
-    options: { model: string; maxTokens: number; temperature: number }
-  ): Promise<string> {
-    const { maxTokens, temperature } = options;
-
-    // Extract system message
-    const systemMessage = messages.find(m => m.role === 'system');
-    const userMessages = messages.filter(m => m.role !== 'system');
-
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.anthropicKey!,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: this.mapToAnthropicModel(options.model),
-          max_tokens: maxTokens,
-          temperature,
-          system: systemMessage?.content || 'You are a helpful assistant.',
-          messages: userMessages.map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Anthropic API error: ${response.status} - ${error}`);
-      }
-
-      const data = await response.json();
-      const content = data.content?.[0]?.text;
-
-      if (!content) {
-        throw new Error('Empty response from Anthropic');
-      }
-
-      return content;
-    } catch (error) {
-      console.error('[OpenRouterClient] Anthropic fallback failed:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Map OpenRouter model IDs to Anthropic model IDs for direct fallback
+   * Map OpenRouter model IDs (kept for compatibility but no longer used for Anthropic fallback)
    */
   private mapToAnthropicModel(openRouterModel: string): string {
     const mapping: Record<string, string> = {
       'anthropic/claude-sonnet-4-20250514': 'claude-sonnet-4-20250514',
       'anthropic/claude-3.5-sonnet': 'claude-sonnet-4-20250514',
       'anthropic/claude-3-haiku': 'claude-3-haiku-20240307',
-      'meta-llama/llama-3.1-8b-instruct': 'claude-sonnet-4-20250514',
-      'mistralai/mixtral-8x7b-instruct': 'claude-sonnet-4-20250514',
+      'meta-llama/llama-3.1-8b-instruct': 'meta-llama/llama-3.1-8b-instruct',
+      'mistralai/mixtral-8x7b-instruct': 'mistralai/mixtral-8x7b-instruct',
       'openai/gpt-4o-mini': 'claude-sonnet-4-20250514',
     };
     return mapping[openRouterModel] || 'claude-sonnet-4-20250514';

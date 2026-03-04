@@ -974,24 +974,9 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   app.get("/api/ai/check-key", async (_req, res) => {
     try {
       const hasKey = !!process.env.ANTHROPIC_API_KEY;
-      if (hasKey) {
-        const Anthropic = (await import("@anthropic-ai/sdk")).default;
-        const client = new Anthropic();
-        await client.messages.create({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 10,
-          messages: [{ role: "user", content: "test" }]
-        });
-        res.json({ valid: true, configured: true });
-      } else {
-        res.json({ valid: false, configured: false });
-      }
+      res.json({ valid: hasKey, configured: hasKey, note: "Direct Anthropic calls disabled for cost safety. All LLM calls routed through OpenRouter." });
     } catch (error: any) {
-      if (error.status === 401) {
-        res.json({ valid: false, configured: true, error: "Invalid API key" });
-      } else {
-        res.json({ valid: true, configured: true });
-      }
+      res.json({ valid: false, configured: false, error: error.message });
     }
   });
 
