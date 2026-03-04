@@ -393,7 +393,6 @@ export const MODEL_COSTS: Record<string, { input: number; output: number }> = {
 export class EnhancedLLMRouter {
   private storage: IStorage;
   private openrouterApiKey: string;
-  private anthropicApiKey: string;
   private modelStrategy: AgentTaskStrategy;
   private usageMetrics: LLMUsageMetrics[] = [];
   private activeABTests: ABTest[] = [];
@@ -404,13 +403,11 @@ export class EnhancedLLMRouter {
   constructor(config: {
     storage: IStorage;
     openrouterApiKey?: string;
-    anthropicApiKey?: string;
     modelStrategy?: AgentTaskStrategy;
     costLimits?: Partial<CostLimit>;
   }) {
     this.storage = config.storage;
     this.openrouterApiKey = config.openrouterApiKey || process.env.OPENROUTER_API_KEY || '';
-    this.anthropicApiKey = config.anthropicApiKey || process.env.ANTHROPIC_API_KEY || '';
     this.modelStrategy = config.modelStrategy || DEFAULT_MODEL_STRATEGY;
     this.costLimits = {
       daily_budget_usd: 50,

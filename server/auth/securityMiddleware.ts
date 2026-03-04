@@ -89,7 +89,7 @@ export function configureSecurityHeaders(app: Express): void {
           scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
           imgSrc: ["'self'", "data:", "https:", "blob:"],
           fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-          connectSrc: ["'self'", "https://api.anthropic.com", "https://api.smith.langchain.com", "wss:", "ws:"],
+          connectSrc: ["'self'", "https://openrouter.ai", "wss:", "ws:"],
           frameSrc: ["'self'"],
           frameAncestors: ["'self'", "https://*.replit.dev", "https://*.replit.app", "https://*.repl.co"],
           objectSrc: ["'none'"],

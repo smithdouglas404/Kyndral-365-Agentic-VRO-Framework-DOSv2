@@ -173,7 +173,7 @@ function SystemSettings() {
 }
 
 function APIKeySettings() {
-  const [anthropicKey, setAnthropicKey] = useState("");
+  const [openRouterKey, setOpenRouterKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [keyStatus, setKeyStatus] = useState<'unknown' | 'valid' | 'invalid' | 'checking'>('unknown');
   const [isSaving, setIsSaving] = useState(false);
@@ -194,7 +194,7 @@ function APIKeySettings() {
   }, []);
 
   const handleSaveKey = async () => {
-    if (!anthropicKey.trim()) {
+    if (!openRouterKey.trim()) {
       toast.error("Please enter an API key");
       return;
     }
@@ -204,12 +204,12 @@ function APIKeySettings() {
       const res = await fetch('/api/admin/api-keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'ANTHROPIC_API_KEY', value: anthropicKey })
+        body: JSON.stringify({ key: 'OPENROUTER_API_KEY', value: openRouterKey })
       });
       
       if (res.ok) {
         toast.success("API key saved successfully. Restart the application to apply changes.");
-        setAnthropicKey("");
+        setOpenRouterKey("");
         checkKeyStatus();
       } else {
         const data = await res.json();
@@ -228,7 +228,7 @@ function APIKeySettings() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Label className="text-base font-medium">Anthropic API Key</Label>
+              <Label className="text-base font-medium">OpenRouter API Key</Label>
               {keyStatus === 'checking' && (
                 <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
               )}
@@ -246,7 +246,7 @@ function APIKeySettings() {
               )}
             </div>
             <p className="text-sm text-gray-500">
-              Required for AI Executive Summary, AI insights, and intelligent analysis features.
+              All AI calls route through OpenRouter for cost control. Supports Claude, GPT-4, Llama, and more.
             </p>
           </div>
           <Button 
@@ -265,11 +265,11 @@ function APIKeySettings() {
           <div className="relative flex-1">
             <Input
               type={showKey ? "text" : "password"}
-              placeholder="sk-ant-api03-..."
-              value={anthropicKey}
-              onChange={(e) => setAnthropicKey(e.target.value)}
+              placeholder="sk-or-v1-..."
+              value={openRouterKey}
+              onChange={(e) => setOpenRouterKey(e.target.value)}
               className="pr-10"
-              data-testid="input-anthropic-key"
+              data-testid="input-openrouter-key"
             />
             <Button
               type="button"
@@ -284,7 +284,7 @@ function APIKeySettings() {
           </div>
           <Button 
             onClick={handleSaveKey}
-            disabled={isSaving || !anthropicKey.trim()}
+            disabled={isSaving || !openRouterKey.trim()}
             data-testid="button-save-api-key"
           >
             {isSaving ? (
@@ -299,13 +299,14 @@ function APIKeySettings() {
         <p className="text-xs text-gray-400">
           Get your API key from{" "}
           <a 
-            href="https://console.anthropic.com/settings/keys" 
+            href="https://openrouter.ai/keys" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"
           >
-            console.anthropic.com
+            openrouter.ai/keys
           </a>
+          {" "}— daily cap: $5/day, 500K tokens/day
         </p>
       </div>
 

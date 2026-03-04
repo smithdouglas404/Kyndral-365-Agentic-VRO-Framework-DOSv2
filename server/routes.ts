@@ -973,8 +973,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   // API Key management endpoints
   app.get("/api/ai/check-key", async (_req, res) => {
     try {
-      const hasKey = !!process.env.ANTHROPIC_API_KEY;
-      res.json({ valid: hasKey, configured: hasKey, note: "Direct Anthropic calls disabled for cost safety. All LLM calls routed through OpenRouter." });
+      const hasOpenRouter = !!process.env.OPENROUTER_API_KEY;
+      res.json({ valid: hasOpenRouter, configured: hasOpenRouter, note: "All LLM calls routed through OpenRouter. No direct Anthropic calls." });
     } catch (error: any) {
       res.json({ valid: false, configured: false, error: error.message });
     }
@@ -987,13 +987,9 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         return res.status(400).json({ error: "Key and value are required" });
       }
       
-      const allowedKeys = ['ANTHROPIC_API_KEY'];
+      const allowedKeys = ['OPENROUTER_API_KEY'];
       if (!allowedKeys.includes(key)) {
-        return res.status(400).json({ error: "Invalid key name" });
-      }
-
-      if (key === 'ANTHROPIC_API_KEY' && !value.startsWith('sk-')) {
-        return res.status(400).json({ error: "Invalid Anthropic API key format. Key should start with 'sk-'" });
+        return res.status(400).json({ error: "Invalid key name. Only OPENROUTER_API_KEY is supported." });
       }
 
       await storage.setAppConfig(`${key}_configured`, 'true');

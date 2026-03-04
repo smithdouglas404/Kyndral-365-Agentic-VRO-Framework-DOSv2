@@ -138,11 +138,10 @@ export function getCostOptimizationStatus(): {
   preferredTier: string;
 } {
   const hasOpenRouter = !!process.env.OPENROUTER_API_KEY;
-  const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
 
   return {
     openRouterEnabled: hasOpenRouter,
-    anthropicEnabled: hasAnthropic,
-    preferredTier: hasOpenRouter ? 'OpenRouter (cost-optimized)' : 'Anthropic (premium)',
+    anthropicEnabled: false,
+    preferredTier: hasOpenRouter ? 'OpenRouter (cost-optimized)' : 'No LLM provider configured',
   };
 }
