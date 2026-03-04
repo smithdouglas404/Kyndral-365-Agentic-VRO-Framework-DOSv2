@@ -1,5 +1,6 @@
 import express, { type RequestHandler } from 'express';
 import { getPalantirService } from '../mcp/MCPServiceFactory.js';
+import { PALANTIR_OBJECT_TYPES, PALANTIR_ACTIONS } from '../constants/palantirOntology.js';
 
 const router = express.Router();
 
@@ -210,6 +211,165 @@ router.post('/cache/clear', (async (_req, res) => {
     const provider = getPalantirDataProvider();
     provider.clearCache();
     res.json({ success: true, message: 'Cache cleared' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+/**
+ * POST /api/palantir/sync/full
+ *
+ * Manually trigger a full sync of PostgreSQL data to Palantir Foundry.
+ * This creates:
+ * - Master transformation structure
+ * - Projects, features, risks from database
+ * - Business rules (companyRules)
+ * - Project dependencies
+ * - Integration source projects for data lineage
+ * - Default KPIs for integration health
+ *
+ * Use this endpoint when you want to initialize or reset Palantir data.
+ */
+router.post('/sync/full', (async (_req, res) => {
+  try {
+    const palantir = getPalantirService();
+    if (!palantir) {
+      return res.status(503).json({
+        success: false,
+        error: 'Palantir AIP not configured. Set PALANTIR_HOSTNAME and PALANTIR_TOKEN.',
+      });
+    }
+
+    console.log('[Palantir Sync] Starting full sync...');
+
+    const { seedPalantirDefaults } = await import('../scripts/seed-palantir-defaults.js');
+    const result = await seedPalantirDefaults();
+
+    res.json({
+      success: result.success,
+      message: result.success
+        ? 'Full sync completed successfully'
+        : 'Sync completed with errors',
+      ...result,
+    });
+  } catch (error: any) {
+    console.error('[Palantir Sync] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+/**
+ * POST /api/palantir/sync/lineage
+ *
+ * Sync only the data lineage structure (integration sources + dependencies).
+ * Lighter operation that just creates the lineage visualization structure.
+ */
+router.post('/sync/lineage', (async (_req, res) => {
+  try {
+    const palantir = getPalantirService();
+    if (!palantir) {
+      return res.status(503).json({
+        success: false,
+        error: 'Palantir AIP not configured',
+      });
+    }
+
+    console.log('[Palantir Sync] Creating data lineage structure...');
+
+    let created = 0;
+    let skipped = 0;
+
+    // Create integration source projects
+    const sources = [
+      { id: 'source-jira', name: '[Integration] Jira' },
+      { id: 'source-openproject', name: '[Integration] OpenProject' },
+      { id: 'source-monday', name: '[Integration] Monday.com' },
+      { id: 'source-postgres', name: '[Integration] PostgreSQL' },
+    ];
+
+    for (const src of sources) {
+      try {
+        await palantir.applyAction(PALANTIR_ACTIONS.UPSERT_PROJECT, {
+          project_id: src.id,
+          name: src.name,
+          status: 'Active',
+          transformation_id: 'atlas-master-transformation',
+        });
+        created++;
+      } catch (e: any) {
+        if (e.message?.includes('already exists')) skipped++;
+      }
+    }
+
+    // Create lineage dependencies
+    const deps = [
+      { id: 'lineage-jira-postgres', source: 'source-jira', target: 'source-postgres' },
+      { id: 'lineage-openproject-postgres', source: 'source-openproject', target: 'source-postgres' },
+      { id: 'lineage-monday-postgres', source: 'source-monday', target: 'source-postgres' },
+    ];
+
+    for (const dep of deps) {
+      try {
+        await palantir.applyAction(PALANTIR_ACTIONS.UPSERT_PROJECT, {
+          dependency_id: dep.id,
+          source_project_id: dep.source,
+          target_project_id: dep.target,
+          dependency_type: 'data-sync',
+          status: 'Active',
+        });
+        created++;
+      } catch (e: any) {
+        if (e.message?.includes('already exists')) skipped++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Data lineage structure created',
+      created,
+      skipped,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+}) as RequestHandler);
+
+/**
+ * GET /api/palantir/sync/status
+ *
+ * Check the current sync status - what's in Palantir vs what's in PostgreSQL.
+ */
+router.get('/sync/status', (async (_req, res) => {
+  try {
+    const palantir = getPalantirService();
+    if (!palantir) {
+      return res.status(503).json({
+        success: false,
+        palantirConfigured: false,
+        error: 'Palantir AIP not configured',
+      });
+    }
+
+    // Count objects in Palantir
+    const [projectsResult, insightsResult, risksResult, kpisResult, okrsResult] = await Promise.all([
+      palantir.listObjects(PALANTIR_OBJECT_TYPES.PROJECT, { pageSize: 1 }),
+      palantir.listObjects(PALANTIR_OBJECT_TYPES.INTERVENTION, { pageSize: 1 }),
+      palantir.listObjects(PALANTIR_OBJECT_TYPES.RISK, { pageSize: 1 }),
+      palantir.listObjects(PALANTIR_OBJECT_TYPES.KPI, { pageSize: 1 }).catch(() => ({ totalCount: 0 })),
+      palantir.listObjects(PALANTIR_OBJECT_TYPES.OKR, { pageSize: 1 }).catch(() => ({ totalCount: 0 })),
+    ]);
+
+    res.json({
+      success: true,
+      palantirConfigured: true,
+      palantirObjects: {
+        projects: projectsResult.totalCount || 0,
+        insights: insightsResult.totalCount || 0,
+        risks: risksResult.totalCount || 0,
+        kpis: kpisResult.totalCount || 0,
+        okrs: okrsResult.totalCount || 0,
+      },
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

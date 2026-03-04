@@ -8,6 +8,7 @@
 import { Router, Request, Response } from 'express';
 import { PalantirSyncService, SyncResult } from '../services/PalantirSyncService.js';
 import { OntologyDataProvider } from '../services/OntologyDataProvider.js';
+import { PALANTIR_OBJECT_TYPES } from '../constants/palantirOntology.js';
 import { OntologySchemaService } from '../services/OntologySchemaService.js';
 import { getPalantirSyncScheduler } from '../services/PalantirSyncScheduler.js';
 import { getPostgresToPalantirSync } from '../services/PostgresToPalantirSync.js';
@@ -663,7 +664,7 @@ router.get('/ontology/projects', async (req: Request, res: Response) => {
 router.get('/ontology/projects/:projectId', async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params;
-    const result = await OntologyDataProvider.getById('Project', projectId);
+    const result = await OntologyDataProvider.getById(PALANTIR_OBJECT_TYPES.PROJECT, projectId);
 
     if (!result) {
       return res.status(404).json({ error: 'Project not found' });
