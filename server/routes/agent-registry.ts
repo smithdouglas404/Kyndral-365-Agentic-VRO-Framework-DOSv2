@@ -1,14 +1,18 @@
 /**
  * AGENT REGISTRY API
  *
- * Single source of truth for agent definitions.
- * All clients should use these endpoints instead of hardcoded values.
+ * SOURCE OF TRUTH: PALANTIR FOUNDRY
+ *
+ * Agent definitions are managed through Palantir Ontology with
+ * LLM-powered dynamic sync (no predefined actions required).
  */
 
 import { Router } from "express";
 import { getAgentRegistry } from "../services/AgentRegistryService.js";
 import { getPalantirActionsService } from "../services/PalantirActionsService.js";
 import { getPalantirService } from "../mcp/MCPServiceFactory.js";
+import { getPalantirLLMBridge } from "../services/PalantirLLMBridge.js";
+import { OntologyDataProvider } from "../services/OntologyDataProvider.js";
 
 const router = Router();
 
@@ -176,45 +180,46 @@ router.get("/:agentId/functions", async (req, res) => {
 
 /**
  * POST /api/agent-registry/sync-to-palantir
- * Sync all agents to Palantir Ontology
+ * Sync all agents to Palantir using LLM Bridge (no predefined actions required)
  */
 router.post("/sync-to-palantir", async (req, res) => {
   try {
     const registry = getAgentRegistry();
-    const actionsService = getPalantirActionsService();
-    const palantir = getPalantirService();
-
-    if (!palantir) {
-      return res.status(503).json({ success: false, error: "Palantir not configured" });
-    }
+    const bridge = await getPalantirLLMBridge();
 
     const agentsToSync = await registry.prepareForPalantirSync();
     const results: any[] = [];
 
     for (const agent of agentsToSync) {
       try {
-        // Create or update Agent object in Palantir
-        const result = await actionsService.executeAction(
-          "ri.actions..action.upsert-agent",
-          {
+        // Use LLM Bridge for dynamic data ingestion - no predefined actions needed!
+        const result = await bridge.ingestData({
+          source: 'agent-registry',
+          datasetName: 'agents',
+          data: {
             agentId: agent.agentId,
             name: agent.name,
             description: agent.description,
             category: agent.category,
             enabled: agent.enabled,
-            capabilities: JSON.stringify(agent.capabilities),
-            palantirObjectTypes: JSON.stringify(agent.palantirObjectTypes),
-            palantirFunctions: JSON.stringify(agent.palantirFunctions),
+            capabilities: agent.capabilities,
+            palantirObjectTypes: agent.palantirObjectTypes,
+            palantirFunctions: agent.palantirFunctions,
             priority: agent.priority,
-            metadata: JSON.stringify(agent.metadata),
+            metadata: agent.metadata,
             syncedAt: new Date().toISOString(),
-          }
-        );
+          },
+          tags: ['agent', 'registry', agent.category],
+          metadata: {
+            agentId: agent.agentId,
+            syncSource: 'agent-registry-api',
+          },
+        });
 
         results.push({
           agentId: agent.agentId,
           success: result.success,
-          objectRid: result.objectRid,
+          datasetId: result.datasetId,
         });
       } catch (error: any) {
         results.push({
@@ -229,9 +234,10 @@ router.post("/sync-to-palantir", async (req, res) => {
 
     res.json({
       success: true,
-      message: `Synced ${successCount}/${agentsToSync.length} agents to Palantir`,
+      message: `Synced ${successCount}/${agentsToSync.length} agents to Palantir via LLM Bridge`,
       results,
       syncedAt: new Date().toISOString(),
+      method: 'llm-bridge', // No predefined actions required!
     });
   } catch (error: any) {
     console.error("[AgentRegistry] Palantir sync failed:", error.message);
@@ -247,14 +253,7 @@ router.get("/palantir-status", async (req, res) => {
   try {
     const registry = getAgentRegistry();
     const palantir = getPalantirService();
-
-    if (!palantir) {
-      return res.json({
-        success: true,
-        palantirConfigured: false,
-        message: "Palantir not configured",
-      });
-    }
+    const isOntologyReady = OntologyDataProvider.isReady();
 
     const agents = await registry.getAllAgents();
 
@@ -262,20 +261,28 @@ router.get("/palantir-status", async (req, res) => {
     const status: any[] = [];
     for (const agent of agents) {
       try {
-        // Query Palantir for this agent via OntologyDataProvider
-        const { OntologyDataProvider } = await import("../services/OntologyDataProvider.js");
-        const palantirAgent = await OntologyDataProvider.query("Agent", {
-          filters: [{ field: "agentId", operator: "eq", value: agent.id }],
-          pageSize: 1,
-        }).catch(() => ({ data: [] }));
+        if (isOntologyReady) {
+          const palantirAgent = await OntologyDataProvider.query("Agent", {
+            filters: [{ field: "agentId", operator: "eq", value: agent.id }],
+            pageSize: 1,
+          }).catch(() => ({ data: [] }));
 
-        status.push({
-          agentId: agent.id,
-          name: agent.name,
-          inPalantir: palantirAgent?.data?.length > 0,
-          palantirRid: palantirAgent?.data?.[0]?.rid,
-          lastSynced: palantirAgent?.data?.[0]?.syncedAt,
-        });
+          status.push({
+            agentId: agent.id,
+            name: agent.name,
+            inPalantir: palantirAgent?.data?.length > 0,
+            palantirRid: palantirAgent?.data?.[0]?.rid,
+            lastSynced: palantirAgent?.data?.[0]?.syncedAt,
+          });
+        } else {
+          // LLM Bridge mode - check local cache
+          status.push({
+            agentId: agent.id,
+            name: agent.name,
+            inPalantir: false,
+            note: 'Using LLM Bridge (ontology not configured)',
+          });
+        }
       } catch (e) {
         status.push({
           agentId: agent.id,
@@ -290,10 +297,15 @@ router.get("/palantir-status", async (req, res) => {
 
     res.json({
       success: true,
-      palantirConfigured: true,
+      palantirConfigured: !!palantir,
+      ontologyReady: isOntologyReady,
+      llmBridgeActive: true, // LLM Bridge always available
       totalAgents: agents.length,
       syncedAgents: syncedCount,
       status,
+      message: isOntologyReady
+        ? 'Palantir Ontology active'
+        : 'Using LLM Bridge - no predefined schemas required',
     });
   } catch (error: any) {
     console.error("[AgentRegistry] Failed to check Palantir status:", error.message);

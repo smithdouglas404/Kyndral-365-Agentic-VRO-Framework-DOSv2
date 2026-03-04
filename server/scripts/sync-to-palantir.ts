@@ -4,15 +4,16 @@
  * Uses the correct Palantir Action APIs to create objects in Foundry.
  *
  * Actions used:
- * - atlas-create-transformation
- * - atlas-create-budget
- * - atlas-create-project
- * - atlas-create-risk
- * - atlas-create-kpi
- * - atlas-create-objective
+ * - upsertDivision
+ * - upsertProject
+ * - upsertRisk
+ * - upsertKPI
+ * - upsertOKR
  *
  * Usage: npx tsx server/scripts/sync-to-palantir.ts
  */
+
+import { PALANTIR_ACTIONS } from '../constants/palantirOntology.js';
 
 const PALANTIR_HOST = process.env.PALANTIR_HOSTNAME?.replace(/\/$/, '') || '';
 const PALANTIR_TOKEN = process.env.PALANTIR_TOKEN || '';
@@ -153,7 +154,7 @@ const OBJECTIVES = [
 
 async function syncTransformation() {
   console.log('\n📦 Creating Transformation...');
-  const success = await applyAction('atlas-create-transformation', TRANSFORMATION);
+  const success = await applyAction(PALANTIR_ACTIONS.UPSERT_DIVISION, TRANSFORMATION);
   console.log(success ? '  ✅ Transformation created' : '  ❌ Transformation failed');
   return success ? 1 : 0;
 }
@@ -162,7 +163,7 @@ async function syncBudgets() {
   console.log('\n💰 Creating Budgets...');
   let synced = 0;
   for (const budget of BUDGETS) {
-    const success = await applyAction('atlas-create-budget', {
+    const success = await applyAction(PALANTIR_ACTIONS.UPSERT_PROJECT, {
       ...budget,
       created_at: new Date().toISOString(),
     });
@@ -179,7 +180,7 @@ async function syncProjects() {
   console.log('\n📊 Creating Projects...');
   let synced = 0;
   for (const project of PROJECTS) {
-    const success = await applyAction('atlas-create-project', {
+    const success = await applyAction(PALANTIR_ACTIONS.UPSERT_PROJECT, {
       ...project,
       created_at: new Date().toISOString(),
     });
@@ -196,7 +197,7 @@ async function syncRisks() {
   console.log('\n⚠️  Creating Risks...');
   let synced = 0;
   for (const risk of RISKS) {
-    const success = await applyAction('atlas-create-risk', {
+    const success = await applyAction(PALANTIR_ACTIONS.UPSERT_RISK, {
       ...risk,
       created_at: new Date().toISOString(),
     });
@@ -213,7 +214,7 @@ async function syncKPIs() {
   console.log('\n📈 Creating KPIs...');
   let synced = 0;
   for (const kpi of KPIS) {
-    const success = await applyAction('atlas-create-kpi', {
+    const success = await applyAction(PALANTIR_ACTIONS.UPSERT_KPI, {
       ...kpi,
       last_measured_date: new Date().toISOString().split('T')[0],
       created_at: new Date().toISOString(),
@@ -231,7 +232,7 @@ async function syncObjectives() {
   console.log('\n🎯 Creating Objectives...');
   let synced = 0;
   for (const obj of OBJECTIVES) {
-    const success = await applyAction('atlas-create-objective', {
+    const success = await applyAction(PALANTIR_ACTIONS.UPSERT_OKR, {
       ...obj,
       created_at: new Date().toISOString(),
     });

@@ -1,5 +1,20 @@
+/**
+ * COMMON OPERATING PICTURE (COP) ROUTES
+ *
+ * SOURCE OF TRUTH: PALANTIR FOUNDRY
+ *
+ * Provides three-layer view of portfolio health:
+ * - Strategic Layer (VRO) - 6-12 months horizon
+ * - Operational Layer (TMO) - 3-6 months horizon
+ * - Tactical Layer (PMO) - Current week
+ * - Action Queue - Immediate attention items
+ *
+ * All endpoints use PalantirDashboardService with PostgreSQL fallback.
+ */
+
 import { Router } from "express";
 import type { IStorage } from "../storage";
+import { getPalantirDashboardService } from "../services/PalantirDashboardService.js";
 
 export function createCOPRoutes(storage: IStorage): Router {
   const router = Router();
@@ -7,64 +22,70 @@ export function createCOPRoutes(storage: IStorage): Router {
   // Get Strategic Layer data (VRO - 6-12 months)
   router.get("/strategic", async (_req, res) => {
     try {
-      // Get portfolio-level strategic metrics
-      const portfolioMetrics = await storage.db.query(`
-        SELECT
-          COUNT(*) as total_projects,
-          COALESCE(AVG(CAST(NULLIF(meta->>'expected_roi', '') AS NUMERIC)), 0) as avg_roi,
-          COALESCE(SUM(CAST(NULLIF(meta->>'planned_value', '') AS NUMERIC)), 0) as total_planned_value,
-          COALESCE(SUM(CAST(NULLIF(meta->>'actual_value', '') AS NUMERIC)), 0) as total_actual_value,
-          COUNT(*) FILTER (WHERE status = 'active') as active_projects,
-          COUNT(*) FILTER (WHERE status = 'completed') as completed_projects
-        FROM projects
-        WHERE status IN ('active', 'planning', 'completed')
-      `);
+      const dashboardService = getPalantirDashboardService();
 
-      // Get strategic initiatives
-      const initiatives = await storage.db.query(`
-        SELECT
-          id,
-          name,
-          description,
-          status,
-          meta->>'expected_roi' as expected_roi,
-          meta->>'planned_value' as planned_value,
-          meta->>'strategic_alignment' as strategic_alignment,
-          start_date,
-          end_date,
-          (
-            SELECT COUNT(*)
-            FROM projects p2
-            WHERE p2.meta->>'parent_initiative' = p.id
-          ) as child_project_count
-        FROM projects p
-        WHERE meta->>'is_strategic_initiative' = 'true'
-        ORDER BY meta->>'planned_value' DESC
-        LIMIT 10
-      `);
+      // Get data from Palantir (with PostgreSQL fallback)
+      const overview = await dashboardService.getDashboardOverview();
+      const safeData = await dashboardService.getSAFeData();
+      const risks = await dashboardService.getRisks();
 
-      // Get value leakage analysis
-      const valueLeakage = await storage.db.query(`
-        SELECT
-          COUNT(*) as projects_with_leakage,
-          COALESCE(SUM(
-            CAST(NULLIF(meta->>'planned_value', '') AS NUMERIC) -
-            CAST(NULLIF(meta->>'actual_value', '') AS NUMERIC)
-          ), 0) as total_value_leakage
-        FROM projects
-        WHERE
-          status IN ('active', 'completed')
-          AND CAST(NULLIF(meta->>'actual_value', '') AS NUMERIC) <
-              CAST(NULLIF(meta->>'planned_value', '') AS NUMERIC)
-      `);
+      // Calculate strategic metrics from the data
+      const activeProjects = safeData.projects.filter((p: any) =>
+        p.status?.toLowerCase().includes('progress') || p.status === 'active'
+      );
+
+      const totalPlannedValue = activeProjects.reduce((sum: number, p: any) =>
+        sum + (p.plannedValue || 0), 0);
+      const totalEarnedValue = activeProjects.reduce((sum: number, p: any) =>
+        sum + (p.earnedValue || 0), 0);
+      const avgRoi = activeProjects.length > 0
+        ? activeProjects.reduce((sum: number, p: any) => sum + parseFloat(p.expectedRoi || '0'), 0) / activeProjects.length
+        : 0;
+
+      // Get strategic initiatives (high priority projects)
+      const initiatives = activeProjects
+        .filter((p: any) => p.priority === 'Critical' || p.priority === 'High')
+        .slice(0, 10)
+        .map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          status: p.status,
+          expected_roi: p.expectedRoi,
+          planned_value: p.plannedValue,
+          strategic_alignment: p.safeStage,
+          start_date: p.startDate,
+          end_date: p.endDate,
+        }));
+
+      // Calculate value leakage
+      const projectsWithLeakage = activeProjects.filter((p: any) =>
+        (p.earnedValue || 0) < (p.plannedValue || 0)
+      );
+      const totalValueLeakage = projectsWithLeakage.reduce((sum: number, p: any) =>
+        sum + ((p.plannedValue || 0) - (p.earnedValue || 0)), 0);
 
       res.json({
         success: true,
         layer: "strategic",
         horizon: "6-12 months",
-        metrics: portfolioMetrics.rows[0],
-        initiatives: initiatives.rows,
-        valueLeakage: valueLeakage.rows[0]
+        source: overview.source,
+        metrics: {
+          total_projects: overview.portfolio.totalProjects,
+          avg_roi: avgRoi,
+          total_planned_value: totalPlannedValue,
+          total_actual_value: totalEarnedValue,
+          active_projects: activeProjects.length,
+          completed_projects: safeData.projects.filter((p: any) =>
+            p.status?.toLowerCase() === 'complete' || p.status?.toLowerCase() === 'completed'
+          ).length,
+        },
+        initiatives,
+        valueLeakage: {
+          projects_with_leakage: projectsWithLeakage.length,
+          total_value_leakage: totalValueLeakage,
+        },
+        timestamp: overview.timestamp,
       });
     } catch (error: any) {
       console.error("Error fetching strategic layer:", error);
@@ -75,59 +96,79 @@ export function createCOPRoutes(storage: IStorage): Router {
   // Get Operational Layer data (TMO - 3-6 months)
   router.get("/operational", async (_req, res) => {
     try {
-      // Get roadmap health metrics
-      const roadmapHealth = await storage.db.query(`
-        SELECT
-          COUNT(*) as total_active_projects,
-          COUNT(*) FILTER (WHERE meta->>'technical_debt_score' IS NOT NULL
-            AND CAST(meta->>'technical_debt_score' AS NUMERIC) > 70) as high_debt_projects,
-          COUNT(*) FILTER (WHERE meta->>'has_blockers' = 'true') as blocked_projects,
-          AVG(CAST(NULLIF(meta->>'resource_utilization', '') AS NUMERIC)) as avg_resource_utilization
-        FROM projects
-        WHERE status = 'active'
-      `);
+      const dashboardService = getPalantirDashboardService();
 
-      // Get cross-functional dependencies
-      const dependencies = await storage.db.query(`
-        SELECT
-          p1.id as source_project_id,
-          p1.name as source_project_name,
-          p2.id as target_project_id,
-          p2.name as target_project_name,
-          dep.meta->>'status' as dependency_status,
-          dep.meta->>'blocker_reason' as blocker_reason,
-          dep.meta->>'impact' as impact
-        FROM projects p1
-        CROSS JOIN LATERAL jsonb_array_elements(p1.meta->'dependencies') dep
-        LEFT JOIN projects p2 ON dep->>'project_id' = p2.id
-        WHERE p1.status = 'active'
-        AND dep->>'status' IN ('blocked', 'at-risk')
-        LIMIT 20
-      `);
+      // Get data from Palantir (with PostgreSQL fallback)
+      const safeData = await dashboardService.getSAFeData();
+      const risks = await dashboardService.getRisks();
 
-      // Get architecture decisions pending
-      const architectureDecisions = await storage.db.query(`
-        SELECT
-          COUNT(*) as pending_decisions,
-          jsonb_agg(
-            jsonb_build_object(
-              'project_id', id,
-              'project_name', name,
-              'decision_required', meta->'architecture_decisions'
-            )
-          ) FILTER (WHERE meta->'architecture_decisions' IS NOT NULL) as decisions
-        FROM projects
-        WHERE status = 'active'
-        AND meta->'architecture_decisions' IS NOT NULL
-      `);
+      const activeProjects = safeData.projects.filter((p: any) =>
+        p.status?.toLowerCase().includes('progress') || p.status === 'active'
+      );
+
+      // Calculate roadmap health metrics
+      const highDebtProjects = activeProjects.filter((p: any) =>
+        p.flowEfficiency && parseInt(p.flowEfficiency) < 60
+      ).length;
+
+      const blockedProjects = activeProjects.filter((p: any) =>
+        p.status?.toLowerCase().includes('risk') || p.status?.toLowerCase().includes('blocked')
+      ).length;
+
+      const avgResourceUtilization = activeProjects.length > 0
+        ? activeProjects.reduce((sum: number, p: any) => sum + (p.progress || 0), 0) / activeProjects.length
+        : 0;
+
+      // Get cross-functional dependencies (projects at risk)
+      const dependencies = activeProjects
+        .filter((p: any) => p.spiValue && p.spiValue < 0.9)
+        .slice(0, 20)
+        .map((p: any) => ({
+          source_project_id: p.id,
+          source_project_name: p.name,
+          dependency_status: p.spiValue < 0.85 ? 'blocked' : 'at-risk',
+          impact: p.spiValue < 0.85 ? 'high' : 'medium',
+          spi: p.spiValue,
+          cpi: p.cpiValue,
+        }));
+
+      // Get architecture decisions (features not yet started)
+      const pendingFeatures = safeData.features
+        .filter((f: any) => f.status === 'Not Started' || f.status === 'Defining')
+        .slice(0, 10);
 
       res.json({
         success: true,
         layer: "operational",
         horizon: "3-6 months",
-        roadmapHealth: roadmapHealth.rows[0],
-        dependencies: dependencies.rows,
-        architectureDecisions: architectureDecisions.rows[0]
+        source: safeData.source,
+        roadmapHealth: {
+          total_active_projects: activeProjects.length,
+          high_debt_projects: highDebtProjects,
+          blocked_projects: blockedProjects,
+          avg_resource_utilization: Math.round(avgResourceUtilization),
+        },
+        dependencies,
+        architectureDecisions: {
+          pending_decisions: pendingFeatures.length,
+          decisions: pendingFeatures.map((f: any) => ({
+            feature_id: f.id,
+            feature_name: f.name,
+            project_id: f.projectId,
+            priority: f.priority,
+            wsjf_score: f.wsjfScore,
+          })),
+        },
+        risks: {
+          total: risks.length,
+          high: risks.filter((r: any) => r.severity === 'high' || r.severity === 'critical').length,
+          by_category: risks.reduce((acc: any, r: any) => {
+            const cat = r.categoryId || 'uncategorized';
+            acc[cat] = (acc[cat] || 0) + 1;
+            return acc;
+          }, {}),
+        },
+        timestamp: safeData.timestamp,
       });
     } catch (error: any) {
       console.error("Error fetching operational layer:", error);
@@ -138,65 +179,94 @@ export function createCOPRoutes(storage: IStorage): Router {
   // Get Tactical Layer data (PMO - Current week)
   router.get("/tactical", async (_req, res) => {
     try {
-      // Get current week metrics
-      const weekMetrics = await storage.db.query(`
-        SELECT
-          COUNT(*) FILTER (WHERE status = 'active') as active_projects,
-          COUNT(*) FILTER (WHERE meta->>'has_blockers' = 'true') as blocked_projects,
-          COALESCE(AVG(CAST(NULLIF(meta->>'sprint_velocity', '') AS NUMERIC)), 0) as avg_velocity,
-          COUNT(*) FILTER (WHERE meta->>'sprint_status' = 'on-track') as on_track_sprints,
-          COUNT(*) FILTER (WHERE meta->>'sprint_status' = 'at-risk') as at_risk_sprints
-        FROM projects
-        WHERE status = 'active'
-      `);
+      const dashboardService = getPalantirDashboardService();
 
-      // Get active sprints this week
-      const activeSprints = await storage.db.query(`
-        SELECT
-          id,
-          name,
-          meta->>'team' as team,
-          meta->>'sprint_velocity' as velocity,
-          meta->>'sprint_status' as status,
-          meta->>'sprint_progress' as progress,
-          meta->>'blockers' as blockers
-        FROM projects
-        WHERE status = 'active'
-        AND meta->>'sprint_active' = 'true'
-        ORDER BY name
-        LIMIT 20
-      `);
+      // Get data from Palantir (with PostgreSQL fallback)
+      const safeData = await dashboardService.getSAFeData();
 
-      // Get blockers requiring immediate attention
-      const blockers = await storage.db.query(`
-        SELECT
-          p.id as project_id,
-          p.name as project_name,
-          blocker->>'description' as blocker_description,
-          blocker->>'severity' as severity,
-          blocker->>'created_at' as created_at
-        FROM projects p
-        CROSS JOIN LATERAL jsonb_array_elements(p.meta->'blockers') blocker
-        WHERE p.status = 'active'
-        AND blocker->>'resolved' = 'false'
-        ORDER BY
-          CASE blocker->>'severity'
-            WHEN 'critical' THEN 1
-            WHEN 'high' THEN 2
-            WHEN 'medium' THEN 3
-            ELSE 4
-          END,
-          blocker->>'created_at' DESC
-        LIMIT 10
-      `);
+      const activeProjects = safeData.projects.filter((p: any) =>
+        p.status?.toLowerCase().includes('progress') || p.status === 'active'
+      );
+
+      // Calculate current week metrics
+      const onTrackProjects = activeProjects.filter((p: any) => {
+        const cpi = p.cpiValue || 1.0;
+        const spi = p.spiValue || 1.0;
+        return cpi >= 0.95 && spi >= 0.95;
+      }).length;
+
+      const atRiskProjects = activeProjects.filter((p: any) => {
+        const cpi = p.cpiValue || 1.0;
+        const spi = p.spiValue || 1.0;
+        return (cpi < 0.95 && cpi >= 0.85) || (spi < 0.95 && spi >= 0.85);
+      }).length;
+
+      const avgVelocity = activeProjects.length > 0
+        ? activeProjects.reduce((sum: number, p: any) => sum + parseInt(p.velocity || '0'), 0) / activeProjects.length
+        : 0;
+
+      const avgPredictability = activeProjects.length > 0
+        ? activeProjects.reduce((sum: number, p: any) => sum + parseInt(p.predictability || '0'), 0) / activeProjects.length
+        : 0;
+
+      // Get active sprints (current PI projects)
+      const activeSprints = activeProjects
+        .filter((p: any) => p.currentPi)
+        .slice(0, 20)
+        .map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          team: p.divisionId,
+          velocity: p.velocity,
+          status: p.spiValue >= 0.95 ? 'on-track' : p.spiValue >= 0.85 ? 'at-risk' : 'behind',
+          progress: p.progress,
+          pi: p.currentPi,
+        }));
+
+      // Get blockers (projects with low SPI)
+      const blockers = activeProjects
+        .filter((p: any) => p.spiValue && p.spiValue < 0.85)
+        .slice(0, 10)
+        .map((p: any) => ({
+          project_id: p.id,
+          project_name: p.name,
+          blocker_description: `SPI at ${(p.spiValue * 100).toFixed(0)}% - schedule performance issue`,
+          severity: p.spiValue < 0.75 ? 'critical' : 'high',
+          spi: p.spiValue,
+          cpi: p.cpiValue,
+        }));
+
+      // Get task completion metrics
+      const totalTasks = safeData.tasks.length;
+      const completedTasks = safeData.tasks.filter((t: any) =>
+        t.status === 'done' || t.status === 'completed'
+      ).length;
+      const inProgressTasks = safeData.tasks.filter((t: any) =>
+        t.status === 'in_progress' || t.status === 'in-progress'
+      ).length;
 
       res.json({
         success: true,
         layer: "tactical",
         horizon: "current week",
-        weekMetrics: weekMetrics.rows[0],
-        activeSprints: activeSprints.rows,
-        blockers: blockers.rows
+        source: safeData.source,
+        weekMetrics: {
+          active_projects: activeProjects.length,
+          blocked_projects: blockers.length,
+          avg_velocity: Math.round(avgVelocity),
+          avg_predictability: Math.round(avgPredictability),
+          on_track_sprints: onTrackProjects,
+          at_risk_sprints: atRiskProjects,
+        },
+        taskMetrics: {
+          total: totalTasks,
+          completed: completedTasks,
+          in_progress: inProgressTasks,
+          completion_rate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        },
+        activeSprints,
+        blockers,
+        timestamp: safeData.timestamp,
       });
     } catch (error: any) {
       console.error("Error fetching tactical layer:", error);
@@ -207,60 +277,90 @@ export function createCOPRoutes(storage: IStorage): Router {
   // Get Action Queue - What needs attention TODAY
   router.get("/action-queue", async (_req, res) => {
     try {
-      // Get critical actions from various sources
-      const criticalDecisions = await storage.db.query(`
-        SELECT
-          'decision' as type,
-          'immediate' as urgency,
-          p.name || ' - Decision Node pending' as title,
-          'Battle Rhythm Orchestrator' as source,
-          dn.decision_date as due_date
-        FROM decision_nodes dn
-        JOIN projects p ON dn.project_id = p.id
-        WHERE dn.decision_date = CURRENT_DATE
-        AND dn.outcome IS NULL
-      `);
+      const dashboardService = getPalantirDashboardService();
 
-      const criticalBlockers = await storage.db.query(`
-        SELECT
-          'blocker' as type,
-          'today' as urgency,
-          p.name || ' - ' || blocker->>'description' as title,
-          'TMO Agent' as source,
-          CURRENT_DATE as due_date
-        FROM projects p
-        CROSS JOIN LATERAL jsonb_array_elements(p.meta->'blockers') blocker
-        WHERE p.status = 'active'
-        AND blocker->>'severity' = 'critical'
-        AND blocker->>'resolved' = 'false'
-        LIMIT 5
-      `);
+      // Get data from Palantir (with PostgreSQL fallback)
+      const overview = await dashboardService.getDashboardOverview();
+      const safeData = await dashboardService.getSAFeData();
+      const risks = await dashboardService.getRisks();
 
-      const budgetRisks = await storage.db.query(`
-        SELECT
-          'risk' as type,
-          'this-week' as urgency,
-          p.name || ' - Budget overrun detected' as title,
-          'FinOps Agent' as source,
-          CURRENT_DATE + INTERVAL '2 days' as due_date
-        FROM projects p
-        WHERE p.status = 'active'
-        AND CAST(NULLIF(p.meta->>'cpi', '') AS NUMERIC) < 0.85
-        LIMIT 5
-      `);
+      const allActions: any[] = [];
 
-      // Combine all actions
-      const allActions = [
-        ...criticalDecisions.rows,
-        ...criticalBlockers.rows,
-        ...budgetRisks.rows
-      ];
+      // Critical budget risks (CPI < 0.85)
+      const budgetRisks = safeData.projects
+        .filter((p: any) => p.cpiValue && p.cpiValue < 0.85)
+        .slice(0, 5)
+        .map((p: any) => ({
+          type: 'risk',
+          urgency: 'today',
+          title: `${p.name} - Budget overrun detected (CPI: ${(p.cpiValue * 100).toFixed(0)}%)`,
+          source: 'FinOps Agent',
+          project_id: p.id,
+          metric: p.cpiValue,
+        }));
+      allActions.push(...budgetRisks);
+
+      // Schedule blockers (SPI < 0.85)
+      const scheduleBlockers = safeData.projects
+        .filter((p: any) => p.spiValue && p.spiValue < 0.85)
+        .slice(0, 5)
+        .map((p: any) => ({
+          type: 'blocker',
+          urgency: 'immediate',
+          title: `${p.name} - Schedule delay detected (SPI: ${(p.spiValue * 100).toFixed(0)}%)`,
+          source: 'TMO Agent',
+          project_id: p.id,
+          metric: p.spiValue,
+        }));
+      allActions.push(...scheduleBlockers);
+
+      // High/Critical risks requiring attention
+      const criticalRisks = risks
+        .filter((r: any) => r.severity === 'high' || r.severity === 'critical')
+        .slice(0, 5)
+        .map((r: any) => ({
+          type: 'risk',
+          urgency: r.severity === 'critical' ? 'immediate' : 'today',
+          title: `Risk: ${r.name || r.title}`,
+          source: 'Risk Agent',
+          risk_id: r.id,
+          severity: r.severity,
+        }));
+      allActions.push(...criticalRisks);
+
+      // Projects at critical health
+      if (overview.health.critical > 0) {
+        allActions.push({
+          type: 'alert',
+          urgency: 'immediate',
+          title: `${overview.health.critical} project(s) in critical status`,
+          source: 'PMO Agent',
+          count: overview.health.critical,
+        });
+      }
+
+      // Low flow efficiency items
+      const lowFlowProjects = safeData.projects
+        .filter((p: any) => p.flowEfficiency && parseInt(p.flowEfficiency) < 50)
+        .slice(0, 3)
+        .map((p: any) => ({
+          type: 'improvement',
+          urgency: 'this-week',
+          title: `${p.name} - Low flow efficiency (${p.flowEfficiency}%)`,
+          source: 'VRO Agent',
+          project_id: p.id,
+        }));
+      allActions.push(...lowFlowProjects);
 
       res.json({
         success: true,
+        source: overview.source,
         actionQueue: allActions,
         urgentCount: allActions.filter(a => a.urgency === 'immediate').length,
-        todayCount: allActions.filter(a => a.urgency === 'today').length
+        todayCount: allActions.filter(a => a.urgency === 'today').length,
+        thisWeekCount: allActions.filter(a => a.urgency === 'this-week').length,
+        totalCount: allActions.length,
+        timestamp: overview.timestamp,
       });
     } catch (error: any) {
       console.error("Error fetching action queue:", error);
@@ -271,49 +371,91 @@ export function createCOPRoutes(storage: IStorage): Router {
   // Get full COP (all three layers + action queue)
   router.get("/full", async (_req, res) => {
     try {
-      // Make parallel requests to all layers
-      const [strategicResult, operationalResult, tacticalResult, actionQueueResult] = await Promise.all([
-        storage.db.query(`
-          SELECT
-            COUNT(*) as total_projects,
-            COALESCE(AVG(CAST(NULLIF(meta->>'expected_roi', '') AS NUMERIC)), 0) as avg_roi
-          FROM projects
-          WHERE status IN ('active', 'planning', 'completed')
-        `),
-        storage.db.query(`
-          SELECT
-            COUNT(*) as total_active_projects,
-            COUNT(*) FILTER (WHERE meta->>'has_blockers' = 'true') as blocked_projects
-          FROM projects
-          WHERE status = 'active'
-        `),
-        storage.db.query(`
-          SELECT
-            COUNT(*) FILTER (WHERE status = 'active') as active_projects,
-            COALESCE(AVG(CAST(NULLIF(meta->>'sprint_velocity', '') AS NUMERIC)), 0) as avg_velocity
-          FROM projects
-          WHERE status = 'active'
-        `),
-        storage.db.query(`
-          SELECT COUNT(*) as urgent_actions
-          FROM decision_nodes
-          WHERE decision_date = CURRENT_DATE
-          AND outcome IS NULL
-        `)
-      ]);
+      const dashboardService = getPalantirDashboardService();
+
+      // Get all data from Palantir (with PostgreSQL fallback)
+      const overview = await dashboardService.getDashboardOverview();
+      const safeData = await dashboardService.getSAFeData();
+      const risks = await dashboardService.getRisks();
+      const kpis = await dashboardService.getKPIs();
+      const okrs = await dashboardService.getOKRs();
+
+      const activeProjects = safeData.projects.filter((p: any) =>
+        p.status?.toLowerCase().includes('progress') || p.status === 'active'
+      );
+
+      // Calculate all metrics
+      const avgVelocity = activeProjects.length > 0
+        ? activeProjects.reduce((sum: number, p: any) => sum + parseInt(p.velocity || '0'), 0) / activeProjects.length
+        : 0;
+
+      const totalPlannedValue = activeProjects.reduce((sum: number, p: any) =>
+        sum + (p.plannedValue || 0), 0);
+
+      const criticalActions = safeData.projects.filter((p: any) =>
+        (p.cpiValue && p.cpiValue < 0.85) || (p.spiValue && p.spiValue < 0.85)
+      ).length;
 
       res.json({
         success: true,
+        source: overview.source,
         cop: {
-          strategic: strategicResult.rows[0],
-          operational: operationalResult.rows[0],
-          tactical: tacticalResult.rows[0],
-          actionQueue: actionQueueResult.rows[0]
+          strategic: {
+            total_projects: overview.portfolio.totalProjects,
+            avg_roi: overview.portfolio.avgCPI * 100,
+            total_planned_value: totalPlannedValue,
+            health_score: overview.health.healthScore,
+          },
+          operational: {
+            total_active_projects: activeProjects.length,
+            blocked_projects: overview.health.critical,
+            at_risk_projects: overview.health.atRisk,
+            total_risks: risks.length,
+            high_risks: risks.filter((r: any) => r.severity === 'high' || r.severity === 'critical').length,
+          },
+          tactical: {
+            active_projects: activeProjects.length,
+            avg_velocity: Math.round(avgVelocity),
+            on_track: overview.health.onTrack,
+            total_features: safeData.features.length,
+            total_stories: safeData.stories.length,
+            total_tasks: safeData.tasks.length,
+          },
+          actionQueue: {
+            urgent_actions: criticalActions,
+            budget_alerts: safeData.projects.filter((p: any) => p.cpiValue && p.cpiValue < 0.85).length,
+            schedule_alerts: safeData.projects.filter((p: any) => p.spiValue && p.spiValue < 0.85).length,
+          },
         },
-        lastUpdated: new Date().toISOString()
+        metrics: {
+          kpis: kpis.length,
+          okrs: okrs.length,
+          value_streams: safeData.valueStreams.length,
+        },
+        lastUpdated: overview.timestamp,
       });
     } catch (error: any) {
       console.error("Error fetching full COP:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Health check endpoint
+  router.get("/status", async (_req, res) => {
+    try {
+      const dashboardService = getPalantirDashboardService();
+      const isPalantirAvailable = dashboardService.isPalantirAvailable();
+
+      res.json({
+        success: true,
+        status: 'operational',
+        palantirConnected: isPalantirAvailable,
+        dataSource: isPalantirAvailable ? 'palantir' : 'postgres',
+        message: isPalantirAvailable
+          ? 'COP using Palantir as source of truth'
+          : 'COP using PostgreSQL fallback',
+      });
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });

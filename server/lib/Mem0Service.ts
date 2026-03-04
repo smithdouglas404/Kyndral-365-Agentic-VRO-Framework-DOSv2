@@ -23,6 +23,7 @@ import { agentFacts, agentFactSubscriptions } from '../../shared/schema.js';
 import type { InsertAgentFact, AgentFact } from '../../shared/schema.js';
 import EventEmitter from 'events';
 import OpenAI from 'openai';
+import { getPalantirMemoryBridge, type AgentFact as BridgeFact } from '../services/PalantirMemoryBridge.js';
 
 export interface Fact {
   id: string;
@@ -114,6 +115,11 @@ export class Mem0Service extends EventEmitter {
     // TRIGGER ORCHESTRATOR: Memory change → Caching check → OpenRouter
     this.notifyOrchestratorOfChange(createdFact);
 
+    // SYNC TO PALANTIR: Write fact to Palantir ontology (async, non-blocking)
+    this.syncFactToPalantir(createdFact).catch(err => {
+      console.error(`[Mem0] Failed to sync fact to Palantir:`, err.message);
+    });
+
     return createdFact;
   }
 
@@ -147,6 +153,32 @@ export class Mem0Service extends EventEmitter {
     } catch (error: any) {
       // Don't throw - this is async enhancement
       console.error(`[Mem0] Semantic memory save failed:`, error.message);
+    }
+  }
+
+  /**
+   * Sync fact to Palantir ontology via PalantirMemoryBridge
+   * This enables facts to be visible in Palantir dashboards and integrated with the ontology
+   */
+  private async syncFactToPalantir(fact: Fact): Promise<void> {
+    try {
+      const bridge = getPalantirMemoryBridge();
+      const bridgeFact: BridgeFact = {
+        id: fact.id,
+        entity: fact.entity,
+        attribute: fact.attribute,
+        value: JSON.stringify(fact.value),
+        confidence: fact.confidence,
+        sourceAgentId: fact.sourceAgent,
+        timestamp: fact.timestamp,
+        metadata: {
+          supersedes: fact.supersedes,
+        },
+      };
+      await bridge.syncFact(bridgeFact);
+    } catch (error: any) {
+      // Don't throw - this is async enhancement
+      console.error(`[Mem0] Palantir sync failed:`, error.message);
     }
   }
 

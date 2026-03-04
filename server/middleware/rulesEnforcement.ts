@@ -1,12 +1,14 @@
 /**
  * RULES ENFORCEMENT MIDDLEWARE
  *
+ * SOURCE OF TRUTH: PALANTIR FOUNDRY
+ *
  * Intercepts entity create/update operations and enforces governance rules.
- * Hooks into the request lifecycle before database operations.
+ * Uses PalantirRulesEngine for evaluation and Palantir for audit logging.
  */
 
 import type { Request, Response, NextFunction } from 'express';
-import { enforceRules, hasPendingApproval } from '../services/rulesEngine';
+import { enforceRules, hasPendingApproval } from '../services/PalantirRulesEngine.js';
 
 /**
  * Middleware to enforce rules on entity operations

@@ -23,6 +23,7 @@ import { createAgentMemory, type LettaAgentMemory } from "../../lib/LettaAgentMe
 import { createMemoryManager, type MemoryManager } from "../../lib/MemoryManager.js";
 import { getSmartRouter, SmartModelRouter, ModelTier, type ProjectChangeEvent } from "../../lib/SmartModelRouter.js";
 import { OntologyDataProvider, type QueryOptions, type QueryFilter } from "../../services/OntologyDataProvider.js";
+import { PALANTIR_OBJECT_TYPES } from "../../constants/palantirOntology.js";
 import { getPalantirActionsService, type CreateInterventionParams, type CreateAlertParams } from "../../services/PalantirActionsService.js";
 type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
 
@@ -163,7 +164,7 @@ export abstract class DeepAgentBase {
    */
   protected async getProject(projectId: string): Promise<any | null> {
     try {
-      const result = await OntologyDataProvider.query('Project', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
         filters: [{ field: 'projectId', operator: 'eq', value: projectId }],
         pageSize: 1
       });
@@ -179,7 +180,7 @@ export abstract class DeepAgentBase {
    */
   protected async getProjects(options?: QueryOptions): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Project', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
         pageSize: 100,
         ...options
       });
@@ -196,7 +197,7 @@ export abstract class DeepAgentBase {
    */
   protected async getRisks(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Risk', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.RISK, {
         filters,
         pageSize: 100
       });
@@ -219,7 +220,8 @@ export abstract class DeepAgentBase {
    */
   protected async getBudgets(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Budget', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
+        // Budget data is on Project
         filters,
         pageSize: 100
       });
@@ -243,7 +245,7 @@ export abstract class DeepAgentBase {
    */
   protected async getObjectives(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Objective', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.OKR, {
         filters,
         pageSize: 100
       });
@@ -262,7 +264,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = objectiveId
         ? [{ field: 'objectiveId', operator: 'eq', value: objectiveId }]
         : [];
-      const result = await OntologyDataProvider.query('KeyResult', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.OKR, { // Key Results are part of OKR
         filters,
         pageSize: 100
       });
@@ -278,7 +280,7 @@ export abstract class DeepAgentBase {
    */
   protected async getMetrics(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Metric', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.KPI, {
         filters,
         pageSize: 100
       });
@@ -294,7 +296,7 @@ export abstract class DeepAgentBase {
    */
   protected async getTeams(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Team', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.TEAM, {
         filters,
         pageSize: 100
       });
@@ -313,7 +315,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'sourceProjectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('Dependency', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.DEPENDENCY, {
         filters,
         pageSize: 100
       });
@@ -332,7 +334,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('Milestone', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, { // Milestones tracked on Projects
         filters,
         pageSize: 100
       });
@@ -351,7 +353,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('ComplianceCheck', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.CHECKPOINT, {
         filters,
         pageSize: 100
       });
@@ -367,7 +369,7 @@ export abstract class DeepAgentBase {
    */
   protected async getChangeInitiatives(filters?: QueryFilter[]): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('ChangeInitiative', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, { // Change initiatives tracked as Projects
         filters,
         pageSize: 100
       });
@@ -412,7 +414,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('WorkItem', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, { // Work items are Projects
         filters,
         pageSize: 100
       });
@@ -451,7 +453,7 @@ export abstract class DeepAgentBase {
    */
   protected async getDivisionOkrs(divisionId: string): Promise<any[]> {
     try {
-      const result = await OntologyDataProvider.query('Objective', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.OKR, {
         filters: [{ field: 'businessUnitId', operator: 'eq', value: divisionId }],
         pageSize: 100
       });
@@ -470,7 +472,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('Issue', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.RISK, { // Issues tracked as Risks
         filters,
         pageSize: 100
       });
@@ -489,7 +491,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('ChangeRequest', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.INTERVENTION, { // Change requests tracked as Interventions
         filters,
         pageSize: 100
       });
@@ -508,7 +510,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query('ResourceAllocation', {
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, { // Resource allocations on Projects
         filters,
         pageSize: 100
       });
@@ -1443,7 +1445,7 @@ Reflect on this action.`;
 
       const recentMessages = context.history.length > 0
         ? context.history.map((msg: any) =>
-          `${msg._getType()}: ${msg.content}`
+          `${msg.role}: ${msg.content}`
         ).join('\n')
         : 'No recent conversation history';
 

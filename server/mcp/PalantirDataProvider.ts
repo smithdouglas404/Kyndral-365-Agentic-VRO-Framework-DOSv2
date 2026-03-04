@@ -236,9 +236,10 @@ export class PalantirDataProvider {
   }
 
   private isProjectLinkedType(objectType: string): boolean {
+    // AtlasDependency has sourceProjectId/targetProjectId, not projectId - handled separately
     return [
       'AtlasRisk', 'AtlasFinancialRecord', 'AtlasKpi',
-      'AtlasGovernanceCheckpoint', 'AtlasDependency',
+      'AtlasGovernanceCheckpoint',
     ].includes(objectType);
   }
 

@@ -67,9 +67,9 @@ const AGENT_OBJECT_PATTERNS: Record<string, RegExp[]> = {
   notification: [/alert/i, /notification/i, /insight/i, /risk/i, /person/i],
 };
 
-// External system field mappings
+// External system field mappings - use simple Palantir names
 const EXTERNAL_FIELD_MAPPINGS: Record<string, Record<string, Record<string, string>>> = {
-  AtlasProject: {
+  Project: {
     jira: {
       key: 'key',
       name: 'summary',
@@ -98,7 +98,7 @@ const EXTERNAL_FIELD_MAPPINGS: Record<string, Record<string, Record<string, stri
       assignee: 'column_values.person.text',
     },
   },
-  AtlasBudget: {
+  Budget: {
     jira: {
       projectKey: 'project.key',
       estimatedCost: 'customfield_budget',
@@ -109,7 +109,7 @@ const EXTERNAL_FIELD_MAPPINGS: Record<string, Record<string, Record<string, stri
       spent: 'column_values.spent.value',
     },
   },
-  AtlasRisk: {
+  Risk: {
     jira: {
       key: 'key',
       summary: 'summary',

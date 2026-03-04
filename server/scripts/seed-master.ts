@@ -390,7 +390,6 @@ async function seedIndustryProfiles() {
 
 async function seedDefaultRuleTemplates() {
   console.log('[Seed] Rule templates seeding skipped (future enhancement)');
-  
 }
 
 // ============================================================================
@@ -427,6 +426,9 @@ export async function runMasterSeed() {
 
     // Step 4: Agent Configs (depends on everything)
     await seedDefaultAgentConfigurations();
+
+    // NOTE: Palantir seeding is NOT done automatically on startup.
+    // Use POST /api/palantir/sync/full or run seed-palantir-defaults.ts manually.
 
     const duration = Date.now() - startTime;
 

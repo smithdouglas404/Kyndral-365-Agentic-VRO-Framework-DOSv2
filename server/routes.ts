@@ -86,6 +86,7 @@ import { registerDemoRoutes } from "./routes/demo.js";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
+import toolMappingRouter from "./routes/tool-mapping.js";
 import { registerWebhookRoutes } from "./webhookHandler";
 import { broadcastCriticalAlert, broadcastNotification } from "./websocket";
 import { isDemoMode } from "./lib/isDemoMode.js";
@@ -425,6 +426,9 @@ export async function registerRoutes(
   // Register Approval Center routes (HITL review for AI-generated content)
   registerApprovalCenterRoutes(app);
 
+  // Register Tool Mapping routes (Multi-tool PM integration: Jira, Monday, OpenProject)
+  app.use("/api/tools", toolMappingRouter);
+
   // Register Governance Enforcement routes (Rules engine, approval requests)
   registerGovernanceEnforcementRoutes(app);
 
@@ -617,9 +621,12 @@ export async function registerRoutes(
 
   app.get("/api/projects", async (_req, res) => {
     try {
-      const projects = await storage.getProjects();
-      res.json(projects);
+      // SOURCE OF TRUTH: PALANTIR
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      res.json(safeData.projects);
     } catch (error) {
+      console.error('Failed to fetch projects from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch projects" });
     }
   });
@@ -1270,75 +1277,99 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Full project with SAFe hierarchy
+  // Full project with SAFe hierarchy - FROM PALANTIR
   app.get("/api/projects/:id/full", async (req, res) => {
     try {
-      const fullProject = await storage.getFullProject(req.params.id);
-      if (!fullProject) {
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      const project = safeData.projects.find((p: any) => p.id === req.params.id || p.project_id === req.params.id);
+      if (!project) {
         return res.status(404).json({ error: "Project not found" });
       }
-      res.json(fullProject);
+      const features = safeData.features.filter((f: any) => f.project_id === req.params.id);
+      const stories = safeData.stories.filter((s: any) => s.project_id === req.params.id);
+      const tasks = safeData.tasks.filter((t: any) => t.project_id === req.params.id);
+      res.json({ ...project, features, stories, tasks });
     } catch (error) {
+      console.error('Failed to fetch full project from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch full project" });
     }
   });
 
-  // Features endpoints
+  // Features endpoints - FROM PALANTIR
   app.get("/api/projects/:id/features", async (req, res) => {
     try {
-      const projectFeatures = await storage.getFeatures(req.params.id);
-      res.json(projectFeatures);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      const features = safeData.features.filter((f: any) => f.project_id === req.params.id);
+      res.json(features);
     } catch (error) {
+      console.error('Failed to fetch features from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch features" });
     }
   });
 
-  // Stories endpoints
+  // Stories endpoints - FROM PALANTIR
   app.get("/api/projects/:id/stories", async (req, res) => {
     try {
-      const projectStories = await storage.getStoriesByProject(req.params.id);
-      res.json(projectStories);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      const stories = safeData.stories.filter((s: any) => s.project_id === req.params.id);
+      res.json(stories);
     } catch (error) {
+      console.error('Failed to fetch stories from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch stories" });
     }
   });
 
-  // Tasks endpoints
+  // Tasks endpoints - FROM PALANTIR
   app.get("/api/projects/:id/tasks", async (req, res) => {
     try {
-      const projectTasks = await storage.getTasksByProject(req.params.id);
-      res.json(projectTasks);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      const tasks = safeData.tasks.filter((t: any) => t.project_id === req.params.id);
+      res.json(tasks);
     } catch (error) {
+      console.error('Failed to fetch tasks from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch tasks" });
     }
   });
 
-  // Resources endpoints
+  // Resources endpoints - FROM PALANTIR (resources stored on projects)
   app.get("/api/projects/:id/resources", async (req, res) => {
     try {
-      const projectResources = await storage.getResources(req.params.id);
-      res.json(projectResources);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      const project = safeData.projects.find((p: any) => p.id === req.params.id || p.project_id === req.params.id);
+      res.json(project?.resources || []);
     } catch (error) {
+      console.error('Failed to fetch resources from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch resources" });
     }
   });
 
-  // Milestones endpoints
+  // Milestones endpoints - FROM PALANTIR (milestones stored on projects)
   app.get("/api/projects/:id/milestones", async (req, res) => {
     try {
-      const projectMilestones = await storage.getMilestones(req.params.id);
-      res.json(projectMilestones);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData();
+      const project = safeData.projects.find((p: any) => p.id === req.params.id || p.project_id === req.params.id);
+      res.json(project?.milestones || []);
     } catch (error) {
+      console.error('Failed to fetch milestones from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch milestones" });
     }
   });
 
-  // Risks endpoints
+  // Risks endpoints - FROM PALANTIR
   app.get("/api/projects/:id/risks", async (req, res) => {
     try {
-      const projectRisks = await storage.getRisks(req.params.id);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const risks = await dashboardService.getRisks();
+      const projectRisks = risks.filter((r: any) => r.project_id === req.params.id);
       res.json(projectRisks);
     } catch (error) {
+      console.error('Failed to fetch risks from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch risks" });
     }
   });
@@ -2230,32 +2261,34 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // OKR endpoints
+  // OKR endpoints - SOURCE OF TRUTH: PALANTIR
   app.get("/api/okrs", async (req, res) => {
     try {
       const { businessUnitId } = req.query;
-      const allOkrs = await storage.getOkrsWithKeyResults();
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const allOkrs = await dashboardService.getOKRs();
       if (businessUnitId) {
-        const filtered = allOkrs.filter(o => o.businessUnitId === businessUnitId);
+        const filtered = allOkrs.filter((o: any) => o.businessUnitId === businessUnitId || o.division_id === businessUnitId);
         return res.json({ okrs: filtered });
       }
       res.json({ okrs: allOkrs });
     } catch (error: any) {
-      console.error("Get OKRs error:", error);
+      console.error("Get OKRs from Palantir error:", error);
       res.status(500).json({ error: "Failed to get OKRs" });
     }
   });
 
   app.get("/api/okrs/:id", async (req, res) => {
     try {
-      const okr = await storage.getOkr(req.params.id);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const allOkrs = await dashboardService.getOKRs();
+      const okr = allOkrs.find((o: any) => o.id === req.params.id || o.objective_id === req.params.id);
       if (!okr) {
         return res.status(404).json({ error: "OKR not found" });
       }
-      const keyResultsList = await storage.getKeyResults(req.params.id);
-      res.json({ okr: { ...okr, keyResults: keyResultsList } });
+      res.json({ okr });
     } catch (error: any) {
-      console.error("Get OKR error:", error);
+      console.error("Get OKR from Palantir error:", error);
       res.status(500).json({ error: "Failed to get OKR" });
     }
   });
@@ -2281,17 +2314,21 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // KPI endpoints
+  // KPI endpoints - SOURCE OF TRUTH: PALANTIR
   app.get("/api/kpis", async (req, res) => {
     try {
       const { projectId, businessUnitId } = req.query;
-      const allKpis = await storage.getKpis(
-        projectId as string | undefined, 
-        businessUnitId as string | undefined
-      );
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      let allKpis = await dashboardService.getKPIs();
+      if (projectId) {
+        allKpis = allKpis.filter((k: any) => k.project_id === projectId);
+      }
+      if (businessUnitId) {
+        allKpis = allKpis.filter((k: any) => k.division_id === businessUnitId || k.businessUnitId === businessUnitId);
+      }
       res.json({ kpis: allKpis });
     } catch (error: any) {
-      console.error("Get KPIs error:", error);
+      console.error("Get KPIs from Palantir error:", error);
       res.status(500).json({ error: "Failed to get KPIs" });
     }
   });
@@ -3036,73 +3073,92 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
   // DIVISIONS API - Enterprise Business Segments (DB-backed)
   // ============================================================================
   
+  // DIVISIONS - SOURCE OF TRUTH: PALANTIR
   app.get("/api/divisions", async (_req, res) => {
     try {
-      const allDivisions = await storage.getDivisions();
-      res.json(allDivisions);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const overview = await dashboardService.getDashboardOverview();
+      res.json(overview.divisions || []);
     } catch (error: any) {
-      console.error("Get divisions error:", error);
+      console.error("Get divisions from Palantir error:", error);
       res.status(500).json({ error: "Failed to get divisions" });
     }
   });
 
   app.get("/api/divisions/:id", async (req, res) => {
     try {
-      const resolvedId = await resolveDivisionIdAsync(req.params.id);
-      const division = await storage.getDivision(resolvedId);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const overview = await dashboardService.getDashboardOverview();
+      const division = (overview.divisions || []).find((d: any) =>
+        d.id === req.params.id || d.division_id === req.params.id
+      );
       if (!division) {
         return res.status(404).json({ error: "Division not found" });
       }
       res.json(division);
     } catch (error: any) {
-      console.error("Get division error:", error);
+      console.error("Get division from Palantir error:", error);
       res.status(500).json({ error: "Failed to get division" });
     }
   });
 
   app.get("/api/divisions/:id/full", async (req, res) => {
     try {
-      const resolvedId = await resolveDivisionIdAsync(req.params.id);
-      const fullDivision = await storage.getFullDivision(resolvedId);
-      if (!fullDivision) {
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const safeData = await dashboardService.getSAFeData(req.params.id);
+      const overview = await dashboardService.getDashboardOverview();
+      const division = (overview.divisions || []).find((d: any) =>
+        d.id === req.params.id || d.division_id === req.params.id
+      );
+      if (!division) {
         return res.status(404).json({ error: "Division not found" });
       }
-      res.json(fullDivision);
+      res.json({
+        ...division,
+        projects: safeData.projects,
+        features: safeData.features,
+        kpis: await dashboardService.getKPIs(),
+        okrs: await dashboardService.getOKRs(),
+        risks: await dashboardService.getRisks(),
+      });
     } catch (error: any) {
-      console.error("Get full division error:", error);
+      console.error("Get full division from Palantir error:", error);
       res.status(500).json({ error: "Failed to get full division" });
     }
   });
 
   app.get("/api/divisions/:id/kpis", async (req, res) => {
     try {
-      const resolvedId = await resolveDivisionIdAsync(req.params.id);
-      const kpis = await storage.getDivisionKpis(resolvedId);
-      res.json(kpis);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const kpis = await dashboardService.getKPIs();
+      const divisionKpis = kpis.filter((k: any) => k.division_id === req.params.id);
+      res.json(divisionKpis);
     } catch (error: any) {
-      console.error("Get division KPIs error:", error);
+      console.error("Get division KPIs from Palantir error:", error);
       res.status(500).json({ error: "Failed to get division KPIs" });
     }
   });
 
   app.get("/api/divisions/:id/okrs", async (req, res) => {
     try {
-      const resolvedId = await resolveDivisionIdAsync(req.params.id);
-      const okrs = await storage.getDivisionOkrs(resolvedId);
-      res.json(okrs);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const okrs = await dashboardService.getOKRs();
+      const divisionOkrs = okrs.filter((o: any) => o.division_id === req.params.id);
+      res.json(divisionOkrs);
     } catch (error: any) {
-      console.error("Get division OKRs error:", error);
+      console.error("Get division OKRs from Palantir error:", error);
       res.status(500).json({ error: "Failed to get division OKRs" });
     }
   });
 
   app.get("/api/divisions/:id/risks", async (req, res) => {
     try {
-      const resolvedId = await resolveDivisionIdAsync(req.params.id);
-      const risks = await storage.getDivisionRisks(resolvedId);
-      res.json(risks);
+      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
+      const risks = await dashboardService.getRisks();
+      const divisionRisks = risks.filter((r: any) => r.division_id === req.params.id);
+      res.json(divisionRisks);
     } catch (error: any) {
-      console.error("Get division risks error:", error);
+      console.error("Get division risks from Palantir error:", error);
       res.status(500).json({ error: "Failed to get division risks" });
     }
   });

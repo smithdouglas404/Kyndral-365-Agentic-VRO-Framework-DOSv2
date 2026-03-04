@@ -15,6 +15,7 @@
 
 import { PalantirAIPService, PalantirSearchFilter } from '../mcp/PalantirAIPService';
 import { OntologySchemaService } from './OntologySchemaService';
+import { PALANTIR_ACTIONS, PALANTIR_OBJECT_TYPES } from '../constants/palantirOntology.js';
 import { db } from '../db';
 import { integrations, projects, syncLogs } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -740,19 +741,39 @@ class PalantirSyncServiceClass {
       throw new Error('Palantir service not initialized');
     }
 
-    // Try to use a Palantir Action for upsert if available
-    // Otherwise fall back to direct object operations
-    try {
-      await this.palantirService.applyAction(`upsert${objectType}`, {
-        objectData: data,
-      });
-    } catch (err: any) {
-      // If action doesn't exist, log warning
-      // In production, you'd need the appropriate Palantir actions configured
-      console.warn(`[PalantirSync] Upsert action not available for ${objectType}, data prepared but not sent: ${data.id}`);
+    // Map objectType to the correct Palantir action from constants
+    const actionMap: Record<string, string> = {
+      'Project': PALANTIR_ACTIONS.CREATE_PROJECT,
+      'AtlasProject': PALANTIR_ACTIONS.CREATE_PROJECT,
+      'Risk': PALANTIR_ACTIONS.CREATE_RISK,
+      'AtlasRisk': PALANTIR_ACTIONS.CREATE_RISK,
+      'KPI': PALANTIR_ACTIONS.CREATE_KPI,
+      'AtlasKpi': PALANTIR_ACTIONS.CREATE_KPI,
+      'Objective': PALANTIR_ACTIONS.CREATE_OBJECTIVE,
+      'OKR': PALANTIR_ACTIONS.CREATE_OBJECTIVE,
+      'AtlasObjective': PALANTIR_ACTIONS.CREATE_OBJECTIVE,
+      'Transformation': PALANTIR_ACTIONS.CREATE_TRANSFORMATION,
+      'Division': PALANTIR_ACTIONS.CREATE_TRANSFORMATION,
+      'AtlasTransformation': PALANTIR_ACTIONS.CREATE_TRANSFORMATION,
+      'Insight': PALANTIR_ACTIONS.CREATE_INSIGHT,
+      'Feature': PALANTIR_ACTIONS.CREATE_INSIGHT,
+      'AtlasInsight': PALANTIR_ACTIONS.CREATE_INSIGHT,
+      'Dependency': PALANTIR_ACTIONS.CREATE_DEPENDENCY,
+      'AtlasDependency': PALANTIR_ACTIONS.CREATE_DEPENDENCY,
+    };
 
-      // Store in local DB as fallback (for demo purposes)
-      await this.storeLocally(objectType, data);
+    const actionName = actionMap[objectType];
+    if (!actionName) {
+      console.warn(`[PalantirSync] No action mapping for objectType: ${objectType}`);
+      return;
+    }
+
+    try {
+      await this.palantirService.applyAction(actionName, data);
+      console.log(`[PalantirSync] ✓ Synced ${objectType} ${data.project_id || data.id} to Palantir`);
+    } catch (err: any) {
+      console.error(`[PalantirSync] ✗ Failed to sync ${objectType}: ${err.message}`);
+      throw err;
     }
   }
 

@@ -3,10 +3,16 @@
  *
  * Exposes Agent-to-Agent messaging operations to Langflow flows.
  * Allows flows to send messages between agents using the A2A bus.
+ *
+ * PALANTIR INTEGRATION:
+ * Critical messages (alerts, approvals, high/critical severity) are synced
+ * to Palantir for audit trail and dashboard visibility.
  */
 
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import type { AgentMessage } from '../agents/ContinuousOrchestrator.js';
+import { getPalantirMemoryBridge, type A2AMessage } from '../services/PalantirMemoryBridge.js';
 
 const router = express.Router();
 
@@ -70,6 +76,31 @@ router.post('/send', async (req, res) => {
     await a2aBus.send(message);
 
     console.log(`[A2AAPI] Message sent: ${from} → ${to} (${type})`);
+
+    // SYNC TO PALANTIR: Critical messages for audit trail and dashboard visibility
+    const shouldSyncToPalantir =
+      requiresApproval ||
+      severity === 'high' ||
+      severity === 'critical' ||
+      type === 'alert' ||
+      type === 'action';
+
+    if (shouldSyncToPalantir) {
+      const bridge = getPalantirMemoryBridge();
+      const a2aMessage: A2AMessage = {
+        id: uuidv4(),
+        fromAgentId: from,
+        toAgentId: to,
+        type: type as any,
+        content,
+        severity: severity as any,
+        requiresApproval,
+        timestamp: new Date(),
+      };
+      bridge.syncA2AMessage(a2aMessage).catch(err => {
+        console.error('[A2AAPI] Failed to sync to Palantir:', err.message);
+      });
+    }
 
     res.json({
       success: true,
@@ -135,6 +166,31 @@ router.post('/broadcast', async (req, res) => {
 
     console.log(`[A2AAPI] Broadcast: ${from} → ${recipients.join(', ')} (${type})`);
 
+    // SYNC TO PALANTIR: Broadcasts are typically important - sync critical ones
+    const shouldSyncToPalantir =
+      severity === 'high' ||
+      severity === 'critical' ||
+      type === 'alert' ||
+      type === 'action';
+
+    if (shouldSyncToPalantir) {
+      const bridge = getPalantirMemoryBridge();
+      // Sync as a single broadcast message
+      const a2aMessage: A2AMessage = {
+        id: uuidv4(),
+        fromAgentId: from,
+        toAgentId: `broadcast:${recipients.join(',')}`,
+        type: type as any,
+        content,
+        severity: severity as any,
+        requiresApproval: false,
+        timestamp: new Date(),
+      };
+      bridge.syncA2AMessage(a2aMessage).catch(err => {
+        console.error('[A2AAPI] Failed to sync broadcast to Palantir:', err.message);
+      });
+    }
+
     res.json({
       success: true,
       broadcast: {
@@ -177,6 +233,50 @@ router.get('/status', async (req, res) => {
     });
   } catch (error: any) {
     console.error('[A2AAPI] Error getting status:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get Palantir Memory Bridge sync status
+ * GET /api/a2a/palantir-sync-status
+ */
+router.get('/palantir-sync-status', async (req, res) => {
+  try {
+    const bridge = getPalantirMemoryBridge();
+    const status = bridge.getStatus();
+
+    res.json({
+      success: true,
+      syncStatus: status
+    });
+  } catch (error: any) {
+    console.error('[A2AAPI] Error getting Palantir sync status:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Force flush pending Palantir syncs
+ * POST /api/a2a/palantir-sync-flush
+ */
+router.post('/palantir-sync-flush', async (req, res) => {
+  try {
+    const bridge = getPalantirMemoryBridge();
+    await bridge.flush();
+
+    res.json({
+      success: true,
+      message: 'Palantir sync queue flushed'
+    });
+  } catch (error: any) {
+    console.error('[A2AAPI] Error flushing Palantir sync:', error.message);
     res.status(500).json({
       success: false,
       error: error.message

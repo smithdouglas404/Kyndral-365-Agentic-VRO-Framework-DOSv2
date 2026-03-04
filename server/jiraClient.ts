@@ -99,10 +99,13 @@ export class JiraClient {
     }
     jql += ' ORDER BY created DESC';
 
+    // Use new search/jql endpoint with fields parameter
+    const fields = 'summary,description,issuetype,status,priority,assignee,reporter,created,updated,parent,subtasks,customfield_10016';
     const response = await this.request<{ issues: JiraIssue[] }>(
-      `/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&expand=names`
+      `/search/jql?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=${fields}`,
+      { method: 'GET' }
     );
-    return response.issues;
+    return response.issues || [];
   }
 
   async getEpics(projectKey: string): Promise<JiraIssue[]> {

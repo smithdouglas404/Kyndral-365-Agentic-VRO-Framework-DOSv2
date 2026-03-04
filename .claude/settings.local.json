@@ -116,7 +116,32 @@
       "Bash(source .env)",
       "Bash(git -C /home/runner/workspace log --oneline)",
       "Bash(timeout 120 npx vite build:*)",
-      "Bash(gh auth status:*)"
+      "Bash(gh auth status:*)",
+      "Bash(head -15 __NEW_LINE_511b21d88594c9f4__ echo \"\" echo \"=== Agent Activity \\(last 20 lines\\) ===\" tail -20 /tmp/server.log)",
+      "Bash(jq:*)",
+      "Bash(head -20 git log --all --oneline --diff-filter=A -- *.ts)",
+      "Bash(head:*)",
+      "Bash(npm search:*)",
+      "Bash(source /home/runner/workspace/.env)",
+      "WebFetch(domain:www.palantir.com)",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_c33146abfc91b53b__ echo \"=== Checking AtlasProject datasource/backing ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objectTypes/AtlasProject/fullMetadata\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\")",
+      "Bash(HOST=\"https://ssg.usw-17.palantirfoundry.com\")",
+      "Bash(ONT_RID=\"$PALANTIR_ONTOLOGY_RID\")",
+      "Bash(__NEW_LINE_c2bbda0ea5605d0a__ echo \"=== Getting AtlasProject full metadata ===\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" __NEW_LINE_e87f0508a0735e6e__ echo \"=== Searching for datasets ===\" __NEW_LINE_e87f0508a0735e6e__ echo -e \"\\\\n1. List datasets\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/datasets\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" __NEW_LINE_9b483233f53c32cf__ echo \"=== Finding datasources ===\" __NEW_LINE_9b483233f53c32cf__ echo -e \"\\\\n1. GET /api/v2/datasets \\(with pageSize\\)\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/datasets?pageSize=50\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_a91e6817d1360fee__ echo \"=== Direct check for AtlasDivision ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objectTypes/AtlasDivision\" 2)",
+      "Bash(1 __NEW_LINE_a91e6817d1360fee__ echo -e \"\\\\n\\\\n=== List all object types \\(fresh\\) ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objectTypes?pageSize=50\")",
+      "Bash(__NEW_LINE_44ca3a0c8eace50b__ echo \"=== Checking for AtlasDivision ===\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_b801211da26b7acb__ echo \"=== Get create-atlas-division action details ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/actionTypes/create-atlas-division\")",
+      "Bash(__NEW_LINE_1eb9bd6e19e9f208__ curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/actionTypes/create-atlas-division\")",
+      "Bash(__NEW_LINE_82f8c9301e5f67fc__ curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objects/AtlasDivision?pageSize=10\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_a2df2a5003ad6e0d__ echo \"=== Check AtlasDivision primary key ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objectTypes/AtlasDivision\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_488ce8eeefa6d5ca__ echo \"=== AtlasDivision object type ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objectTypes/AtlasDivision\")",
+      "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_894ae055825371fe__ echo \"=== Try to update action with primaryKey_ parameter ===\" curl -s -X PATCH -w \"\\\\nStatus: %{http_code}\" -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" \"$HOST/api/v2/ontologies/$ONT_RID/actionTypes/create-atlas-division\" -d '{\n    \"\"\"\"parameters\"\"\"\": {\n      \"\"\"\"primaryKey_\"\"\"\": {\n        \"\"\"\"displayName\"\"\"\": \"\"\"\"Primary Key\"\"\"\",\n        \"\"\"\"dataType\"\"\"\": {\"\"\"\"type\"\"\"\": \"\"\"\"string\"\"\"\"},\n        \"\"\"\"required\"\"\"\": true\n      }\n    }\n  }')",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)"
     ]
   }
 }

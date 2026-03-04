@@ -312,9 +312,9 @@ async function executeSyncJob(jobId: string): Promise<void> {
         }
         
         const result = await client.syncProject(projectGid, job.mcpAdapterId);
-        recordsCreated = (result.projectsCreated || 0) + 
-                        (result.featuresCreated || 0) + 
-                        (result.storiesCreated || 0) + 
+        recordsCreated = (result.projectsCreated || 0) +
+                        (result.featuresCreated || 0) +
+                        (result.storiesCreated || 0) +
                         (result.tasksCreated || 0);
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;

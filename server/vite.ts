@@ -11,7 +11,7 @@ const viteLogger = createLogger();
 export async function setupVite(server: Server, app: Express) {
   const serverOptions = {
     middlewareMode: true,
-    hmr: { server },
+    hmr: false,
     allowedHosts: true as const,
   };
 
@@ -22,17 +22,29 @@ export async function setupVite(server: Server, app: Express) {
       ...viteLogger,
       error: (msg, options) => {
         viteLogger.error(msg, options);
-        process.exit(1);
       },
     },
     server: serverOptions,
     appType: "custom",
   });
 
-  app.use(vite.middlewares);
+  // Wrap Vite middleware to skip API routes
+  app.use((req, res, next) => {
+    // Skip Vite middleware for API routes
+    if (req.url?.startsWith("/api/")) {
+      return next();
+    }
+    vite.middlewares(req, res, next);
+  });
 
-  app.use("*", async (req, res, next) => {
+  // SPA fallback - only for GET requests and non-API routes
+  app.get("*", async (req, res, next) => {
     const url = req.originalUrl;
+
+    // Skip API routes - let them 404 properly
+    if (url.startsWith("/api/")) {
+      return next();
+    }
 
     try {
       const clientTemplate = path.resolve(

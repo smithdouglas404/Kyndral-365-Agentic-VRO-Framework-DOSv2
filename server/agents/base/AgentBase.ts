@@ -240,6 +240,146 @@ After tool results, continue reasoning. When done, provide your final answer.`;
     }
   }
 
+  // ============================================================================
+  // PALANTIR WIDGET UPDATE - Agents can update their own dashboards
+  // ============================================================================
+
+  /**
+   * Update a widget in Palantir via the LLM Bridge
+   * This allows agents to update their dashboard widgets without predefined actions
+   */
+  protected async updateWidget(widgetData: {
+    widgetId: string;
+    title: string;
+    type: 'metric' | 'chart' | 'list' | 'status' | 'insight';
+    data: any;
+    metadata?: Record<string, any>;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const { getPalantirLLMBridge } = await import('../../services/PalantirLLMBridge.js');
+      const bridge = await getPalantirLLMBridge();
+
+      const result = await bridge.agentUpdateData(this.config.agentId, 'widget', {
+        widgetId: widgetData.widgetId,
+        title: widgetData.title,
+        type: widgetData.type,
+        data: widgetData.data,
+        metadata: widgetData.metadata,
+        updatedBy: this.config.agentName,
+        updatedAt: new Date().toISOString(),
+      });
+
+      if (result.success) {
+        console.log(`[${this.config.agentName}] ✅ Updated widget: ${widgetData.widgetId}`);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Widget update failed:`, error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * Publish a metric to Palantir
+   */
+  protected async publishMetric(metric: {
+    name: string;
+    value: number | string;
+    unit?: string;
+    trend?: 'up' | 'down' | 'stable';
+    status?: 'good' | 'warning' | 'critical';
+    context?: Record<string, any>;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const { getPalantirLLMBridge } = await import('../../services/PalantirLLMBridge.js');
+      const bridge = await getPalantirLLMBridge();
+
+      const result = await bridge.agentUpdateData(this.config.agentId, 'metric', {
+        metricName: metric.name,
+        value: metric.value,
+        unit: metric.unit,
+        trend: metric.trend,
+        status: metric.status,
+        context: metric.context,
+        publishedBy: this.config.agentName,
+        publishedAt: new Date().toISOString(),
+      });
+
+      if (result.success) {
+        console.log(`[${this.config.agentName}] 📊 Published metric: ${metric.name} = ${metric.value}`);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Metric publish failed:`, error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * Publish an insight to Palantir
+   */
+  protected async publishInsight(insight: {
+    title: string;
+    description: string;
+    severity: 'info' | 'warning' | 'critical';
+    category: string;
+    recommendations?: string[];
+    relatedEntities?: string[];
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const { getPalantirLLMBridge } = await import('../../services/PalantirLLMBridge.js');
+      const bridge = await getPalantirLLMBridge();
+
+      const result = await bridge.agentUpdateData(this.config.agentId, 'insight', {
+        ...insight,
+        publishedBy: this.config.agentName,
+        publishedAt: new Date().toISOString(),
+      });
+
+      if (result.success) {
+        console.log(`[${this.config.agentName}] 💡 Published insight: ${insight.title}`);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Insight publish failed:`, error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * Send an alert to Palantir
+   */
+  protected async sendAlert(alert: {
+    title: string;
+    message: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    entityId?: string;
+    actions?: Array<{ label: string; action: string }>;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const { getPalantirLLMBridge } = await import('../../services/PalantirLLMBridge.js');
+      const bridge = await getPalantirLLMBridge();
+
+      const result = await bridge.agentUpdateData(this.config.agentId, 'alert', {
+        ...alert,
+        sentBy: this.config.agentName,
+        sentAt: new Date().toISOString(),
+      });
+
+      if (result.success) {
+        console.log(`[${this.config.agentName}] 🚨 Sent alert: ${alert.title} (${alert.severity})`);
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error(`[${this.config.agentName}] Alert send failed:`, error);
+      return { success: false, message: error.message };
+    }
+  }
+
   getConfig(): AgentConfig {
     return this.config;
   }

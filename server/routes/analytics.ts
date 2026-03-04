@@ -1,9 +1,15 @@
 /**
  * ANALYTICS ENGINE API ROUTES
+ *
+ * SOURCE OF TRUTH: PALANTIR FOUNDRY
+ *
  * Exposes the three major analytics engines to the UI:
  * - Predictive Analytics Engine
  * - Cross-Project Impact Engine
  * - Financial Calculation Engine
+ *
+ * All data reads go through PalantirStorageAdapter which prioritizes
+ * Palantir Foundry as the source of truth.
  */
 
 import type { Express, Request, Response } from 'express';
@@ -11,11 +17,15 @@ import type { IStorage } from '../storage.js';
 import { PredictiveAnalyticsEngine } from '../engines/PredictiveAnalyticsEngine.js';
 import { CrossProjectImpactEngine } from '../engines/CrossProjectImpactEngine.js';
 import { FinancialCalculationEngine } from '../engines/FinancialCalculationEngine.js';
+import { getPalantirStorageAdapter } from '../services/PalantirStorageAdapter.js';
 
 export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
-  const predictiveEngine = new PredictiveAnalyticsEngine(storage);
-  const impactEngine = new CrossProjectImpactEngine(storage);
-  const financialEngine = new FinancialCalculationEngine(storage);
+  // Wrap storage with Palantir adapter - reads from Palantir, writes to PostgreSQL
+  const palantirStorage = getPalantirStorageAdapter(storage);
+
+  const predictiveEngine = new PredictiveAnalyticsEngine(palantirStorage);
+  const impactEngine = new CrossProjectImpactEngine(palantirStorage);
+  const financialEngine = new FinancialCalculationEngine(palantirStorage);
 
   /**
    * PREDICTIVE ANALYTICS ENGINE
@@ -31,8 +41,8 @@ export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
       if (projectIds && typeof projectIds === 'string') {
         projectsToAnalyze = projectIds.split(',');
       } else {
-        // Get all active projects
-        const allProjects = await storage.getProjects();
+        // Get all active projects from Palantir
+        const allProjects = await palantirStorage.getProjects();
         projectsToAnalyze = allProjects
           .filter(p => p.status === 'active')
           .map(p => p.id);
@@ -128,7 +138,7 @@ export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
       if (projectIds && typeof projectIds === 'string') {
         projectsToAnalyze = projectIds.split(',');
       } else {
-        const allProjects = await storage.getProjects();
+        const allProjects = await palantirStorage.getProjects();
         projectsToAnalyze = allProjects
           .filter(p => p.status === 'active')
           .map(p => p.id);
@@ -174,9 +184,9 @@ export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
       const { portfolioId, criticality } = req.query;
 
       // Get all projects and their dependencies
-      const allProjects = await storage.getProjects();
+      const allProjects = await palantirStorage.getProjects();
       const allDependenciesArrays = await Promise.all(
-        allProjects.map(p => storage.getDependencies(p.id))
+        allProjects.map(p => palantirStorage.getDependencies(p.id))
       );
       const dependencies = allDependenciesArrays.flat();
 
@@ -184,7 +194,7 @@ export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
 
       // Filter by portfolio if specified
       if (portfolioId && typeof portfolioId === 'string') {
-        const portfolioProjects = await storage.getProjectsByPortfolio(portfolioId);
+        const portfolioProjects = await palantirStorage.getProjectsByPortfolio(portfolioId);
         const projectIds = new Set(portfolioProjects.map(p => p.id));
         filtered = filtered.filter(
           d => projectIds.has(d.sourceProjectId) || projectIds.has(d.targetProjectId)
@@ -280,10 +290,10 @@ export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
       let projectIds: string[];
 
       if (portfolioId && typeof portfolioId === 'string') {
-        const projects = await storage.getProjectsByPortfolio(portfolioId);
+        const projects = await palantirStorage.getProjectsByPortfolio(portfolioId);
         projectIds = projects.map(p => p.id);
       } else {
-        const allProjects = await storage.getProjects();
+        const allProjects = await palantirStorage.getProjects();
         projectIds = allProjects.filter(p => p.status === 'active').map(p => p.id);
       }
 
@@ -316,11 +326,11 @@ export function registerAnalyticsRoutes(app: Express, storage: IStorage) {
       let projects;
 
       if (portfolioId && typeof portfolioId === 'string') {
-        projects = await storage.getProjectsByPortfolio(portfolioId);
+        projects = await palantirStorage.getProjectsByPortfolio(portfolioId);
       } else if (businessUnitId && typeof businessUnitId === 'string') {
-        projects = await storage.getProjectsByBusinessUnit(businessUnitId);
+        projects = await palantirStorage.getProjectsByBusinessUnit(businessUnitId);
       } else {
-        projects = await storage.getProjects();
+        projects = await palantirStorage.getProjects();
       }
 
       // Calculate EVM metrics for each project and aggregate
