@@ -28,6 +28,7 @@ import {
 } from "./lib/processManager.js";
 import { registerHealthRoutes, trackRequestMetrics } from "./routes/health.js";
 import { configureSecurityHeaders } from "./auth/securityMiddleware.js";
+import { serverReadyService } from "./services/ServerReadyService.js";
 
 // Export agent scheduler instance (initialized after server starts)
 export let agentScheduler: AgentScheduler | null = null;
@@ -113,7 +114,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Database is connected at this point (via storage import)
+  serverReadyService.setDbConnected();
+
   await registerRoutes(httpServer, app);
+  serverReadyService.setRoutesRegistered();
 
   // Backfill orphan strategic themes with portfolio linkage
   try {
@@ -130,8 +135,11 @@ app.use((req, res, next) => {
     const { runMasterSeed } = await import('./scripts/seed-master.js');
     await runMasterSeed();
     log('[Seed] ✅ Master seed completed - System fully initialized');
+    serverReadyService.setSeedsComplete();
   } catch (e: any) {
     log(`[Seed] Master seed skipped: ${e.message}`);
+    // Seeds are optional, still mark as complete to unblock orchestrator
+    serverReadyService.setSeedsComplete();
   }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -155,14 +163,17 @@ app.use((req, res, next) => {
     },
     async () => {
       log(`serving on port ${port}`);
+      serverReadyService.setPortBound();
 
       // Setup Vite AFTER port binding so the workflow monitor sees the port quickly
       if (process.env.NODE_ENV === "production") {
         serveStatic(app);
+        serverReadyService.setViteReady(); // Static serving ready
       } else {
         const { setupVite } = await import("./vite");
         await setupVite(httpServer, app);
         log("Vite dev server ready");
+        serverReadyService.setViteReady();
       }
 
       // ===================================================================
@@ -194,6 +205,7 @@ app.use((req, res, next) => {
       log("🔌 Initializing MCP Services...");
       initializeMCPServices();
       log("✅ MCP Services initialized - Real API integrations ready");
+      serverReadyService.setMcpReady();
 
       // ===================================================================
       // Initialize Palantir Ontology Services (ONTOLOGY-FIRST ARCHITECTURE)
@@ -287,6 +299,8 @@ app.use((req, res, next) => {
       // Start memory monitoring (warn if >512MB heap usage)
       startMemoryMonitoring(512, 60000);
 
+      // Log server ready state for orchestrator
+      serverReadyService.logState();
       logger.info("🚀 Server fully initialized with process management");
     },
   );

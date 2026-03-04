@@ -23,6 +23,9 @@ import { broadcastCriticalAlert, broadcastNotification, broadcastAgentInsight } 
 import { MCP_SERVER_REGISTRY } from '../mcp/MCPServerRegistry.js';
 import { getPalantirDataProvider } from '../mcp/PalantirDataProvider.js';
 import { getPalantirRulesService, type RuleResult } from '../lib/PalantirRulesService.js';
+import { serverReadyService } from '../services/ServerReadyService.js';
+import { memoryMonitorService } from '../services/MemoryMonitorService.js';
+import { getSettings } from '../services/OrchestratorConfig.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -814,6 +817,11 @@ export class ContinuousOrchestrator {
 
   /**
    * Start 24x7 continuous orchestration
+   *
+   * SAFEGUARDS:
+   * - Waits for server to be fully ready before starting
+   * - Applies configurable startup delay (default: 60s)
+   * - Checks memory before each cycle
    */
   async start(intervalMs: number = 600000): Promise<void> {
     if (this.isRunning) {
@@ -821,17 +829,54 @@ export class ContinuousOrchestrator {
       return;
     }
 
-    this.isRunning = true;
+    const settings = getSettings();
     console.log(`[ContinuousOrchestrator] Starting 24x7 coordination (interval: ${intervalMs}ms)`);
+    console.log(`[ContinuousOrchestrator] Startup delay: ${settings.startupDelayMs}ms, Memory threshold: ${settings.memoryThresholdPercent}%`);
+
+    // SAFEGUARD 1: Wait for server to be fully ready
+    console.log('[ContinuousOrchestrator] Waiting for server to be ready...');
+    const serverReady = await serverReadyService.waitForReady(120000);
+    if (!serverReady) {
+      console.error('[ContinuousOrchestrator] Server did not become ready in time, aborting startup');
+      return;
+    }
+    console.log('[ContinuousOrchestrator] Server ready confirmed');
+
+    // SAFEGUARD 2: Apply startup delay to let server stabilize
+    console.log(`[ContinuousOrchestrator] Applying ${settings.startupDelayMs}ms startup delay...`);
+    await new Promise(resolve => setTimeout(resolve, settings.startupDelayMs));
+    console.log('[ContinuousOrchestrator] Startup delay complete');
+
+    // SAFEGUARD 3: Check memory before starting
+    const memCheck = memoryMonitorService.checkMemory(settings.memoryThresholdPercent);
+    if (!memCheck.canProceed) {
+      console.warn(`[ContinuousOrchestrator] Memory too high to start: ${memCheck.reason}`);
+      console.warn('[ContinuousOrchestrator] Will retry when memory improves');
+      memoryMonitorService.forceGC();
+      // Schedule a retry after delay
+      setTimeout(() => this.start(intervalMs), 30000);
+      return;
+    }
+
+    this.isRunning = true;
+    memoryMonitorService.logStatus();
 
     // Initialize Palantir Rules Service
     await this.initializePalantirRules();
 
-    // Run first cycle immediately
+    // Run first cycle (after safeguards applied)
+    console.log('[ContinuousOrchestrator] Running first orchestration cycle...');
     await this.orchestrationCycle();
 
     // Then run continuously
     this.orchestrationInterval = setInterval(async () => {
+      // Check memory before each cycle
+      const cycleMemCheck = memoryMonitorService.checkMemory(settings.memoryThresholdPercent);
+      if (!cycleMemCheck.canProceed) {
+        console.warn(`[ContinuousOrchestrator] Skipping cycle - ${cycleMemCheck.reason}`);
+        memoryMonitorService.forceGC();
+        return;
+      }
       await this.orchestrationCycle();
     }, intervalMs);
   }
