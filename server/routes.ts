@@ -52,6 +52,8 @@ import { registerPolicyMCPRoutes } from "./routes/policy-mcp.js";
 import ruleExecutionHistoryRouter from "./routes/rule-execution-history.js";
 import hitlRouter from "./routes/hitl.js";
 import palantirRulesRouter from "./routes/palantir-rules.js";
+import enterpriseRulesRouter from "./routes/enterprise-rules.js";
+import { initializeEnterpriseRulesEngine } from "./services/EnterpriseRulesEngine.js";
 import ontologyExplorerRouter from "./routes/ontology-explorer.js";
 import ontologySubscriptionsRouter from "./routes/ontology-subscriptions.js";
 import workflowAutomationRouter from "./routes/workflow-automation.js";
@@ -378,6 +380,14 @@ export async function registerRoutes(
   app.use("/api/rules", ruleExecutionHistoryRouter);
   app.use("/api/hitl", hitlRouter);
   app.use("/api/palantir-rules", palantirRulesRouter);
+  app.use("/api/enterprise-rules", enterpriseRulesRouter);
+
+  try {
+    initializeEnterpriseRulesEngine();
+    console.log('[Routes] Enterprise Rules Engine initialized');
+  } catch (error: any) {
+    console.warn(`[Routes] Enterprise Rules Engine init failed: ${error.message}`);
+  }
   app.use("/api/ontology-explorer", ontologyExplorerRouter);
   app.use("/api/ontology-subscriptions", ontologySubscriptionsRouter);
   app.use("/api/workflow-automation", workflowAutomationRouter);

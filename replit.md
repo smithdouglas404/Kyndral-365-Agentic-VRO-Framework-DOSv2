@@ -70,12 +70,19 @@ Preferred communication style: Simple, everyday language.
 - **OntologyDataProvider**: Palantir-first data provider for knowledge graph
 - **PalantirSync**: Scheduled sync jobs (Jira 4h, OpenProject 6h, Monday.com 2h)
 
-### Rules Engine
-- **Enterprise Rules**: Palantir Functions for business rule evaluation (`PalantirRulesService`)
+### Rules Engine (Enterprise Rules Engine)
+- **Unified Pipeline**: `EnterpriseRulesEngine` → Rulebricks evaluation → Local threshold fallback → Palantir Action response
+- **Rulebricks Integration**: 16 enterprise rules defined, API at `https://rulebricks.com/api/v1/solve`, falls back to local thresholds if API unavailable
+- **PalantirRulesService**: Local threshold-based rule evaluation with configurable thresholds per agent
+- **Palantir Actions (real, wired)**: 8 action mappings fire on threshold breaches:
+  - `atlas-flag-budget-anomaly` (budget overrun, burn rate)
+  - `atlas-update-risk` (risk score escalation)
+  - `atlas-record-governance-decision` (compliance alerts)
+  - `atlas-create-insight` (schedule, health, value gap alerts)
+  - `atlas-update-readiness-score` (readiness scores)
 - **Rule-to-Agent Mapping**: budget-alert→finops, schedule-alert→tmo, risk-alert→risk, compliance-alert→governance, health-alert→pmo, value-gap→vro, change-impact→ocm, dependency-alert→planning
-- **Workflow**: Palantir Actions for workflow orchestration
-- **Local Fallbacks**: Local threshold definitions ensure continuity when Palantir is unavailable
-- **Rulebricks**: External rules engine integration via `RULEBRICKS_API_KEY`
+- **API Routes**: `/api/enterprise-rules/status`, `/api/enterprise-rules/rules`, `/api/enterprise-rules/evaluate/project/:id`, `/api/enterprise-rules/evaluate/portfolio`
+- **Auth Guard**: `executeActions=true` requires `x-admin-token` header
 
 ### Authentication & Security
 - **Auth**: JWT-based authentication with bcrypt password hashing
@@ -148,6 +155,9 @@ Preferred communication style: Simple, everyday language.
 | `server/lib/SmartModelRouter.ts` | 3-tier AI model routing (heuristic/cheap/premium) |
 | `server/mcp/PalantirDataProvider.ts` | Palantir MCP data provider and ontology cache |
 | `server/lib/PalantirRulesService.ts` | Palantir Functions/Actions for rule evaluation |
+| `server/services/RulebricksService.ts` | Rulebricks external rules engine integration |
+| `server/services/EnterpriseRulesEngine.ts` | Unified rules pipeline (Rulebricks + Palantir Actions + thresholds) |
+| `server/routes/enterprise-rules.ts` | Enterprise rules API routes |
 | `server/services/OrchestratorConfig.ts` | Orchestrator settings and configuration |
 | `server/routes/agents.ts` | Agent execution routes (Palantir-wrapped storage) |
 | `server/routes/logic-gates.ts` | Logic gate evaluation (Palantir-wrapped storage) |

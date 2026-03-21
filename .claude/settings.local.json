@@ -141,7 +141,8 @@
       "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_488ce8eeefa6d5ca__ echo \"=== AtlasDivision object type ===\" curl -s -H \"Authorization: Bearer $TOKEN\" \"$HOST/api/v2/ontologies/$ONT_RID/objectTypes/AtlasDivision\")",
       "Bash(TOKEN=\"$PALANTIR_TOKEN\" HOST=\"https://ssg.usw-17.palantirfoundry.com\" ONT_RID=\"$PALANTIR_ONTOLOGY_RID\" __NEW_LINE_894ae055825371fe__ echo \"=== Try to update action with primaryKey_ parameter ===\" curl -s -X PATCH -w \"\\\\nStatus: %{http_code}\" -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" \"$HOST/api/v2/ontologies/$ONT_RID/actionTypes/create-atlas-division\" -d '{\n    \"\"\"\"parameters\"\"\"\": {\n      \"\"\"\"primaryKey_\"\"\"\": {\n        \"\"\"\"displayName\"\"\"\": \"\"\"\"Primary Key\"\"\"\",\n        \"\"\"\"dataType\"\"\"\": {\"\"\"\"type\"\"\"\": \"\"\"\"string\"\"\"\"},\n        \"\"\"\"required\"\"\"\": true\n      }\n    }\n  }')",
       "Bash(git push:*)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(npx vite build:*)"
     ]
   }
 }

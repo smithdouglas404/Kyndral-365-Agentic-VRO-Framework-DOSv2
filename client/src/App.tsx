@@ -88,6 +88,10 @@ const PasswordResetRequestPage = lazy(() => import("@/pages/PasswordResetRequest
 const PasswordResetPage = lazy(() => import("@/pages/PasswordResetPage"));
 const DemoPage = lazy(() => import("@/pages/DemoPage"));
 const PPMDashboard = lazy(() => import("@/pages/PPMDashboard"));
+const PPMExecutiveDashboard = lazy(() => import("@/pages/PPMExecutiveDashboard"));
+const FeatureDetailPage = lazy(() => import("@/pages/FeatureDetailPage"));
+const StoryDetailPage = lazy(() => import("@/pages/StoryDetailPage"));
+const TaskBoardPage = lazy(() => import("@/pages/TaskBoardPage"));
 
 const ExecutiveWorkspace = lazy(() => import("@/pages/workspaces/ExecutiveWorkspace"));
 const PMWorkspace = lazy(() => import("@/pages/workspaces/PMWorkspace"));
@@ -172,7 +176,11 @@ function Router() {
         <Route path="/dashboard/planning" component={PlanningDashboard} />
         <Route path="/dashboard/ocm" component={OCMDashboard} />
         <Route path="/dashboard/ppm" component={PPMDashboard} />
-        <Route path="/ppm" component={PPMDashboard} />
+        <Route path="/ppm" component={PPMExecutiveDashboard} />
+        <Route path="/ppm-old" component={PPMDashboard} />
+        <Route path="/feature/:id" component={FeatureDetailPage} />
+        <Route path="/story/:id" component={StoryDetailPage} />
+        <Route path="/tasks" component={TaskBoardPage} />
         <Route path="/value-proposition" component={ValueProposition} />
         <Route path="/segment/:id" component={SegmentPage} />
         <Route path="/division/:id" component={SegmentPage} />

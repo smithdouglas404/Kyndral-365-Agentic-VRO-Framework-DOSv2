@@ -46,7 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useDashboardMetrics, useOntologyProjects } from '@/hooks/usePalantirOntology';
+import { useLiveDashboardMetrics, useLiveProjects } from '@/hooks/useLivePalantirData';
 import { cn } from '@/lib/utils';
 
 // ============================================================================
@@ -498,8 +498,8 @@ export default function PPMExecutiveDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
 
-  const { data: metrics, isLoading: metricsLoading, refetch: refetchMetrics } = useDashboardMetrics();
-  const { data: projects, isLoading: projectsLoading, refetch: refetchProjects } = useOntologyProjects();
+  const { metrics, isLoading: metricsLoading, refetch: refetchMetrics, isLive } = useLiveDashboardMetrics();
+  const { data: projects, isLoading: projectsLoading, refetch: refetchProjects } = useLiveProjects();
 
   const filteredProjects = (projects || []).filter((p: any) => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
@@ -539,6 +539,19 @@ export default function PPMExecutiveDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Live Status Indicator */}
+              <Badge
+                variant="outline"
+                className={cn(
+                  'gap-1.5 px-3 py-1',
+                  isLive
+                    ? 'bg-green-100 text-green-700 border-green-300'
+                    : 'bg-amber-100 text-amber-700 border-amber-300'
+                )}
+              >
+                <Activity className={cn('h-3 w-3', isLive && 'animate-pulse')} />
+                {isLive ? 'Live' : 'Polling'}
+              </Badge>
               <Button variant="outline" size="sm" onClick={handleRefresh}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh

@@ -1,30 +1,64 @@
-import { useParams, useLocation } from "wouter";
-import { useState } from "react";
+/**
+ * PROJECT DETAIL PAGE (ENHANCED)
+ *
+ * Comprehensive project view with rich visualizations:
+ * - Progress & timeline charts
+ * - Budget burndown visualization
+ * - EVM (Earned Value Management) indicators
+ * - Risk heat map
+ * - SAFe metrics
+ * - Work breakdown structure
+ */
+
+import { useParams, useLocation, Link } from "wouter";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  ArrowLeft, 
-  Target, 
-  Calendar, 
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Target,
+  Calendar,
   AlertTriangle,
   CheckCircle,
   Clock,
   TrendingUp,
+  TrendingDown,
   BarChart3,
   Layers,
   ChevronDown,
   ChevronRight,
-  Activity,
   Loader2,
   Shield,
   Zap,
   GitBranch,
   CircleDot,
-  DollarSign
+  DollarSign,
+  RefreshCw,
+  Users,
+  Activity,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  ExternalLink,
+  PlayCircle,
+  PauseCircle,
+  CheckCircle2,
+  Circle,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+
+// ============================================================================
+// TYPES & CONFIGS
+// ============================================================================
 
 interface ProjectDetail {
   project: {
@@ -48,6 +82,10 @@ interface ProjectDetail {
     milestoneProgress: number;
     progress: number;
     createdAt: string;
+    cpiValue?: number;
+    spiValue?: number;
+    earnedValue?: number;
+    plannedValue?: number;
   };
   features: Array<{
     id: string;
@@ -85,6 +123,7 @@ interface ProjectDetail {
     riskScore: number;
     mitigationPlan: string;
     owner: string;
+    category?: string;
   }>;
   kpis: Array<{
     id: string;
@@ -104,18 +143,22 @@ interface ProjectDetail {
   }>;
 }
 
-const statusConfig: Record<string, { color: string; bg: string; border: string; icon: any }> = {
-  green: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-500', icon: CheckCircle },
-  amber: { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-500', icon: Clock },
-  red: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-500', icon: AlertTriangle },
+const statusConfig: Record<string, { color: string; bg: string; border: string; icon: any; label: string }> = {
+  green: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-500', icon: CheckCircle, label: 'On Track' },
+  amber: { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-500', icon: Clock, label: 'At Risk' },
+  red: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-500', icon: AlertTriangle, label: 'Critical' },
 };
 
-const priorityConfig: Record<string, { color: string; bg: string }> = {
-  critical: { color: 'text-red-700', bg: 'bg-red-100' },
-  high: { color: 'text-orange-700', bg: 'bg-orange-100' },
-  medium: { color: 'text-blue-700', bg: 'bg-blue-100' },
-  low: { color: 'text-gray-700', bg: 'bg-gray-100' },
+const priorityConfig: Record<string, { color: string; bg: string; dot: string }> = {
+  critical: { color: 'text-red-700', bg: 'bg-red-100', dot: 'bg-red-500' },
+  high: { color: 'text-orange-700', bg: 'bg-orange-100', dot: 'bg-orange-500' },
+  medium: { color: 'text-blue-700', bg: 'bg-blue-100', dot: 'bg-blue-500' },
+  low: { color: 'text-gray-700', bg: 'bg-gray-100', dot: 'bg-gray-400' },
 };
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '—';
@@ -124,6 +167,15 @@ function formatDate(dateStr: string) {
   } catch {
     return dateStr;
   }
+}
+
+function formatCurrency(amount: number, compact = false) {
+  if (amount === 0) return '$0';
+  if (compact) {
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
+  }
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 }
 
 function getTimelineProgress(start: string, end: string): number {
@@ -135,14 +187,24 @@ function getTimelineProgress(start: string, end: string): number {
   return Math.min(100, Math.max(0, Math.round(((now - s) / (e - s)) * 100)));
 }
 
+function getDaysRemaining(endDate: string): number {
+  if (!endDate) return 0;
+  const end = new Date(endDate).getTime();
+  const now = Date.now();
+  return Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
+}
+
+// ============================================================================
+// VISUALIZATION COMPONENTS
+// ============================================================================
+
 function StatusBadge({ status }: { status: string }) {
   const cfg = statusConfig[status] || statusConfig.amber;
   const Icon = cfg.icon;
-  const label = status === 'green' ? 'On Track' : status === 'red' ? 'At Risk' : 'In Progress';
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${cfg.bg} ${cfg.color}`} data-testid="badge-status">
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${cfg.bg} ${cfg.color}`}>
       <Icon className="h-3.5 w-3.5" />
-      {label}
+      {cfg.label}
     </span>
   );
 }
@@ -150,57 +212,502 @@ function StatusBadge({ status }: { status: string }) {
 function PriorityBadge({ priority }: { priority: string }) {
   const cfg = priorityConfig[priority] || priorityConfig.medium;
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${cfg.bg} ${cfg.color}`} data-testid="badge-priority">
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${cfg.bg} ${cfg.color}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
       {priority}
     </span>
   );
 }
 
-function MetricCard({ icon: Icon, label, value, subtitle, color = 'text-gray-900' }: { icon: any; label: string; value: string | number; subtitle?: string; color?: string }) {
+function EVMIndicator({
+  label,
+  value,
+  threshold = 1,
+  format = 'decimal',
+}: {
+  label: string;
+  value: number;
+  threshold?: number;
+  format?: 'decimal' | 'percent' | 'currency';
+}) {
+  const isGood = value >= threshold;
+  const isBad = value < threshold - 0.1;
+  const color = isGood ? 'text-green-600' : isBad ? 'text-red-600' : 'text-amber-600';
+  const bgColor = isGood ? 'bg-green-50' : isBad ? 'bg-red-50' : 'bg-amber-50';
+  const Icon = isGood ? ArrowUpRight : isBad ? ArrowDownRight : Minus;
+
+  let displayValue = '';
+  if (format === 'decimal') displayValue = value.toFixed(2);
+  else if (format === 'percent') displayValue = `${(value * 100).toFixed(0)}%`;
+  else if (format === 'currency') displayValue = formatCurrency(value, true);
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow" data-testid={`metric-${label.toLowerCase().replace(/\s/g, '-')}`}>
-      <div className="flex items-center gap-2 text-gray-500 mb-2">
-        <Icon className="h-4 w-4" />
-        <span className="text-sm font-medium">{label}</span>
+    <div className={cn('p-4 rounded-lg', bgColor)}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-gray-600 uppercase tracking-wide">{label}</span>
+        <Icon className={cn('h-4 w-4', color)} />
       </div>
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
-      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+      <p className={cn('text-2xl font-bold', color)}>{displayValue}</p>
+      <p className="text-xs text-gray-500 mt-1">
+        Target: {format === 'decimal' ? threshold.toFixed(2) : format === 'percent' ? `${(threshold * 100).toFixed(0)}%` : formatCurrency(threshold, true)}
+      </p>
     </div>
   );
 }
 
-function WorkItemRow({ name, status, priority, description, testId }: { name: string; status: string; priority?: string; description: string; testId: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const statusColor = status === 'done' || status === 'complete' ? 'bg-emerald-500' : 
-                       status === 'in_progress' || status === 'implementing' ? 'bg-blue-500' : 
-                       status === 'blocked' ? 'bg-red-500' : 'bg-gray-300';
+function BudgetVisualization({ total, spent, allocated }: { total: number; spent: number; allocated: number }) {
+  const spentPercent = total > 0 ? (spent / total) * 100 : 0;
+  const allocatedPercent = total > 0 ? (allocated / total) * 100 : 0;
+  const remaining = total - spent;
+  const isOverBudget = spent > total;
+
   return (
-    <div className="border-b border-gray-100 last:border-0" data-testid={testId}>
-      <div className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => setExpanded(!expanded)}>
-        {expanded ? <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />}
-        <div className={`h-2 w-2 rounded-full ${statusColor} flex-shrink-0`} />
-        <span className="font-medium text-gray-900 flex-1 truncate">{name}</span>
-        <span className="text-xs text-gray-500 capitalize px-2 py-0.5 rounded bg-gray-100">{status.replace('_', ' ')}</span>
-        {priority && <PriorityBadge priority={priority} />}
-      </div>
-      {expanded && description && (
-        <div className="px-12 pb-3 text-sm text-gray-600">{description}</div>
-      )}
-    </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <DollarSign className="h-4 w-4 text-green-600" />
+          Budget Overview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Budget Bar */}
+        <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden">
+          <div
+            className={cn(
+              'absolute inset-y-0 left-0 transition-all',
+              isOverBudget ? 'bg-red-500' : spentPercent > 80 ? 'bg-amber-500' : 'bg-green-500'
+            )}
+            style={{ width: `${Math.min(spentPercent, 100)}%` }}
+          />
+          {allocatedPercent > spentPercent && (
+            <div
+              className="absolute inset-y-0 bg-blue-200 opacity-50"
+              style={{ left: `${spentPercent}%`, width: `${Math.min(allocatedPercent - spentPercent, 100 - spentPercent)}%` }}
+            />
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="text-xs text-gray-500">Total Budget</p>
+            <p className="font-bold text-gray-900">{formatCurrency(total, true)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Spent</p>
+            <p className={cn('font-bold', isOverBudget ? 'text-red-600' : 'text-gray-900')}>
+              {formatCurrency(spent, true)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Remaining</p>
+            <p className={cn('font-bold', remaining < 0 ? 'text-red-600' : 'text-green-600')}>
+              {formatCurrency(remaining, true)}
+            </p>
+          </div>
+        </div>
+
+        {/* Utilization */}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <span className="text-sm text-gray-600">Utilization</span>
+          <Badge
+            variant="outline"
+            className={cn(
+              spentPercent > 90 ? 'border-red-300 bg-red-50 text-red-700' :
+              spentPercent > 70 ? 'border-amber-300 bg-amber-50 text-amber-700' :
+              'border-green-300 bg-green-50 text-green-700'
+            )}
+          >
+            {spentPercent.toFixed(0)}%
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
+
+function TimelineVisualization({
+  startDate,
+  endDate,
+  progress,
+}: {
+  startDate: string;
+  endDate: string;
+  progress: number;
+}) {
+  const timelineProgress = getTimelineProgress(startDate, endDate);
+  const daysRemaining = getDaysRemaining(endDate);
+  const isAhead = progress > timelineProgress;
+  const isBehind = progress < timelineProgress - 10;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-blue-600" />
+          Timeline & Progress
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Timeline Bar */}
+        <div>
+          <div className="flex justify-between text-xs text-gray-500 mb-2">
+            <span>{formatDate(startDate)}</span>
+            <span>{formatDate(endDate)}</span>
+          </div>
+          <div className="relative h-6 bg-gray-100 rounded-lg overflow-hidden">
+            {/* Time elapsed */}
+            <div
+              className="absolute inset-y-0 left-0 bg-gray-300"
+              style={{ width: `${timelineProgress}%` }}
+            />
+            {/* Work completed */}
+            <div
+              className={cn(
+                'absolute inset-y-0 left-0 transition-all',
+                isAhead ? 'bg-green-500' : isBehind ? 'bg-red-500' : 'bg-blue-500'
+              )}
+              style={{ width: `${progress}%` }}
+            />
+            {/* Today marker */}
+            <div
+              className="absolute top-0 bottom-0 w-0.5 bg-gray-800"
+              style={{ left: `${timelineProgress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <p className="text-xs text-gray-500">Time Elapsed</p>
+            <p className="font-bold text-gray-900">{timelineProgress}%</p>
+          </div>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <p className="text-xs text-gray-500">Work Done</p>
+            <p className={cn(
+              'font-bold',
+              isAhead ? 'text-green-600' : isBehind ? 'text-red-600' : 'text-blue-600'
+            )}>
+              {progress}%
+            </p>
+          </div>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <p className="text-xs text-gray-500">Days Left</p>
+            <p className={cn('font-bold', daysRemaining < 30 ? 'text-red-600' : 'text-gray-900')}>
+              {daysRemaining}
+            </p>
+          </div>
+        </div>
+
+        {/* Status Indicator */}
+        <div className={cn(
+          'p-3 rounded-lg flex items-center gap-3',
+          isAhead ? 'bg-green-50' : isBehind ? 'bg-red-50' : 'bg-blue-50'
+        )}>
+          {isAhead ? (
+            <>
+              <TrendingUp className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="font-medium text-green-700">Ahead of Schedule</p>
+                <p className="text-xs text-green-600">{(progress - timelineProgress).toFixed(0)}% ahead</p>
+              </div>
+            </>
+          ) : isBehind ? (
+            <>
+              <TrendingDown className="h-5 w-5 text-red-600" />
+              <div>
+                <p className="font-medium text-red-700">Behind Schedule</p>
+                <p className="text-xs text-red-600">{(timelineProgress - progress).toFixed(0)}% behind</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <Activity className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="font-medium text-blue-700">On Track</p>
+                <p className="text-xs text-blue-600">Progress aligned with timeline</p>
+              </div>
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RiskHeatMap({ risks }: { risks: ProjectDetail['risks'] }) {
+  const risksByLevel = useMemo(() => {
+    const groups = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const r of risks) {
+      const level = (r.severity || 'medium').toLowerCase() as keyof typeof groups;
+      if (groups[level] !== undefined) groups[level]++;
+    }
+    return groups;
+  }, [risks]);
+
+  const totalRisks = risks.length;
+  const criticalRisks = risks.filter(r =>
+    r.severity === 'critical' || r.severity === 'high' || r.riskScore >= 7
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Shield className="h-4 w-4 text-red-600" />
+          Risk Overview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Risk Grid */}
+        <div className="grid grid-cols-4 gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className={cn(
+                'p-3 rounded-lg text-center cursor-pointer transition-all hover:scale-105',
+                risksByLevel.critical > 0 ? 'bg-red-500 text-white' : 'bg-red-100 text-red-700'
+              )}>
+                <p className="text-2xl font-bold">{risksByLevel.critical}</p>
+                <p className="text-xs">Critical</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Critical severity risks</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className={cn(
+                'p-3 rounded-lg text-center cursor-pointer transition-all hover:scale-105',
+                risksByLevel.high > 0 ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-700'
+              )}>
+                <p className="text-2xl font-bold">{risksByLevel.high}</p>
+                <p className="text-xs">High</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>High severity risks</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className={cn(
+                'p-3 rounded-lg text-center cursor-pointer transition-all hover:scale-105',
+                risksByLevel.medium > 0 ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700'
+              )}>
+                <p className="text-2xl font-bold">{risksByLevel.medium}</p>
+                <p className="text-xs">Medium</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Medium severity risks</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className={cn(
+                'p-3 rounded-lg text-center cursor-pointer transition-all hover:scale-105',
+                risksByLevel.low > 0 ? 'bg-gray-500 text-white' : 'bg-gray-100 text-gray-700'
+              )}>
+                <p className="text-2xl font-bold">{risksByLevel.low}</p>
+                <p className="text-xs">Low</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Low severity risks</TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Critical Risks List */}
+        {criticalRisks.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Critical Risks</p>
+            {criticalRisks.slice(0, 3).map((risk, i) => (
+              <div key={risk.id || i} className="flex items-start gap-2 p-2 bg-red-50 rounded-lg">
+                <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-red-700 truncate">{risk.title}</p>
+                  {risk.mitigationPlan && (
+                    <p className="text-xs text-red-600 truncate">{risk.mitigationPlan}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {totalRisks === 0 && (
+          <div className="text-center py-4 text-gray-500">
+            <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No risks registered</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function WorkBreakdownChart({
+  features,
+  stories,
+  tasks,
+}: {
+  features: ProjectDetail['features'];
+  stories: ProjectDetail['stories'];
+  tasks: ProjectDetail['tasks'];
+}) {
+  const getStats = (items: Array<{ status: string }>) => {
+    const total = items.length;
+    const done = items.filter(i =>
+      ['done', 'complete', 'accepted', 'closed'].includes((i.status || '').toLowerCase())
+    ).length;
+    const inProgress = items.filter(i =>
+      ['in_progress', 'in progress', 'implementing', 'active'].includes((i.status || '').toLowerCase())
+    ).length;
+    return { total, done, inProgress, pending: total - done - inProgress };
+  };
+
+  const featureStats = getStats(features);
+  const storyStats = getStats(stories);
+  const taskStats = getStats(tasks);
+
+  const items = [
+    { label: 'Features', ...featureStats, icon: Zap, color: 'bg-purple-500' },
+    { label: 'Stories', ...storyStats, icon: GitBranch, color: 'bg-blue-500' },
+    { label: 'Tasks', ...taskStats, icon: CircleDot, color: 'bg-green-500' },
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Layers className="h-4 w-4 text-purple-600" />
+          Work Breakdown
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {items.map((item) => (
+          <div key={item.label} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <item.icon className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium">{item.label}</span>
+              </div>
+              <span className="text-sm text-gray-500">
+                {item.done}/{item.total}
+              </span>
+            </div>
+            <div className="flex h-2 rounded-full overflow-hidden bg-gray-100">
+              {item.done > 0 && (
+                <div
+                  className="bg-green-500"
+                  style={{ width: `${(item.done / item.total) * 100}%` }}
+                />
+              )}
+              {item.inProgress > 0 && (
+                <div
+                  className="bg-blue-500"
+                  style={{ width: `${(item.inProgress / item.total) * 100}%` }}
+                />
+              )}
+            </div>
+            <div className="flex gap-4 text-xs text-gray-500">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                Done: {item.done}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                Active: {item.inProgress}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-gray-300" />
+                Pending: {item.pending}
+              </span>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function WorkItemCard({
+  item,
+  type,
+}: {
+  item: { id: string; name: string; status: string; description?: string; priority?: string };
+  type: 'feature' | 'story' | 'task';
+}) {
+  const statusLower = (item.status || '').toLowerCase();
+  const isDone = ['done', 'complete', 'accepted', 'closed'].includes(statusLower);
+  const isInProgress = ['in_progress', 'in progress', 'implementing', 'active'].includes(statusLower);
+  const isBlocked = statusLower.includes('blocked');
+
+  const StatusIcon = isDone ? CheckCircle2 : isInProgress ? PlayCircle : isBlocked ? PauseCircle : Circle;
+  const statusColor = isDone ? 'text-green-600' : isInProgress ? 'text-blue-600' : isBlocked ? 'text-red-600' : 'text-gray-400';
+
+  const linkPath = type === 'feature' ? `/feature/${item.id}` : type === 'story' ? `/story/${item.id}` : null;
+
+  const content = (
+    <div className="flex items-start gap-3 p-3 rounded-lg border hover:border-blue-300 hover:bg-gray-50 transition-all cursor-pointer">
+      <StatusIcon className={cn('h-5 w-5 mt-0.5 shrink-0', statusColor)} />
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-gray-900 truncate">{item.name}</p>
+        {item.description && (
+          <p className="text-sm text-gray-500 truncate">{item.description}</p>
+        )}
+      </div>
+      {item.priority && <PriorityBadge priority={item.priority} />}
+      {linkPath && <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />}
+    </div>
+  );
+
+  if (linkPath) {
+    return <Link href={linkPath}>{content}</Link>;
+  }
+  return content;
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const [activeSection, setActiveSection] = useState<'overview' | 'features' | 'stories' | 'tasks' | 'risks'>('overview');
 
-  const { data, isLoading, error } = useQuery<ProjectDetail>({
+  const { data, isLoading, error, refetch } = useQuery<ProjectDetail>({
     queryKey: ["project-detail", params.id],
     queryFn: async () => {
-      const res = await fetch(`/api/projects/${params.id}/full`);
-      if (!res.ok) throw new Error("Project not found");
-      return res.json();
+      // Try project360 endpoint first
+      const res = await fetch(`/api/palantir/ontology/project360/${params.id}`);
+      if (res.ok) {
+        const project360 = await res.json();
+        return {
+          project: project360,
+          features: project360.features || [],
+          stories: project360.stories || [],
+          tasks: project360.tasks || [],
+          risks: project360.risks || [],
+          kpis: [],
+          insights: [],
+        };
+      }
+
+      // Fallback to individual project endpoint
+      const projectRes = await fetch(`/api/palantir/ontology/projects/${params.id}`);
+      if (!projectRes.ok) throw new Error("Project not found");
+      const project = await projectRes.json();
+
+      // Fetch related data in parallel
+      const [risksRes] = await Promise.all([
+        fetch(`/api/palantir/ontology/risks?projectId=${params.id}`).catch(() => null),
+      ]);
+
+      return {
+        project,
+        features: [],
+        stories: [],
+        tasks: [],
+        risks: risksRes?.ok ? await risksRes.json() : [],
+        kpis: [],
+        insights: [],
+      };
     },
     enabled: !!params.id,
     staleTime: 30000,
@@ -221,327 +728,273 @@ export default function ProjectDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-gray-900 mb-2">Project Not Found</h2>
           <p className="text-gray-500 mb-4">The project you're looking for doesn't exist or couldn't be loaded.</p>
-          <Button onClick={() => setLocation('/dashboard')} data-testid="button-back-dashboard">Back to Dashboard</Button>
+          <Button onClick={() => setLocation('/ppm')}>Back to Dashboard</Button>
         </div>
       </div>
     );
   }
 
   const { project, features, stories, tasks, risks } = data;
-  const timelineProgress = getTimelineProgress(project.startDate, project.endDate);
-  const milestonePercent = Math.round((project.milestoneProgress || 0) * 100);
-
-  const sections = [
-    { id: 'overview' as const, label: 'Overview' },
-    { id: 'features' as const, label: `Features (${features.length})` },
-    { id: 'stories' as const, label: `Stories (${stories.length})` },
-    { id: 'tasks' as const, label: `Tasks (${tasks.length})` },
-    { id: 'risks' as const, label: `Risks (${risks.length})` },
-  ];
+  const milestonePercent = Math.round((project.milestoneProgress || project.progress || 0));
+  const cpi = project.cpiValue || 1;
+  const spi = project.spiValue || 1;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-start gap-4">
-            <Button variant="ghost" size="icon" onClick={() => setLocation('/dashboard')} className="mt-1" data-testid="button-back">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-bold text-gray-900 truncate" data-testid="text-project-name">{project.name}</h1>
-                <StatusBadge status={project.status} />
-                <PriorityBadge priority={project.priority} />
-                <Badge variant="outline" className="border-purple-300 bg-purple-50 text-purple-600 text-[10px] gap-1" data-testid="badge-palantir">
-                  <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
-                  Palantir Ontology
-                </Badge>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-[1400px] mx-auto px-6 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <Button variant="ghost" size="icon" onClick={() => setLocation('/ppm')} className="mt-1">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+                  <StatusBadge status={project.status} />
+                  <PriorityBadge priority={project.priority} />
+                </div>
+                {project.description && (
+                  <p className="text-gray-500 mt-1 text-sm max-w-2xl">{project.description}</p>
+                )}
               </div>
-              <p className="text-gray-500 mt-1 text-sm">{project.description}</p>
             </div>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
-
-          <nav className="flex gap-1 mt-4 -mb-px overflow-x-auto">
-            {sections.map(s => (
-              <button
-                key={s.id}
-                onClick={() => setActiveSection(s.id)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
-                  activeSection === s.id
-                    ? 'bg-gray-50 text-purple-700 border border-gray-200 border-b-gray-50 -mb-px'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-                data-testid={`tab-${s.id}`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </nav>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-6">
-        {activeSection === 'overview' && (
-          <div className="space-y-6">
+      <main className="max-w-[1400px] mx-auto px-6 py-6">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="features">Features ({features.length})</TabsTrigger>
+            <TabsTrigger value="stories">Stories ({stories.length})</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks ({tasks.length})</TabsTrigger>
+            <TabsTrigger value="risks">Risks ({risks.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* EVM Indicators */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MetricCard icon={Calendar} label="Timeline" value={`${timelineProgress}%`} subtitle={`${formatDate(project.startDate)} — ${formatDate(project.endDate)}`} />
-              <MetricCard icon={Target} label="Milestone Progress" value={`${milestonePercent}%`} subtitle={milestonePercent >= 70 ? 'On track' : milestonePercent >= 40 ? 'Progressing' : 'Early stage'} />
-              <MetricCard icon={DollarSign} label="Budget" value={project.budgetTotal > 0 ? `$${(project.budgetTotal / 1000000).toFixed(1)}M` : '—'} subtitle={project.budgetTotal > 0 ? `${Math.round((project.budgetSpent / project.budgetTotal) * 100)}% utilized` : 'No budget linked'} />
-              <MetricCard icon={BarChart3} label="Budget Spent" value={project.budgetSpent > 0 ? `$${(project.budgetSpent / 1000000).toFixed(1)}M` : '—'} subtitle={project.budgetTotal > 0 ? `$${((project.budgetTotal - project.budgetSpent) / 1000000).toFixed(1)}M remaining` : ''} />
+              <EVMIndicator label="CPI (Cost Performance)" value={cpi} threshold={1} />
+              <EVMIndicator label="SPI (Schedule Performance)" value={spi} threshold={1} />
+              <EVMIndicator
+                label="Milestone Progress"
+                value={milestonePercent / 100}
+                threshold={0.5}
+                format="percent"
+              />
+              <EVMIndicator
+                label="Budget Utilization"
+                value={project.budgetTotal > 0 ? project.budgetSpent / project.budgetTotal : 0}
+                threshold={0.8}
+                format="percent"
+              />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-purple-600" />
-                    Project Timeline
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-600">Schedule Progress</span>
-                        <span className="font-medium">{timelineProgress}% elapsed</span>
-                      </div>
-                      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            timelineProgress > 85 ? 'bg-red-500' : timelineProgress > 60 ? 'bg-amber-500' : 'bg-emerald-500'
-                          }`}
-                          style={{ width: `${timelineProgress}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-600">Milestone Completion</span>
-                        <span className="font-medium">{milestonePercent}%</span>
-                      </div>
-                      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${milestonePercent}%` }} />
-                      </div>
-                    </div>
+            {/* Main Visualizations */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TimelineVisualization
+                startDate={project.startDate}
+                endDate={project.endDate}
+                progress={milestonePercent}
+              />
+              <BudgetVisualization
+                total={project.budgetTotal || 0}
+                spent={project.budgetSpent || 0}
+                allocated={project.budgetAllocated || project.budgetTotal || 0}
+              />
+            </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-2">
-                      <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-start-date">
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
-                        <p className="font-semibold text-gray-900 mt-1">{formatDate(project.startDate)}</p>
-                      </div>
-                      <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-end-date">
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Target End</p>
-                        <p className="font-semibold text-gray-900 mt-1">{formatDate(project.endDate)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <WorkBreakdownChart features={features} stories={stories} tasks={tasks} />
+              <RiskHeatMap risks={risks} />
+            </div>
 
+            {/* Quick Info Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
-                    <Layers className="h-4 w-4 text-purple-600" />
-                    Work Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div data-testid="breakdown-features">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Features</span>
-                      <span className="font-medium">{features.filter(f => f.status === 'done' || f.status === 'complete').length} / {features.length}</span>
-                    </div>
-                    <Progress value={features.length > 0 ? (features.filter(f => f.status === 'done' || f.status === 'complete').length / features.length) * 100 : 0} className="h-2" />
-                  </div>
-                  <div data-testid="breakdown-stories">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Stories</span>
-                      <span className="font-medium">{stories.filter(s => s.status === 'done' || s.status === 'accepted').length} / {stories.length}</span>
-                    </div>
-                    <Progress value={stories.length > 0 ? (stories.filter(s => s.status === 'done' || s.status === 'accepted').length / stories.length) * 100 : 0} className="h-2" />
-                  </div>
-                  <div data-testid="breakdown-tasks">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Tasks</span>
-                      <span className="font-medium">{tasks.filter(t => t.status === 'done').length} / {tasks.length}</span>
-                    </div>
-                    <Progress value={tasks.length > 0 ? (tasks.filter(t => t.status === 'done').length / tasks.length) * 100 : 0} className="h-2" />
-                  </div>
-
-                  {risks.length > 0 && (
-                    <div className="pt-2 border-t">
-                      <div className="flex items-center gap-2 text-sm">
-                        <AlertTriangle className="h-4 w-4 text-amber-500" />
-                        <span className="text-gray-600">{risks.length} active risk{risks.length !== 1 ? 's' : ''}</span>
-                      </div>
-                    </div>
-                  )}
+                <CardContent className="p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Transformation</p>
+                  <p className="font-semibold text-gray-900 mt-1 truncate">
+                    {project.transformationName || project.transformationId || '—'}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Budget</p>
+                  <p className="font-semibold text-gray-900 mt-1 truncate">
+                    {project.budgetName || formatCurrency(project.budgetTotal || 0, true)}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
+                  <p className="font-semibold text-gray-900 mt-1">{formatDate(project.startDate)}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">End Date</p>
+                  <p className="font-semibold text-gray-900 mt-1">{formatDate(project.endDate)}</p>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-transformation">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Transformation</p>
-                <p className="font-semibold text-gray-900 mt-1">{project.transformationName || project.transformationId || '—'}</p>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-budget-name">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Budget</p>
-                <p className="font-semibold text-gray-900 mt-1">{project.budgetName || '—'}</p>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-priority">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Priority</p>
-                <p className="font-semibold text-gray-900 mt-1 capitalize">{project.priorityText || '—'}</p>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-status">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Status</p>
-                <p className="font-semibold text-gray-900 mt-1">{project.statusText || '—'}</p>
-              </div>
-            </div>
-          </div>
-        )}
+          <TabsContent value="features">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-purple-600" />
+                  Features
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {features.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No features linked to this project</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {features.map((f) => (
+                      <WorkItemCard key={f.id} item={f} type="feature" />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {activeSection === 'features' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Zap className="h-4 w-4 text-purple-600" />
-                Features ({features.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {features.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <Layers className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                  <p>No features linked to this project in Palantir.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {features.map(f => (
-                    <WorkItemRow
-                      key={f.id}
-                      name={f.name}
-                      status={f.status}
-                      priority={f.priority}
-                      description={f.description}
-                      testId={`feature-${f.id}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="stories">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <GitBranch className="h-4 w-4 text-blue-600" />
+                  Stories
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stories.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No stories linked to this project</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {stories.map((s) => (
+                      <WorkItemCard key={s.id} item={s} type="story" />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {activeSection === 'stories' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <GitBranch className="h-4 w-4 text-blue-600" />
-                Stories ({stories.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {stories.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <GitBranch className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                  <p>No stories linked to this project in Palantir.</p>
+          <TabsContent value="tasks">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <CircleDot className="h-4 w-4 text-green-600" />
+                    Tasks
+                  </CardTitle>
+                  <Link href="/tasks">
+                    <Button variant="outline" size="sm">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open Task Board
+                    </Button>
+                  </Link>
                 </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {stories.map(s => (
-                    <WorkItemRow
-                      key={s.id}
-                      name={s.name}
-                      status={s.status}
-                      description={s.description}
-                      testId={`story-${s.id}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+              </CardHeader>
+              <CardContent>
+                {tasks.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <CircleDot className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No tasks linked to this project</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {tasks.map((t) => (
+                      <WorkItemCard key={t.id} item={t} type="task" />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {activeSection === 'tasks' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <CircleDot className="h-4 w-4 text-emerald-600" />
-                Tasks ({tasks.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {tasks.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <CircleDot className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                  <p>No tasks linked to this project in Palantir.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {tasks.map(t => (
-                    <WorkItemRow
-                      key={t.id}
-                      name={t.name}
-                      status={t.status}
-                      priority={t.priority}
-                      description={t.description}
-                      testId={`task-${t.id}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="risks">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-red-600" />
+                  Risk Register
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {risks.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No risks registered for this project</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {risks.map((r) => {
+                      const severityColor =
+                        r.severity === 'critical' ? 'bg-red-100 text-red-700 border-red-200' :
+                        r.severity === 'high' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                        r.severity === 'medium' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                        'bg-gray-100 text-gray-700 border-gray-200';
 
-        {activeSection === 'risks' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Shield className="h-4 w-4 text-red-600" />
-                Risks ({risks.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {risks.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <Shield className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                  <p>No risks registered for this project in Palantir.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {risks.map(r => (
-                    <div key={r.id} className="p-4 hover:bg-gray-50 transition-colors" data-testid={`risk-${r.id}`}>
-                      <div className="flex items-start gap-3">
-                        <AlertTriangle className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                          r.severity === 'critical' || r.severity === 'high' ? 'text-red-500' : 'text-amber-500'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-gray-900">{r.title}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              r.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                              r.severity === 'high' ? 'bg-orange-100 text-orange-700' :
-                              r.severity === 'medium' ? 'bg-amber-100 text-amber-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>{r.severity}</span>
-                            <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">{r.category}</span>
-                            <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600 capitalize">{r.status}</span>
+                      return (
+                        <div key={r.id} className="p-4 rounded-lg border hover:border-red-300 transition-all">
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className={cn(
+                              'h-5 w-5 mt-0.5 shrink-0',
+                              r.severity === 'critical' || r.severity === 'high' ? 'text-red-500' : 'text-amber-500'
+                            )} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <span className="font-medium text-gray-900">{r.title}</span>
+                                <Badge variant="outline" className={severityColor}>
+                                  {r.severity}
+                                </Badge>
+                                {r.riskScore > 0 && (
+                                  <Badge variant="secondary">Score: {r.riskScore}</Badge>
+                                )}
+                              </div>
+                              {r.description && (
+                                <p className="text-sm text-gray-600 mb-2">{r.description}</p>
+                              )}
+                              {r.mitigationPlan && (
+                                <div className="p-2 bg-blue-50 rounded text-sm">
+                                  <span className="font-medium text-blue-700">Mitigation: </span>
+                                  <span className="text-blue-600">{r.mitigationPlan}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          {r.description && <p className="text-sm text-gray-600 mt-1">{r.description}</p>}
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

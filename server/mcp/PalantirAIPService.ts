@@ -172,6 +172,17 @@ export class PalantirAIPService {
   /**
    * Validate action parameters before execution
    */
+  async listActionTypes(ontologyRid?: string): Promise<any[]> {
+    const rid = ontologyRid || await this.resolveOntology();
+    try {
+      const result = await this.request('GET', `/ontologies/${rid}/actionTypes`);
+      return result?.data || result || [];
+    } catch (error: any) {
+      console.warn(`[PalantirAIP] listActionTypes failed: ${error.message}`);
+      return [];
+    }
+  }
+
   async validateAction(ontologyRid: string, actionRid: string, parameters: Record<string, any>): Promise<{
     valid: boolean;
     errors?: Array<{ parameter: string; message: string; code: string }>;

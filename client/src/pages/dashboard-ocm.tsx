@@ -18,7 +18,26 @@ import { AIRecommendations } from '@/components/AIRecommendations';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { useOCMReadiness, useOCMStakeholders } from '@/hooks/useDashboardData';
-import type { DataMode, TransformedReadinessMetric, TransformedStakeholderGroup } from '@/lib/agentDataTransformers';
+import type { DataMode } from '@/lib/agentDataTransformers';
+
+interface ReadinessMetric {
+  category: string;
+  score: number;
+  target: number;
+  description: string;
+  division?: string;
+  readiness?: number;
+  engagement?: number;
+  riskLevel?: string;
+}
+
+interface StakeholderGroup {
+  name: string;
+  group?: string;
+  count: number;
+  engagement: number;
+  sentiment: string;
+}
 
 function NavBar() {
   return (
@@ -49,14 +68,14 @@ function ChangeReadinessWidget({ mode }: { mode: DataMode }) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {(readinessData as TransformedReadinessMetric[]).map((metric, i) => (
+          {(readinessData as ReadinessMetric[]).map((metric: ReadinessMetric, i: number) => (
             <div key={i} className="p-3 border rounded-lg bg-white">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-sm">{metric.category}</span>
-                <span className="text-lg font-bold text-pink-600">{metric.score}%</span>
+                <span className="font-semibold text-sm">{metric.category || metric.division || 'Assessment'}</span>
+                <span className="text-lg font-bold text-pink-600">{metric.score ?? metric.readiness ?? 0}%</span>
               </div>
-              <Progress value={Math.min((metric.score / metric.target) * 100, 100)} className="h-2" />
-              <p className="text-xs text-gray-500 mt-2">{metric.description}</p>
+              <Progress value={Math.min(((metric.score ?? metric.readiness ?? 0) / (metric.target || 100)) * 100, 100)} className="h-2" />
+              <p className="text-xs text-gray-500 mt-2">{metric.description || `Engagement: ${metric.engagement || 0}%`}</p>
             </div>
           ))}
           {readinessData.length === 0 && (
@@ -92,17 +111,17 @@ function StakeholderGroupsWidget({ mode }: { mode: DataMode }) {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {(stakeholderData as TransformedStakeholderGroup[]).map((group, i) => (
+          {(stakeholderData as StakeholderGroup[]).map((group: StakeholderGroup, i: number) => (
             <div key={i} className="p-3 border rounded-lg bg-white">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-sm">{group.name}</span>
-                <Badge className={getSentimentColor(group.sentiment)}>{group.sentiment}</Badge>
+                <span className="font-medium text-sm">{group.name || group.group || 'Group'}</span>
+                <Badge className={getSentimentColor(group.sentiment || 'neutral')}>{group.sentiment || 'neutral'}</Badge>
               </div>
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>{group.count.toLocaleString()} people</span>
-                <span className="font-bold text-blue-600">{group.engagement}% engaged</span>
+                <span>{(group.count || 0).toLocaleString()} people</span>
+                <span className="font-bold text-blue-600">{group.engagement || 0}% engaged</span>
               </div>
-              <Progress value={group.engagement} className="h-1.5 mt-2" />
+              <Progress value={group.engagement || 0} className="h-1.5 mt-2" />
             </div>
           ))}
           {stakeholderData.length === 0 && (
