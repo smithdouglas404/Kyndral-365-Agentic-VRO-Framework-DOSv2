@@ -35,9 +35,9 @@ export const PALANTIR_OBJECT_TYPES = {
   PROJECT: 'AtlasProject',           // Projects, EPICs, Value Streams
   DIVISION: ATLAS_DIVISION_ENABLED ? 'AtlasDivision' : 'AtlasProject', // Business Units / Divisions - enabled via PALANTIR_ATLAS_DIVISION_ENABLED
   TRANSFORMATION: 'AtlasTransformation', // TMO/PMO/VRO Offices
-  FEATURE: 'AtlasProject',           // Features stored as AtlasProject with [Feature] prefix
-  STORY: 'AtlasProject',             // Stories stored as AtlasProject with [Story] prefix
-  TASK: 'AtlasProject',              // Tasks stored as AtlasProject with [Task] prefix
+  FEATURE: 'AtlasFeature',           // SAFe Features - see ontology/palantir/AtlasFeature.ts
+  STORY: 'AtlasStory',               // SAFe User Stories - see ontology/palantir/AtlasStory.ts
+  TASK: 'AtlasTask',                 // SAFe Tasks - see ontology/palantir/AtlasTask.ts
 
   // Metrics & Goals
   KPI: 'AtlasKpi',
@@ -105,6 +105,11 @@ export const PALANTIR_ACTIONS = {
   UPDATE_READINESS_SCORE: 'atlas-update-readiness-score',
   RECORD_GOVERNANCE_DECISION: 'atlas-record-governance-decision',
 
+  // Feature/Story/Task Management (proper SAFe object types)
+  CREATE_FEATURE: 'atlas-create-feature',
+  CREATE_STORY: 'atlas-create-story',
+  CREATE_TASK: 'atlas-create-task',
+
   // Aliases for convenience (map to existing actions)
   UPSERT_PROJECT: 'atlas-create-project',  // Palantir handles upsert automatically
   UPSERT_DIVISION: 'create-atlas-division', // Business Units
@@ -112,9 +117,9 @@ export const PALANTIR_ACTIONS = {
   UPSERT_RISK: 'atlas-create-risk',
   UPSERT_KPI: 'atlas-create-kpi',
   UPSERT_OKR: 'atlas-create-objective',
-  UPSERT_FEATURE: 'atlas-create-insight',  // Features stored as Insights
-  UPSERT_STORY: 'atlas-create-project',    // Stories stored as Projects
-  UPSERT_TASK: 'atlas-create-project',     // Tasks stored as Projects
+  UPSERT_FEATURE: 'atlas-create-feature',  // SAFe Features in AtlasFeature
+  UPSERT_STORY: 'atlas-create-story',      // SAFe Stories in AtlasStory
+  UPSERT_TASK: 'atlas-create-task',        // SAFe Tasks in AtlasTask
   UPSERT_AGENT: 'atlas-create-project',    // Agents stored as Projects (needs own action)
   UPSERT_AGENT_ATTRIBUTE: 'atlas-create-insight',  // Agent attributes stored as Insights
   CREATE_INTERVENTION: 'atlas-create-insight',     // Interventions stored as Insights
@@ -144,8 +149,12 @@ export const ACTION_ALIASES: Record<string, string> = {
   'createOKR': PALANTIR_ACTIONS.CREATE_OBJECTIVE,
   'upsertOKR': PALANTIR_ACTIONS.CREATE_OBJECTIVE,
   'createInsight': PALANTIR_ACTIONS.CREATE_INSIGHT,
-  'createFeature': PALANTIR_ACTIONS.CREATE_INSIGHT,
-  'upsertFeature': PALANTIR_ACTIONS.CREATE_INSIGHT,
+  'createFeature': PALANTIR_ACTIONS.CREATE_FEATURE,
+  'upsertFeature': PALANTIR_ACTIONS.CREATE_FEATURE,
+  'createStory': PALANTIR_ACTIONS.CREATE_STORY,
+  'upsertStory': PALANTIR_ACTIONS.CREATE_STORY,
+  'createTask': PALANTIR_ACTIONS.CREATE_TASK,
+  'upsertTask': PALANTIR_ACTIONS.CREATE_TASK,
   'createBudget': PALANTIR_ACTIONS.CREATE_BUDGET,
   'createDependency': PALANTIR_ACTIONS.CREATE_DEPENDENCY,
 };
