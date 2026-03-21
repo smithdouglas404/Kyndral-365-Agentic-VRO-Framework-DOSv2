@@ -18,25 +18,24 @@ async function main() {
   
   // Try the admin endpoint to see object type definition with datasource
   const adminUrls = [
-    `${baseUrl}/ontologies/${ontologyRid}/objectTypes/AtlasProject/fullMetadata`,
-    `${baseUrl}/admin/ontologies/${ontologyRid}/objectTypes/AtlasProject`,
-    `https://ssg.usw-17.palantirfoundry.com/ontology-metadata/api/ontology/${ontologyRid}/objectType/AtlasProject`,
+    \`\${baseUrl}/ontologies/\${ontologyRid}/objectTypes/AtlasProject/fullMetadata\`,
+    \`\${baseUrl}/admin/ontologies/\${ontologyRid}/objectTypes/AtlasProject\`,
+    \`https://ssg.usw-17.palantirfoundry.com/ontology-metadata/api/ontology/\${ontologyRid}/objectType/AtlasProject\`,
   ];
   
   for (const url of adminUrls) {
-    console.log(`
-Trying: ${url}`);
+    console.log(\`\nTrying: \${url}\`);
     try {
       const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': \`Bearer \${token}\` }
       });
-      console.log(`  Status: ${response.status}`);
+      console.log(\`  Status: \${response.status}\`);
       if (response.ok) {
         const data = await response.json();
         console.log('  Response:', JSON.stringify(data, null, 2).slice(0, 1000));
       }
     } catch (e: any) {
-      console.log(`  Error: ${e.message}`);
+      console.log(\`  Error: \${e.message}\`);
     }
   }
 }
