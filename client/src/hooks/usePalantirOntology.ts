@@ -45,6 +45,10 @@ export interface OntologySchema {
 export interface DashboardMetrics {
   totalProjects: number;
   activeProjects: number;
+  onTrackProjects: number;
+  atRiskProjects: number;
+  delayedProjects: number;
+  avgProgress: number;
   projectsByStatus: {
     green: number;
     amber: number;

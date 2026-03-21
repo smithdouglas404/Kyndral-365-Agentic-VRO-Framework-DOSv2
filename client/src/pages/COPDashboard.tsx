@@ -9,6 +9,7 @@ import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { HelpMenu } from "@/components/HelpMenu";
 import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { useCompanyName, useCompanyProfile } from "@/contexts/CompanyProfileContext";
+import { useDashboardMetrics } from "@/hooks/usePalantirOntology";
 
 function NavBar() {
   const companyName = useCompanyName();
@@ -53,6 +54,7 @@ function NavBar() {
 export default function COPDashboard() {
   const [, navigate] = useLocation();
   const { setPageContext } = usePageContext();
+  const { data: palantirMetrics } = useDashboardMetrics();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState<{type: string; id: string} | null>(null);
 
@@ -95,6 +97,16 @@ export default function COPDashboard() {
       <NavBar />
 
       <main className="px-8 py-8 max-w-[1600px] mx-auto">
+        {palantirMetrics && (
+          <div className="mb-4 flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-purple-50/50 to-blue-50/50 border border-purple-200 rounded-lg" data-testid="palantir-cop-banner">
+            <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+            <span className="text-sm font-medium text-purple-700">Palantir Ontology</span>
+            <span className="text-xs text-gray-500">{palantirMetrics.totalProjects} projects</span>
+            <span className="text-xs text-gray-500">{palantirMetrics.onTrackProjects} on track</span>
+            <span className="text-xs text-gray-500">{palantirMetrics.atRiskProjects} at risk</span>
+            <span className="text-xs text-gray-500">{palantirMetrics.criticalRisks} critical risks</span>
+          </div>
+        )}
         <CommonOperationalPicture onDrillDown={handleDrillDown} />
       </main>
 

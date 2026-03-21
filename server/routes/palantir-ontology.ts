@@ -132,6 +132,10 @@ router.get('/metrics', (async (_req, res) => {
     res.json({
       totalProjects,
       activeProjects,
+      onTrackProjects: projectsByStatus.green,
+      atRiskProjects: projectsByStatus.amber,
+      delayedProjects: projectsByStatus.red,
+      avgProgress: okrProgress,
       projectsByStatus,
       totalBudget,
       spentBudget,

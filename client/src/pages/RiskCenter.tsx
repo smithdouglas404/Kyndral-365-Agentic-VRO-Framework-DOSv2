@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from "wouter";
 import { usePageContext } from "@/contexts/PageContext";
-import { ArrowLeft, Shield, AlertTriangle, TrendingUp, CreditCard, Droplets, Settings, Eye, Users } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle, TrendingUp, CreditCard, Droplets, Settings, Eye, Users, Database } from "lucide-react";
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { riskData, aiAlerts } from "@/lib/lgData";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, Cell } from "recharts";
+import { useOntologyRisks, useDashboardMetrics } from "@/hooks/usePalantirOntology";
 
 export default function RiskCenter() {
   const [, navigate] = useLocation();
@@ -16,7 +17,9 @@ export default function RiskCenter() {
   const [selectedEntity, setSelectedEntity] = useState<{type: string; id: string} | null>(null);
   const handleDrillDown = (type: string, id: string) => setSelectedEntity({ type, id });
 
-  // Update page context for Ask PM
+  const { data: palantirRisks = [], isLoading: risksLoading } = useOntologyRisks();
+  const { data: metrics } = useDashboardMetrics();
+
   useEffect(() => {
     setPageContext({
       pageType: 'tool',
@@ -31,6 +34,13 @@ export default function RiskCenter() {
     a.title.toLowerCase().includes("credit") || 
     a.title.toLowerCase().includes("longevity")
   );
+
+  const criticalRisks = palantirRisks.filter(r => r.severity === 'critical');
+  const highRisks = palantirRisks.filter(r => r.severity === 'high');
+  const mediumRisks = palantirRisks.filter(r => r.severity === 'medium');
+  const lowRisks = palantirRisks.filter(r => r.severity === 'low');
+  const openRisks = palantirRisks.filter(r => r.status === 'open');
+  const mitigatedRisks = palantirRisks.filter(r => r.status === 'mitigated');
 
   const categoryIcons: Record<string, React.ReactNode> = {
     "insurance": <Shield className="h-6 w-6" />,
@@ -91,6 +101,72 @@ export default function RiskCenter() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        {/* Palantir Ontology Risk Data */}
+        <Card className="mb-6 border-purple-300 bg-gradient-to-r from-purple-50/50 to-blue-50/50">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Database className="h-5 w-5 text-purple-600" />
+              Risk Data from Palantir Ontology
+              <Badge className="bg-purple-600">{palantirRisks.length} Risks</Badge>
+              {metrics && <Badge variant="outline" className="text-xs bg-red-50 text-red-700">{metrics.criticalRisks} Critical</Badge>}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {risksLoading ? (
+              <div className="text-center py-4">Loading risks from Palantir...</div>
+            ) : palantirRisks.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">No risks found in Palantir Ontology</div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+                  <div className="p-3 rounded-lg border text-center bg-red-100 text-red-800 border-red-300" data-testid="risk-stat-critical">
+                    <p className="text-2xl font-bold">{criticalRisks.length}</p>
+                    <p className="text-xs font-medium">Critical</p>
+                  </div>
+                  <div className="p-3 rounded-lg border text-center bg-amber-100 text-amber-800 border-amber-300" data-testid="risk-stat-high">
+                    <p className="text-2xl font-bold">{highRisks.length}</p>
+                    <p className="text-xs font-medium">High</p>
+                  </div>
+                  <div className="p-3 rounded-lg border text-center bg-yellow-100 text-yellow-800 border-yellow-300" data-testid="risk-stat-medium">
+                    <p className="text-2xl font-bold">{mediumRisks.length}</p>
+                    <p className="text-xs font-medium">Medium</p>
+                  </div>
+                  <div className="p-3 rounded-lg border text-center bg-green-100 text-green-800 border-green-300" data-testid="risk-stat-low">
+                    <p className="text-2xl font-bold">{lowRisks.length}</p>
+                    <p className="text-xs font-medium">Low</p>
+                  </div>
+                  <div className="p-3 rounded-lg border text-center bg-blue-100 text-blue-800 border-blue-300" data-testid="risk-stat-mitigated">
+                    <p className="text-2xl font-bold">{mitigatedRisks.length}</p>
+                    <p className="text-xs font-medium">Mitigated</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {palantirRisks.slice(0, 9).map((risk) => {
+                    const severityBg = risk.severity === 'critical' ? 'border-l-red-500 bg-red-50' : risk.severity === 'high' ? 'border-l-amber-500 bg-amber-50' : risk.severity === 'medium' ? 'border-l-yellow-500 bg-yellow-50' : 'border-l-green-500 bg-green-50';
+                    return (
+                      <div key={risk.id} className={`p-3 rounded-lg border border-l-4 cursor-pointer hover:shadow-md transition-shadow ${severityBg}`} onClick={() => handleDrillDown('risk', risk.id)} data-testid={`palantir-risk-${risk.id}`}>
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="font-semibold text-sm line-clamp-2">{risk.title}</p>
+                          <Badge variant={risk.severity === 'critical' ? 'destructive' : risk.severity === 'high' ? 'default' : 'secondary'} className="text-[10px] shrink-0">{risk.severity}</Badge>
+                        </div>
+                        {risk.description && <p className="text-xs text-gray-500 line-clamp-2 mb-1">{risk.description}</p>}
+                        <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                          <span>Impact: {risk.impact}</span>
+                          <span>Prob: {risk.probability}</span>
+                          <Badge variant="outline" className="text-[10px]">{risk.status}</Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {palantirRisks.length > 9 && (
+                  <p className="text-center text-xs text-gray-400 pt-2">Showing 9 of {palantirRisks.length} risks from Palantir</p>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           <Card className="lg:col-span-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('governance', 'risk-governance-framework')} data-testid="card-risk-governance-framework">
             <CardHeader>

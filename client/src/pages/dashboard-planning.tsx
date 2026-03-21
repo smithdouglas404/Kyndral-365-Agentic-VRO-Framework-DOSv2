@@ -16,7 +16,7 @@ import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
 import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useOntologyProjects } from '@/hooks/usePalantirOntology';
+import { useOntologyProjects, useDashboardMetrics } from '@/hooks/usePalantirOntology';
 import { useProjects } from '@/hooks/useDashboardData';
 import { useAgentData } from '@/hooks/useAgentData';
 import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
@@ -214,6 +214,7 @@ export default function PlanningDashboard() {
   const liveData = useAgentData('planning');
   const { data: planningAttributes } = useAgentAttributes('planning');
   const { data: projects = [] } = useOntologyProjects();
+  const { data: palantirMetrics } = useDashboardMetrics();
   const { data: projectsData } = useProjects();
   const { data: milestonesData = [] } = usePlanningMilestones();
   const { data: roadmapData = [] } = usePlanningRoadmap();
@@ -329,6 +330,40 @@ export default function PlanningDashboard() {
               </div>
             </div>
           </div>
+
+          {palantirMetrics && (
+            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50/30 to-indigo-50/30" data-testid="palantir-planning-card">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-purple-700">Palantir Ontology</span>
+                  <Badge variant="outline" className="text-[10px]">{projects.length} projects loaded</Badge>
+                </div>
+                <div className="grid grid-cols-5 gap-3">
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-indigo-600">{palantirMetrics.totalProjects}</p>
+                    <p className="text-[10px] text-gray-500">Total Projects</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-green-600">{palantirMetrics.onTrackProjects}</p>
+                    <p className="text-[10px] text-gray-500">On Track</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-amber-600">{palantirMetrics.atRiskProjects}</p>
+                    <p className="text-[10px] text-gray-500">At Risk</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-red-600">{palantirMetrics.delayedProjects}</p>
+                    <p className="text-[10px] text-gray-500">Delayed</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-purple-600">{Math.round(palantirMetrics.avgProgress)}%</p>
+                    <p className="text-[10px] text-gray-500">Avg Progress</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'planning-phase')} data-testid="metric-phase">

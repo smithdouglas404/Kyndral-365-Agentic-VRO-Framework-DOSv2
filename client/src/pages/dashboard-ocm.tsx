@@ -28,6 +28,7 @@ import {
   type TransformedTrainingProgram
 } from '@/lib/agentDataTransformers';
 import { AIRecommendations } from "@/components/AIRecommendations";
+import { useDashboardMetrics, useOntologyProjects } from '@/hooks/usePalantirOntology';
 
 function NavBar() {
   return (
@@ -245,6 +246,8 @@ export default function OCMDashboard() {
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
   const liveData = useAgentData('ocm');
+  const { data: palantirMetrics } = useDashboardMetrics();
+  const { data: palantirProjects = [] } = useOntologyProjects();
   const { data: ocmAttributes } = useAgentAttributes('ocm');
   const { data: companyAttributes } = useAgentAttributes('company');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
@@ -335,6 +338,36 @@ export default function OCMDashboard() {
               </div>
             </div>
           </div>
+
+          {palantirMetrics && (
+            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50/30 to-pink-50/30" data-testid="palantir-ocm-card">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-purple-700">Palantir Ontology</span>
+                  <Badge variant="outline" className="text-[10px]">{palantirProjects.length} projects tracked</Badge>
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-pink-600">{palantirMetrics.totalProjects}</p>
+                    <p className="text-[10px] text-gray-500">Total Projects</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-green-600">{palantirMetrics.onTrackProjects}</p>
+                    <p className="text-[10px] text-gray-500">Adopted</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-amber-600">{palantirMetrics.atRiskProjects}</p>
+                    <p className="text-[10px] text-gray-500">At Risk</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-purple-600">{Math.round(palantirMetrics.avgProgress)}%</p>
+                    <p className="text-[10px] text-gray-500">Avg Readiness</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-readiness')} data-testid="metric-readiness">

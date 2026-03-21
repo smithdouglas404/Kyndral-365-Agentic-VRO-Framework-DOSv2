@@ -16,7 +16,7 @@ import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
 import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
 import AgentActionQueue from '@/components/AgentActionQueue';
-import { useOntologyProjects } from '@/hooks/usePalantirOntology';
+import { useOntologyProjects, useDashboardMetrics, useOntologyFinancials } from '@/hooks/usePalantirOntology';
 import { formatMoney } from '@/lib/formatters';
 import { useAgentData } from '@/hooks/useAgentData';
 import {
@@ -203,6 +203,8 @@ export default function FinOpsDashboard() {
   const liveData = useAgentData('finops');
   const { data: projects = [], isLoading: projectsLoading } = useOntologyProjects();
   const { data: financialInsights, isLoading: insightsLoading } = useFinancialInsights();
+  const { data: palantirMetrics } = useDashboardMetrics();
+  const { data: palantirFinancials = [] } = useOntologyFinancials();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
@@ -290,6 +292,37 @@ export default function FinOpsDashboard() {
               </div>
             </div>
           </div>
+
+          {palantirMetrics && (
+            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50/30 to-blue-50/30" data-testid="palantir-finops-card">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-purple-700">Palantir Ontology</span>
+                  <Badge variant="outline" className="text-[10px]">{palantirMetrics.totalProjects} projects</Badge>
+                  {palantirFinancials.length > 0 && <Badge variant="outline" className="text-[10px]">{palantirFinancials.length} financial records</Badge>}
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-blue-600">{palantirMetrics.totalProjects}</p>
+                    <p className="text-[10px] text-gray-500">Total Projects</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-green-600">{palantirMetrics.onTrackProjects}</p>
+                    <p className="text-[10px] text-gray-500">On Track</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-amber-600">{palantirMetrics.atRiskProjects}</p>
+                    <p className="text-[10px] text-gray-500">At Risk</p>
+                  </div>
+                  <div className="text-center p-2 bg-white rounded border">
+                    <p className="text-lg font-bold text-red-600">{palantirMetrics.criticalRisks}</p>
+                    <p className="text-[10px] text-gray-500">Critical Risks</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-budget')} data-testid="metric-budget">

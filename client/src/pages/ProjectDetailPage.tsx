@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFullProject } from "@/hooks/useProjects";
 import { getProjectById } from "@/lib/projects";
+import { useDashboardMetrics } from "@/hooks/usePalantirOntology";
 import type { Feature, Story, Task, Milestone, Resource, Dependency } from "@/lib/safeProjectData";
 
 const statusColors = {
@@ -74,8 +75,8 @@ export default function ProjectDetailPage() {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [executiveSummary, setExecutiveSummary] = useState<string | null>(null);
   
-  // Fetch project from database API
   const { data: fullProject, isLoading: isLoadingProject } = useFullProject(params.id || '');
+  const { data: palantirMetrics } = useDashboardMetrics();
   
   // Transform API data to SAFeProject format for rendering
   const project = useMemo(() => {
@@ -354,6 +355,12 @@ export default function ProjectDetailPage() {
                 <Badge variant="outline" className="border-purple-500 text-purple-700">
                   {stageLabels[project.safeStage]}
                 </Badge>
+                {palantirMetrics && (
+                  <Badge variant="outline" className="border-purple-300 bg-purple-50 text-purple-600 text-[10px] gap-1" data-testid="palantir-source-badge">
+                    <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
+                    Palantir
+                  </Badge>
+                )}
               </div>
               <p className="text-gray-600 mt-1">{project.bu} | {project.artName}</p>
             </div>
