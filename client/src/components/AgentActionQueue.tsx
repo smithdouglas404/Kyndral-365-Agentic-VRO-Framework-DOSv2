@@ -131,12 +131,13 @@ export default function AgentActionQueue() {
     },
   });
 
+  const safeInterventions = Array.isArray(interventions) ? interventions : [];
   const filteredInterventions = activeTab === 'pending'
-    ? interventions.filter(i => i.status === 'pending')
-    : interventions;
+    ? safeInterventions.filter(i => i.status === 'pending')
+    : safeInterventions;
 
-  const pendingCount = interventions.filter(i => i.status === 'pending').length;
-  const criticalCount = interventions.filter(i => i.severity === 'critical' && i.status === 'pending').length;
+  const pendingCount = safeInterventions.filter(i => i.status === 'pending').length;
+  const criticalCount = safeInterventions.filter(i => i.severity === 'critical' && i.status === 'pending').length;
 
   if (isLoading) {
     return (

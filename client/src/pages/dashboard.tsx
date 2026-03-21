@@ -466,11 +466,10 @@ function DashboardContent() {
     });
     startBackgroundMonitor(15000);
     startOrchestrator(5000, 45000);
-    const stopScenarios = startScenarioSimulation(240000);
+    startScenarioSimulation();
     return () => {
       stopBackgroundMonitor();
       stopOrchestrator();
-      stopScenarios();
     };
   }, []);
   
