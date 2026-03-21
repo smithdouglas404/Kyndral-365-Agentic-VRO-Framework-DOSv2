@@ -56,6 +56,7 @@ import ontologyExplorerRouter from "./routes/ontology-explorer.js";
 import ontologySubscriptionsRouter from "./routes/ontology-subscriptions.js";
 import workflowAutomationRouter from "./routes/workflow-automation.js";
 import agentRegistryRouter from "./routes/agent-registry.js";
+import agentDataRouter from "./routes/agent-data.js";
 import { registerOkrKpiRoutes } from "./routes/admin/okr-kpi.js";
 import { registerOKRRuleMappingRoutes } from "./routes/okr-rule-mappings.js";
 import { registerPermissionRoutes } from "./routes/admin/permissions.js";
@@ -235,6 +236,9 @@ export async function registerRoutes(
 
   // Register Agent-MCP Query routes (Agents query their connected MCPs: Knowledge + Governance)
   app.use('/api/agent-mcp', agentMcpRouter);
+
+  // Agent Data Push API (External agents push real-time data to UI via WebSocket)
+  app.use('/api/agent', agentDataRouter);
 
   // Register Agent-MCP Connection Management routes (ADMIN - Manage MCP connections to agents)
   registerAgentMcpConnectionRoutes(app);
@@ -1378,7 +1382,13 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         priority: p.priority || 'medium',
         startDate: p.start_date,
         endDate: p.end_date,
-      }));
+      })).filter((p: any) => {
+        const name = p.name || '';
+        if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]') || name.startsWith('[Jira') || name.startsWith('[OpenProject]')) return false;
+        const id = p.id || '';
+        if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') || id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
+        return true;
+      });
       const allAlerts: any[] = [];
       const allInterventions: any[] = [];
       

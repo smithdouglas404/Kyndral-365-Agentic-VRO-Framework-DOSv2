@@ -76,8 +76,8 @@ function useDashboardMode() {
 function isSAFeProject(p: any): boolean {
   if (!p.name) return false;
   const name = p.name;
-  if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]')) return false;
-  if (p.id?.startsWith('feature-') || p.id?.startsWith('story-') || p.id?.startsWith('task-') || p.id?.startsWith('agent-') || p.id?.startsWith('source-') || p.id?.startsWith('div-') || p.id?.startsWith('monday-')) return false;
+  if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]') || name.startsWith('[Jira') || name.startsWith('[OpenProject]')) return false;
+  if (p.id?.startsWith('feature-') || p.id?.startsWith('story-') || p.id?.startsWith('task-') || p.id?.startsWith('agent-') || p.id?.startsWith('source-') || p.id?.startsWith('div-') || p.id?.startsWith('monday-') || p.id?.startsWith('story-test-') || p.id?.startsWith('test-div-')) return false;
   return true;
 }
 

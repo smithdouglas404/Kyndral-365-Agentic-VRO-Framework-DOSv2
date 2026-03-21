@@ -360,11 +360,16 @@ class PalantirDashboardServiceClass {
     const allProjects = projectsResult.data || [];
 
     // Separate Projects, Features, Stories, Tasks by prefix in name or project_id
+    // Filter out all non-project items: agents, integrations, divisions, Monday boards, Jira epics
     let projectList = allProjects.filter((p: any) => {
       const id = p.project_id || p.projectId || p.__primaryKey?.project_id || '';
       const name = p.name || '';
-      return !id.startsWith('feature-') && !id.startsWith('story-') && !id.startsWith('task-') &&
-             !name.startsWith('[Feature]') && !name.startsWith('[Story]') && !name.startsWith('[Task]');
+      if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') ||
+          id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
+      if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') ||
+          name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') ||
+          name.startsWith('[Monday]') || name.startsWith('[Jira')) return false;
+      return true;
     });
 
     let featureList = allProjects.filter((p: any) => {

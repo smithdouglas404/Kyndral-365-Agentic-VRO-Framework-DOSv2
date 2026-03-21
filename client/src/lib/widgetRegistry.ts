@@ -371,6 +371,40 @@ export const widgetDefinitions: WidgetDefinition[] = [
     tabs: ['decisions'],
     minHeight: 3,
   },
+  // PPM Live Dashboard Widgets
+  {
+    id: 'live-metrics',
+    name: 'Live Portfolio Metrics',
+    description: 'Real-time portfolio metrics with WebSocket updates from Palantir',
+    defaultSize: 'full',
+    allowedSizes: ['large', 'full'],
+    category: 'metrics',
+    defaultVisible: true,
+    tabs: ['ppm', 'overview'],
+    minHeight: 3,
+  },
+  {
+    id: 'agent-feed',
+    name: 'Agent Activity Feed',
+    description: 'Real-time activity feed showing agent updates, insights, and actions',
+    defaultSize: 'large',
+    allowedSizes: ['medium', 'large', 'full'],
+    category: 'agents',
+    defaultVisible: true,
+    tabs: ['ppm', 'agents'],
+    minHeight: 4,
+  },
+  {
+    id: 'live-project-status',
+    name: 'Live Project Status',
+    description: 'Project cards with real-time status updates from Palantir',
+    defaultSize: 'full',
+    allowedSizes: ['large', 'full'],
+    category: 'insights',
+    defaultVisible: true,
+    tabs: ['ppm', 'overview', 'portfolios'],
+    minHeight: 4,
+  },
 ];
 
 export function getWidgetById(id: string): WidgetDefinition | undefined {

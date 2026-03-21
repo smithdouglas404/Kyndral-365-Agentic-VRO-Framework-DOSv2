@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageContextProvider } from "@/contexts/PageContext";
 import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
+import { WebSocketProvider } from "@/contexts/WebSocketContext";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -86,6 +87,7 @@ const EmailVerificationPage = lazy(() => import("@/pages/EmailVerificationPage")
 const PasswordResetRequestPage = lazy(() => import("@/pages/PasswordResetRequestPage"));
 const PasswordResetPage = lazy(() => import("@/pages/PasswordResetPage"));
 const DemoPage = lazy(() => import("@/pages/DemoPage"));
+const PPMDashboard = lazy(() => import("@/pages/PPMDashboard"));
 
 const ExecutiveWorkspace = lazy(() => import("@/pages/workspaces/ExecutiveWorkspace"));
 const PMWorkspace = lazy(() => import("@/pages/workspaces/PMWorkspace"));
@@ -169,6 +171,8 @@ function Router() {
         <Route path="/dashboard/governance" component={GovernanceDashboard} />
         <Route path="/dashboard/planning" component={PlanningDashboard} />
         <Route path="/dashboard/ocm" component={OCMDashboard} />
+        <Route path="/dashboard/ppm" component={PPMDashboard} />
+        <Route path="/ppm" component={PPMDashboard} />
         <Route path="/value-proposition" component={ValueProposition} />
         <Route path="/segment/:id" component={SegmentPage} />
         <Route path="/division/:id" component={SegmentPage} />
@@ -247,14 +251,16 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <CompanyProfileProvider>
-          <PageContextProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </PageContextProvider>
-        </CompanyProfileProvider>
+        <WebSocketProvider>
+          <CompanyProfileProvider>
+            <PageContextProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </PageContextProvider>
+          </CompanyProfileProvider>
+        </WebSocketProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

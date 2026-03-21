@@ -116,7 +116,14 @@ export function registerAgentInsightsRoutes(app: Express, storage: IStorage) {
       } else {
         const allProjects = await storage.getProjects();
         projectsToAnalyze = allProjects
-          .filter(p => p.status === 'active')
+          .filter(p => {
+            if (p.status !== 'active') return false;
+            const name = p.name || '';
+            if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]') || name.startsWith('[Jira') || name.startsWith('[OpenProject]')) return false;
+            const id = p.id || '';
+            if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') || id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
+            return true;
+          })
           .slice(0, 50)
           .map(p => p.id);
       }
