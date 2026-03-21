@@ -3,7 +3,7 @@ import {
   Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight,
   BarChart3, Building2, Briefcase, PieChart, Upload, Bot,
-  Settings, Network, Zap, Layers, GitBranch, Route
+  Settings, Network, Zap, Layers, GitBranch, Route, Scale
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -305,6 +305,15 @@ export function AgentSidebar({ activeTab = "overview", onTabChange = () => {}, c
             <div className="w-full px-3 py-2 rounded-lg cursor-pointer transition-all text-left flex items-center gap-3 hover:bg-gray-100 text-gray-700" data-testid="nav-mcp-config">
               <Network className="h-4 w-4 text-gray-500" />
               {!collapsed && <span className="text-sm font-medium">MCP Config</span>}
+            </div>
+          </Link>
+          <Link href="/admin/rules-engine">
+            <div className={cn(
+              "w-full px-3 py-2 rounded-lg cursor-pointer transition-all text-left flex items-center gap-3",
+              isActive('/admin/rules-engine') ? "bg-[#005EB8] text-white" : "hover:bg-gray-100 text-gray-700"
+            )} data-testid="nav-enterprise-rules">
+              <Scale className={cn("h-4 w-4", isActive('/admin/rules-engine') ? "text-white" : "text-gray-500")} />
+              {!collapsed && <span className="text-sm font-medium">Enterprise Rules</span>}
             </div>
           </Link>
         </div>

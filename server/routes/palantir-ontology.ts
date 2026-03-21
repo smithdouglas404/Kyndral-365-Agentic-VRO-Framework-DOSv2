@@ -604,54 +604,25 @@ router.get('/features', (async (req, res) => {
 
     const { projectId, status } = req.query;
 
-    // First try to get from AtlasFeature (proper object type)
-    let featureList: any[] = [];
-    try {
-      const result = await palantir.listObjects('AtlasFeature', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      featureList = (result.data || []).map((f: any) => ({
-        id: f.featureId || f.__primaryKey,
-        name: f.name || '',
-        description: f.description || '',
-        status: f.status || 'Backlog',
-        projectId: f.projectId || '',
-        storyPoints: f.storyPoints || 0,
-        completedPoints: f.completedPoints || 0,
-        priority: f.priority || 'Medium',
-        targetPi: f.targetPi || '',
-        wsjfScore: f.wsjfScore || 0,
-        owner: f.owner || '',
-        progress: f.storyPoints > 0 ? Math.round((f.completedPoints / f.storyPoints) * 100) : 0,
-      }));
-    } catch (e) {
-      // Fallback to AtlasProject with naming conventions
-      console.log('[PalantirOntology] AtlasFeature not available, falling back to AtlasProject');
-      const result = await palantir.listObjects('AtlasProject', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      featureList = (result.data || [])
-        .filter((p: any) => {
-          const name = p.name || '';
-          const id = p.projectId || p.__primaryKey || '';
-          return name.startsWith('[Feature]') || id.startsWith('feature-');
-        })
-        .map((f: any) => ({
-          id: f.projectId || f.__primaryKey,
-          name: (f.name || '').replace('[Feature] ', ''),
-          description: f.description || '',
-          status: f.status || 'In Progress',
-          projectId: f.transformationId || '',
-          storyPoints: 0,
-          completedPoints: 0,
-          priority: f.priority || 'Medium',
-          targetPi: '',
-          wsjfScore: 0,
-          progress: (f.milestoneProgress || 0) * 100,
-        }));
-    }
+    const result = await palantir.listObjects('AtlasFeature', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    let featureList = (result.data || []).map((f: any) => ({
+      id: f.featureId || f.__primaryKey,
+      name: f.name || '',
+      description: f.description || '',
+      status: f.status || 'Backlog',
+      projectId: f.projectId || '',
+      storyPoints: f.storyPoints || 0,
+      completedPoints: f.completedPoints || 0,
+      priority: f.priority || 'Medium',
+      targetPi: f.targetPi || '',
+      wsjfScore: f.wsjfScore || 0,
+      owner: f.owner || '',
+      progress: f.storyPoints > 0 ? Math.round((f.completedPoints / f.storyPoints) * 100) : 0,
+    }));
 
     if (projectId) {
       const projectIdLower = (projectId as string).toLowerCase();
