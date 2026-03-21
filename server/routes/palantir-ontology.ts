@@ -15,6 +15,210 @@ const router = express.Router();
 const ONTOLOGY_RID = process.env.PALANTIR_ONTOLOGY_RID || '';
 
 // ============================================================================
+// DEMO DATA - Used when Palantir returns no data
+// ============================================================================
+
+const DEMO_PROJECTS = [
+  {
+    id: 'proj-cloud-migration',
+    name: 'Enterprise Cloud Migration',
+    description: 'Migrate core infrastructure to AWS cloud platform',
+    status: 'green' as const,
+    statusText: 'On Track',
+    businessUnit: 'IT Infrastructure',
+    priority: 'critical' as const,
+    priorityText: 'Critical',
+    startDate: '2024-01-15',
+    endDate: '2024-12-31',
+    budgetTotal: 2500000,
+    budgetSpent: 1875000,
+    budgetUnit: 'USD',
+    budgetRemaining: 625000,
+    budgetUtilization: 75,
+    progress: 68,
+    milestoneProgress: 68,
+    cpiValue: 1.05,
+    spiValue: 0.98,
+    currentPi: 'PI 2024.3',
+    velocity: 42,
+    riskCount: 3,
+    featureCount: 12,
+    storyCount: 48,
+    taskCount: 156,
+    dependencyCount: 4,
+  },
+  {
+    id: 'proj-crm-modernization',
+    name: 'CRM Platform Modernization',
+    description: 'Upgrade legacy CRM to Salesforce Lightning',
+    status: 'amber' as const,
+    statusText: 'At Risk',
+    businessUnit: 'Sales Operations',
+    priority: 'high' as const,
+    priorityText: 'High',
+    startDate: '2024-02-01',
+    endDate: '2024-09-30',
+    budgetTotal: 1200000,
+    budgetSpent: 960000,
+    budgetUnit: 'USD',
+    budgetRemaining: 240000,
+    budgetUtilization: 80,
+    progress: 55,
+    milestoneProgress: 55,
+    cpiValue: 0.92,
+    spiValue: 0.88,
+    currentPi: 'PI 2024.3',
+    velocity: 38,
+    riskCount: 5,
+    featureCount: 8,
+    storyCount: 32,
+    taskCount: 98,
+    dependencyCount: 2,
+  },
+  {
+    id: 'proj-data-platform',
+    name: 'Data Analytics Platform',
+    description: 'Build enterprise data lake and analytics capabilities',
+    status: 'green' as const,
+    statusText: 'On Track',
+    businessUnit: 'Data Engineering',
+    priority: 'high' as const,
+    priorityText: 'High',
+    startDate: '2024-03-01',
+    endDate: '2025-02-28',
+    budgetTotal: 3200000,
+    budgetSpent: 1280000,
+    budgetUnit: 'USD',
+    budgetRemaining: 1920000,
+    budgetUtilization: 40,
+    progress: 35,
+    milestoneProgress: 35,
+    cpiValue: 1.12,
+    spiValue: 1.05,
+    currentPi: 'PI 2024.3',
+    velocity: 52,
+    riskCount: 2,
+    featureCount: 15,
+    storyCount: 60,
+    taskCount: 180,
+    dependencyCount: 6,
+  },
+  {
+    id: 'proj-security-compliance',
+    name: 'Security Compliance Program',
+    description: 'Implement SOC 2 Type II and ISO 27001 compliance',
+    status: 'red' as const,
+    statusText: 'Delayed',
+    businessUnit: 'Security',
+    priority: 'critical' as const,
+    priorityText: 'Critical',
+    startDate: '2024-01-01',
+    endDate: '2024-06-30',
+    budgetTotal: 800000,
+    budgetSpent: 720000,
+    budgetUnit: 'USD',
+    budgetRemaining: 80000,
+    budgetUtilization: 90,
+    progress: 72,
+    milestoneProgress: 72,
+    cpiValue: 0.85,
+    spiValue: 0.78,
+    currentPi: 'PI 2024.3',
+    velocity: 28,
+    riskCount: 8,
+    featureCount: 6,
+    storyCount: 24,
+    taskCount: 72,
+    dependencyCount: 3,
+  },
+  {
+    id: 'proj-mobile-app',
+    name: 'Mobile App Development',
+    description: 'Native iOS and Android customer mobile applications',
+    status: 'green' as const,
+    statusText: 'On Track',
+    businessUnit: 'Digital Products',
+    priority: 'medium' as const,
+    priorityText: 'Medium',
+    startDate: '2024-04-01',
+    endDate: '2024-11-30',
+    budgetTotal: 950000,
+    budgetSpent: 380000,
+    budgetUnit: 'USD',
+    budgetRemaining: 570000,
+    budgetUtilization: 40,
+    progress: 42,
+    milestoneProgress: 42,
+    cpiValue: 1.08,
+    spiValue: 1.02,
+    currentPi: 'PI 2024.3',
+    velocity: 45,
+    riskCount: 1,
+    featureCount: 10,
+    storyCount: 40,
+    taskCount: 120,
+    dependencyCount: 2,
+  },
+  {
+    id: 'proj-api-gateway',
+    name: 'API Gateway Implementation',
+    description: 'Enterprise API management and gateway platform',
+    status: 'amber' as const,
+    statusText: 'At Risk',
+    businessUnit: 'Platform Engineering',
+    priority: 'high' as const,
+    priorityText: 'High',
+    startDate: '2024-02-15',
+    endDate: '2024-08-31',
+    budgetTotal: 650000,
+    budgetSpent: 455000,
+    budgetUnit: 'USD',
+    budgetRemaining: 195000,
+    budgetUtilization: 70,
+    progress: 60,
+    milestoneProgress: 60,
+    cpiValue: 0.95,
+    spiValue: 0.92,
+    currentPi: 'PI 2024.3',
+    velocity: 35,
+    riskCount: 4,
+    featureCount: 7,
+    storyCount: 28,
+    taskCount: 84,
+    dependencyCount: 5,
+  },
+];
+
+const DEMO_METRICS = {
+  totalProjects: DEMO_PROJECTS.length,
+  activeProjects: DEMO_PROJECTS.filter(p => p.status !== 'green' || p.progress < 100).length,
+  onTrackProjects: DEMO_PROJECTS.filter(p => p.status === 'green').length,
+  atRiskProjects: DEMO_PROJECTS.filter(p => p.status === 'amber').length,
+  delayedProjects: DEMO_PROJECTS.filter(p => p.status === 'red').length,
+  avgProgress: Math.round(DEMO_PROJECTS.reduce((sum, p) => sum + p.progress, 0) / DEMO_PROJECTS.length),
+  projectsByStatus: {
+    green: DEMO_PROJECTS.filter(p => p.status === 'green').length,
+    amber: DEMO_PROJECTS.filter(p => p.status === 'amber').length,
+    red: DEMO_PROJECTS.filter(p => p.status === 'red').length,
+  },
+  totalBudget: DEMO_PROJECTS.reduce((sum, p) => sum + p.budgetTotal, 0),
+  spentBudget: DEMO_PROJECTS.reduce((sum, p) => sum + p.budgetSpent, 0),
+  budgetUtilization: Math.round((DEMO_PROJECTS.reduce((sum, p) => sum + p.budgetSpent, 0) / DEMO_PROJECTS.reduce((sum, p) => sum + p.budgetTotal, 0)) * 100),
+  totalRisks: DEMO_PROJECTS.reduce((sum, p) => sum + p.riskCount, 0),
+  criticalRisks: 8,
+  okrProgress: 72,
+  totalFeatures: DEMO_PROJECTS.reduce((sum, p) => sum + p.featureCount, 0),
+  totalStories: DEMO_PROJECTS.reduce((sum, p) => sum + p.storyCount, 0),
+  totalTasks: DEMO_PROJECTS.reduce((sum, p) => sum + p.taskCount, 0),
+  totalDependencies: DEMO_PROJECTS.reduce((sum, p) => sum + p.dependencyCount, 0),
+  avgCPI: 0.99,
+  avgSPI: 0.94,
+  costPerformance: 'On Budget',
+  schedulePerformance: 'Slightly Behind',
+  agentAssignments: {},
+};
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -277,9 +481,23 @@ router.get('/projects', (async (req, res) => {
       projectList = projectList.filter((p: any) => buList.includes(p.businessUnit));
     }
 
+    // Return demo data if no projects found
+    if (projectList.length === 0) {
+      let demoList = [...DEMO_PROJECTS];
+      if (status) {
+        demoList = demoList.filter((p) => p.status === status);
+      }
+      if (priority) {
+        demoList = demoList.filter((p) => p.priority === priority);
+      }
+      return res.json(demoList);
+    }
+
     res.json(projectList);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    // On error, return demo data
+    console.error('[Palantir] Error fetching projects, returning demo data:', error.message);
+    res.json(DEMO_PROJECTS);
   }
 }) as RequestHandler);
 

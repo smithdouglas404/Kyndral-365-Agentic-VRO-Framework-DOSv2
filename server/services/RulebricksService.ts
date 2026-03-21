@@ -16,6 +16,7 @@
  */
 
 const RULEBRICKS_API_BASE = 'https://rulebricks.com/api/v1';
+const RULEBRICKS_DASHBOARD_URL = 'https://rulebricks.com/dashboard';
 
 export interface RulebricksRule {
   slug: string;
@@ -442,16 +443,13 @@ export class RulebricksService {
     ruleSlug: string,
     input: Record<string, any>
   ): Promise<{ triggered: boolean; severity: 'low' | 'medium' | 'high' | 'critical'; message: string; action?: string; details?: Record<string, any> }> {
-    const response = await fetch(`${RULEBRICKS_API_BASE}/solve`, {
+    const response = await fetch(`${RULEBRICKS_API_BASE}/rules/${ruleSlug}/solve`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': this.apiKey!,
       },
-      body: JSON.stringify({
-        slug: ruleSlug,
-        request: input,
-      }),
+      body: JSON.stringify(input),
     });
 
     if (!response.ok) {

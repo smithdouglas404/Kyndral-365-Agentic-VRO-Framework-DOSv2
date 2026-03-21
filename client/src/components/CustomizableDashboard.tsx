@@ -31,9 +31,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 const RGLModule = RGL as any;
-const Responsive = RGLModule.Responsive || RGLModule.default?.Responsive;
-const WidthProviderFn = RGLModule.WidthProvider || RGLModule.default?.WidthProvider;
-const ResponsiveGridLayout = WidthProviderFn ? WidthProviderFn(Responsive) : Responsive;
+const ResponsiveGridLayout = RGLModule.ResponsiveGridLayout || RGLModule.default?.ResponsiveGridLayout || RGLModule.Responsive || RGLModule.default?.Responsive;
 
 interface WidgetWrapperProps {
   widget: WidgetDefinition;
