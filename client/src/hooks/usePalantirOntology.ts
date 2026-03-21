@@ -63,16 +63,17 @@ export interface OntologyProject {
   name: string;
   description?: string;
   status: "green" | "amber" | "red";
+  statusText?: string;
   businessUnit: string;
   startDate?: string;
   endDate?: string;
   priority: "critical" | "high" | "medium" | "low";
+  priorityText?: string;
   budgetTotal?: number;
   budgetSpent?: number;
   budgetUnit?: string;
   expectedRoi?: string;
   roiValue?: number;
-  // SAFe fields
   artName?: string;
   portfolioTheme?: string;
   safeStage?: string;
@@ -80,12 +81,12 @@ export interface OntologyProject {
   velocity?: number;
   predictability?: number;
   flowEfficiency?: number;
-  // Counts
   featureCount?: number;
   storyCount?: number;
   taskCount?: number;
   riskCount?: number;
   dependencyCount?: number;
+  milestoneProgress?: number;
 }
 
 export interface OntologyRisk {

@@ -162,26 +162,27 @@ router.get('/projects', (async (req, res) => {
     });
 
     let projects = (result.data || []).map((p: any) => ({
-      id: p.project_id || p.__primaryKey,
-      name: p.name || 'Untitled Project',
+      id: p.projectId || p.project_id || p.__primaryKey,
+      name: p.name || p.__title || 'Untitled Project',
       description: p.description || '',
       status: mapStatusToColor(p.status || ''),
-      businessUnit: p.business_unit || p.transformation_id || 'General',
-      startDate: p.start_date,
-      endDate: p.end_date,
+      statusText: p.status || 'Unknown',
+      businessUnit: p.business_unit || p.transformationId || p.transformation_id || 'General',
+      startDate: p.startDate || p.start_date,
+      endDate: p.endDate || p.end_date,
       priority: mapPriorityToLevel(p.priority || 'medium'),
-      budgetTotal: p.budget_total || 0,
-      budgetSpent: p.budget_spent || 0,
-      expectedRoi: p.expected_roi || '',
-      milestoneProgress: p.milestone_progress || 0,
-      // SAFe fields
-      artName: p.art_name,
-      portfolioTheme: p.portfolio_theme,
-      safeStage: p.safe_stage,
-      currentPi: p.current_pi,
+      priorityText: p.priority || 'Medium',
+      budgetTotal: p.budget_total || p.budgetTotal || 0,
+      budgetSpent: p.budget_spent || p.budgetSpent || 0,
+      expectedRoi: p.expected_roi || p.expectedRoi || '',
+      milestoneProgress: p.milestone_progress || p.milestoneProgress || 0,
+      artName: p.art_name || p.artName,
+      portfolioTheme: p.portfolio_theme || p.portfolioTheme,
+      safeStage: p.safe_stage || p.safeStage,
+      currentPi: p.current_pi || p.currentPi,
       velocity: p.velocity,
       predictability: p.predictability,
-      flowEfficiency: p.flow_efficiency,
+      flowEfficiency: p.flow_efficiency || p.flowEfficiency,
     }));
 
     // Apply filters
@@ -219,18 +220,20 @@ router.get('/projects/:projectId', (async (req, res) => {
     }
 
     res.json({
-      id: project.project_id || project.__primaryKey,
-      name: project.name || 'Untitled Project',
+      id: project.projectId || project.project_id || project.__primaryKey,
+      name: project.name || project.__title || 'Untitled Project',
       description: project.description || '',
       status: mapStatusToColor(project.status || ''),
-      businessUnit: project.business_unit || project.transformation_id || 'General',
-      startDate: project.start_date,
-      endDate: project.end_date,
+      statusText: project.status || 'Unknown',
+      businessUnit: project.business_unit || project.transformationId || project.transformation_id || 'General',
+      startDate: project.startDate || project.start_date,
+      endDate: project.endDate || project.end_date,
       priority: mapPriorityToLevel(project.priority || 'medium'),
-      budgetTotal: project.budget_total || 0,
-      budgetSpent: project.budget_spent || 0,
-      expectedRoi: project.expected_roi || '',
-      milestoneProgress: project.milestone_progress || 0,
+      priorityText: project.priority || 'Medium',
+      budgetTotal: project.budget_total || project.budgetTotal || 0,
+      budgetSpent: project.budget_spent || project.budgetSpent || 0,
+      expectedRoi: project.expected_roi || project.expectedRoi || '',
+      milestoneProgress: project.milestone_progress || project.milestoneProgress || 0,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

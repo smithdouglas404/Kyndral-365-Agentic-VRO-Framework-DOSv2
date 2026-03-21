@@ -14,9 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScenarioChartsGrid } from "@/components/ScenarioCharts";
-import { AIExecutiveInsights } from "@/components/AIExecutiveInsights";
 import { UnifiedMetricsSection } from "@/components/UnifiedMetricsSection";
-import { startScenarioSimulation, stopScenarioSimulation } from "@/lib/scenarioSimulator";
+import { startScenarioSimulation } from "@/lib/scenarioSimulator";
 import { useValueInsights } from "@/hooks/useAgentInsights";
 import { AIAlertTicker } from "@/components/AIAlertTicker";
 import { VROMetricsTable } from "@/components/VROMetricsTable";
@@ -529,8 +528,40 @@ function DashboardContent() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Palantir Portfolio Summary - Direct from Ontology */}
-            <Card className="border-purple-300 bg-gradient-to-r from-purple-50 to-blue-50">
+            <VROMetricsSummary />
+
+            {/* Portfolio Status Breakdown */}
+            {!projectsLoading && projects.length > 0 && (() => {
+              const statusCounts: Record<string, number> = {};
+              projects.forEach((p) => {
+                const st = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
+                statusCounts[st] = (statusCounts[st] || 0) + 1;
+              });
+              const statusColors: Record<string, string> = {
+                'Active': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                'active': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                'In Progress': 'bg-blue-100 text-blue-800 border-blue-300',
+                'Planning': 'bg-violet-100 text-violet-800 border-violet-300',
+                'At Risk': 'bg-amber-100 text-amber-800 border-amber-300',
+                'Complete': 'bg-gray-100 text-gray-800 border-gray-300',
+                'Not Started': 'bg-slate-100 text-slate-700 border-slate-300',
+                'On Track': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                'Critical': 'bg-red-100 text-red-800 border-red-300',
+              };
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+                  {Object.entries(statusCounts).sort((a,b) => b[1] - a[1]).map(([st, count]) => (
+                    <div key={st} className={`p-3 rounded-lg border text-center ${statusColors[st] || 'bg-gray-100 text-gray-700 border-gray-300'}`} data-testid={`status-badge-${st.toLowerCase().replace(/\s+/g,'-')}`}>
+                      <p className="text-2xl font-bold">{count}</p>
+                      <p className="text-xs font-medium">{st}</p>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Palantir Portfolio - Project List */}
+            <Card className="border-purple-300 bg-gradient-to-r from-purple-50/50 to-blue-50/50">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-purple-600" />
@@ -544,23 +575,38 @@ function DashboardContent() {
                 ) : projects.length === 0 ? (
                   <div className="text-center py-4 text-gray-500">No projects found in Palantir</div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {projects.slice(0, 8).map((p) => (
-                      <div key={p.id} className={`p-3 rounded-lg border-l-4 bg-white ${
-                        p.status === 'green' ? 'border-green-500' :
-                        p.status === 'red' ? 'border-red-500' : 'border-amber-500'
-                      }`}>
-                        <p className="font-medium text-sm truncate">{p.name}</p>
-                        <p className="text-xs text-gray-500">{p.priority} priority</p>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {projects.slice(0, 12).map((p) => {
+                        const statusLabel = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
+                        const statusBg = p.status === 'green' ? 'bg-emerald-100 text-emerald-700' : p.status === 'red' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+                        const borderColor = p.status === 'green' ? 'border-l-emerald-500' : p.status === 'red' ? 'border-l-red-500' : 'border-l-amber-500';
+                        return (
+                          <div key={p.id} className={`p-4 rounded-lg border border-gray-200 border-l-4 bg-white hover:shadow-md transition-shadow cursor-pointer ${borderColor}`} onClick={() => handleDrillDown('project', p.id)} data-testid={`project-card-${p.id}`}>
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <p className="font-semibold text-sm leading-tight line-clamp-2" title={p.name}>{p.name}</p>
+                              <Badge variant="outline" className={`text-[10px] shrink-0 ${statusBg}`}>{statusLabel}</Badge>
+                            </div>
+                            {p.description && (
+                              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{p.description}</p>
+                            )}
+                            <div className="flex items-center gap-3 text-[11px] text-gray-400 flex-wrap">
+                              {p.priorityText && <span className="font-medium">{p.priorityText}</span>}
+                              {p.businessUnit && p.businessUnit !== 'General' && <span>{p.businessUnit}</span>}
+                              {p.startDate && <span>{new Date(p.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
+                              {p.endDate && <span>→ {new Date(p.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {projects.length > 12 && (
+                      <p className="text-center text-xs text-gray-400 pt-2">Showing 12 of {projects.length} projects from Palantir</p>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
-
-            {/* AI Executive Intelligence - Portfolio-level insights and recommendations */}
-            <AIExecutiveInsights />
 
             {/* Agent Action Queue - HITL Dashboard for Agent Recommendations */}
             <AgentActionQueue />
@@ -656,8 +702,6 @@ function DashboardContent() {
 
           {/* Portfolios Tab - BU Programs */}
           <TabsContent value="portfolios" className="space-y-6">
-            {/* AI Executive Intelligence - Portfolio-level insights */}
-            <AIExecutiveInsights />
 
             {/* Portfolio Projects from Palantir */}
             <div className="space-y-4">
