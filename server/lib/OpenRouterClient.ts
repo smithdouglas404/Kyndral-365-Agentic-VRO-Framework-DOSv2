@@ -46,7 +46,7 @@ const FALLBACK_MODEL = 'anthropic/claude-3.5-sonnet';
 
 class OpenRouterClient {
   private apiKey: string | undefined;
-  private baseUrl = 'https://openrouter.ai/api/v1';
+  private baseUrl = process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1';
   private dailyTokenCount: number = 0;
   private dailyTokenResetDate: string = '';
   private dailyTokenLimit: number = 500_000;
@@ -148,7 +148,7 @@ class OpenRouterClient {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
-          'HTTP-Referer': 'https://kyndryl365.ai',
+          'HTTP-Referer': process.env.APP_URL || 'https://kyndryl365.ai',
           'X-Title': 'Kyndryl Clarity',
         },
         body: JSON.stringify({

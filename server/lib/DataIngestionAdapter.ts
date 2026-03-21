@@ -197,7 +197,7 @@ export class AzureDevOpsAdapter {
    */
   async fetchSprintData(iterationPath: string): Promise<SprintData | null> {
     try {
-      const url = `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/wiql?api-version=7.0`;
+      const url = `${process.env.AZURE_DEVOPS_API_URL || 'https://dev.azure.com'}/${this.organization}/${this.project}/_apis/wit/wiql?api-version=7.0`;
 
       const query = {
         query: `SELECT [System.Id], [System.Title], [System.State], [Microsoft.VSTS.Scheduling.StoryPoints]
@@ -224,7 +224,7 @@ export class AzureDevOpsAdapter {
       const workItemIds = data.workItems.map((wi: any) => wi.id);
 
       // Fetch work item details
-      const detailsUrl = `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems?ids=${workItemIds.join(',')}&api-version=7.0`;
+      const detailsUrl = `${process.env.AZURE_DEVOPS_API_URL || 'https://dev.azure.com'}/${this.organization}/${this.project}/_apis/wit/workitems?ids=${workItemIds.join(',')}&api-version=7.0`;
       const detailsResponse = await fetch(detailsUrl, {
         headers: {
           'Authorization': `Basic ${Buffer.from(`:${this.pat}`).toString('base64')}`

@@ -158,7 +158,7 @@ app.use((req, res, next) => {
   httpServer.listen(
     {
       port,
-      host: "0.0.0.0",
+      host: process.env.HOST || "0.0.0.0",
       reusePort: true,
     },
     async () => {
@@ -291,7 +291,7 @@ app.use((req, res, next) => {
       });
 
       setupProcessHandlers(httpServer, cleanupCallbacks, {
-        gracefulShutdownTimeout: 30000, // 30 seconds
+        gracefulShutdownTimeout: parseInt(process.env.GRACEFUL_SHUTDOWN_TIMEOUT || "30000", 10), // 30 seconds
         healthCheckInterval: 60000, // 1 minute
         hangingProcessTimeout: 300000, // 5 minutes
       });

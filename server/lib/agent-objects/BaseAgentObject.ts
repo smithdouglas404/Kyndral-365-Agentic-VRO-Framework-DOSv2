@@ -41,7 +41,7 @@ export class BaseAgentObject {
     this.agentType = config.agentType;
     this.entityId = config.entityId;
     this.rulesService = config.rulesService;
-    this.mem0Endpoint = config.mem0Endpoint || 'http://localhost:5000/api/mem0';
+    this.mem0Endpoint = config.mem0Endpoint || process.env.MEM0_API_URL || 'http://localhost:5000/api/mem0';
 
     // Load attributes from registry
     this.attributes = new Map();

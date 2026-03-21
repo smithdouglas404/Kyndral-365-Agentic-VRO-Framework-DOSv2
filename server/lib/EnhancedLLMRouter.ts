@@ -559,7 +559,7 @@ export class EnhancedLLMRouter {
     const timeoutId = timeout ? setTimeout(() => controller.abort(), timeout) : null;
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.openrouterApiKey}`,

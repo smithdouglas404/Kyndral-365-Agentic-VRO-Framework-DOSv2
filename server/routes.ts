@@ -3156,7 +3156,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const divisions = await storage.getDivisions();
 
       // Get real financial data from agent insights
-      const financialResponse = await fetch('http://localhost:5000/api/agent-insights/financial');
+      const financialResponse = await fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:5000'}/api/agent-insights/financial`);
       let agentData: any = null;
       if (financialResponse.ok) {
         agentData = await financialResponse.json();
@@ -3220,8 +3220,8 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       const projects = await storage.getProjects();
 
       // Get real financial and value insights from agents
-      const financialResponse = await fetch('http://localhost:5000/api/agent-insights/financial');
-      const valueResponse = await fetch('http://localhost:5000/api/agent-insights/value');
+      const financialResponse = await fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:5000'}/api/agent-insights/financial`);
+      const valueResponse = await fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:5000'}/api/agent-insights/value`);
 
       let financialData: any = null;
       let valueData: any = null;

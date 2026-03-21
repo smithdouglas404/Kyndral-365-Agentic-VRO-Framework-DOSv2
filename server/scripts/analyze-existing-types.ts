@@ -1,5 +1,5 @@
 const token = process.env.PALANTIR_TOKEN;
-const host = 'https://ssg.usw-17.palantirfoundry.com';
+const host = process.env.PALANTIR_HOSTNAME || 'https://ssg.usw-17.palantirfoundry.com';
 const ontologyRid = process.env.PALANTIR_ONTOLOGY_RID;
 
 async function main() {

@@ -13,14 +13,14 @@ async function main() {
   
   // Try to get more details about the existing AtlasProject to understand its backing
   console.log('Fetching full metadata for AtlasProject...');
-  const baseUrl = 'https://ssg.usw-17.palantirfoundry.com/api/v2';
+  const baseUrl = `https://${process.env.PALANTIR_HOSTNAME || 'ssg.usw-17.palantirfoundry.com'}/api/v2`;
   const token = process.env.PALANTIR_TOKEN;
   
   // Try the admin endpoint to see object type definition with datasource
   const adminUrls = [
     `${baseUrl}/ontologies/${ontologyRid}/objectTypes/AtlasProject/fullMetadata`,
     `${baseUrl}/admin/ontologies/${ontologyRid}/objectTypes/AtlasProject`,
-    `https://ssg.usw-17.palantirfoundry.com/ontology-metadata/api/ontology/${ontologyRid}/objectType/AtlasProject`,
+    `https://${process.env.PALANTIR_HOSTNAME || 'ssg.usw-17.palantirfoundry.com'}/ontology-metadata/api/ontology/${ontologyRid}/objectType/AtlasProject`,
   ];
   
   for (const url of adminUrls) {

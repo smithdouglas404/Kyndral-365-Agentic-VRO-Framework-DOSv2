@@ -3,9 +3,9 @@
  */
 
 import { AdminLayout } from '@/components/AdminLayout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Save, Mail, Bell, Calendar } from 'lucide-react';
+import { Settings, Save, Mail, Bell, Calendar, LayoutDashboard } from 'lucide-react';
 
 export default function SystemSettings() {
   const queryClient = useQueryClient();
@@ -189,6 +189,9 @@ export default function SystemSettings() {
             </button>
           </div>
 
+          {/* Dashboard Mode */}
+          <DashboardModeToggle />
+
           {/* Notification Settings */}
           <div className="bg-white dark:bg-slate-800 rounded-lg border p-6">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -223,5 +226,81 @@ export default function SystemSettings() {
         </div>
       </div>
     </AdminLayout>
+  );
+}
+
+function DashboardModeToggle() {
+  const queryClient = useQueryClient();
+
+  const { data: currentMode, isLoading } = useQuery({
+    queryKey: ['/api/config/dashboard_mode'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/config/dashboard_mode');
+        if (!res.ok) return 'custom';
+        const data = await res.json();
+        return data.value || 'custom';
+      } catch {
+        return 'custom';
+      }
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async (mode: string) => {
+      const res = await fetch('/api/config/dashboard_mode', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          value: mode,
+          description: 'Dashboard widget mode: custom (user picks) or dynamic (auto based on data)',
+          category: 'dashboard',
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to save dashboard mode');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/config/dashboard_mode'] });
+    },
+  });
+
+  const mode = currentMode || 'custom';
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-lg border p-6">
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <LayoutDashboard className="w-5 h-5" />
+        Dashboard Mode
+      </h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Choose how the overview dashboard displays widgets.
+      </p>
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          onClick={() => toggleMutation.mutate('custom')}
+          disabled={toggleMutation.isPending}
+          className={`p-4 rounded-lg border-2 text-left transition-all ${mode === 'custom' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
+          data-testid="button-mode-custom"
+        >
+          <p className="font-bold text-sm mb-1">Custom Mode</p>
+          <p className="text-xs text-gray-500">Users choose which widgets to show/hide and can drag to reorder. Layout is saved per user.</p>
+          {mode === 'custom' && <span className="inline-block mt-2 text-xs font-semibold text-blue-600">Active</span>}
+        </button>
+        <button
+          onClick={() => toggleMutation.mutate('dynamic')}
+          disabled={toggleMutation.isPending}
+          className={`p-4 rounded-lg border-2 text-left transition-all ${mode === 'dynamic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
+          data-testid="button-mode-dynamic"
+        >
+          <p className="font-bold text-sm mb-1">Dynamic Mode</p>
+          <p className="text-xs text-gray-500">Widgets auto-populate based on available Palantir data. Shows only widgets that have data to display.</p>
+          {mode === 'dynamic' && <span className="inline-block mt-2 text-xs font-semibold text-blue-600">Active</span>}
+        </button>
+      </div>
+      {toggleMutation.isPending && (
+        <p className="text-xs text-gray-400 mt-2">Saving...</p>
+      )}
+    </div>
   );
 }

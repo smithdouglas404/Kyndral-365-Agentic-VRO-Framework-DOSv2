@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, ReactNode } from "react";
 import { usePageContext } from "@/contexts/PageContext";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
@@ -42,16 +42,177 @@ import { toast } from "sonner";
 import { ProjectLifecycleCommandCenter } from "@/components/ProjectLifecycleCommandCenter";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { HelpMenu } from "@/components/HelpMenu";
+import { CustomizableDashboard } from "@/components/CustomizableDashboard";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { DashboardMode } from "@/lib/widgetRegistry";
 
 // Design System Colors
 const brandColors = {
-  blue: colors.brand.blue,      // #0072CE - Primary actions, links, navigation
-  teal: colors.brand.teal,      // #00A651 - Positive trends, success states
-  red: colors.brand.red,        // #D50032 - Alerts, errors, negative trends
-  yellow: colors.brand.yellow,  // #FFD700 - Subtle highlights
-  grey500: colors.neutral.grey500, // #757575 - Secondary text
-  grey700: colors.neutral.grey700, // #424242 - Icons
+  blue: colors.brand.blue,
+  teal: colors.brand.teal,
+  red: colors.brand.red,
+  yellow: colors.brand.yellow,
+  grey500: colors.neutral.grey500,
+  grey700: colors.neutral.grey700,
 };
+
+function useDashboardMode() {
+  return useQuery<DashboardMode>({
+    queryKey: ['/api/config/dashboard_mode'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/config/dashboard_mode');
+        if (!res.ok) return 'custom';
+        const data = await res.json();
+        return (data.value === 'dynamic' ? 'dynamic' : 'custom') as DashboardMode;
+      } catch {
+        return 'custom' as DashboardMode;
+      }
+    },
+    staleTime: 60000,
+  });
+}
+
+function PortfolioStatusBreakdownWidget({ projects }: { projects: any[] }) {
+  if (!projects || projects.length === 0) return null;
+  const statusCounts: Record<string, number> = {};
+  projects.forEach((p) => {
+    const st = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
+    statusCounts[st] = (statusCounts[st] || 0) + 1;
+  });
+  const statusColors: Record<string, string> = {
+    'Active': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    'active': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    'In Progress': 'bg-blue-100 text-blue-800 border-blue-300',
+    'Planning': 'bg-violet-100 text-violet-800 border-violet-300',
+    'At Risk': 'bg-amber-100 text-amber-800 border-amber-300',
+    'Complete': 'bg-gray-100 text-gray-800 border-gray-300',
+    'Not Started': 'bg-slate-100 text-slate-700 border-slate-300',
+    'On Track': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    'Critical': 'bg-red-100 text-red-800 border-red-300',
+  };
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+      {Object.entries(statusCounts).sort((a,b) => b[1] - a[1]).map(([st, count]) => (
+        <div key={st} className={`p-3 rounded-lg border text-center ${statusColors[st] || 'bg-gray-100 text-gray-700 border-gray-300'}`} data-testid={`status-badge-${st.toLowerCase().replace(/\s+/g,'-')}`}>
+          <p className="text-2xl font-bold">{count}</p>
+          <p className="text-xs font-medium">{st}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PalantirPortfolioWidget({ projects, projectsLoading, onDrillDown }: { projects: any[]; projectsLoading: boolean; onDrillDown: (type: string, id: string) => void }) {
+  return (
+    <Card className="border-purple-300 bg-gradient-to-r from-purple-50/50 to-blue-50/50">
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-purple-600" />
+          Portfolio from Palantir Ontology
+          <Badge className="bg-purple-600">{projects.length} Projects</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {projectsLoading ? (
+          <div className="text-center py-4">Loading from Palantir...</div>
+        ) : projects.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">No projects found in Palantir</div>
+        ) : (
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {projects.slice(0, 12).map((p) => {
+                const statusLabel = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
+                const statusBg = p.status === 'green' ? 'bg-emerald-100 text-emerald-700' : p.status === 'red' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+                const borderColor = p.status === 'green' ? 'border-l-emerald-500' : p.status === 'red' ? 'border-l-red-500' : 'border-l-amber-500';
+                return (
+                  <div key={p.id} className={`p-4 rounded-lg border border-gray-200 border-l-4 bg-white hover:shadow-md transition-shadow cursor-pointer ${borderColor}`} onClick={() => onDrillDown('project', p.id)} data-testid={`project-card-${p.id}`}>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <p className="font-semibold text-sm leading-tight line-clamp-2" title={p.name}>{p.name}</p>
+                      <Badge variant="outline" className={`text-[10px] shrink-0 ${statusBg}`}>{statusLabel}</Badge>
+                    </div>
+                    {p.description && (
+                      <p className="text-xs text-gray-500 line-clamp-2 mb-2">{p.description}</p>
+                    )}
+                    <div className="flex items-center gap-3 text-[11px] text-gray-400 flex-wrap">
+                      {p.priorityText && <span className="font-medium">{p.priorityText}</span>}
+                      {p.businessUnit && p.businessUnit !== 'General' && <span>{p.businessUnit}</span>}
+                      {p.startDate && <span>{new Date(p.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
+                      {p.endDate && <span>→ {new Date(p.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {projects.length > 12 && (
+              <p className="text-center text-xs text-gray-400 pt-2">Showing 12 of {projects.length} projects from Palantir</p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ValueRealizationWidget({ valueInsights }: { valueInsights: any }) {
+  if (!valueInsights) return null;
+  return (
+    <Card className="border-purple-200 bg-purple-50/30">
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Brain className="h-5 w-5 text-purple-600" />
+          Agent-Calculated Value Realization Metrics
+          <Badge variant="outline" className="ml-2 text-xs">Real-time from Value Realization Agent</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-lg border">
+            <p className="text-xs text-gray-500 mb-1">Total Planned Value</p>
+            <p className="text-2xl font-bold text-blue-600">${(valueInsights.aggregated.totalPlannedValue / 1000000).toFixed(1)}M</p>
+            <p className="text-xs text-gray-500 mt-1">Across {valueInsights.aggregated.totalProjects} projects</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <p className="text-xs text-gray-500 mb-1">Total Actual Value</p>
+            <p className="text-2xl font-bold text-green-600">${(valueInsights.aggregated.totalActualValue / 1000000).toFixed(1)}M</p>
+            <p className="text-xs text-gray-500 mt-1">Benefits realized to date</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <p className="text-xs text-gray-500 mb-1">Value Leakage</p>
+            <p className={`text-2xl font-bold ${valueInsights.aggregated.totalValueLeakage > 1000000 ? 'text-red-600' : 'text-amber-600'}`}>
+              ${(valueInsights.aggregated.totalValueLeakage / 1000000).toFixed(1)}M
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{((valueInsights.aggregated.totalValueLeakage / valueInsights.aggregated.totalPlannedValue) * 100).toFixed(1)}% of planned value</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <p className="text-xs text-gray-500 mb-1">Avg Realization Rate</p>
+            <p className={`text-2xl font-bold ${valueInsights.aggregated.avgRealizationRate >= 0.9 ? 'text-green-600' : valueInsights.aggregated.avgRealizationRate >= 0.75 ? 'text-amber-600' : 'text-red-600'}`}>
+              {(valueInsights.aggregated.avgRealizationRate * 100).toFixed(0)}%
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{valueInsights.aggregated.avgRealizationRate >= 0.9 ? 'Excellent' : valueInsights.aggregated.avgRealizationRate >= 0.75 ? 'Acceptable' : 'Needs attention'}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          <div className="bg-white p-4 rounded-lg border border-green-200">
+            <p className="text-xs text-gray-500 mb-1">On Track</p>
+            <p className="text-2xl font-bold text-green-600">{valueInsights.aggregated.projectsOnTrack}</p>
+            <p className="text-xs text-gray-500 mt-1">{((valueInsights.aggregated.projectsOnTrack / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-amber-200">
+            <p className="text-xs text-gray-500 mb-1">At Risk</p>
+            <p className="text-2xl font-bold text-amber-600">{valueInsights.aggregated.projectsAtRisk}</p>
+            <p className="text-xs text-gray-500 mt-1">{((valueInsights.aggregated.projectsAtRisk / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-red-200">
+            <p className="text-xs text-gray-500 mb-1">High Risk</p>
+            <p className="text-2xl font-bold text-red-600">{valueInsights.aggregated.projectsHighRisk}</p>
+            <p className="text-xs text-gray-500 mt-1">{((valueInsights.aggregated.projectsHighRisk / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 
 // Palantir-driven VRO Metrics Summary
@@ -408,6 +569,37 @@ function NavBar() {
   );
 }
 
+function OverviewWidgetDashboard({ projects, projectsLoading, valueInsights, onDrillDown }: {
+  projects: any[];
+  projectsLoading: boolean;
+  valueInsights: any;
+  onDrillDown: (type: string, id: string) => void;
+}) {
+  const { data: dashboardMode = 'custom' } = useDashboardMode();
+
+  const widgetComponents = useMemo<Record<string, ReactNode>>(() => {
+    const components: Record<string, ReactNode> = {
+      'vro-metrics-summary': <VROMetricsSummary />,
+      'portfolio-status-breakdown': !projectsLoading && projects.length > 0
+        ? <PortfolioStatusBreakdownWidget projects={projects} />
+        : null,
+      'palantir-portfolio': <PalantirPortfolioWidget projects={projects} projectsLoading={projectsLoading} onDrillDown={onDrillDown} />,
+      'agent-action-queue': <AgentActionQueue />,
+      'value-realization-metrics': <ValueRealizationWidget valueInsights={valueInsights} />,
+      'unified-metrics': <UnifiedMetricsSection onDrillDown={onDrillDown} />,
+    };
+    return components;
+  }, [projects, projectsLoading, valueInsights, onDrillDown]);
+
+  return (
+    <CustomizableDashboard
+      activeTab="overview"
+      widgetComponents={widgetComponents}
+      onDrillDown={onDrillDown}
+    />
+  );
+}
+
 function DashboardContent() {
   const [location, navigate] = useLocation();
   const { setPageContext } = usePageContext();
@@ -526,178 +718,14 @@ function DashboardContent() {
 
         {/* Tab Content - Navigation handled by sidebar */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          {/* Overview Tab */}
+          {/* Overview Tab - Customizable Widget Dashboard */}
           <TabsContent value="overview" className="space-y-8">
-            <VROMetricsSummary />
-
-            {/* Portfolio Status Breakdown */}
-            {!projectsLoading && projects.length > 0 && (() => {
-              const statusCounts: Record<string, number> = {};
-              projects.forEach((p) => {
-                const st = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
-                statusCounts[st] = (statusCounts[st] || 0) + 1;
-              });
-              const statusColors: Record<string, string> = {
-                'Active': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                'active': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                'In Progress': 'bg-blue-100 text-blue-800 border-blue-300',
-                'Planning': 'bg-violet-100 text-violet-800 border-violet-300',
-                'At Risk': 'bg-amber-100 text-amber-800 border-amber-300',
-                'Complete': 'bg-gray-100 text-gray-800 border-gray-300',
-                'Not Started': 'bg-slate-100 text-slate-700 border-slate-300',
-                'On Track': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                'Critical': 'bg-red-100 text-red-800 border-red-300',
-              };
-              return (
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-                  {Object.entries(statusCounts).sort((a,b) => b[1] - a[1]).map(([st, count]) => (
-                    <div key={st} className={`p-3 rounded-lg border text-center ${statusColors[st] || 'bg-gray-100 text-gray-700 border-gray-300'}`} data-testid={`status-badge-${st.toLowerCase().replace(/\s+/g,'-')}`}>
-                      <p className="text-2xl font-bold">{count}</p>
-                      <p className="text-xs font-medium">{st}</p>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
-
-            {/* Palantir Portfolio - Project List */}
-            <Card className="border-purple-300 bg-gradient-to-r from-purple-50/50 to-blue-50/50">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-purple-600" />
-                  Portfolio from Palantir Ontology
-                  <Badge className="bg-purple-600">{projects.length} Projects</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {projectsLoading ? (
-                  <div className="text-center py-4">Loading from Palantir...</div>
-                ) : projects.length === 0 ? (
-                  <div className="text-center py-4 text-gray-500">No projects found in Palantir</div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {projects.slice(0, 12).map((p) => {
-                        const statusLabel = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
-                        const statusBg = p.status === 'green' ? 'bg-emerald-100 text-emerald-700' : p.status === 'red' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
-                        const borderColor = p.status === 'green' ? 'border-l-emerald-500' : p.status === 'red' ? 'border-l-red-500' : 'border-l-amber-500';
-                        return (
-                          <div key={p.id} className={`p-4 rounded-lg border border-gray-200 border-l-4 bg-white hover:shadow-md transition-shadow cursor-pointer ${borderColor}`} onClick={() => handleDrillDown('project', p.id)} data-testid={`project-card-${p.id}`}>
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <p className="font-semibold text-sm leading-tight line-clamp-2" title={p.name}>{p.name}</p>
-                              <Badge variant="outline" className={`text-[10px] shrink-0 ${statusBg}`}>{statusLabel}</Badge>
-                            </div>
-                            {p.description && (
-                              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{p.description}</p>
-                            )}
-                            <div className="flex items-center gap-3 text-[11px] text-gray-400 flex-wrap">
-                              {p.priorityText && <span className="font-medium">{p.priorityText}</span>}
-                              {p.businessUnit && p.businessUnit !== 'General' && <span>{p.businessUnit}</span>}
-                              {p.startDate && <span>{new Date(p.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
-                              {p.endDate && <span>→ {new Date(p.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {projects.length > 12 && (
-                      <p className="text-center text-xs text-gray-400 pt-2">Showing 12 of {projects.length} projects from Palantir</p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Agent Action Queue - HITL Dashboard for Agent Recommendations */}
-            <AgentActionQueue />
-
-            {/* Agent-Calculated Value Realization Metrics */}
-            {valueInsights && (
-              <Card className="border-purple-200 bg-purple-50/30">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-purple-600" />
-                    Agent-Calculated Value Realization Metrics
-                    <Badge variant="outline" className="ml-2 text-xs">
-                      Real-time from Value Realization Agent
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-lg border">
-                      <p className="text-xs text-gray-500 mb-1">Total Planned Value</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        ${(valueInsights.aggregated.totalPlannedValue / 1000000).toFixed(1)}M
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Across {valueInsights.aggregated.totalProjects} projects
-                      </p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <p className="text-xs text-gray-500 mb-1">Total Actual Value</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        ${(valueInsights.aggregated.totalActualValue / 1000000).toFixed(1)}M
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Benefits realized to date
-                      </p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <p className="text-xs text-gray-500 mb-1">Value Leakage</p>
-                      <p className={`text-2xl font-bold ${valueInsights.aggregated.totalValueLeakage > 1000000 ? 'text-red-600' : 'text-amber-600'}`}>
-                        ${(valueInsights.aggregated.totalValueLeakage / 1000000).toFixed(1)}M
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {((valueInsights.aggregated.totalValueLeakage / valueInsights.aggregated.totalPlannedValue) * 100).toFixed(1)}% of planned value
-                      </p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <p className="text-xs text-gray-500 mb-1">Avg Realization Rate</p>
-                      <p className={`text-2xl font-bold ${valueInsights.aggregated.avgRealizationRate >= 0.9 ? 'text-green-600' : valueInsights.aggregated.avgRealizationRate >= 0.75 ? 'text-amber-600' : 'text-red-600'}`}>
-                        {(valueInsights.aggregated.avgRealizationRate * 100).toFixed(0)}%
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {valueInsights.aggregated.avgRealizationRate >= 0.9 ? 'Excellent' : valueInsights.aggregated.avgRealizationRate >= 0.75 ? 'Acceptable' : 'Needs attention'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    <div className="bg-white p-4 rounded-lg border border-green-200">
-                      <p className="text-xs text-gray-500 mb-1">On Track</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {valueInsights.aggregated.projectsOnTrack}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {((valueInsights.aggregated.projectsOnTrack / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
-                      </p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-amber-200">
-                      <p className="text-xs text-gray-500 mb-1">At Risk</p>
-                      <p className="text-2xl font-bold text-amber-600">
-                        {valueInsights.aggregated.projectsAtRisk}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {((valueInsights.aggregated.projectsAtRisk / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
-                      </p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-red-200">
-                      <p className="text-xs text-gray-500 mb-1">High Risk</p>
-                      <p className="text-2xl font-bold text-red-600">
-                        {valueInsights.aggregated.projectsHighRisk}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {((valueInsights.aggregated.projectsHighRisk / valueInsights.aggregated.totalProjects) * 100).toFixed(0)}% of portfolio
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Unified Metrics Section - VRO and PMO side by side */}
-            <UnifiedMetricsSection onDrillDown={handleDrillDown} />
-
+            <OverviewWidgetDashboard
+              projects={projects}
+              projectsLoading={projectsLoading}
+              valueInsights={valueInsights}
+              onDrillDown={handleDrillDown}
+            />
           </TabsContent>
 
           {/* Portfolios Tab - BU Programs */}
