@@ -17,3 +17,5 @@ async function main() {
   console.log('Total: ' + actions.length + ' actions');
 }
 main().catch(console.error);
+
+export {};
