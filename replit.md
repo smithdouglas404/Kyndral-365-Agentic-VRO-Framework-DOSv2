@@ -4,7 +4,7 @@
 
 ## Overview
 
-Kyndryl Clarity is a Level 4 fully autonomous, self-learning multi-agent platform designed for enterprise transformation management. It employs 11 specialized Deep Agents (10 domain + 1 Notification gateway) that continuously monitor, learn, communicate, and act without human intervention. The system prioritizes cost optimization through a 3-tier AI model approach and uses Palantir AIP as the **super-MCP** — ALL data reads flow through Palantir Ontology first, with PostgreSQL as fallback only. Zero LangChain dependency. Rulebricks and Palantir Functions serve as the rules engine. The Notification Agent (11th agent) acts as the single A2A gateway for all HITL approvals and external notifications.
+Kyndryl Clarity is a Level 4 fully autonomous, self-learning multi-agent platform designed for enterprise transformation management. It employs 11 specialized Deep Agents (10 domain + 1 Notification gateway) that continuously monitor, learn, communicate, and act without human intervention. The system prioritizes cost optimization through a 3-tier AI model approach and uses Palantir AIP as the **super-MCP** — ALL project data reads flow through Palantir Ontology exclusively (zero PostgreSQL for project data). PostgreSQL is used only for auth, config, and agent state. Zero LangChain dependency. Rulebricks and Palantir Functions serve as the rules engine. The Notification Agent (11th agent) acts as the single A2A gateway for all HITL approvals and external notifications.
 
 ## User Preferences
 

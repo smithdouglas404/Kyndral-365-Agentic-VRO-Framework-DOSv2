@@ -1,34 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useOCMReadiness, useOCMStakeholders } from "@/hooks/useDashboardData";
+/**
+ * OCM DASHBOARD
+ *
+ * Organizational Change Management console using CustomizableDashboard.
+ */
+
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users, BookOpen, MessageSquare, TrendingUp,
-  Award, ChevronDown, ChevronRight,
-  Bot, Building2, Brain
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Brain } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
-import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
-import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useAgentData } from '@/hooks/useAgentData';
-import { AttributeStatusBadge } from '@/components/AttributeStatusBadge';
-import { getAttributeMap, parseAttributeNumber, parseAttributeText, useAgentAttributes } from '@/hooks/useAgentAttributes';
-import { 
-  getTrainingProgramsFromOKRs,
-  getCompanyMetrics,
-  type DataMode,
-  type TransformedReadinessMetric,
-  type TransformedStakeholderGroup,
-  type TransformedTrainingProgram
-} from '@/lib/agentDataTransformers';
-import { AIRecommendations } from "@/components/AIRecommendations";
-import { useDashboardMetrics, useOntologyProjects } from '@/hooks/usePalantirOntology';
+import { CustomizableDashboard } from '@/components/CustomizableDashboard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { AIRecommendations } from '@/components/AIRecommendations';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { useOCMReadiness, useOCMStakeholders } from '@/hooks/useDashboardData';
+import type { DataMode, TransformedReadinessMetric, TransformedStakeholderGroup } from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -45,75 +35,42 @@ function NavBar() {
   );
 }
 
-function ReadinessMetricCard({ metric, mode }: { metric: TransformedReadinessMetric, mode: DataMode }) {
-  const [expanded, setExpanded] = useState(false);
-  const progressPercent = (metric.score / metric.target) * 100;
+// Simple Change Readiness Widget
+function ChangeReadinessWidget({ mode }: { mode: DataMode }) {
+  const { data: readinessData = [] } = useOCMReadiness();
 
   return (
-    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`readiness-${metric.category.toLowerCase()}`}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
-            <span className="font-semibold">{metric.category}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-pink-600">{metric.score}%</span>
-            <span className="text-xs text-gray-400">/ {metric.target}%</span>
-          </div>
-        </div>
-        <Progress value={progressPercent > 100 ? 100 : progressPercent} className="h-2" />
-        <p className="text-xs text-gray-500 mt-2">{metric.description}</p>
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className={`p-3 rounded-lg border ${mode === 'VRO' ? 'bg-purple-50 border-purple-100' : 'bg-gray-100 border-gray-200'}`}>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Bot className={`h-4 w-4 ${mode === 'VRO' ? 'text-purple-500' : 'text-gray-400'}`} />
-                  {mode === 'VRO' ? 'AI-Driven Insight' : 'Current Status'}
-                </h4>
-                <p className="text-sm text-gray-700">{metric.aiInsight}</p>
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center justify-between">
+          <span>Change Readiness (ADKAR)</span>
+          <Badge variant="outline" className="text-xs">Assessment</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {(readinessData as TransformedReadinessMetric[]).map((metric, i) => (
+            <div key={i} className="p-3 border rounded-lg bg-white">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-sm">{metric.category}</span>
+                <span className="text-lg font-bold text-pink-600">{metric.score}%</span>
               </div>
-
-              {mode === 'VRO' && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  <div className="bg-white p-2 rounded border text-center">
-                    <p className="text-xs text-gray-500">Trend</p>
-                    <p className="font-bold text-green-600">+{metric.trend}%</p>
-                  </div>
-                  <div className="bg-white p-2 rounded border text-center">
-                    <p className="text-xs text-gray-500">Velocity</p>
-                    <p className="font-bold text-blue-600">2.3x</p>
-                  </div>
-                  <div className="bg-white p-2 rounded border text-center">
-                    <p className="text-xs text-gray-500">Prediction</p>
-                    <p className="font-bold text-purple-600">On track</p>
-                  </div>
-                </div>
-              )}
+              <Progress value={Math.min((metric.score / metric.target) * 100, 100)} className="h-2" />
+              <p className="text-xs text-gray-500 mt-2">{metric.description}</p>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          ))}
+          {readinessData.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">No readiness data available</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-function StakeholderCard({ group, mode }: { group: TransformedStakeholderGroup, mode: DataMode }) {
-  const [expanded, setExpanded] = useState(false);
+// Simple Stakeholder Groups Widget
+function StakeholderGroupsWidget({ mode }: { mode: DataMode }) {
+  const { data: stakeholderData = [] } = useOCMStakeholders();
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
@@ -126,134 +83,44 @@ function StakeholderCard({ group, mode }: { group: TransformedStakeholderGroup, 
   };
 
   return (
-    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`stakeholder-${group.name.toLowerCase().replace(/\s+/g, '-')}`}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
-            <span className="font-semibold">{group.name}</span>
-          </div>
-          <Badge className={getSentimentColor(group.sentiment)}>{group.sentiment}</Badge>
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500">{group.count.toLocaleString()} people</span>
-          <span className="font-bold text-blue-600">{group.engagement}% engaged</span>
-        </div>
-        <Progress value={group.engagement} className="h-1.5 mt-2" />
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className={`p-3 rounded-lg border ${mode === 'VRO' ? 'bg-blue-50 border-blue-100' : 'bg-gray-100 border-gray-200'}`}>
-                <h4 className="font-semibold text-sm mb-2">Engagement Actions</h4>
-                <p className="text-sm text-gray-700">{group.aiActions}</p>
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center justify-between">
+          <span>Stakeholder Groups</span>
+          <Badge variant="outline" className="text-xs">Engagement</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {(stakeholderData as TransformedStakeholderGroup[]).map((group, i) => (
+            <div key={i} className="p-3 border rounded-lg bg-white">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-sm">{group.name}</span>
+                <Badge className={getSentimentColor(group.sentiment)}>{group.sentiment}</Badge>
               </div>
-
-              {mode === 'VRO' && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <div className="bg-white p-2 rounded border">
-                    <p className="text-xs text-gray-500">Response Rate</p>
-                    <p className="font-bold text-green-600">{Math.round(group.engagement * 1.1)}%</p>
-                  </div>
-                  <div className="bg-white p-2 rounded border">
-                    <p className="text-xs text-gray-500">NPS Change</p>
-                    <p className="font-bold text-blue-600">+{Math.round(group.engagement / 5)}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function TrainingCard({ program, mode }: { program: TransformedTrainingProgram, mode: DataMode }) {
-  const [expanded, setExpanded] = useState(false);
-  const completionRate = Math.round((program.completed / program.enrolled) * 100);
-
-  return (
-    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`training-${program.name.toLowerCase().replace(/\s+/g, '-')}`}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
-            <span className="font-semibold text-sm">{program.name}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Award className="h-4 w-4 text-amber-500" />
-            <span className="font-bold">{program.satisfaction.toFixed(1)}</span>
-          </div>
-        </div>
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>{program.completed.toLocaleString()} / {program.enrolled.toLocaleString()} completed</span>
-          <span className="font-bold text-green-600">{completionRate}%</span>
-        </div>
-        <Progress value={completionRate} className="h-1.5 mt-2" />
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Format</p>
-                  <p className="font-semibold text-sm">{program.format}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Duration</p>
-                  <p className="font-semibold text-sm">{program.duration}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Reportable Segment</p>
-                  <p className="font-semibold text-sm">{program.division}</p>
-                </div>
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>{group.count.toLocaleString()} people</span>
+                <span className="font-bold text-blue-600">{group.engagement}% engaged</span>
               </div>
+              <Progress value={group.engagement} className="h-1.5 mt-2" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          ))}
+          {stakeholderData.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">No stakeholder data available</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 export default function OCMDashboard() {
-  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [dataMode, setDataMode] = useState<DataMode>('VRO');
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
-  const liveData = useAgentData('ocm');
-  const { data: palantirMetrics } = useDashboardMetrics();
-  const { data: palantirProjects = [] } = useOntologyProjects();
-  const { data: ocmAttributes } = useAgentAttributes('ocm');
-  const { data: companyAttributes } = useAgentAttributes('company');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
-  // Update page context for Ask PM
   useEffect(() => {
     setPageContext({
       pageType: 'dashboard',
@@ -267,40 +134,23 @@ export default function OCMDashboard() {
     setDrillDownEntity({ type: entityType, id: entityId });
     setDrillDownOpen(true);
   };
-  
-  const trainingPrograms = getTrainingProgramsFromOKRs(dataMode);
-  const companyMetrics = getCompanyMetrics();
-  
-  const ocmMap = getAttributeMap(ocmAttributes?.attributes || []);
-  const companyMap = getAttributeMap(companyAttributes?.attributes || []);
 
-  const avgReadiness = Math.round(readinessMetrics.reduce((sum, m) => sum + m.score, 0) / readinessMetrics.length);
-  const totalCompleted = trainingPrograms.reduce((sum, p) => sum + p.completed, 0);
-  const totalEnrolled = trainingPrograms.reduce((sum, p) => sum + p.enrolled, 0);
-  const avgSatisfaction = (trainingPrograms.reduce((sum, p) => sum + p.satisfaction, 0) / trainingPrograms.length).toFixed(1);
-
-  const positiveStakeholders = stakeholderGroups.filter(g => g.sentiment === 'positive').length;
-
-  const readinessAttr = ocmMap.stakeholderReadinessScore;
-  const trainingAttr = ocmMap.trainingCompletionRate;
-  const sentimentAttr = ocmMap.sentiment_trend;
-  const supportAttr = ocmMap.impactedUsersSupportLevel;
-  const employeeAttr = companyMap.employee_count;
-
-  const readinessValue = parseAttributeNumber(readinessAttr?.value);
-  const trainingValue = parseAttributeNumber(trainingAttr?.value);
-  const sentimentValue = parseAttributeText(sentimentAttr?.value);
-  const supportValue = parseAttributeNumber(supportAttr?.value);
-  const employeeValue = parseAttributeNumber(employeeAttr?.value);
+  // Map widget IDs to their components
+  const widgetComponents = useMemo(() => ({
+    'ocm-change-readiness': <ChangeReadinessWidget mode={dataMode} />,
+    'ocm-stakeholder-groups': <StakeholderGroupsWidget mode={dataMode} />,
+    'cross-agent-collaboration': <CrossAgentActivityFeed maxItems={5} compact />,
+  }), [dataMode]);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
-      
+
       <div className="flex">
         <AgentSidebar />
-        
+
         <main className="flex-1 px-8 py-8">
+          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">
@@ -339,171 +189,20 @@ export default function OCMDashboard() {
             </div>
           </div>
 
-          {palantirMetrics && (
-            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50/30 to-pink-50/30" data-testid="palantir-ocm-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
-                  <span className="text-sm font-semibold text-purple-700">Palantir Ontology</span>
-                  <Badge variant="outline" className="text-[10px]">{palantirProjects.length} projects tracked</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-pink-600">{palantirMetrics.totalProjects}</p>
-                    <p className="text-[10px] text-gray-500">Total Projects</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-green-600">{palantirMetrics.onTrackProjects}</p>
-                    <p className="text-[10px] text-gray-500">Adopted</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-amber-600">{palantirMetrics.atRiskProjects}</p>
-                    <p className="text-[10px] text-gray-500">At Risk</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-purple-600">{Math.round(palantirMetrics.avgProgress)}%</p>
-                    <p className="text-[10px] text-gray-500">Avg Readiness</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-readiness')} data-testid="metric-readiness">
-              {liveData.metrics.activeAlerts > 0 && (
-                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Change Readiness</p>
-                    <p className="text-2xl font-bold text-pink-600">{readinessValue ?? (liveData.metrics.avgConfidence || avgReadiness)}%</p>
-                  </div>
-                  {readinessAttr && <AttributeStatusBadge availability={readinessAttr.availability} />}
-                </div>
-                <Progress value={liveData.metrics.avgConfidence || avgReadiness} className="h-1.5 mt-2" />
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-training')} data-testid="metric-training">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Training Completion</p>
-                    <p className="text-2xl font-bold text-blue-600">{trainingValue ?? Math.round((totalCompleted / totalEnrolled) * 100)}%</p>
-                  </div>
-                  {trainingAttr && <AttributeStatusBadge availability={trainingAttr.availability} />}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">{totalCompleted.toLocaleString()} completed</p>
-              </CardContent>
-            </Card>
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-sentiment')} data-testid="metric-sentiment">
-              {liveData.metrics.atRiskProjects > 0 && (
-                <AlertBubble count={liveData.metrics.atRiskProjects} severity="critical" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Stakeholder Sentiment</p>
-                    <p className="text-2xl font-bold text-green-600">{sentimentValue ?? `${positiveStakeholders}/${stakeholderGroups.length}`}</p>
-                  </div>
-                  {sentimentAttr && <AttributeStatusBadge availability={sentimentAttr.availability} />}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">positive groups</p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-satisfaction')} data-testid="metric-satisfaction">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Avg Satisfaction</p>
-                    <p className="text-2xl font-bold text-amber-600">{supportValue ?? avgSatisfaction}/5</p>
-                  </div>
-                  {supportAttr && <AttributeStatusBadge availability={supportAttr.availability} />}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">training rating</p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'ocm-staff')} data-testid="metric-staff">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Impacted Staff</p>
-                    <p className="text-2xl font-bold text-purple-600">{employeeValue?.toLocaleString() || companyMetrics.totalEmployees.toLocaleString()}</p>
-                  </div>
-                  {employeeAttr && <AttributeStatusBadge availability={employeeAttr.availability} />}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">Enterprise employees</p>
-              </CardContent>
-            </Card>
-          </div>
-
+          {/* AI Recommendations */}
           <div className="mb-8">
             <AIRecommendations agentType="ocm" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>ADKAR Readiness</span>
-                  <Badge variant="outline" className="text-xs">Click to expand</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {readinessMetrics.map((metric, i) => (
-                    <ReadinessMetricCard key={i} metric={metric} mode={dataMode} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          {/* Customizable Dashboard */}
+          <CustomizableDashboard
+            activeTab="ocm"
+            dashboardType="ocm"
+            widgetComponents={widgetComponents}
+            onDrillDown={handleDrillDown}
+          />
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Segment Stakeholders</span>
-                  <Badge variant="outline" className="text-xs">From Enterprise Business Units</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {stakeholderGroups.map((group, i) => (
-                    <StakeholderCard key={i} group={group} mode={dataMode} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Training Programs</span>
-                  <Badge variant="outline" className="text-xs">From OKRs</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {trainingPrograms.map((program, i) => (
-                    <TrainingCard key={i} program={program} mode={dataMode} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                Cross-Agent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CrossAgentActivityFeed maxItems={5} compact />
-            </CardContent>
-          </Card>
-
+          {/* Cross-Agent Collaboration */}
           <CrossAgentCollaboration />
         </main>
       </div>

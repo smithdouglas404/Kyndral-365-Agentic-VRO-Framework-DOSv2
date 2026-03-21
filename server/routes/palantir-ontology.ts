@@ -1,26 +1,14 @@
 /**
  * PALANTIR ONTOLOGY API ROUTES
  *
- * Serves dashboard data combining Palantir Foundry ontology with PostgreSQL.
- * - Core project structure from Palantir
- * - Detailed data (budget, EVM, SAFe) from PostgreSQL
+ * 100% Palantir Foundry — zero PostgreSQL for project data.
+ * All reads: AtlasProject, AtlasBudget, AtlasRisk, AtlasObjective, AtlasKeyResult, AtlasDependency.
  *
  * These routes map to the usePalantirOntology.ts hooks on the frontend.
  */
 
 import express, { type RequestHandler } from 'express';
 import { getPalantirService } from '../mcp/MCPServiceFactory.js';
-import { db } from '../db.js';
-import {
-  projects,
-  features,
-  stories,
-  tasks,
-  enterpriseRisks,
-  divisionKpis,
-  divisionOkrs,
-} from '../../shared/schema.js';
-import { eq, sql, count, sum, avg } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -188,7 +176,7 @@ router.get('/metrics', (async (_req, res) => {
 }) as RequestHandler);
 
 // ============================================================================
-// PROJECTS - Reads from PostgreSQL for full 360° data
+// PROJECTS - 100% Palantir with AtlasBudget joins
 // ============================================================================
 
 router.get('/projects', (async (req, res) => {
@@ -589,37 +577,46 @@ router.get('/agent/:agentType', (async (req, res) => {
 
 router.get('/features', (async (req, res) => {
   try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
     const { projectId, status } = req.query;
 
-    // Fetch from PostgreSQL
-    let featureList = await db.select().from(features);
+    const result = await palantir.listObjects('AtlasProject', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    let featureList = (result.data || [])
+      .filter((p: any) => {
+        const name = p.name || '';
+        const id = p.projectId || p.__primaryKey || '';
+        return name.startsWith('[Feature]') || id.startsWith('feature-');
+      })
+      .map((f: any) => ({
+        id: f.projectId || f.__primaryKey,
+        name: (f.name || '').replace('[Feature] ', ''),
+        description: f.description || '',
+        status: f.status || 'In Progress',
+        projectId: f.transformationId || '',
+        storyPoints: 0,
+        completedPoints: 0,
+        priority: f.priority || 'Medium',
+        targetPi: '',
+        wsjfScore: 0,
+        progress: (f.milestoneProgress || 0) * 100,
+      }));
 
     if (projectId) {
-      featureList = featureList.filter((f) => f.projectId === projectId);
+      featureList = featureList.filter((f: any) => f.projectId === projectId);
     }
     if (status) {
-      featureList = featureList.filter((f) =>
-        f.status?.toLowerCase() === (status as string).toLowerCase()
+      featureList = featureList.filter((f: any) =>
+        f.status.toLowerCase() === (status as string).toLowerCase()
       );
     }
 
-    const result = featureList.map((f) => ({
-      id: f.id,
-      name: f.name || '',
-      description: f.description || '',
-      status: f.status || 'In Progress',
-      projectId: f.projectId || '',
-      storyPoints: f.storyPoints || 0,
-      completedPoints: f.completedPoints || 0,
-      priority: f.priority || 'Medium',
-      targetPi: f.targetPi || '',
-      wsjfScore: f.wsjfScore || 0,
-      progress: f.storyPoints && f.storyPoints > 0
-        ? ((f.completedPoints || 0) / f.storyPoints) * 100
-        : 0,
-    }));
-
-    res.json(result);
+    res.json(featureList);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -781,119 +778,101 @@ router.get('/dependencies', (async (req, res) => {
 
 router.get('/project360/:projectId', (async (req, res) => {
   try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
     const { projectId } = req.params;
 
-    // Get project from PostgreSQL
-    const projectResults = await db.select().from(projects).where(eq(projects.id, projectId));
-    const project = projectResults[0];
+    const [project, budgetsResult, risksResult, dependenciesResult] = await Promise.all([
+      palantir.getObject('AtlasProject', projectId, { ontologyRid: ONTOLOGY_RID }).catch(() => null),
+      palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasDependency', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+    ]);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    // Get related features, stories, tasks, risks
-    const projectFeatures = await db.select().from(features).where(eq(features.projectId, projectId));
-    const projectStories = await db.select().from(stories).where(eq(stories.projectId, projectId));
-    const projectTasks = await db.select().from(tasks).where(eq(tasks.projectId, projectId));
-    const projectRisks = await db.select().from(enterpriseRisks).where(eq(enterpriseRisks.projectId, projectId));
+    const budget = (budgetsResult.data || []).find((b: any) => (b.budgetId || b.__primaryKey) === project.budgetId);
+    const budgetTotal = budget ? (budget.totalAmount || 0) : 0;
+    const budgetSpent = budget ? (budget.spentAmount || 0) : 0;
+    const progress = (project.milestoneProgress || 0) * 100;
 
-    // Parse project fields
-    const budgetTotal = parseFloat(project.budgetTotal || project.budget || '0') || 0;
-    const budgetSpent = parseFloat(project.budgetSpent || project.actualCost || '0') || 0;
-    const progress = project.progress || 0;
+    const projectRisks = (risksResult.data || []).filter((r: any) => r.projectId === projectId);
+    const projectDeps = (dependenciesResult.data || []).filter((d: any) =>
+      d.sourceProjectId === projectId || d.targetProjectId === projectId
+    );
 
     res.json({
-      // Core project info
-      id: project.id,
+      id: project.projectId || project.__primaryKey,
       name: project.name || 'Untitled Project',
       description: project.description || '',
       status: mapStatusToColor(project.status || ''),
       statusText: project.status || 'Unknown',
       priority: mapPriorityToLevel(project.priority || 'medium'),
       priorityText: project.priority || 'Medium',
-      // Dates
-      startDate: project.startDate?.toISOString(),
-      endDate: project.endDate?.toISOString(),
-      // Organization
-      businessUnit: project.divisionId || project.businessUnitId || 'General',
-      artName: project.artName || '',
-      portfolioTheme: project.portfolioTheme || '',
-      // Budget & Financial
+      startDate: project.startDate,
+      endDate: project.endDate,
+      businessUnit: 'General',
+      artName: '',
+      portfolioTheme: '',
       budgetTotal,
       budgetSpent,
-      budgetUnit: project.budgetUnit || 'USD',
+      budgetUnit: budget?.currency || 'USD',
       budgetRemaining: budgetTotal - budgetSpent,
       budgetUtilization: budgetTotal > 0 ? (budgetSpent / budgetTotal) * 100 : 0,
-      expectedRoi: project.expectedRoi || '',
-      roiValue: parseFloat(project.roiValue || '0') || 0,
-      // EVM Metrics
+      budgetName: budget?.name || '',
+      expectedRoi: '',
+      roiValue: 0,
       progress,
-      cpiValue: project.cpiValue || 1,
-      spiValue: project.spiValue || 1,
-      earnedValue: project.earnedValue || 0,
-      plannedValue: project.plannedValue || 0,
-      // SAFe fields
-      safeStage: project.safeStage || '',
-      currentPi: project.currentPi || '',
-      velocity: parseFloat(project.velocity || '0') || 0,
-      predictability: parseFloat(project.predictability || '0') || 0,
-      flowEfficiency: parseFloat(project.flowEfficiency || '0') || 0,
-      // Epic linkage
-      epicId: project.epicId || '',
-      epicName: project.epicName || '',
-      epicProgress: project.epicProgress || '',
-      // OKR linkage
-      okrObjective: project.okrObjective || '',
-      okrKeyResult: project.okrKeyResult || '',
-      okrProgress: project.okrProgress || 0,
-      // AI recommendation
-      aiRecommendation: project.aiRecommendation || '',
-      // Timeline
-      timelineElapsed: project.timelineElapsed || 0,
-      timelineTotal: project.timelineTotal || 0,
-      // Counts
-      featureCount: projectFeatures.length,
-      storyCount: projectStories.length,
-      taskCount: projectTasks.length,
+      milestoneProgress: progress,
+      cpiValue: 1,
+      spiValue: 1,
+      earnedValue: 0,
+      plannedValue: 0,
+      safeStage: '',
+      currentPi: '',
+      velocity: 0,
+      predictability: 0,
+      flowEfficiency: 0,
+      epicId: '',
+      epicName: '',
+      epicProgress: '',
+      okrObjective: '',
+      okrKeyResult: '',
+      okrProgress: 0,
+      aiRecommendation: '',
+      timelineElapsed: 0,
+      timelineTotal: 0,
+      transformationId: project.transformationId || '',
+      featureCount: 0,
+      storyCount: 0,
+      taskCount: 0,
       riskCount: projectRisks.length,
-      dependencyCount: 0, // Add dependencies if available
-      // Related items
-      features: projectFeatures.map((f) => ({
-        id: f.id,
-        name: f.name || '',
-        status: f.status,
-        description: f.description || '',
-        storyPoints: f.storyPoints || 0,
-        completedPoints: f.completedPoints || 0,
-        priority: f.priority || 'medium',
-      })),
-      stories: projectStories.map((s) => ({
-        id: s.id,
-        name: s.name || '',
-        status: s.status,
-        description: s.description || '',
-        storyPoints: s.storyPoints || 0,
-        featureId: s.featureId || '',
-      })),
-      tasks: projectTasks.map((t) => ({
-        id: t.id,
-        name: t.name || '',
-        status: t.status,
-        description: t.description || '',
-        storyId: t.storyId || '',
-        assignee: t.assignee || '',
-      })),
-      risks: projectRisks.map((r) => ({
-        id: r.id,
-        name: r.name || '',
+      dependencyCount: projectDeps.length,
+      features: [],
+      stories: [],
+      tasks: [],
+      risks: projectRisks.map((r: any) => ({
+        id: r.riskId || r.__primaryKey,
+        name: r.description || r.__title || 'Risk',
         description: r.description || '',
-        severity: r.severity,
-        status: r.status,
-        likelihood: r.likelihood,
+        severity: (r.impact || 'medium').toLowerCase(),
+        status: (r.status || 'open').toLowerCase(),
+        likelihood: r.probability || 'medium',
+        riskScore: r.riskScore || 0,
         mitigationPlan: r.mitigationPlan || '',
         owner: r.owner || '',
       })),
-      dependencies: [], // Add dependencies query if available
+      dependencies: projectDeps.map((d: any) => ({
+        id: d.dependencyId || d.__primaryKey,
+        sourceProjectId: d.sourceProjectId || '',
+        targetProjectId: d.targetProjectId || '',
+        type: d.dependencyType || 'blocks',
+        status: d.status || 'active',
+        description: d.description || '',
+      })),
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

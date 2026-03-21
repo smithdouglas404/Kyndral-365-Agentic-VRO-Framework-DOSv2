@@ -1,32 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useOKRObjectives } from "@/hooks/useDashboardData";
+/**
+ * OKR DASHBOARD
+ *
+ * Strategy alignment console using CustomizableDashboard.
+ */
+
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Target, CheckCircle2, TrendingUp, AlertTriangle,
-  ChevronRight, ChevronDown, Bot, DollarSign,
-  Building2, Repeat, Brain
-} from 'lucide-react';
-import { formatValueInMillions } from '@/lib/formatters';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Target, Brain } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
-import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
-import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
-import { useOntologyProjects, useDashboardMetrics, useOntologyOKRs } from '@/hooks/usePalantirOntology';
-import { useAgentData } from '@/hooks/useAgentData';
-import { 
-  getObjectivesFromDivisions,
-  getCompanyMetrics,
-  type DataMode,
-  type TransformedObjective
-} from '@/lib/agentDataTransformers';
-import { AIRecommendations } from "@/components/AIRecommendations";
-import AgentActionQueue from "@/components/AgentActionQueue";
+import { CustomizableDashboard } from '@/components/CustomizableDashboard';
+import { ObjectivesBoardWidget } from '@/components/widgets/okr/ObjectivesBoardWidget';
+import { AIRecommendations } from '@/components/AIRecommendations';
+import AgentActionQueue from '@/components/AgentActionQueue';
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import type { DataMode } from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -43,174 +34,13 @@ function NavBar() {
   );
 }
 
-function ObjectiveCard({ objective, mode }: { objective: TransformedObjective, mode: DataMode }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <Card className="overflow-hidden" data-testid={`objective-card-${objective.id}`}>
-      <div 
-        className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`objective-toggle-${objective.id}`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg ${
-              objective.status === 'ahead' ? 'bg-green-500' :
-              objective.status === 'on-track' ? 'bg-blue-500' : 'bg-amber-500'
-            }`}>
-              {objective.progress}%
-            </div>
-            <div>
-              <h3 className="font-semibold text-base">{objective.title}</h3>
-              <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-                <span className="flex items-center gap-1">
-                  <Building2 className="h-3 w-3" />
-                  {objective.division}
-                </span>
-                <span>{objective.owner}</span>
-                <span className="flex items-center gap-1 text-green-600">
-                  <DollarSign className="h-3 w-3" />
-                  {formatValueInMillions((objective.totalValueImpact?.costSavings || 0) + (objective.totalValueImpact?.revenueImpact || 0))} value
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge variant={
-              objective.status === 'ahead' ? 'default' :
-              objective.status === 'on-track' ? 'secondary' : 'destructive'
-            }>
-              {objective.status}
-            </Badge>
-            {expanded ? (
-              <ChevronDown className="h-5 w-5 text-gray-400" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <div className="bg-white p-3 rounded-lg border flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-green-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Cost Savings</p>
-                    <p className="font-bold text-green-600">{formatValueInMillions(objective.totalValueImpact?.costSavings || 0)}</p>
-                  </div>
-                </div>
-                <div className="bg-white p-3 rounded-lg border flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 text-blue-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Revenue Impact</p>
-                    <p className="font-bold text-blue-600">{formatValueInMillions(objective.totalValueImpact?.revenueImpact || 0)}</p>
-                  </div>
-                </div>
-              </div>
-
-              <h4 className="font-semibold text-sm mb-3">Key Results & Linked Initiatives</h4>
-              <div className="space-y-4">
-                {objective.keyResults.map((kr, i: number) => (
-                  <div key={i} className="bg-white p-4 rounded-lg border">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">{kr.title || kr.name}</span>
-                      <span className="text-sm font-bold text-orange-600">{kr.progress || 0}%</span>
-                    </div>
-                    <Progress value={kr.progress || 0} className="h-1.5 mb-2" />
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                      <span>Current: {kr.current}</span>
-                      <span>Target: {kr.target}</span>
-                    </div>
-
-                    {(kr.linkedInitiatives?.length || 0) > 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
-                          <Repeat className="h-3 w-3" />
-                          Contributing Initiatives
-                        </p>
-                        <div className="space-y-2">
-                          {(kr.linkedInitiatives || []).map((init, j: number) => (
-                            <div key={j} className="flex items-center justify-between p-2 bg-orange-50 rounded border border-orange-100">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm text-orange-800">{init.name}</span>
-                                  <Badge variant={
-                                    init.status === 'complete' ? 'default' :
-                                    init.status === 'at-risk' ? 'destructive' : 'secondary'
-                                  } className="text-[10px]">
-                                    {init.status}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-                                  <span>{init.division}</span>
-                                  <span>Phase: {init.phase}</span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-lg font-bold text-orange-600">+{init.contribution}%</span>
-                                <p className="text-[10px] text-green-600">{init.valueImpact}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {(kr.linkedInitiatives?.length || 0) === 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <p className="text-xs text-gray-400 italic">No initiatives linked to this key result</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Bot className="h-4 w-4 text-purple-500" />
-                  Collaborating Agents
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {(objective.collaboratingAgents || []).map((agent, i: number) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2 bg-purple-50 rounded-lg border border-purple-100">
-                      <div className={`w-2 h-2 rounded-full ${mode === 'VRO' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      <span className="font-medium text-sm text-purple-800">{agent.agentName || agent.name}</span>
-                      <span className="text-xs text-gray-500">{agent.lastSync || 'Just now'}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
-  );
-}
-
 export default function OKRDashboard() {
-  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [dataMode, setDataMode] = useState<DataMode>('VRO');
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
-  const liveData = useAgentData('okr');
-  const { data: projects = [], isLoading: projectsLoading } = useOntologyProjects();
-  const { data: palantirMetrics } = useDashboardMetrics();
-  const { data: palantirOKRs = [] } = useOntologyOKRs();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
-  // Update page context for Ask PM
   useEffect(() => {
     setPageContext({
       pageType: 'dashboard',
@@ -225,59 +55,22 @@ export default function OKRDashboard() {
     setDrillDownOpen(true);
   };
 
-  const { data: rawObjectives = [], isLoading: okrLoading } = useOKRObjectives();
-
-  // Transform raw OKR data to expected format
-  const objectives: TransformedObjective[] = (rawObjectives as any[]).map((o: any, i: number) => {
-    const progress = typeof o.progress === 'number' ? o.progress : parseInt(o.progress || '0', 10) || 50;
-    return {
-      id: o.id || `obj-${i}`,
-      name: o.title || o.objective || o.name || `Objective ${i + 1}`,
-      title: o.title || o.objective || o.name || `Objective ${i + 1}`,
-      progress,
-      status: o.status || (progress >= 80 ? 'ahead' : progress >= 50 ? 'on-track' : 'at-risk'),
-      division: o.division || o.businessUnit || 'Operations',
-      owner: o.owner || 'TBD',
-      totalValueImpact: o.totalValueImpact || { costSavings: 100000 + i * 50000, revenueImpact: 200000 + i * 75000 },
-      collaboratingAgents: (o.collaboratingAgents || [{ name: 'OKR Agent', role: 'Tracker' }]).map((a: any) => ({
-        name: a.name || 'Agent',
-        role: a.role || 'Tracker',
-        agentName: a.agentName || a.name || 'Agent',
-        lastSync: a.lastSync || new Date().toISOString(),
-      })),
-      keyResults: (o.keyResults || []).map((kr: any, j: number) => ({
-        name: kr.title || kr.keyResult || kr.name || `Key Result ${j + 1}`,
-        title: kr.title || kr.keyResult || kr.name || `Key Result ${j + 1}`,
-        target: parseFloat(kr.targetValue || kr.target || '100') || 100,
-        current: parseFloat(kr.currentValue || kr.current || '0') || 0,
-        status: kr.status || 'on-track',
-        progress: typeof kr.progress === 'number' ? kr.progress : parseInt(kr.progress || '0', 10) || 0,
-        linkedInitiatives: (kr.linkedInitiatives || []).length > 0
-          ? kr.linkedInitiatives.map((init: any) => typeof init === 'string'
-            ? { name: init, status: 'active', division: 'Ops', phase: 'Execution', contribution: 25, valueImpact: 50000 }
-            : init)
-          : [{ name: 'Initiative 1', status: 'active', division: 'Ops', phase: 'Execution', contribution: 25, valueImpact: 50000 }],
-      })),
-    };
-  });
-
-  const avgProgress = objectives.length > 0 ? Math.round(objectives.reduce((sum: number, o) => sum + (o.progress || 0), 0) / objectives.length) : 0;
-  const totalValue = objectives.reduce((sum: number, o) => sum + (o.totalValueImpact?.costSavings || 0) + (o.totalValueImpact?.revenueImpact || 0), 0);
-  const totalInitiatives = objectives.reduce((sum: number, o) =>
-    sum + o.keyResults.reduce((s: number, kr) => s + (kr.linkedInitiatives?.length || 0), 0), 0);
-
-  const aheadCount = objectives.filter((o) => o.status === 'ahead').length;
-  const onTrackCount = objectives.filter((o) => o.status === 'on-track').length;
-  const atRiskCount = objectives.filter((o) => o.status === 'at-risk').length;
+  // Map widget IDs to their components
+  const widgetComponents = useMemo(() => ({
+    'okr-objectives-board': <ObjectivesBoardWidget mode={dataMode} />,
+    'agent-action-queue': <AgentActionQueue />,
+    'cross-agent-collaboration': <CrossAgentActivityFeed maxItems={5} compact />,
+  }), [dataMode]);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
-      
+
       <div className="flex">
         <AgentSidebar />
-        
+
         <main className="flex-1 px-8 py-8">
+          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">
@@ -316,190 +109,20 @@ export default function OKRDashboard() {
             </div>
           </div>
 
-          {palantirMetrics && (
-            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50/30 to-orange-50/30" data-testid="palantir-okr-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
-                  <span className="text-sm font-semibold text-purple-700">Palantir Ontology</span>
-                  <Badge variant="outline" className="text-[10px]">{palantirOKRs.length} OKRs tracked</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-orange-600">{palantirOKRs.length}</p>
-                    <p className="text-[10px] text-gray-500">Active OKRs</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-green-600">{palantirOKRs.filter(o => o.progress >= 70).length}</p>
-                    <p className="text-[10px] text-gray-500">On Track</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-amber-600">{palantirOKRs.filter(o => o.progress >= 30 && o.progress < 70).length}</p>
-                    <p className="text-[10px] text-gray-500">In Progress</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-purple-600">{Math.round(palantirMetrics.avgProgress)}%</p>
-                    <p className="text-[10px] text-gray-500">Avg Progress</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-progress')} data-testid="metric-progress">
-              {liveData.metrics.activeAlerts > 0 && (
-                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Overall Progress</p>
-                    <p className="text-2xl font-bold text-orange-600">{liveData.metrics.avgConfidence || avgProgress}%</p>
-                  </div>
-                  <Target className="h-8 w-8 text-orange-200" />
-                </div>
-                <Progress value={liveData.metrics.avgConfidence || avgProgress} className="h-1.5 mt-2" />
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-value')} data-testid="metric-value">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Total Value</p>
-                    <p className="text-2xl font-bold text-green-600">{formatValueInMillions(liveData.metrics.totalValue || totalValue)}</p>
-                  </div>
-                  <DollarSign className="h-8 w-8 text-green-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">across all OKRs</p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-ahead')} data-testid="metric-ahead">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Ahead</p>
-                    <p className="text-2xl font-bold text-green-600">{aheadCount}</p>
-                  </div>
-                  <TrendingUp className="h-8 w-8 text-green-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">exceeding targets</p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-on-track')} data-testid="metric-on-track">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">On Track</p>
-                    <p className="text-2xl font-bold text-blue-600">{onTrackCount}</p>
-                  </div>
-                  <CheckCircle2 className="h-8 w-8 text-blue-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">meeting targets</p>
-              </CardContent>
-            </Card>
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-at-risk')} data-testid="metric-at-risk">
-              {(liveData.metrics.atRiskProjects > 0 || atRiskCount > 0) && (
-                <AlertBubble count={liveData.metrics.atRiskProjects || atRiskCount} severity="critical" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">At Risk</p>
-                    <p className="text-2xl font-bold text-amber-600">{liveData.metrics.atRiskProjects || atRiskCount}</p>
-                  </div>
-                  <AlertTriangle className="h-8 w-8 text-amber-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">needs attention</p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'okr-initiatives')} data-testid="metric-initiatives">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Linked Initiatives</p>
-                    <p className="text-2xl font-bold text-purple-600">{liveData.metrics.totalProjects || totalInitiatives}</p>
-                  </div>
-                  <Repeat className="h-8 w-8 text-purple-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">contributing</p>
-              </CardContent>
-            </Card>
-          </div>
-
+          {/* AI Recommendations */}
           <div className="mb-8">
-          <div className="mb-8">
-            <AgentActionQueue />
-          </div>
-
             <AIRecommendations agentType="okr" />
           </div>
 
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Strategic Objectives from Enterprise Segments</h2>
-              <Badge variant="outline" className="text-xs">Click to expand for initiative details</Badge>
-            </div>
-            {objectives.map((objective) => (
-              <ObjectiveCard key={objective.id} objective={objective} mode={dataMode} />
-            ))}
-          </div>
+          {/* Customizable Dashboard */}
+          <CustomizableDashboard
+            activeTab="okr"
+            dashboardType="okr"
+            widgetComponents={widgetComponents}
+            onDrillDown={handleDrillDown}
+          />
 
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Reportable Segments OKRs Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {projectsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
-                </div>
-              ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {projects.slice(0, 4).map((segment, idx) => {
-                  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
-                  const segmentColor = colors[idx % colors.length];
-                  const profit2024 = (segment as any).profit2024 ?? (segment.budgetTotal || 0) * 0.15;
-                  const changePercent = (segment as any).changePercent ?? (Math.random() * 20 - 5).toFixed(1);
-                  return (
-                    <Link key={segment.id} href={`/segment/${segment.id}`}>
-                      <div
-                        className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                        style={{ borderLeftColor: segmentColor, borderLeftWidth: '4px' }}
-                      >
-                        <p className="text-sm font-medium text-gray-500">{segment.name}</p>
-                        <div className="mt-2 flex items-center justify-between">
-                          <div className="text-xs text-gray-500">
-                            <p>2024 Profit: {formatValueInMillions(profit2024)}</p>
-                            <p className="mt-1">
-                              <Badge variant={Number(changePercent) >= 0 ? 'default' : 'destructive'} className="text-xs">
-                                {Number(changePercent) >= 0 ? '+' : ''}{changePercent}% YoY
-                              </Badge>
-                            </p>
-                          </div>
-                          <ChevronRight className="h-5 w-5 text-gray-400" />
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                Cross-Agent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CrossAgentActivityFeed maxItems={5} compact />
-            </CardContent>
-          </Card>
-
+          {/* Cross-Agent Collaboration */}
           <CrossAgentCollaboration />
         </main>
       </div>

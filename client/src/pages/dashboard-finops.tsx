@@ -1,31 +1,27 @@
-import { useState, useEffect } from 'react';
+/**
+ * FINOPS DASHBOARD
+ *
+ * Financial operations intelligence dashboard using CustomizableDashboard.
+ */
+
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'wouter';
 import { usePageContext } from "@/contexts/PageContext";
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Calculator, DollarSign, TrendingUp, PieChart,
-  BarChart3, ChevronDown, ChevronRight, Building2, Bot,
-  ArrowUpRight, ArrowDownRight, Brain
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calculator, Brain } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { AgentSidebar } from '@/components/AgentSidebar';
-import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
-import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
-import { AlertBubble } from '@/components/AlertBubble';
 import { DrillDownDrawer } from '@/components/DrillDownDrawer';
+import { CustomizableDashboard } from '@/components/CustomizableDashboard';
+import { BudgetOverviewWidget } from '@/components/widgets/finops/BudgetOverviewWidget';
+import { CostCategoriesWidget } from '@/components/widgets/finops/CostCategoriesWidget';
+import { SavingsOpportunitiesWidget } from '@/components/widgets/finops/SavingsOpportunitiesWidget';
+import { EVMMetricsWidget } from '@/components/widgets/finops/EVMMetricsWidget';
+import { AIRecommendations } from '@/components/AIRecommendations';
 import AgentActionQueue from '@/components/AgentActionQueue';
-import { useOntologyProjects, useDashboardMetrics, useOntologyFinancials } from '@/hooks/usePalantirOntology';
-import { formatMoney } from '@/lib/formatters';
-import { useAgentData } from '@/hooks/useAgentData';
-import {
-  getCompanyMetrics,
-  type DataMode
-} from '@/lib/agentDataTransformers';
-import { useCostCategories, useSavingsOpportunities, type CostCategory, type SavingsOpportunity } from '@/hooks/useFinOpsData';
-import { AIRecommendations } from "@/components/AIRecommendations";
-import { useFinancialInsights } from "@/hooks/useAgentInsights";
+import { CrossAgentActivityFeed } from '@/components/CrossAgentActivityFeed';
+import { CrossAgentCollaboration } from '@/components/CrossAgentCollaboration';
+import { useFinancialInsights } from '@/hooks/useAgentInsights';
+import type { DataMode } from '@/lib/agentDataTransformers';
 
 function NavBar() {
   return (
@@ -42,173 +38,14 @@ function NavBar() {
   );
 }
 
-function CostCategoryCard({ category, mode }: { category: CostCategory, mode: DataMode }) {
-  const [expanded, setExpanded] = useState(false);
-  const isOverBudget = category.variance > 0;
-
-  return (
-    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`cost-category-${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
-            <span className="font-semibold">{category.name}</span>
-          </div>
-          <Badge variant={isOverBudget ? 'destructive' : 'default'}>
-            {isOverBudget ? '+' : ''}{category.variance.toFixed(1)}%
-          </Badge>
-        </div>
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="text-xs text-gray-500">Budget</p>
-            <p className="font-bold">${category.budget}M</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">YTD Spend</p>
-            <p className="font-bold">${category.spent}M</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Forecast</p>
-            <p className={`font-bold ${isOverBudget ? 'text-red-600' : 'text-green-600'}`}>${category.forecast}M</p>
-          </div>
-        </div>
-        <Progress value={(category.spent / category.budget) * 100} className="h-1.5 mt-3" />
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Segment Owner</p>
-                  <p className="font-semibold text-sm">{category.division}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Savings Identified</p>
-                  <p className="font-bold text-green-600">${category.savings}M</p>
-                </div>
-              </div>
-              
-              <div className={`p-3 rounded-lg border ${mode === 'VRO' ? 'bg-purple-50 border-purple-100' : 'bg-gray-100 border-gray-200'}`}>
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Bot className={`h-4 w-4 ${mode === 'VRO' ? 'text-purple-500' : 'text-gray-400'}`} />
-                  {mode === 'VRO' ? 'AI-Driven Analysis' : 'Manual Analysis'}
-                </h4>
-                <p className="text-sm text-gray-700">{category.aiInsight}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function SavingsOpportunityCard({ opportunity, mode }: { opportunity: SavingsOpportunity, mode: DataMode }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className="border rounded-lg bg-white overflow-hidden hover:shadow-md transition-all">
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-        data-testid={`savings-${opportunity.area.toLowerCase().replace(/\s+/g, '-')}`}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
-            <span className="font-semibold text-sm">{opportunity.area}</span>
-          </div>
-          <Badge variant={
-            opportunity.status === 'validated' ? 'default' :
-            opportunity.status === 'in-progress' ? 'secondary' : 'outline'
-          }>
-            {opportunity.status}
-          </Badge>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xl font-bold text-green-600">${opportunity.potential.toFixed(1)}M</p>
-            <p className="text-xs text-gray-500">potential savings</p>
-          </div>
-          <div className="text-right">
-            <p className="text-lg font-bold text-blue-600">{opportunity.confidence}%</p>
-            <p className="text-xs text-gray-500">confidence</p>
-          </div>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-gray-100"
-          >
-            <div className="p-4 bg-gray-50">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Reportable Segment</p>
-                  <p className="font-semibold text-sm">{opportunity.division}</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border">
-                  <p className="text-xs text-gray-500">Payback Period</p>
-                  <p className="font-semibold text-sm">{opportunity.paybackMonths} months</p>
-                </div>
-              </div>
-              
-              <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2 text-purple-800">
-                  <Bot className="h-4 w-4 text-purple-500" />
-                  AI Insight
-                </h4>
-                <p className="text-sm text-gray-700">{opportunity.aiInsight}</p>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="bg-white p-2 rounded border text-center">
-                  <p className="text-xs text-gray-500">ROI</p>
-                  <p className="font-bold text-blue-600">{opportunity.roi.toFixed(1)}x</p>
-                </div>
-                <div className="bg-white p-2 rounded border text-center">
-                  <p className="text-xs text-gray-500">Implementation</p>
-                  <p className="font-bold text-green-600">{mode === 'VRO' ? 'Low Risk' : 'Medium Risk'}</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 export default function FinOpsDashboard() {
-  const [dataMode, setDataMode] = useState<'VRO' | 'PMO'>('VRO');
+  const [dataMode, setDataMode] = useState<DataMode>('VRO');
   const [viewMode, setViewMode] = useState<'realtime' | 'snapshot'>('realtime');
   const { setPageContext } = usePageContext();
-  const liveData = useAgentData('finops');
-  const { data: projects = [], isLoading: projectsLoading } = useOntologyProjects();
-  const { data: financialInsights, isLoading: insightsLoading } = useFinancialInsights();
-  const { data: palantirMetrics } = useDashboardMetrics();
-  const { data: palantirFinancials = [] } = useOntologyFinancials();
+  const { data: financialInsights } = useFinancialInsights();
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownEntity, setDrillDownEntity] = useState({ type: '', id: '' });
 
-  // Update page context for Ask PM
   useEffect(() => {
     setPageContext({
       pageType: 'dashboard',
@@ -222,33 +59,26 @@ export default function FinOpsDashboard() {
     setDrillDownEntity({ type: entityType, id: entityId });
     setDrillDownOpen(true);
   };
-  
-  const { data: costCategories = [], isLoading: costLoading } = useCostCategories();
-  const { data: savingsOpportunities = [], isLoading: savingsLoading } = useSavingsOpportunities();
-  const companyMetrics = getCompanyMetrics();
 
-  // Use agent-calculated insights if available, fallback to static data
-  const agentMetrics = financialInsights?.aggregated;
-  const totalBudget = agentMetrics?.totalBAC || costCategories.reduce((sum, c) => sum + c.budget, 0);
-  const totalSpent = agentMetrics?.totalAC || costCategories.reduce((sum, c) => sum + c.spent, 0);
-  const totalEV = agentMetrics?.totalEV || 0;
-  const totalPV = agentMetrics?.totalPV || 0;
-  const totalForecast = agentMetrics?.totalEAC || costCategories.reduce((sum, c) => sum + c.forecast, 0);
-  const avgCPI = agentMetrics?.avgCPI || 1.0;
-  const avgSPI = agentMetrics?.avgSPI || 1.0;
-  const portfolioHealth = agentMetrics?.portfolioHealth || 0;
-  const totalSavings = savingsOpportunities.reduce((sum, s) => sum + s.potential, 0);
-  const utilizationRate = Math.round((totalSpent / totalBudget) * 100);
-  const forecastVariance = ((totalForecast - totalBudget) / totalBudget) * 100;
+  // Map widget IDs to their components
+  const widgetComponents = useMemo(() => ({
+    'finops-budget-overview': <BudgetOverviewWidget mode={dataMode} onDrillDown={handleDrillDown} />,
+    'finops-cost-categories': <CostCategoriesWidget mode={dataMode} />,
+    'finops-savings-opportunities': <SavingsOpportunitiesWidget mode={dataMode} />,
+    'finops-evm-metrics': <EVMMetricsWidget mode={dataMode} />,
+    'agent-action-queue': <AgentActionQueue />,
+    'cross-agent-collaboration': <CrossAgentActivityFeed maxItems={5} compact />,
+  }), [dataMode]);
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <NavBar />
-      
+
       <div className="flex">
         <AgentSidebar />
-        
+
         <main className="flex-1 px-8 py-8">
+          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 mb-2">
@@ -293,281 +123,20 @@ export default function FinOpsDashboard() {
             </div>
           </div>
 
-          {palantirMetrics && (
-            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50/30 to-blue-50/30" data-testid="palantir-finops-card">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
-                  <span className="text-sm font-semibold text-purple-700">Palantir Ontology</span>
-                  <Badge variant="outline" className="text-[10px]">{palantirMetrics.totalProjects} projects</Badge>
-                  {palantirFinancials.length > 0 && <Badge variant="outline" className="text-[10px]">{palantirFinancials.length} financial records</Badge>}
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-blue-600">{palantirMetrics.totalProjects}</p>
-                    <p className="text-[10px] text-gray-500">Total Projects</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-green-600">{palantirMetrics.onTrackProjects}</p>
-                    <p className="text-[10px] text-gray-500">On Track</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-amber-600">{palantirMetrics.atRiskProjects}</p>
-                    <p className="text-[10px] text-gray-500">At Risk</p>
-                  </div>
-                  <div className="text-center p-2 bg-white rounded border">
-                    <p className="text-lg font-bold text-red-600">{palantirMetrics.criticalRisks}</p>
-                    <p className="text-[10px] text-gray-500">Critical Risks</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-budget')} data-testid="metric-budget">
-              {liveData.metrics.activeAlerts > 0 && (
-                <AlertBubble count={liveData.metrics.activeAlerts} severity="warning" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Total Budget</p>
-                    <p className="text-2xl font-bold text-blue-600">${liveData.metrics.totalValue || totalBudget}M</p>
-                  </div>
-                  <DollarSign className="h-8 w-8 text-blue-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">FY 2025 allocation</p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-spend')} data-testid="metric-spend">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">YTD Spend</p>
-                    <p className="text-2xl font-bold text-green-600">${liveData.metrics.realizedValue || totalSpent}M</p>
-                  </div>
-                  <TrendingUp className="h-8 w-8 text-green-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">{utilizationRate}% utilized</p>
-              </CardContent>
-            </Card>
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-forecast')} data-testid="metric-forecast">
-              {forecastVariance > 5 && (
-                <AlertBubble severity="warning" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Forecast</p>
-                    <p className={`text-2xl font-bold ${forecastVariance > 0 ? 'text-amber-600' : 'text-green-600'}`}>${totalForecast}M</p>
-                  </div>
-                  <BarChart3 className="h-8 w-8 text-amber-200" />
-                </div>
-                <p className={`text-xs mt-2 ${forecastVariance > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                  {forecastVariance > 0 ? '+' : ''}{forecastVariance.toFixed(1)}% vs budget
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-savings')} data-testid="metric-savings">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Savings Identified</p>
-                    <p className="text-2xl font-bold text-purple-600">${totalSavings.toFixed(1)}M</p>
-                  </div>
-                  <PieChart className="h-8 w-8 text-purple-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">{liveData.metrics.totalProjects || savingsOpportunities.length} opportunities</p>
-              </CardContent>
-            </Card>
-            <Card className="relative cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleDrillDown('metric', 'finops-profit')} data-testid="metric-profit">
-              {liveData.metrics.atRiskProjects > 0 && (
-                <AlertBubble count={liveData.metrics.atRiskProjects} severity="critical" />
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">Group Profit</p>
-                    <p className="text-2xl font-bold text-blue-600">${companyMetrics.totalProfit}M</p>
-                  </div>
-                  <Building2 className="h-8 w-8 text-blue-200" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">2024 actual</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Agent-Calculated EVM Metrics */}
-          {financialInsights && (
-            <Card className="mb-8 border-purple-200 bg-purple-50/30">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  Agent-Calculated EVM Metrics
-                  <Badge variant="outline" className="ml-2 text-xs">
-                    Real-time from FinancialCalculationEngine
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white p-4 rounded-lg border">
-                    <p className="text-xs text-gray-500 mb-1">Cost Performance Index</p>
-                    <p className={`text-2xl font-bold ${avgCPI >= 0.95 ? 'text-green-600' : avgCPI >= 0.85 ? 'text-amber-600' : 'text-red-600'}`}>
-                      {avgCPI.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {avgCPI >= 1.0 ? 'Under budget' : avgCPI >= 0.85 ? 'Acceptable' : 'Over budget'}
-                    </p>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg border">
-                    <p className="text-xs text-gray-500 mb-1">Schedule Performance Index</p>
-                    <p className={`text-2xl font-bold ${avgSPI >= 0.95 ? 'text-green-600' : avgSPI >= 0.85 ? 'text-amber-600' : 'text-red-600'}`}>
-                      {avgSPI.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {avgSPI >= 1.0 ? 'Ahead of schedule' : avgSPI >= 0.85 ? 'Acceptable' : 'Behind schedule'}
-                    </p>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg border">
-                    <p className="text-xs text-gray-500 mb-1">Earned Value (EV)</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      ${(totalEV / 1000000).toFixed(1)}M
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Value of work completed
-                    </p>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg border">
-                    <p className="text-xs text-gray-500 mb-1">Portfolio Health</p>
-                    <p className={`text-2xl font-bold ${portfolioHealth >= 0.8 ? 'text-green-600' : portfolioHealth >= 0.6 ? 'text-amber-600' : 'text-red-600'}`}>
-                      {(portfolioHealth * 100).toFixed(0)}%
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Projects with CPI ≥ 0.95
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 p-3 bg-white rounded-lg border">
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="text-gray-500 text-xs mb-1">Total Projects Analyzed</p>
-                      <p className="font-semibold">{agentMetrics?.totalProjects || 0} projects</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-500 text-xs mb-1">Data Source</p>
-                      <p className="font-semibold text-purple-600">FinOps Agent Engine</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="mb-8">
-            <AgentActionQueue />
-          </div>
-
+          {/* AI Recommendations */}
           <div className="mb-8">
             <AIRecommendations agentType="finops" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Reportable Segments Cost Performance</span>
-                  <Badge variant="outline" className="text-xs">Click to expand</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {costCategories.map((category, i) => (
-                    <CostCategoryCard key={i} category={category} mode={dataMode} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          {/* Customizable Dashboard */}
+          <CustomizableDashboard
+            activeTab="finops"
+            dashboardType="finops"
+            widgetComponents={widgetComponents}
+            onDrillDown={handleDrillDown}
+          />
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Savings Opportunities</span>
-                  <Badge variant="outline" className="text-xs">From Segment Projects</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {savingsOpportunities.map((opportunity, i) => (
-                    <SavingsOpportunityCard key={i} opportunity={opportunity} mode={dataMode} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Reportable Segments Financial Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {projectsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-                </div>
-              ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {projects.map((segment, idx) => {
-                  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899', '#84CC16'];
-                  const segmentColor = colors[idx % colors.length];
-                  const profit2024 = (segment as any).profit2024 ?? (segment.budgetTotal || 0) * 0.12;
-                  const changePercent = (segment as any).changePercent ?? Number((Math.random() * 20 - 5).toFixed(1));
-                  const ceo = (segment as any).ceo ?? 'Executive';
-                  return (
-                    <Link key={segment.id} href={`/segment/${segment.id}`}>
-                      <div
-                        className="p-4 rounded-lg border hover:shadow-md transition-all cursor-pointer"
-                        style={{ borderLeftColor: segmentColor, borderLeftWidth: '4px' }}
-                      >
-                        <p className="text-sm font-medium text-gray-500">{segment.name}</p>
-                        <p className="text-2xl font-bold" style={{ color: segmentColor }}>{formatMoney(profit2024)}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          {changePercent >= 0 ? (
-                            <ArrowUpRight className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <ArrowDownRight className="h-4 w-4 text-red-500" />
-                          )}
-                          <span className={`text-sm font-medium ${changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {changePercent >= 0 ? '+' : ''}{changePercent}%
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">{ceo}</p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                Cross-Agent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CrossAgentActivityFeed maxItems={5} compact />
-            </CardContent>
-          </Card>
-
+          {/* Cross-Agent Collaboration */}
           <CrossAgentCollaboration />
         </main>
       </div>
