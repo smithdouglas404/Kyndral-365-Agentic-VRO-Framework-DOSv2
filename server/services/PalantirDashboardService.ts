@@ -359,10 +359,10 @@ class PalantirDashboardServiceClass {
 
     const allProjects = projectsResult.data || [];
 
-    // Separate Projects, Features, Stories, Tasks by prefix in name or project_id
-    // Filter out all non-project items: agents, integrations, divisions, Monday boards, Jira epics
+    const getId = (p: any) => p.projectId || p.__primaryKey || '';
+
     let projectList = allProjects.filter((p: any) => {
-      const id = p.project_id || p.projectId || p.__primaryKey?.project_id || '';
+      const id = getId(p);
       const name = p.name || '';
       if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') ||
           id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
@@ -373,30 +373,29 @@ class PalantirDashboardServiceClass {
     });
 
     let featureList = allProjects.filter((p: any) => {
-      const id = p.project_id || p.projectId || p.__primaryKey?.project_id || '';
+      const id = getId(p);
       const name = p.name || '';
       return id.startsWith('feature-') || name.startsWith('[Feature]');
     });
 
     let storyList = allProjects.filter((p: any) => {
-      const id = p.project_id || p.projectId || p.__primaryKey?.project_id || '';
+      const id = getId(p);
       const name = p.name || '';
       return id.startsWith('story-') || name.startsWith('[Story]');
     });
 
     let taskList = allProjects.filter((p: any) => {
-      const id = p.project_id || p.projectId || p.__primaryKey?.project_id || '';
+      const id = getId(p);
       const name = p.name || '';
       return id.startsWith('task-') || name.startsWith('[Task]');
     });
 
-    // Filter by division/transformation if specified
     if (divisionId) {
       projectList = projectList.filter((p: any) =>
-        p.divisionId === divisionId || p.transformation_id === divisionId
+        p.transformationId === divisionId
       );
       featureList = featureList.filter((f: any) =>
-        f.transformation_id === divisionId || projectList.some((p: any) => f.transformation_id === p.project_id)
+        f.transformationId === divisionId || projectList.some((p: any) => f.transformationId === getId(p))
       );
     }
 
@@ -435,7 +434,7 @@ class PalantirDashboardServiceClass {
 
     if (divisionId) {
       kpis = kpis.filter((k: any) =>
-        k.divisionId === divisionId || k.project_id === divisionId
+        k.projectId === divisionId || k.objectiveId === divisionId
       );
     }
 
@@ -450,7 +449,7 @@ class PalantirDashboardServiceClass {
 
     if (divisionId) {
       okrs = okrs.filter((o: any) =>
-        o.divisionId === divisionId || o.objective_id?.includes(divisionId)
+        o.objectiveId?.includes(divisionId) || o.timeframe === divisionId
       );
     }
 

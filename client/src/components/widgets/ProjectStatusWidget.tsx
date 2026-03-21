@@ -114,10 +114,13 @@ function formatCurrency(value: number | undefined): string {
 function ProjectCard({ project }: { project: Project }) {
   const statusConfig = STATUS_CONFIG[project.status];
   const StatusIcon = statusConfig.icon;
-  const budgetPercent =
-    project.budgetTotal && project.budgetSpent
+  const budgetPercent = project.budgetUtilization ||
+    (project.budgetTotal && project.budgetSpent
       ? (project.budgetSpent / project.budgetTotal) * 100
-      : 0;
+      : 0);
+  const progress = project.progress || project.milestoneProgress || 0;
+  const cpi = project.cpiValue || 1;
+  const spi = project.spiValue || 1;
 
   return (
     <div
@@ -134,10 +137,13 @@ function ProjectCard({ project }: { project: Project }) {
               variant="outline"
               className={cn("shrink-0 text-xs", PRIORITY_BADGE[project.priority])}
             >
-              {project.priority}
+              {project.priorityText || project.priority}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">{project.businessUnit}</p>
+          {project.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2">{project.description}</p>
+          )}
         </div>
         <div
           className={cn(
@@ -150,12 +156,19 @@ function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="mt-4 space-y-3">
-        {/* Status */}
+        {/* Status & PI */}
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Status</span>
-          <span className={cn("font-medium", statusConfig.color)}>
-            {project.statusText || statusConfig.label}
-          </span>
+          <div className="flex items-center gap-2">
+            {project.currentPi && (
+              <Badge variant="outline" className="text-[10px]">
+                {project.currentPi}
+              </Badge>
+            )}
+            <span className={cn("font-medium", statusConfig.color)}>
+              {project.statusText || statusConfig.label}
+            </span>
+          </div>
         </div>
 
         {/* Budget */}
@@ -181,39 +194,107 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         )}
 
-        {/* Milestone Progress */}
-        {project.milestoneProgress !== undefined && (
+        {/* Progress */}
+        {progress > 0 && (
           <div className="space-y-1">
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 Progress
               </span>
-              <span className="font-medium">{project.milestoneProgress}%</span>
+              <span className="font-medium">{progress.toFixed(0)}%</span>
             </div>
-            <Progress value={project.milestoneProgress} className="h-1.5" />
+            <Progress value={progress} className="h-1.5" />
           </div>
         )}
 
-        {/* Risks */}
-        {project.riskCount !== undefined && project.riskCount > 0 && (
+        {/* EVM Performance Indicators */}
+        {(cpi !== 1 || spi !== 1) && (
           <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <AlertTriangle className="h-3 w-3" />
-              Active Risks
-            </span>
-            <Badge
-              variant="outline"
-              className={cn(
-                project.riskCount > 5
-                  ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                  : project.riskCount > 2
-                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                    : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+            <span className="text-muted-foreground">Performance</span>
+            <div className="flex gap-2">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px]",
+                  cpi >= 1
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                )}
+              >
+                CPI: {cpi.toFixed(2)}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px]",
+                  spi >= 1
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                )}
+              >
+                SPI: {spi.toFixed(2)}
+              </Badge>
+            </div>
+          </div>
+        )}
+
+        {/* Work Items */}
+        {(project.featureCount || project.storyCount || project.taskCount) && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Work Items</span>
+            <div className="flex gap-1.5">
+              {project.featureCount !== undefined && project.featureCount > 0 && (
+                <Badge variant="outline" className="text-[10px]">
+                  {project.featureCount} Features
+                </Badge>
               )}
-            >
-              {project.riskCount}
+              {project.storyCount !== undefined && project.storyCount > 0 && (
+                <Badge variant="outline" className="text-[10px]">
+                  {project.storyCount} Stories
+                </Badge>
+              )}
+              {project.taskCount !== undefined && project.taskCount > 0 && (
+                <Badge variant="outline" className="text-[10px]">
+                  {project.taskCount} Tasks
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Risks & Dependencies */}
+        <div className="flex items-center justify-between text-sm">
+          {project.riskCount !== undefined && project.riskCount > 0 && (
+            <div className="flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3 text-muted-foreground" />
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px]",
+                  project.riskCount > 5
+                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    : project.riskCount > 2
+                      ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                      : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                )}
+              >
+                {project.riskCount} Risks
+              </Badge>
+            </div>
+          )}
+          {project.dependencyCount !== undefined && project.dependencyCount > 0 && (
+            <Badge variant="outline" className="text-[10px]">
+              {project.dependencyCount} Dependencies
             </Badge>
+          )}
+        </div>
+
+        {/* Velocity (if available) */}
+        {project.velocity !== undefined && project.velocity > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Velocity</span>
+            <span className="font-medium">{project.velocity} pts/sprint</span>
           </div>
         )}
       </div>

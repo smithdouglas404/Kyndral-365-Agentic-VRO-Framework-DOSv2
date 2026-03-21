@@ -284,8 +284,31 @@ router.get('/ontology/agent/:agentId', async (req: Request, res: Response) => {
  */
 router.get('/ontology/metrics', async (req: Request, res: Response) => {
   try {
-    const metrics = await OntologyDataProvider.getDashboardMetrics();
-    res.json(metrics);
+    const raw = await OntologyDataProvider.getDashboardMetrics();
+    const p = raw.projects || {} as any;
+    const f = raw.financials || {} as any;
+    const r = raw.risks || {} as any;
+    const o = raw.okrs || {} as any;
+
+    res.json({
+      totalProjects: p.total || 0,
+      activeProjects: p.active || 0,
+      onTrackProjects: p.onTrack || 0,
+      atRiskProjects: p.atRisk || 0,
+      delayedProjects: p.delayed || 0,
+      avgProgress: 0,
+      projectsByStatus: {
+        green: p.onTrack || 0,
+        amber: p.atRisk || 0,
+        red: p.delayed || 0,
+      },
+      totalBudget: f.totalBudget || 0,
+      spentBudget: f.totalSpent || 0,
+      totalRisks: r.total || 0,
+      criticalRisks: r.critical || 0,
+      okrProgress: o.avgProgress || 0,
+      agentAssignments: {},
+    });
   } catch (error: any) {
     console.error('[API] Metrics fetch failed:', error.message);
     res.status(500).json({ error: error.message });

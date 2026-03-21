@@ -18,7 +18,8 @@ import {
   Shield,
   Zap,
   GitBranch,
-  CircleDot
+  CircleDot,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,19 +35,19 @@ interface ProjectDetail {
     statusText: string;
     priority: string;
     priorityText: string;
-    businessUnit: string;
+    transformationId: string;
+    transformationName: string;
     startDate: string;
     endDate: string;
+    budgetId: string;
+    budgetName: string;
     budgetTotal: number;
     budgetSpent: number;
-    expectedRoi: string;
+    budgetAllocated: number;
+    budgetCurrency: string;
     milestoneProgress: number;
-    artName: string;
-    portfolioTheme: string;
-    safeStage: string;
-    currentPi: string;
-    velocity: number;
-    predictability: number;
+    progress: number;
+    createdAt: string;
   };
   features: Array<{
     id: string;
@@ -63,7 +64,6 @@ interface ProjectDetail {
     description: string;
     status: string;
     storyPoints: number;
-    featureId: string;
     assignedTeam: string;
   }>;
   tasks: Array<{
@@ -73,7 +73,6 @@ interface ProjectDetail {
     status: string;
     assignee: string;
     priority: string;
-    effortHours: number;
   }>;
   risks: Array<{
     id: string;
@@ -81,9 +80,27 @@ interface ProjectDetail {
     description: string;
     severity: string;
     status: string;
-    category: string;
     impact: string;
     probability: number;
+    riskScore: number;
+    mitigationPlan: string;
+    owner: string;
+  }>;
+  kpis: Array<{
+    id: string;
+    name: string;
+    currentValue: number;
+    targetValue: number;
+    unit: string;
+    status: string;
+  }>;
+  insights: Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: string;
+    recommendation: string;
+    sourceAgent: string;
   }>;
 }
 
@@ -271,8 +288,8 @@ export default function ProjectDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <MetricCard icon={Calendar} label="Timeline" value={`${timelineProgress}%`} subtitle={`${formatDate(project.startDate)} — ${formatDate(project.endDate)}`} />
               <MetricCard icon={Target} label="Milestone Progress" value={`${milestonePercent}%`} subtitle={milestonePercent >= 70 ? 'On track' : milestonePercent >= 40 ? 'Progressing' : 'Early stage'} />
-              <MetricCard icon={Activity} label="Velocity" value={project.velocity || '—'} subtitle="Story points / sprint" />
-              <MetricCard icon={BarChart3} label="Predictability" value={project.predictability ? `${Math.round(project.predictability * 100)}%` : '—'} subtitle="Delivery confidence" />
+              <MetricCard icon={DollarSign} label="Budget" value={project.budgetTotal > 0 ? `$${(project.budgetTotal / 1000000).toFixed(1)}M` : '—'} subtitle={project.budgetTotal > 0 ? `${Math.round((project.budgetSpent / project.budgetTotal) * 100)}% utilized` : 'No budget linked'} />
+              <MetricCard icon={BarChart3} label="Budget Spent" value={project.budgetSpent > 0 ? `$${(project.budgetSpent / 1000000).toFixed(1)}M` : '—'} subtitle={project.budgetTotal > 0 ? `$${((project.budgetTotal - project.budgetSpent) / 1000000).toFixed(1)}M remaining` : ''} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -366,21 +383,21 @@ export default function ProjectDetailPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-business-unit">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Business Unit</p>
-                <p className="font-semibold text-gray-900 mt-1">{project.businessUnit || '—'}</p>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-transformation">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Transformation</p>
+                <p className="font-semibold text-gray-900 mt-1">{project.transformationName || project.transformationId || '—'}</p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-art">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Agile Release Train</p>
-                <p className="font-semibold text-gray-900 mt-1">{project.artName || '—'}</p>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-budget-name">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Budget</p>
+                <p className="font-semibold text-gray-900 mt-1">{project.budgetName || '—'}</p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-safe-stage">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">SAFe Stage</p>
-                <p className="font-semibold text-gray-900 mt-1 capitalize">{project.safeStage || '—'}</p>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-priority">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Priority</p>
+                <p className="font-semibold text-gray-900 mt-1 capitalize">{project.priorityText || '—'}</p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-pi">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Current PI</p>
-                <p className="font-semibold text-gray-900 mt-1">{project.currentPi || '—'}</p>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-status">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Status</p>
+                <p className="font-semibold text-gray-900 mt-1">{project.statusText || '—'}</p>
               </div>
             </div>
           </div>

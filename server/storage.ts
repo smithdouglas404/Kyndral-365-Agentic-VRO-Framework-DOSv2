@@ -2891,12 +2891,76 @@ export class DatabaseStorage implements IStorage {
     console.log("[Seed] VRO metrics seeded successfully");
   }
 
-  // Seed Demo Mode Config
+  // Seed Demo Mode Config and Default Configurations
   async seedAppConfig(): Promise<void> {
     const existingConfig = await this.getAppConfig('demo_mode');
     if (!existingConfig) {
       await this.setAppConfig('demo_mode', 'true', 'Enable demo simulation mode', 'system');
       console.log("[Seed] App config seeded with demo_mode=true");
+    }
+
+    // Seed default configurations that were previously hardcoded
+    const defaultConfigs = [
+      {
+        key: 'risk.scoring',
+        value: {
+          impact: { high: 90, medium: 60, low: 30 },
+          probability: { high: 90, medium: 60, low: 30 }
+        },
+        description: 'Risk scoring thresholds for impact and probability mappings',
+        category: 'risk'
+      },
+      {
+        key: 'status.colors',
+        value: {
+          'Active': { border: '#22c55e', bg: 'bg-emerald-100', text: 'text-emerald-800', borderClass: 'border-emerald-300' },
+          'active': { border: '#22c55e', bg: 'bg-emerald-100', text: 'text-emerald-800', borderClass: 'border-emerald-300' },
+          'In Progress': { border: '#3b82f6', bg: 'bg-blue-100', text: 'text-blue-800', borderClass: 'border-blue-300' },
+          'Planning': { border: '#8b5cf6', bg: 'bg-violet-100', text: 'text-violet-800', borderClass: 'border-violet-300' },
+          'At Risk': { border: '#f59e0b', bg: 'bg-amber-100', text: 'text-amber-800', borderClass: 'border-amber-300' },
+          'Complete': { border: '#6b7280', bg: 'bg-gray-100', text: 'text-gray-800', borderClass: 'border-gray-300' },
+          'Not Started': { border: '#64748b', bg: 'bg-slate-100', text: 'text-slate-700', borderClass: 'border-slate-300' },
+          'On Track': { border: '#22c55e', bg: 'bg-emerald-100', text: 'text-emerald-800', borderClass: 'border-emerald-300' },
+          'Critical': { border: '#ef4444', bg: 'bg-red-100', text: 'text-red-800', borderClass: 'border-red-300' },
+          'green': { border: '#00A651', bg: 'bg-green-50', text: 'text-green-700' },
+          'amber': { border: '#FFA500', bg: 'bg-amber-50', text: 'text-amber-700' },
+          'red': { border: '#D50032', bg: 'bg-red-50', text: 'text-red-700' }
+        },
+        description: 'Project status color mappings',
+        category: 'ui'
+      },
+      {
+        key: 'brand.colors',
+        value: {
+          blue: '#0072CE',
+          teal: '#00A99D',
+          red: '#D50032',
+          yellow: '#FFC72C',
+          grey500: '#6B7280',
+          grey700: '#374151'
+        },
+        description: 'Brand color definitions',
+        category: 'ui'
+      },
+      {
+        key: 'project.metrics.defaults',
+        value: {
+          qualityScore: 80,
+          burndownHealth: 75,
+          confidence: 75,
+          costMultipliers: { labor: 0.7, materials: 0.2, other: 0.1 }
+        },
+        description: 'Default project metric values',
+        category: 'project'
+      }
+    ];
+
+    for (const config of defaultConfigs) {
+      const existing = await this.getAppConfig(config.key);
+      if (!existing) {
+        await this.setAppConfig(config.key, JSON.stringify(config.value), config.description, config.category);
+        console.log(`[Seed] App config seeded: ${config.key}`);
+      }
     }
   }
 

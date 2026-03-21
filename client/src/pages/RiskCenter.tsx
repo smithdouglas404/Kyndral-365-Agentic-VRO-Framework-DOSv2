@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from "wouter";
 import { usePageContext } from "@/contexts/PageContext";
 import { ArrowLeft, Shield, AlertTriangle, TrendingUp, CreditCard, Droplets, Settings, Eye, Users, Database } from "lucide-react";
@@ -10,6 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { riskData, aiAlerts } from "@/lib/lgData";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, Cell } from "recharts";
 import { useOntologyRisks, useDashboardMetrics } from "@/hooks/usePalantirOntology";
+import { useAppConfigValue } from "@/hooks/useAppConfig";
+
+// Default risk scoring values (fetched from config)
+const defaultRiskScoring = {
+  impact: { high: 90, medium: 60, low: 30 },
+  probability: { high: 90, medium: 60, low: 30 }
+};
 
 export default function RiskCenter() {
   const [, navigate] = useLocation();
@@ -20,6 +27,9 @@ export default function RiskCenter() {
   const { data: palantirRisks = [], isLoading: risksLoading } = useOntologyRisks();
   const { data: metrics } = useDashboardMetrics();
 
+  // Fetch risk scoring config from server (with fallback to defaults)
+  const { data: riskScoring } = useAppConfigValue('risk.scoring', defaultRiskScoring);
+
   useEffect(() => {
     setPageContext({
       pageType: 'tool',
@@ -29,9 +39,9 @@ export default function RiskCenter() {
     });
   }, [setPageContext]);
 
-  const riskAlerts = aiAlerts.filter(a => 
-    a.title.toLowerCase().includes("risk") || 
-    a.title.toLowerCase().includes("credit") || 
+  const riskAlerts = aiAlerts.filter(a =>
+    a.title.toLowerCase().includes("risk") ||
+    a.title.toLowerCase().includes("credit") ||
     a.title.toLowerCase().includes("longevity")
   );
 
@@ -52,18 +62,23 @@ export default function RiskCenter() {
 
   const radarData = riskData.categories.map(cat => ({
     subject: cat.name.replace(" Risk", ""),
-    severity: cat.subRisks.filter(r => r.severity === "high").length * 30 + 
+    severity: cat.subRisks.filter(r => r.severity === "high").length * 30 +
               cat.subRisks.filter(r => r.severity === "medium").length * 20 +
               cat.subRisks.filter(r => r.severity === "low").length * 10,
     fullMark: 100
   }));
 
-  const emergingRisksData = riskData.emergingRisks.keyEmergingRisks.map(risk => ({
-    name: risk.name,
-    impact: risk.impact === "high" ? 90 : risk.impact === "medium" ? 60 : 30,
-    probability: risk.probability === "high" ? 90 : risk.probability === "medium" ? 60 : 30,
-    horizon: risk.horizon
-  }));
+  // Use config-driven risk scoring values
+  const emergingRisksData = useMemo(() => {
+    const emergingRisks = riskData.emergingRisks?.keyEmergingRisks || [];
+    const scoring = riskScoring || defaultRiskScoring;
+    return emergingRisks.map(risk => ({
+      name: risk.name,
+      impact: scoring.impact[risk.impact as keyof typeof scoring.impact] || 50,
+      probability: scoring.probability[risk.probability as keyof typeof scoring.probability] || 50,
+      horizon: risk.horizon
+    }));
+  }, [riskScoring]);
 
   return (
     <div className="min-h-screen bg-[#F6F6F6]">

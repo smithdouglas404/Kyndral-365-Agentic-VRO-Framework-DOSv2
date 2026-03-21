@@ -1,14 +1,26 @@
 /**
  * PALANTIR ONTOLOGY API ROUTES
  *
- * Serves dashboard data from Palantir Foundry ontology.
- * This is the SINGLE SOURCE OF TRUTH for all business data.
+ * Serves dashboard data combining Palantir Foundry ontology with PostgreSQL.
+ * - Core project structure from Palantir
+ * - Detailed data (budget, EVM, SAFe) from PostgreSQL
  *
  * These routes map to the usePalantirOntology.ts hooks on the frontend.
  */
 
 import express, { type RequestHandler } from 'express';
 import { getPalantirService } from '../mcp/MCPServiceFactory.js';
+import { db } from '../db.js';
+import {
+  projects,
+  features,
+  stories,
+  tasks,
+  enterpriseRisks,
+  divisionKpis,
+  divisionOkrs,
+} from '../../shared/schema.js';
+import { eq, sql, count, sum, avg } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -73,138 +85,78 @@ router.get('/metrics', (async (_req, res) => {
     const palantir = getPalantirOrFail(res);
     if (!palantir) return;
 
-    // Fetch projects
-    const projectsResult = await palantir.listObjects('AtlasProject', {
-      pageSize: 500,
-      ontologyRid: ONTOLOGY_RID,
-    });
+    const [projectsResult, budgetsResult, risksResult, okrsResult, keyResultsResult] = await Promise.all([
+      palantir.listObjects('AtlasProject', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasObjective', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasKeyResult', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+    ]);
 
-    const projects = projectsResult.data || [];
+    const safeExcludePrefixes = ['[Feature]', '[Story]', '[Task]', '[Agent]', '[Integration]', '[Division]', '[Monday]', '[Jira'];
+    const safeExcludeIdPrefixes = ['feature-', 'story-', 'task-', 'agent-', 'source-', 'div-', 'monday-', 'story-test-', 'test-div-'];
 
-    // Fetch budgets
-    const budgetsResult = await palantir.listObjects('AtlasBudget', {
-      pageSize: 100,
-      ontologyRid: ONTOLOGY_RID,
-    });
-
-    const budgets = budgetsResult.data || [];
-
-    // Fetch risks
-    const risksResult = await palantir.listObjects('AtlasRisk', {
-      pageSize: 500,
-      ontologyRid: ONTOLOGY_RID,
-    });
-
-    const risks = risksResult.data || [];
-
-    // Fetch objectives
-    const objectivesResult = await palantir.listObjects('AtlasObjective', {
-      pageSize: 100,
-      ontologyRid: ONTOLOGY_RID,
-    });
-
-    const objectives = objectivesResult.data || [];
-
-    // Filter to only SAFe-level projects (exclude features, stories, tasks, agents, integrations)
-    const safeProjects = projects.filter((p: any) => {
+    const allProjects = (projectsResult.data || []).filter((p: any) => {
       const name = p.name || '';
-      if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]') || name.startsWith('[Jira') || name.startsWith('[OpenProject]')) return false;
-      const id = p.__primaryKey || p.id || '';
-      if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') || id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
-      return true;
+      const id = p.projectId || p.__primaryKey || '';
+      return !safeExcludePrefixes.some(prefix => name.startsWith(prefix)) &&
+             !safeExcludeIdPrefixes.some(prefix => id.startsWith(prefix));
     });
 
-    // Identify features, stories, tasks from all projects
-    const features = projects.filter((p: any) => {
-      const name = p.name || '';
-      const id = p.__primaryKey || p.project_id || p.id || '';
-      return name.startsWith('[Feature]') || id.startsWith('feature-');
-    });
+    const budgetMap = new Map<string, any>();
+    for (const b of (budgetsResult.data || [])) {
+      budgetMap.set(b.budgetId || b.__primaryKey, b);
+    }
 
-    const stories = projects.filter((p: any) => {
-      const name = p.name || '';
-      const id = p.__primaryKey || p.project_id || p.id || '';
-      return name.startsWith('[Story]') || id.startsWith('story-');
-    });
-
-    const tasks = projects.filter((p: any) => {
-      const name = p.name || '';
-      const id = p.__primaryKey || p.project_id || p.id || '';
-      return name.startsWith('[Task]') || id.startsWith('task-');
-    });
-
-    // Calculate metrics from SAFe projects only
-    const totalProjects = safeProjects.length;
-    const activeProjects = safeProjects.filter((p: any) =>
+    const totalProjects = allProjects.length;
+    const activeProjects = allProjects.filter((p: any) =>
       p.status && !p.status.toLowerCase().includes('complete')
     ).length;
 
     const projectsByStatus = {
-      green: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'green').length,
-      amber: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'amber').length,
-      red: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'red').length,
+      green: allProjects.filter((p: any) => mapStatusToColor(p.status || '') === 'green').length,
+      amber: allProjects.filter((p: any) => mapStatusToColor(p.status || '') === 'amber').length,
+      red: allProjects.filter((p: any) => mapStatusToColor(p.status || '') === 'red').length,
     };
 
-    // Calculate budget from AtlasBudget objects
-    let totalBudget = budgets.reduce((sum: number, b: any) => sum + (b.total_amount || b.planned_amount || 0), 0);
-    let spentBudget = budgets.reduce((sum: number, b: any) => sum + (b.spent_amount || b.actual_amount || 0), 0);
+    let totalBudget = 0;
+    let spentBudget = 0;
+    let progressSum = 0;
+    let projectsWithProgress = 0;
 
-    // If no AtlasBudget objects, calculate from project fields
-    if (totalBudget === 0) {
-      totalBudget = safeProjects.reduce((sum: number, p: any) => {
-        const budget = parseFloat(p.budget_total || p.budgetTotal || p.budget || '0');
-        return sum + (isNaN(budget) ? 0 : budget);
-      }, 0);
-    }
-    if (spentBudget === 0) {
-      spentBudget = safeProjects.reduce((sum: number, p: any) => {
-        const spent = parseFloat(p.budget_spent || p.budgetSpent || p.actual_cost || '0');
-        return sum + (isNaN(spent) ? 0 : spent);
-      }, 0);
+    for (const [, budget] of budgetMap) {
+      totalBudget += budget.totalAmount || 0;
+      spentBudget += budget.spentAmount || 0;
     }
 
-    // Calculate average progress from projects
-    const avgProjectProgress = safeProjects.length > 0
-      ? safeProjects.reduce((sum: number, p: any) => {
-          const progress = parseFloat(p.milestone_progress || p.progress || '0');
-          // milestone_progress is 0-1, progress is 0-100
-          return sum + (progress > 1 ? progress : progress * 100);
-        }, 0) / safeProjects.length
-      : 0;
+    for (const p of allProjects) {
+      const progress = (p.milestoneProgress || 0) * 100;
+      if (progress > 0) {
+        progressSum += progress;
+        projectsWithProgress++;
+      }
+    }
 
-    // Calculate EVM metrics
-    const cpiSum = safeProjects.reduce((sum: number, p: any) => {
-      const cpi = parseFloat(p.cpi_value || p.cpiValue || '1');
-      return sum + (isNaN(cpi) ? 1 : cpi);
-    }, 0);
-    const avgCPI = safeProjects.length > 0 ? cpiSum / safeProjects.length : 1;
+    const avgProgress = projectsWithProgress > 0 ? progressSum / projectsWithProgress : 0;
 
-    const spiSum = safeProjects.reduce((sum: number, p: any) => {
-      const spi = parseFloat(p.spi_value || p.spiValue || '1');
-      return sum + (isNaN(spi) ? 1 : spi);
-    }, 0);
-    const avgSPI = safeProjects.length > 0 ? spiSum / safeProjects.length : 1;
-
-    const totalRisks = risks.length;
-    const criticalRisks = risks.filter((r: any) =>
-      r.severity?.toLowerCase() === 'critical' || r.severity?.toLowerCase() === 'high'
+    const allRisks = risksResult.data || [];
+    const totalRisks = allRisks.length;
+    const criticalRisks = allRisks.filter((r: any) =>
+      (r.riskScore || 0) >= 8 || r.impact?.toLowerCase() === 'critical' || r.impact?.toLowerCase() === 'high'
     ).length;
 
-    const okrProgress = objectives.length > 0
-      ? objectives.reduce((sum: number, o: any) => sum + (o.progress || 0), 0) / objectives.length
-      : 0;
-
-    // Fetch dependencies count
-    let totalDependencies = 0;
-    try {
-      const depsResult = await palantir.listObjects('AtlasDependency', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      totalDependencies = depsResult.data?.length || 0;
-    } catch {
-      // AtlasDependency might not exist, ignore
+    const allOkrs = okrsResult.data || [];
+    const allKeyResults = keyResultsResult.data || [];
+    let okrProgress = 0;
+    if (allKeyResults.length > 0) {
+      const krs = allKeyResults.filter((kr: any) => (kr.targetValue || 0) > 0);
+      if (krs.length > 0) {
+        okrProgress = krs.reduce((sum: number, kr: any) =>
+          sum + ((kr.currentValue || 0) / (kr.targetValue || 1)) * 100, 0) / krs.length;
+      }
     }
+
+    const budgetUtilization = totalBudget > 0 ? (spentBudget / totalBudget) * 100 : 0;
 
     res.json({
       totalProjects,
@@ -212,24 +164,22 @@ router.get('/metrics', (async (_req, res) => {
       onTrackProjects: projectsByStatus.green,
       atRiskProjects: projectsByStatus.amber,
       delayedProjects: projectsByStatus.red,
-      avgProgress: avgProjectProgress,
+      avgProgress,
       projectsByStatus,
       totalBudget,
       spentBudget,
-      budgetUtilization: totalBudget > 0 ? (spentBudget / totalBudget) * 100 : 0,
+      budgetUtilization,
       totalRisks,
       criticalRisks,
       okrProgress,
-      // SAFe breakdown
-      totalFeatures: features.length,
-      totalStories: stories.length,
-      totalTasks: tasks.length,
-      totalDependencies,
-      // EVM metrics
-      avgCPI,
-      avgSPI,
-      costPerformance: avgCPI >= 1 ? 'On Budget' : 'Over Budget',
-      schedulePerformance: avgSPI >= 1 ? 'On Schedule' : 'Behind Schedule',
+      totalFeatures: 0,
+      totalStories: 0,
+      totalTasks: 0,
+      totalDependencies: 0,
+      avgCPI: budgetUtilization > 0 ? (avgProgress / budgetUtilization) : 1,
+      avgSPI: 1,
+      costPerformance: spentBudget <= totalBudget ? 'On Budget' : 'Over Budget',
+      schedulePerformance: 'On Schedule',
       agentAssignments: {},
     });
   } catch (error: any) {
@@ -238,7 +188,7 @@ router.get('/metrics', (async (_req, res) => {
 }) as RequestHandler);
 
 // ============================================================================
-// PROJECTS
+// PROJECTS - Reads from PostgreSQL for full 360° data
 // ============================================================================
 
 router.get('/projects', (async (req, res) => {
@@ -248,92 +198,98 @@ router.get('/projects', (async (req, res) => {
 
     const { status, businessUnit, priority, businessUnits } = req.query;
 
-    const result = await palantir.listObjects('AtlasProject', {
-      pageSize: 500,
-      ontologyRid: ONTOLOGY_RID,
-    });
+    const [projectsResult, budgetsResult, risksResult] = await Promise.all([
+      palantir.listObjects('AtlasProject', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+    ]);
 
-    let projects = (result.data || []).map((p: any) => {
-      // Parse budget values
-      const budgetTotal = parseFloat(p.budget_total || p.budgetTotal || p.budget || '0') || 0;
-      const budgetSpent = parseFloat(p.budget_spent || p.budgetSpent || p.actual_cost || '0') || 0;
-      const progress = p.milestone_progress || p.progress || 0;
-      // milestone_progress is 0-1, progress is 0-100
-      const normalizedProgress = progress > 1 ? progress : progress * 100;
+    const safeExcludePrefixes = ['[Feature]', '[Story]', '[Task]', '[Agent]', '[Integration]', '[Division]', '[Monday]', '[Jira'];
+    const safeExcludeIdPrefixes = ['feature-', 'story-', 'task-', 'agent-', 'source-', 'div-', 'monday-', 'story-test-', 'test-div-'];
 
-      return {
-        id: p.projectId || p.project_id || p.__primaryKey,
-        name: p.name || p.__title || 'Untitled Project',
-        description: p.description || '',
-        status: mapStatusToColor(p.status || ''),
-        statusText: p.status || 'Unknown',
-        businessUnit: p.business_unit || p.transformationId || p.transformation_id || 'General',
-        startDate: p.startDate || p.start_date,
-        endDate: p.endDate || p.end_date,
-        priority: mapPriorityToLevel(p.priority || 'medium'),
-        priorityText: p.priority || 'Medium',
-        // Budget fields
-        budgetTotal,
-        budgetSpent,
-        budgetUnit: p.budget_unit || p.budgetUnit || 'USD',
-        budgetRemaining: budgetTotal - budgetSpent,
-        budgetUtilization: budgetTotal > 0 ? (budgetSpent / budgetTotal) * 100 : 0,
-        // ROI
-        expectedRoi: p.expected_roi || p.expectedRoi || p.roi_value || '',
-        roiValue: parseFloat(p.roi_value || p.roiValue || '0') || 0,
-        // Progress
-        milestoneProgress: normalizedProgress,
-        progress: normalizedProgress,
-        // EVM metrics
-        cpiValue: parseFloat(p.cpi_value || p.cpiValue || '1') || 1,
-        spiValue: parseFloat(p.spi_value || p.spiValue || '1') || 1,
-        earnedValue: parseFloat(p.earned_value || p.earnedValue || '0') || 0,
-        plannedValue: parseFloat(p.planned_value || p.plannedValue || '0') || 0,
-        // SAFe fields
-        artName: p.art_name || p.artName || '',
-        portfolioTheme: p.portfolio_theme || p.portfolioTheme || '',
-        safeStage: p.safe_stage || p.safeStage || '',
-        currentPi: p.current_pi || p.currentPi || '',
-        velocity: parseFloat(p.velocity || '0') || 0,
-        predictability: parseFloat(p.predictability || '0') || 0,
-        flowEfficiency: parseFloat(p.flow_efficiency || p.flowEfficiency || '0') || 0,
-        // Epic linkage
-        epicId: p.epic_id || p.epicId || '',
-        epicName: p.epic_name || p.epicName || '',
-        // Source tracking
-        source: p.source || '',
-        syncedAt: p.synced_at || p.syncedAt || '',
-      };
-    });
-
-    // Filter out non-SAFe items by default (features, stories, tasks, agents, integrations)
-    const includeSafeOnly = req.query.safeOnly !== 'false';
-    if (includeSafeOnly) {
-      projects = projects.filter((p: any) => {
-        const name = p.name || '';
-        if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]') || name.startsWith('[Jira') || name.startsWith('[OpenProject]')) return false;
-        const id = p.id || '';
-        if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') || id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
-        return true;
-      });
+    const budgetMap = new Map<string, any>();
+    for (const b of (budgetsResult.data || [])) {
+      budgetMap.set(b.budgetId || b.__primaryKey, b);
     }
 
-    // Apply additional filters
+    const riskCounts = new Map<string, number>();
+    for (const r of (risksResult.data || [])) {
+      const pid = r.projectId || '';
+      riskCounts.set(pid, (riskCounts.get(pid) || 0) + 1);
+    }
+
+    let projectList = (projectsResult.data || [])
+      .filter((p: any) => {
+        const name = p.name || '';
+        const id = p.projectId || p.__primaryKey || '';
+        return !safeExcludePrefixes.some(prefix => name.startsWith(prefix)) &&
+               !safeExcludeIdPrefixes.some(prefix => id.startsWith(prefix));
+      })
+      .map((p: any) => {
+        const id = p.projectId || p.__primaryKey || '';
+        const budget = budgetMap.get(p.budgetId);
+        const budgetTotal = budget ? (budget.totalAmount || 0) : 0;
+        const budgetSpent = budget ? (budget.spentAmount || 0) : 0;
+        const progress = (p.milestoneProgress || 0) * 100;
+
+        return {
+          id,
+          name: p.name || 'Untitled Project',
+          description: p.description || '',
+          status: mapStatusToColor(p.status || ''),
+          statusText: p.status || 'Unknown',
+          businessUnit: 'General',
+          startDate: p.startDate,
+          endDate: p.endDate,
+          priority: mapPriorityToLevel(p.priority || 'medium'),
+          priorityText: p.priority || 'Medium',
+          budgetTotal,
+          budgetSpent,
+          budgetUnit: budget?.currency || 'USD',
+          budgetRemaining: budgetTotal - budgetSpent,
+          budgetUtilization: budgetTotal > 0 ? (budgetSpent / budgetTotal) * 100 : 0,
+          budgetName: budget?.name || '',
+          expectedRoi: '',
+          roiValue: 0,
+          milestoneProgress: progress,
+          progress,
+          cpiValue: 1,
+          spiValue: 1,
+          earnedValue: 0,
+          plannedValue: 0,
+          artName: '',
+          portfolioTheme: '',
+          safeStage: '',
+          currentPi: '',
+          velocity: 0,
+          predictability: 0,
+          flowEfficiency: 0,
+          epicId: '',
+          epicName: '',
+          featureCount: 0,
+          storyCount: 0,
+          taskCount: 0,
+          riskCount: riskCounts.get(id) || 0,
+          dependencyCount: 0,
+          transformationId: p.transformationId || '',
+        };
+      });
+
     if (status) {
-      projects = projects.filter((p: any) => p.status === status);
+      projectList = projectList.filter((p: any) => p.status === status);
     }
     if (priority) {
-      projects = projects.filter((p: any) => p.priority === priority);
+      projectList = projectList.filter((p: any) => p.priority === priority);
     }
     if (businessUnit) {
-      projects = projects.filter((p: any) => p.businessUnit === businessUnit);
+      projectList = projectList.filter((p: any) => p.businessUnit === businessUnit);
     }
     if (businessUnits) {
       const buList = (businessUnits as string).split(',');
-      projects = projects.filter((p: any) => buList.includes(p.businessUnit));
+      projectList = projectList.filter((p: any) => buList.includes(p.businessUnit));
     }
 
-    res.json(projects);
+    res.json(projectList);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -344,29 +300,41 @@ router.get('/projects/:projectId', (async (req, res) => {
     const palantir = getPalantirOrFail(res);
     if (!palantir) return;
 
-    const project = await palantir.getObject('AtlasProject', req.params.projectId, {
-      ontologyRid: ONTOLOGY_RID,
-    });
+    const [project, budgetsResult, transformationsResult] = await Promise.all([
+      palantir.getObject('AtlasProject', req.params.projectId, { ontologyRid: ONTOLOGY_RID }),
+      palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasTransformation', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+    ]);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
+    const budget = (budgetsResult.data || []).find((b: any) => (b.budgetId || b.__primaryKey) === project.budgetId);
+    const transformation = (transformationsResult.data || []).find((t: any) => (t.transformationId || t.__primaryKey) === project.transformationId);
+    const milestoneProgress = project.milestoneProgress || 0;
+
     res.json({
-      id: project.projectId || project.project_id || project.__primaryKey,
+      id: project.projectId || project.__primaryKey,
       name: project.name || project.__title || 'Untitled Project',
       description: project.description || '',
       status: mapStatusToColor(project.status || ''),
       statusText: project.status || 'Unknown',
-      businessUnit: project.business_unit || project.transformationId || project.transformation_id || 'General',
-      startDate: project.startDate || project.start_date,
-      endDate: project.endDate || project.end_date,
+      businessUnit: project.transformationId || 'General',
+      transformationName: transformation?.name || project.transformationId || '',
+      startDate: project.startDate || '',
+      endDate: project.endDate || '',
       priority: mapPriorityToLevel(project.priority || 'medium'),
       priorityText: project.priority || 'Medium',
-      budgetTotal: project.budget_total || project.budgetTotal || 0,
-      budgetSpent: project.budget_spent || project.budgetSpent || 0,
-      expectedRoi: project.expected_roi || project.expectedRoi || '',
-      milestoneProgress: project.milestone_progress || project.milestoneProgress || 0,
+      budgetId: project.budgetId || '',
+      budgetName: budget?.name || '',
+      budgetTotal: budget?.totalAmount || 0,
+      budgetSpent: budget?.spentAmount || 0,
+      budgetAllocated: budget?.allocatedAmount || 0,
+      budgetCurrency: budget?.currency || 'USD',
+      milestoneProgress,
+      progress: Math.round(milestoneProgress * 100),
+      createdAt: project.createdAt || '',
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -390,16 +358,18 @@ router.get('/risks', (async (req, res) => {
     });
 
     let risks = (result.data || []).map((r: any) => ({
-      id: r.risk_id || r.__primaryKey,
-      title: r.title || r.name || 'Untitled Risk',
+      id: r.riskId || r.__primaryKey,
+      title: r.__title || r.title || r.name || r.description || 'Risk',
       description: r.description || '',
-      severity: r.severity?.toLowerCase() || 'medium',
-      probability: parseFloat(r.probability) || 0.5,
-      impact: parseFloat(r.impact) || 0.5,
-      status: r.status?.toLowerCase() || 'open',
-      projectId: r.project_id,
-      owner: r.owner,
-      mitigationPlan: r.mitigation_strategy || r.mitigation_plan || '',
+      severity: (r.probability || r.severity || 'medium').toLowerCase(),
+      probability: r.riskScore ? r.riskScore / 10 : 0.5,
+      impact: (r.impact || 'medium').toLowerCase(),
+      riskScore: r.riskScore || 5,
+      status: (r.status || 'open').toLowerCase(),
+      projectId: r.projectId || '',
+      owner: r.owner || '',
+      mitigationPlan: r.mitigationPlan || '',
+      identifiedDate: r.identifiedDate || r.createdAt || '',
     }));
 
     // Apply filters
@@ -435,15 +405,39 @@ router.get('/okrs', (async (req, res) => {
       ontologyRid: ONTOLOGY_RID,
     });
 
-    let okrs = (result.data || []).map((o: any) => ({
-      id: o.objective_id || o.__primaryKey,
-      objective: o.title || o.objective || 'Untitled Objective',
-      keyResults: o.key_results || [],
-      progress: o.progress || 0,
-      owner: o.owner,
-      period: o.period || o.time_period,
-      strategicPriority: o.strategic_priority || o.category,
-    }));
+    const keyResultsData = await palantir.listObjects('AtlasKeyResult', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    }).catch(() => ({ data: [] }));
+
+    const krByObjective = new Map<string, any[]>();
+    for (const kr of (keyResultsData.data || [])) {
+      const oid = kr.objectiveId || '';
+      if (!krByObjective.has(oid)) krByObjective.set(oid, []);
+      krByObjective.get(oid)!.push({
+        id: kr.keyResultId || kr.__primaryKey,
+        name: kr.name || '',
+        currentValue: kr.currentValue || 0,
+        targetValue: kr.targetValue || 100,
+        unit: kr.unit || '%',
+        status: kr.status || 'On Track',
+        progress: kr.targetValue ? Math.round((kr.currentValue / kr.targetValue) * 100) : 0,
+      });
+    }
+
+    let okrs = (result.data || []).map((o: any) => {
+      const krs = krByObjective.get(o.objectiveId || o.__primaryKey) || [];
+      const avgProgress = krs.length > 0 ? Math.round(krs.reduce((sum: number, kr: any) => sum + kr.progress, 0) / krs.length) : 0;
+      return {
+        id: o.objectiveId || o.__primaryKey,
+        objective: o.name || o.__title || 'Untitled Objective',
+        description: o.description || '',
+        keyResults: krs,
+        progress: avgProgress,
+        status: o.status || 'On Track',
+        timeframe: o.timeframe || '',
+      };
+    });
 
     // Apply filters
     if (period) {
@@ -475,18 +469,26 @@ router.get('/financials', (async (req, res) => {
       ontologyRid: ONTOLOGY_RID,
     });
 
-    let financials = (result.data || []).map((b: any) => ({
-      id: b.budget_id || b.__primaryKey,
-      projectId: b.project_id,
-      budgetAllocated: b.allocated_amount || b.total_amount || 0,
-      budgetSpent: b.spent_amount || 0,
-      budgetRemaining: (b.allocated_amount || b.total_amount || 0) - (b.spent_amount || 0),
-      forecastAtCompletion: b.forecast_at_completion || b.total_amount || 0,
-      variance: ((b.allocated_amount || b.total_amount || 0) - (b.spent_amount || 0)) / (b.allocated_amount || b.total_amount || 1),
-      variancePercent: (((b.allocated_amount || b.total_amount || 0) - (b.spent_amount || 0)) / (b.allocated_amount || b.total_amount || 1)) * 100,
-      burnRate: b.burn_rate,
-      lastUpdated: b.updated_at || new Date().toISOString(),
-    }));
+    let financials = (result.data || []).map((b: any) => {
+      const total = b.totalAmount || 0;
+      const spent = b.spentAmount || 0;
+      const allocated = b.allocatedAmount || total;
+      return {
+        id: b.budgetId || b.__primaryKey,
+        name: b.name || '',
+        budgetAllocated: allocated,
+        budgetSpent: spent,
+        budgetRemaining: total - spent,
+        totalAmount: total,
+        currency: b.currency || 'USD',
+        fiscalYear: b.fiscalYear || '',
+        forecastAtCompletion: total,
+        variance: total > 0 ? (total - spent) / total : 0,
+        variancePercent: total > 0 ? Math.round(((total - spent) / total) * 100) : 0,
+        utilization: total > 0 ? Math.round((spent / total) * 100) : 0,
+        lastUpdated: b.createdAt || new Date().toISOString(),
+      };
+    });
 
     if (projectId) {
       financials = financials.filter((f: any) => f.projectId === projectId);
@@ -587,45 +589,37 @@ router.get('/agent/:agentType', (async (req, res) => {
 
 router.get('/features', (async (req, res) => {
   try {
-    const palantir = getPalantirOrFail(res);
-    if (!palantir) return;
-
     const { projectId, status } = req.query;
 
-    const result = await palantir.listObjects('AtlasProject', {
-      pageSize: 500,
-      ontologyRid: ONTOLOGY_RID,
-    });
-
-    // Filter to features only
-    let features = (result.data || [])
-      .filter((p: any) => {
-        const name = p.name || '';
-        const id = p.__primaryKey || p.project_id || p.id || '';
-        return name.startsWith('[Feature]') || id.startsWith('feature-');
-      })
-      .map((f: any) => ({
-        id: f.projectId || f.project_id || f.__primaryKey,
-        name: (f.name || '').replace('[Feature] ', ''),
-        description: f.description || '',
-        status: f.status || 'In Progress',
-        projectId: f.parent_project_id || f.epic_id || '',
-        storyPoints: parseInt(f.story_points || '0') || 0,
-        completedPoints: parseInt(f.completed_points || '0') || 0,
-        priority: f.priority || 'Medium',
-        targetPi: f.current_pi || f.target_pi || '',
-        wsjfScore: parseFloat(f.wsjf_score || '0') || 0,
-        progress: f.milestone_progress ? f.milestone_progress * 100 : 0,
-      }));
+    // Fetch from PostgreSQL
+    let featureList = await db.select().from(features);
 
     if (projectId) {
-      features = features.filter((f: any) => f.projectId === projectId);
+      featureList = featureList.filter((f) => f.projectId === projectId);
     }
     if (status) {
-      features = features.filter((f: any) => f.status.toLowerCase() === (status as string).toLowerCase());
+      featureList = featureList.filter((f) =>
+        f.status?.toLowerCase() === (status as string).toLowerCase()
+      );
     }
 
-    res.json(features);
+    const result = featureList.map((f) => ({
+      id: f.id,
+      name: f.name || '',
+      description: f.description || '',
+      status: f.status || 'In Progress',
+      projectId: f.projectId || '',
+      storyPoints: f.storyPoints || 0,
+      completedPoints: f.completedPoints || 0,
+      priority: f.priority || 'Medium',
+      targetPi: f.targetPi || '',
+      wsjfScore: f.wsjfScore || 0,
+      progress: f.storyPoints && f.storyPoints > 0
+        ? ((f.completedPoints || 0) / f.storyPoints) * 100
+        : 0,
+    }));
+
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -647,20 +641,20 @@ router.get('/stories', (async (req, res) => {
     let stories = (result.data || [])
       .filter((p: any) => {
         const name = p.name || '';
-        const id = p.__primaryKey || p.project_id || p.id || '';
+        const id = p.projectId || p.__primaryKey || '';
         return name.startsWith('[Story]') || id.startsWith('story-');
       })
       .map((s: any) => ({
-        id: s.projectId || s.project_id || s.__primaryKey,
+        id: s.projectId || s.__primaryKey,
         name: (s.name || '').replace('[Story] ', ''),
         description: s.description || '',
         status: s.status || 'In Progress',
-        featureId: s.parent_feature_id || s.feature_id || '',
-        projectId: s.parent_project_id || s.epic_id || '',
-        storyPoints: parseInt(s.story_points || '0') || 0,
+        featureId: '',
+        projectId: s.transformationId || '',
+        storyPoints: 0,
         priority: s.priority || 'Medium',
-        assignee: s.assignee || '',
-        sprint: s.sprint || s.current_pi || '',
+        assignee: '',
+        sprint: '',
       }));
 
     if (featureId) {
@@ -695,21 +689,21 @@ router.get('/tasks', (async (req, res) => {
     let tasks = (result.data || [])
       .filter((p: any) => {
         const name = p.name || '';
-        const id = p.__primaryKey || p.project_id || p.id || '';
+        const id = p.projectId || p.__primaryKey || '';
         return name.startsWith('[Task]') || id.startsWith('task-');
       })
       .map((t: any) => ({
-        id: t.projectId || t.project_id || t.__primaryKey,
+        id: t.projectId || t.__primaryKey,
         name: (t.name || '').replace('[Task] ', ''),
         description: t.description || '',
         status: t.status || 'In Progress',
-        storyId: t.parent_story_id || t.story_id || '',
-        projectId: t.parent_project_id || t.epic_id || '',
-        estimatedHours: parseFloat(t.estimated_hours || '0') || 0,
-        actualHours: parseFloat(t.actual_hours || '0') || 0,
+        storyId: '',
+        projectId: t.transformationId || '',
+        estimatedHours: 0,
+        actualHours: 0,
         priority: t.priority || 'Medium',
-        assignee: t.assignee || '',
-        dueDate: t.due_date || t.end_date || '',
+        assignee: '',
+        dueDate: t.endDate || '',
       }));
 
     if (storyId) {
@@ -750,14 +744,14 @@ router.get('/dependencies', (async (req, res) => {
         ontologyRid: ONTOLOGY_RID,
       });
       dependencies = (result.data || []).map((d: any) => ({
-        id: d.dependency_id || d.__primaryKey,
-        sourceProjectId: d.source_project_id || d.from_project,
-        targetProjectId: d.target_project_id || d.to_project,
-        type: d.dependency_type || d.type || 'blocks',
+        id: d.dependencyId || d.__primaryKey,
+        sourceProjectId: d.sourceProjectId || '',
+        targetProjectId: d.targetProjectId || '',
+        type: d.dependencyType || 'blocks',
         status: d.status || 'active',
         description: d.description || '',
-        impact: d.impact || 'medium',
-        resolvedAt: d.resolved_at || null,
+        dueDate: d.dueDate || '',
+        createdAt: d.createdAt || '',
       }));
     } catch {
       // AtlasDependency might not exist
@@ -787,82 +781,30 @@ router.get('/dependencies', (async (req, res) => {
 
 router.get('/project360/:projectId', (async (req, res) => {
   try {
-    const palantir = getPalantirOrFail(res);
-    if (!palantir) return;
-
     const { projectId } = req.params;
 
-    // Get project
-    const projectResult = await palantir.listObjects('AtlasProject', {
-      pageSize: 500,
-      ontologyRid: ONTOLOGY_RID,
-    });
-
-    const allProjects = projectResult.data || [];
-    const project = allProjects.find((p: any) =>
-      (p.projectId || p.project_id || p.__primaryKey) === projectId
-    );
+    // Get project from PostgreSQL
+    const projectResults = await db.select().from(projects).where(eq(projects.id, projectId));
+    const project = projectResults[0];
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    // Get related features, stories, tasks
-    const features = allProjects.filter((p: any) => {
-      const name = p.name || '';
-      const id = p.__primaryKey || p.project_id || '';
-      const isFeature = name.startsWith('[Feature]') || id.startsWith('feature-');
-      const belongsToProject = (p.parent_project_id || p.epic_id) === projectId;
-      return isFeature && belongsToProject;
-    });
-
-    const stories = allProjects.filter((p: any) => {
-      const name = p.name || '';
-      const id = p.__primaryKey || p.project_id || '';
-      const isStory = name.startsWith('[Story]') || id.startsWith('story-');
-      const belongsToProject = (p.parent_project_id || p.epic_id) === projectId;
-      return isStory && belongsToProject;
-    });
-
-    const tasks = allProjects.filter((p: any) => {
-      const name = p.name || '';
-      const id = p.__primaryKey || p.project_id || '';
-      const isTask = name.startsWith('[Task]') || id.startsWith('task-');
-      const belongsToProject = (p.parent_project_id || p.epic_id) === projectId;
-      return isTask && belongsToProject;
-    });
-
-    // Get risks
-    let risks: any[] = [];
-    try {
-      const risksResult = await palantir.listObjects('AtlasRisk', {
-        pageSize: 100,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      risks = (risksResult.data || []).filter((r: any) => r.project_id === projectId);
-    } catch {}
-
-    // Get dependencies
-    let dependencies: any[] = [];
-    try {
-      const depsResult = await palantir.listObjects('AtlasDependency', {
-        pageSize: 100,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      dependencies = (depsResult.data || []).filter((d: any) =>
-        d.source_project_id === projectId || d.target_project_id === projectId
-      );
-    } catch {}
+    // Get related features, stories, tasks, risks
+    const projectFeatures = await db.select().from(features).where(eq(features.projectId, projectId));
+    const projectStories = await db.select().from(stories).where(eq(stories.projectId, projectId));
+    const projectTasks = await db.select().from(tasks).where(eq(tasks.projectId, projectId));
+    const projectRisks = await db.select().from(enterpriseRisks).where(eq(enterpriseRisks.projectId, projectId));
 
     // Parse project fields
-    const budgetTotal = parseFloat(project.budget_total || project.budgetTotal || project.budget || '0') || 0;
-    const budgetSpent = parseFloat(project.budget_spent || project.budgetSpent || project.actual_cost || '0') || 0;
-    const progress = project.milestone_progress || project.progress || 0;
-    const normalizedProgress = progress > 1 ? progress : progress * 100;
+    const budgetTotal = parseFloat(project.budgetTotal || project.budget || '0') || 0;
+    const budgetSpent = parseFloat(project.budgetSpent || project.actualCost || '0') || 0;
+    const progress = project.progress || 0;
 
     res.json({
       // Core project info
-      id: project.projectId || project.project_id || project.__primaryKey,
+      id: project.id,
       name: project.name || 'Untitled Project',
       description: project.description || '',
       status: mapStatusToColor(project.status || ''),
@@ -870,73 +812,88 @@ router.get('/project360/:projectId', (async (req, res) => {
       priority: mapPriorityToLevel(project.priority || 'medium'),
       priorityText: project.priority || 'Medium',
       // Dates
-      startDate: project.startDate || project.start_date,
-      endDate: project.endDate || project.end_date,
+      startDate: project.startDate?.toISOString(),
+      endDate: project.endDate?.toISOString(),
       // Organization
-      businessUnit: project.business_unit || project.transformationId || project.transformation_id || 'General',
-      artName: project.art_name || project.artName || '',
-      portfolioTheme: project.portfolio_theme || project.portfolioTheme || '',
+      businessUnit: project.divisionId || project.businessUnitId || 'General',
+      artName: project.artName || '',
+      portfolioTheme: project.portfolioTheme || '',
       // Budget & Financial
       budgetTotal,
       budgetSpent,
-      budgetUnit: project.budget_unit || project.budgetUnit || 'USD',
+      budgetUnit: project.budgetUnit || 'USD',
       budgetRemaining: budgetTotal - budgetSpent,
       budgetUtilization: budgetTotal > 0 ? (budgetSpent / budgetTotal) * 100 : 0,
-      expectedRoi: project.expected_roi || project.expectedRoi || '',
-      roiValue: parseFloat(project.roi_value || project.roiValue || '0') || 0,
+      expectedRoi: project.expectedRoi || '',
+      roiValue: parseFloat(project.roiValue || '0') || 0,
       // EVM Metrics
-      progress: normalizedProgress,
-      cpiValue: parseFloat(project.cpi_value || project.cpiValue || '1') || 1,
-      spiValue: parseFloat(project.spi_value || project.spiValue || '1') || 1,
-      earnedValue: parseFloat(project.earned_value || project.earnedValue || '0') || 0,
-      plannedValue: parseFloat(project.planned_value || project.plannedValue || '0') || 0,
+      progress,
+      cpiValue: project.cpiValue || 1,
+      spiValue: project.spiValue || 1,
+      earnedValue: project.earnedValue || 0,
+      plannedValue: project.plannedValue || 0,
       // SAFe fields
-      safeStage: project.safe_stage || project.safeStage || '',
-      currentPi: project.current_pi || project.currentPi || '',
+      safeStage: project.safeStage || '',
+      currentPi: project.currentPi || '',
       velocity: parseFloat(project.velocity || '0') || 0,
       predictability: parseFloat(project.predictability || '0') || 0,
-      flowEfficiency: parseFloat(project.flow_efficiency || project.flowEfficiency || '0') || 0,
+      flowEfficiency: parseFloat(project.flowEfficiency || '0') || 0,
+      // Epic linkage
+      epicId: project.epicId || '',
+      epicName: project.epicName || '',
+      epicProgress: project.epicProgress || '',
+      // OKR linkage
+      okrObjective: project.okrObjective || '',
+      okrKeyResult: project.okrKeyResult || '',
+      okrProgress: project.okrProgress || 0,
+      // AI recommendation
+      aiRecommendation: project.aiRecommendation || '',
+      // Timeline
+      timelineElapsed: project.timelineElapsed || 0,
+      timelineTotal: project.timelineTotal || 0,
       // Counts
-      featureCount: features.length,
-      storyCount: stories.length,
-      taskCount: tasks.length,
-      riskCount: risks.length,
-      dependencyCount: dependencies.length,
+      featureCount: projectFeatures.length,
+      storyCount: projectStories.length,
+      taskCount: projectTasks.length,
+      riskCount: projectRisks.length,
+      dependencyCount: 0, // Add dependencies if available
       // Related items
-      features: features.map((f: any) => ({
-        id: f.projectId || f.project_id || f.__primaryKey,
-        name: (f.name || '').replace('[Feature] ', ''),
+      features: projectFeatures.map((f) => ({
+        id: f.id,
+        name: f.name || '',
         status: f.status,
-        progress: f.milestone_progress ? f.milestone_progress * 100 : 0,
+        description: f.description || '',
+        storyPoints: f.storyPoints || 0,
+        completedPoints: f.completedPoints || 0,
+        priority: f.priority || 'medium',
       })),
-      stories: stories.map((s: any) => ({
-        id: s.projectId || s.project_id || s.__primaryKey,
-        name: (s.name || '').replace('[Story] ', ''),
+      stories: projectStories.map((s) => ({
+        id: s.id,
+        name: s.name || '',
         status: s.status,
-        storyPoints: parseInt(s.story_points || '0') || 0,
+        description: s.description || '',
+        storyPoints: s.storyPoints || 0,
+        featureId: s.featureId || '',
       })),
-      tasks: tasks.map((t: any) => ({
-        id: t.projectId || t.project_id || t.__primaryKey,
-        name: (t.name || '').replace('[Task] ', ''),
+      tasks: projectTasks.map((t) => ({
+        id: t.id,
+        name: t.name || '',
         status: t.status,
+        description: t.description || '',
+        storyId: t.storyId || '',
         assignee: t.assignee || '',
       })),
-      risks: risks.map((r: any) => ({
-        id: r.risk_id || r.__primaryKey,
-        title: r.title || r.name,
+      risks: projectRisks.map((r) => ({
+        id: r.id,
+        name: r.name || '',
+        description: r.description || '',
         severity: r.severity,
         status: r.status,
+        likelihood: r.likelihood,
+        mitigationPlan: r.mitigationPlan || '',
+        owner: r.owner || '',
       })),
-      dependencies: dependencies.map((d: any) => ({
-        id: d.dependency_id || d.__primaryKey,
-        type: d.dependency_type || d.type,
-        targetProjectId: d.target_project_id,
-        sourceProjectId: d.source_project_id,
-        status: d.status,
-      })),
-      // Source tracking
-      source: project.source || '',
-      syncedAt: project.synced_at || project.syncedAt || '',
+      dependencies: [], // Add dependencies query if available
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

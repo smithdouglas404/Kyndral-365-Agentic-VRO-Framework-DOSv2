@@ -241,10 +241,9 @@ class OntologyDataProviderClass {
     const cached = this.getFromCache<DashboardMetrics>(cacheKey);
     if (cached) return cached;
 
-    // Fetch all relevant data in parallel
     const [projectsResult, budgetsResult, risksResult, okrsResult] = await Promise.all([
       this.query(PALANTIR_OBJECT_TYPES.PROJECT, { pageSize: 500 }),
-      this.query(PALANTIR_OBJECT_TYPES.PROJECT, { pageSize: 500 }), // Budget is on Project
+      this.query('AtlasBudget', { pageSize: 100 }),
       this.query(PALANTIR_OBJECT_TYPES.RISK, { pageSize: 500 }),
       this.query(PALANTIR_OBJECT_TYPES.OKR, { pageSize: 500 }),
     ]);
@@ -254,18 +253,27 @@ class OntologyDataProviderClass {
     const risks = risksResult.data;
     const objectives = okrsResult.data;
 
-    // Calculate project metrics
+    const safeProjects = projects.filter((p: any) => {
+      const id = p.projectId || p.__primaryKey || '';
+      const name = p.name || '';
+      if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') ||
+          id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-') || id.startsWith('story-test-') || id.startsWith('test-div-')) return false;
+      if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') ||
+          name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') ||
+          name.startsWith('[Monday]') || name.startsWith('[Jira')) return false;
+      return true;
+    });
+
     const projectMetrics = {
-      total: projects.length,
-      active: projects.filter((p: any) => p.status?.toLowerCase() === 'active' || p.status?.toLowerCase() === 'in progress').length,
-      atRisk: projects.filter((p: any) => p.healthStatus?.toLowerCase() === 'at_risk' || p.status?.toLowerCase() === 'at risk').length,
-      onTrack: projects.filter((p: any) => p.healthStatus?.toLowerCase() === 'on_track' || p.status?.toLowerCase() === 'on track').length,
-      delayed: projects.filter((p: any) => p.healthStatus?.toLowerCase() === 'delayed' || p.status?.toLowerCase() === 'delayed').length,
+      total: safeProjects.length,
+      active: safeProjects.filter((p: any) => p.status?.toLowerCase() === 'active' || p.status?.toLowerCase() === 'in progress').length,
+      atRisk: safeProjects.filter((p: any) => p.status?.toLowerCase() === 'at risk').length,
+      onTrack: safeProjects.filter((p: any) => p.status?.toLowerCase() === 'on track' || p.status?.toLowerCase() === 'complete').length,
+      delayed: safeProjects.filter((p: any) => p.status?.toLowerCase() === 'delayed' || p.status?.toLowerCase() === 'blocked').length,
     };
 
-    // Calculate financial metrics
-    const totalBudget = budgets.reduce((sum: number, b: any) => sum + (parseFloat(b.plannedBudget) || 0), 0);
-    const totalSpent = budgets.reduce((sum: number, b: any) => sum + (parseFloat(b.actualSpend) || 0), 0);
+    const totalBudget = budgets.reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
+    const totalSpent = budgets.reduce((sum: number, b: any) => sum + (b.spentAmount || 0), 0);
     const variance = totalBudget - totalSpent;
 
     const financialMetrics = {
@@ -275,13 +283,12 @@ class OntologyDataProviderClass {
       variancePercent: totalBudget > 0 ? (variance / totalBudget) * 100 : 0,
     };
 
-    // Calculate risk metrics
     const riskMetrics = {
       total: risks.length,
-      critical: risks.filter((r: any) => r.severity?.toLowerCase() === 'critical' || r.priority === 1).length,
-      high: risks.filter((r: any) => r.severity?.toLowerCase() === 'high' || r.priority === 2).length,
-      medium: risks.filter((r: any) => r.severity?.toLowerCase() === 'medium' || r.priority === 3).length,
-      low: risks.filter((r: any) => r.severity?.toLowerCase() === 'low' || r.priority >= 4).length,
+      critical: risks.filter((r: any) => (r.riskScore || 0) >= 8 || r.impact?.toLowerCase() === 'critical').length,
+      high: risks.filter((r: any) => ((r.riskScore || 0) >= 6 && (r.riskScore || 0) < 8) || r.impact?.toLowerCase() === 'high').length,
+      medium: risks.filter((r: any) => ((r.riskScore || 0) >= 4 && (r.riskScore || 0) < 6) || r.impact?.toLowerCase() === 'medium').length,
+      low: risks.filter((r: any) => (r.riskScore || 0) < 4 || r.impact?.toLowerCase() === 'low').length,
     };
 
     // Calculate OKR metrics
@@ -328,7 +335,7 @@ class OntologyDataProviderClass {
    * Get budgets/financial records
    */
   async getBudgets(options: QueryOptions = {}): Promise<QueryResult> {
-    return this.query(PALANTIR_OBJECT_TYPES.PROJECT, options); // Budget is on Project
+    return this.query('AtlasBudget', options);
   }
 
   /**
