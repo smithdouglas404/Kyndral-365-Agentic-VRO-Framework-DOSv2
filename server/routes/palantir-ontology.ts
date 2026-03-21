@@ -649,52 +649,24 @@ router.get('/stories', (async (req, res) => {
 
     const { featureId, projectId, status } = req.query;
 
-    // First try to get from AtlasStory (proper object type)
-    let stories: any[] = [];
-    try {
-      const result = await palantir.listObjects('AtlasStory', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      stories = (result.data || []).map((s: any) => ({
-        id: s.storyId || s.__primaryKey,
-        name: s.name || '',
-        description: s.description || '',
-        status: s.status || 'Backlog',
-        featureId: s.featureId || '',
-        projectId: s.projectId || '',
-        storyPoints: s.storyPoints || 0,
-        priority: s.priority || 'Medium',
-        assignee: s.assignee || '',
-        sprint: s.sprint || '',
-        teamId: s.teamId || '',
-      }));
-    } catch (e) {
-      // Fallback to AtlasProject with naming conventions
-      console.log('[PalantirOntology] AtlasStory not available, falling back to AtlasProject');
-      const result = await palantir.listObjects('AtlasProject', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      stories = (result.data || [])
-        .filter((p: any) => {
-          const name = p.name || '';
-          const id = p.projectId || p.__primaryKey || '';
-          return name.startsWith('[Story]') || id.startsWith('story-');
-        })
-        .map((s: any) => ({
-          id: s.projectId || s.__primaryKey,
-          name: (s.name || '').replace('[Story] ', ''),
-          description: s.description || '',
-          status: s.status || 'In Progress',
-          featureId: '',
-          projectId: s.transformationId || '',
-          storyPoints: 0,
-          priority: s.priority || 'Medium',
-          assignee: '',
-          sprint: '',
-        }));
-    }
+    const result = await palantir.listObjects('AtlasStory', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    let stories = (result.data || []).map((s: any) => ({
+      id: s.storyId || s.__primaryKey,
+      name: s.name || '',
+      description: s.description || '',
+      status: s.status || 'Backlog',
+      featureId: s.featureId || '',
+      projectId: s.projectId || '',
+      storyPoints: s.storyPoints || 0,
+      priority: s.priority || 'Medium',
+      assignee: s.assignee || '',
+      sprint: s.sprint || '',
+      teamId: s.teamId || '',
+    }));
 
     if (featureId) {
       const featureIdLower = (featureId as string).toLowerCase();
@@ -725,58 +697,29 @@ router.get('/tasks', (async (req, res) => {
 
     const { storyId, projectId, status, assignee } = req.query;
 
-    // First try to get from AtlasTask (proper object type)
-    let tasks: any[] = [];
-    try {
-      const result = await palantir.listObjects('AtlasTask', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      tasks = (result.data || []).map((t: any) => ({
-        id: t.taskId || t.__primaryKey,
-        name: t.name || '',
-        description: t.description || '',
-        status: t.status || 'To Do',
-        storyId: t.storyId || '',
-        featureId: t.featureId || '',
-        projectId: t.projectId || '',
-        estimatedHours: t.estimatedHours || 0,
-        actualHours: t.actualHours || 0,
-        remainingHours: t.remainingHours || 0,
-        taskType: t.taskType || '',
-        priority: t.priority || 'Medium',
-        assignee: t.assignee || '',
-        sprint: t.sprint || '',
-        teamId: t.teamId || '',
-        dueDate: t.completedDate || '',
-      }));
-    } catch (e) {
-      // Fallback to AtlasProject with naming conventions
-      console.log('[PalantirOntology] AtlasTask not available, falling back to AtlasProject');
-      const result = await palantir.listObjects('AtlasProject', {
-        pageSize: 500,
-        ontologyRid: ONTOLOGY_RID,
-      });
-      tasks = (result.data || [])
-        .filter((p: any) => {
-          const name = p.name || '';
-          const id = p.projectId || p.__primaryKey || '';
-          return name.startsWith('[Task]') || id.startsWith('task-');
-        })
-        .map((t: any) => ({
-          id: t.projectId || t.__primaryKey,
-          name: (t.name || '').replace('[Task] ', ''),
-          description: t.description || '',
-          status: t.status || 'In Progress',
-          storyId: '',
-          projectId: t.transformationId || '',
-          estimatedHours: 0,
-          actualHours: 0,
-          priority: t.priority || 'Medium',
-          assignee: '',
-          dueDate: t.endDate || '',
-        }));
-    }
+    const result = await palantir.listObjects('AtlasTask', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    let tasks = (result.data || []).map((t: any) => ({
+      id: t.taskId || t.__primaryKey,
+      name: t.name || '',
+      description: t.description || '',
+      status: t.status || 'To Do',
+      storyId: t.storyId || '',
+      featureId: t.featureId || '',
+      projectId: t.projectId || '',
+      estimatedHours: t.estimatedHours || 0,
+      actualHours: t.actualHours || 0,
+      remainingHours: t.remainingHours || 0,
+      taskType: t.taskType || '',
+      priority: t.priority || 'Medium',
+      assignee: t.assignee || '',
+      sprint: t.sprint || '',
+      teamId: t.teamId || '',
+      dueDate: t.completedDate || '',
+    }));
 
     if (storyId) {
       const storyIdLower = (storyId as string).toLowerCase();
@@ -865,150 +808,65 @@ router.get('/project360/:projectId', (async (req, res) => {
     const { projectId } = req.params;
     const projectIdLower = projectId.toLowerCase();
 
-    // Fetch project and related data
-    const [project, budgetsResult, risksResult, dependenciesResult] = await Promise.all([
+    // Fetch project and all related data from proper object types
+    const [project, budgetsResult, risksResult, dependenciesResult, featuresResult, storiesResult, tasksResult] = await Promise.all([
       palantir.getObject('AtlasProject', projectId, { ontologyRid: ONTOLOGY_RID }).catch(() => null),
       palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasDependency', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasFeature', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasStory', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasTask', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
     ]);
-
-    // Try to fetch from proper object types first, fallback to AtlasProject naming conventions
-    let projectFeatures: any[] = [];
-    let projectStories: any[] = [];
-    let projectTasks: any[] = [];
-
-    try {
-      // Try AtlasFeature
-      const featuresResult = await palantir.listObjects('AtlasFeature', { pageSize: 500, ontologyRid: ONTOLOGY_RID });
-      projectFeatures = (featuresResult.data || [])
-        .filter((f: any) => (f.projectId || '').toLowerCase() === projectIdLower)
-        .map((f: any) => ({
-          id: f.featureId || f.__primaryKey,
-          name: f.name || 'Untitled Feature',
-          description: f.description || '',
-          status: f.status || 'Backlog',
-          priority: f.priority || 'Medium',
-          storyPoints: f.storyPoints || 0,
-          completedPoints: f.completedPoints || 0,
-          owner: f.owner || '',
-          targetPi: f.targetPi || '',
-          progress: f.storyPoints > 0 ? Math.round((f.completedPoints / f.storyPoints) * 100) : 0,
-        }));
-    } catch (e) {
-      console.log('[PalantirOntology] AtlasFeature not available for project360');
-    }
-
-    try {
-      // Try AtlasStory
-      const storiesResult = await palantir.listObjects('AtlasStory', { pageSize: 500, ontologyRid: ONTOLOGY_RID });
-      projectStories = (storiesResult.data || [])
-        .filter((s: any) => (s.projectId || '').toLowerCase() === projectIdLower)
-        .map((s: any) => ({
-          id: s.storyId || s.__primaryKey,
-          name: s.name || 'Untitled Story',
-          description: s.description || '',
-          status: s.status || 'Backlog',
-          storyPoints: s.storyPoints || 0,
-          priority: s.priority || 'Medium',
-          assignee: s.assignee || '',
-          sprint: s.sprint || '',
-          featureId: s.featureId || '',
-        }));
-    } catch (e) {
-      console.log('[PalantirOntology] AtlasStory not available for project360');
-    }
-
-    try {
-      // Try AtlasTask
-      const tasksResult = await palantir.listObjects('AtlasTask', { pageSize: 500, ontologyRid: ONTOLOGY_RID });
-      projectTasks = (tasksResult.data || [])
-        .filter((t: any) => (t.projectId || '').toLowerCase() === projectIdLower)
-        .map((t: any) => ({
-          id: t.taskId || t.__primaryKey,
-          name: t.name || 'Untitled Task',
-          description: t.description || '',
-          status: t.status || 'To Do',
-          priority: t.priority || 'Medium',
-          assignee: t.assignee || '',
-          estimatedHours: t.estimatedHours || 0,
-          actualHours: t.actualHours || 0,
-          storyId: t.storyId || '',
-          taskType: t.taskType || '',
-        }));
-    } catch (e) {
-      console.log('[PalantirOntology] AtlasTask not available for project360');
-    }
-
-    // Fallback to AtlasProject naming conventions if no proper objects found
-    if (projectFeatures.length === 0 && projectStories.length === 0 && projectTasks.length === 0) {
-      try {
-        const allProjectsResult = await palantir.listObjects('AtlasProject', { pageSize: 1000, ontologyRid: ONTOLOGY_RID });
-        const allProjects = allProjectsResult.data || [];
-
-        projectFeatures = allProjects
-          .filter((p: any) => {
-            const name = p.name || '';
-            const id = p.projectId || p.__primaryKey || '';
-            const transformId = (p.transformationId || '').toLowerCase();
-            return (name.startsWith('[Feature]') || id.startsWith('feature-')) && transformId === projectIdLower;
-          })
-          .map((f: any) => ({
-            id: f.projectId || f.__primaryKey,
-            name: (f.name || 'Untitled Feature').replace('[Feature] ', ''),
-            description: f.description || '',
-            status: f.status || 'Backlog',
-            priority: f.priority || 'Medium',
-            storyPoints: 0,
-            completedPoints: 0,
-            progress: (f.milestoneProgress || 0) * 100,
-          }));
-
-        projectStories = allProjects
-          .filter((p: any) => {
-            const name = p.name || '';
-            const id = p.projectId || p.__primaryKey || '';
-            const transformId = (p.transformationId || '').toLowerCase();
-            return (name.startsWith('[Story]') || id.startsWith('story-')) && transformId === projectIdLower;
-          })
-          .map((s: any) => ({
-            id: s.projectId || s.__primaryKey,
-            name: (s.name || 'Untitled Story').replace('[Story] ', ''),
-            description: s.description || '',
-            status: s.status || 'Backlog',
-            storyPoints: 0,
-            priority: s.priority || 'Medium',
-            assignee: '',
-            sprint: '',
-            featureId: '',
-          }));
-
-        projectTasks = allProjects
-          .filter((p: any) => {
-            const name = p.name || '';
-            const id = p.projectId || p.__primaryKey || '';
-            const transformId = (p.transformationId || '').toLowerCase();
-            return (name.startsWith('[Task]') || id.startsWith('task-')) && transformId === projectIdLower;
-          })
-          .map((t: any) => ({
-            id: t.projectId || t.__primaryKey,
-            name: (t.name || 'Untitled Task').replace('[Task] ', ''),
-            description: t.description || '',
-            status: t.status || 'Backlog',
-            priority: t.priority || 'Medium',
-            assignee: '',
-            estimatedHours: 0,
-            actualHours: 0,
-            storyId: '',
-          }));
-      } catch (e) {
-        console.log('[PalantirOntology] Fallback to AtlasProject naming conventions failed');
-      }
-    }
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
+
+    // Filter features/stories/tasks for this project
+    const projectFeatures = (featuresResult.data || [])
+      .filter((f: any) => (f.projectId || '').toLowerCase() === projectIdLower)
+      .map((f: any) => ({
+        id: f.featureId || f.__primaryKey,
+        name: f.name || 'Untitled Feature',
+        description: f.description || '',
+        status: f.status || 'Backlog',
+        priority: f.priority || 'Medium',
+        storyPoints: f.storyPoints || 0,
+        completedPoints: f.completedPoints || 0,
+        owner: f.owner || '',
+        targetPi: f.targetPi || '',
+        progress: f.storyPoints > 0 ? Math.round((f.completedPoints / f.storyPoints) * 100) : 0,
+      }));
+
+    const projectStories = (storiesResult.data || [])
+      .filter((s: any) => (s.projectId || '').toLowerCase() === projectIdLower)
+      .map((s: any) => ({
+        id: s.storyId || s.__primaryKey,
+        name: s.name || 'Untitled Story',
+        description: s.description || '',
+        status: s.status || 'Backlog',
+        storyPoints: s.storyPoints || 0,
+        priority: s.priority || 'Medium',
+        assignee: s.assignee || '',
+        sprint: s.sprint || '',
+        featureId: s.featureId || '',
+      }));
+
+    const projectTasks = (tasksResult.data || [])
+      .filter((t: any) => (t.projectId || '').toLowerCase() === projectIdLower)
+      .map((t: any) => ({
+        id: t.taskId || t.__primaryKey,
+        name: t.name || 'Untitled Task',
+        description: t.description || '',
+        status: t.status || 'To Do',
+        priority: t.priority || 'Medium',
+        assignee: t.assignee || '',
+        estimatedHours: t.estimatedHours || 0,
+        actualHours: t.actualHours || 0,
+        storyId: t.storyId || '',
+        taskType: t.taskType || '',
+      }));
 
     const budget = (budgetsResult.data || []).find((b: any) => (b.budgetId || b.__primaryKey) === project.budgetId);
     const budgetTotal = budget ? (budget.totalAmount || 0) : 0;
