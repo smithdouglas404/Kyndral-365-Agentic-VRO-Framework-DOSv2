@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageContextProvider } from "@/contexts/PageContext";
 import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
+import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -261,12 +262,14 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <WebSocketProvider>
           <CompanyProfileProvider>
-            <PageContextProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-              </TooltipProvider>
-            </PageContextProvider>
+            <UnifiedNotificationProvider>
+              <PageContextProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </PageContextProvider>
+            </UnifiedNotificationProvider>
           </CompanyProfileProvider>
         </WebSocketProvider>
       </QueryClientProvider>

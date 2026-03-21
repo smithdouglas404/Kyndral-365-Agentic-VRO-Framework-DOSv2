@@ -65,7 +65,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/rules', icon: Zap, label: 'Agent Rules' },
     { path: '/admin/agent-mcp', icon: Plug, label: 'Agent MCP Manager' },
     { path: '/admin/palantir-sync', icon: Cloud, label: 'Palantir Ontology' },
-    { path: '/admin/palantir-rules', icon: Code, label: 'Rules Engine' },
+    { path: '/admin/rules-engine', icon: Code, label: 'Enterprise Rules' },
     { path: '/admin/ontology-explorer', icon: Layers, label: 'Ontology Explorer' },
     { path: '/admin/subscriptions', icon: Radio, label: 'Real-Time Subscriptions' },
     { path: '/admin/workflow-automation', icon: Workflow, label: 'Workflow Automation' },
