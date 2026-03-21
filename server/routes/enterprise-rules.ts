@@ -233,4 +233,88 @@ router.get('/palantir-actions', (async (_req, res) => {
   }
 }) as RequestHandler);
 
+router.get('/rules/:ruleSlug', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) {
+    return res.status(503).json({ error: 'Rulebricks service not initialized' });
+  }
+  const details = rb.getRuleDetails(req.params.ruleSlug);
+  if (!details) {
+    return res.status(404).json({ error: `Rule "${req.params.ruleSlug}" not found` });
+  }
+  res.json(details);
+}) as RequestHandler);
+
+router.patch('/rules/:ruleSlug/threshold', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) {
+    return res.status(503).json({ error: 'Rulebricks service not initialized' });
+  }
+  const { field, threshold, operator, severity, escalateSeverity } = req.body;
+  if (!field) {
+    return res.status(400).json({ error: 'field is required' });
+  }
+  const updates: Record<string, any> = {};
+  if (threshold !== undefined) updates.threshold = threshold;
+  if (operator) updates.operator = operator;
+  if (severity) updates.severity = severity;
+  if (escalateSeverity !== undefined) updates.escalateSeverity = escalateSeverity;
+
+  const result = rb.updateRuleThreshold(req.params.ruleSlug, field, updates);
+  if (!result.success) {
+    return res.status(404).json(result);
+  }
+  res.json(result);
+}) as RequestHandler);
+
+router.post('/rules/:ruleSlug/enable', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) return res.status(503).json({ error: 'Service not initialized' });
+  const result = rb.enableRule(req.params.ruleSlug);
+  res.json(result);
+}) as RequestHandler);
+
+router.post('/rules/:ruleSlug/disable', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) return res.status(503).json({ error: 'Service not initialized' });
+  const result = rb.disableRule(req.params.ruleSlug);
+  res.json(result);
+}) as RequestHandler);
+
+router.post('/rules/:ruleSlug/reset', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) return res.status(503).json({ error: 'Service not initialized' });
+  const result = rb.resetRuleThreshold(req.params.ruleSlug);
+  res.json(result);
+}) as RequestHandler);
+
+router.post('/rules/custom', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) return res.status(503).json({ error: 'Service not initialized' });
+  const { slug, name, description, agentMapping, category, thresholds } = req.body;
+  if (!slug || !name || !agentMapping || !category) {
+    return res.status(400).json({ error: 'slug, name, agentMapping, and category are required' });
+  }
+  const result = rb.addCustomRule(
+    { slug, name, description: description || '', agentMapping, category },
+    thresholds
+  );
+  if (!result.success) return res.status(409).json(result);
+  res.status(201).json(result);
+}) as RequestHandler);
+
+router.delete('/rules/custom/:ruleSlug', (async (req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) return res.status(503).json({ error: 'Service not initialized' });
+  const result = rb.removeCustomRule(req.params.ruleSlug);
+  if (!result.success) return res.status(404).json(result);
+  res.json(result);
+}) as RequestHandler);
+
+router.get('/overrides', (async (_req, res) => {
+  const rb = getRulebricksService();
+  if (!rb) return res.status(503).json({ error: 'Service not initialized' });
+  res.json({ overrides: rb.getAllOverrides() });
+}) as RequestHandler);
+
 export default router;

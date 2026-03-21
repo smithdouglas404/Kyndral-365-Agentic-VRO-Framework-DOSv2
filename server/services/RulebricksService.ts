@@ -202,10 +202,23 @@ const LOCAL_THRESHOLDS: Record<string, Record<string, { threshold: number; opera
   },
 };
 
+export type ThresholdConfig = { threshold: number; operator: 'gt' | 'lt' | 'gte' | 'lte'; severity: 'low' | 'medium' | 'high' | 'critical'; escalateSeverity?: 'critical' };
+
+export interface RuleOverride {
+  slug: string;
+  enabled?: boolean;
+  thresholds?: Record<string, Partial<ThresholdConfig>>;
+  updatedAt: string;
+  updatedBy?: string;
+}
+
 export class RulebricksService {
   private static instance: RulebricksService | null = null;
   private apiKey: string | null;
   private available: boolean = false;
+  private ruleOverrides: Map<string, RuleOverride> = new Map();
+  private customRules: RulebricksRule[] = [];
+  private disabledRules: Set<string> = new Set();
 
   private constructor() {
     this.apiKey = process.env.RULEBRICKS_API_KEY || null;
@@ -228,17 +241,135 @@ export class RulebricksService {
     return this.available;
   }
 
+  updateRuleThreshold(
+    ruleSlug: string,
+    field: string,
+    updates: Partial<ThresholdConfig>,
+    updatedBy?: string
+  ): { success: boolean; message: string; rule?: any } {
+    const baseThresholds = LOCAL_THRESHOLDS[ruleSlug];
+    if (!baseThresholds || !baseThresholds[field]) {
+      return { success: false, message: `Rule "${ruleSlug}" or field "${field}" not found` };
+    }
+
+    const existing = this.ruleOverrides.get(ruleSlug) || {
+      slug: ruleSlug,
+      thresholds: {},
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (!existing.thresholds) existing.thresholds = {};
+    existing.thresholds[field] = { ...existing.thresholds[field], ...updates };
+    existing.updatedAt = new Date().toISOString();
+    existing.updatedBy = updatedBy;
+    this.ruleOverrides.set(ruleSlug, existing);
+
+    const merged = { ...baseThresholds[field], ...existing.thresholds[field] };
+    console.log(`[Rulebricks] Rule "${ruleSlug}.${field}" updated: threshold=${merged.threshold}, severity=${merged.severity}`);
+
+    return {
+      success: true,
+      message: `Rule "${ruleSlug}.${field}" updated successfully`,
+      rule: { slug: ruleSlug, field, original: baseThresholds[field], current: merged, override: existing.thresholds[field] },
+    };
+  }
+
+  enableRule(ruleSlug: string): { success: boolean; message: string } {
+    const rule = ENTERPRISE_RULES.find(r => r.slug === ruleSlug) || this.customRules.find(r => r.slug === ruleSlug);
+    if (!rule) return { success: false, message: `Rule "${ruleSlug}" not found` };
+    this.disabledRules.delete(ruleSlug);
+    console.log(`[Rulebricks] Rule "${ruleSlug}" enabled`);
+    return { success: true, message: `Rule "${ruleSlug}" enabled` };
+  }
+
+  disableRule(ruleSlug: string): { success: boolean; message: string } {
+    const rule = ENTERPRISE_RULES.find(r => r.slug === ruleSlug) || this.customRules.find(r => r.slug === ruleSlug);
+    if (!rule) return { success: false, message: `Rule "${ruleSlug}" not found` };
+    this.disabledRules.add(ruleSlug);
+    console.log(`[Rulebricks] Rule "${ruleSlug}" disabled`);
+    return { success: true, message: `Rule "${ruleSlug}" disabled` };
+  }
+
+  isRuleEnabled(ruleSlug: string): boolean {
+    return !this.disabledRules.has(ruleSlug);
+  }
+
+  addCustomRule(rule: RulebricksRule, thresholds?: Record<string, ThresholdConfig>): { success: boolean; message: string } {
+    if (ENTERPRISE_RULES.find(r => r.slug === rule.slug) || this.customRules.find(r => r.slug === rule.slug)) {
+      return { success: false, message: `Rule slug "${rule.slug}" already exists` };
+    }
+    this.customRules.push(rule);
+    if (thresholds) {
+      LOCAL_THRESHOLDS[rule.slug] = thresholds;
+    }
+    console.log(`[Rulebricks] Custom rule "${rule.slug}" added`);
+    return { success: true, message: `Custom rule "${rule.slug}" added` };
+  }
+
+  removeCustomRule(ruleSlug: string): { success: boolean; message: string } {
+    const idx = this.customRules.findIndex(r => r.slug === ruleSlug);
+    if (idx === -1) return { success: false, message: `Custom rule "${ruleSlug}" not found (built-in rules cannot be removed)` };
+    this.customRules.splice(idx, 1);
+    delete LOCAL_THRESHOLDS[ruleSlug];
+    this.ruleOverrides.delete(ruleSlug);
+    this.disabledRules.delete(ruleSlug);
+    console.log(`[Rulebricks] Custom rule "${ruleSlug}" removed`);
+    return { success: true, message: `Custom rule "${ruleSlug}" removed` };
+  }
+
+  resetRuleThreshold(ruleSlug: string): { success: boolean; message: string } {
+    if (!LOCAL_THRESHOLDS[ruleSlug]) return { success: false, message: `Rule "${ruleSlug}" not found` };
+    this.ruleOverrides.delete(ruleSlug);
+    console.log(`[Rulebricks] Rule "${ruleSlug}" reset to defaults`);
+    return { success: true, message: `Rule "${ruleSlug}" reset to default thresholds` };
+  }
+
+  getRuleDetails(ruleSlug: string): any | null {
+    const rule = ENTERPRISE_RULES.find(r => r.slug === ruleSlug) || this.customRules.find(r => r.slug === ruleSlug);
+    if (!rule) return null;
+
+    const baseThresholds = LOCAL_THRESHOLDS[ruleSlug] || {};
+    const override = this.ruleOverrides.get(ruleSlug);
+    const effectiveThresholds: Record<string, any> = {};
+
+    for (const [field, config] of Object.entries(baseThresholds)) {
+      const overrideFields = override?.thresholds?.[field] || {};
+      effectiveThresholds[field] = {
+        ...config,
+        ...overrideFields,
+        isOverridden: Object.keys(overrideFields).length > 0,
+        originalThreshold: config.threshold,
+      };
+    }
+
+    return {
+      ...rule,
+      enabled: !this.disabledRules.has(ruleSlug),
+      isBuiltIn: ENTERPRISE_RULES.some(r => r.slug === ruleSlug),
+      thresholds: effectiveThresholds,
+      override: override || null,
+    };
+  }
+
+  getAllOverrides(): RuleOverride[] {
+    return Array.from(this.ruleOverrides.values());
+  }
+
   getEnterpriseRules(): RulebricksRule[] {
-    return ENTERPRISE_RULES;
+    return [...ENTERPRISE_RULES, ...this.customRules];
+  }
+
+  getActiveRules(): RulebricksRule[] {
+    return this.getEnterpriseRules().filter(r => !this.disabledRules.has(r.slug));
   }
 
   getRulesForAgent(agentType: string): RulebricksRule[] {
     const normalized = agentType.toLowerCase().replace(/deep|agent/g, '');
-    return ENTERPRISE_RULES.filter(r => r.agentMapping === normalized);
+    return this.getActiveRules().filter(r => r.agentMapping === normalized);
   }
 
   getRulesByCategory(category: string): RulebricksRule[] {
-    return ENTERPRISE_RULES.filter(r => r.category === category);
+    return this.getActiveRules().filter(r => r.category === category);
   }
 
   async evaluateRule(
@@ -246,6 +377,17 @@ export class RulebricksService {
     input: Record<string, any>
   ): Promise<RulebricksEvalResult> {
     const startTime = Date.now();
+
+    if (this.disabledRules.has(ruleSlug)) {
+      return {
+        ruleSlug,
+        triggered: false,
+        severity: 'low',
+        message: `Rule "${ruleSlug}" is disabled`,
+        source: 'local-fallback',
+        executionTimeMs: Date.now() - startTime,
+      };
+    }
 
     if (this.available && this.apiKey) {
       try {
@@ -345,7 +487,12 @@ export class RulebricksService {
     const messages: string[] = [];
     const severityOrder = { low: 0, medium: 1, high: 2, critical: 3 };
 
-    for (const [field, config] of Object.entries(ruleThresholds)) {
+    const override = this.ruleOverrides.get(ruleSlug);
+
+    for (const [field, baseConfig] of Object.entries(ruleThresholds)) {
+      const overrideFields = override?.thresholds?.[field] || {};
+      const config = { ...baseConfig, ...overrideFields } as typeof baseConfig;
+
       const value = input[field];
       if (value === undefined || value === null) continue;
 
