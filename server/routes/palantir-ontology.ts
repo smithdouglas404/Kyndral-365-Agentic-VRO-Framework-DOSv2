@@ -105,16 +105,25 @@ router.get('/metrics', (async (_req, res) => {
 
     const objectives = objectivesResult.data || [];
 
-    // Calculate metrics
-    const totalProjects = projects.length;
-    const activeProjects = projects.filter((p: any) =>
+    // Filter to only SAFe-level projects (exclude features, stories, tasks, agents, integrations)
+    const safeProjects = projects.filter((p: any) => {
+      const name = p.name || '';
+      if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]')) return false;
+      const id = p.__primaryKey || p.id || '';
+      if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') || id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-')) return false;
+      return true;
+    });
+
+    // Calculate metrics from SAFe projects only
+    const totalProjects = safeProjects.length;
+    const activeProjects = safeProjects.filter((p: any) =>
       p.status && !p.status.toLowerCase().includes('complete')
     ).length;
 
     const projectsByStatus = {
-      green: projects.filter((p: any) => mapStatusToColor(p.status) === 'green').length,
-      amber: projects.filter((p: any) => mapStatusToColor(p.status) === 'amber').length,
-      red: projects.filter((p: any) => mapStatusToColor(p.status) === 'red').length,
+      green: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'green').length,
+      amber: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'amber').length,
+      red: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'red').length,
     };
 
     const totalBudget = budgets.reduce((sum: number, b: any) => sum + (b.total_amount || 0), 0);
@@ -189,7 +198,19 @@ router.get('/projects', (async (req, res) => {
       flowEfficiency: p.flow_efficiency || p.flowEfficiency,
     }));
 
-    // Apply filters
+    // Filter out non-SAFe items by default (features, stories, tasks, agents, integrations)
+    const includeSafeOnly = req.query.safeOnly !== 'false';
+    if (includeSafeOnly) {
+      projects = projects.filter((p: any) => {
+        const name = p.name || '';
+        if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]')) return false;
+        const id = p.id || '';
+        if (id.startsWith('feature-') || id.startsWith('story-') || id.startsWith('task-') || id.startsWith('agent-') || id.startsWith('source-') || id.startsWith('div-') || id.startsWith('monday-')) return false;
+        return true;
+      });
+    }
+
+    // Apply additional filters
     if (status) {
       projects = projects.filter((p: any) => p.status === status);
     }

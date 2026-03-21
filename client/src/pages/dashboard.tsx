@@ -73,10 +73,19 @@ function useDashboardMode() {
   });
 }
 
+function isSAFeProject(p: any): boolean {
+  if (!p.name) return false;
+  const name = p.name;
+  if (name.startsWith('[Feature]') || name.startsWith('[Story]') || name.startsWith('[Task]') || name.startsWith('[Agent]') || name.startsWith('[Integration]') || name.startsWith('[Division]') || name.startsWith('[Monday]')) return false;
+  if (p.id?.startsWith('feature-') || p.id?.startsWith('story-') || p.id?.startsWith('task-') || p.id?.startsWith('agent-') || p.id?.startsWith('source-') || p.id?.startsWith('div-') || p.id?.startsWith('monday-')) return false;
+  return true;
+}
+
 function PortfolioStatusBreakdownWidget({ projects }: { projects: any[] }) {
-  if (!projects || projects.length === 0) return null;
+  const safeOnly = projects.filter(isSAFeProject);
+  if (!safeOnly || safeOnly.length === 0) return null;
   const statusCounts: Record<string, number> = {};
-  projects.forEach((p) => {
+  safeOnly.forEach((p) => {
     const st = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
     statusCounts[st] = (statusCounts[st] || 0) + 1;
   });
@@ -104,24 +113,32 @@ function PortfolioStatusBreakdownWidget({ projects }: { projects: any[] }) {
 }
 
 function PalantirPortfolioWidget({ projects, projectsLoading, onDrillDown }: { projects: any[]; projectsLoading: boolean; onDrillDown: (type: string, id: string) => void }) {
+  const safeProjects = projects.filter(isSAFeProject);
+  const features = projects.filter(p => p.name?.startsWith('[Feature]') || p.id?.startsWith('feature-'));
+  const stories = projects.filter(p => p.name?.startsWith('[Story]') || p.id?.startsWith('story-'));
+  const tasks = projects.filter(p => p.name?.startsWith('[Task]') || p.id?.startsWith('task-'));
+
   return (
     <Card className="border-purple-300 bg-gradient-to-r from-purple-50/50 to-blue-50/50">
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <Building2 className="h-5 w-5 text-purple-600" />
-          Portfolio from Palantir Ontology
-          <Badge className="bg-purple-600">{projects.length} Projects</Badge>
+          SAFe Portfolio from Palantir Ontology
+          <Badge className="bg-purple-600">{safeProjects.length} Projects</Badge>
+          <Badge variant="outline" className="text-[10px]">{features.length} Features</Badge>
+          <Badge variant="outline" className="text-[10px]">{stories.length} Stories</Badge>
+          <Badge variant="outline" className="text-[10px]">{tasks.length} Tasks</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
         {projectsLoading ? (
           <div className="text-center py-4">Loading from Palantir...</div>
-        ) : projects.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">No projects found in Palantir</div>
+        ) : safeProjects.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">No SAFe projects found in Palantir ({projects.length} total objects loaded)</div>
         ) : (
           <div className="space-y-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {projects.slice(0, 12).map((p) => {
+              {safeProjects.slice(0, 12).map((p) => {
                 const statusLabel = p.statusText || (p.status === 'green' ? 'On Track' : p.status === 'red' ? 'Critical' : 'In Progress');
                 const statusBg = p.status === 'green' ? 'bg-emerald-100 text-emerald-700' : p.status === 'red' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
                 const borderColor = p.status === 'green' ? 'border-l-emerald-500' : p.status === 'red' ? 'border-l-red-500' : 'border-l-amber-500';
@@ -144,8 +161,8 @@ function PalantirPortfolioWidget({ projects, projectsLoading, onDrillDown }: { p
                 );
               })}
             </div>
-            {projects.length > 12 && (
-              <p className="text-center text-xs text-gray-400 pt-2">Showing 12 of {projects.length} projects from Palantir</p>
+            {safeProjects.length > 12 && (
+              <p className="text-center text-xs text-gray-400 pt-2">Showing 12 of {safeProjects.length} SAFe projects from Palantir</p>
             )}
           </div>
         )}
