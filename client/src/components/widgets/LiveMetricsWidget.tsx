@@ -327,17 +327,101 @@ export function LiveMetricsWidget() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Budget Utilization</span>
                   <span className="font-medium">
-                    {(
-                      ((metrics.spentBudget || 0) / metrics.totalBudget) *
-                      100
-                    ).toFixed(1)}
-                    %
+                    {(metrics.budgetUtilization || ((metrics.spentBudget || 0) / metrics.totalBudget) * 100).toFixed(1)}%
                   </span>
                 </div>
                 <Progress
-                  value={((metrics.spentBudget || 0) / metrics.totalBudget) * 100}
+                  value={metrics.budgetUtilization || ((metrics.spentBudget || 0) / metrics.totalBudget) * 100}
                   className="h-2"
                 />
+              </div>
+            )}
+
+            {/* SAFe Work Items */}
+            {(metrics?.totalFeatures || metrics?.totalStories || metrics?.totalTasks) && (
+              <div>
+                <h4 className="mb-3 text-sm font-medium text-muted-foreground">
+                  SAFe Work Breakdown
+                </h4>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <MetricCard
+                    label="Features"
+                    value={metrics?.totalFeatures || 0}
+                    icon={<FolderKanban className="h-4 w-4" />}
+                  />
+                  <MetricCard
+                    label="Stories"
+                    value={metrics?.totalStories || 0}
+                    icon={<FolderKanban className="h-4 w-4" />}
+                  />
+                  <MetricCard
+                    label="Tasks"
+                    value={metrics?.totalTasks || 0}
+                    icon={<Clock className="h-4 w-4" />}
+                  />
+                  <MetricCard
+                    label="Dependencies"
+                    value={metrics?.totalDependencies || 0}
+                    icon={<AlertTriangle className="h-4 w-4" />}
+                    variant={
+                      (metrics?.totalDependencies || 0) > 10 ? "warning" : "default"
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* EVM Performance Indicators */}
+            {(metrics?.avgCPI || metrics?.avgSPI) && (
+              <div>
+                <h4 className="mb-3 text-sm font-medium text-muted-foreground">
+                  Earned Value Performance
+                </h4>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <MetricCard
+                    label="Cost Performance (CPI)"
+                    value={metrics?.avgCPI?.toFixed(2)}
+                    icon={<DollarSign className="h-4 w-4" />}
+                    variant={
+                      (metrics?.avgCPI || 1) >= 1 ? "success" : "danger"
+                    }
+                  />
+                  <MetricCard
+                    label="Schedule Performance (SPI)"
+                    value={metrics?.avgSPI?.toFixed(2)}
+                    icon={<Clock className="h-4 w-4" />}
+                    variant={
+                      (metrics?.avgSPI || 1) >= 1 ? "success" : "danger"
+                    }
+                  />
+                  <MetricCard
+                    label="Cost Status"
+                    value={metrics?.costPerformance || (metrics?.avgCPI && metrics.avgCPI >= 1 ? 'On Budget' : 'Over Budget')}
+                    icon={<TrendingUp className="h-4 w-4" />}
+                    variant={
+                      metrics?.costPerformance === 'On Budget' || (metrics?.avgCPI && metrics.avgCPI >= 1) ? "success" : "danger"
+                    }
+                  />
+                  <MetricCard
+                    label="Schedule Status"
+                    value={metrics?.schedulePerformance || (metrics?.avgSPI && metrics.avgSPI >= 1 ? 'On Schedule' : 'Behind')}
+                    icon={<Clock className="h-4 w-4" />}
+                    variant={
+                      metrics?.schedulePerformance === 'On Schedule' || (metrics?.avgSPI && metrics.avgSPI >= 1) ? "success" : "warning"
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Average Progress */}
+            {metrics?.avgProgress !== undefined && metrics.avgProgress > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Average Project Progress</span>
+                  <span className="font-medium">{metrics.avgProgress.toFixed(1)}%</span>
+                </div>
+                <Progress value={metrics.avgProgress} className="h-2" />
               </div>
             )}
           </div>

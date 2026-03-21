@@ -42,14 +42,32 @@ type ProjectPriority = "critical" | "high" | "medium" | "low";
 interface Project {
   id: string;
   name: string;
+  description?: string;
   status: ProjectStatus;
   statusText?: string;
   businessUnit: string;
   priority: ProjectPriority;
+  priorityText?: string;
+  // Budget
   budgetTotal?: number;
   budgetSpent?: number;
-  riskCount?: number;
+  budgetUnit?: string;
+  budgetUtilization?: number;
+  // Progress & EVM
+  progress?: number;
   milestoneProgress?: number;
+  cpiValue?: number;
+  spiValue?: number;
+  // SAFe
+  artName?: string;
+  currentPi?: string;
+  velocity?: number;
+  // Counts
+  riskCount?: number;
+  featureCount?: number;
+  storyCount?: number;
+  taskCount?: number;
+  dependencyCount?: number;
 }
 
 const STATUS_CONFIG = {

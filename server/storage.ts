@@ -94,6 +94,8 @@ import {
   type VroMetric, type InsertVroMetric,
   type Benchmark, type InsertBenchmark,
   type AppConfig, type InsertAppConfig,
+  type UserDashboardConfig, type InsertUserDashboardConfig,
+  type UserWidget, type InsertUserWidget,
   type DashboardWidget, type InsertDashboardWidget,
   type Notification, type InsertNotification,
   type UserRoleAssignment, type InsertUserRole,
@@ -126,7 +128,8 @@ import {
   ingestionSessions, qaReviews, clarifyingQuestions,
   vroMetrics, benchmarks, appConfig, dashboardWidgets,
   notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail,
-  ontologyEntities, ontologyMappings, obdaQueryCache, graphSyncLog
+  ontologyEntities, ontologyMappings, obdaQueryCache, graphSyncLog,
+  userDashboardConfigs, userWidgets
 } from "@shared/schema";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -416,10 +419,22 @@ export interface IStorage {
   createBenchmark(benchmark: InsertBenchmark): Promise<Benchmark>;
   
   // App Config Methods
-  getAppConfig(key: string): Promise<AppConfig | undefined>;
+  getAppConfig(key: string, tenantId?: string | null): Promise<AppConfig | undefined>;
   getAllAppConfig(category?: string): Promise<AppConfig[]>;
-  setAppConfig(key: string, value: string, description?: string, category?: string): Promise<AppConfig>;
-  
+  setAppConfig(key: string, value: string, description?: string, category?: string, tenantId?: string | null): Promise<AppConfig>;
+
+  // User Dashboard Config Methods
+  getUserDashboardConfig(userId: string, dashboardType: string): Promise<UserDashboardConfig | undefined>;
+  saveUserDashboardConfig(config: InsertUserDashboardConfig): Promise<UserDashboardConfig>;
+  updateUserDashboardConfig(id: string, updates: Partial<InsertUserDashboardConfig>): Promise<UserDashboardConfig | undefined>;
+  deleteUserDashboardConfig(id: string): Promise<boolean>;
+
+  // User Widget Methods
+  getUserWidgets(userId: string): Promise<UserWidget[]>;
+  createUserWidget(widget: InsertUserWidget): Promise<UserWidget>;
+  updateUserWidget(id: string, updates: Partial<InsertUserWidget>): Promise<UserWidget | undefined>;
+  deleteUserWidget(id: string): Promise<boolean>;
+
   // Dashboard Widget Methods
   getDashboardWidgets(category?: string, visibleOnly?: boolean): Promise<DashboardWidget[]>;
   getDashboardWidget(id: string): Promise<DashboardWidget | undefined>;
@@ -2756,8 +2771,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   // App Config Methods
-  async getAppConfig(key: string): Promise<AppConfig | undefined> {
-    const result = await db.select().from(appConfig).where(eq(appConfig.configKey, key)).limit(1);
+  async getAppConfig(key: string, tenantId?: string | null): Promise<AppConfig | undefined> {
+    if (tenantId) {
+      const result = await db.select().from(appConfig)
+        .where(and(eq(appConfig.configKey, key), eq(appConfig.tenantId, tenantId)))
+        .limit(1);
+      if (result[0]) return result[0];
+    }
+    // Fall back to global config (null tenantId)
+    const result = await db.select().from(appConfig)
+      .where(eq(appConfig.configKey, key))
+      .limit(1);
     return result[0];
   }
 
@@ -2768,17 +2792,82 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(appConfig);
   }
 
-  async setAppConfig(key: string, value: string, description?: string, category?: string): Promise<AppConfig> {
+  async setAppConfig(key: string, value: string, description?: string, category?: string, tenantId?: string | null): Promise<AppConfig> {
     const result = await db.insert(appConfig).values({
       configKey: key,
       configValue: value,
       description,
-      category: category || 'general'
+      category: category || 'general',
+      tenantId: tenantId || null
     }).onConflictDoUpdate({
       target: appConfig.configKey,
       set: { configValue: value, updatedAt: new Date() }
     }).returning();
     return result[0];
+  }
+
+  // User Dashboard Config Methods
+  async getUserDashboardConfig(userId: string, dashboardType: string): Promise<UserDashboardConfig | undefined> {
+    const result = await db.select().from(userDashboardConfigs)
+      .where(and(
+        eq(userDashboardConfigs.userId, userId),
+        eq(userDashboardConfigs.dashboardType, dashboardType)
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async saveUserDashboardConfig(config: InsertUserDashboardConfig): Promise<UserDashboardConfig> {
+    // Check if config already exists for this user/dashboard type
+    const existing = await this.getUserDashboardConfig(config.userId, config.dashboardType);
+    if (existing) {
+      const result = await this.updateUserDashboardConfig(existing.id, config);
+      return result!;
+    }
+    const result = await db.insert(userDashboardConfigs).values(config).returning();
+    return result[0];
+  }
+
+  async updateUserDashboardConfig(id: string, updates: Partial<InsertUserDashboardConfig>): Promise<UserDashboardConfig | undefined> {
+    const result = await db.update(userDashboardConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userDashboardConfigs.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteUserDashboardConfig(id: string): Promise<boolean> {
+    const result = await db.delete(userDashboardConfigs)
+      .where(eq(userDashboardConfigs.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  // User Widget Methods
+  async getUserWidgets(userId: string): Promise<UserWidget[]> {
+    return await db.select().from(userWidgets)
+      .where(eq(userWidgets.userId, userId))
+      .orderBy(desc(userWidgets.createdAt));
+  }
+
+  async createUserWidget(widget: InsertUserWidget): Promise<UserWidget> {
+    const result = await db.insert(userWidgets).values(widget).returning();
+    return result[0];
+  }
+
+  async updateUserWidget(id: string, updates: Partial<InsertUserWidget>): Promise<UserWidget | undefined> {
+    const result = await db.update(userWidgets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userWidgets.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteUserWidget(id: string): Promise<boolean> {
+    const result = await db.delete(userWidgets)
+      .where(eq(userWidgets.id, id))
+      .returning();
+    return result.length > 0;
   }
 
   // Seed VRO Metrics

@@ -293,6 +293,7 @@ export function useAgentDataStream(
 export function useLiveDashboardMetrics() {
   const { data, isLive, isLoading, error, lastUpdated, refetch } =
     useLivePalantirData<{
+      // Project counts
       totalProjects: number;
       activeProjects: number;
       onTrackProjects: number;
@@ -304,11 +305,26 @@ export function useLiveDashboardMetrics() {
         amber: number;
         red: number;
       };
+      // Budget & Financial
       totalBudget: number;
       spentBudget: number;
+      budgetUtilization: number;
+      // Risks
       totalRisks: number;
       criticalRisks: number;
+      // OKRs
       okrProgress: number;
+      // SAFe breakdown
+      totalFeatures: number;
+      totalStories: number;
+      totalTasks: number;
+      totalDependencies: number;
+      // EVM metrics
+      avgCPI: number;
+      avgSPI: number;
+      costPerformance: string;
+      schedulePerformance: string;
+      // Agent assignments
       agentAssignments: Record<string, string[]>;
     }>("metrics", {
       staleTime: 30000,
@@ -344,14 +360,48 @@ export function useLiveProjects(filters?: {
     Array<{
       id: string;
       name: string;
+      description: string;
       status: "green" | "amber" | "red";
       statusText?: string;
       businessUnit: string;
       priority: "critical" | "high" | "medium" | "low";
+      priorityText?: string;
+      // Dates
+      startDate?: string;
+      endDate?: string;
+      // Budget
       budgetTotal?: number;
       budgetSpent?: number;
-      riskCount?: number;
+      budgetUnit?: string;
+      budgetRemaining?: number;
+      budgetUtilization?: number;
+      // ROI
+      expectedRoi?: string;
+      roiValue?: number;
+      // Progress & EVM
+      progress?: number;
       milestoneProgress?: number;
+      cpiValue?: number;
+      spiValue?: number;
+      earnedValue?: number;
+      plannedValue?: number;
+      // SAFe
+      artName?: string;
+      portfolioTheme?: string;
+      safeStage?: string;
+      currentPi?: string;
+      velocity?: number;
+      predictability?: number;
+      flowEfficiency?: number;
+      // Epic
+      epicId?: string;
+      epicName?: string;
+      // Counts
+      riskCount?: number;
+      featureCount?: number;
+      storyCount?: number;
+      taskCount?: number;
+      dependencyCount?: number;
     }>
   >(`projects${queryString ? `?${queryString}` : ""}`, {
     staleTime: 30000,

@@ -2927,7 +2927,8 @@ export type Benchmark = typeof benchmarks.$inferSelect;
 
 export const appConfig = pgTable("app_config", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  configKey: text("config_key").notNull().unique(),
+  tenantId: varchar("tenant_id"), // null = global config
+  configKey: text("config_key").notNull(),
   configValue: text("config_value").notNull(),
   description: text("description"),
   category: text("category").default("general"),
@@ -3546,3 +3547,59 @@ export const insertMcpExecutionLogSchema = createInsertSchema(mcpExecutionLog).o
 
 export type InsertMcpExecutionLog = z.infer<typeof insertMcpExecutionLogSchema>;
 export type McpExecutionLog = typeof mcpExecutionLog.$inferSelect;
+
+// ============================================================================
+// USER DASHBOARD CONFIGS - Per-user layout persistence for customizable dashboards
+// ============================================================================
+
+export const userDashboardConfigs = pgTable("user_dashboard_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  dashboardType: text("dashboard_type").notNull(), // 'finops', 'governance', 'ppm', etc.
+  layouts: text("layouts").notNull(), // JSON: { lg: [], md: [], sm: [] }
+  visibleWidgets: text("visible_widgets").notNull(), // JSON array of widget IDs
+  widgetSizes: text("widget_sizes"), // JSON: { widgetId: 'small' | 'medium' | 'large' }
+  widgetConfigs: text("widget_configs"), // JSON: per-widget settings
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserDashboardConfigSchema = createInsertSchema(userDashboardConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserDashboardConfig = z.infer<typeof insertUserDashboardConfigSchema>;
+export type UserDashboardConfig = typeof userDashboardConfigs.$inferSelect;
+
+// ============================================================================
+// USER WIDGETS - User-created custom widgets
+// ============================================================================
+
+export const userWidgets = pgTable("user_widgets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  templateId: varchar("template_id"), // Optional: based on existing widget template
+  dataSourceConfig: text("data_source_config").notNull(), // JSON: { type, objectType, endpoint, filters }
+  visualizationConfig: text("visualization_config").notNull(), // JSON: { type, chartType, fields, thresholds }
+  size: text("size").default("medium"), // small, medium, large
+  refreshInterval: integer("refresh_interval").default(60000), // milliseconds
+  isShared: boolean("is_shared").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserWidgetSchema = createInsertSchema(userWidgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserWidget = z.infer<typeof insertUserWidgetSchema>;
+export type UserWidget = typeof userWidgets.$inferSelect;
