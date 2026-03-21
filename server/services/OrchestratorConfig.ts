@@ -41,7 +41,7 @@ export function getOrchestratorSettings(): OrchestratorSettings {
     startupDelayMs: parseInt(process.env.ORCHESTRATOR_STARTUP_DELAY_MS || '60000', 10),
     scanIntervalMs: parseInt(process.env.ORCHESTRATOR_SCAN_INTERVAL_MS || '300000', 10),
     scanTimeoutMs: parseInt(process.env.ORCHESTRATOR_SCAN_TIMEOUT_MS || '300000', 10),
-    memoryThresholdPercent: parseInt(process.env.ORCHESTRATOR_MEMORY_THRESHOLD_PERCENT || '80', 10),
+    memoryThresholdPercent: parseInt(process.env.ORCHESTRATOR_MEMORY_THRESHOLD_PERCENT || '95', 10),
     maxConcurrentScans: 1, // Always 1 for safety
     maxRetries: parseInt(process.env.ORCHESTRATOR_MAX_RETRIES || '3', 10),
     retryDelayMs: parseInt(process.env.ORCHESTRATOR_RETRY_DELAY_MS || '5000', 10),

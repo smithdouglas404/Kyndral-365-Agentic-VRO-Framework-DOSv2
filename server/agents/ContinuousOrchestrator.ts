@@ -847,15 +847,12 @@ export class ContinuousOrchestrator {
     await new Promise(resolve => setTimeout(resolve, settings.startupDelayMs));
     console.log('[ContinuousOrchestrator] Startup delay complete');
 
-    // SAFEGUARD 3: Check memory before starting
+    // SAFEGUARD 3: Log memory status (Palantir-native mode uses minimal memory)
     const memCheck = memoryMonitorService.checkMemory(settings.memoryThresholdPercent);
     if (!memCheck.canProceed) {
-      console.warn(`[ContinuousOrchestrator] Memory too high to start: ${memCheck.reason}`);
-      console.warn('[ContinuousOrchestrator] Will retry when memory improves');
+      console.warn(`[ContinuousOrchestrator] Memory note: ${memCheck.reason}`);
+      console.warn('[ContinuousOrchestrator] Proceeding anyway - Palantir-native mode (no LLM, low memory usage)');
       memoryMonitorService.forceGC();
-      // Schedule a retry after delay
-      setTimeout(() => this.start(intervalMs), 30000);
-      return;
     }
 
     this.isRunning = true;
@@ -870,12 +867,10 @@ export class ContinuousOrchestrator {
 
     // Then run continuously
     this.orchestrationInterval = setInterval(async () => {
-      // Check memory before each cycle
       const cycleMemCheck = memoryMonitorService.checkMemory(settings.memoryThresholdPercent);
       if (!cycleMemCheck.canProceed) {
-        console.warn(`[ContinuousOrchestrator] Skipping cycle - ${cycleMemCheck.reason}`);
+        console.warn(`[ContinuousOrchestrator] Memory note: ${cycleMemCheck.reason} (proceeding - Palantir-native)`);
         memoryMonitorService.forceGC();
-        return;
       }
       await this.orchestrationCycle();
     }, intervalMs);
@@ -1120,55 +1115,73 @@ export class ContinuousOrchestrator {
 
   /**
    * Detect if project has issues in agent's domain
-   * Uses Deep Agent run() method for full planning, execution, and learning
+   * Palantir-native: Fetches data from Palantir ontology + runs Tier 0 heuristics (zero LLM cost)
    */
   private async detectIssue(agent: any, agentId: string, project: any): Promise<any | null> {
     const config = this.getAgentConfig(agent, agentId);
 
-    // FOR DEEP AGENTS: Call run() method with full planning, execution, and fact retrieval
-    if (typeof agent.run === 'function') {
-      try {
-        const goal = `Analyze ${project.name} (${project.id}) for ${config.agentName.toLowerCase()} issues. Check for budget, schedule, risk, and quality concerns.`;
-
-        console.log(`[ContinuousOrchestrator] ${config.agentName} running deep analysis on ${project.name}...`);
-
-        let agentContext: any = { projectId: project.id, project };
-
-        try {
-          const palantirProvider = getPalantirDataProvider();
-          if (palantirProvider.isAvailable()) {
-            agentContext = await palantirProvider.enrichAgentContext(agentId, agentContext);
-            if (agentContext.palantirSummary) {
-              console.log(`[ContinuousOrchestrator] ${config.agentName} enriched with ${agentContext.palantirSummary.totalObjects} Palantir objects (${agentContext.palantirSummary.label})`);
-            }
-          }
-        } catch (enrichError: any) {
-          console.warn(`[ContinuousOrchestrator] ${config.agentName} Palantir enrichment failed: ${enrichError.message}`);
+    // PALANTIR-NATIVE MODE: Fetch data from Palantir + run heuristics (zero LLM cost)
+    // Step 1: Enrich with Palantir data
+    let agentContext: any = { projectId: project.id, project };
+    try {
+      const palantirProvider = getPalantirDataProvider();
+      if (palantirProvider.isAvailable()) {
+        agentContext = await palantirProvider.enrichAgentContext(agentId, agentContext);
+        if (agentContext.palantirSummary) {
+          console.log(`[ContinuousOrchestrator] ${config.agentName} enriched with ${agentContext.palantirSummary.totalObjects} Palantir objects (${agentContext.palantirSummary.label})`);
         }
-
-        const result = await agent.run(goal, agentContext);
-
-        // Extract findings from Deep Agent result
-        if (result && result.success && result.steps) {
-          // Check if any step found issues
-          for (const step of result.steps) {
-            if (step.result && step.result.issues && step.result.issues.length > 0) {
-              const issue = step.result.issues[0]; // Take first issue
-              return {
-                description: issue.description || step.description,
-                severity: issue.severity || 'medium',
-                confidence: issue.confidence || 0.8,
-                action: issue.recommendedAction || 'Review and address',
-              };
-            }
-          }
-        }
-
-        return null; // No issues found
-      } catch (error) {
-        console.error(`[ContinuousOrchestrator] Deep Agent run failed for ${config.agentName}:`, error);
-        // Fall through to rule evaluation as fallback
       }
+    } catch (enrichError: any) {
+      console.warn(`[ContinuousOrchestrator] ${config.agentName} Palantir enrichment failed: ${enrichError.message}`);
+    }
+
+    // Step 2: Run Tier 0 heuristics on the enriched data (zero cost)
+    try {
+      const { getSmartRouter } = await import('../lib/SmartModelRouter.js');
+      const router = getSmartRouter();
+      const projectData = { ...project, ...(agentContext.palantirData || {}) };
+      const heuristicResult = router.runHeuristics(agentId, projectData);
+
+      if (heuristicResult.applicable && heuristicResult.findings.length > 0) {
+        const criticalFindings = heuristicResult.findings.filter(f => f.status === 'critical');
+        const warningFindings = heuristicResult.findings.filter(f => f.status === 'warning');
+
+        if (criticalFindings.length > 0 || warningFindings.length > 0) {
+          // Broadcast findings as facts to Mem0 (so other agents can see them)
+          if (typeof agent.broadcastFact === 'function') {
+            for (const finding of heuristicResult.findings.filter(f => f.status !== 'ok')) {
+              await agent.broadcastFact(
+                `project_${project.id}`,
+                finding.metric.toLowerCase().replace(/\s+/g, '_'),
+                { value: finding.value, status: finding.status, message: finding.message },
+                0.95
+              );
+            }
+          }
+
+          // Check Palantir rules if available
+          try {
+            const rulesService = getPalantirRulesService();
+            if (rulesService) {
+              for (const finding of criticalFindings) {
+                await rulesService.checkThreshold(agentId, finding.metric, typeof finding.value === 'string' ? parseFloat(finding.value) : finding.value);
+              }
+            }
+          } catch (ruleErr: any) {
+            // Rules check is optional
+          }
+
+          return {
+            description: heuristicResult.summary,
+            severity: heuristicResult.riskLevel === 'critical' ? 'critical' : heuristicResult.riskLevel === 'high' ? 'high' : 'medium',
+            confidence: 0.95,
+            action: heuristicResult.recommendations.join('; ') || 'Review findings',
+            source: 'palantir_heuristic',
+          };
+        }
+      }
+    } catch (heuristicErr: any) {
+      console.warn(`[ContinuousOrchestrator] ${config.agentName} heuristic analysis failed: ${heuristicErr.message}`);
     }
 
     // FALLBACK: Use rule evaluation for agents without run() method
@@ -1485,14 +1498,7 @@ export class ContinuousOrchestrator {
           }
 
           if (!result) {
-            const collaborationPrompt = `Briefly assess this ${severityLabel} issue from ${fromConfig?.agentName} on project ${request.projectId || 'N/A'}: ${issueContent}. Focus on your ${config.focus} perspective. 2-3 sentences max.`;
-            if (typeof agent.run === 'function') {
-              result = await agent.run(collaborationPrompt, { projectId: request.projectId, projectData, isCollaboration: true });
-            } else if (typeof agent.execute === 'function') {
-              result = await agent.execute(collaborationPrompt, { projectId: request.projectId });
-            } else {
-              result = { output: `${config.agentName}: Acknowledged ${severityLabel} issue. Will monitor from ${config.focus} perspective.` };
-            }
+            result = { output: `${config.agentName}: Acknowledged ${severityLabel} issue regarding "${issueContent}". Will monitor from ${config.focus} perspective and report via heuristics.` };
           }
         } catch (collaborationError) {
           console.error(`[ContinuousOrchestrator] Collaboration response error for ${config.agentName}:`, collaborationError);

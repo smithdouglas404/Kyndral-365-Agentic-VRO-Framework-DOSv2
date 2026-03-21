@@ -50,7 +50,7 @@ export class Mem0Service extends EventEmitter {
   private constructor() {
     super();
     // Increase max listeners to support 10+ agents subscribing to fact events
-    this.setMaxListeners(20);
+    this.setMaxListeners(50);
 
     // Initialize OpenAI for embeddings
     this.openai = new OpenAI({
