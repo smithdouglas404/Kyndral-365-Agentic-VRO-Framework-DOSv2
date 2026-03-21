@@ -60,3 +60,5 @@ async function main() {
   console.log('Response:', text || '(empty)');
 }
 main().catch(console.error);
+
+export {};

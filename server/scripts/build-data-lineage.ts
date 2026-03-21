@@ -217,3 +217,5 @@ View in Palantir Foundry:
 }
 
 main().catch(console.error);
+
+export {};

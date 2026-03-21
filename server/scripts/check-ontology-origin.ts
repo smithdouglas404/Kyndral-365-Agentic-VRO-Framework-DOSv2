@@ -46,3 +46,5 @@ async function main() {
   console.log('\n\nTotal: ' + example.length + ' Example, ' + atlas.length + ' Atlas, ' + other.length + ' Other');
 }
 main().catch(console.error);
+
+export {};
