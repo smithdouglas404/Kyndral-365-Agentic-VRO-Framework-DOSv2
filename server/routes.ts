@@ -1,7 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage as postgresStorage } from "./storage";
+import { getPalantirStorageAdapter } from "./services/PalantirStorageAdapter.js";
 import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } from "./anthropic";
+
+const storage = getPalantirStorageAdapter(postgresStorage);
 import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
 import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";

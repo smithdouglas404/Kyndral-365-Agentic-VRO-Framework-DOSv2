@@ -5,7 +5,9 @@
  */
 
 import type { Express } from "express";
-import { storage } from "../storage";
+import { storage as postgresStorage } from "../storage";
+import { getPalantirStorageAdapter } from "../services/PalantirStorageAdapter.js";
+const storage = getPalantirStorageAdapter(postgresStorage);
 import { LogicGateEngine, ALL_LOGIC_GATES } from "../lib/AgentLogicGates";
 import { ALL_SCENARIOS } from "../lib/AgentInteractionScenarios";
 

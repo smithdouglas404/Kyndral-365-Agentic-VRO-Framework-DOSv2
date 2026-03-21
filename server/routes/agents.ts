@@ -6,11 +6,13 @@
 
 import type { Express, Request, Response } from 'express';
 import { authenticate } from '../auth/authMiddleware.js';
-import { storage } from '../storage.js';
+import { storage as postgresStorage } from '../storage.js';
+import { getPalantirStorageAdapter } from '../services/PalantirStorageAdapter.js';
 import { getAgentOrchestrator } from '../lib/AgentOrchestrator.js';
 import type { AgentRequest } from '../lib/AgentOrchestrator.js';
 
 export function registerAgentExecutionRoutes(app: Express): void {
+  const storage = getPalantirStorageAdapter(postgresStorage);
   const orchestrator = getAgentOrchestrator(storage);
 
   /**

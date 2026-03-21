@@ -389,8 +389,11 @@ export class ContinuousOrchestrator {
     return config;
   }
 
+  private _rawStorage: IStorage;
+
   constructor(storage: IStorage, agents: Map<string, any>) {
-    this.storage = storage;
+    this._rawStorage = storage;
+    this.storage = storage; // Will be replaced with Palantir adapter in start()
     this.agents = agents;
     this.state = {
       activeScans: new Map(),
@@ -832,6 +835,15 @@ export class ContinuousOrchestrator {
     const settings = getSettings();
     console.log(`[ContinuousOrchestrator] Starting 24x7 coordination (interval: ${intervalMs}ms)`);
     console.log(`[ContinuousOrchestrator] Startup delay: ${settings.startupDelayMs}ms, Memory threshold: ${settings.memoryThresholdPercent}%`);
+
+    // Wrap storage with Palantir adapter for reads
+    try {
+      const { getPalantirStorageAdapter } = await import('../services/PalantirStorageAdapter.js');
+      this.storage = getPalantirStorageAdapter(this._rawStorage);
+      console.log('[ContinuousOrchestrator] Storage wrapped with PalantirStorageAdapter - reads go through Palantir');
+    } catch (adapterErr: any) {
+      console.warn(`[ContinuousOrchestrator] PalantirStorageAdapter unavailable: ${adapterErr.message}`);
+    }
 
     // SAFEGUARD 1: Wait for server to be fully ready
     console.log('[ContinuousOrchestrator] Waiting for server to be ready...');
