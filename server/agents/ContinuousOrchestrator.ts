@@ -1017,21 +1017,31 @@ export class ContinuousOrchestrator {
     const config = this.getAgentConfig(agent, agentId);
 
     try {
-      // Get ALL projects to scan (Level 4 autonomy - full portfolio coverage)
       const allProjects = await this.storage.getProjects();
 
       this.state.activeScans.set(config.agentId, allProjects.map(p => p.id));
 
-      // LEVEL 4 AUTONOMY: Agent also checks their own Mem0 risks
       const mem0Risks = await this.checkAgentMem0Risks(agentId);
       
-      // Log scanning activity
       await this.storage.createAgentActivityLog({
         eventType: 'detection',
         primaryAgentId: config.agentId,
         primaryAgentName: config.agentName,
-        summary: `${config.agentName} scanning ALL ${allProjects.length} projects + ${mem0Risks.length} stored risks`,
+        summary: `${config.agentName} scanning ${allProjects.length} projects + ${mem0Risks.length} stored risks`,
       });
+
+      let cachedPalantirContext: any = null;
+      try {
+        const palantirProvider = getPalantirDataProvider();
+        if (palantirProvider.isAvailable()) {
+          cachedPalantirContext = await palantirProvider.enrichAgentContext(agentId, { projectId: null });
+          if (cachedPalantirContext?.palantirSummary) {
+            console.log(`[ContinuousOrchestrator] ${config.agentName} pre-fetched ${cachedPalantirContext.palantirSummary.totalObjects} Palantir objects (${cachedPalantirContext.palantirSummary.label})`);
+          }
+        }
+      } catch (enrichErr: any) {
+        console.warn(`[ContinuousOrchestrator] ${config.agentName} Palantir pre-fetch failed: ${enrichErr.message}`);
+      }
 
       const findings: any[] = [];
 
@@ -1065,7 +1075,7 @@ export class ContinuousOrchestrator {
         scanned++;
         this.recordScan(agentId, project.id);
 
-        const issue = await this.detectIssue(agent, agentId, project);
+        const issue = await this.detectIssue(agent, agentId, project, cachedPalantirContext);
         if (issue) {
           findings.push({
             projectId: project.id,
@@ -1129,22 +1139,12 @@ export class ContinuousOrchestrator {
    * Detect if project has issues in agent's domain
    * Palantir-native: Fetches data from Palantir ontology + runs Tier 0 heuristics (zero LLM cost)
    */
-  private async detectIssue(agent: any, agentId: string, project: any): Promise<any | null> {
+  private async detectIssue(agent: any, agentId: string, project: any, cachedPalantirContext?: any): Promise<any | null> {
     const config = this.getAgentConfig(agent, agentId);
 
-    // PALANTIR-NATIVE MODE: Fetch data from Palantir + run heuristics (zero LLM cost)
-    // Step 1: Enrich with Palantir data
     let agentContext: any = { projectId: project.id, project };
-    try {
-      const palantirProvider = getPalantirDataProvider();
-      if (palantirProvider.isAvailable()) {
-        agentContext = await palantirProvider.enrichAgentContext(agentId, agentContext);
-        if (agentContext.palantirSummary) {
-          console.log(`[ContinuousOrchestrator] ${config.agentName} enriched with ${agentContext.palantirSummary.totalObjects} Palantir objects (${agentContext.palantirSummary.label})`);
-        }
-      }
-    } catch (enrichError: any) {
-      console.warn(`[ContinuousOrchestrator] ${config.agentName} Palantir enrichment failed: ${enrichError.message}`);
+    if (cachedPalantirContext?.palantirData) {
+      agentContext = { ...agentContext, palantirData: cachedPalantirContext.palantirData, palantirSummary: cachedPalantirContext.palantirSummary };
     }
 
     // Step 2: Run Tier 0 heuristics on the enriched data (zero cost)

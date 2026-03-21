@@ -212,24 +212,8 @@ export class AgentScheduler {
     console.log('[AgentScheduler] Mode 1: 24x7 Continuous Coordination (A2A + MCP)');
     console.log('[AgentScheduler] Mode 2: Scheduled Deep Scans');
 
-    // Start Mode 1: Continuous orchestration (every 15 seconds)
-    // ONLY if admin has enabled it - check persisted settings first
-    if (this.orchestrator) {
-      try {
-        const { getOrchestratorSettings } = await import('../lib/OrchestratorSettings.js');
-        const settings = await getOrchestratorSettings();
-        
-        if (settings.enabled) {
-          await this.orchestrator.start(settings.interval || 600000);
-          console.log(`[AgentScheduler] ✅ Continuous orchestration started (${(settings.interval || 600000) / 1000}s interval)`);
-        } else {
-          console.log('[AgentScheduler] ⚠️  Continuous orchestration OFF - respecting admin setting');
-          console.log('[AgentScheduler] 💡 Enable via Admin > Settings > Orchestrator');
-        }
-      } catch (settingsError) {
-        console.log('[AgentScheduler] ⚠️  Could not load orchestrator settings, defaulting to OFF');
-      }
-    }
+    // Continuous orchestration is started by DeepAgentBootstrap — skip here to avoid duplicate instances
+    console.log('[AgentScheduler] Continuous orchestration deferred to DeepAgentBootstrap (single instance)');
 
     // Start Mode 2: Scheduled deep scans - ONLY if orchestrator is enabled
     // This respects the admin setting to turn off all agent activity
