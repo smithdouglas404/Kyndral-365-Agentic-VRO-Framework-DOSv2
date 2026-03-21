@@ -783,11 +783,14 @@ router.get('/project360/:projectId', (async (req, res) => {
 
     const { projectId } = req.params;
 
-    const [project, budgetsResult, risksResult, dependenciesResult] = await Promise.all([
+    const [project, budgetsResult, risksResult, dependenciesResult, featuresResult, storiesResult, tasksResult] = await Promise.all([
       palantir.getObject('AtlasProject', projectId, { ontologyRid: ONTOLOGY_RID }).catch(() => null),
       palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasDependency', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasFeature', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasStory', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
+      palantir.listObjects('AtlasTask', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
     ]);
 
     if (!project) {
@@ -802,6 +805,15 @@ router.get('/project360/:projectId', (async (req, res) => {
     const projectRisks = (risksResult.data || []).filter((r: any) => r.projectId === projectId);
     const projectDeps = (dependenciesResult.data || []).filter((d: any) =>
       d.sourceProjectId === projectId || d.targetProjectId === projectId
+    );
+    const projectFeatures = (featuresResult.data || []).filter((f: any) =>
+      f.projectId === projectId || f.projectId?.toLowerCase() === projectId.toLowerCase()
+    );
+    const projectStories = (storiesResult.data || []).filter((s: any) =>
+      s.projectId === projectId || s.projectId?.toLowerCase() === projectId.toLowerCase()
+    );
+    const projectTasks = (tasksResult.data || []).filter((t: any) =>
+      t.projectId === projectId || t.projectId?.toLowerCase() === projectId.toLowerCase()
     );
 
     res.json({
@@ -846,14 +858,43 @@ router.get('/project360/:projectId', (async (req, res) => {
       timelineElapsed: 0,
       timelineTotal: 0,
       transformationId: project.transformationId || '',
-      featureCount: 0,
-      storyCount: 0,
-      taskCount: 0,
+      featureCount: projectFeatures.length,
+      storyCount: projectStories.length,
+      taskCount: projectTasks.length,
       riskCount: projectRisks.length,
       dependencyCount: projectDeps.length,
-      features: [],
-      stories: [],
-      tasks: [],
+      features: projectFeatures.map((f: any) => ({
+        id: f.featureId || f.__primaryKey,
+        name: f.name || 'Untitled Feature',
+        description: f.description || '',
+        status: f.status || 'Backlog',
+        priority: f.priority || 'Medium',
+        storyPoints: f.storyPoints || 0,
+        completedPoints: f.completedPoints || 0,
+        progress: f.storyPoints > 0 ? ((f.completedPoints || 0) / f.storyPoints) * 100 : 0,
+      })),
+      stories: projectStories.map((s: any) => ({
+        id: s.storyId || s.__primaryKey,
+        name: s.name || 'Untitled Story',
+        description: s.description || '',
+        status: s.status || 'Backlog',
+        storyPoints: s.storyPoints || 0,
+        priority: s.priority || 'Medium',
+        assignee: s.assignee || '',
+        sprint: s.sprint || '',
+        featureId: s.featureId || '',
+      })),
+      tasks: projectTasks.map((t: any) => ({
+        id: t.taskId || t.__primaryKey,
+        name: t.name || 'Untitled Task',
+        description: t.description || '',
+        status: t.status || 'Backlog',
+        priority: t.priority || 'Medium',
+        assignee: t.assignee || '',
+        estimatedHours: t.estimatedHours || 0,
+        actualHours: t.actualHours || 0,
+        storyId: t.storyId || '',
+      })),
       risks: projectRisks.map((r: any) => ({
         id: r.riskId || r.__primaryKey,
         name: r.description || r.__title || 'Risk',

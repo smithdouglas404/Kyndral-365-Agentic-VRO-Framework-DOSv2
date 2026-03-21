@@ -47,6 +47,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLiveDashboardMetrics, useLiveProjects } from '@/hooks/useLivePalantirData';
+import { LiveMetricsWidget } from '@/components/widgets/LiveMetricsWidget';
+import { ProjectStatusWidget } from '@/components/widgets/ProjectStatusWidget';
 import { cn } from '@/lib/utils';
 
 // ============================================================================
@@ -498,8 +500,8 @@ export default function PPMExecutiveDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
 
-  const { metrics, isLoading: metricsLoading, refetch: refetchMetrics, isLive } = useLiveDashboardMetrics();
-  const { data: projects, isLoading: projectsLoading, refetch: refetchProjects } = useLiveProjects();
+  const { metrics, isLoading: metricsLoading, refetch: refetchMetrics, isLive, error: metricsError } = useLiveDashboardMetrics();
+  const { data: projects, isLoading: projectsLoading, refetch: refetchProjects, error: projectsError, lastUpdated } = useLiveProjects();
 
   const filteredProjects = (projects || []).filter((p: any) => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
@@ -523,6 +525,22 @@ export default function PPMExecutiveDashboard() {
     );
   }
 
+  if (metricsError || projectsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
+          <h2 className="text-xl font-semibold text-gray-900">Error Loading Data</h2>
+          <p className="text-gray-500">{metricsError?.message || projectsError?.message}</p>
+          <Button onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -540,18 +558,27 @@ export default function PPMExecutiveDashboard() {
             </div>
             <div className="flex items-center gap-3">
               {/* Live Status Indicator */}
-              <Badge
-                variant="outline"
-                className={cn(
-                  'gap-1.5 px-3 py-1',
-                  isLive
-                    ? 'bg-green-100 text-green-700 border-green-300'
-                    : 'bg-amber-100 text-amber-700 border-amber-300'
-                )}
-              >
-                <Activity className={cn('h-3 w-3', isLive && 'animate-pulse')} />
-                {isLive ? 'Live' : 'Polling'}
-              </Badge>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      'gap-1.5 px-3 py-1',
+                      isLive
+                        ? 'bg-green-100 text-green-700 border-green-300'
+                        : 'bg-amber-100 text-amber-700 border-amber-300'
+                    )}
+                  >
+                    <Activity className={cn('h-3 w-3', isLive && 'animate-pulse')} />
+                    {isLive ? 'Live' : 'Polling'}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {lastUpdated ? `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}` : 'Fetching data...'}
+                  <br />
+                  {projects?.length || 0} projects loaded
+                </TooltipContent>
+              </Tooltip>
               <Button variant="outline" size="sm" onClick={handleRefresh}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
@@ -567,6 +594,19 @@ export default function PPMExecutiveDashboard() {
       </header>
 
       <main className="max-w-[1600px] mx-auto px-6 py-6 space-y-6">
+        <Tabs defaultValue="executive" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="executive" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Executive View
+            </TabsTrigger>
+            <TabsTrigger value="live" className="gap-2">
+              <Activity className="h-4 w-4" />
+              Live Widgets
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="executive" className="space-y-6">
         {/* Key Metrics Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <MetricCard
@@ -676,6 +716,15 @@ export default function PPMExecutiveDashboard() {
             </ScrollArea>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="live" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <LiveMetricsWidget />
+              <ProjectStatusWidget />
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
