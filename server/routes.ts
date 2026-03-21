@@ -1265,19 +1265,93 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
-  // Full project with SAFe hierarchy - FROM PALANTIR
+  // Full project with SAFe hierarchy - FROM PALANTIR ONTOLOGY
   app.get("/api/projects/:id/full", async (req, res) => {
     try {
-      const dashboardService = (await import('./services/PalantirDashboardService.js')).getPalantirDashboardService();
-      const safeData = await dashboardService.getSAFeData();
-      const project = safeData.projects.find((p: any) => p.id === req.params.id || p.project_id === req.params.id);
+      const palantir = (await import('./mcp/MCPServiceFactory.js')).getPalantirService();
+      if (!palantir) {
+        return res.status(503).json({ error: 'Palantir not available' });
+      }
+
+      const projectId = req.params.id;
+      const ontologyRid = process.env.PALANTIR_ONTOLOGY_RID || '';
+      const result = await palantir.listObjects('AtlasProject', { pageSize: 1000, ontologyRid });
+      const allRaw = result.data || [];
+
+      const mapStatus = (s: string) => {
+        const sl = (s || '').toLowerCase();
+        if (sl.includes('complete') || sl.includes('on track')) return 'green';
+        if (sl.includes('critical') || sl.includes('blocked') || sl.includes('delayed')) return 'red';
+        return 'amber';
+      };
+      const mapPriority = (p: string) => {
+        const pl = (p || '').toLowerCase();
+        if (pl === 'critical') return 'critical';
+        if (pl === 'high') return 'high';
+        if (pl === 'low') return 'low';
+        return 'medium';
+      };
+
+      const normalize = (o: any) => ({
+        id: o.projectId || o.project_id || o.__primaryKey || '',
+        name: o.name || o.__title || '',
+        description: o.description || '',
+        status: mapStatus(o.status || ''),
+        statusText: o.status || 'Unknown',
+        businessUnit: o.business_unit || o.transformationId || o.transformation_id || '',
+        startDate: o.startDate || o.start_date || '',
+        endDate: o.endDate || o.end_date || '',
+        priority: mapPriority(o.priority || 'medium'),
+        priorityText: o.priority || 'Medium',
+        budgetTotal: parseFloat(o.budget_total || o.budgetTotal || '0'),
+        budgetSpent: parseFloat(o.budget_spent || o.budgetSpent || '0'),
+        expectedRoi: o.expected_roi || o.expectedRoi || '',
+        milestoneProgress: parseFloat(o.milestone_progress || o.milestoneProgress || '0'),
+        artName: o.art_name || o.artName || '',
+        portfolioTheme: o.portfolio_theme || o.portfolioTheme || '',
+        safeStage: o.safe_stage || o.safeStage || 'implementing',
+        currentPi: o.current_pi || o.currentPi || '',
+        velocity: parseFloat(o.velocity || '0'),
+        predictability: parseFloat(o.predictability || '0'),
+      });
+
+      const all = allRaw.map(normalize);
+
+      const project = all.find(p => p.id === projectId && !p.name.startsWith('['));
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
       }
-      const features = safeData.features.filter((f: any) => f.project_id === req.params.id);
-      const stories = safeData.stories.filter((s: any) => s.project_id === req.params.id);
-      const tasks = safeData.tasks.filter((t: any) => t.project_id === req.params.id);
-      res.json({ ...project, features, stories, tasks });
+
+      const features = all
+        .filter(o => (o.id.startsWith('feature-') || o.name.startsWith('[Feature]')) && o.businessUnit === projectId)
+        .map(f => ({ ...f, name: f.name.replace(/^\[Feature\]\s*/, '') }));
+
+      const stories = all
+        .filter(o => (o.id.startsWith('story-') || o.name.startsWith('[Story]')) && o.businessUnit === projectId)
+        .map(s => ({ ...s, name: s.name.replace(/^\[Story\]\s*/, '') }));
+
+      const tasks = all
+        .filter(o => (o.id.startsWith('task-') || o.name.startsWith('[Task]')) && o.businessUnit === projectId)
+        .map(t => ({ ...t, name: t.name.replace(/^\[Task\]\s*/, '') }));
+
+      let risks: any[] = [];
+      try {
+        const risksResult = await palantir.listObjects('AtlasRisk', { pageSize: 200, ontologyRid });
+        risks = (risksResult.data || [])
+          .filter((r: any) => (r.project_id || '') === projectId)
+          .map((r: any) => ({
+            id: r.risk_id || r.__primaryKey || '',
+            title: r.title || r.name || '',
+            description: r.description || '',
+            severity: (r.severity || 'medium').toLowerCase(),
+            status: (r.status || 'open').toLowerCase(),
+            category: r.category || 'Technical',
+            impact: r.impact || '',
+            probability: parseFloat(r.probability || '0'),
+          }));
+      } catch {}
+
+      res.json({ project, features, stories, tasks, risks });
     } catch (error) {
       console.error('Failed to fetch full project from Palantir:', error);
       res.status(500).json({ error: "Failed to fetch full project" });

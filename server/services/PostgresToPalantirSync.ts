@@ -223,6 +223,15 @@ export class PostgresToPalantirSync {
           // Calculate milestone progress as a decimal (0.0 to 1.0)
           const progress = project.progress ? safeParseFloat(project.progress, 0) / 100 : 0;
 
+          // Parse budget fields
+          const budgetTotal = safeParseFloat(project.budgetTotal || project.budget, 0);
+          const budgetSpent = safeParseFloat(project.budgetSpent || project.actualCost, 0);
+          const cpiValue = safeParseFloat(project.cpiValue, 1.0);
+          const spiValue = safeParseFloat(project.spiValue, 1.0);
+          const earnedValue = safeParseFloat(project.earnedValue, 0);
+          const plannedValue = safeParseFloat(project.plannedValue, 0);
+          const roiValue = safeParseFloat(project.expectedROI || project.roiValue, 0);
+
           // Try create first (most common case)
           await this.palantirService!.applyAction(PALANTIR_ACTIONS.UPSERT_PROJECT, {
             project_id: String(project.id),
@@ -234,6 +243,28 @@ export class PostgresToPalantirSync {
             end_date: safeToISOString(project.endDate),
             transformation_id: project.divisionId || 'vs-digital-platform',
             milestone_progress: progress,
+            // Budget & Financial fields
+            budget_total: budgetTotal,
+            budget_spent: budgetSpent,
+            budget_unit: project.budgetUnit || 'USD',
+            cpi_value: cpiValue,
+            spi_value: spiValue,
+            earned_value: earnedValue,
+            planned_value: plannedValue,
+            roi_value: roiValue,
+            expected_roi: project.expectedROI || '',
+            // SAFe fields
+            safe_stage: project.safeStage || '',
+            current_pi: project.currentPi || '',
+            velocity: safeParseFloat(project.velocity, 0),
+            predictability: safeParseFloat(project.predictability, 0),
+            flow_efficiency: safeParseFloat(project.flowEfficiency, 0),
+            // Epic/Feature linkage
+            epic_id: project.epicId || '',
+            epic_name: project.epicName || '',
+            // Source tracking
+            source: 'postgres-sync',
+            synced_at: new Date().toISOString(),
           });
           synced++;
           console.log(`  ✓ Created project: ${project.id}`);

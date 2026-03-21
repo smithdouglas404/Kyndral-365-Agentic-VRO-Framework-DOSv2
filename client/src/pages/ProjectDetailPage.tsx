@@ -1,1167 +1,531 @@
 import { useParams, useLocation } from "wouter";
-import { useState, useMemo, useEffect } from "react";
-import { usePageContext } from "@/contexts/PageContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { 
   ArrowLeft, 
   Target, 
-  Users, 
   Calendar, 
-  DollarSign,
   AlertTriangle,
   CheckCircle,
   Clock,
-  GitBranch,
-  Link2,
-  Sparkles,
-  Brain,
   TrendingUp,
   BarChart3,
-  ListTodo,
   Layers,
   ChevronDown,
   ChevronRight,
-  FileText,
-  Milestone as MilestoneIcon,
   Activity,
-  ExternalLink,
   Loader2,
-  X
+  Shield,
+  Zap,
+  GitBranch,
+  CircleDot
 } from "lucide-react";
-import { DrillDownDrawer } from "@/components/DrillDownDrawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useFullProject } from "@/hooks/useProjects";
-import { getProjectById } from "@/lib/projects";
-import { useDashboardMetrics } from "@/hooks/usePalantirOntology";
-import type { Feature, Story, Task, Milestone, Resource, Dependency } from "@/lib/safeProjectData";
 
-const statusColors = {
-  green: 'bg-green-500',
-  amber: 'bg-amber-500',
-  red: 'bg-red-500'
+interface ProjectDetail {
+  project: {
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    statusText: string;
+    priority: string;
+    priorityText: string;
+    businessUnit: string;
+    startDate: string;
+    endDate: string;
+    budgetTotal: number;
+    budgetSpent: number;
+    expectedRoi: string;
+    milestoneProgress: number;
+    artName: string;
+    portfolioTheme: string;
+    safeStage: string;
+    currentPi: string;
+    velocity: number;
+    predictability: number;
+  };
+  features: Array<{
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    priority: string;
+    storyPoints: number;
+    milestoneProgress: number;
+  }>;
+  stories: Array<{
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    storyPoints: number;
+    featureId: string;
+    assignedTeam: string;
+  }>;
+  tasks: Array<{
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    assignee: string;
+    priority: string;
+    effortHours: number;
+  }>;
+  risks: Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: string;
+    status: string;
+    category: string;
+    impact: string;
+    probability: number;
+  }>;
+}
+
+const statusConfig: Record<string, { color: string; bg: string; border: string; icon: any }> = {
+  green: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-500', icon: CheckCircle },
+  amber: { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-500', icon: Clock },
+  red: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-500', icon: AlertTriangle },
 };
 
-const priorityColors = {
-  critical: 'bg-red-600 text-white',
-  high: 'bg-orange-500 text-white',
-  medium: 'bg-blue-500 text-white',
-  low: 'bg-gray-400 text-white'
+const priorityConfig: Record<string, { color: string; bg: string }> = {
+  critical: { color: 'text-red-700', bg: 'bg-red-100' },
+  high: { color: 'text-orange-700', bg: 'bg-orange-100' },
+  medium: { color: 'text-blue-700', bg: 'bg-blue-100' },
+  low: { color: 'text-gray-700', bg: 'bg-gray-100' },
 };
 
-const stageLabels: Record<string, string> = {
-  funnel: 'Funnel',
-  reviewing: 'Reviewing',
-  analyzing: 'Analyzing',
-  backlog: 'Backlog',
-  implementing: 'Implementing',
-  done: 'Done'
-};
+function formatDate(dateStr: string) {
+  if (!dateStr) return '—';
+  try {
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}
+
+function getTimelineProgress(start: string, end: string): number {
+  if (!start || !end) return 0;
+  const now = Date.now();
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  if (e <= s) return 100;
+  return Math.min(100, Math.max(0, Math.round(((now - s) / (e - s)) * 100)));
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const cfg = statusConfig[status] || statusConfig.amber;
+  const Icon = cfg.icon;
+  const label = status === 'green' ? 'On Track' : status === 'red' ? 'At Risk' : 'In Progress';
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${cfg.bg} ${cfg.color}`} data-testid="badge-status">
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </span>
+  );
+}
+
+function PriorityBadge({ priority }: { priority: string }) {
+  const cfg = priorityConfig[priority] || priorityConfig.medium;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${cfg.bg} ${cfg.color}`} data-testid="badge-priority">
+      {priority}
+    </span>
+  );
+}
+
+function MetricCard({ icon: Icon, label, value, subtitle, color = 'text-gray-900' }: { icon: any; label: string; value: string | number; subtitle?: string; color?: string }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow" data-testid={`metric-${label.toLowerCase().replace(/\s/g, '-')}`}>
+      <div className="flex items-center gap-2 text-gray-500 mb-2">
+        <Icon className="h-4 w-4" />
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+    </div>
+  );
+}
+
+function WorkItemRow({ name, status, priority, description, testId }: { name: string; status: string; priority?: string; description: string; testId: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const statusColor = status === 'done' || status === 'complete' ? 'bg-emerald-500' : 
+                       status === 'in_progress' || status === 'implementing' ? 'bg-blue-500' : 
+                       status === 'blocked' ? 'bg-red-500' : 'bg-gray-300';
+  return (
+    <div className="border-b border-gray-100 last:border-0" data-testid={testId}>
+      <div className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => setExpanded(!expanded)}>
+        {expanded ? <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+        <div className={`h-2 w-2 rounded-full ${statusColor} flex-shrink-0`} />
+        <span className="font-medium text-gray-900 flex-1 truncate">{name}</span>
+        <span className="text-xs text-gray-500 capitalize px-2 py-0.5 rounded bg-gray-100">{status.replace('_', ' ')}</span>
+        {priority && <PriorityBadge priority={priority} />}
+      </div>
+      {expanded && description && (
+        <div className="px-12 pb-3 text-sm text-gray-600">{description}</div>
+      )}
+    </div>
+  );
+}
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const { setPageContext } = usePageContext();
-  const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
-  const [expandedStories, setExpandedStories] = useState<Set<string>>(new Set());
-  const [drilldownOpen, setDrilldownOpen] = useState(false);
-  const [drilldownEntityType, setDrilldownEntityType] = useState('');
-  const [drilldownEntityId, setDrilldownEntityId] = useState('');
-  const [showSummary, setShowSummary] = useState(false);
-  const [summaryLoading, setSummaryLoading] = useState(false);
-  const [executiveSummary, setExecutiveSummary] = useState<string | null>(null);
-  
-  const { data: fullProject, isLoading: isLoadingProject } = useFullProject(params.id || '');
-  const { data: palantirMetrics } = useDashboardMetrics();
-  
-  // Transform API data to SAFeProject format for rendering
-  const project = useMemo(() => {
-    if (!fullProject?.project) return undefined;
-    const p = fullProject.project;
-    const features = fullProject.features || [];
-    const stories = fullProject.stories || [];
-    const tasks = fullProject.tasks || [];
-    
-    const mappedFeatures = features.map((f: any) => ({
-      id: f.id,
-      epicId: p.epicId || '',
-      title: f.name,
-      description: f.description || '',
-      status: f.status || 'backlog',
-      targetPI: parseFloat(p.currentPi?.replace(/[^\d.]/g, '') || '25.1'),
-      wsjfScore: parseInt(f.wsjfScore) || 0,
-      benefitHypothesis: '',
-      acceptanceCriteria: f.acceptanceCriteria ? JSON.parse(f.acceptanceCriteria) : [],
-      dependencies: [],
-      stories: stories.filter((s: any) => s.featureId === f.id).map((s: any) => ({
-        id: s.id,
-        featureId: s.featureId,
-        title: s.name,
-        description: s.description || '',
-        status: s.status || 'backlog',
-        storyPoints: parseInt(s.storyPoints) || 0,
-        sprint: 1,
-        assignedTeam: s.assignedTeam || 'Unassigned',
-        acceptanceCriteria: s.acceptanceCriteria ? JSON.parse(s.acceptanceCriteria) : [],
-        tasks: tasks.filter((t: any) => t.storyId === s.id).map((t: any) => ({
-          id: t.id,
-          storyId: t.storyId,
-          title: t.name,
-          description: t.description || '',
-          status: t.status || 'todo',
-          assignee: t.assignee || 'Unassigned',
-          estimatedHours: parseInt(t.effortHours) || 0,
-          actualHours: t.status === 'done' ? parseInt(t.effortHours) || 0 : 0,
-          priority: t.priority || 'medium'
-        }))
-      }))
-    }));
-    
-    const budgetSpent = parseInt(p.budgetSpent) || 0;
-    const budgetTotal = parseInt(p.budgetTotal) || 1;
-    
-    return {
-      id: p.id,
-      name: p.name,
-      bu: p.businessUnitId as any,
-      artName: p.artName || '',
-      description: p.description || '',
-      status: p.status as any,
-      priority: p.priority as any,
-      safeStage: p.safeStage as any || 'backlog',
-      startDate: p.startDate?.split('T')[0] || '',
-      targetEndDate: p.endDate?.split('T')[0] || '',
-      currentPI: parseFloat(p.currentPi?.replace(/[^\d.]/g, '') || '25.1'),
-      totalPIs: parseInt(p.totalPis) || 4,
-      portfolioTheme: p.portfolioTheme || '',
-      velocity: parseInt(p.velocity) || 0,
-      totalFTE: (fullProject.resources || []).length,
-      qualityScore: 80,
-      burndownHealth: 75,
-      financials: {
-        budget: budgetTotal * 1000000,
-        spent: budgetSpent * 1000000,
-        forecast: budgetTotal * 1100000,
-        currency: '$',
-        laborCost: budgetSpent * 700000,
-        vendorCost: budgetSpent * 200000,
-        infrastructureCost: budgetSpent * 100000,
-        contingency: budgetTotal * 100000,
-        roi: {
-          projected: parseInt(p.roiValue) * 1000000 || 0,
-          confidence: 75,
-          paybackMonths: 24
-        }
-      },
-      features: mappedFeatures,
-      milestones: (fullProject.milestones || []).map((m: any) => ({
-        id: m.id,
-        name: m.name,
-        targetDate: m.targetDate,
-        status: m.status || 'on-track',
-        deliverables: m.deliverables ? JSON.parse(m.deliverables) : [],
-        piNumber: parseFloat(m.piNumber || '25.1')
-      })),
-      resources: (fullProject.resources || []).map((r: any) => ({
-        id: r.id,
-        name: r.name,
-        role: r.role,
-        allocation: parseInt(r.allocation) || 100,
-        team: r.team || 'Unassigned',
-        costRate: parseInt(r.costRate) || 0
-      })),
-      dependencies: (fullProject.dependencies || []).map((d: any) => ({
-        id: d.id,
-        sourceProjectId: d.sourceProjectId,
-        targetProjectId: d.targetProjectId,
-        type: d.type || 'related',
-        health: d.health || 'green',
-        description: d.description || '',
-        impactIfDelayed: d.impactIfDelayed || ''
-      })),
-      riskFlags: (fullProject.risks || []).map((r: any) => r.description || r.name),
-      aiRecommendations: [`Expected ROI: ${p.expectedRoi}`],
-      vroInsights: [`Value aligned with ${p.portfolioTheme} strategic priorities`],
-      pmoDataFeeds: [`Budget utilization: ${Math.round((budgetSpent / budgetTotal) * 100)}%`]
-    };
-  }, [fullProject]);
-  
-  // Update page context for Ask PM chat
-  const projectName = project?.name;
-  const projectBU = project?.bu;
-  useEffect(() => {
-    if (projectName && projectBU) {
-      setPageContext({
-        pageType: 'project',
-        entityId: params.id || '',
-        entityName: projectName,
-        businessUnit: projectBU,
-        breadcrumb: ['Dashboard', projectBU, projectName]
-      });
-    }
-  }, [projectName, projectBU, params.id, setPageContext]);
-  
-  if (isLoadingProject) {
+  const [activeSection, setActiveSection] = useState<'overview' | 'features' | 'stories' | 'tasks' | 'risks'>('overview');
+
+  const { data, isLoading, error } = useQuery<ProjectDetail>({
+    queryKey: ["project-detail", params.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/projects/${params.id}/full`);
+      if (!res.ok) throw new Error("Project not found");
+      return res.json();
+    },
+    enabled: !!params.id,
+    staleTime: 30000,
+  });
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8">
-          <div className="flex items-center gap-3">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-            <span className="text-gray-600">Loading project...</span>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-  
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8">
-          <h2 className="text-xl font-bold mb-4">Project Not Found</h2>
-          <p className="text-gray-600 mb-4">The project you're looking for doesn't exist.</p>
-          <Button onClick={() => setLocation('/dashboard')}>Return to Dashboard</Button>
-        </Card>
+        <div className="flex items-center gap-3 text-gray-500">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="text-lg">Loading project details...</span>
+        </div>
       </div>
     );
   }
 
-  const toggleFeature = (featureId: string) => {
-    setExpandedFeatures(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(featureId)) {
-        newSet.delete(featureId);
-      } else {
-        newSet.add(featureId);
-      }
-      return newSet;
-    });
-  };
+  if (error || !data?.project) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Project Not Found</h2>
+          <p className="text-gray-500 mb-4">The project you're looking for doesn't exist or couldn't be loaded.</p>
+          <Button onClick={() => setLocation('/dashboard')} data-testid="button-back-dashboard">Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
-  const toggleStory = (storyId: string) => {
-    setExpandedStories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(storyId)) {
-        newSet.delete(storyId);
-      } else {
-        newSet.add(storyId);
-      }
-      return newSet;
-    });
-  };
+  const { project, features, stories, tasks, risks } = data;
+  const timelineProgress = getTimelineProgress(project.startDate, project.endDate);
+  const milestonePercent = Math.round((project.milestoneProgress || 0) * 100);
 
-  const budgetUtilization = Math.round((project.financials.spent / project.financials.budget) * 100) || 0;
-  const forecastVariance = Math.round(((project.financials.forecast - project.financials.budget) / project.financials.budget) * 100) || 0;
-  
-  const totalStories = project.features.reduce((sum, f) => sum + f.stories.length, 0);
-  const completedStories = project.features.reduce((sum, f) => 
-    sum + f.stories.filter(s => s.status === 'done' || s.status === 'accepted').length, 0);
-  
-  const totalTasks = project.features.reduce((sum, f) => 
-    sum + f.stories.reduce((sSum, s) => sSum + s.tasks.length, 0), 0);
-  const completedTasks = project.features.reduce((sum, f) => 
-    sum + f.stories.reduce((sSum, s) => sSum + s.tasks.filter(t => t.status === 'done').length, 0), 0);
-
-  const openDrilldown = (entityType: string, entityId: string) => {
-    setDrilldownEntityType(entityType);
-    setDrilldownEntityId(entityId);
-    setDrilldownOpen(true);
-  };
-
-  const handleDrilldownNavigate = (entityType: string, entityId: string) => {
-    setDrilldownEntityType(entityType);
-    setDrilldownEntityId(entityId);
-  };
-
-  const generateExecutiveSummary = async () => {
-    setSummaryLoading(true);
-    setShowSummary(true);
-    try {
-      const response = await fetch('/api/ai/executive-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectId: params.id,
-          projectName: project.name,
-          projectData: {
-            status: project.status,
-            priority: project.priority,
-            bu: project.bu,
-            budget: (project.financials.budget / 1000000).toFixed(1),
-            budgetUtilization,
-            roi: (project.financials.roi.projected / 1000000).toFixed(1),
-            currentPI: project.currentPI,
-            totalPIs: project.totalPIs,
-            risks: project.aiRecommendations?.join(', ') || 'None identified',
-            dependencies: project.dependencies?.map((d: Dependency) => d.targetProjectId).join(', ') || 'None'
-          }
-        })
-      });
-      const data = await response.json();
-      if (data.summary) {
-        setExecutiveSummary(data.summary);
-      } else {
-        setExecutiveSummary('Failed to generate summary. Please try again.');
-      }
-    } catch (error) {
-      setExecutiveSummary('Failed to generate summary. Please try again.');
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
+  const sections = [
+    { id: 'overview' as const, label: 'Overview' },
+    { id: 'features' as const, label: `Features (${features.length})` },
+    { id: 'stories' as const, label: `Stories (${stories.length})` },
+    { id: 'tasks' as const, label: `Tasks (${tasks.length})` },
+    { id: 'risks' as const, label: `Risks (${risks.length})` },
+  ];
 
   return (
-    <>
-    <DrillDownDrawer
-      isOpen={drilldownOpen}
-      onClose={() => setDrilldownOpen(false)}
-      entityType={drilldownEntityType}
-      entityId={drilldownEntityId}
-      onNavigate={handleDrilldownNavigate}
-    />
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b-4 border-purple-600">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => {
-                const segmentMap: Record<string, string> = {
-                  'Regional Utility': 'fpl',
-                  'Renewable Energy Division': 'neer',
-                  'Corporate & Other': 'corporate-other'
-                };
-                const segmentId = segmentMap[project.bu] || 'fpl';
-                setLocation(`/segment/${segmentId}`);
-              }} 
-              data-testid="button-back"
-            >
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-start gap-4">
+            <Button variant="ghost" size="icon" onClick={() => setLocation('/dashboard')} className="mt-1" data-testid="button-back">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900" data-testid="text-project-name">
-                  {project.name}
-                </h1>
-                <div className={`w-3 h-3 rounded-full ${statusColors[project.status]}`} />
-                <Badge className={priorityColors[project.priority]}>
-                  {project.priority.toUpperCase()}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold text-gray-900 truncate" data-testid="text-project-name">{project.name}</h1>
+                <StatusBadge status={project.status} />
+                <PriorityBadge priority={project.priority} />
+                <Badge variant="outline" className="border-purple-300 bg-purple-50 text-purple-600 text-[10px] gap-1" data-testid="badge-palantir">
+                  <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
+                  Palantir Ontology
                 </Badge>
-                <Badge variant="outline" className="border-purple-500 text-purple-700">
-                  {stageLabels[project.safeStage]}
-                </Badge>
-                {palantirMetrics && (
-                  <Badge variant="outline" className="border-purple-300 bg-purple-50 text-purple-600 text-[10px] gap-1" data-testid="palantir-source-badge">
-                    <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
-                    Palantir
-                  </Badge>
-                )}
               </div>
-              <p className="text-gray-600 mt-1">{project.bu} | {project.artName}</p>
+              <p className="text-gray-500 mt-1 text-sm">{project.description}</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">PI {project.currentPI} of {project.totalPIs}</p>
-              <p className="text-2xl font-bold text-purple-600">
-                ${(project.financials.roi.projected / 1000000).toFixed(1)}M ROI
-              </p>
-            </div>
-            <Button 
-              onClick={generateExecutiveSummary}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-              data-testid="button-executive-summary"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              AI Summary
-            </Button>
           </div>
+
+          <nav className="flex gap-1 mt-4 -mb-px overflow-x-auto">
+            {sections.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSection(s.id)}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+                  activeSection === s.id
+                    ? 'bg-gray-50 text-purple-700 border border-gray-200 border-b-gray-50 -mb-px'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+                data-testid={`tab-${s.id}`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 
-      <AnimatePresence>
-        {showSummary && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200"
-          >
-            <div className="container mx-auto px-4 py-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
-                    <Brain className="h-4 w-4 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-purple-900">AI Executive Summary</h3>
-                  {summaryLoading && <Loader2 className="h-4 w-4 animate-spin text-purple-600" />}
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => setShowSummary(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              {summaryLoading ? (
-                <div className="flex items-center gap-2 text-purple-700">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Generating executive summary...</span>
-                </div>
-              ) : executiveSummary ? (
-                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                  {executiveSummary}
-                </div>
-              ) : null}
+      <main className="max-w-7xl mx-auto px-6 py-6">
+        {activeSection === 'overview' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <MetricCard icon={Calendar} label="Timeline" value={`${timelineProgress}%`} subtitle={`${formatDate(project.startDate)} — ${formatDate(project.endDate)}`} />
+              <MetricCard icon={Target} label="Milestone Progress" value={`${milestonePercent}%`} subtitle={milestonePercent >= 70 ? 'On track' : milestonePercent >= 40 ? 'Progressing' : 'Early stage'} />
+              <MetricCard icon={Activity} label="Velocity" value={project.velocity || '—'} subtitle="Story points / sprint" />
+              <MetricCard icon={BarChart3} label="Predictability" value={project.predictability ? `${Math.round(project.predictability * 100)}%` : '—'} subtitle="Delivery confidence" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-teal-300"
-            onClick={() => openDrilldown('kpi', 'budget-analysis')}
-            data-testid="card-kpi-budget"
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="text-sm">Budget</span>
-                </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
-              </div>
-              <p className="text-2xl font-bold">${(project.financials.budget / 1000000).toFixed(1)}M</p>
-              <Progress value={budgetUtilization} className="h-2 mt-2" />
-              <p className="text-xs text-gray-500 mt-1">{budgetUtilization}% utilized</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-blue-300"
-            onClick={() => openDrilldown('kpi', 'velocity-metrics')}
-            data-testid="card-kpi-velocity"
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4" />
-                  <span className="text-sm">Velocity</span>
-                </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
-              </div>
-              <p className="text-2xl font-bold">{project.velocity}</p>
-              <p className="text-xs text-gray-500 mt-1">story points/sprint</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-purple-300"
-            onClick={() => openDrilldown('kpi', 'resource-allocation')}
-            data-testid="card-kpi-resources"
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm">Resources</span>
-                </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
-              </div>
-              <p className="text-2xl font-bold">{project.totalFTE}</p>
-              <p className="text-xs text-gray-500 mt-1">FTE allocated</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow hover:border-green-300"
-            onClick={() => openDrilldown('kpi', 'quality-score')}
-            data-testid="card-kpi-quality"
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between text-gray-600 mb-1">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  <span className="text-sm">Quality Score</span>
-                </div>
-                <ExternalLink className="h-3 w-3 text-gray-400" />
-              </div>
-              <p className="text-2xl font-bold">{project.qualityScore}%</p>
-              <Progress value={project.qualityScore} className="h-2 mt-2" />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-white shadow-sm flex-wrap">
-            <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-            <TabsTrigger value="features" data-testid="tab-features">Features & Stories</TabsTrigger>
-            <TabsTrigger value="resources" data-testid="tab-resources">Resources</TabsTrigger>
-            <TabsTrigger value="milestones" data-testid="tab-milestones">Milestones</TabsTrigger>
-            <TabsTrigger value="dependencies" data-testid="tab-dependencies">Dependencies</TabsTrigger>
-            <TabsTrigger value="financials" data-testid="tab-financials">Financials</TabsTrigger>
-            <TabsTrigger value="ai-insights" data-testid="tab-ai-insights">AI Insights</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-purple-600" />
-                    Project Description
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-purple-600" />
+                    Project Timeline
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 leading-relaxed">{project.description}</p>
-                  <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-start-date">
-                      <p className="text-sm text-gray-500">Start Date</p>
-                      <p className="font-medium">{project.startDate}</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-end-date">
-                      <p className="text-sm text-gray-500">Target End Date</p>
-                      <p className="font-medium">{project.targetEndDate}</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-theme">
-                      <p className="text-sm text-gray-500">Portfolio Theme</p>
-                      <p className="font-medium">{project.portfolioTheme}</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-art">
-                      <p className="text-sm text-gray-500">Agile Release Train</p>
-                      <p className="font-medium">{project.artName}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-purple-600" />
-                    Progress Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div 
-                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
-                    onClick={() => openDrilldown('kpi', 'features-summary')}
-                    data-testid="progress-features"
-                  >
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">Features <ExternalLink className="h-3 w-3 text-gray-400" /></span>
-                      <span>{project.features.filter(f => f.status === 'done').length}/{project.features.length}</span>
-                    </div>
-                    <Progress value={(project.features.filter(f => f.status === 'done').length / Math.max(1, project.features.length)) * 100} className="h-2" />
-                  </div>
-                  <div 
-                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
-                    onClick={() => openDrilldown('kpi', 'stories-summary')}
-                    data-testid="progress-stories"
-                  >
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">Stories <ExternalLink className="h-3 w-3 text-gray-400" /></span>
-                      <span>{completedStories}/{totalStories}</span>
-                    </div>
-                    <Progress value={(completedStories / Math.max(1, totalStories)) * 100} className="h-2" />
-                  </div>
-                  <div 
-                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
-                    onClick={() => openDrilldown('kpi', 'tasks-summary')}
-                    data-testid="progress-tasks"
-                  >
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">Tasks <ExternalLink className="h-3 w-3 text-gray-400" /></span>
-                      <span>{completedTasks}/{totalTasks}</span>
-                    </div>
-                    <Progress value={(completedTasks / Math.max(1, totalTasks)) * 100} className="h-2" />
-                  </div>
-                  <div 
-                    className="cursor-pointer hover:bg-gray-50 p-2 -m-2 rounded-lg transition-colors"
-                    onClick={() => openDrilldown('kpi', 'burndown-health')}
-                    data-testid="progress-burndown"
-                  >
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">Burndown Health <ExternalLink className="h-3 w-3 text-gray-400" /></span>
-                      <span>{project.burndownHealth}%</span>
-                    </div>
-                    <Progress value={project.burndownHealth} className="h-2" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {project.riskFlags.length > 0 && (
-              <Card className="border-red-200 bg-red-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-700">
-                    <AlertTriangle className="h-5 w-5" />
-                    Risk Flags
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {project.riskFlags.map((flag, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-red-800">{flag}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-blue-600" />
-                    VRO Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {project.vroInsights.map((insight, idx) => (
-                      <li 
-                        key={idx} 
-                        className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
-                        onClick={() => openDrilldown('kpi', `vro-insight-${idx}`)}
-                        data-testid={`vro-insight-${idx}`}
-                      >
-                        <Sparkles className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-blue-800 flex-1">{insight}</span>
-                        <ExternalLink className="h-3 w-3 text-blue-400 mt-0.5 flex-shrink-0" />
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-green-600" />
-                    PMO Data Feeds
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {project.pmoDataFeeds.map((feed, idx) => (
-                      <li 
-                        key={idx} 
-                        className="flex items-start gap-2 p-2 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition-colors"
-                        onClick={() => openDrilldown('kpi', `pmo-feed-${idx}`)}
-                        data-testid={`pmo-feed-${idx}`}
-                      >
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-green-800 flex-1">{feed}</span>
-                        <ExternalLink className="h-3 w-3 text-green-400 mt-0.5 flex-shrink-0" />
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="features" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-purple-600" />
-                  SAFe Hierarchy: Features → Stories → Tasks
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {project.features.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No features defined yet for this project.</p>
-                ) : (
                   <div className="space-y-4">
-                    {project.features.map(feature => (
-                      <div key={feature.id} className="border rounded-lg">
-                        <div 
-                          className="flex items-center gap-3 p-4 bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors"
-                          onClick={() => toggleFeature(feature.id)}
-                          data-testid={`feature-${feature.id}`}
-                        >
-                          {expandedFeatures.has(feature.id) ? (
-                            <ChevronDown className="h-5 w-5 text-purple-600" />
-                          ) : (
-                            <ChevronRight className="h-5 w-5 text-purple-600" />
-                          )}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-purple-900">{feature.title}</h3>
-                              <Badge variant="outline" className="text-xs">PI {feature.targetPI}</Badge>
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs ${
-                                  feature.status === 'done' ? 'bg-green-50 text-green-700 border-green-200' :
-                                  feature.status === 'implementing' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                  'bg-gray-50 text-gray-700 border-gray-200'
-                                }`}
-                              >
-                                {feature.status}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">{feature.description}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium">WSJF: {feature.wsjfScore}</p>
-                            <p className="text-xs text-gray-500">{feature.stories.length} stories</p>
-                          </div>
-                        </div>
-
-                        <AnimatePresence>
-                          {expandedFeatures.has(feature.id) && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="p-4 border-t bg-white">
-                                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                                  <p className="text-sm font-medium text-blue-800">Benefit Hypothesis</p>
-                                  <p className="text-sm text-blue-700 mt-1">{feature.benefitHypothesis}</p>
-                                </div>
-
-                                {feature.acceptanceCriteria.length > 0 && (
-                                  <div className="mb-4">
-                                    <p className="text-sm font-medium mb-2">Acceptance Criteria</p>
-                                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                      {feature.acceptanceCriteria.map((ac, idx) => (
-                                        <li key={idx}>{ac}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-
-                                {feature.stories.length > 0 && (
-                                  <div className="space-y-2">
-                                    <p className="text-sm font-medium">Stories ({feature.stories.length})</p>
-                                    {feature.stories.map(story => (
-                                      <div key={story.id} className="border rounded-lg ml-4">
-                                        <div 
-                                          className="flex items-center gap-3 p-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                                          onClick={(e) => { e.stopPropagation(); toggleStory(story.id); }}
-                                          data-testid={`story-${story.id}`}
-                                        >
-                                          {expandedStories.has(story.id) ? (
-                                            <ChevronDown className="h-4 w-4 text-gray-600" />
-                                          ) : (
-                                            <ChevronRight className="h-4 w-4 text-gray-600" />
-                                          )}
-                                          <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                              <span className="font-medium text-sm">{story.title}</span>
-                                              <Badge 
-                                                variant="outline" 
-                                                className={`text-xs ${
-                                                  story.status === 'done' || story.status === 'accepted' ? 'bg-green-50 text-green-700' :
-                                                  story.status === 'in-progress' ? 'bg-blue-50 text-blue-700' :
-                                                  'bg-gray-50 text-gray-700'
-                                                }`}
-                                              >
-                                                {story.status}
-                                              </Badge>
-                                              <Badge variant="outline" className="text-xs">{story.storyPoints} pts</Badge>
-                                            </div>
-                                            <p className="text-xs text-gray-500">Sprint {story.sprint} | {story.assignedTeam}</p>
-                                          </div>
-                                          <span className="text-xs text-gray-500">{story.tasks.length} tasks</span>
-                                        </div>
-
-                                        <AnimatePresence>
-                                          {expandedStories.has(story.id) && (
-                                            <motion.div
-                                              initial={{ height: 0, opacity: 0 }}
-                                              animate={{ height: "auto", opacity: 1 }}
-                                              exit={{ height: 0, opacity: 0 }}
-                                              className="overflow-hidden"
-                                            >
-                                              <div className="p-3 border-t bg-white">
-                                                <p className="text-sm text-gray-700 mb-3">{story.description}</p>
-                                                
-                                                {story.acceptanceCriteria.length > 0 && (
-                                                  <div className="mb-3">
-                                                    <p className="text-xs font-medium mb-1">Acceptance Criteria</p>
-                                                    <ul className="list-disc list-inside text-xs text-gray-600 space-y-0.5">
-                                                      {story.acceptanceCriteria.map((ac, idx) => (
-                                                        <li key={idx}>{ac}</li>
-                                                      ))}
-                                                    </ul>
-                                                  </div>
-                                                )}
-
-                                                {story.tasks.length > 0 && (
-                                                  <div>
-                                                    <p className="text-xs font-medium mb-2">Tasks</p>
-                                                    <div className="space-y-1 ml-2">
-                                                      {story.tasks.map(task => (
-                                                        <div 
-                                                          key={task.id} 
-                                                          className="flex items-center gap-2 p-2 bg-gray-50 rounded text-xs"
-                                                          data-testid={`task-${task.id}`}
-                                                        >
-                                                          <div className={`w-2 h-2 rounded-full ${
-                                                            task.status === 'done' ? 'bg-green-500' :
-                                                            task.status === 'in-progress' ? 'bg-blue-500' :
-                                                            task.status === 'blocked' ? 'bg-red-500' :
-                                                            'bg-gray-300'
-                                                          }`} />
-                                                          <span className="flex-1 font-medium">{task.title}</span>
-                                                          <span className="text-gray-500">{task.assignee}</span>
-                                                          <span className="text-gray-400">{task.actualHours || task.estimatedHours}h</span>
-                                                        </div>
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </motion.div>
-                                          )}
-                                        </AnimatePresence>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600">Schedule Progress</span>
+                        <span className="font-medium">{timelineProgress}% elapsed</span>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="resources" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-purple-600" />
-                  Team Resources ({project.resources.length} members, {project.totalFTE} FTE)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-gray-50">
-                        <th className="text-left p-3">Name</th>
-                        <th className="text-left p-3">Role</th>
-                        <th className="text-left p-3">Team</th>
-                        <th className="text-center p-3">Allocation</th>
-                        <th className="text-right p-3">Daily Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {project.resources.map(resource => (
-                        <tr key={resource.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 font-medium">{resource.name}</td>
-                          <td className="p-3">
-                            <Badge variant="outline" className="text-xs">{resource.role}</Badge>
-                          </td>
-                          <td className="p-3 text-gray-600">{resource.team}</td>
-                          <td className="p-3 text-center">
-                            <div className="flex items-center gap-2 justify-center">
-                              <Progress value={resource.allocation} className="w-16 h-2" />
-                              <span className="text-xs">{resource.allocation}%</span>
-                            </div>
-                          </td>
-                          <td className="p-3 text-right">${resource.costRate}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="milestones" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MilestoneIcon className="h-5 w-5 text-purple-600" />
-                  Project Milestones
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {project.milestones.map((milestone, idx) => (
-                    <div key={milestone.id} className="relative">
-                      {idx < project.milestones.length - 1 && (
-                        <div className="absolute left-4 top-10 bottom-0 w-0.5 bg-gray-200" />
-                      )}
-                      <div className="flex items-start gap-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          milestone.status === 'completed' ? 'bg-green-500' :
-                          milestone.status === 'on-track' ? 'bg-blue-500' :
-                          milestone.status === 'at-risk' ? 'bg-amber-500' :
-                          'bg-red-500'
-                        }`}>
-                          {milestone.status === 'completed' ? (
-                            <CheckCircle className="h-4 w-4 text-white" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1 pb-6">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{milestone.name}</h3>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${
-                                milestone.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
-                                milestone.status === 'on-track' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                milestone.status === 'at-risk' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                'bg-red-50 text-red-700 border-red-200'
-                              }`}
-                            >
-                              {milestone.status}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">PI {milestone.piNumber}</Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">Target: {milestone.targetDate}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {milestone.deliverables.map((deliverable, dIdx) => (
-                              <Badge key={dIdx} variant="secondary" className="text-xs">
-                                {deliverable}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="dependencies" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Link2 className="h-5 w-5 text-purple-600" />
-                  Cross-Project Dependencies ({project.dependencies.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {project.dependencies.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No cross-project dependencies defined.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {project.dependencies.map(dep => {
-                      const targetProject = getProjectById(dep.targetProjectId);
-                      return (
-                        <div 
-                          key={dep.id} 
-                          className={`p-4 rounded-lg border-2 cursor-pointer hover:shadow-md transition-shadow ${
-                            dep.health === 'green' ? 'border-green-300 bg-green-50' :
-                            dep.health === 'yellow' ? 'border-amber-300 bg-amber-50' :
-                            'border-red-300 bg-red-50'
+                      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            timelineProgress > 85 ? 'bg-red-500' : timelineProgress > 60 ? 'bg-amber-500' : 'bg-emerald-500'
                           }`}
-                          onClick={() => targetProject && setLocation(`/project/${targetProject.id}`)}
-                          data-testid={`dependency-${dep.id}`}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-3 h-3 rounded-full ${
-                              dep.health === 'green' ? 'bg-green-500' :
-                              dep.health === 'yellow' ? 'bg-amber-500' :
-                              'bg-red-500'
-                            }`} />
-                            <Badge variant="outline" className="text-xs uppercase">{dep.type.replace('-', ' ')}</Badge>
-                            <span className="font-semibold">{targetProject?.name || dep.targetProjectId}</span>
+                          style={{ width: `${timelineProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600">Milestone Completion</span>
+                        <span className="font-medium">{milestonePercent}%</span>
+                      </div>
+                      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${milestonePercent}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-start-date">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
+                        <p className="font-semibold text-gray-900 mt-1">{formatDate(project.startDate)}</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-lg" data-testid="tile-end-date">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Target End</p>
+                        <p className="font-semibold text-gray-900 mt-1">{formatDate(project.endDate)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-purple-600" />
+                    Work Breakdown
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div data-testid="breakdown-features">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Features</span>
+                      <span className="font-medium">{features.filter(f => f.status === 'done' || f.status === 'complete').length} / {features.length}</span>
+                    </div>
+                    <Progress value={features.length > 0 ? (features.filter(f => f.status === 'done' || f.status === 'complete').length / features.length) * 100 : 0} className="h-2" />
+                  </div>
+                  <div data-testid="breakdown-stories">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Stories</span>
+                      <span className="font-medium">{stories.filter(s => s.status === 'done' || s.status === 'accepted').length} / {stories.length}</span>
+                    </div>
+                    <Progress value={stories.length > 0 ? (stories.filter(s => s.status === 'done' || s.status === 'accepted').length / stories.length) * 100 : 0} className="h-2" />
+                  </div>
+                  <div data-testid="breakdown-tasks">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Tasks</span>
+                      <span className="font-medium">{tasks.filter(t => t.status === 'done').length} / {tasks.length}</span>
+                    </div>
+                    <Progress value={tasks.length > 0 ? (tasks.filter(t => t.status === 'done').length / tasks.length) * 100 : 0} className="h-2" />
+                  </div>
+
+                  {risks.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <div className="flex items-center gap-2 text-sm">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <span className="text-gray-600">{risks.length} active risk{risks.length !== 1 ? 's' : ''}</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-business-unit">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Business Unit</p>
+                <p className="font-semibold text-gray-900 mt-1">{project.businessUnit || '—'}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-art">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Agile Release Train</p>
+                <p className="font-semibold text-gray-900 mt-1">{project.artName || '—'}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-safe-stage">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">SAFe Stage</p>
+                <p className="font-semibold text-gray-900 mt-1 capitalize">{project.safeStage || '—'}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-4" data-testid="detail-pi">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Current PI</p>
+                <p className="font-semibold text-gray-900 mt-1">{project.currentPi || '—'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'features' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Zap className="h-4 w-4 text-purple-600" />
+                Features ({features.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {features.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <Layers className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <p>No features linked to this project in Palantir.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {features.map(f => (
+                    <WorkItemRow
+                      key={f.id}
+                      name={f.name}
+                      status={f.status}
+                      priority={f.priority}
+                      description={f.description}
+                      testId={`feature-${f.id}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'stories' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <GitBranch className="h-4 w-4 text-blue-600" />
+                Stories ({stories.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {stories.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <GitBranch className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <p>No stories linked to this project in Palantir.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {stories.map(s => (
+                    <WorkItemRow
+                      key={s.id}
+                      name={s.name}
+                      status={s.status}
+                      description={s.description}
+                      testId={`story-${s.id}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'tasks' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CircleDot className="h-4 w-4 text-emerald-600" />
+                Tasks ({tasks.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {tasks.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <CircleDot className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <p>No tasks linked to this project in Palantir.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {tasks.map(t => (
+                    <WorkItemRow
+                      key={t.id}
+                      name={t.name}
+                      status={t.status}
+                      priority={t.priority}
+                      description={t.description}
+                      testId={`task-${t.id}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeSection === 'risks' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Shield className="h-4 w-4 text-red-600" />
+                Risks ({risks.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {risks.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <Shield className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <p>No risks registered for this project in Palantir.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {risks.map(r => (
+                    <div key={r.id} className="p-4 hover:bg-gray-50 transition-colors" data-testid={`risk-${r.id}`}>
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                          r.severity === 'critical' || r.severity === 'high' ? 'text-red-500' : 'text-amber-500'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-gray-900">{r.title}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              r.severity === 'critical' ? 'bg-red-100 text-red-700' :
+                              r.severity === 'high' ? 'bg-orange-100 text-orange-700' :
+                              r.severity === 'medium' ? 'bg-amber-100 text-amber-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>{r.severity}</span>
+                            <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">{r.category}</span>
+                            <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600 capitalize">{r.status}</span>
                           </div>
-                          <p className="text-sm text-gray-700 mb-2">{dep.description}</p>
-                          {dep.impactIfDelayed && (
-                            <div className="flex items-start gap-2 p-2 bg-white/50 rounded">
-                              <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
-                              <div>
-                                <p className="text-xs font-medium text-amber-800">Impact if Delayed</p>
-                                <p className="text-xs text-amber-700">{dep.impactIfDelayed}</p>
-                              </div>
-                            </div>
-                          )}
-                          {dep.financialImpact && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <DollarSign className="h-4 w-4 text-red-600" />
-                              <span className="text-sm font-medium text-red-700">
-                                ${(dep.financialImpact / 1000000).toFixed(1)}M financial impact
-                              </span>
-                            </div>
-                          )}
+                          {r.description && <p className="text-sm text-gray-600 mt-1">{r.description}</p>}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="financials" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                    Budget Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>Total Budget</span>
-                    <span className="font-bold text-lg">${(project.financials.budget / 1000000).toFixed(2)}M</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                    <span>Spent to Date</span>
-                    <span className="font-bold text-blue-700">${(project.financials.spent / 1000000).toFixed(2)}M</span>
-                  </div>
-                  <div className={`flex justify-between items-center p-3 rounded-lg ${forecastVariance > 0 ? 'bg-red-50' : 'bg-green-50'}`}>
-                    <span>Forecast at Completion</span>
-                    <div className="text-right">
-                      <span className={`font-bold ${forecastVariance > 0 ? 'text-red-700' : 'text-green-700'}`}>
-                        ${(project.financials.forecast / 1000000).toFixed(2)}M
-                      </span>
-                      <p className="text-xs text-gray-500">
-                        {forecastVariance > 0 ? '+' : ''}{forecastVariance}% variance
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Labor Cost</span>
-                      <span>${(project.financials.laborCost / 1000000).toFixed(2)}M</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Vendor Cost</span>
-                      <span>${(project.financials.vendorCost / 1000000).toFixed(2)}M</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Infrastructure</span>
-                      <span>${(project.financials.infrastructureCost / 1000000).toFixed(2)}M</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Contingency</span>
-                      <span>${(project.financials.contingency / 1000000).toFixed(2)}M</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-purple-600" />
-                    ROI Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-purple-50 rounded-lg text-center">
-                    <p className="text-sm text-gray-600">Projected ROI</p>
-                    <p className="text-3xl font-bold text-purple-700">
-                      ${(project.financials.roi.projected / 1000000).toFixed(1)}M
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-gray-50 rounded-lg text-center">
-                      <p className="text-xs text-gray-500">Confidence</p>
-                      <p className="text-xl font-bold">{project.financials.roi.confidence}%</p>
-                      <Progress value={project.financials.roi.confidence} className="h-1 mt-2" />
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg text-center">
-                      <p className="text-xs text-gray-500">Payback Period</p>
-                      <p className="text-xl font-bold">{project.financials.roi.paybackMonths}</p>
-                      <p className="text-xs text-gray-500">months</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="text-sm font-medium text-green-800">ROI Multiple</p>
-                    <p className="text-2xl font-bold text-green-700">
-                      {(project.financials.roi.projected / project.financials.budget).toFixed(1)}x
-                    </p>
-                    <p className="text-xs text-green-600">Return on investment</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ai-insights" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-purple-200">
-                <CardHeader className="bg-purple-50">
-                  <CardTitle className="flex items-center gap-2 text-purple-800">
-                    <Sparkles className="h-5 w-5" />
-                    AI Recommendations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    {project.aiRecommendations.map((rec, idx) => (
-                      <div key={idx} className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
-                        <Brain className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-purple-900">{rec}</p>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-blue-200">
-                <CardHeader className="bg-blue-50">
-                  <CardTitle className="flex items-center gap-2 text-blue-800">
-                    <Target className="h-5 w-5" />
-                    VRO Value Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    {project.vroInsights.map((insight, idx) => (
-                      <div key={idx} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                        <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-blue-900">{insight}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="border-green-200">
-              <CardHeader className="bg-green-50">
-                <CardTitle className="flex items-center gap-2 text-green-800">
-                  <Activity className="h-5 w-5" />
-                  PMO Data Feeds
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {project.pmoDataFeeds.map((feed, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-green-900">{feed}</p>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
-    </>
   );
 }

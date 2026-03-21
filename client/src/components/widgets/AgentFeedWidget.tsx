@@ -113,9 +113,9 @@ function EventItem({ event }: { event: AgentEvent }) {
             <p className="text-sm font-medium leading-tight">
               {(event.payload.title as string) || event.type.replace(/-/g, " ")}
             </p>
-            {event.payload.message && (
+            {typeof event.payload.message === 'string' && event.payload.message && (
               <p className="text-xs text-muted-foreground line-clamp-2">
-                {String(event.payload.message)}
+                {event.payload.message}
               </p>
             )}
           </div>

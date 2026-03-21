@@ -114,6 +114,25 @@ router.get('/metrics', (async (_req, res) => {
       return true;
     });
 
+    // Identify features, stories, tasks from all projects
+    const features = projects.filter((p: any) => {
+      const name = p.name || '';
+      const id = p.__primaryKey || p.project_id || p.id || '';
+      return name.startsWith('[Feature]') || id.startsWith('feature-');
+    });
+
+    const stories = projects.filter((p: any) => {
+      const name = p.name || '';
+      const id = p.__primaryKey || p.project_id || p.id || '';
+      return name.startsWith('[Story]') || id.startsWith('story-');
+    });
+
+    const tasks = projects.filter((p: any) => {
+      const name = p.name || '';
+      const id = p.__primaryKey || p.project_id || p.id || '';
+      return name.startsWith('[Task]') || id.startsWith('task-');
+    });
+
     // Calculate metrics from SAFe projects only
     const totalProjects = safeProjects.length;
     const activeProjects = safeProjects.filter((p: any) =>
@@ -126,8 +145,45 @@ router.get('/metrics', (async (_req, res) => {
       red: safeProjects.filter((p: any) => mapStatusToColor(p.status) === 'red').length,
     };
 
-    const totalBudget = budgets.reduce((sum: number, b: any) => sum + (b.total_amount || 0), 0);
-    const spentBudget = budgets.reduce((sum: number, b: any) => sum + (b.spent_amount || 0), 0);
+    // Calculate budget from AtlasBudget objects
+    let totalBudget = budgets.reduce((sum: number, b: any) => sum + (b.total_amount || b.planned_amount || 0), 0);
+    let spentBudget = budgets.reduce((sum: number, b: any) => sum + (b.spent_amount || b.actual_amount || 0), 0);
+
+    // If no AtlasBudget objects, calculate from project fields
+    if (totalBudget === 0) {
+      totalBudget = safeProjects.reduce((sum: number, p: any) => {
+        const budget = parseFloat(p.budget_total || p.budgetTotal || p.budget || '0');
+        return sum + (isNaN(budget) ? 0 : budget);
+      }, 0);
+    }
+    if (spentBudget === 0) {
+      spentBudget = safeProjects.reduce((sum: number, p: any) => {
+        const spent = parseFloat(p.budget_spent || p.budgetSpent || p.actual_cost || '0');
+        return sum + (isNaN(spent) ? 0 : spent);
+      }, 0);
+    }
+
+    // Calculate average progress from projects
+    const avgProjectProgress = safeProjects.length > 0
+      ? safeProjects.reduce((sum: number, p: any) => {
+          const progress = parseFloat(p.milestone_progress || p.progress || '0');
+          // milestone_progress is 0-1, progress is 0-100
+          return sum + (progress > 1 ? progress : progress * 100);
+        }, 0) / safeProjects.length
+      : 0;
+
+    // Calculate EVM metrics
+    const cpiSum = safeProjects.reduce((sum: number, p: any) => {
+      const cpi = parseFloat(p.cpi_value || p.cpiValue || '1');
+      return sum + (isNaN(cpi) ? 1 : cpi);
+    }, 0);
+    const avgCPI = safeProjects.length > 0 ? cpiSum / safeProjects.length : 1;
+
+    const spiSum = safeProjects.reduce((sum: number, p: any) => {
+      const spi = parseFloat(p.spi_value || p.spiValue || '1');
+      return sum + (isNaN(spi) ? 1 : spi);
+    }, 0);
+    const avgSPI = safeProjects.length > 0 ? spiSum / safeProjects.length : 1;
 
     const totalRisks = risks.length;
     const criticalRisks = risks.filter((r: any) =>
@@ -138,19 +194,42 @@ router.get('/metrics', (async (_req, res) => {
       ? objectives.reduce((sum: number, o: any) => sum + (o.progress || 0), 0) / objectives.length
       : 0;
 
+    // Fetch dependencies count
+    let totalDependencies = 0;
+    try {
+      const depsResult = await palantir.listObjects('AtlasDependency', {
+        pageSize: 500,
+        ontologyRid: ONTOLOGY_RID,
+      });
+      totalDependencies = depsResult.data?.length || 0;
+    } catch {
+      // AtlasDependency might not exist, ignore
+    }
+
     res.json({
       totalProjects,
       activeProjects,
       onTrackProjects: projectsByStatus.green,
       atRiskProjects: projectsByStatus.amber,
       delayedProjects: projectsByStatus.red,
-      avgProgress: okrProgress,
+      avgProgress: avgProjectProgress,
       projectsByStatus,
       totalBudget,
       spentBudget,
+      budgetUtilization: totalBudget > 0 ? (spentBudget / totalBudget) * 100 : 0,
       totalRisks,
       criticalRisks,
       okrProgress,
+      // SAFe breakdown
+      totalFeatures: features.length,
+      totalStories: stories.length,
+      totalTasks: tasks.length,
+      totalDependencies,
+      // EVM metrics
+      avgCPI,
+      avgSPI,
+      costPerformance: avgCPI >= 1 ? 'On Budget' : 'Over Budget',
+      schedulePerformance: avgSPI >= 1 ? 'On Schedule' : 'Behind Schedule',
       agentAssignments: {},
     });
   } catch (error: any) {
@@ -174,29 +253,58 @@ router.get('/projects', (async (req, res) => {
       ontologyRid: ONTOLOGY_RID,
     });
 
-    let projects = (result.data || []).map((p: any) => ({
-      id: p.projectId || p.project_id || p.__primaryKey,
-      name: p.name || p.__title || 'Untitled Project',
-      description: p.description || '',
-      status: mapStatusToColor(p.status || ''),
-      statusText: p.status || 'Unknown',
-      businessUnit: p.business_unit || p.transformationId || p.transformation_id || 'General',
-      startDate: p.startDate || p.start_date,
-      endDate: p.endDate || p.end_date,
-      priority: mapPriorityToLevel(p.priority || 'medium'),
-      priorityText: p.priority || 'Medium',
-      budgetTotal: p.budget_total || p.budgetTotal || 0,
-      budgetSpent: p.budget_spent || p.budgetSpent || 0,
-      expectedRoi: p.expected_roi || p.expectedRoi || '',
-      milestoneProgress: p.milestone_progress || p.milestoneProgress || 0,
-      artName: p.art_name || p.artName,
-      portfolioTheme: p.portfolio_theme || p.portfolioTheme,
-      safeStage: p.safe_stage || p.safeStage,
-      currentPi: p.current_pi || p.currentPi,
-      velocity: p.velocity,
-      predictability: p.predictability,
-      flowEfficiency: p.flow_efficiency || p.flowEfficiency,
-    }));
+    let projects = (result.data || []).map((p: any) => {
+      // Parse budget values
+      const budgetTotal = parseFloat(p.budget_total || p.budgetTotal || p.budget || '0') || 0;
+      const budgetSpent = parseFloat(p.budget_spent || p.budgetSpent || p.actual_cost || '0') || 0;
+      const progress = p.milestone_progress || p.progress || 0;
+      // milestone_progress is 0-1, progress is 0-100
+      const normalizedProgress = progress > 1 ? progress : progress * 100;
+
+      return {
+        id: p.projectId || p.project_id || p.__primaryKey,
+        name: p.name || p.__title || 'Untitled Project',
+        description: p.description || '',
+        status: mapStatusToColor(p.status || ''),
+        statusText: p.status || 'Unknown',
+        businessUnit: p.business_unit || p.transformationId || p.transformation_id || 'General',
+        startDate: p.startDate || p.start_date,
+        endDate: p.endDate || p.end_date,
+        priority: mapPriorityToLevel(p.priority || 'medium'),
+        priorityText: p.priority || 'Medium',
+        // Budget fields
+        budgetTotal,
+        budgetSpent,
+        budgetUnit: p.budget_unit || p.budgetUnit || 'USD',
+        budgetRemaining: budgetTotal - budgetSpent,
+        budgetUtilization: budgetTotal > 0 ? (budgetSpent / budgetTotal) * 100 : 0,
+        // ROI
+        expectedRoi: p.expected_roi || p.expectedRoi || p.roi_value || '',
+        roiValue: parseFloat(p.roi_value || p.roiValue || '0') || 0,
+        // Progress
+        milestoneProgress: normalizedProgress,
+        progress: normalizedProgress,
+        // EVM metrics
+        cpiValue: parseFloat(p.cpi_value || p.cpiValue || '1') || 1,
+        spiValue: parseFloat(p.spi_value || p.spiValue || '1') || 1,
+        earnedValue: parseFloat(p.earned_value || p.earnedValue || '0') || 0,
+        plannedValue: parseFloat(p.planned_value || p.plannedValue || '0') || 0,
+        // SAFe fields
+        artName: p.art_name || p.artName || '',
+        portfolioTheme: p.portfolio_theme || p.portfolioTheme || '',
+        safeStage: p.safe_stage || p.safeStage || '',
+        currentPi: p.current_pi || p.currentPi || '',
+        velocity: parseFloat(p.velocity || '0') || 0,
+        predictability: parseFloat(p.predictability || '0') || 0,
+        flowEfficiency: parseFloat(p.flow_efficiency || p.flowEfficiency || '0') || 0,
+        // Epic linkage
+        epicId: p.epic_id || p.epicId || '',
+        epicName: p.epic_name || p.epicName || '',
+        // Source tracking
+        source: p.source || '',
+        syncedAt: p.synced_at || p.syncedAt || '',
+      };
+    });
 
     // Filter out non-SAFe items by default (features, stories, tasks, agents, integrations)
     const includeSafeOnly = req.query.safeOnly !== 'false';
@@ -467,6 +575,368 @@ router.get('/agent/:agentType', (async (req, res) => {
       objectTypes,
       data,
       summary,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}) as RequestHandler);
+
+// ============================================================================
+// SAFE WORK ITEMS (Features, Stories, Tasks)
+// ============================================================================
+
+router.get('/features', (async (req, res) => {
+  try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
+    const { projectId, status } = req.query;
+
+    const result = await palantir.listObjects('AtlasProject', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    // Filter to features only
+    let features = (result.data || [])
+      .filter((p: any) => {
+        const name = p.name || '';
+        const id = p.__primaryKey || p.project_id || p.id || '';
+        return name.startsWith('[Feature]') || id.startsWith('feature-');
+      })
+      .map((f: any) => ({
+        id: f.projectId || f.project_id || f.__primaryKey,
+        name: (f.name || '').replace('[Feature] ', ''),
+        description: f.description || '',
+        status: f.status || 'In Progress',
+        projectId: f.parent_project_id || f.epic_id || '',
+        storyPoints: parseInt(f.story_points || '0') || 0,
+        completedPoints: parseInt(f.completed_points || '0') || 0,
+        priority: f.priority || 'Medium',
+        targetPi: f.current_pi || f.target_pi || '',
+        wsjfScore: parseFloat(f.wsjf_score || '0') || 0,
+        progress: f.milestone_progress ? f.milestone_progress * 100 : 0,
+      }));
+
+    if (projectId) {
+      features = features.filter((f: any) => f.projectId === projectId);
+    }
+    if (status) {
+      features = features.filter((f: any) => f.status.toLowerCase() === (status as string).toLowerCase());
+    }
+
+    res.json(features);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}) as RequestHandler);
+
+router.get('/stories', (async (req, res) => {
+  try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
+    const { featureId, projectId, status } = req.query;
+
+    const result = await palantir.listObjects('AtlasProject', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    // Filter to stories only
+    let stories = (result.data || [])
+      .filter((p: any) => {
+        const name = p.name || '';
+        const id = p.__primaryKey || p.project_id || p.id || '';
+        return name.startsWith('[Story]') || id.startsWith('story-');
+      })
+      .map((s: any) => ({
+        id: s.projectId || s.project_id || s.__primaryKey,
+        name: (s.name || '').replace('[Story] ', ''),
+        description: s.description || '',
+        status: s.status || 'In Progress',
+        featureId: s.parent_feature_id || s.feature_id || '',
+        projectId: s.parent_project_id || s.epic_id || '',
+        storyPoints: parseInt(s.story_points || '0') || 0,
+        priority: s.priority || 'Medium',
+        assignee: s.assignee || '',
+        sprint: s.sprint || s.current_pi || '',
+      }));
+
+    if (featureId) {
+      stories = stories.filter((s: any) => s.featureId === featureId);
+    }
+    if (projectId) {
+      stories = stories.filter((s: any) => s.projectId === projectId);
+    }
+    if (status) {
+      stories = stories.filter((s: any) => s.status.toLowerCase() === (status as string).toLowerCase());
+    }
+
+    res.json(stories);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}) as RequestHandler);
+
+router.get('/tasks', (async (req, res) => {
+  try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
+    const { storyId, projectId, status, assignee } = req.query;
+
+    const result = await palantir.listObjects('AtlasProject', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    // Filter to tasks only
+    let tasks = (result.data || [])
+      .filter((p: any) => {
+        const name = p.name || '';
+        const id = p.__primaryKey || p.project_id || p.id || '';
+        return name.startsWith('[Task]') || id.startsWith('task-');
+      })
+      .map((t: any) => ({
+        id: t.projectId || t.project_id || t.__primaryKey,
+        name: (t.name || '').replace('[Task] ', ''),
+        description: t.description || '',
+        status: t.status || 'In Progress',
+        storyId: t.parent_story_id || t.story_id || '',
+        projectId: t.parent_project_id || t.epic_id || '',
+        estimatedHours: parseFloat(t.estimated_hours || '0') || 0,
+        actualHours: parseFloat(t.actual_hours || '0') || 0,
+        priority: t.priority || 'Medium',
+        assignee: t.assignee || '',
+        dueDate: t.due_date || t.end_date || '',
+      }));
+
+    if (storyId) {
+      tasks = tasks.filter((t: any) => t.storyId === storyId);
+    }
+    if (projectId) {
+      tasks = tasks.filter((t: any) => t.projectId === projectId);
+    }
+    if (status) {
+      tasks = tasks.filter((t: any) => t.status.toLowerCase() === (status as string).toLowerCase());
+    }
+    if (assignee) {
+      tasks = tasks.filter((t: any) => t.assignee === assignee);
+    }
+
+    res.json(tasks);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}) as RequestHandler);
+
+// ============================================================================
+// DEPENDENCIES
+// ============================================================================
+
+router.get('/dependencies', (async (req, res) => {
+  try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
+    const { projectId, status, type } = req.query;
+
+    // Try to get from AtlasDependency first
+    let dependencies: any[] = [];
+    try {
+      const result = await palantir.listObjects('AtlasDependency', {
+        pageSize: 500,
+        ontologyRid: ONTOLOGY_RID,
+      });
+      dependencies = (result.data || []).map((d: any) => ({
+        id: d.dependency_id || d.__primaryKey,
+        sourceProjectId: d.source_project_id || d.from_project,
+        targetProjectId: d.target_project_id || d.to_project,
+        type: d.dependency_type || d.type || 'blocks',
+        status: d.status || 'active',
+        description: d.description || '',
+        impact: d.impact || 'medium',
+        resolvedAt: d.resolved_at || null,
+      }));
+    } catch {
+      // AtlasDependency might not exist
+    }
+
+    if (projectId) {
+      dependencies = dependencies.filter((d: any) =>
+        d.sourceProjectId === projectId || d.targetProjectId === projectId
+      );
+    }
+    if (status) {
+      dependencies = dependencies.filter((d: any) => d.status === status);
+    }
+    if (type) {
+      dependencies = dependencies.filter((d: any) => d.type === type);
+    }
+
+    res.json(dependencies);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}) as RequestHandler);
+
+// ============================================================================
+// PROJECT 360 VIEW (Full project data with related items)
+// ============================================================================
+
+router.get('/project360/:projectId', (async (req, res) => {
+  try {
+    const palantir = getPalantirOrFail(res);
+    if (!palantir) return;
+
+    const { projectId } = req.params;
+
+    // Get project
+    const projectResult = await palantir.listObjects('AtlasProject', {
+      pageSize: 500,
+      ontologyRid: ONTOLOGY_RID,
+    });
+
+    const allProjects = projectResult.data || [];
+    const project = allProjects.find((p: any) =>
+      (p.projectId || p.project_id || p.__primaryKey) === projectId
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Get related features, stories, tasks
+    const features = allProjects.filter((p: any) => {
+      const name = p.name || '';
+      const id = p.__primaryKey || p.project_id || '';
+      const isFeature = name.startsWith('[Feature]') || id.startsWith('feature-');
+      const belongsToProject = (p.parent_project_id || p.epic_id) === projectId;
+      return isFeature && belongsToProject;
+    });
+
+    const stories = allProjects.filter((p: any) => {
+      const name = p.name || '';
+      const id = p.__primaryKey || p.project_id || '';
+      const isStory = name.startsWith('[Story]') || id.startsWith('story-');
+      const belongsToProject = (p.parent_project_id || p.epic_id) === projectId;
+      return isStory && belongsToProject;
+    });
+
+    const tasks = allProjects.filter((p: any) => {
+      const name = p.name || '';
+      const id = p.__primaryKey || p.project_id || '';
+      const isTask = name.startsWith('[Task]') || id.startsWith('task-');
+      const belongsToProject = (p.parent_project_id || p.epic_id) === projectId;
+      return isTask && belongsToProject;
+    });
+
+    // Get risks
+    let risks: any[] = [];
+    try {
+      const risksResult = await palantir.listObjects('AtlasRisk', {
+        pageSize: 100,
+        ontologyRid: ONTOLOGY_RID,
+      });
+      risks = (risksResult.data || []).filter((r: any) => r.project_id === projectId);
+    } catch {}
+
+    // Get dependencies
+    let dependencies: any[] = [];
+    try {
+      const depsResult = await palantir.listObjects('AtlasDependency', {
+        pageSize: 100,
+        ontologyRid: ONTOLOGY_RID,
+      });
+      dependencies = (depsResult.data || []).filter((d: any) =>
+        d.source_project_id === projectId || d.target_project_id === projectId
+      );
+    } catch {}
+
+    // Parse project fields
+    const budgetTotal = parseFloat(project.budget_total || project.budgetTotal || project.budget || '0') || 0;
+    const budgetSpent = parseFloat(project.budget_spent || project.budgetSpent || project.actual_cost || '0') || 0;
+    const progress = project.milestone_progress || project.progress || 0;
+    const normalizedProgress = progress > 1 ? progress : progress * 100;
+
+    res.json({
+      // Core project info
+      id: project.projectId || project.project_id || project.__primaryKey,
+      name: project.name || 'Untitled Project',
+      description: project.description || '',
+      status: mapStatusToColor(project.status || ''),
+      statusText: project.status || 'Unknown',
+      priority: mapPriorityToLevel(project.priority || 'medium'),
+      priorityText: project.priority || 'Medium',
+      // Dates
+      startDate: project.startDate || project.start_date,
+      endDate: project.endDate || project.end_date,
+      // Organization
+      businessUnit: project.business_unit || project.transformationId || project.transformation_id || 'General',
+      artName: project.art_name || project.artName || '',
+      portfolioTheme: project.portfolio_theme || project.portfolioTheme || '',
+      // Budget & Financial
+      budgetTotal,
+      budgetSpent,
+      budgetUnit: project.budget_unit || project.budgetUnit || 'USD',
+      budgetRemaining: budgetTotal - budgetSpent,
+      budgetUtilization: budgetTotal > 0 ? (budgetSpent / budgetTotal) * 100 : 0,
+      expectedRoi: project.expected_roi || project.expectedRoi || '',
+      roiValue: parseFloat(project.roi_value || project.roiValue || '0') || 0,
+      // EVM Metrics
+      progress: normalizedProgress,
+      cpiValue: parseFloat(project.cpi_value || project.cpiValue || '1') || 1,
+      spiValue: parseFloat(project.spi_value || project.spiValue || '1') || 1,
+      earnedValue: parseFloat(project.earned_value || project.earnedValue || '0') || 0,
+      plannedValue: parseFloat(project.planned_value || project.plannedValue || '0') || 0,
+      // SAFe fields
+      safeStage: project.safe_stage || project.safeStage || '',
+      currentPi: project.current_pi || project.currentPi || '',
+      velocity: parseFloat(project.velocity || '0') || 0,
+      predictability: parseFloat(project.predictability || '0') || 0,
+      flowEfficiency: parseFloat(project.flow_efficiency || project.flowEfficiency || '0') || 0,
+      // Counts
+      featureCount: features.length,
+      storyCount: stories.length,
+      taskCount: tasks.length,
+      riskCount: risks.length,
+      dependencyCount: dependencies.length,
+      // Related items
+      features: features.map((f: any) => ({
+        id: f.projectId || f.project_id || f.__primaryKey,
+        name: (f.name || '').replace('[Feature] ', ''),
+        status: f.status,
+        progress: f.milestone_progress ? f.milestone_progress * 100 : 0,
+      })),
+      stories: stories.map((s: any) => ({
+        id: s.projectId || s.project_id || s.__primaryKey,
+        name: (s.name || '').replace('[Story] ', ''),
+        status: s.status,
+        storyPoints: parseInt(s.story_points || '0') || 0,
+      })),
+      tasks: tasks.map((t: any) => ({
+        id: t.projectId || t.project_id || t.__primaryKey,
+        name: (t.name || '').replace('[Task] ', ''),
+        status: t.status,
+        assignee: t.assignee || '',
+      })),
+      risks: risks.map((r: any) => ({
+        id: r.risk_id || r.__primaryKey,
+        title: r.title || r.name,
+        severity: r.severity,
+        status: r.status,
+      })),
+      dependencies: dependencies.map((d: any) => ({
+        id: d.dependency_id || d.__primaryKey,
+        type: d.dependency_type || d.type,
+        targetProjectId: d.target_project_id,
+        sourceProjectId: d.source_project_id,
+        status: d.status,
+      })),
+      // Source tracking
+      source: project.source || '',
+      syncedAt: project.synced_at || project.syncedAt || '',
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

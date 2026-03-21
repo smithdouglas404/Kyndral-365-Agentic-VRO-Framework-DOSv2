@@ -694,6 +694,10 @@ function DashboardContent() {
       navigate('/risk');
       return;
     }
+    if (type === 'project') {
+      navigate(`/project/${id}`);
+      return;
+    }
     setDrillDownEntity({ type, id });
     setDrillDownOpen(true);
   };

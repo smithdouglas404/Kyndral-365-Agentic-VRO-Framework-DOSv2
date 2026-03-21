@@ -34,7 +34,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useWebSocketContext } from "@/contexts/WebSocketContext";
-import { usePageContext } from "@/contexts/PageContext";
 import { useCompanyName } from "@/contexts/CompanyProfileContext";
 
 // Import live widgets
@@ -242,13 +241,6 @@ function APIDocumentation() {
 
 export default function PPMDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const { setTitle, setDescription } = usePageContext();
-
-  // Set page context
-  useState(() => {
-    setTitle("PPM Live Dashboard");
-    setDescription("Real-time portfolio management with agent updates");
-  });
 
   return (
     <div className="flex min-h-screen bg-background">
