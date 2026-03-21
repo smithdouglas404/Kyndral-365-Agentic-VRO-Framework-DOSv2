@@ -74,16 +74,19 @@ router.get('/metrics', (async (_req, res) => {
     const palantir = getPalantirOrFail(res);
     if (!palantir) return;
 
-    const [projectsResult, budgetsResult, risksResult, okrsResult, keyResultsResult, featuresResult, storiesResult, tasksResult] = await Promise.all([
+    const [projectsResult, budgetsResult, risksResult, okrsResult, keyResultsResult] = await Promise.all([
       palantir.listObjects('AtlasProject', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasObjective', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasKeyResult', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
-      palantir.listObjects('AtlasFeature', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
-      palantir.listObjects('AtlasStory', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
-      palantir.listObjects('AtlasTask', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
     ]);
+
+    // Work items are stored as AtlasProject objects with name prefixes
+    const allProjectData = projectsResult.data || [];
+    const featuresResult = { data: allProjectData.filter((p: any) => (p.name || '').startsWith('[Feature]')) };
+    const storiesResult = { data: allProjectData.filter((p: any) => (p.name || '').startsWith('[Story]')) };
+    const tasksResult = { data: allProjectData.filter((p: any) => (p.name || '').startsWith('[Task]')) };
 
     const safeExcludePrefixes = ['[Feature]', '[Story]', '[Task]', '[Agent]', '[Integration]', '[Division]', '[Monday]', '[Jira'];
     const safeExcludeIdPrefixes = ['feature-', 'story-', 'task-', 'agent-', 'source-', 'div-', 'monday-', 'story-test-', 'test-div-'];
@@ -597,6 +600,16 @@ router.get('/agent/:agentType', (async (req, res) => {
 // SAFE WORK ITEMS (Features, Stories, Tasks)
 // ============================================================================
 
+// Helper: parse key-value pairs from description text
+function parseWorkItemDescription(desc: string): Record<string, string> {
+  const lines: Record<string, string> = {};
+  (desc || '').split('\n').forEach((line: string) => {
+    const match = line.match(/^(\w[\w\s]*?):\s*(.+)$/);
+    if (match) lines[match[1].trim().toLowerCase()] = match[2].trim();
+  });
+  return lines;
+}
+
 router.get('/features', (async (req, res) => {
   try {
     const palantir = getPalantirOrFail(res);
@@ -604,25 +617,30 @@ router.get('/features', (async (req, res) => {
 
     const { projectId, status } = req.query;
 
-    const result = await palantir.listObjects('AtlasFeature', {
+    const result = await palantir.listObjects('AtlasProject', {
       pageSize: 500,
       ontologyRid: ONTOLOGY_RID,
     });
 
-    let featureList = (result.data || []).map((f: any) => ({
-      id: f.featureId || f.__primaryKey,
-      name: f.name || '',
-      description: f.description || '',
-      status: f.status || 'Backlog',
-      projectId: f.projectId || '',
-      storyPoints: f.storyPoints || 0,
-      completedPoints: f.completedPoints || 0,
-      priority: f.priority || 'Medium',
-      targetPi: f.targetPi || '',
-      wsjfScore: f.wsjfScore || 0,
-      owner: f.owner || '',
-      progress: f.storyPoints > 0 ? Math.round((f.completedPoints / f.storyPoints) * 100) : 0,
-    }));
+    let featureList = (result.data || [])
+      .filter((f: any) => (f.name || '').startsWith('[Feature]'))
+      .map((f: any) => {
+        const desc = parseWorkItemDescription(f.description || '');
+        return {
+          id: f.__primaryKey || f.projectId,
+          name: (f.name || '').replace('[Feature] ', ''),
+          description: (f.description || '').split('\n\n')[0] || '',
+          status: f.status || desc['status'] || 'Backlog',
+          projectId: f.transformationId || '',
+          storyPoints: parseInt(desc['points'] || desc['story points'] || '0') || 0,
+          completedPoints: 0,
+          priority: f.priority || desc['priority'] || 'Medium',
+          targetPi: desc['pi'] || '',
+          wsjfScore: parseInt(desc['wsjf'] || '0') || 0,
+          owner: desc['owner'] || '',
+          progress: (f.milestoneProgress || 0) * 100,
+        };
+      });
 
     if (projectId) {
       const projectIdLower = (projectId as string).toLowerCase();
@@ -649,24 +667,29 @@ router.get('/stories', (async (req, res) => {
 
     const { featureId, projectId, status } = req.query;
 
-    const result = await palantir.listObjects('AtlasStory', {
+    const result = await palantir.listObjects('AtlasProject', {
       pageSize: 500,
       ontologyRid: ONTOLOGY_RID,
     });
 
-    let stories = (result.data || []).map((s: any) => ({
-      id: s.storyId || s.__primaryKey,
-      name: s.name || '',
-      description: s.description || '',
-      status: s.status || 'Backlog',
-      featureId: s.featureId || '',
-      projectId: s.projectId || '',
-      storyPoints: s.storyPoints || 0,
-      priority: s.priority || 'Medium',
-      assignee: s.assignee || '',
-      sprint: s.sprint || '',
-      teamId: s.teamId || '',
-    }));
+    let stories = (result.data || [])
+      .filter((s: any) => (s.name || '').startsWith('[Story]'))
+      .map((s: any) => {
+        const desc = parseWorkItemDescription(s.description || '');
+        return {
+          id: s.__primaryKey || s.projectId,
+          name: (s.name || '').replace('[Story] ', ''),
+          description: (s.description || '').split('\n\n')[0] || '',
+          status: s.status || desc['status'] || 'Backlog',
+          featureId: desc['feature'] || '',
+          projectId: s.transformationId || '',
+          storyPoints: parseInt(desc['points'] || desc['story points'] || '0') || 0,
+          priority: s.priority || desc['priority'] || 'Medium',
+          assignee: desc['assignee'] || desc['team'] || '',
+          sprint: desc['sprint'] || '',
+          teamId: desc['team'] || '',
+        };
+      });
 
     if (featureId) {
       const featureIdLower = (featureId as string).toLowerCase();
@@ -697,29 +720,34 @@ router.get('/tasks', (async (req, res) => {
 
     const { storyId, projectId, status, assignee } = req.query;
 
-    const result = await palantir.listObjects('AtlasTask', {
+    const result = await palantir.listObjects('AtlasProject', {
       pageSize: 500,
       ontologyRid: ONTOLOGY_RID,
     });
 
-    let tasks = (result.data || []).map((t: any) => ({
-      id: t.taskId || t.__primaryKey,
-      name: t.name || '',
-      description: t.description || '',
-      status: t.status || 'To Do',
-      storyId: t.storyId || '',
-      featureId: t.featureId || '',
-      projectId: t.projectId || '',
-      estimatedHours: t.estimatedHours || 0,
-      actualHours: t.actualHours || 0,
-      remainingHours: t.remainingHours || 0,
-      taskType: t.taskType || '',
-      priority: t.priority || 'Medium',
-      assignee: t.assignee || '',
-      sprint: t.sprint || '',
-      teamId: t.teamId || '',
-      dueDate: t.completedDate || '',
-    }));
+    let tasks = (result.data || [])
+      .filter((t: any) => (t.name || '').startsWith('[Task]'))
+      .map((t: any) => {
+        const desc = parseWorkItemDescription(t.description || '');
+        return {
+          id: t.__primaryKey || t.projectId,
+          name: (t.name || '').replace('[Task] ', ''),
+          description: (t.description || '').split('\n\n')[0] || '',
+          status: t.status || desc['status'] || 'To Do',
+          storyId: desc['story'] || '',
+          featureId: desc['feature'] || '',
+          projectId: t.transformationId || '',
+          estimatedHours: parseFloat(desc['effort']?.replace('h', '') || '0') || 0,
+          actualHours: 0,
+          remainingHours: 0,
+          taskType: desc['skills'] || '',
+          priority: t.priority || desc['priority'] || 'Medium',
+          assignee: desc['assignee'] || '',
+          sprint: desc['sprint'] || '',
+          teamId: desc['team'] || '',
+          dueDate: '',
+        };
+      });
 
     if (storyId) {
       const storyIdLower = (storyId as string).toLowerCase();
@@ -808,65 +836,117 @@ router.get('/project360/:projectId', (async (req, res) => {
     const { projectId } = req.params;
     const projectIdLower = projectId.toLowerCase();
 
-    // Fetch project and all related data from proper object types
-    const [project, budgetsResult, risksResult, dependenciesResult, featuresResult, storiesResult, tasksResult] = await Promise.all([
+    // Fetch project and all related data
+    // NOTE: AtlasFeature/AtlasStory/AtlasTask don't exist as separate object types in Palantir.
+    // Work items are stored as AtlasProject objects with name prefixes [Feature], [Story], [Task]
+    // and linked to parent projects via transformationId.
+    const [project, allProjectObjects, budgetsResult, risksResult, dependenciesResult] = await Promise.all([
       palantir.getObject('AtlasProject', projectId, { ontologyRid: ONTOLOGY_RID }).catch(() => null),
+      palantir.listObjects('AtlasProject', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasBudget', { pageSize: 100, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasRisk', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
       palantir.listObjects('AtlasDependency', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
-      palantir.listObjects('AtlasFeature', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
-      palantir.listObjects('AtlasStory', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
-      palantir.listObjects('AtlasTask', { pageSize: 500, ontologyRid: ONTOLOGY_RID }).catch(() => ({ data: [] })),
     ]);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    // Filter features/stories/tasks for this project
-    const projectFeatures = (featuresResult.data || [])
-      .filter((f: any) => (f.projectId || '').toLowerCase() === projectIdLower)
-      .map((f: any) => ({
-        id: f.featureId || f.__primaryKey,
-        name: f.name || 'Untitled Feature',
-        description: f.description || '',
-        status: f.status || 'Backlog',
-        priority: f.priority || 'Medium',
-        storyPoints: f.storyPoints || 0,
-        completedPoints: f.completedPoints || 0,
-        owner: f.owner || '',
-        targetPi: f.targetPi || '',
-        progress: f.storyPoints > 0 ? Math.round((f.completedPoints / f.storyPoints) * 100) : 0,
-      }));
+    // Work items reference parent projects via transformationId using prj-XXX format.
+    // But projects may have different primary keys (PRJ-XXX). We need to find ALL
+    // project IDs (primary keys) that share the same name as this project,
+    // so we can match work items that reference any of those IDs.
+    const allObjects = allProjectObjects.data || [];
+    const projectName = (project.name || '').toLowerCase().trim();
+    const matchingProjectIds = new Set<string>();
+    matchingProjectIds.add((project.__primaryKey || '').toLowerCase());
+    matchingProjectIds.add((project.projectId || '').toLowerCase());
+    if (project.transformationId) matchingProjectIds.add(project.transformationId.toLowerCase());
 
-    const projectStories = (storiesResult.data || [])
-      .filter((s: any) => (s.projectId || '').toLowerCase() === projectIdLower)
-      .map((s: any) => ({
-        id: s.storyId || s.__primaryKey,
-        name: s.name || 'Untitled Story',
-        description: s.description || '',
-        status: s.status || 'Backlog',
-        storyPoints: s.storyPoints || 0,
-        priority: s.priority || 'Medium',
-        assignee: s.assignee || '',
-        sprint: s.sprint || '',
-        featureId: s.featureId || '',
-      }));
+    for (const obj of allObjects) {
+      const objName = (obj.name || '').toLowerCase().trim();
+      if (objName === projectName && !objName.startsWith('[')) {
+        matchingProjectIds.add((obj.__primaryKey || '').toLowerCase());
+        if (obj.projectId) matchingProjectIds.add(obj.projectId.toLowerCase());
+        if (obj.transformationId) matchingProjectIds.add(obj.transformationId.toLowerCase());
+      }
+    }
+    matchingProjectIds.delete('');
 
-    const projectTasks = (tasksResult.data || [])
-      .filter((t: any) => (t.projectId || '').toLowerCase() === projectIdLower)
-      .map((t: any) => ({
-        id: t.taskId || t.__primaryKey,
-        name: t.name || 'Untitled Task',
-        description: t.description || '',
-        status: t.status || 'To Do',
-        priority: t.priority || 'Medium',
-        assignee: t.assignee || '',
-        estimatedHours: t.estimatedHours || 0,
-        actualHours: t.actualHours || 0,
-        storyId: t.storyId || '',
-        taskType: t.taskType || '',
-      }));
+    const parseDescription = (desc: string) => {
+      const lines: Record<string, string> = {};
+      (desc || '').split('\n').forEach((line: string) => {
+        const match = line.match(/^(\w[\w\s]*?):\s*(.+)$/);
+        if (match) lines[match[1].trim().toLowerCase()] = match[2].trim();
+      });
+      return lines;
+    };
+
+    const projectFeatures = allObjects
+      .filter((f: any) => {
+        const name = f.name || '';
+        const tid = (f.transformationId || '').toLowerCase();
+        return name.startsWith('[Feature]') && matchingProjectIds.has(tid);
+      })
+      .map((f: any) => {
+        const desc = parseDescription(f.description || '');
+        return {
+          id: f.__primaryKey || f.projectId,
+          name: (f.name || '').replace('[Feature] ', ''),
+          description: (f.description || '').split('\n\n')[0] || '',
+          status: f.status || desc['status'] || 'Backlog',
+          priority: f.priority || desc['priority'] || 'Medium',
+          storyPoints: parseInt(desc['points'] || desc['story points'] || '0') || 0,
+          completedPoints: 0,
+          owner: desc['owner'] || '',
+          targetPi: desc['pi'] || '',
+          wsjf: parseInt(desc['wsjf'] || '0') || 0,
+          progress: (f.milestoneProgress || 0) * 100,
+        };
+      });
+
+    const projectStories = allObjects
+      .filter((s: any) => {
+        const name = s.name || '';
+        const tid = (s.transformationId || '').toLowerCase();
+        return name.startsWith('[Story]') && matchingProjectIds.has(tid);
+      })
+      .map((s: any) => {
+        const desc = parseDescription(s.description || '');
+        return {
+          id: s.__primaryKey || s.projectId,
+          name: (s.name || '').replace('[Story] ', ''),
+          description: (s.description || '').split('\n\n')[0] || '',
+          status: s.status || desc['status'] || 'Backlog',
+          storyPoints: parseInt(desc['points'] || desc['story points'] || '0') || 0,
+          priority: s.priority || desc['priority'] || 'Medium',
+          assignee: desc['assignee'] || desc['team'] || '',
+          sprint: desc['sprint'] || '',
+          featureId: desc['feature'] || '',
+        };
+      });
+
+    const projectTasks = allObjects
+      .filter((t: any) => {
+        const name = t.name || '';
+        const tid = (t.transformationId || '').toLowerCase();
+        return name.startsWith('[Task]') && matchingProjectIds.has(tid);
+      })
+      .map((t: any) => {
+        const desc = parseDescription(t.description || '');
+        return {
+          id: t.__primaryKey || t.projectId,
+          name: (t.name || '').replace('[Task] ', ''),
+          description: (t.description || '').split('\n\n')[0] || '',
+          status: t.status || desc['status'] || 'To Do',
+          priority: t.priority || desc['priority'] || 'Medium',
+          assignee: desc['assignee'] || '',
+          estimatedHours: parseFloat(desc['effort']?.replace('h', '') || '0') || 0,
+          actualHours: 0,
+          storyId: desc['story'] || '',
+          taskType: desc['skills'] || '',
+        };
+      });
 
     const budget = (budgetsResult.data || []).find((b: any) => (b.budgetId || b.__primaryKey) === project.budgetId);
     const budgetTotal = budget ? (budget.totalAmount || 0) : 0;
@@ -874,11 +954,11 @@ router.get('/project360/:projectId', (async (req, res) => {
     const progress = (project.milestoneProgress || 0) * 100;
 
     const projectRisks = (risksResult.data || []).filter((r: any) =>
-      (r.projectId || '').toLowerCase() === projectIdLower
+      matchingProjectIds.has((r.projectId || '').toLowerCase())
     );
     const projectDeps = (dependenciesResult.data || []).filter((d: any) =>
-      (d.sourceProjectId || '').toLowerCase() === projectIdLower ||
-      (d.targetProjectId || '').toLowerCase() === projectIdLower
+      matchingProjectIds.has((d.sourceProjectId || '').toLowerCase()) ||
+      matchingProjectIds.has((d.targetProjectId || '').toLowerCase())
     );
 
     res.json({
