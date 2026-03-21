@@ -34,10 +34,11 @@ Preferred communication style: Simple, everyday language.
 ### Multi-Agent System (11 Agents)
 - **Domain Agents (10)**: FinOps, TMO, Risk, Governance, VRO, PMO, OCM, Planning, Integrated, OKR Inference
 - **Notification Agent (11th)**: Single A2A gateway for HITL approvals, escalations, alerts, and all external notifications to Palantir
-- **Orchestration**: ContinuousOrchestrator runs 24/7 (600s interval) with:
+- **Orchestration**: Single master ContinuousOrchestrator (created by DeepAgentBootstrap, shared by AgentScheduler) runs 24/7 (600s interval) with:
   - A2A message bus for inter-agent collaboration
   - Model Context Protocol (MCP) with 4 active services (Palantir, Jira, OpenProject, Monday.com)
-  - Palantir-native scan flow: `enrichAgentContext()` → `runHeuristics()` → `broadcastFact()` — zero LLM calls
+  - Palantir-native scan flow: pre-fetch once per cycle → `runHeuristics()` → `broadcastFact()` — zero LLM calls
+  - **CRITICAL**: Only one orchestrator instance — DeepAgentBootstrap owns it, AgentScheduler references it via `(global).__deepAgentBootstrap`
 - **Agent Memory**: Mem0 shared fact ledger with semantic search; PalantirMemoryBridge syncs facts
 - **Agent Subscriptions**: PMO subscribes to 5 fact patterns; Notification subscribes to 10 fact patterns (alerts, approvals, HITL requests)
 

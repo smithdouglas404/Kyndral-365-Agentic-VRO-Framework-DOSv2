@@ -36,3 +36,5 @@ async function main() {
   console.log(JSON.stringify(actionData, null, 2));
 }
 main().catch(console.error);
+
+export {};

@@ -92,12 +92,16 @@ export class AgentScheduler {
   private async initialize(): Promise<void> {
     if (this.agentsInitialized) return;
 
-    // Load agents from database
     await this.initializeAgentsFromDatabase();
 
-    // Initialize continuous orchestrator with loaded agents
-    this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
-    console.log('[AgentScheduler] Continuous orchestrator initialized with A2A and MCP protocols');
+    const bootstrap = (global as any).__deepAgentBootstrap;
+    if (bootstrap?.getOrchestrator?.()) {
+      this.orchestrator = bootstrap.getOrchestrator();
+      console.log('[AgentScheduler] Using master orchestrator from DeepAgentBootstrap (single instance)');
+    } else {
+      this.orchestrator = new ContinuousOrchestrator(this.storage, this.agents);
+      console.log('[AgentScheduler] Created fallback orchestrator (bootstrap not available)');
+    }
 
     this.agentsInitialized = true;
   }
