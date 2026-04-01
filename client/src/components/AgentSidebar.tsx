@@ -3,7 +3,8 @@ import {
   Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight,
   BarChart3, Building2, Briefcase, PieChart, Upload, Bot,
-  Settings, Network, Zap, Layers, GitBranch, Route, Scale, TrendingUp
+  Settings, Network, Zap, Layers, GitBranch, Route, Scale, TrendingUp,
+  Heart, DollarSign
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -108,6 +109,13 @@ const dashboardNavItems = [
   { id: "value-stream-dashboard", label: "Value Stream", icon: GitBranch, href: "/dashboard/value-stream" },
   { id: "prediction-dashboard", label: "Prediction Hub", icon: Zap, href: "/dashboard/predictions" },
   { id: "predictive-analytics", label: "Predictive Analytics", icon: TrendingUp, href: "/dashboard/predictive-analytics" },
+  { id: "resource-optimization", label: "Resource Optimization", icon: Users, href: "/dashboard/resource-optimization" },
+  { id: "impact-simulator", label: "Impact Simulator", icon: Zap, href: "/dashboard/impact-simulator" },
+  { id: "agent-performance", label: "Agent Performance", icon: Bot, href: "/dashboard/agent-performance" },
+  { id: "compliance-audit", label: "Compliance & Audit", icon: Shield, href: "/dashboard/compliance-audit" },
+  { id: "stakeholder-sentiment", label: "Stakeholder Sentiment", icon: Heart, href: "/dashboard/stakeholder-sentiment" },
+  { id: "portfolio-investment", label: "Investment Rebalancing", icon: DollarSign, href: "/dashboard/portfolio-investment" },
+  { id: "dependency-health", label: "Dependency Health", icon: Network, href: "/dashboard/dependency-health" },
   { id: "dependency-dashboard", label: "Dependency Map", icon: Network, href: "/dashboard/dependencies" },
   { id: "decision-dashboard", label: "Decision Board", icon: Settings, href: "/dashboard/decisions" },
   { id: "mcp-dashboard", label: "MCP Management", icon: Network, href: "/dashboard/mcp" },

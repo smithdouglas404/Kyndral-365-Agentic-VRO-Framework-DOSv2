@@ -532,6 +532,24 @@ export async function registerRoutes(
   app.use('/api/trend-forecast', createTrendForecastRoutes(storage));
   console.log('[TrendForecast] Routes registered at /api/trend-forecast');
 
+  // Register new analytics module routes
+  const { createAgentROIRoutes } = await import('./routes/agent-roi.js');
+  app.use('/api/agent-roi', createAgentROIRoutes(storage));
+
+  const { createComplianceAuditRoutes } = await import('./routes/compliance-audit.js');
+  app.use('/api/compliance-audit', createComplianceAuditRoutes(storage));
+
+  const { createStakeholderSentimentRoutes } = await import('./routes/stakeholder-sentiment.js');
+  app.use('/api/stakeholder-sentiment', createStakeholderSentimentRoutes(storage));
+
+  const { createPortfolioInvestmentRoutes } = await import('./routes/portfolio-investment.js');
+  app.use('/api/portfolio-investment', createPortfolioInvestmentRoutes(storage));
+
+  const { createDependencyHealthRoutes } = await import('./routes/dependency-health.js');
+  app.use('/api/dependency-health', createDependencyHealthRoutes(storage));
+
+  console.log('[Analytics] 5 new module routes registered (agent-roi, compliance-audit, stakeholder-sentiment, portfolio-investment, dependency-health)');
+
   // Register Cross-Project Impact routes (THE KILLER FEATURE - cascade impact analysis)
   registerCrossProjectImpactRoutes(app, storage);
 

@@ -47,6 +47,13 @@ const ValueStreamDashboard = lazy(() => import("@/pages/ValueStreamDashboard"));
 const MCPDashboard = lazy(() => import("@/pages/MCPDashboard"));
 const PredictionHubDashboard = lazy(() => import("@/pages/PredictionHubDashboard"));
 const PredictiveAnalytics = lazy(() => import("@/pages/PredictiveAnalytics"));
+const ResourceOptimization = lazy(() => import("@/pages/ResourceOptimization"));
+const ChangeImpactSimulator = lazy(() => import("@/pages/ChangeImpactSimulator"));
+const AgentPerformance = lazy(() => import("@/pages/AgentPerformance"));
+const ComplianceAudit = lazy(() => import("@/pages/ComplianceAudit"));
+const StakeholderSentiment = lazy(() => import("@/pages/StakeholderSentiment"));
+const PortfolioInvestment = lazy(() => import("@/pages/PortfolioInvestment"));
+const DependencyHealth = lazy(() => import("@/pages/DependencyHealth"));
 const DependencyMapDashboard = lazy(() => import("@/pages/DependencyMapDashboard"));
 const DecisionBoardDashboard = lazy(() => import("@/pages/DecisionBoardDashboard"));
 const COPDashboard = lazy(() => import("@/pages/COPDashboard"));
@@ -170,6 +177,13 @@ function Router() {
         <Route path="/dashboard/mcp" component={MCPDashboard} />
         <Route path="/dashboard/predictions" component={PredictionHubDashboard} />
         <Route path="/dashboard/predictive-analytics" component={PredictiveAnalytics} />
+        <Route path="/dashboard/resource-optimization" component={ResourceOptimization} />
+        <Route path="/dashboard/impact-simulator" component={ChangeImpactSimulator} />
+        <Route path="/dashboard/agent-performance" component={AgentPerformance} />
+        <Route path="/dashboard/compliance-audit" component={ComplianceAudit} />
+        <Route path="/dashboard/stakeholder-sentiment" component={StakeholderSentiment} />
+        <Route path="/dashboard/portfolio-investment" component={PortfolioInvestment} />
+        <Route path="/dashboard/dependency-health" component={DependencyHealth} />
         <Route path="/dashboard/dependencies" component={DependencyMapDashboard} />
         <Route path="/dashboard/decisions" component={DecisionBoardDashboard} />
         <Route path="/cop" component={COPDashboard} />
