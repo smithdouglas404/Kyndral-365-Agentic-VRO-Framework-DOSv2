@@ -997,6 +997,314 @@ export const evaluateRulesTool = createTool({
 });
 
 /**
+ * PMO - SAFe Flow Metrics
+ */
+export const flowMetricsTool = createTool({
+  id: 'flow-metrics',
+  description: 'Analyze SAFe flow metrics — Distribution, Velocity, Time, Load, and Efficiency — with anomaly detection across ARTs and value streams',
+  inputSchema: z.object({
+    projectId: z.string().optional().describe('Project identifier'),
+    valueStream: z.string().optional().describe('Value stream (e.g. vs-digital-platform)'),
+    metric: z.enum(['distribution', 'velocity', 'time', 'load', 'efficiency', 'all']).optional(),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    flowEfficiency: z.number().optional(),
+    cycleTime: z.number().optional(),
+    throughput: z.number().optional(),
+    wipCount: z.number().optional(),
+    anomalies: z.array(z.string()).optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Analyze SAFe flow ${input.metric || 'all'} metrics${input.valueStream ? ` for value stream ${input.valueStream}` : ''}${input.projectId ? ` for project ${input.projectId}` : ''}`;
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', goal, { projectId: input.projectId, valueStream: input.valueStream, metric: input.metric });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), flowEfficiency: result?.flowEfficiency, cycleTime: result?.cycleTime, throughput: result?.throughput, wipCount: result?.wipCount, anomalies: result?.anomalies };
+  },
+});
+
+/**
+ * FinOps - Spend Analytics
+ */
+export const spendAnalyticsTool = createTool({
+  id: 'spend-analytics',
+  description: 'Analyze spend patterns across the portfolio — cost anomaly detection, vendor spend distribution, and spending trend analysis from AtlasFinancialRecord data',
+  inputSchema: z.object({
+    projectId: z.string().optional().describe('Project identifier (omit for portfolio-wide)'),
+    period: z.enum(['monthly', 'quarterly', 'ytd', 'all']).optional(),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    totalSpend: z.number().optional(),
+    anomalies: z.array(z.object({ description: z.string(), amount: z.number(), severity: z.string() })).optional(),
+    topCategories: z.array(z.object({ category: z.string(), amount: z.number() })).optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Analyze spend patterns${input.projectId ? ` for project ${input.projectId}` : ' across portfolio'} for ${input.period || 'current'} period`;
+    const result = await executeWithMemory('finops', 'DeepFinOpsAgent', goal, { projectId: input.projectId, period: input.period });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), totalSpend: result?.totalSpend, anomalies: result?.anomalies, topCategories: result?.topCategories };
+  },
+});
+
+/**
+ * FinOps - Budget Forecasting
+ */
+export const budgetForecastingTool = createTool({
+  id: 'budget-forecasting',
+  description: 'Generate budget forecasts based on current burn rate trends, historical patterns, and planned scope — flag projects likely to overrun before they do',
+  inputSchema: z.object({
+    projectId: z.string().optional().describe('Project identifier'),
+    forecastQuarters: z.number().optional().describe('Quarters to forecast'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    forecastedSpend: z.number().optional(),
+    overrunRisk: z.string().optional(),
+    confidenceLevel: z.number().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Forecast budget${input.projectId ? ` for project ${input.projectId}` : ' for portfolio'} over ${input.forecastQuarters || 2} quarters`;
+    const result = await executeWithMemory('finops', 'DeepFinOpsAgent', goal, { projectId: input.projectId, forecastQuarters: input.forecastQuarters });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), forecastedSpend: result?.forecastedSpend, overrunRisk: result?.overrunRisk, confidenceLevel: result?.confidenceLevel };
+  },
+});
+
+/**
+ * VRO - Investment Recommendations
+ */
+export const investmentRecommendationsTool = createTool({
+  id: 'investment-recommendations',
+  description: 'Generate investment portfolio recommendations — which projects to increase, maintain, reduce, or sunset based on ROI, NPV, and value realization trends',
+  inputSchema: z.object({
+    portfolioId: z.string().optional().describe('Portfolio or value stream'),
+    investmentThreshold: z.number().optional().describe('Minimum ROI threshold'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    recommendations: z.array(z.object({ projectId: z.string(), action: z.string(), rationale: z.string() })).optional(),
+    portfolioRoi: z.number().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Generate investment recommendations${input.portfolioId ? ` for ${input.portfolioId}` : ' across portfolio'}${input.investmentThreshold ? ` with ${input.investmentThreshold}% ROI threshold` : ''}`;
+    const result = await executeWithMemory('vro', 'DeepVROAgent', goal, { portfolioId: input.portfolioId, investmentThreshold: input.investmentThreshold });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), recommendations: result?.recommendations, portfolioRoi: result?.portfolioRoi };
+  },
+});
+
+/**
+ * Governance - Policy Validation
+ */
+export const policyValidationTool = createTool({
+  id: 'policy-validation',
+  description: 'Validate project actions against Policy-as-Code rules — check if proposed changes, approvals, or decisions comply with enterprise governance policies and SOPs',
+  inputSchema: z.object({
+    projectId: z.string().describe('Project identifier'),
+    action: z.string().describe('Proposed action to validate'),
+    policyDomain: z.enum(['budget', 'compliance', 'risk', 'change', 'procurement', 'all']).optional(),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    compliant: z.boolean().optional(),
+    violations: z.array(z.object({ policy: z.string(), violation: z.string(), severity: z.string() })).optional(),
+    requiredApprovals: z.array(z.string()).optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Validate action "${input.action}" for project ${input.projectId} against ${input.policyDomain || 'all'} policies`;
+    const result = await executeWithMemory('governance', 'DeepGovernanceAgent', goal, { projectId: input.projectId, action: input.action, policyDomain: input.policyDomain });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), compliant: result?.compliant, violations: result?.violations, requiredApprovals: result?.requiredApprovals };
+  },
+});
+
+/**
+ * Governance - Audit Trail Generation
+ */
+export const auditTrailTool = createTool({
+  id: 'audit-trail',
+  description: 'Generate audit trail report for a project or decision — all significant actions, approvals, agent interventions, and policy checks with timestamps',
+  inputSchema: z.object({
+    projectId: z.string().optional().describe('Project identifier'),
+    startDate: z.string().optional().describe('Start date for audit period'),
+    endDate: z.string().optional().describe('End date for audit period'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    auditEntries: z.array(z.object({ timestamp: z.string(), action: z.string(), actor: z.string(), outcome: z.string() })).optional(),
+    totalEntries: z.number().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Generate audit trail${input.projectId ? ` for project ${input.projectId}` : ' for portfolio'}${input.startDate ? ` from ${input.startDate}` : ''}${input.endDate ? ` to ${input.endDate}` : ''}`;
+    const result = await executeWithMemory('governance', 'DeepGovernanceAgent', goal, { projectId: input.projectId, startDate: input.startDate, endDate: input.endDate });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), auditEntries: result?.auditEntries, totalEntries: result?.totalEntries };
+  },
+});
+
+/**
+ * TMO - Adoption Curve Tracking
+ */
+export const adoptionCurveTool = createTool({
+  id: 'adoption-curve-tracking',
+  description: 'Track adoption curves against targets for transformation initiatives — correlate initiative progress with business outcome metrics and flag transformation fatigue',
+  inputSchema: z.object({
+    projectId: z.string().describe('Project identifier'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    adoptionRate: z.number().optional(),
+    targetRate: z.number().optional(),
+    fatigueDetected: z.boolean().optional(),
+    velocityTrend: z.string().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Track adoption curve and detect transformation fatigue for project ${input.projectId}`;
+    const result = await executeWithMemory('tmo', 'DeepTMOAgent', goal, { projectId: input.projectId });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), adoptionRate: result?.adoptionRate, targetRate: result?.targetRate, fatigueDetected: result?.fatigueDetected, velocityTrend: result?.velocityTrend };
+  },
+});
+
+/**
+ * OKR - Orphaned Project Detection
+ */
+export const orphanedProjectDetectionTool = createTool({
+  id: 'orphaned-project-detection',
+  description: 'Detect orphaned projects — work not linked to any strategic objective or OKR — and alignment drift where key results have degraded over quarters',
+  inputSchema: z.object({
+    includeAlignment: z.boolean().optional().describe('Include alignment scoring'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    orphanedProjects: z.array(z.object({ projectId: z.string(), name: z.string(), reason: z.string() })).optional(),
+    alignmentDrift: z.array(z.object({ okrId: z.string(), q1Score: z.number(), currentScore: z.number() })).optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Detect orphaned projects and OKR alignment drift${input.includeAlignment ? ' with full alignment scoring' : ''}`;
+    const result = await executeWithMemory('vro', 'DeepVROAgent', goal, { includeAlignment: input.includeAlignment });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), orphanedProjects: result?.orphanedProjects, alignmentDrift: result?.alignmentDrift };
+  },
+});
+
+/**
+ * Integrated - Executive Insight Synthesis
+ */
+export const executiveInsightTool = createTool({
+  id: 'executive-insight-synthesis',
+  description: 'Generate executive leadership briefing — cross-agent pattern correlation across financial, operational, compliance, and change management domains with quantified impacts and prioritized recommendations',
+  inputSchema: z.object({
+    focus: z.enum(['strategic', 'financial', 'risk', 'delivery', 'comprehensive']).optional(),
+    division: z.string().optional().describe('Specific division to focus on'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    keyFindings: z.array(z.string()).optional(),
+    recommendations: z.array(z.object({ action: z.string(), impact: z.string(), priority: z.string() })).optional(),
+    riskSummary: z.string().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Generate ${input.focus || 'comprehensive'} executive insight briefing${input.division ? ` for ${input.division}` : ''}`;
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', goal, { focus: input.focus, division: input.division });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), keyFindings: result?.keyFindings, recommendations: result?.recommendations, riskSummary: result?.riskSummary };
+  },
+});
+
+/**
+ * Integrated - What-If Simulation
+ */
+export const whatIfSimulationTool = createTool({
+  id: 'what-if-simulation',
+  description: 'Run what-if simulation — modify portfolio variables (budgets, timelines, resources, scope) and preview how changes propagate across the portfolio before committing',
+  inputSchema: z.object({
+    scenarioName: z.string().describe('Name for this simulation scenario'),
+    changes: z.array(z.object({
+      projectId: z.string(),
+      variable: z.string(),
+      currentValue: z.string(),
+      newValue: z.string(),
+    })).describe('Variable changes to simulate'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    impactSummary: z.string().optional(),
+    affectedProjects: z.array(z.object({ projectId: z.string(), impact: z.string() })).optional(),
+    recommendation: z.string().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Run what-if simulation "${input.scenarioName}" with ${input.changes.length} variable changes`;
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', goal, { scenarioName: input.scenarioName, changes: input.changes });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), impactSummary: result?.impactSummary, affectedProjects: result?.affectedProjects, recommendation: result?.recommendation };
+  },
+});
+
+/**
+ * Integrated - Write-Back to Source Systems
+ */
+export const writeBackTool = createTool({
+  id: 'write-back',
+  description: 'Push governed changes back to source PPM systems (Jira, OpenProject, Monday.com) — closes the loop between AI analysis and operational action via MCP write-back API',
+  inputSchema: z.object({
+    targetSystem: z.enum(['jira', 'openproject', 'monday', 'confluence']).describe('Target system'),
+    entityType: z.enum(['project', 'epic', 'insight', 'risk', 'task']).describe('Entity type'),
+    action: z.enum(['create', 'update', 'comment']).describe('Action to perform'),
+    projectId: z.string().describe('Source project identifier'),
+    payload: z.record(z.any()).describe('Data payload for the write-back'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    success: z.boolean().optional(),
+    externalId: z.string().optional(),
+    targetUrl: z.string().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Write-back ${input.action} ${input.entityType} to ${input.targetSystem} for project ${input.projectId}`;
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', goal, { targetSystem: input.targetSystem, entityType: input.entityType, action: input.action, projectId: input.projectId, payload: input.payload });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), success: result?.success, externalId: result?.externalId, targetUrl: result?.targetUrl };
+  },
+});
+
+/**
+ * Notification - Cascade Workflow
+ */
+export const cascadeWorkflowTool = createTool({
+  id: 'cascade-workflow',
+  description: 'Trigger a pre-defined multi-agent cascade workflow — e.g. Budget Reduction Cascade sequences through FinOps → VRO → TMO → Planning → Governance automatically',
+  inputSchema: z.object({
+    cascadeType: z.enum(['budget-reduction', 'risk-escalation', 'compliance-breach', 'schedule-slip', 'go-live-readiness']).describe('Type of cascade to trigger'),
+    projectId: z.string().describe('Project that triggered the cascade'),
+    trigger: z.string().describe('What triggered this cascade'),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    cascadeId: z.string().optional(),
+    agentsInvolved: z.array(z.string()).optional(),
+    status: z.string().optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Trigger ${input.cascadeType} cascade for project ${input.projectId}: ${input.trigger}`;
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', goal, { cascadeType: input.cascadeType, projectId: input.projectId, trigger: input.trigger });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), cascadeId: result?.cascadeId, agentsInvolved: result?.agentsInvolved, status: result?.status };
+  },
+});
+
+/**
+ * Notification - Priority Routing & Deduplication
+ */
+export const notificationRoutingTool = createTool({
+  id: 'notification-routing',
+  description: 'Deduplicate overlapping agent findings, prioritize by severity and organizational impact, and route notifications to appropriate stakeholders via email, Slack, Teams, or in-app',
+  inputSchema: z.object({
+    findings: z.array(z.object({ agentId: z.string(), finding: z.string(), severity: z.string() })).describe('Agent findings to process'),
+    channel: z.enum(['email', 'slack', 'teams', 'in-app', 'auto']).optional(),
+  }),
+  outputSchema: z.object({
+    analysis: z.string(),
+    deduplicatedCount: z.number().optional(),
+    routedNotifications: z.array(z.object({ recipient: z.string(), channel: z.string(), priority: z.string() })).optional(),
+  }),
+  execute: async (input) => {
+    const goal = `Process and route ${input.findings.length} agent findings via ${input.channel || 'auto'} channel`;
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', goal, { findings: input.findings, channel: input.channel });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), deduplicatedCount: result?.deduplicatedCount, routedNotifications: result?.routedNotifications };
+  },
+});
+
+/**
  * Export all tools grouped by agent
  */
 export const pmoTools = {
@@ -1005,6 +1313,7 @@ export const pmoTools = {
   resourceCapacityTool,
   safePiPlanningTool,
   milestoneTrackingTool,
+  flowMetricsTool,
 };
 
 export const finopsTools = {
@@ -1013,6 +1322,8 @@ export const finopsTools = {
   burnRateForecastTool,
   costOptimizationTool,
   earnedValueTool,
+  spendAnalyticsTool,
+  budgetForecastingTool,
 };
 
 export const riskTools = {
@@ -1027,6 +1338,7 @@ export const vroTools = {
   analyzeOkrAlignmentTool,
   benefitsRealizationTool,
   valueStreamMappingTool,
+  investmentRecommendationsTool,
 };
 
 export const governanceTools = {
@@ -1034,6 +1346,8 @@ export const governanceTools = {
   gateReviewTool,
   auditPreparationTool,
   evaluateRulesTool,
+  policyValidationTool,
+  auditTrailTool,
 };
 
 export const ocmTools = {
@@ -1046,6 +1360,7 @@ export const tmoTools = {
   transitionReadinessTool,
   cutoverPlanningTool,
   hypercareTool,
+  adoptionCurveTool,
 };
 
 export const planningTools = {
@@ -1058,27 +1373,19 @@ export const planningTools = {
 export const integratedTools = {
   portfolioHealthTool,
   crossProjectImpactTool,
+  executiveInsightTool,
+  whatIfSimulationTool,
+  writeBackTool,
 };
 
 export const okrTools = {
   okrGapDetectionTool,
   kpiTrendTool,
+  orphanedProjectDetectionTool,
 };
 
 export const notificationTools = {
   hitlApprovalTool,
-};
-
-export const allTools = {
-  ...pmoTools,
-  ...finopsTools,
-  ...riskTools,
-  ...vroTools,
-  ...governanceTools,
-  ...ocmTools,
-  ...tmoTools,
-  ...planningTools,
-  ...integratedTools,
-  ...okrTools,
-  ...notificationTools,
+  cascadeWorkflowTool,
+  notificationRoutingTool,
 };

@@ -31,9 +31,11 @@ Preferred communication style: Simple, everyday language.
 - **Process Management**: PM2 for production
 - **AI Kill Switch**: `ENABLE_AI_AGENTS=false` in .env blocks all LLM calls; orchestrator runs in Palantir-native heuristic-only mode
 
-### Multi-Agent System (11 Agents)
+### Multi-Agent System (11 Agents, 61 MCP Tools)
 - **Domain Agents (10)**: FinOps, TMO, Risk, Governance, VRO, PMO, OCM, Planning, Integrated, OKR Inference
-- **Notification Agent (11th)**: Single A2A gateway for HITL approvals, escalations, alerts, and all external notifications to Palantir
+- **Notification Agent (11th)**: Single A2A gateway for HITL approvals, cascade workflows, and notification routing
+- **MCP Tool Counts**: PMO(6), FinOps(7), Risk(4), OCM(3), TMO(4), VRO(5), Governance(6), Planning(4), Integrated(5), OKR(3), Notification(3) = 50 skills + 11 agent tools = 61 MCP tools
+- **Key Skills Added**: Flow Metrics, Spend Analytics, Budget Forecasting, Investment Recommendations, Policy Validation, Audit Trail, Adoption Curve Tracking, Orphaned Project Detection, Executive Insight Synthesis, What-If Simulation, Write-Back to Source Systems, Cascade Workflow, Notification Routing
 - **Orchestration**: Single master ContinuousOrchestrator (created by DeepAgentBootstrap, shared by AgentScheduler) runs 24/7 (600s interval) with:
   - A2A message bus for inter-agent collaboration
   - Model Context Protocol (MCP) with 4 active services (Palantir, Jira, OpenProject, Monday.com)

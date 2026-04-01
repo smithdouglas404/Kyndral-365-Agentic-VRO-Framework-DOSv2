@@ -76,6 +76,19 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
         required: ['projectId'],
       },
     },
+    {
+      id: 'flow-metrics',
+      name: 'SAFe Flow Metrics',
+      description: 'Analyze SAFe flow metrics — Distribution, Velocity, Time, Load, and Efficiency — with anomaly detection across ARTs and value streams',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+          valueStream: { type: 'string' },
+          metric: { type: 'string', enum: ['distribution', 'velocity', 'time', 'load', 'efficiency', 'all'] },
+        },
+      },
+    },
   ],
   finops: [
     {
@@ -109,6 +122,30 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
       id: 'earned-value-analysis',
       name: 'Earned Value Analysis',
       description: 'Calculate earned value metrics (CPI, SPI, EV, PV, AC) for cost and schedule performance',
+    },
+    {
+      id: 'spend-analytics',
+      name: 'Spend Analytics',
+      description: 'Analyze spend patterns across the portfolio — cost anomaly detection, vendor spend distribution, and spending trend analysis from AtlasFinancialRecord data',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+          period: { type: 'string', enum: ['monthly', 'quarterly', 'ytd', 'all'] },
+        },
+      },
+    },
+    {
+      id: 'budget-forecasting',
+      name: 'Budget Forecasting',
+      description: 'Generate budget forecasts based on current burn rate trends, historical patterns, and planned scope — flag projects likely to overrun before they do',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+          forecastQuarters: { type: 'number' },
+        },
+      },
     },
   ],
   risk: [
@@ -187,6 +224,18 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
       name: 'Hypercare Assessment',
       description: 'Plan and assess hypercare support requirements',
     },
+    {
+      id: 'adoption-curve-tracking',
+      name: 'Adoption Curve Tracking',
+      description: 'Track adoption curves against targets — correlate initiative progress with business outcome metrics and flag transformation fatigue',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+        },
+        required: ['projectId'],
+      },
+    },
   ],
   vro: [
     {
@@ -216,6 +265,18 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
       name: 'Value Stream Mapping',
       description: 'Map value streams across the portfolio — identify bottlenecks, waste, and flow efficiency',
     },
+    {
+      id: 'investment-recommendations',
+      name: 'Investment Recommendations',
+      description: 'Generate investment portfolio recommendations — which projects to increase, maintain, reduce, or sunset based on ROI, NPV, and value realization trends',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          portfolioId: { type: 'string' },
+          investmentThreshold: { type: 'number' },
+        },
+      },
+    },
   ],
   governance: [
     {
@@ -244,6 +305,33 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
       id: 'evaluate-enterprise-rules',
       name: 'Enterprise Rules Evaluation',
       description: 'Evaluate all 16 Rulebricks enterprise rules against a project and trigger Palantir Actions on breach',
+    },
+    {
+      id: 'policy-validation',
+      name: 'Policy Validation',
+      description: 'Validate project actions against Policy-as-Code rules — check if proposed changes comply with enterprise governance policies and SOPs',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+          action: { type: 'string' },
+          policyDomain: { type: 'string', enum: ['budget', 'compliance', 'risk', 'change', 'procurement', 'all'] },
+        },
+        required: ['projectId', 'action'],
+      },
+    },
+    {
+      id: 'audit-trail',
+      name: 'Audit Trail Generation',
+      description: 'Generate audit trail report — all significant actions, approvals, agent interventions, and policy checks with timestamps',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          projectId: { type: 'string' },
+          startDate: { type: 'string' },
+          endDate: { type: 'string' },
+        },
+      },
     },
   ],
   planning: [
@@ -300,6 +388,47 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
         required: ['projectId', 'changeType'],
       },
     },
+    {
+      id: 'executive-insight-synthesis',
+      name: 'Executive Insight Synthesis',
+      description: 'Generate executive leadership briefing — cross-agent pattern correlation across financial, operational, compliance, and change management with quantified impacts',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          focus: { type: 'string', enum: ['strategic', 'financial', 'risk', 'delivery', 'comprehensive'] },
+          division: { type: 'string' },
+        },
+      },
+    },
+    {
+      id: 'what-if-simulation',
+      name: 'What-If Simulation',
+      description: 'Run what-if simulation — modify portfolio variables (budgets, timelines, resources, scope) and preview how changes propagate across the portfolio',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          scenarioName: { type: 'string' },
+          changes: { type: 'array', items: { type: 'object', properties: { projectId: { type: 'string' }, variable: { type: 'string' }, currentValue: { type: 'string' }, newValue: { type: 'string' } } } },
+        },
+        required: ['scenarioName', 'changes'],
+      },
+    },
+    {
+      id: 'write-back',
+      name: 'Write-Back to Source Systems',
+      description: 'Push governed changes back to source PPM systems (Jira, OpenProject, Monday.com, Confluence) via MCP write-back API',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          targetSystem: { type: 'string', enum: ['jira', 'openproject', 'monday', 'confluence'] },
+          entityType: { type: 'string', enum: ['project', 'epic', 'insight', 'risk', 'task'] },
+          action: { type: 'string', enum: ['create', 'update', 'comment'] },
+          projectId: { type: 'string' },
+          payload: { type: 'object' },
+        },
+        required: ['targetSystem', 'entityType', 'action', 'projectId'],
+      },
+    },
   ],
   okr: [
     {
@@ -319,6 +448,11 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
         },
       },
     },
+    {
+      id: 'orphaned-project-detection',
+      name: 'Orphaned Project Detection',
+      description: 'Detect orphaned projects — work not linked to any strategic objective or OKR — and alignment drift where key results have degraded over quarters',
+    },
   ],
   notification: [
     {
@@ -334,6 +468,33 @@ const AGENT_SKILLS: Record<AgentType, AgentSkill[]> = {
           urgency: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
         },
         required: ['requestType', 'projectId', 'description'],
+      },
+    },
+    {
+      id: 'cascade-workflow',
+      name: 'Cascade Workflow',
+      description: 'Trigger pre-defined multi-agent cascade workflow — e.g. Budget Reduction Cascade sequences through FinOps → VRO → TMO → Planning → Governance automatically',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          cascadeType: { type: 'string', enum: ['budget-reduction', 'risk-escalation', 'compliance-breach', 'schedule-slip', 'go-live-readiness'] },
+          projectId: { type: 'string' },
+          trigger: { type: 'string' },
+        },
+        required: ['cascadeType', 'projectId', 'trigger'],
+      },
+    },
+    {
+      id: 'notification-routing',
+      name: 'Notification Routing & Deduplication',
+      description: 'Deduplicate overlapping agent findings, prioritize by severity and organizational impact, route notifications to stakeholders via email, Slack, Teams, or in-app',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          findings: { type: 'array', items: { type: 'object', properties: { agentId: { type: 'string' }, finding: { type: 'string' }, severity: { type: 'string' } } } },
+          channel: { type: 'string', enum: ['email', 'slack', 'teams', 'in-app', 'auto'] },
+        },
+        required: ['findings'],
       },
     },
   ],
