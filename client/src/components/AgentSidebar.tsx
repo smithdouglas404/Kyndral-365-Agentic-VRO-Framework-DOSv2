@@ -3,7 +3,7 @@ import {
   Repeat, Calculator, Target, 
   Shield, Calendar, Users, Sparkles, ChevronRight,
   BarChart3, Building2, Briefcase, PieChart, Upload, Bot,
-  Settings, Network, Zap, Layers, GitBranch, Route, Scale
+  Settings, Network, Zap, Layers, GitBranch, Route, Scale, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAllAgentsSummary } from '@/hooks/useAgentData';
@@ -107,6 +107,7 @@ const dashboardNavItems = [
   { id: "art-dashboard", label: "ART Dashboard", icon: Route, href: "/dashboard/art" },
   { id: "value-stream-dashboard", label: "Value Stream", icon: GitBranch, href: "/dashboard/value-stream" },
   { id: "prediction-dashboard", label: "Prediction Hub", icon: Zap, href: "/dashboard/predictions" },
+  { id: "predictive-analytics", label: "Predictive Analytics", icon: TrendingUp, href: "/dashboard/predictive-analytics" },
   { id: "dependency-dashboard", label: "Dependency Map", icon: Network, href: "/dashboard/dependencies" },
   { id: "decision-dashboard", label: "Decision Board", icon: Settings, href: "/dashboard/decisions" },
   { id: "mcp-dashboard", label: "MCP Management", icon: Network, href: "/dashboard/mcp" },

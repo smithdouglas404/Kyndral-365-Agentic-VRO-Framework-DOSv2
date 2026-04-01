@@ -46,6 +46,7 @@ const ARTDashboard = lazy(() => import("@/pages/ARTDashboard"));
 const ValueStreamDashboard = lazy(() => import("@/pages/ValueStreamDashboard"));
 const MCPDashboard = lazy(() => import("@/pages/MCPDashboard"));
 const PredictionHubDashboard = lazy(() => import("@/pages/PredictionHubDashboard"));
+const PredictiveAnalytics = lazy(() => import("@/pages/PredictiveAnalytics"));
 const DependencyMapDashboard = lazy(() => import("@/pages/DependencyMapDashboard"));
 const DecisionBoardDashboard = lazy(() => import("@/pages/DecisionBoardDashboard"));
 const COPDashboard = lazy(() => import("@/pages/COPDashboard"));
@@ -168,6 +169,7 @@ function Router() {
         <Route path="/dashboard/value-stream" component={ValueStreamDashboard} />
         <Route path="/dashboard/mcp" component={MCPDashboard} />
         <Route path="/dashboard/predictions" component={PredictionHubDashboard} />
+        <Route path="/dashboard/predictive-analytics" component={PredictiveAnalytics} />
         <Route path="/dashboard/dependencies" component={DependencyMapDashboard} />
         <Route path="/dashboard/decisions" component={DecisionBoardDashboard} />
         <Route path="/cop" component={COPDashboard} />

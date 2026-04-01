@@ -107,6 +107,17 @@ Preferred communication style: Simple, everyday language.
 - Background orchestration independent of HTTP requests
 - OBDA (Ontology-Based Data Access) for SPARQL queries with virtual data federation
 
+### Trend Forecast Engine (Predictive Analytics Module)
+- **Engine**: `server/engines/TrendForecastEngine.ts` — linear regression + exponential smoothing with deterministic seeded series
+- **VRO Forecasting**: Portfolio value score, OKR attainment, benefits realization, strategic alignment trend lines
+- **PMO Forecasting**: Portfolio health, team velocity, budget variance, schedule performance (SPI) trend lines
+- **OKR Trajectory**: 4 strategic objectives with key results tracking and projected completion dates
+- **Benefits Forecast**: Realization rate by category (Cost Savings, Revenue Growth, Efficiency Gains, Risk Reduction)
+- **Capacity Forecast**: Monthly utilization projections with overallocation risk detection
+- **Proactive Insights**: Agent-attributed insights (risk, warning, opportunity, recommendation) with severity, confidence, and suggested actions
+- **API Routes**: `/api/trend-forecast/vro`, `/api/trend-forecast/pmo`, `/api/trend-forecast/combined`
+- **Dashboard**: `/dashboard/predictive-analytics` — 5-tab UI (Overview, VRO Trends, PMO Trends, OKR Trajectory, Insights) with sparkline visualizations
+
 ### Battle Rhythm
 - Weekly cadence orchestrator with scheduled ceremonies:
   - Scrum of Scrums, Cross-Functional Optimization, Decision Nodes, Value Pulse, Weekly Orders
@@ -163,6 +174,8 @@ Preferred communication style: Simple, everyday language.
 | `server/lib/SmartModelRouter.ts` | 3-tier AI model routing (heuristic/cheap/premium) |
 | `server/mcp/PalantirDataProvider.ts` | Palantir MCP data provider and ontology cache |
 | `server/lib/PalantirRulesService.ts` | Palantir Functions/Actions for rule evaluation |
+| `server/engines/TrendForecastEngine.ts` | VRO/PMO trend forecasting — linear regression + exponential smoothing |
+| `server/routes/trend-forecast.ts` | Trend forecast API routes (/vro, /pmo, /combined) |
 | `server/services/RulebricksService.ts` | Rulebricks external rules engine integration |
 | `server/services/EnterpriseRulesEngine.ts` | Unified rules pipeline (Rulebricks + Palantir Actions + thresholds) |
 | `server/routes/enterprise-rules.ts` | Enterprise rules API routes |

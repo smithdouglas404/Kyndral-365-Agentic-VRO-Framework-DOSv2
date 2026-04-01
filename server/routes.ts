@@ -527,6 +527,11 @@ export async function registerRoutes(
   // Register Predictive Analytics routes (for risk prediction and forecasting)
   registerPredictiveRoutes(app, storage);
 
+  // Register VRO/PMO Trend Forecast routes (proactive portfolio analytics)
+  const { createTrendForecastRoutes } = await import('./routes/trend-forecast.js');
+  app.use('/api/trend-forecast', createTrendForecastRoutes(storage));
+  console.log('[TrendForecast] Routes registered at /api/trend-forecast');
+
   // Register Cross-Project Impact routes (THE KILLER FEATURE - cascade impact analysis)
   registerCrossProjectImpactRoutes(app, storage);
 
