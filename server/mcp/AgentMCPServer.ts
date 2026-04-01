@@ -212,17 +212,19 @@ export class AgentMCPServer {
         }
       }
 
-      // Normalize agent ID
-      const normalizedAgentId = agentId.includes('-agent') ? agentId : `${agentId}-agent`;
+      // Normalize agent ID - registry uses short form (pmo, finops) as keys
+      const shortAgentId = agentId.replace('-agent', '');
+      const fullAgentId = agentId.includes('-agent') ? agentId : `${agentId}-agent`;
 
-      // Check if agent exists
-      const agent = registry.getAgent(agentId) || registry.getAgent(normalizedAgentId);
+      // Get agent - registry.getAgent now handles ID normalization
+      const agent = registry.getAgent(shortAgentId) || registry.getAgent(agentId);
+
       if (!agent) {
         return {
           content: [
             {
               type: 'text',
-              text: `Error: Agent not found: ${agentId}`,
+              text: `Error: Agent not found: ${agentId} (tried: ${shortAgentId}, ${agentId}, ${fullAgentId})`,
             },
           ],
           isError: true,

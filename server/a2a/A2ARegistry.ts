@@ -96,7 +96,31 @@ export class A2ARegistry {
    * Get agent registration by ID
    */
   getAgent(agentId: string): AgentRegistration | undefined {
-    return this.agents.get(agentId);
+    // Try direct key lookup first
+    let result = this.agents.get(agentId);
+
+    // If not found and ID ends with "-agent", try without the suffix
+    if (!result && agentId.endsWith('-agent')) {
+      const shortId = agentId.replace('-agent', '');
+      result = this.agents.get(shortId);
+    }
+
+    // If not found, try with "-agent" suffix
+    if (!result && !agentId.endsWith('-agent')) {
+      result = this.agents.get(`${agentId}-agent`);
+    }
+
+    // If still not found, search by agentCard.id
+    if (!result) {
+      for (const [, reg] of this.agents) {
+        if (reg.agentCard.id === agentId) {
+          result = reg;
+          break;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**

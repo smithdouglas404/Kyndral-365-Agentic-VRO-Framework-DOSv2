@@ -8,12 +8,56 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import type { IStorage } from '../storage.js';
+import { getMastraMemory, createToolContext } from './memory.js';
 
 // Storage reference - set during initialization
 let storageRef: IStorage | null = null;
 
 export function setToolStorage(storage: IStorage) {
   storageRef = storage;
+}
+
+/**
+ * Helper to execute a Deep Agent with memory context
+ */
+async function executeWithMemory(
+  agentType: string,
+  agentClass: string,
+  goal: string,
+  context: Record<string, any>
+): Promise<any> {
+  if (!storageRef) throw new Error('Storage not initialized');
+
+  // Get memory context
+  const entityId = context.projectId || context.initiativeId;
+  const { memory, contextPrompt } = await createToolContext(agentType, goal, entityId);
+
+  // Enrich goal with memory context
+  const enrichedGoal = contextPrompt
+    ? `${goal}\n\n--- Memory Context ---\n${contextPrompt}`
+    : goal;
+
+  // Execute Deep Agent
+  const module = await import(`../agents/deep/${agentClass}.js`);
+  const AgentClass = module[agentClass] || module.default;
+  const agent = new AgentClass(storageRef);
+
+  const result = await agent.run(enrichedGoal, context);
+
+  // Learn from the interaction
+  if (result) {
+    await memory.recordInteraction('agent', typeof result === 'string' ? result : JSON.stringify(result));
+
+    // Broadcast key findings as facts
+    if (entityId && result.healthScore !== undefined) {
+      await memory.broadcastFact(entityId, 'health_score', result.healthScore, 0.9);
+    }
+    if (entityId && result.riskLevel) {
+      await memory.broadcastFact(entityId, 'risk_level', result.riskLevel, 0.9);
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -32,12 +76,12 @@ export const analyzeProjectHealthTool = createTool({
     recommendations: z.array(z.string()).optional(),
   }),
   execute: async (input) => {
-    const { DeepPMOAgent } = await import('../agents/deep/DeepPMOAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Analyze project health for project ${input.projectId}${input.includeHistory ? ' including historical trends' : ''}`;
 
-    const agent = new DeepPMOAgent(storageRef);
-    const result = await agent.run(
-      `Analyze project health for project ${input.projectId}${input.includeHistory ? ' including historical trends' : ''}`,
+    const result = await executeWithMemory(
+      'pmo',
+      'DeepPMOAgent',
+      goal,
       { projectId: input.projectId }
     );
 
@@ -67,12 +111,12 @@ export const identifyDependenciesTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepPMOAgent } = await import('../agents/deep/DeepPMOAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Identify dependencies for project ${input.projectId}${input.depth ? ` to depth ${input.depth}` : ''}`;
 
-    const agent = new DeepPMOAgent(storageRef);
-    const result = await agent.run(
-      `Identify dependencies for project ${input.projectId}${input.depth ? ` to depth ${input.depth}` : ''}`,
+    const result = await executeWithMemory(
+      'pmo',
+      'DeepPMOAgent',
+      goal,
       { projectId: input.projectId }
     );
 
@@ -101,12 +145,12 @@ export const analyzeBudgetVarianceTool = createTool({
     recommendations: z.array(z.string()).optional(),
   }),
   execute: async (input) => {
-    const { DeepFinOpsAgent } = await import('../agents/deep/DeepFinOpsAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Analyze budget variance for project ${input.projectId} for ${input.period || 'current'} period`;
 
-    const agent = new DeepFinOpsAgent(storageRef);
-    const result = await agent.run(
-      `Analyze budget variance for project ${input.projectId} for ${input.period || 'current'} period`,
+    const result = await executeWithMemory(
+      'finops',
+      'DeepFinOpsAgent',
+      goal,
       { projectId: input.projectId, period: input.period }
     );
 
@@ -133,13 +177,13 @@ export const calculateRoiTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepFinOpsAgent } = await import('../agents/deep/DeepFinOpsAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Calculate ROI for project ${input.projectId}${input.timeHorizon ? ` over ${input.timeHorizon}` : ''}`;
 
-    const agent = new DeepFinOpsAgent(storageRef);
-    const result = await agent.run(
-      `Calculate ROI for project ${input.projectId}${input.timeHorizon ? ` over ${input.timeHorizon}` : ''}`,
-      { projectId: input.projectId }
+    const result = await executeWithMemory(
+      'finops',
+      'DeepFinOpsAgent',
+      goal,
+      { projectId: input.projectId, timeHorizon: input.timeHorizon }
     );
 
     return {
@@ -173,12 +217,12 @@ export const assessRiskTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepRiskAgent } = await import('../agents/deep/DeepRiskAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Assess ${input.riskCategory || 'all'} risks for project ${input.projectId}`;
 
-    const agent = new DeepRiskAgent(storageRef);
-    const result = await agent.run(
-      `Assess ${input.riskCategory || 'all'} risks for project ${input.projectId}`,
+    const result = await executeWithMemory(
+      'risk',
+      'DeepRiskAgent',
+      goal,
       { projectId: input.projectId, riskCategory: input.riskCategory }
     );
 
@@ -207,12 +251,12 @@ export const planMitigationTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepRiskAgent } = await import('../agents/deep/DeepRiskAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Create mitigation plan for ${input.riskId ? `risk ${input.riskId}` : 'all risks'} in project ${input.projectId}`;
 
-    const agent = new DeepRiskAgent(storageRef);
-    const result = await agent.run(
-      `Create mitigation plan for ${input.riskId ? `risk ${input.riskId}` : 'all risks'} in project ${input.projectId}`,
+    const result = await executeWithMemory(
+      'risk',
+      'DeepRiskAgent',
+      goal,
       { projectId: input.projectId, riskId: input.riskId }
     );
 
@@ -240,12 +284,12 @@ export const trackValueTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepVROAgent } = await import('../agents/deep/DeepVROAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Track value realization for initiative ${input.initiativeId}${input.metrics ? ` focusing on ${input.metrics.join(', ')}` : ''}`;
 
-    const agent = new DeepVROAgent(storageRef);
-    const result = await agent.run(
-      `Track value realization for initiative ${input.initiativeId}${input.metrics ? ` focusing on ${input.metrics.join(', ')}` : ''}`,
+    const result = await executeWithMemory(
+      'vro',
+      'DeepVROAgent',
+      goal,
       { initiativeId: input.initiativeId, metrics: input.metrics }
     );
 
@@ -272,12 +316,12 @@ export const analyzeOkrAlignmentTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepVROAgent } = await import('../agents/deep/DeepVROAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Analyze OKR alignment for ${input.projectId ? `project ${input.projectId}` : 'portfolio'}${input.okrId ? ` against OKR ${input.okrId}` : ''}`;
 
-    const agent = new DeepVROAgent(storageRef);
-    const result = await agent.run(
-      `Analyze OKR alignment for ${input.projectId ? `project ${input.projectId}` : 'portfolio'}${input.okrId ? ` against OKR ${input.okrId}` : ''}`,
+    const result = await executeWithMemory(
+      'vro',
+      'DeepVROAgent',
+      goal,
       { projectId: input.projectId, okrId: input.okrId }
     );
 
@@ -307,12 +351,12 @@ export const checkComplianceTool = createTool({
     analysis: z.string(),
   }),
   execute: async (input) => {
-    const { DeepGovernanceAgent } = await import('../agents/deep/DeepGovernanceAgent.js');
-    if (!storageRef) throw new Error('Storage not initialized');
+    const goal = `Check compliance for project ${input.projectId}${input.framework ? ` against ${input.framework} framework` : ''}`;
 
-    const agent = new DeepGovernanceAgent(storageRef);
-    const result = await agent.run(
-      `Check compliance for project ${input.projectId}${input.framework ? ` against ${input.framework} framework` : ''}`,
+    const result = await executeWithMemory(
+      'governance',
+      'DeepGovernanceAgent',
+      goal,
       { projectId: input.projectId, framework: input.framework }
     );
 
