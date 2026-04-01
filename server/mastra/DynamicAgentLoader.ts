@@ -22,6 +22,7 @@ import {
   dataQualityTools,
   resourceTools,
 } from './tools.js';
+import { ontologyToolMap } from '../tools/ontology-tools.js';
 import { getA2ARegistry } from '../a2a/A2ARegistry.js';
 import type { AgentCard, AgentSkill } from '../a2a/types.js';
 
@@ -48,6 +49,7 @@ const TOOL_REGISTRY: Record<string, Record<string, any>> = {
   intervention: interventionTools,
   'data-quality': dataQualityTools,
   resource: resourceTools,
+  ontology: ontologyToolMap, // Cross-domain semantic query tools
 };
 
 let mastraInstance: Mastra | null = null;

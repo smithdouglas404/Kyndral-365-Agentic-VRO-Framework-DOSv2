@@ -13,12 +13,15 @@ const __dirname = dirname(__filename);
 
 /**
  * OntologyService
- * Manages the unified project management ontology across SAFe, PMBOK, PRINCE2
- * Provides semantic reconciliation and query capabilities
+ * Manages the unified K360 enterprise ontology for multi-agent governance
+ * Integrates SAFe 6.0, PMBOK, PRINCE2, and 11 agent domain ontologies
+ * Provides semantic reconciliation and cross-domain query capabilities
  */
 export class OntologyService {
   private store: Store;
-  private baseIRI = 'http://nextera.energy/ontology/';
+  private baseIRI = 'https://kyndryl.com/k360/ontology#';
+  private safeIRI = 'https://scaledagileframework.com/ontology#';
+  private legacyIRI = 'http://nextera.energy/ontology/';
   private isLoaded = false;
 
   constructor() {
@@ -37,11 +40,12 @@ export class OntologyService {
     console.log('[OntologyService] Loading ontologies...');
 
     const ontologyFiles = [
-      'schema/core.ttl',
-      'schema/safe.ttl',
-      'schema/pmbok.ttl',
-      'schema/prince2.ttl',
-      'schema/bridging.ttl',
+      'schema/k360.ttl',        // Primary K360 enterprise ontology (1543 lines)
+      'schema/core.ttl',        // Legacy core PM ontology
+      'schema/safe.ttl',        // Legacy SAFe extension
+      'schema/pmbok.ttl',       // PMBOK mapping
+      'schema/prince2.ttl',     // PRINCE2 mapping
+      'schema/bridging.ttl',    // Cross-methodology bridging
     ];
 
     const parser = new Parser({ format: 'Turtle' });
@@ -416,12 +420,83 @@ export class OntologyService {
       totalObjectProperties: properties.objectProperties.length,
       totalDatatypeProperties: properties.datatypeProperties.length,
       namespaces: {
-        pm: `${this.baseIRI}pm#`,
-        safe: `${this.baseIRI}safe#`,
-        pmbok: `${this.baseIRI}pmbok#`,
-        prince2: `${this.baseIRI}prince2#`,
+        k360: this.baseIRI,
+        safe: this.safeIRI,
+        pm: `${this.legacyIRI}pm#`,
+        pmbok: `${this.legacyIRI}pmbok#`,
+        prince2: `${this.legacyIRI}prince2#`,
       },
+      agentDomains: [
+        'VRO', 'PMO', 'TMO', 'FinOps', 'OKR',
+        'Governance', 'Planning', 'OCM', 'Notification', 'AgentOperations'
+      ],
     };
+  }
+
+  /**
+   * Get all concepts for a specific agent domain
+   */
+  getAgentDomainConcepts(agentType: string): string[] {
+    const domainPrefix = `${this.baseIRI}`;
+    const concepts: string[] = [];
+
+    // Domain mappings
+    const domainClasses: Record<string, string[]> = {
+      vro: ['Investment', 'Benefit', 'BenefitRealization', 'ValueMetric', 'InvestmentPortfolio'],
+      pmo: ['Project', 'Program', 'FlowMetric', 'ScheduleVariance', 'ResourceAllocation', 'DeliveryRisk'],
+      tmo: ['TransformationProgram', 'Initiative', 'AdoptionMetric', 'TransformationFatigue', 'BusinessOutcome'],
+      finops: ['Budget', 'CostRecord', 'Forecast', 'CostAnomaly', 'CostOptimization', 'SpendCategory'],
+      okr: ['OKR', 'Objective', 'KeyResult', 'AlignmentScore', 'OrphanedProject', 'OKRCascade'],
+      governance: ['Policy', 'PolicyRule', 'ComplianceCheckpoint', 'ComplianceViolation', 'AuditTrail', 'Risk', 'RiskMitigation'],
+      planning: ['CapacityPlan', 'Resource', 'Roadmap', 'Scenario', 'DependencyAnalysis', 'CapacityForecast'],
+      ocm: ['ReadinessAssessment', 'Stakeholder', 'StakeholderGroup', 'TrainingRecord', 'ChangeImpact', 'AdoptionBarrier'],
+      notification: ['Notification', 'Alert', 'AgentFinding', 'EscalationPath', 'NotificationRule'],
+      risk: ['Risk', 'RiskMitigation', 'RegulatoryFramework'], // Alias for governance risk subset
+    };
+
+    const normalizedType = agentType.toLowerCase().replace(/agent$/i, '');
+    const classNames = domainClasses[normalizedType] || [];
+
+    for (const className of classNames) {
+      concepts.push(`${domainPrefix}${className}`);
+    }
+
+    return concepts;
+  }
+
+  /**
+   * Find cross-domain relationships between agent concepts
+   * Key for multi-agent reasoning
+   */
+  getCrossDomainRelationships(concept1: string, concept2: string): Quad[] {
+    const relationships: Quad[] = [];
+
+    // Find direct relationships
+    const directQuads = this.store.getQuads(
+      namedNode(concept1),
+      null,
+      namedNode(concept2),
+      null
+    );
+    relationships.push(...directQuads);
+
+    // Find inverse relationships
+    const inverseQuads = this.store.getQuads(
+      namedNode(concept2),
+      null,
+      namedNode(concept1),
+      null
+    );
+    relationships.push(...inverseQuads);
+
+    return relationships;
+  }
+
+  /**
+   * Get the N3 store for direct SPARQL-like queries
+   */
+  getStore(): Store {
+    return this.store;
   }
 }
 

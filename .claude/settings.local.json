@@ -147,7 +147,8 @@
       "WebFetch(domain:mastra.ai)",
       "WebFetch(domain:google.github.io)",
       "WebFetch(domain:a2a-protocol.org)",
-      "Bash(npx mastra:*)"
+      "Bash(npx mastra:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }

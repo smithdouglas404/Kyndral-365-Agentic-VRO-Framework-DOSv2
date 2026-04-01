@@ -26,6 +26,7 @@ import { getPalantirRulesService, type RuleResult } from '../lib/PalantirRulesSe
 import { serverReadyService } from '../services/ServerReadyService.js';
 import { memoryMonitorService } from '../services/MemoryMonitorService.js';
 import { getSettings } from '../services/OrchestratorConfig.js';
+import { timbrQueryService } from '../services/TimbrQueryService.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -370,6 +371,7 @@ export class ContinuousOrchestrator {
   // Palantir Rules tracking
   private rulesServiceAvailable: boolean = false;
   private static RULE_CHECK_INTERVAL = 10; // Check rules every N cycles
+  private static INSIGHT_CHECK_INTERVAL = 5; // Generate cross-domain insights every N cycles
 
   /**
    * Helper to safely get agent config (handles agents without getConfig method)
@@ -958,6 +960,11 @@ export class ContinuousOrchestrator {
 
       // Phase 5: Autonomous actions only created for actual findings (not random)
       // Agents only act when they detect real issues, not on random chance
+
+      // Phase 5.5: Cross-domain insight generation via ontology queries
+      if (this.cycleCount % ContinuousOrchestrator.INSIGHT_CHECK_INTERVAL === 0) {
+        await this.generateCrossDomainInsights(agentId);
+      }
 
       // Phase 6: Clear agent memory to prevent history buildup between cycles
       if (agent && typeof agent.clearMemory === 'function') {
@@ -1650,6 +1657,144 @@ export class ContinuousOrchestrator {
       // Supervised agents create pending interventions
       await this.createPendingIntervention(agent, finding);
     }
+  }
+
+  /**
+   * Generate cross-domain insights using ontology semantic queries
+   * Runs periodically to detect patterns across agent domains
+   */
+  private async generateCrossDomainInsights(currentAgentId: string): Promise<void> {
+    try {
+      console.log(`[ContinuousOrchestrator] Generating cross-domain insights...`);
+
+      // Initialize the Timbr query service
+      await timbrQueryService.initialize();
+
+      // Generate cross-domain insights
+      const insights = await timbrQueryService.generateCrossDomainInsights();
+
+      if (insights.length === 0) {
+        console.log(`[ContinuousOrchestrator] No cross-domain insights detected`);
+        return;
+      }
+
+      console.log(`[ContinuousOrchestrator] Found ${insights.length} cross-domain insights`);
+
+      // Process each insight
+      for (const insight of insights) {
+        // Broadcast critical insights to WebSocket
+        if (insight.severity === 'critical' || insight.severity === 'high') {
+          broadcastAgentInsight({
+            sourceAgent: 'orchestrator',
+            agentName: 'Cross-Domain Analysis',
+            severity: insight.severity,
+            title: insight.title,
+            description: insight.description,
+            rootCause: insight.details?.rootCause ? {
+              primary: insight.details.rootCause,
+              confidence: insight.confidence || 0.8,
+            } : undefined,
+            recommendations: insight.recommendation ? [{
+              action: insight.recommendation,
+              priority: insight.severity === 'critical' ? 'immediate' : 'soon',
+              effort: 'medium',
+              confidence: insight.confidence || 0.8,
+            }] : undefined,
+            affectedDomains: insight.affectedDomains,
+          });
+        }
+
+        // Log insight to agent activity
+        await this.storage.createAgentActivityLog({
+          eventType: 'cross_domain_insight',
+          primaryAgentId: 'orchestrator',
+          primaryAgentName: 'Cross-Domain Analysis',
+          summary: insight.title,
+          details: JSON.stringify({
+            type: insight.type,
+            description: insight.description,
+            affectedDomains: insight.affectedDomains,
+            severity: insight.severity,
+            recommendation: insight.recommendation,
+            confidence: insight.confidence,
+            relatedEntities: insight.relatedEntities,
+          }),
+        });
+
+        // Route insight to relevant agents via A2A
+        for (const domain of insight.affectedDomains || []) {
+          const targetAgentId = this.domainToAgentId(domain);
+          if (targetAgentId && targetAgentId !== currentAgentId) {
+            await this.messageBus.send({
+              from: 'orchestrator',
+              to: targetAgentId,
+              type: 'cross_domain_insight',
+              content: insight,
+              severity: insight.severity,
+              requiresApproval: insight.severity === 'critical',
+            });
+          }
+        }
+      }
+
+      // Also get agent-specific insights for the current agent
+      const agentInsights = await timbrQueryService.getAgentDomainInsights(currentAgentId);
+
+      if (agentInsights.length > 0) {
+        console.log(`[ContinuousOrchestrator] Found ${agentInsights.length} domain-specific insights for ${currentAgentId}`);
+
+        for (const insight of agentInsights) {
+          await this.storage.createAgentActivityLog({
+            eventType: 'domain_insight',
+            primaryAgentId: currentAgentId,
+            primaryAgentName: this.getAgentNameFromId(currentAgentId),
+            summary: insight.title,
+            details: JSON.stringify(insight),
+          });
+        }
+      }
+
+    } catch (error: any) {
+      console.error(`[ContinuousOrchestrator] Error generating cross-domain insights:`, error.message);
+    }
+  }
+
+  /**
+   * Map domain name to agent ID
+   */
+  private domainToAgentId(domain: string): string | null {
+    const domainMap: Record<string, string> = {
+      'VRO': 'vro',
+      'PMO': 'pmo',
+      'TMO': 'tmo',
+      'FinOps': 'finops',
+      'Risk': 'risk',
+      'OKR': 'okr',
+      'Governance': 'governance',
+      'Planning': 'planning',
+      'OCM': 'ocm',
+      'Notification': 'notification',
+    };
+    return domainMap[domain] || null;
+  }
+
+  /**
+   * Get agent name from ID
+   */
+  private getAgentNameFromId(agentId: string): string {
+    const names: Record<string, string> = {
+      finops: 'FinOps Agent',
+      tmo: 'TMO Agent',
+      risk: 'Risk Agent',
+      vro: 'VRO Agent',
+      pmo: 'PMO Agent',
+      ocm: 'OCM Agent',
+      governance: 'Governance Agent',
+      planning: 'Planning Agent',
+      okr: 'OKR Inference Agent',
+      notification: 'Notification Agent',
+    };
+    return names[agentId] || agentId.toUpperCase();
   }
 
   /**
