@@ -6,6 +6,7 @@
  */
 
 import { Mastra } from '@mastra/core';
+import { CloudExporter } from '@mastra/core/ai-tracing';
 
 import { pmoAgent } from './agents/pmo';
 import { finopsAgent } from './agents/finops';
@@ -30,4 +31,13 @@ export const mastra = new Mastra({
     planningAgent,
   },
   tools,
+  observability: {
+    default: { enabled: true },
+    cloud: {
+      enabled: true,
+      exporter: new CloudExporter({
+        accessToken: process.env.MASTRA_CLOUD_ACCESS_TOKEN,
+      }),
+    },
+  },
 });

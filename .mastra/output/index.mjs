@@ -4,6 +4,7 @@ import { TABLE_EVALS } from '@mastra/core/storage';
 import { scoreTraces, scoreTracesWorkflow } from '@mastra/core/scores/scoreTraces';
 import { generateEmptyFromSchema, checkEvalStorageFields } from '@mastra/core/utils';
 import { Mastra } from '@mastra/core';
+import { CloudExporter, AISpanType } from '@mastra/core/ai-tracing';
 import { Agent, tryGenerateWithJsonFallback, tryStreamWithJsonFallback, MessageList, convertMessages } from '@mastra/core/agent';
 import { i as identifyDependenciesTool, a as analyzeProjectHealthTool, c as calculateRoiTool, b as analyzeBudgetVarianceTool, p as planMitigationTool, d as assessRiskTool, e as analyzeOkrAlignmentTool, t as trackValueTool, f as checkComplianceTool, g as tools } from './index2.mjs';
 import crypto$1, { randomUUID } from 'crypto';
@@ -24,7 +25,6 @@ import { ModelRouterLanguageModel, PROVIDER_REGISTRY, getProviderConfig } from '
 import { ChunkFrom } from '@mastra/core/stream';
 import util, { promisify } from 'util';
 import { Buffer as Buffer$1 } from 'buffer';
-import { AISpanType } from '@mastra/core/ai-tracing';
 import { zodToJsonSchema as zodToJsonSchema$1 } from '@mastra/core/utils/zod-to-json';
 import { MastraA2AError } from '@mastra/core/a2a';
 import { RuntimeContext as RuntimeContext$1 } from '@mastra/core/di';
@@ -179,7 +179,18 @@ const mastra = new Mastra({
     governanceAgent,
     planningAgent
   },
-  tools
+  tools,
+  observability: {
+    default: {
+      enabled: true
+    },
+    cloud: {
+      enabled: true,
+      exporter: new CloudExporter({
+        accessToken: process.env.MASTRA_CLOUD_ACCESS_TOKEN
+      })
+    }
+  }
 });
 
 // src/utils/mime.ts
