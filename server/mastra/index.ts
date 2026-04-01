@@ -246,89 +246,73 @@ function createMastraAgents(): Record<string, Agent> {
   return agents;
 }
 
-/**
- * Mastra instance singleton
- */
-let mastraInstance: Mastra | null = null;
+import {
+  initializeDynamicAgents,
+  getDynamicMastra,
+  getDynamicAgent,
+  getDynamicAgentConfig,
+  listDynamicAgents,
+  getDynamicAgentCards,
+} from './DynamicAgentLoader.js';
+
 let initialized = false;
 
-/**
- * Initialize Mastra with storage
- * Must be called before using any Mastra functionality
- */
 export async function initializeMastra(storage: IStorage): Promise<Mastra> {
-  if (initialized && mastraInstance) {
-    return mastraInstance;
+  if (initialized) {
+    return getDynamicMastra();
   }
 
-  console.log('[Mastra] Initializing...');
-
-  // Set storage for tools
-  setToolStorage(storage);
-
-  // Create agents
-  const agents = createMastraAgents();
-
-  // Create Mastra instance
-  mastraInstance = new Mastra({
-    agents,
-  });
-
+  console.log('[Mastra] Initializing with dynamic agent loader...');
+  const mastra = await initializeDynamicAgents(storage);
   initialized = true;
-
-  console.log(`[Mastra] ✅ Initialized with ${Object.keys(agents).length} agents`);
-  console.log(`[Mastra] Using model: ${DEFAULT_MODEL}`);
-
-  return mastraInstance;
+  return mastra;
 }
 
-/**
- * Get the Mastra instance
- * Throws if not initialized
- */
 export function getMastra(): Mastra {
-  if (!mastraInstance) {
-    throw new Error('Mastra not initialized. Call initializeMastra(storage) first.');
-  }
-  return mastraInstance;
+  return getDynamicMastra();
 }
 
-/**
- * Check if Mastra is initialized
- */
 export function isMastraInitialized(): boolean {
-  return initialized && mastraInstance !== null;
+  return initialized;
 }
 
-/**
- * Get agent by type (convenience method)
- */
-export function getAgent(agentType: AgentType): Agent {
-  const mastra = getMastra();
-  const configs = createAgentConfigs();
-  const config = configs[agentType];
-
-  if (!config) {
+export function getAgent(agentType: string): Agent {
+  const agent = getDynamicAgent(agentType);
+  if (!agent) {
+    const mastra = getDynamicMastra();
+    const configs = createAgentConfigs();
+    const config = (configs as any)[agentType];
+    if (config) {
+      return mastra.getAgentById(config.id);
+    }
     throw new Error(`Unknown agent type: ${agentType}`);
   }
-
-  return mastra.getAgentById(config.id);
+  return agent;
 }
 
-/**
- * List all available agent types
- */
 export function listAgentTypes(): AgentType[] {
-  return Object.keys(createAgentConfigs()) as AgentType[];
+  const dynamic = listDynamicAgents().map(a => a.key);
+  const hardcoded = Object.keys(createAgentConfigs());
+  return [...new Set([...dynamic, ...hardcoded])] as AgentType[];
 }
 
-/**
- * Get agent configurations (for A2A/MCP integration)
- */
 export function getAgentConfigs() {
+  const dynamicConfigs = listDynamicAgents();
+  if (dynamicConfigs.length > 0) {
+    const configs: Record<string, any> = {};
+    for (const { key, config } of dynamicConfigs) {
+      configs[key] = {
+        id: config.agentId,
+        name: config.name,
+        instructions: config.instructions,
+        model: config.model,
+        tools: {},
+      };
+    }
+    return configs;
+  }
   return createAgentConfigs();
 }
 
-// Re-export for convenience
 export { Agent };
 export const AGENT_CONFIGS = createAgentConfigs();

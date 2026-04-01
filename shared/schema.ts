@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, real, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, real, boolean, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -3603,3 +3603,32 @@ export const insertUserWidgetSchema = createInsertSchema(userWidgets).omit({
 
 export type InsertUserWidget = z.infer<typeof insertUserWidgetSchema>;
 export type UserWidget = typeof userWidgets.$inferSelect;
+
+export const dynamicAgents = pgTable("dynamic_agents", {
+  id: serial("id").primaryKey(),
+  agentKey: varchar("agent_key", { length: 100 }).notNull().unique(),
+  agentId: varchar("agent_id", { length: 100 }).notNull().unique(),
+  name: varchar("name", { length: 200 }).notNull(),
+  instructions: text("instructions").notNull(),
+  model: varchar("model", { length: 200 }).default("anthropic:claude-sonnet-4-20250514"),
+  enabled: boolean("enabled").default(true),
+  skills: text("skills").notNull().default("[]"),
+  toolMappings: text("tool_mappings").notNull().default("[]"),
+  tags: text("tags").notNull().default("[]"),
+  palantirObjectTypes: text("palantir_object_types").default("[]"),
+  rulebricksRules: text("rulebricks_rules").default("[]"),
+  a2aMessageTypes: text("a2a_message_types").default("[]"),
+  memoryNamespace: varchar("memory_namespace", { length: 100 }),
+  factSubscriptions: text("fact_subscriptions").default("[]"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDynamicAgentSchema = createInsertSchema(dynamicAgents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertDynamicAgent = z.infer<typeof insertDynamicAgentSchema>;
+export type DynamicAgent = typeof dynamicAgents.$inferSelect;
