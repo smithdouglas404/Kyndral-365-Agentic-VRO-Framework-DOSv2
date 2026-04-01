@@ -36,7 +36,11 @@ Preferred communication style: Simple, everyday language.
 - **Default Agents (11)**: PMO, FinOps, Risk, OCM, TMO, VRO, Governance, Planning, Integrated, OKR Inference, Notification — auto-seeded on first run
 - **MCP Tool Counts**: PMO(6), FinOps(7), Risk(4), OCM(3), TMO(4), VRO(5), Governance(6), Planning(4), Integrated(5), OKR(3), Notification(3) = 50 skills + 11 agent tools = 61 MCP tools
 - **Dynamic Agent API**: `POST /api/dynamic-agents/agents` (create), `PUT /api/dynamic-agents/agents/:key` (update), `DELETE /api/dynamic-agents/agents/:key` (remove) — instantly registers in Mastra + A2A + MCP
-- **Tool Registry**: 11 reusable tool sets that new agents can compose from — `GET /api/dynamic-agents/tool-registry`
+- **Tool Registry**: 16 reusable tool sets (11 agent + 5 cross-cutting) that new agents can compose from — `GET /api/dynamic-agents/tool-registry`
+  - Cross-cutting sets: `simulation` (2), `policy` (1), `intervention` (1), `data-quality` (1), `resource` (1)
+- **Agent Observability**: `server/services/AgentTracing.ts` — in-memory trace buffer with per-agent metrics, tool breakdown, error tracking; wired into `executeWithMemory()` for automatic tracing
+  - API: `/api/agent-tracing/summary`, `/api/agent-tracing/metrics`, `/api/agent-tracing/traces`, `/api/agent-tracing/toggle`
+- **Admin UI**: `/admin/dynamic-agents` — 4-tab interface (Agents, Tool Registry, Observability, Traces) for creating/editing/toggling/deleting agents with live hot-reload
 - **Agent Loader**: `server/mastra/DynamicAgentLoader.ts` — replaces hardcoded configs, reads from DB, creates Mastra agents, builds A2A cards
 - **Orchestration**: Single master ContinuousOrchestrator (created by DeepAgentBootstrap, shared by AgentScheduler) runs 24/7 (600s interval) with:
   - A2A message bus for inter-agent collaboration

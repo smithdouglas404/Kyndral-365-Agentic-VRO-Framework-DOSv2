@@ -23,18 +23,30 @@ export function createDynamicAgentRoutes(storage: IStorage): Router {
       res.json({
         success: true,
         count: agents.length,
-        agents: agents.map(({ key, config }) => ({
-          key,
-          id: config.agentId,
-          name: config.name,
-          enabled: config.enabled,
-          model: config.model,
-          skillCount: config.skills?.length || 0,
-          toolMappings: config.toolMappings,
-          tags: config.tags,
-          palantirObjectTypes: config.palantirObjectTypes,
-          memoryNamespace: config.memoryNamespace,
-        })),
+        agents: agents.map(({ key, config }) => {
+          let toolCount = 0;
+          for (const mapping of (config.toolMappings || [])) {
+            try {
+              const details = getToolSetDetails();
+              toolCount += details[mapping]?.length || 0;
+            } catch {}
+          }
+          return {
+            key,
+            agentId: config.agentId,
+            name: config.name,
+            enabled: config.enabled,
+            model: config.model,
+            instructions: config.instructions,
+            skills: config.skills || [],
+            skillCount: config.skills?.length || 0,
+            toolMappings: config.toolMappings,
+            toolCount,
+            tags: config.tags,
+            palantirObjectTypes: config.palantirObjectTypes,
+            memoryNamespace: config.memoryNamespace,
+          };
+        }),
       });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });

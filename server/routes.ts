@@ -235,6 +235,13 @@ export async function registerRoutes(
   app.use('/api/dynamic-agents', createDynamicAgentRoutes(storage));
   console.log('[DynamicAgents] Routes registered at /api/dynamic-agents');
 
+  // Register Agent Tracing / Observability routes
+  const { initTracing } = await import('./services/AgentTracing.js');
+  const agentTracingRouter = (await import('./routes/agent-tracing.js')).default;
+  initTracing(storage);
+  app.use('/api/agent-tracing', agentTracingRouter);
+  console.log('[AgentTracing] Routes registered at /api/agent-tracing');
+
   // Register Mastra + A2A Protocol + MCP routes (external agent interoperability)
   // - A2A: Agent Cards, task management, discovery (/.well-known/a2a/agent-card, /api/a2a/*)
   // - MCP: Tool exposure for external MCP clients (/api/mcp/*)

@@ -16,6 +16,11 @@ import {
   integratedTools,
   okrTools,
   notificationTools,
+  simulationTools,
+  policyTools,
+  interventionTools,
+  dataQualityTools,
+  resourceTools,
 } from './tools.js';
 import { getA2ARegistry } from '../a2a/A2ARegistry.js';
 import type { AgentCard, AgentSkill } from '../a2a/types.js';
@@ -38,6 +43,11 @@ const TOOL_REGISTRY: Record<string, Record<string, any>> = {
   integrated: integratedTools,
   okr: okrTools,
   notification: notificationTools,
+  simulation: simulationTools,
+  policy: policyTools,
+  intervention: interventionTools,
+  'data-quality': dataQualityTools,
+  resource: resourceTools,
 };
 
 let mastraInstance: Mastra | null = null;

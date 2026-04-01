@@ -137,6 +137,7 @@ const PalantirRulesEngine = lazy(() => import("@/pages/admin/PalantirRulesEngine
 const OntologyExplorer = lazy(() => import("@/pages/admin/OntologyExplorer"));
 const RealTimeSubscriptions = lazy(() => import("@/pages/admin/RealTimeSubscriptions"));
 const WorkflowAutomation = lazy(() => import("@/pages/admin/WorkflowAutomation"));
+const DynamicAgentAdmin = lazy(() => import("@/pages/admin/DynamicAgentAdmin"));
 
 function Router() {
   return (
@@ -250,6 +251,7 @@ function Router() {
         <Route path="/admin/ontology-explorer" component={OntologyExplorer} />
         <Route path="/admin/subscriptions" component={RealTimeSubscriptions} />
         <Route path="/admin/workflow-automation" component={WorkflowAutomation} />
+        <Route path="/admin/dynamic-agents" component={DynamicAgentAdmin} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

@@ -9,6 +9,7 @@ import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import type { IStorage } from '../storage.js';
 import { getMastraMemory, createToolContext } from './memory.js';
+import { startTrace, endTrace, recordToolCall, recordToolResult, recordError } from '../services/AgentTracing.js';
 
 // Storage reference - set during initialization
 let storageRef: IStorage | null = null;
@@ -28,36 +29,47 @@ async function executeWithMemory(
 ): Promise<any> {
   if (!storageRef) throw new Error('Storage not initialized');
 
-  // Get memory context
-  const entityId = context.projectId || context.initiativeId;
-  const { memory, contextPrompt } = await createToolContext(agentType, goal, entityId);
+  const traceId = startTrace(agentType, { agentClass, goal, context: { projectId: context.projectId } });
+  const startTime = Date.now();
 
-  // Enrich goal with memory context
-  const enrichedGoal = contextPrompt
-    ? `${goal}\n\n--- Memory Context ---\n${contextPrompt}`
-    : goal;
+  try {
+    recordToolCall(traceId, agentType, agentClass, { goal: goal.substring(0, 200), projectId: context.projectId });
 
-  // Execute Deep Agent
-  const module = await import(`../agents/deep/${agentClass}.js`);
-  const AgentClass = module[agentClass] || module.default;
-  const agent = new AgentClass(storageRef);
+    const entityId = context.projectId || context.initiativeId;
+    const { memory, contextPrompt } = await createToolContext(agentType, goal, entityId);
 
-  const result = await agent.run(enrichedGoal, context);
+    const enrichedGoal = contextPrompt
+      ? `${goal}\n\n--- Memory Context ---\n${contextPrompt}`
+      : goal;
 
-  // Learn from the interaction
-  if (result) {
-    await memory.recordInteraction('agent', typeof result === 'string' ? result : JSON.stringify(result));
+    const module = await import(`../agents/deep/${agentClass}.js`);
+    const AgentClass = module[agentClass] || module.default;
+    const agent = new AgentClass(storageRef);
 
-    // Broadcast key findings as facts
-    if (entityId && result.healthScore !== undefined) {
-      await memory.broadcastFact(entityId, 'health_score', result.healthScore, 0.9);
+    const result = await agent.run(enrichedGoal, context);
+    const durationMs = Date.now() - startTime;
+
+    recordToolResult(traceId, agentType, agentClass, { hasResult: !!result, keys: result ? Object.keys(result).slice(0, 10) : [] }, durationMs);
+    endTrace(traceId, agentType, durationMs);
+
+    if (result) {
+      await memory.recordInteraction('agent', typeof result === 'string' ? result : JSON.stringify(result));
+
+      if (entityId && result.healthScore !== undefined) {
+        await memory.broadcastFact(entityId, 'health_score', result.healthScore, 0.9);
+      }
+      if (entityId && result.riskLevel) {
+        await memory.broadcastFact(entityId, 'risk_level', result.riskLevel, 0.9);
+      }
     }
-    if (entityId && result.riskLevel) {
-      await memory.broadcastFact(entityId, 'risk_level', result.riskLevel, 0.9);
-    }
+
+    return result;
+  } catch (err: any) {
+    const durationMs = Date.now() - startTime;
+    recordError(traceId, agentType, err.message, agentClass);
+    endTrace(traceId, agentType, durationMs);
+    throw err;
   }
-
-  return result;
 }
 
 /**
@@ -1388,4 +1400,117 @@ export const notificationTools = {
   hitlApprovalTool,
   cascadeWorkflowTool,
   notificationRoutingTool,
+};
+
+export const simulationTool = createTool({
+  id: 'simulation-sandbox',
+  description: 'Run agent re-run simulation — modify portfolio variables and re-execute agent analysis against modified data to preview outcomes before committing changes',
+  inputSchema: z.object({
+    scenarioName: z.string().describe('Descriptive name for this simulation'),
+    modifications: z.array(z.object({ entity: z.string(), field: z.string(), originalValue: z.string(), newValue: z.string() })),
+    agentsToRerun: z.array(z.string()).optional().describe('Agent keys to re-run (default: all)'),
+  }),
+  outputSchema: z.object({ analysis: z.string(), outcomes: z.array(z.object({ agent: z.string(), finding: z.string() })).optional() }),
+  execute: async (input) => {
+    const result = await executeWithMemory('integrated', 'DeepIntegratedMgmt', `Simulation "${input.scenarioName}": re-run agents against modified data`, { modifications: input.modifications, agentsToRerun: input.agentsToRerun });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), outcomes: result?.outcomes };
+  },
+});
+
+export const temporalQueryTool = createTool({
+  id: 'temporal-query',
+  description: 'Execute temporal knowledge graph queries — point-in-time snapshots, range analysis, causal chain traversal, counterfactual what-if, and drift/decay detection',
+  inputSchema: z.object({
+    queryType: z.enum(['point-in-time', 'range', 'causal-chain', 'counterfactual', 'decay-drift']),
+    entity: z.string().optional().describe('Entity to query (project, policy, risk, etc.)'),
+    entityId: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+  }),
+  outputSchema: z.object({ analysis: z.string(), results: z.array(z.any()).optional(), timelineEvents: z.array(z.object({ date: z.string(), event: z.string() })).optional() }),
+  execute: async (input) => {
+    const result = await executeWithMemory('integrated', 'DeepIntegratedMgmt', `Temporal ${input.queryType} query for ${input.entity || 'portfolio'}`, { queryType: input.queryType, entity: input.entity, entityId: input.entityId, startDate: input.startDate, endDate: input.endDate });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), results: result?.results, timelineEvents: result?.timelineEvents };
+  },
+});
+
+export const policyIngestionTool = createTool({
+  id: 'policy-ingestion',
+  description: 'Ingest policy documents (SOPs, regulatory filings, compliance frameworks) and extract machine-executable rules using Policy-as-Code pipeline',
+  inputSchema: z.object({
+    documentName: z.string(),
+    documentType: z.enum(['sop', 'regulatory', 'compliance-framework', 'governance-policy', 'custom']),
+    content: z.string().describe('Document text content'),
+  }),
+  outputSchema: z.object({ analysis: z.string(), extractedRules: z.array(z.object({ ruleId: z.string(), description: z.string(), threshold: z.string() })).optional(), policyId: z.string().optional() }),
+  execute: async (input) => {
+    const result = await executeWithMemory('governance', 'DeepGovernanceAgent', `Ingest ${input.documentType} document "${input.documentName}" and extract rules`, { documentName: input.documentName, documentType: input.documentType, content: input.content });
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), extractedRules: result?.extractedRules, policyId: result?.policyId };
+  },
+});
+
+export const interventionTool = createTool({
+  id: 'intervention-management',
+  description: 'Create, track, and manage interventions — the closed-loop pipeline from AI detection through human approval to write-back execution',
+  inputSchema: z.object({
+    action: z.enum(['create', 'list', 'approve', 'reject', 'execute']),
+    interventionId: z.string().optional(),
+    projectId: z.string().optional(),
+    description: z.string().optional(),
+    interventionType: z.enum(['budget-pause', 'scope-reduction', 'timeline-extension', 'resource-reallocation', 'risk-mitigation', 'escalation']).optional(),
+  }),
+  outputSchema: z.object({ analysis: z.string(), interventionId: z.string().optional(), status: z.string().optional() }),
+  execute: async (input) => {
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', `Intervention ${input.action}${input.projectId ? ` for project ${input.projectId}` : ''}${input.description ? `: ${input.description}` : ''}`, input);
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), interventionId: result?.interventionId, status: result?.status };
+  },
+});
+
+export const dataQualityTool = createTool({
+  id: 'data-quality-assessment',
+  description: 'Assess data quality across Palantir Foundry objects — completeness, consistency, freshness, and accuracy scores per entity type',
+  inputSchema: z.object({
+    objectType: z.string().optional().describe('Palantir object type to assess (e.g. AtlasProject)'),
+    scope: z.enum(['single-type', 'portfolio-wide']).optional(),
+  }),
+  outputSchema: z.object({ analysis: z.string(), qualityScore: z.number().optional(), issues: z.array(z.object({ field: z.string(), issue: z.string(), severity: z.string() })).optional() }),
+  execute: async (input) => {
+    const result = await executeWithMemory('integrated', 'DeepIntegratedMgmt', `Data quality assessment for ${input.objectType || 'all object types'}`, input);
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), qualityScore: result?.qualityScore, issues: result?.issues };
+  },
+});
+
+export const resourceOptimizationTool = createTool({
+  id: 'resource-optimization',
+  description: 'Optimize resource allocation across the portfolio — identify over/under-allocated teams, suggest rebalancing, and forecast hiring needs',
+  inputSchema: z.object({
+    horizon: z.enum(['current-sprint', 'current-pi', 'next-quarter', 'annual']).optional(),
+    valueStream: z.string().optional(),
+  }),
+  outputSchema: z.object({ analysis: z.string(), overAllocated: z.array(z.object({ team: z.string(), utilization: z.number() })).optional(), underAllocated: z.array(z.object({ team: z.string(), utilization: z.number() })).optional(), recommendations: z.array(z.string()).optional() }),
+  execute: async (input) => {
+    const result = await executeWithMemory('pmo', 'DeepPMOAgent', `Resource optimization for ${input.horizon || 'current-pi'}${input.valueStream ? ` in ${input.valueStream}` : ''}`, input);
+    return { analysis: typeof result === 'string' ? result : JSON.stringify(result), overAllocated: result?.overAllocated, underAllocated: result?.underAllocated, recommendations: result?.recommendations };
+  },
+});
+
+export const simulationTools = {
+  simulationTool,
+  temporalQueryTool,
+};
+
+export const policyTools = {
+  policyIngestionTool,
+};
+
+export const interventionTools = {
+  interventionTool,
+};
+
+export const dataQualityTools = {
+  dataQualityTool,
+};
+
+export const resourceTools = {
+  resourceOptimizationTool,
 };
