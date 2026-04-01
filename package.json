@@ -27,6 +27,8 @@
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@mastra/core": "^1.20.0",
+    "@mastra/observability": "^0.0.6",
+    "@mastra/server": "^0.24.9",
     "@palantir/pack.state.foundry": "^0.6.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

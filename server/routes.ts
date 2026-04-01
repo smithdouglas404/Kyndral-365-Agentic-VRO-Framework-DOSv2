@@ -31,6 +31,7 @@ import { registerLogicGatesRoutes } from "./routes/logic-gates.js";
 import mem0ApiRouter from "./routes/mem0-api.js";
 import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
 import { registerAgentIntegrationRoutes, initializeAgentIntegration } from "./integration/mastra-a2a-mcp.js";
+import mastraServerRouter from "./routes/mastra-server.js";
 import ontologyApiRouter from "./routes/ontology-api.js";
 import agentSchemasRouter from "./routes/agent-schemas.js";
 import llmCalculatorRouter from "./routes/llm-calculator.js";
@@ -224,6 +225,10 @@ export async function registerRoutes(
 
   // Register A2A API routes (Agent-to-Agent messaging - legacy internal bus)
   app.use('/api/a2a', a2aApiRouter);
+
+  // Register Mastra server routes (for Mastra Cloud integration)
+  app.use('/api/mastra', mastraServerRouter);
+  console.log('[MastraServer] Routes registered at /api/mastra');
 
   // Register Mastra + A2A Protocol + MCP routes (external agent interoperability)
   // - A2A: Agent Cards, task management, discovery (/.well-known/a2a/agent-card, /api/a2a/*)

@@ -20,6 +20,12 @@ import {
   riskTools,
   vroTools,
   governanceTools,
+  ocmTools,
+  tmoTools,
+  planningTools,
+  integratedTools,
+  okrTools,
+  notificationTools,
 } from './tools.js';
 
 // Check if Anthropic API key is available
@@ -100,7 +106,7 @@ Prioritize risks by severity and probability of occurrence.`,
 Help organizations navigate change effectively by analyzing stakeholder impacts
 and recommending communication and training strategies.`,
     model: DEFAULT_MODEL,
-    tools: {}, // OCM tools can be added later
+    tools: ocmTools,
   },
   tmo: {
     id: 'tmo-agent',
@@ -116,7 +122,7 @@ and recommending communication and training strategies.`,
 Ensure smooth transitions from project to operations by assessing readiness
 and coordinating cutover activities.`,
     model: DEFAULT_MODEL,
-    tools: {}, // TMO tools can be added later
+    tools: tmoTools,
   },
   vro: {
     id: 'vro-agent',
@@ -165,7 +171,51 @@ Ensure projects follow established governance frameworks and flag any violations
 Help organizations plan effectively for the future by analyzing capacity
 and recommending portfolio optimizations.`,
     model: DEFAULT_MODEL,
-    tools: {}, // Planning tools can be added later
+    tools: planningTools,
+  },
+  integrated: {
+    id: 'integrated-agent',
+    name: 'Integrated Management Agent',
+    instructions: `You are the Integrated Management Agent responsible for:
+- Cross-functional portfolio health monitoring
+- Portfolio-wide health dashboards aggregating all 22 SAFe projects
+- Cross-project impact analysis via dependency chains
+- Unified reporting across all agent domains
+- Escalation coordination between domain agents
+
+You have a holistic view across all agents and data sources. Use Palantir Foundry
+as the single source of truth for all project data.`,
+    model: DEFAULT_MODEL,
+    tools: integratedTools,
+  },
+  okr: {
+    id: 'okr-agent',
+    name: 'OKR Inference Agent',
+    instructions: `You are the OKR Inference Agent responsible for:
+- Strategic objective and key result tracking via AtlasObjective, AtlasKpi, AtlasKeyResult
+- OKR gap detection — finding objectives with no supporting projects
+- KPI trend analysis and forecasting
+- Alignment scoring between execution and strategy
+- Inferring missing OKR linkages from project data
+
+Ensure strategic objectives are supported by execution and flag gaps early.`,
+    model: DEFAULT_MODEL,
+    tools: okrTools,
+  },
+  notification: {
+    id: 'notification-agent',
+    name: 'Notification Agent',
+    instructions: `You are the Notification Agent — the single A2A gateway for all human-in-the-loop (HITL) interactions:
+- Route approval requests to appropriate stakeholders
+- Escalate critical alerts via Palantir Actions
+- Manage HITL approval workflows
+- Broadcast important facts to subscribed agents
+- Coordinate notifications across email (SendGrid), Slack, Teams, and in-app WebSocket
+
+You are the bridge between autonomous agent decisions and human oversight.
+All external notifications flow through you.`,
+    model: DEFAULT_MODEL,
+    tools: notificationTools,
   },
 });
 
