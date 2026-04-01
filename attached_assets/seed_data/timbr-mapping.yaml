@@ -1,0 +1,1506 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TIMBR.AI MAPPING CONFIGURATION FOR KYNDRYL FABRIC [K360]
+# 
+# This configuration maps your 105 PostgreSQL tables to the K360 ontology,
+# creating a semantic layer that agents can query using SQL or SPARQL.
+#
+# File: timbr-mapping.yaml
+# Version: 1.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# -----------------------------------------------------------------------------
+# TIMBR.AI KNOWLEDGE GRAPH CONFIGURATION
+# -----------------------------------------------------------------------------
+
+knowledge_graph:
+  name: "k360_enterprise_ontology"
+  description: "Kyndryl Fabric K360 Enterprise Transformation Knowledge Graph"
+  version: "1.0"
+  
+  # Connection to your existing PostgreSQL (Neon)
+  datasource:
+    type: postgresql
+    connection:
+      host: "${NEON_DATABASE_HOST}"
+      port: 5432
+      database: "k360_production"
+      schema: "public"
+      ssl_mode: require
+    credentials:
+      # Use environment variables or secrets manager
+      username: "${DATABASE_USERNAME}"
+      password: "${DATABASE_PASSWORD}"
+  
+  # Import the OWL ontology
+  ontology:
+    import:
+      - file: "k360-complete-ontology.ttl"
+        format: turtle
+    
+    # Base namespace
+    namespaces:
+      k360: "https://kyndryl.com/k360/ontology#"
+      safe: "https://scaledagileframework.com/ontology#"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1: SAFe HIERARCHY MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+concept_mappings:
+
+  # ---------------------------------------------------------------------------
+  # 1.1 Portfolio
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Portfolio"
+    table: "portfolios"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:created_at"
+        column: "created_at"
+      - property: "k360:updated_at"
+        column: "updated_at"
+      - property: "k360:valid_from"
+        column: "effective_from"
+      - property: "k360:valid_to"
+        column: "effective_to"
+
+  # ---------------------------------------------------------------------------
+  # 1.2 Value Stream
+  # ---------------------------------------------------------------------------
+  - concept: "safe:ValueStream"
+    table: "value_streams"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:created_at"
+        column: "created_at"
+    
+    relationships:
+      - property: "safe:belongsToPortfolio"
+        target_concept: "safe:Portfolio"
+        foreign_key: "portfolio_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.3 ART (Agile Release Train)
+  # ---------------------------------------------------------------------------
+  - concept: "safe:ART"
+    table: "arts"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:altLabel"
+        column: "short_name"
+      - property: "k360:created_at"
+        column: "created_at"
+    
+    relationships:
+      - property: "safe:belongsToValueStream"
+        target_concept: "safe:ValueStream"
+        foreign_key: "value_stream_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.4 Team
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Team"
+    table: "teams"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:teamCapacity"
+        column: "capacity"
+      - property: "k360:created_at"
+        column: "created_at"
+    
+    relationships:
+      - property: "safe:belongsToART"
+        target_concept: "safe:ART"
+        foreign_key: "art_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.5 Division
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Division"
+    table: "divisions"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:divisionCode"
+        column: "code"
+
+  # ---------------------------------------------------------------------------
+  # 1.6 Strategic Theme
+  # ---------------------------------------------------------------------------
+  - concept: "safe:StrategicTheme"
+    table: "strategic_themes"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:themeWeight"
+        column: "weight"
+    
+    relationships:
+      - property: "safe:belongsToPortfolio"
+        target_concept: "safe:Portfolio"
+        foreign_key: "portfolio_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.7 Epic
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Epic"
+    table: "epics"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:epicStatus"
+        column: "status"
+      - property: "k360:epicType"
+        column: "type"
+      - property: "k360:wsjf"
+        column: "wsjf_score"
+      - property: "k360:created_at"
+        column: "created_at"
+      - property: "k360:updated_at"
+        column: "updated_at"
+    
+    relationships:
+      - property: "safe:belongsToPortfolio"
+        target_concept: "safe:Portfolio"
+        foreign_key: "portfolio_id"
+        target_key: "id"
+      - property: "safe:belongsToValueStream"
+        target_concept: "safe:ValueStream"
+        foreign_key: "value_stream_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.8 Feature
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Feature"
+    table: "features"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:featureStatus"
+        column: "status"
+      - property: "k360:storyPoints"
+        column: "story_points"
+    
+    relationships:
+      - property: "safe:decomposesFrom"
+        target_concept: "safe:Epic"
+        foreign_key: "epic_id"
+        target_key: "id"
+      - property: "safe:belongsToPI"
+        target_concept: "safe:ProgramIncrement"
+        foreign_key: "pi_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.9 Story
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Story"
+    table: "stories"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:storyStatus"
+        column: "status"
+      - property: "k360:storyPoints"
+        column: "story_points"
+      - property: "k360:acceptanceCriteria"
+        column: "acceptance_criteria"
+    
+    relationships:
+      - property: "safe:decomposesFrom"
+        target_concept: "safe:Feature"
+        foreign_key: "feature_id"
+        target_key: "id"
+      - property: "safe:belongsToSprint"
+        target_concept: "safe:Sprint"
+        foreign_key: "sprint_id"
+        target_key: "id"
+      - property: "safe:assignedToTeam"
+        target_concept: "safe:Team"
+        foreign_key: "team_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.10 Task
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Task"
+    table: "tasks"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "k360:taskStatus"
+        column: "status"
+      - property: "k360:estimatedHours"
+        column: "estimated_hours"
+      - property: "k360:actualHours"
+        column: "actual_hours"
+    
+    relationships:
+      - property: "safe:decomposesFrom"
+        target_concept: "safe:Story"
+        foreign_key: "story_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.11 Program Increment
+  # ---------------------------------------------------------------------------
+  - concept: "safe:ProgramIncrement"
+    table: "program_increments"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:piNumber"
+        column: "pi_number"
+      - property: "k360:valid_from"
+        column: "start_date"
+      - property: "k360:valid_to"
+        column: "end_date"
+      - property: "k360:piStatus"
+        column: "status"
+    
+    relationships:
+      - property: "safe:belongsToART"
+        target_concept: "safe:ART"
+        foreign_key: "art_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.12 Sprint
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Sprint"
+    table: "sprints"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:sprintNumber"
+        column: "sprint_number"
+      - property: "k360:valid_from"
+        column: "start_date"
+      - property: "k360:valid_to"
+        column: "end_date"
+      - property: "k360:sprintGoal"
+        column: "goal"
+    
+    relationships:
+      - property: "safe:belongsToPI"
+        target_concept: "safe:ProgramIncrement"
+        foreign_key: "pi_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 1.13 Milestone
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Milestone"
+    table: "milestones"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:milestoneType"
+        column: "type"
+      - property: "k360:plannedDate"
+        column: "planned_date"
+      - property: "k360:actualDate"
+        column: "actual_date"
+      - property: "k360:milestoneStatus"
+        column: "status"
+
+  # ---------------------------------------------------------------------------
+  # 1.14 Dependency
+  # ---------------------------------------------------------------------------
+  - concept: "safe:Dependency"
+    table: "dependencies"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:dependencyType"
+        column: "type"
+      - property: "k360:dependencyStatus"
+        column: "status"
+      - property: "k360:dependencyRisk"
+        column: "risk_level"
+    
+    relationships:
+      - property: "k360:sourceWorkItem"
+        target_concept: "safe:WorkItem"
+        foreign_key: "source_id"
+        target_key: "id"
+      - property: "k360:targetWorkItem"
+        target_concept: "safe:WorkItem"
+        foreign_key: "target_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 2: VRO AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 2.1 Investment
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Investment"
+    table: "investments"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:roi"
+        column: "roi"
+        transform: "CAST(roi AS DECIMAL) / 100"  # Convert percentage to decimal
+      - property: "k360:npv"
+        column: "npv"
+      - property: "k360:irr"
+        column: "irr"
+        transform: "CAST(irr AS DECIMAL) / 100"
+      - property: "k360:paybackPeriod"
+        column: "payback_months"
+      - property: "k360:investmentAmount"
+        column: "amount"
+      - property: "k360:investmentStatus"
+        column: "status"
+      - property: "k360:valid_from"
+        column: "start_date"
+      - property: "k360:valid_to"
+        column: "end_date"
+    
+    relationships:
+      - property: "k360:fundsEpic"
+        target_concept: "safe:Epic"
+        foreign_key: "epic_id"
+        target_key: "id"
+      - property: "k360:belongsToPortfolio"
+        target_concept: "k360:InvestmentPortfolio"
+        foreign_key: "portfolio_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 2.2 Benefit
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Benefit"
+    table: "benefits"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:benefitTarget"
+        column: "target_value"
+      - property: "k360:benefitType"
+        column: "type"
+      - property: "k360:benefitCategory"
+        column: "category"
+      - property: "k360:measurementUnit"
+        column: "unit"
+    
+    relationships:
+      - property: "k360:deliveredBy"
+        target_concept: "k360:Investment"
+        foreign_key: "investment_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 2.3 Benefit Realization
+  # ---------------------------------------------------------------------------
+  - concept: "k360:BenefitRealization"
+    table: "benefit_realizations"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:benefitActual"
+        column: "actual_value"
+      - property: "k360:realizationDate"
+        column: "measurement_date"
+      - property: "k360:variance"
+        column: "variance"
+        transform: "actual_value - target_value"
+    
+    relationships:
+      - property: "k360:tracksRealizationOf"
+        target_concept: "k360:Benefit"
+        foreign_key: "benefit_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 2.4 VRO Metrics
+  # ---------------------------------------------------------------------------
+  - concept: "k360:ValueMetric"
+    table: "vro_metrics"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "metric_name"
+      - property: "k360:metricValue"
+        column: "value"
+      - property: "k360:metricTarget"
+        column: "target"
+      - property: "k360:measurementDate"
+        column: "measured_at"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 3: PMO AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 3.1 Project
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Project"
+    table: "projects"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:projectStatus"
+        column: "status"
+      - property: "k360:ragStatus"
+        column: "rag_status"
+      - property: "k360:percentComplete"
+        column: "percent_complete"
+        transform: "CAST(percent_complete AS DECIMAL) / 100"
+      - property: "k360:valid_from"
+        column: "start_date"
+      - property: "k360:valid_to"
+        column: "end_date"
+      - property: "k360:plannedEndDate"
+        column: "planned_end_date"
+      - property: "k360:created_at"
+        column: "created_at"
+      - property: "k360:updated_at"
+        column: "updated_at"
+    
+    relationships:
+      - property: "k360:belongsToDivision"
+        target_concept: "safe:Division"
+        foreign_key: "division_id"
+        target_key: "id"
+      - property: "k360:implementsEpic"
+        target_concept: "safe:Epic"
+        foreign_key: "epic_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 3.2 Program
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Program"
+    table: "programs"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:programStatus"
+        column: "status"
+    
+    relationships:
+      - property: "k360:containsProject"
+        target_concept: "k360:Project"
+        join_table: "program_projects"
+        source_key: "program_id"
+        target_key: "project_id"
+
+  # ---------------------------------------------------------------------------
+  # 3.3 Flow Metrics
+  # ---------------------------------------------------------------------------
+  - concept: "k360:FlowMetric"
+    table: "flow_metrics"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:cycleTime"
+        column: "cycle_time_days"
+      - property: "k360:throughput"
+        column: "throughput"
+      - property: "k360:wip"
+        column: "wip_count"
+      - property: "k360:flowEfficiency"
+        column: "flow_efficiency"
+        transform: "CAST(flow_efficiency AS DECIMAL) / 100"
+      - property: "k360:flowLoad"
+        column: "flow_load"
+      - property: "k360:flowDistribution"
+        column: "flow_distribution"
+      - property: "k360:flowVelocity"
+        column: "flow_velocity"
+      - property: "k360:flowPredictability"
+        column: "predictability"
+      - property: "k360:measurementDate"
+        column: "measured_at"
+    
+    relationships:
+      - property: "k360:metricsForTeam"
+        target_concept: "safe:Team"
+        foreign_key: "team_id"
+        target_key: "id"
+      - property: "k360:metricsForPI"
+        target_concept: "safe:ProgramIncrement"
+        foreign_key: "pi_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 3.4 Schedule Variance
+  # ---------------------------------------------------------------------------
+  - concept: "k360:ScheduleVariance"
+    table: "schedule_variances"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:spi"
+        column: "spi"
+      - property: "k360:sv"
+        column: "sv_days"
+      - property: "k360:earnedValue"
+        column: "earned_value"
+      - property: "k360:plannedValue"
+        column: "planned_value"
+      - property: "k360:measurementDate"
+        column: "calculated_at"
+    
+    relationships:
+      - property: "k360:varianceForProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 4: FINOPS AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 4.1 Budget
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Budget"
+    table: "project_financials"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:budgetAmount"
+        column: "budget_amount"
+      - property: "k360:actualSpend"
+        column: "actual_spend"
+      - property: "k360:budgetUtilization"
+        column: "utilization"
+        transform: "CASE WHEN budget_amount > 0 THEN actual_spend / budget_amount ELSE 0 END"
+      - property: "k360:cpi"
+        column: "cpi"
+      - property: "k360:budgetCurrency"
+        column: "currency"
+      - property: "k360:fiscalYear"
+        column: "fiscal_year"
+      - property: "k360:fiscalQuarter"
+        column: "fiscal_quarter"
+    
+    relationships:
+      - property: "k360:budgetForProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 4.2 Cost Record
+  # ---------------------------------------------------------------------------
+  - concept: "k360:CostRecord"
+    table: "cost_tracking"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:costAmount"
+        column: "amount"
+      - property: "k360:costDate"
+        column: "transaction_date"
+      - property: "k360:costDescription"
+        column: "description"
+      - property: "k360:costType"
+        column: "cost_type"
+      - property: "k360:vendor"
+        column: "vendor_name"
+    
+    relationships:
+      - property: "k360:costForProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+      - property: "k360:categorizedAs"
+        target_concept: "k360:SpendCategory"
+        foreign_key: "category_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 4.3 Forecast
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Forecast"
+    table: "financial_forecasts"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:burnRate"
+        column: "burn_rate"
+      - property: "k360:eac"
+        column: "estimate_at_completion"
+      - property: "k360:etc"
+        column: "estimate_to_complete"
+      - property: "k360:forecastDate"
+        column: "forecast_date"
+      - property: "k360:forecastConfidence"
+        column: "confidence"
+    
+    relationships:
+      - property: "k360:forecastForBudget"
+        target_concept: "k360:Budget"
+        foreign_key: "financial_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 4.4 Spend Category
+  # ---------------------------------------------------------------------------
+  - concept: "k360:SpendCategory"
+    table: "spend_categories"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:categoryCode"
+        column: "code"
+      - property: "k360:parentCategory"
+        column: "parent_id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 5: OKR AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 5.1 OKR
+  # ---------------------------------------------------------------------------
+  - concept: "k360:OKR"
+    table: "okrs"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "k360:okrLevel"
+        column: "level"  # company, division, team
+      - property: "k360:okrQuarter"
+        column: "quarter"
+      - property: "k360:okrYear"
+        column: "year"
+      - property: "k360:okrStatus"
+        column: "status"
+    
+    relationships:
+      - property: "k360:cascadesFrom"
+        target_concept: "k360:OKR"
+        foreign_key: "parent_okr_id"
+        target_key: "id"
+      - property: "k360:ownedByDivision"
+        target_concept: "safe:Division"
+        foreign_key: "division_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 5.2 Objective
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Objective"
+    table: "objectives"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:objectiveText"
+        column: "description"
+      - property: "k360:objectiveWeight"
+        column: "weight"
+    
+    relationships:
+      - property: "k360:belongsToOKR"
+        target_concept: "k360:OKR"
+        foreign_key: "okr_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 5.3 Key Result
+  # ---------------------------------------------------------------------------
+  - concept: "k360:KeyResult"
+    table: "key_results"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "k360:keyResultTarget"
+        column: "target_value"
+      - property: "k360:keyResultActual"
+        column: "current_value"
+      - property: "k360:keyResultProgress"
+        column: "progress"
+        transform: "CASE WHEN target_value > 0 THEN current_value / target_value ELSE 0 END"
+      - property: "k360:keyResultUnit"
+        column: "unit"
+      - property: "k360:keyResultStatus"
+        column: "status"
+    
+    relationships:
+      - property: "k360:belongsToObjective"
+        target_concept: "k360:Objective"
+        foreign_key: "objective_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 5.4 Epic-OKR Alignment (Critical for OKR Agent)
+  # ---------------------------------------------------------------------------
+  - concept: "k360:AlignmentScore"
+    table: "epic_okr_alignments"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:alignmentScoreValue"
+        column: "alignment_score"
+      - property: "k360:alignmentRationale"
+        column: "rationale"
+      - property: "k360:measurementDate"
+        column: "calculated_at"
+    
+    relationships:
+      - property: "k360:alignmentForEpic"
+        target_concept: "safe:Epic"
+        foreign_key: "epic_id"
+        target_key: "id"
+      - property: "k360:alignsToOKR"
+        target_concept: "k360:OKR"
+        foreign_key: "okr_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 6: GOVERNANCE AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 6.1 Policy
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Policy"
+    table: "policies"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:policyStatus"
+        column: "status"
+      - property: "k360:policyType"
+        column: "type"
+      - property: "k360:version"
+        column: "version"
+      - property: "k360:valid_from"
+        column: "effective_date"
+      - property: "k360:valid_to"
+        column: "expiry_date"
+      - property: "k360:policyContent"
+        column: "content_yaml"  # GoRules YAML
+    
+    relationships:
+      - property: "k360:supersedes"
+        target_concept: "k360:Policy"
+        foreign_key: "supersedes_id"
+        target_key: "id"
+      - property: "k360:appliesToPortfolio"
+        target_concept: "safe:Portfolio"
+        foreign_key: "portfolio_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 6.2 Threshold Rule (GoRules)
+  # ---------------------------------------------------------------------------
+  - concept: "k360:PolicyRule"
+    table: "threshold_rules"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:ruleCategory"
+        column: "category"
+      - property: "k360:ruleCondition"
+        column: "condition_json"
+      - property: "k360:ruleAction"
+        column: "action_json"
+      - property: "k360:ruleActive"
+        column: "is_active"
+    
+    relationships:
+      - property: "k360:ruleInPolicy"
+        target_concept: "k360:Policy"
+        foreign_key: "policy_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 6.3 Compliance Checkpoint
+  # ---------------------------------------------------------------------------
+  - concept: "k360:ComplianceCheckpoint"
+    table: "compliance_checkpoints"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:complianceStatus"
+        column: "status"
+      - property: "k360:checkpointType"
+        column: "type"
+      - property: "k360:checkDate"
+        column: "checked_at"
+      - property: "k360:findings"
+        column: "findings_json"
+    
+    relationships:
+      - property: "k360:checkpointForProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+      - property: "k360:checksPolicy"
+        target_concept: "k360:Policy"
+        foreign_key: "policy_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 6.4 Risk
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Risk"
+    table: "risks"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:riskSeverity"
+        column: "severity"
+        transform: "probability * impact"
+      - property: "k360:riskProbability"
+        column: "probability"
+      - property: "k360:riskImpact"
+        column: "impact"
+      - property: "k360:riskStatus"
+        column: "status"
+      - property: "k360:riskCategory"
+        column: "category"
+      - property: "k360:riskProximity"
+        column: "proximity"
+      - property: "k360:created_at"
+        column: "created_at"
+      - property: "k360:updated_at"
+        column: "updated_at"
+    
+    relationships:
+      - property: "k360:riskForProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+      - property: "k360:riskForEpic"
+        target_concept: "safe:Epic"
+        foreign_key: "epic_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 6.5 Risk Mitigation
+  # ---------------------------------------------------------------------------
+  - concept: "k360:RiskMitigation"
+    table: "risk_mitigations"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "k360:mitigationType"
+        column: "type"  # Avoid, Transfer, Mitigate, Accept
+      - property: "k360:mitigationStatus"
+        column: "status"
+      - property: "k360:mitigationCost"
+        column: "cost"
+      - property: "k360:dueDate"
+        column: "due_date"
+    
+    relationships:
+      - property: "k360:mitigatesRisk"
+        target_concept: "k360:Risk"
+        foreign_key: "risk_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 6.6 Audit Trail
+  # ---------------------------------------------------------------------------
+  - concept: "k360:AuditTrail"
+    table: "audit_logs"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:auditAction"
+        column: "action"
+      - property: "k360:auditEntity"
+        column: "entity_type"
+      - property: "k360:auditEntityId"
+        column: "entity_id"
+      - property: "k360:auditUser"
+        column: "user_id"
+      - property: "k360:auditTimestamp"
+        column: "created_at"
+      - property: "k360:auditChanges"
+        column: "changes_json"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 7: PLANNING AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 7.1 Capacity Plan
+  # ---------------------------------------------------------------------------
+  - concept: "k360:CapacityPlan"
+    table: "capacity_plans"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:totalCapacity"
+        column: "total_fte"
+      - property: "k360:allocatedCapacity"
+        column: "allocated_fte"
+      - property: "k360:availableCapacity"
+        column: "available_fte"
+        transform: "total_fte - allocated_fte"
+      - property: "k360:valid_from"
+        column: "period_start"
+      - property: "k360:valid_to"
+        column: "period_end"
+    
+    relationships:
+      - property: "k360:capacityForART"
+        target_concept: "safe:ART"
+        foreign_key: "art_id"
+        target_key: "id"
+      - property: "k360:capacityForPI"
+        target_concept: "safe:ProgramIncrement"
+        foreign_key: "pi_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 7.2 Resource
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Resource"
+    table: "resources"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:resourceType"
+        column: "role"
+      - property: "k360:resourceAvailability"
+        column: "availability_percent"
+      - property: "k360:resourceCostRate"
+        column: "cost_rate"
+    
+    relationships:
+      - property: "k360:belongsToTeam"
+        target_concept: "safe:Team"
+        foreign_key: "team_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 7.3 Resource Allocation
+  # ---------------------------------------------------------------------------
+  - concept: "k360:ResourceAllocation"
+    table: "resource_allocations"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:allocationPercent"
+        column: "allocation_percent"
+      - property: "k360:valid_from"
+        column: "start_date"
+      - property: "k360:valid_to"
+        column: "end_date"
+    
+    relationships:
+      - property: "k360:allocatesResource"
+        target_concept: "k360:Resource"
+        foreign_key: "resource_id"
+        target_key: "id"
+      - property: "k360:allocatedToProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 8: OCM AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 8.1 Readiness Assessment
+  # ---------------------------------------------------------------------------
+  - concept: "k360:ReadinessAssessment"
+    table: "stakeholder_readiness"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:readinessScore"
+        column: "overall_score"
+      - property: "k360:awarenessScore"
+        column: "awareness"
+      - property: "k360:desireScore"
+        column: "desire"
+      - property: "k360:knowledgeScore"
+        column: "knowledge"
+      - property: "k360:abilityScore"
+        column: "ability"
+      - property: "k360:reinforcementScore"
+        column: "reinforcement"
+      - property: "k360:assessmentDate"
+        column: "assessed_at"
+    
+    relationships:
+      - property: "k360:assessmentForInitiative"
+        target_concept: "k360:Initiative"
+        foreign_key: "initiative_id"
+        target_key: "id"
+      - property: "k360:assessmentForGroup"
+        target_concept: "k360:StakeholderGroup"
+        foreign_key: "stakeholder_group_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 8.2 Stakeholder Group
+  # ---------------------------------------------------------------------------
+  - concept: "k360:StakeholderGroup"
+    table: "stakeholder_groups"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:groupSize"
+        column: "size"
+      - property: "k360:groupInfluence"
+        column: "influence_level"
+      - property: "k360:groupImpact"
+        column: "impact_level"
+
+  # ---------------------------------------------------------------------------
+  # 8.3 Training Record
+  # ---------------------------------------------------------------------------
+  - concept: "k360:TrainingRecord"
+    table: "training_records"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "training_name"
+      - property: "k360:trainingCompletion"
+        column: "completion_percent"
+        transform: "CAST(completion_percent AS DECIMAL) / 100"
+      - property: "k360:trainingStatus"
+        column: "status"
+      - property: "k360:completionDate"
+        column: "completed_at"
+    
+    relationships:
+      - property: "k360:trainingForInitiative"
+        target_concept: "k360:Initiative"
+        foreign_key: "initiative_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 9: TMO AGENT DOMAIN MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 9.1 Transformation Program
+  # ---------------------------------------------------------------------------
+  - concept: "k360:TransformationProgram"
+    table: "transformation_programs"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "skos:definition"
+        column: "description"
+      - property: "k360:programStatus"
+        column: "status"
+      - property: "k360:programPhase"
+        column: "phase"
+      - property: "k360:valid_from"
+        column: "start_date"
+      - property: "k360:valid_to"
+        column: "target_end_date"
+    
+    relationships:
+      - property: "k360:transformsPortfolio"
+        target_concept: "safe:Portfolio"
+        foreign_key: "portfolio_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 9.2 Initiative
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Initiative"
+    table: "initiatives"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:initiativeStatus"
+        column: "status"
+      - property: "k360:initiativeProgress"
+        column: "progress_percent"
+    
+    relationships:
+      - property: "k360:belongsToProgram"
+        target_concept: "k360:TransformationProgram"
+        foreign_key: "program_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 9.3 Adoption Metric
+  # ---------------------------------------------------------------------------
+  - concept: "k360:AdoptionMetric"
+    table: "adoption_metrics"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:adoptionRate"
+        column: "adoption_rate"
+      - property: "k360:adoptionTarget"
+        column: "target_rate"
+      - property: "k360:adoptionVelocity"
+        column: "velocity"
+      - property: "k360:measurementDate"
+        column: "measured_at"
+    
+    relationships:
+      - property: "k360:adoptionForInitiative"
+        target_concept: "k360:Initiative"
+        foreign_key: "initiative_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 10: AGENT OPERATIONS MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  # ---------------------------------------------------------------------------
+  # 10.1 Agent
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Agent"
+    table: "agent_attributes"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "name"
+      - property: "k360:agentType"
+        column: "type"
+      - property: "k360:agentPersona"
+        column: "persona"
+      - property: "k360:agentModel"
+        column: "model_id"
+
+  # ---------------------------------------------------------------------------
+  # 10.2 Agent State
+  # ---------------------------------------------------------------------------
+  - concept: "k360:AgentState"
+    table: "agent_state"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:agentStatus"
+        column: "status"
+      - property: "k360:lastCycleTime"
+        column: "last_run_at"
+      - property: "k360:cycleCount"
+        column: "cycle_count"
+      - property: "k360:errorCount"
+        column: "error_count"
+    
+    relationships:
+      - property: "k360:stateForAgent"
+        target_concept: "k360:Agent"
+        foreign_key: "agent_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 10.3 A2A Conversation
+  # ---------------------------------------------------------------------------
+  - concept: "k360:A2AConversation"
+    table: "a2a_conversations"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:conversationTopic"
+        column: "topic"
+      - property: "k360:conversationStatus"
+        column: "status"
+      - property: "k360:created_at"
+        column: "created_at"
+
+  # ---------------------------------------------------------------------------
+  # 10.4 A2A Message
+  # ---------------------------------------------------------------------------
+  - concept: "k360:A2AMessage"
+    table: "a2a_messages"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:a2aMessageType"
+        column: "type"
+      - property: "k360:messageContent"
+        column: "content"
+      - property: "k360:created_at"
+        column: "created_at"
+    
+    relationships:
+      - property: "k360:inConversation"
+        target_concept: "k360:A2AConversation"
+        foreign_key: "conversation_id"
+        target_key: "id"
+      - property: "k360:sentByAgent"
+        target_concept: "k360:Agent"
+        foreign_key: "sender_agent_id"
+        target_key: "id"
+      - property: "k360:receivedByAgent"
+        target_concept: "k360:Agent"
+        foreign_key: "receiver_agent_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 10.5 Intervention
+  # ---------------------------------------------------------------------------
+  - concept: "k360:Intervention"
+    table: "interventions"
+    primary_key: "id"
+    
+    properties:
+      - property: "rdfs:label"
+        column: "title"
+      - property: "k360:interventionType"
+        column: "type"
+      - property: "k360:interventionStatus"
+        column: "status"
+      - property: "k360:interventionPriority"
+        column: "priority"
+      - property: "k360:recommendation"
+        column: "recommendation"
+      - property: "k360:evidence"
+        column: "evidence_json"
+      - property: "k360:created_at"
+        column: "created_at"
+      - property: "k360:resolvedAt"
+        column: "resolved_at"
+    
+    relationships:
+      - property: "k360:generatedByAgent"
+        target_concept: "k360:Agent"
+        foreign_key: "agent_id"
+        target_key: "id"
+      - property: "k360:interventionForProject"
+        target_concept: "k360:Project"
+        foreign_key: "project_id"
+        target_key: "id"
+
+  # ---------------------------------------------------------------------------
+  # 10.6 Activity Log
+  # ---------------------------------------------------------------------------
+  - concept: "k360:AgentFinding"
+    table: "activity_log"
+    primary_key: "id"
+    
+    properties:
+      - property: "k360:findingType"
+        column: "type"
+      - property: "k360:findingSummary"
+        column: "summary"
+      - property: "k360:findingDetails"
+        column: "details_json"
+      - property: "k360:sourceAgent"
+        column: "agent_type"
+      - property: "k360:findingConfidence"
+        column: "confidence"
+      - property: "k360:created_at"
+        column: "created_at"
+    
+    relationships:
+      - property: "k360:findingByAgent"
+        target_concept: "k360:Agent"
+        foreign_key: "agent_id"
+        target_key: "id"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 11: SEMANTIC VIEWS (Computed Concepts)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+semantic_views:
+
+  # ---------------------------------------------------------------------------
+  # 11.1 Orphaned Projects (No OKR alignment)
+  # ---------------------------------------------------------------------------
+  - name: "OrphanedProject"
+    concept: "k360:OrphanedProject"
+    query: |
+      SELECT p.id, p.name, p.status
+      FROM projects p
+      LEFT JOIN epic_okr_alignments eoa ON p.epic_id = eoa.epic_id
+      WHERE eoa.id IS NULL
+        AND p.status NOT IN ('Completed', 'Cancelled')
+
+  # ---------------------------------------------------------------------------
+  # 11.2 Critical Risks (Severity > 0.8, no mitigation)
+  # ---------------------------------------------------------------------------
+  - name: "UnmitigatedCriticalRisk"
+    concept: "k360:CriticalRisk"
+    query: |
+      SELECT r.id, r.title, r.probability * r.impact as severity
+      FROM risks r
+      LEFT JOIN risk_mitigations rm ON r.id = rm.risk_id
+      WHERE r.probability * r.impact > 0.8
+        AND rm.id IS NULL
+        AND r.status = 'Open'
+
+  # ---------------------------------------------------------------------------
+  # 11.3 Over-Budget Projects
+  # ---------------------------------------------------------------------------
+  - name: "OverBudgetProject"
+    concept: "k360:OverBudgetProject"
+    query: |
+      SELECT p.id, p.name, pf.actual_spend / pf.budget_amount as utilization
+      FROM projects p
+      JOIN project_financials pf ON p.id = pf.project_id
+      WHERE pf.actual_spend > pf.budget_amount
+        AND p.status NOT IN ('Completed', 'Cancelled')
+
+  # ---------------------------------------------------------------------------
+  # 11.4 Low Readiness Initiatives
+  # ---------------------------------------------------------------------------
+  - name: "LowReadinessInitiative"
+    concept: "k360:LowReadinessInitiative"
+    query: |
+      SELECT i.id, i.name, AVG(sr.overall_score) as avg_readiness
+      FROM initiatives i
+      JOIN stakeholder_readiness sr ON i.id = sr.initiative_id
+      GROUP BY i.id, i.name
+      HAVING AVG(sr.overall_score) < 0.5
+
+  # ---------------------------------------------------------------------------
+  # 11.5 Transformation Fatigue Indicators
+  # ---------------------------------------------------------------------------
+  - name: "TransformationFatigueIndicator"
+    concept: "k360:TransformationFatigue"
+    query: |
+      SELECT d.id as division_id, d.name as division_name,
+             COUNT(CASE WHEN am.velocity < 0 THEN 1 END) as declining_initiatives
+      FROM divisions d
+      JOIN initiatives i ON i.division_id = d.id
+      JOIN adoption_metrics am ON i.id = am.initiative_id
+      GROUP BY d.id, d.name
+      HAVING COUNT(CASE WHEN am.velocity < 0 THEN 1 END) > 3
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 12: INFERENCE RULES (For Agent Reasoning)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+inference_rules:
+
+  # Rule 1: Budget Alert Trigger
+  - name: "BudgetAlertTrigger"
+    description: "Alert when budget utilization > 90% and progress < 70%"
+    condition: |
+      ?budget k360:budgetUtilization ?util .
+      ?budget k360:budgetForProject ?project .
+      ?project k360:percentComplete ?progress .
+      FILTER(?util > 0.9 && ?progress < 0.7)
+    action: "CREATE k360:Alert WITH priority='High', source='FinOps'"
+
+  # Rule 2: Cross-Agent Collaboration
+  - name: "RiskScheduleCorrelation"
+    description: "Initiate A2A when risk correlates with schedule variance"
+    condition: |
+      ?risk k360:riskSeverity ?severity .
+      ?risk k360:riskForProject ?project .
+      ?project k360:hasScheduleVariance ?sv .
+      ?sv k360:spi ?spi .
+      FILTER(?severity > 0.7 && ?spi < 0.9)
+    action: "CREATE k360:A2AConversation BETWEEN Governance AND PMO"
+
+  # Rule 3: Benefit Realization Gap
+  - name: "BenefitGapDetection"
+    description: "Alert VRO when realized benefits < 80% of target"
+    condition: |
+      ?realization k360:benefitActual ?actual .
+      ?realization k360:tracksRealizationOf ?benefit .
+      ?benefit k360:benefitTarget ?target .
+      FILTER(?actual < ?target * 0.8)
+    action: "CREATE k360:Alert WITH priority='High', source='VRO'"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF TIMBR.AI MAPPING CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
