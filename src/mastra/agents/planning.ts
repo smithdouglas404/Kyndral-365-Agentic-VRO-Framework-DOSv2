@@ -12,8 +12,5 @@ export const planningAgent = new Agent({
 
 Help organizations plan effectively for the future by analyzing capacity
 and recommending portfolio optimizations.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
 });

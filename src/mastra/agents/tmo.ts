@@ -12,8 +12,5 @@ export const tmoAgent = new Agent({
 
 Ensure smooth transitions from project to operations by assessing readiness
 and coordinating cutover activities.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
 });

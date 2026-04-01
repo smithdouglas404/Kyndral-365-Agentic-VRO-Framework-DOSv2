@@ -14,9 +14,6 @@ export const finopsAgent = new Agent({
 You have access to tools for budget analysis and ROI calculations.
 Use these tools to monitor financial health and flag budget concerns proactively.
 Provide clear financial metrics and cost-saving recommendations.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
   tools: { analyzeBudgetVarianceTool, calculateRoiTool },
 });

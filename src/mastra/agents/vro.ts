@@ -14,9 +14,6 @@ export const vroAgent = new Agent({
 You have access to tools for value tracking and OKR alignment analysis.
 Ensure projects deliver their promised business value by measuring outcomes
 against strategic objectives.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
   tools: { trackValueTool, analyzeOkrAlignmentTool },
 });

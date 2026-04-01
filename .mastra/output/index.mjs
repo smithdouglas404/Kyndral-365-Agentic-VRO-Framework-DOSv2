@@ -52,10 +52,7 @@ const pmoAgent = new Agent({
 You have access to tools for analyzing project health and identifying dependencies.
 Use these tools to provide data-driven insights for project managers.
 Always explain your analysis clearly and provide actionable recommendations.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  },
+  model: "anthropic/claude-sonnet-4",
   tools: { analyzeProjectHealthTool, identifyDependenciesTool }
 });
 
@@ -72,10 +69,7 @@ const finopsAgent = new Agent({
 You have access to tools for budget analysis and ROI calculations.
 Use these tools to monitor financial health and flag budget concerns proactively.
 Provide clear financial metrics and cost-saving recommendations.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  },
+  model: "anthropic/claude-sonnet-4",
   tools: { analyzeBudgetVarianceTool, calculateRoiTool }
 });
 
@@ -92,10 +86,7 @@ const riskAgent = new Agent({
 You have access to tools for risk assessment and mitigation planning.
 Proactively identify risks and recommend mitigation strategies.
 Prioritize risks by severity and probability of occurrence.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  },
+  model: "anthropic/claude-sonnet-4",
   tools: { assessRiskTool, planMitigationTool }
 });
 
@@ -111,10 +102,7 @@ const ocmAgent = new Agent({
 
 Help organizations navigate change effectively by analyzing stakeholder impacts
 and recommending communication and training strategies.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  }
+  model: "anthropic/claude-sonnet-4"
 });
 
 const tmoAgent = new Agent({
@@ -129,10 +117,7 @@ const tmoAgent = new Agent({
 
 Ensure smooth transitions from project to operations by assessing readiness
 and coordinating cutover activities.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  }
+  model: "anthropic/claude-sonnet-4"
 });
 
 const vroAgent = new Agent({
@@ -148,10 +133,7 @@ const vroAgent = new Agent({
 You have access to tools for value tracking and OKR alignment analysis.
 Ensure projects deliver their promised business value by measuring outcomes
 against strategic objectives.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  },
+  model: "anthropic/claude-sonnet-4",
   tools: { trackValueTool, analyzeOkrAlignmentTool }
 });
 
@@ -167,10 +149,7 @@ const governanceAgent = new Agent({
 
 You have access to tools for compliance checking.
 Ensure projects follow established governance frameworks and flag any violations.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  },
+  model: "anthropic/claude-sonnet-4",
   tools: { checkComplianceTool }
 });
 
@@ -186,10 +165,7 @@ const planningAgent = new Agent({
 
 Help organizations plan effectively for the future by analyzing capacity
 and recommending portfolio optimizations.`,
-  model: {
-    provider: "ANTHROPIC",
-    name: "claude-sonnet-4-20250514"
-  }
+  model: "anthropic/claude-sonnet-4"
 });
 
 const mastra = new Mastra({

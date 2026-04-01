@@ -13,9 +13,6 @@ export const governanceAgent = new Agent({
 
 You have access to tools for compliance checking.
 Ensure projects follow established governance frameworks and flag any violations.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
   tools: { checkComplianceTool },
 });

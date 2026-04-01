@@ -12,8 +12,5 @@ export const ocmAgent = new Agent({
 
 Help organizations navigate change effectively by analyzing stakeholder impacts
 and recommending communication and training strategies.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
 });

@@ -14,9 +14,6 @@ export const pmoAgent = new Agent({
 You have access to tools for analyzing project health and identifying dependencies.
 Use these tools to provide data-driven insights for project managers.
 Always explain your analysis clearly and provide actionable recommendations.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
   tools: { analyzeProjectHealthTool, identifyDependenciesTool },
 });

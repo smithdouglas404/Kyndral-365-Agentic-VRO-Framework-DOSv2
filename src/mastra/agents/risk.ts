@@ -14,9 +14,6 @@ export const riskAgent = new Agent({
 You have access to tools for risk assessment and mitigation planning.
 Proactively identify risks and recommend mitigation strategies.
 Prioritize risks by severity and probability of occurrence.`,
-  model: {
-    provider: 'ANTHROPIC',
-    name: 'claude-sonnet-4-20250514',
-  },
+  model: 'anthropic/claude-sonnet-4',
   tools: { assessRiskTool, planMitigationTool },
 });
