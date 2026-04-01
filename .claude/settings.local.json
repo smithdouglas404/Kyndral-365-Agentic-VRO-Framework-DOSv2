@@ -143,7 +143,10 @@
       "Bash(git push:*)",
       "Bash(git remote set-url:*)",
       "Bash(npx vite build:*)",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "WebFetch(domain:mastra.ai)",
+      "WebFetch(domain:google.github.io)",
+      "WebFetch(domain:a2a-protocol.org)"
     ]
   }
 }

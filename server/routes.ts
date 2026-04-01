@@ -30,6 +30,7 @@ import { registerAgentActionRoutes } from "./routes/agent-actions.js";
 import { registerLogicGatesRoutes } from "./routes/logic-gates.js";
 import mem0ApiRouter from "./routes/mem0-api.js";
 import a2aApiRouter, { setA2ABusGetter } from "./routes/a2a-api.js";
+import { registerAgentIntegrationRoutes, initializeAgentIntegration } from "./integration/mastra-a2a-mcp.js";
 import ontologyApiRouter from "./routes/ontology-api.js";
 import agentSchemasRouter from "./routes/agent-schemas.js";
 import llmCalculatorRouter from "./routes/llm-calculator.js";
@@ -221,8 +222,13 @@ export async function registerRoutes(
   // Register Mem0 API routes (Mem0 fact operations for agents)
   app.use('/api/mem0', mem0ApiRouter);
 
-  // Register A2A API routes (Agent-to-Agent messaging)
+  // Register A2A API routes (Agent-to-Agent messaging - legacy internal bus)
   app.use('/api/a2a', a2aApiRouter);
+
+  // Register Mastra + A2A Protocol + MCP routes (external agent interoperability)
+  // - A2A: Agent Cards, task management, discovery (/.well-known/a2a/agent-card, /api/a2a/*)
+  // - MCP: Tool exposure for external MCP clients (/api/mcp/*)
+  registerAgentIntegrationRoutes(app, storage);
 
   // Register Agent Object Model routes (Agent definitions, attributes, signals)
   registerAgentModelRoutes(app);
@@ -335,6 +341,11 @@ export async function registerRoutes(
       throw new Error('Orchestrator not initialized');
     }
     return orchestrator.getA2ABus();
+  });
+
+  // Initialize Mastra + A2A Protocol + MCP integration (async, non-blocking)
+  initializeAgentIntegration(storage).catch((err) => {
+    console.error('[Routes] Failed to initialize agent integration:', err.message);
   });
 
   // Register Agent Configuration routes (ADMIN - AI agent settings and thresholds)
