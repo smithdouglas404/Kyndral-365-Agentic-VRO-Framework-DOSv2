@@ -1326,30 +1326,38 @@ export class ContinuousOrchestrator {
     await new Promise(resolve => setTimeout(resolve, settings.startupDelayMs));
     console.log('[ContinuousOrchestrator] Startup delay complete');
 
-    // SAFEGUARD 3: Log memory status (Palantir-native mode uses minimal memory)
+    // SAFEGUARD 3: Check memory status - SKIP if too high to prevent OOM crash
     const memCheck = memoryMonitorService.checkMemory(settings.memoryThresholdPercent);
     if (!memCheck.canProceed) {
-      console.warn(`[ContinuousOrchestrator] Memory note: ${memCheck.reason}`);
-      console.warn('[ContinuousOrchestrator] Proceeding anyway - Palantir-native mode (no LLM, low memory usage)');
+      console.warn(`[ContinuousOrchestrator] Memory too high at startup: ${memCheck.reason}`);
+      console.warn('[ContinuousOrchestrator] Deferring orchestration — will retry on interval when memory allows');
       memoryMonitorService.forceGC();
+    } else {
+      console.log('[ContinuousOrchestrator] Memory OK — proceeding with first cycle');
     }
 
     this.isRunning = true;
     memoryMonitorService.logStatus();
 
-    // Initialize Palantir Rules Service
-    await this.initializePalantirRules();
+    // Initialize Palantir Rules and run first cycle ONLY if memory permits
+    if (memCheck.canProceed) {
+      await this.initializePalantirRules();
+      console.log('[ContinuousOrchestrator] Running first orchestration cycle...');
+      await this.orchestrationCycle();
+    } else {
+      console.log('[ContinuousOrchestrator] Palantir Rules init deferred — will initialize on first available cycle');
+    }
 
-    // Run first cycle (after safeguards applied)
-    console.log('[ContinuousOrchestrator] Running first orchestration cycle...');
-    await this.orchestrationCycle();
-
-    // Then run continuously
+    // Then run continuously — but skip cycles when memory is too high
     this.orchestrationInterval = setInterval(async () => {
       const cycleMemCheck = memoryMonitorService.checkMemory(settings.memoryThresholdPercent);
       if (!cycleMemCheck.canProceed) {
-        console.warn(`[ContinuousOrchestrator] Memory note: ${cycleMemCheck.reason} (proceeding - Palantir-native)`);
+        console.warn(`[ContinuousOrchestrator] Skipping cycle — memory too high: ${cycleMemCheck.reason}`);
         memoryMonitorService.forceGC();
+        return;
+      }
+      if (!this.rulesServiceAvailable) {
+        await this.initializePalantirRules();
       }
       await this.orchestrationCycle();
     }, intervalMs);
