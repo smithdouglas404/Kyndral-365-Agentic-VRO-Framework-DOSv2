@@ -44,6 +44,24 @@ export interface OpenRouterOptions {
 const DEFAULT_MODEL = 'anthropic/claude-sonnet-4-20250514';
 const FALLBACK_MODEL = 'anthropic/claude-3.5-sonnet';
 
+/**
+ * Free model fallback chain for Tier 1 (when rate limited)
+ *
+ * PRIMARY: NVIDIA Nemotron 3 Super
+ * - 120B params (12B active via MoE)
+ * - 1M token context
+ * - Agent-optimized architecture
+ * - 50%+ faster than other open models
+ */
+const FREE_MODEL_FALLBACKS = [
+  'nvidia/nemotron-3-super-120b-a12b:free',  // PRIMARY - Agent-optimized
+  'deepseek/deepseek-r1:free',               // Fallback - o1-class reasoning
+  'deepseek/deepseek-chat:free',             // Fallback - Fast
+  'qwen/qwen3-235b-a22b:free',               // Fallback - MoE
+  'nvidia/nemotron-3-super-120b-a12b',       // Paid fallback ($0.30/M)
+  'meta-llama/llama-3.1-8b-instruct',        // Original fallback ($0.10/M)
+];
+
 class OpenRouterClient {
   private apiKey: string | undefined;
   private baseUrl = process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1';
@@ -87,8 +105,16 @@ class OpenRouterClient {
 
   private trackUsage(tokens: number, model: string): void {
     this.dailyTokenCount += tokens;
+
+    // Free models cost $0
+    if (model.endsWith(':free')) {
+      console.log(`[OpenRouterClient] ✅ FREE model used: ${model} (${tokens} tokens, $0)`);
+      return;
+    }
+
     const costPer1M: Record<string, number> = {
       'meta-llama/llama-3.1-8b-instruct': 0.10,
+      'deepseek/deepseek-v3.2': 0.30,
       'mistralai/mixtral-8x7b-instruct': 0.27,
       'openai/gpt-4o-mini': 0.15,
       'openai/gpt-4o': 5.00,
@@ -134,13 +160,15 @@ class OpenRouterClient {
   }
 
   /**
-   * Call OpenRouter API
+   * Call OpenRouter API with automatic free model fallback
    */
   private async callOpenRouter(
     messages: OpenRouterMessage[],
-    options: { model: string; maxTokens: number; temperature: number }
+    options: { model: string; maxTokens: number; temperature: number },
+    attemptedModels: Set<string> = new Set()
   ): Promise<string> {
     const { model, maxTokens, temperature } = options;
+    attemptedModels.add(model);
 
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -161,15 +189,25 @@ class OpenRouterClient {
 
       if (!response.ok) {
         const error = await response.text();
-        console.error('[OpenRouterClient] Error:', error);
-        
-        // Try fallback model if primary fails
+        const status = response.status;
+        console.error(`[OpenRouterClient] ${model} error (${status}):`, error);
+
+        // Rate limited (429) or model unavailable - try fallback
+        if (status === 429 || status === 503 || status === 400) {
+          const nextModel = this.getNextFallbackModel(model, attemptedModels);
+          if (nextModel) {
+            console.log(`[OpenRouterClient] Rate limited on ${model}, trying ${nextModel}`);
+            return this.callOpenRouter(messages, { ...options, model: nextModel }, attemptedModels);
+          }
+        }
+
+        // Try premium fallback if primary fails
         if (model === DEFAULT_MODEL) {
           console.log('[OpenRouterClient] Retrying with fallback model');
-          return this.callOpenRouter(messages, { ...options, model: FALLBACK_MODEL });
+          return this.callOpenRouter(messages, { ...options, model: FALLBACK_MODEL }, attemptedModels);
         }
-        
-        throw new Error(`OpenRouter API error: ${response.status}`);
+
+        throw new Error(`OpenRouter API error: ${status}`);
       }
 
       const data: OpenRouterResponse = await response.json();
@@ -181,7 +219,8 @@ class OpenRouterClient {
 
       if (data.usage) {
         this.trackUsage(data.usage.total_tokens, model);
-        console.log(`[OpenRouterClient] ${model}: ${data.usage.total_tokens} tokens | Daily: $${this.dailyCostEstimate.toFixed(3)}`);
+        const isFree = model.endsWith(':free');
+        console.log(`[OpenRouterClient] ${model}: ${data.usage.total_tokens} tokens ${isFree ? '(FREE)' : `| Daily: $${this.dailyCostEstimate.toFixed(3)}`}`);
       }
 
       return content;
@@ -189,6 +228,32 @@ class OpenRouterClient {
       console.error('[OpenRouterClient] Request failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Get next fallback model from the free model chain
+   */
+  private getNextFallbackModel(currentModel: string, attemptedModels: Set<string>): string | null {
+    // If current is a free model, find next in fallback chain
+    const currentIndex = FREE_MODEL_FALLBACKS.indexOf(currentModel);
+
+    if (currentIndex >= 0) {
+      // Find next unattempted model in chain
+      for (let i = currentIndex + 1; i < FREE_MODEL_FALLBACKS.length; i++) {
+        if (!attemptedModels.has(FREE_MODEL_FALLBACKS[i])) {
+          return FREE_MODEL_FALLBACKS[i];
+        }
+      }
+    } else {
+      // Current model not in free chain, try first free model
+      for (const fallback of FREE_MODEL_FALLBACKS) {
+        if (!attemptedModels.has(fallback)) {
+          return fallback;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

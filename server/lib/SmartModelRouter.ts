@@ -37,7 +37,15 @@ export enum ModelTier {
 
 const MODEL_COSTS: Record<string, number> = {
   'heuristic': 0,
+  // FREE models (OpenRouter free tier)
+  'nvidia/nemotron-3-super-120b-a12b:free': 0,  // PRIMARY - 120B MoE, 1M context, agent-optimized
+  'deepseek/deepseek-r1:free': 0,
+  'deepseek/deepseek-chat:free': 0,
+  'qwen/qwen3-235b-a22b:free': 0,
+  // Paid models (fallback)
+  'nvidia/nemotron-3-super-120b-a12b': 0.30,   // Paid version
   'meta-llama/llama-3.1-8b-instruct': 0.10,
+  'deepseek/deepseek-v3.2': 0.30,
   'mistralai/mixtral-8x7b-instruct': 0.27,
   'openai/gpt-4o-mini': 0.15,
   'openai/gpt-4o': 5.00,
@@ -45,8 +53,29 @@ const MODEL_COSTS: Record<string, number> = {
   'anthropic/claude-sonnet-4': 3.00,
 };
 
+/**
+ * TIER 1 MODEL: NVIDIA Nemotron 3 Super (FREE)
+ *
+ * Specs:
+ * - 120B parameters (activates only 12B via MoE)
+ * - Hybrid Mamba-Transformer architecture
+ * - 1M token context window
+ * - Optimized for agentic reasoning
+ * - 50%+ faster token generation than other open models
+ *
+ * Fallback chain if rate limited:
+ */
+const TIER1_MODELS_PRIORITY = [
+  'nvidia/nemotron-3-super-120b-a12b:free',  // PRIMARY - 120B MoE, agent-optimized
+  'deepseek/deepseek-r1:free',               // Fallback - o1-class reasoning
+  'deepseek/deepseek-chat:free',             // Fallback - Fast general
+  'qwen/qwen3-235b-a22b:free',               // Fallback - Strong MoE
+  'nvidia/nemotron-3-super-120b-a12b',       // Paid fallback ($0.30/M)
+  'meta-llama/llama-3.1-8b-instruct',        // Original fallback ($0.10/M)
+];
+
 const TIER_MODELS: Record<string, string> = {
-  [ModelTier.CHEAP]: 'meta-llama/llama-3.1-8b-instruct',
+  [ModelTier.CHEAP]: 'nvidia/nemotron-3-super-120b-a12b:free',  // FREE! 120B agent-optimized
   [ModelTier.PREMIUM]: 'anthropic/claude-sonnet-4-20250514',
 };
 
