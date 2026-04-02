@@ -157,8 +157,10 @@ export interface AgentTierConfig {
 export class SmartModelRouter {
   private cache: Map<string, CacheEntry> = new Map();
   private cacheTTL: number = 30 * 60 * 1000;
+  private maxCacheSize: number = 100; // Limit cache to prevent memory bloat
   private pendingChanges: Map<string, ProjectChangeEvent[]> = new Map();
   private summaryStore: Map<string, string> = new Map();
+  private maxSummarySize: number = 50; // Limit summaries stored
   private aiEnabled: boolean = false;
   private agentTierOverrides: Map<string, TierOverride> = new Map();
   private projectTierOverrides: Map<string, TierOverride> = new Map();
@@ -744,6 +746,14 @@ export class SmartModelRouter {
     result: string,
     tier: ModelTier
   ): void {
+    // Enforce cache size limit to prevent memory bloat
+    if (this.cache.size >= this.maxCacheSize) {
+      // Remove oldest entries (first 20%)
+      const toRemove = Math.floor(this.maxCacheSize * 0.2);
+      const keys = Array.from(this.cache.keys()).slice(0, toRemove);
+      keys.forEach(k => this.cache.delete(k));
+    }
+
     const cacheKey = this.generateCacheKey(taskType, projectData, agentType);
     this.cache.set(cacheKey, {
       hash: cacheKey,
@@ -751,13 +761,19 @@ export class SmartModelRouter {
       timestamp: Date.now(),
       tier,
     });
-    
+
     if (projectData?.id) {
       this.clearChanges(projectData.id);
     }
   }
 
   storeSummary(agentId: string, projectId: string, summary: string): void {
+    // Enforce summary store size limit
+    if (this.summaryStore.size >= this.maxSummarySize) {
+      const toRemove = Math.floor(this.maxSummarySize * 0.2);
+      const keys = Array.from(this.summaryStore.keys()).slice(0, toRemove);
+      keys.forEach(k => this.summaryStore.delete(k));
+    }
     this.summaryStore.set(`${agentId}:${projectId}`, summary);
   }
 

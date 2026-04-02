@@ -1149,6 +1149,52 @@ export class ContinuousOrchestrator {
   }
 
   /**
+   * Aggressive memory cleanup to prevent OOM crashes
+   * Called at end of each orchestration cycle
+   */
+  private performMemoryCleanup(): void {
+    // Clear old findings (keep only last 10 per project)
+    for (const [projectId, findings] of this.state.recentFindings) {
+      if (findings.length > 10) {
+        this.state.recentFindings.set(projectId, findings.slice(-10));
+      }
+    }
+
+    // Clear old project snapshots (keep only last 50)
+    if (this.projectSnapshots.size > 50) {
+      const entries = Array.from(this.projectSnapshots.entries());
+      const toKeep = entries.slice(-50);
+      this.projectSnapshots.clear();
+      for (const [k, v] of toKeep) {
+        this.projectSnapshots.set(k, v);
+      }
+    }
+
+    // Clear old scan timestamps (keep only recent)
+    for (const [agentId, scanMap] of this.agentLastScan) {
+      if (scanMap.size > 100) {
+        const entries = Array.from(scanMap.entries());
+        const toKeep = entries.slice(-50);
+        scanMap.clear();
+        for (const [k, v] of toKeep) {
+          scanMap.set(k, v);
+        }
+      }
+    }
+
+    // Clear agent context that's older than 5 minutes
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    for (const [key, context] of this.state.agentContext) {
+      if (context.timestamp && context.timestamp < fiveMinutesAgo) {
+        this.state.agentContext.delete(key);
+      }
+    }
+
+    // Force garbage collection if available
+    memoryMonitorService.forceGC();
+  }
+
+  /**
    * Apply a batch result - create intervention or action based on response
    */
   private async applyBatchResult(response: BatchedLLMResponse): Promise<void> {
@@ -1405,10 +1451,14 @@ export class ContinuousOrchestrator {
       // Phase 8: Decay priority scores for fair agent rotation
       this.decayAllPriorities();
 
+      // Phase 9: Aggressive memory cleanup to prevent OOM
+      this.performMemoryCleanup();
+
       const executionTime = Date.now() - startTime;
       const eff = this.getScanEfficiency();
       const batchEff = this.getBatchStats();
-      console.log(`[ContinuousOrchestrator] Cycle ${this.cycleCount} completed in ${executionTime}ms (scan skip: ${eff.skipRate}, batch efficiency: ${batchEff.efficiency})\n`);
+      const memStats = memoryMonitorService.getStats();
+      console.log(`[ContinuousOrchestrator] Cycle ${this.cycleCount} completed in ${executionTime}ms (scan skip: ${eff.skipRate}, batch: ${batchEff.efficiency}, heap: ${memStats.usagePercent}%)\n`);
 
       // Reset error counter on successful cycle
       this.state.errorCount = 0;

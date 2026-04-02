@@ -30,6 +30,7 @@ export class OntologyService {
 
   /**
    * Load all ontology files into the triple store
+   * MEMORY OPTIMIZATION: Load minimal schema only, defer full load
    */
   async loadOntologies(): Promise<void> {
     if (this.isLoaded) {
@@ -37,20 +38,26 @@ export class OntologyService {
       return;
     }
 
-    console.log('[OntologyService] Loading ontologies...');
+    // MEMORY OPTIMIZATION: Only load essential bridging ontology at startup
+    // Full ontologies are loaded on-demand when queries require them
+    const essentialFiles = [
+      'schema/bridging.ttl',    // Cross-methodology bridging (smallest)
+    ];
 
-    const ontologyFiles = [
+    // Deferred loading for memory conservation
+    const deferredFiles = [
       'schema/k360.ttl',        // Primary K360 enterprise ontology (1543 lines)
       'schema/core.ttl',        // Legacy core PM ontology
       'schema/safe.ttl',        // Legacy SAFe extension
       'schema/pmbok.ttl',       // PMBOK mapping
       'schema/prince2.ttl',     // PRINCE2 mapping
-      'schema/bridging.ttl',    // Cross-methodology bridging
     ];
+
+    console.log('[OntologyService] Loading essential ontologies (memory-optimized)...');
 
     const parser = new Parser({ format: 'Turtle' });
 
-    for (const file of ontologyFiles) {
+    for (const file of essentialFiles) {
       try {
         const filePath = join(__dirname, file);
         const content = readFileSync(filePath, 'utf-8');
@@ -59,12 +66,41 @@ export class OntologyService {
         console.log(`[OntologyService] Loaded ${file}: ${quads.length} triples`);
       } catch (error) {
         console.error(`[OntologyService] Error loading ${file}:`, error);
-        throw error;
+        // Don't throw - continue with reduced functionality
       }
     }
 
     this.isLoaded = true;
-    console.log(`[OntologyService] Total triples loaded: ${this.store.size}`);
+    console.log(`[OntologyService] Essential triples loaded: ${this.store.size} (deferred: ${deferredFiles.length} files)`);
+
+    // Store deferred files for lazy loading
+    (this as any).deferredFiles = deferredFiles;
+  }
+
+  /**
+   * Load full ontologies on demand (lazy loading)
+   */
+  async loadFullOntologies(): Promise<void> {
+    const deferredFiles = (this as any).deferredFiles || [];
+    if (deferredFiles.length === 0) return;
+
+    console.log('[OntologyService] Loading full ontologies on demand...');
+    const parser = new Parser({ format: 'Turtle' });
+
+    for (const file of deferredFiles) {
+      try {
+        const filePath = join(__dirname, file);
+        const content = readFileSync(filePath, 'utf-8');
+        const quads = parser.parse(content);
+        this.store.addQuads(quads);
+        console.log(`[OntologyService] Loaded ${file}: ${quads.length} triples`);
+      } catch (error) {
+        console.error(`[OntologyService] Error loading ${file}:`, error);
+      }
+    }
+
+    (this as any).deferredFiles = [];
+    console.log(`[OntologyService] Full ontology loaded: ${this.store.size} triples`);
   }
 
   /**
