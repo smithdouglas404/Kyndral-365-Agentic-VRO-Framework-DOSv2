@@ -2,7 +2,7 @@
  * PALANTIR GRAPH SERVICE
  *
  * Provides graph exploration and cross-domain insights directly from Palantir.
- * This replaces Timbr - Palantir IS the knowledge graph.
+ * Neo4j handles graph traversal; Palantir provides the data.
  *
  * Features:
  * - Node/edge traversal via Palantir Ontology API
@@ -509,7 +509,7 @@ class PalantirGraphService {
   }
 
   /**
-   * Generate cross-domain insights (replaces TimbrQueryService)
+   * Generate cross-domain insights from Palantir data
    */
   async generateCrossDomainInsights(): Promise<NodeInsight['insights']> {
     await this.initialize();

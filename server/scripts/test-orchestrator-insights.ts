@@ -3,7 +3,7 @@
  * Simulates what happens during Phase 5.5 of the orchestration cycle
  */
 
-import { timbrQueryService } from '../services/TimbrQueryService.js';
+import { neo4jInsightService } from '../services/Neo4jInsightService.js';
 import { broadcastAgentInsight } from '../websocket.js';
 
 async function testOrchestratorInsights() {
@@ -14,12 +14,12 @@ async function testOrchestratorInsights() {
 
   try {
     // Initialize
-    console.log('[Phase 5.5] Initializing TimbrQueryService...\n');
-    await timbrQueryService.initialize();
+    console.log('[Phase 5.5] Initializing Neo4jInsightService...\n');
+    await neo4jInsightService.initialize();
 
     // Generate insights (what happens in Phase 5.5)
     console.log('[Phase 5.5] Generating cross-domain insights...\n');
-    const insights = await timbrQueryService.generateCrossDomainInsights();
+    const insights = await neo4jInsightService.generateCrossDomainInsights();
 
     console.log(`\n[Phase 5.5] Processing ${insights.length} insights...\n`);
 
@@ -67,7 +67,7 @@ async function testOrchestratorInsights() {
     console.log('[Phase 5.5] Agent-specific insight distribution:\n');
 
     for (const agentId of agents) {
-      const agentInsights = await timbrQueryService.getAgentDomainInsights(agentId);
+      const agentInsights = await neo4jInsightService.getAgentDomainInsights(agentId);
       console.log(`  ${agentId.toUpperCase()}: ${agentInsights.length} relevant insights`);
       for (const insight of agentInsights) {
         console.log(`    - ${insight.type}: ${insight.title.substring(0, 50)}...`);

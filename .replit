@@ -77,3 +77,6 @@ LANGFLOW_API_URL = "https://aws-us-east-2.langflow.datastax.com/lf/ed39ba15-ded9
 ENABLE_AI_AGENTS = "true"
 PALANTIR_ONTOLOGY_RID = "ri.ontology.main.ontology.84e2e319-c566-4304-a12a-8dbb05224f4f"
 RULEBRICKS_API_URL = "https://rulebricks.com/api/v1"
+NEO4J_URI = "neo4j+s://eaa64e2d.databases.neo4j.io"
+NEO4J_USER = "eaa64e2d"
+NEO4J_PASSWORD = "b31pnxt2sBIPxRqz5JGToJx-TULSnXD2Ds_wJ_eHk4c"

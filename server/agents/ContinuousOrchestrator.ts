@@ -26,7 +26,7 @@ import { getPalantirRulesService, type RuleResult } from '../lib/PalantirRulesSe
 import { serverReadyService } from '../services/ServerReadyService.js';
 import { memoryMonitorService } from '../services/MemoryMonitorService.js';
 import { getSettings } from '../services/OrchestratorConfig.js';
-import { timbrQueryService } from '../services/TimbrQueryService.js';
+import { neo4jInsightService } from '../services/Neo4jInsightService.js';
 
 /**
  * A2A Message Bus for Agent-to-Agent Communication
@@ -2140,11 +2140,11 @@ export class ContinuousOrchestrator {
     try {
       console.log(`[ContinuousOrchestrator] Generating cross-domain insights...`);
 
-      // Initialize the Timbr query service
-      await timbrQueryService.initialize();
+      // Initialize Neo4j insight service and sync from Palantir
+      await neo4jInsightService.initialize();
 
-      // Generate cross-domain insights
-      const insights = await timbrQueryService.generateCrossDomainInsights();
+      // Generate cross-domain insights via Neo4j graph traversal
+      const insights = await neo4jInsightService.generateCrossDomainInsights();
 
       if (insights.length === 0) {
         console.log(`[ContinuousOrchestrator] No cross-domain insights detected`);
@@ -2211,7 +2211,7 @@ export class ContinuousOrchestrator {
       }
 
       // Also get agent-specific insights for the current agent
-      const agentInsights = await timbrQueryService.getAgentDomainInsights(currentAgentId);
+      const agentInsights = await neo4jInsightService.getAgentDomainInsights(currentAgentId);
 
       if (agentInsights.length > 0) {
         console.log(`[ContinuousOrchestrator] Found ${agentInsights.length} domain-specific insights for ${currentAgentId}`);

@@ -1,33 +1,32 @@
 /**
- * Test script for cross-domain insights via TimbrQueryService
+ * Test script for cross-domain insights via Neo4jInsightService
  * Run with: npx tsx server/scripts/test-cross-domain-insights.ts
  */
 
-import { timbrQueryService } from '../services/TimbrQueryService.js';
+import { neo4jInsightService } from '../services/Neo4jInsightService.js';
 
 async function main() {
   console.log('╔══════════════════════════════════════════════════════════════╗');
   console.log('║       CROSS-DOMAIN INSIGHTS TEST                             ║');
-  console.log('║       Testing Timbr + Palantir Integration                   ║');
+  console.log('║       Testing Neo4j + Palantir Integration                    ║');
   console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
   try {
     // Initialize the service
-    console.log('[1] Initializing TimbrQueryService...');
-    await timbrQueryService.initialize();
+    console.log('[1] Initializing Neo4jInsightService...');
+    await neo4jInsightService.initialize();
 
     // Get status
-    const status = timbrQueryService.getStatus();
+    const status = neo4jInsightService.getStatus();
     console.log('\n[2] Service Status:');
+    console.log(`    • Connected: ${status.connected}`);
     console.log(`    • Initialized: ${status.initialized}`);
-    console.log(`    • Timbr Enabled: ${status.timbrEnabled}`);
-    console.log(`    • Palantir Available: ${status.palantirAvailable}`);
     console.log(`    • Data Source: ${status.dataSource}`);
-    console.log(`    • Ontology Triples: ${status.ontologyStats?.totalTriples || 'N/A'}`);
+    console.log(`    • Last Sync: ${status.lastSyncTime || 'never'}`);
 
     // Generate cross-domain insights
     console.log('\n[3] Generating cross-domain insights from Palantir...\n');
-    const insights = await timbrQueryService.generateCrossDomainInsights();
+    const insights = await neo4jInsightService.generateCrossDomainInsights();
 
     if (insights.length === 0) {
       console.log('    ⚠️  No cross-domain insights generated');
@@ -63,23 +62,16 @@ async function main() {
     if (insights.length > 0) {
       console.log('[4] Testing write-back to Palantir...');
       const testInsight = insights[0];
-      const writeResult = await timbrQueryService.writeInsightToPalantir(testInsight);
+      const writeResult = await neo4jInsightService.writeInsightToPalantir(testInsight);
       console.log(`    Write result: ${writeResult ? '✅ Success' : '⚠️ Failed (Palantir action not available)'}\n`);
     }
 
-    // Test a semantic query
-    console.log('[5] Testing semantic query: k360:Project...');
-    const projectQuery = await timbrQueryService.query('k360:Project', undefined, 5);
-    console.log(`    Source: ${projectQuery.source}`);
-    console.log(`    Results: ${projectQuery.count} projects`);
-    console.log(`    Execution time: ${projectQuery.executionTime}ms`);
-
-    if (projectQuery.entities.length > 0) {
-      console.log('    Sample projects:');
-      for (const project of projectQuery.entities.slice(0, 3)) {
-        console.log(`      - ${project.title || project.name || project.id}`);
-      }
-    }
+    // Test Neo4j status
+    console.log('[5] Neo4j service status:');
+    const neo4jStatus = neo4jInsightService.getStatus();
+    console.log(`    Connected: ${neo4jStatus.connected}`);
+    console.log(`    Data source: ${neo4jStatus.dataSource}`);
+    console.log(`    Last sync: ${neo4jStatus.lastSyncTime || 'never'}`);
 
     console.log('\n╔══════════════════════════════════════════════════════════════╗');
     console.log('║       ✅ TEST COMPLETE                                       ║');
