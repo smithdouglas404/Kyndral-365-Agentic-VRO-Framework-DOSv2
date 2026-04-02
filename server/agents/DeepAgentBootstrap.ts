@@ -103,15 +103,19 @@ export class DeepAgentBootstrap {
       console.log('[DeepAgentBootstrap] ✅ MCP protocol ready');
       console.log(`[DeepAgentBootstrap] ✅ Cost optimization: ${costStatus.preferredTier}`);
       
-      if (settings.enabled) {
-        // Admin enabled orchestration - auto-start
-        console.log('[DeepAgentBootstrap] ⚡ Orchestration ENABLED by admin');
-        await this.orchestrator.start(settings.interval);
-        console.log(`[DeepAgentBootstrap] ✅ Continuous orchestration running (${settings.interval / 1000}s interval)`);
+      // Auto-start orchestration if OpenRouter is configured (cost-optimized)
+      const shouldStart = settings.enabled || costStatus.openRouterEnabled;
+
+      if (shouldStart) {
+        const interval = settings.interval || 300000; // Default 5 min
+        console.log('[DeepAgentBootstrap] ⚡ Orchestration ENABLED');
+        console.log(`[DeepAgentBootstrap] ✅ Using NVIDIA Nemotron 3 Super (FREE via OpenRouter)`);
+        await this.orchestrator.start(interval);
+        console.log(`[DeepAgentBootstrap] ✅ Continuous orchestration running (${interval / 1000}s interval)`);
       } else {
-        // Default OFF - respects admin preference
-        console.log('[DeepAgentBootstrap] ⚠️  Continuous orchestration OFF (default)');
-        console.log('[DeepAgentBootstrap] 💡 Admin can enable in Settings > Orchestrator');
+        // No LLM configured - cannot run
+        console.log('[DeepAgentBootstrap] ⚠️  Continuous orchestration OFF (no LLM configured)');
+        console.log('[DeepAgentBootstrap] 💡 Set OPENROUTER_API_KEY to enable');
       }
     } catch (error) {
       console.error('[DeepAgentBootstrap] ❌ Initialization failed:', error);

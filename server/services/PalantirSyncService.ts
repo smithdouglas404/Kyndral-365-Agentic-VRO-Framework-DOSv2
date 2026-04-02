@@ -768,13 +768,92 @@ class PalantirSyncServiceClass {
       return;
     }
 
+    const palantirParams = this.mapToActionParameters(objectType, actionName, data);
+
     try {
-      await this.palantirService.applyAction(actionName, data);
-      console.log(`[PalantirSync] ✓ Synced ${objectType} ${data.project_id || data.id} to Palantir`);
+      await this.palantirService.applyAction(actionName, palantirParams);
+      console.log(`[PalantirSync] ✓ Synced ${objectType} ${palantirParams.project_id || palantirParams.insight_id || data.id} to Palantir`);
     } catch (err: any) {
       console.error(`[PalantirSync] ✗ Failed to sync ${objectType}: ${err.message}`);
       throw err;
     }
+  }
+
+  private mapToActionParameters(objectType: string, actionName: string, data: Record<string, any>): Record<string, any> {
+    const id = data.id || data.sourceId || `sync-${Date.now()}`;
+    const source = data.source || 'unknown';
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_PROJECT || actionName === PALANTIR_ACTIONS.UPDATE_PROJECT) {
+      return {
+        project_id: data.project_id || id,
+        name: data.name || `[${source}] Item ${id}`,
+        status: data.status || 'Planning',
+        description: data.description || `Synced from ${source}`,
+        ...(data.priority !== undefined && { priority: String(data.priority) }),
+        ...(data.assignee && { owner: data.assignee }),
+        ...(data.dueDate && { end_date: data.dueDate }),
+        ...(data.startDate && { start_date: data.startDate }),
+      };
+    }
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_RISK) {
+      return {
+        risk_id: data.risk_id || id,
+        title: data.name || data.title || `Risk from ${source}`,
+        status: data.status || 'New',
+        ...(data.description && { description: data.description }),
+        ...(data.severity && { severity: data.severity }),
+        ...(data.probability && { probability: String(data.probability) }),
+      };
+    }
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_KPI) {
+      return {
+        kpi_id: data.kpi_id || id,
+        name: data.name || `KPI from ${source}`,
+        ...(data.value !== undefined && { current_value: String(data.value) }),
+        ...(data.target !== undefined && { target_value: String(data.target) }),
+      };
+    }
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_OBJECTIVE) {
+      return {
+        objective_id: data.objective_id || id,
+        title: data.name || data.title || `Objective from ${source}`,
+        status: data.status || 'Draft',
+        ...(data.description && { description: data.description }),
+      };
+    }
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_INSIGHT) {
+      return {
+        insight_id: data.insight_id || id,
+        title: data.name || data.title || `Insight from ${source}`,
+        status: data.status || 'New',
+        insight_type: data.insight_type || data.type || 'Observation',
+        ...(data.description && { description: data.description }),
+      };
+    }
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_TRANSFORMATION) {
+      return {
+        transformation_id: data.transformation_id || id,
+        name: data.name || `Transformation from ${source}`,
+        status: data.status || 'Planning',
+        ...(data.description && { description: data.description }),
+      };
+    }
+
+    if (actionName === PALANTIR_ACTIONS.CREATE_DEPENDENCY) {
+      return {
+        dependency_id: data.dependency_id || id,
+        source_project_id: data.source_project_id || data.sourceProjectId || id,
+        target_project_id: data.target_project_id || data.targetProjectId || id,
+        dependency_type: data.dependency_type || data.type || 'blocks',
+      };
+    }
+
+    return { ...data, project_id: data.project_id || id };
   }
 
   private async findInPalantir(objectType: string, id: string): Promise<any | null> {

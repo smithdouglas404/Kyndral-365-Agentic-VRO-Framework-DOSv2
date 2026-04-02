@@ -74,6 +74,28 @@ function getNextRunTime(cronExpression: string, from: Date = new Date()): Date {
   return next;
 }
 
+function normalizeSyncType(job: any): string {
+  const syncType = (job.syncType || '').toLowerCase().trim();
+
+  if (['jira', 'servicenow', 'azure_devops', 'planview', 'msproject', 'smartsheet', 'rally', 'monday', 'asana'].includes(syncType)) {
+    return syncType;
+  }
+
+  const jobName = (job.name || '').toLowerCase();
+  if (jobName.includes('azure') || jobName.includes('devops')) return 'azure_devops';
+  if (jobName.includes('servicenow') || jobName.includes('snow')) return 'servicenow';
+  if (jobName.includes('jira')) return 'jira';
+  if (jobName.includes('monday')) return 'monday';
+  if (jobName.includes('openproject')) return 'openproject';
+  if (jobName.includes('asana')) return 'asana';
+  if (jobName.includes('planview')) return 'planview';
+  if (jobName.includes('smartsheet')) return 'smartsheet';
+  if (jobName.includes('rally')) return 'rally';
+  if (jobName.includes('msproject') || jobName.includes('ms project')) return 'msproject';
+
+  return syncType;
+}
+
 async function executeSyncJob(jobId: string): Promise<void> {
   try {
     const job = await storage.getSyncJob(jobId);
@@ -97,7 +119,9 @@ async function executeSyncJob(jobId: string): Promise<void> {
       let recordsFailed = 0;
       const errors: string[] = [];
 
-      if (job.syncType === 'jira' && job.mcpAdapterId) {
+      const normalizedSyncType = normalizeSyncType(job);
+
+      if (normalizedSyncType === 'jira' && job.mcpAdapterId) {
         const client = await createJiraClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Jira client - check adapter configuration");
@@ -123,7 +147,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'servicenow' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'servicenow' && job.mcpAdapterId) {
         const client = await createServiceNowClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create ServiceNow client - check adapter configuration");
@@ -149,7 +173,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'azure_devops' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'azure_devops' && job.mcpAdapterId) {
         const client = await createAzureDevOpsClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Azure DevOps client - check adapter configuration");
@@ -163,7 +187,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'planview' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'planview' && job.mcpAdapterId) {
         const client = await createPlanviewClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Planview client - check adapter configuration (instanceUrl, apiKey)");
@@ -189,7 +213,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'msproject' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'msproject' && job.mcpAdapterId) {
         const client = await createMSProjectClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create MS Project client - check adapter configuration (tenantId, clientId, clientSecret)");
@@ -215,7 +239,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'smartsheet' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'smartsheet' && job.mcpAdapterId) {
         const client = await createSmartsheetClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Smartsheet client - check adapter configuration (accessToken)");
@@ -241,7 +265,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'rally' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'rally' && job.mcpAdapterId) {
         const client = await createRallyClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Rally client - check adapter configuration (apiKey)");
@@ -267,7 +291,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'monday' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'monday' && job.mcpAdapterId) {
         const client = await createMondayClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Monday.com client - check adapter configuration (apiKey)");
@@ -293,7 +317,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
-      } else if (job.syncType === 'asana' && job.mcpAdapterId) {
+      } else if (normalizedSyncType === 'asana' && job.mcpAdapterId) {
         const client = await createAsanaClientFromAdapter(job.mcpAdapterId);
         if (!client) {
           throw new Error("Failed to create Asana client - check adapter configuration (accessToken)");
@@ -320,7 +344,7 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
       } else {
-        throw new Error(`Unsupported sync type: ${job.syncType} - supported types: jira, servicenow, azure_devops, planview, msproject, smartsheet, rally, monday, asana`);
+        throw new Error(`Unsupported sync type: ${normalizedSyncType} (original: ${job.syncType}) - supported types: jira, servicenow, azure_devops, planview, msproject, smartsheet, rally, monday, asana`);
       }
 
       await storage.updateSyncJobRun(run.id, {
