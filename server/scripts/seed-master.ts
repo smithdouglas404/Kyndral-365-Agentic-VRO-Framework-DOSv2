@@ -460,8 +460,8 @@ export async function runMasterSeed() {
   }
 }
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run if called directly (skip in bundled mode)
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   runMasterSeed()
     .then(() => {
       console.log('[Seed] Done!');

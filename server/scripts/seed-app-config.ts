@@ -134,7 +134,7 @@ export async function seedAppConfigs(): Promise<void> {
 }
 
 // Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   seedAppConfigs()
     .then(() => process.exit(0))
     .catch((error) => {

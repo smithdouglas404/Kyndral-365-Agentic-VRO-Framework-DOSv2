@@ -103,7 +103,7 @@ async function seedIndustryProfiles() {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   seedIndustryProfiles()
     .then(() => {
       console.log('[Seed] Done!');

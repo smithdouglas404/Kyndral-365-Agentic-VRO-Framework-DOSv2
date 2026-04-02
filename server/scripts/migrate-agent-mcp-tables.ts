@@ -174,7 +174,7 @@ async function migrateAgentMcpTables() {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   migrateAgentMcpTables()
     .then(() => {
       console.log('[Migration] Done');

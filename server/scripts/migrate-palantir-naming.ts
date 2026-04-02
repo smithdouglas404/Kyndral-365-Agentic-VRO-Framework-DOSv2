@@ -340,7 +340,7 @@ export async function runPalantirMigration(): Promise<MigrationResult> {
 }
 
 // Run if called directly as a script
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   runPalantirMigration()
     .then((result) => {
       if (result.success) {

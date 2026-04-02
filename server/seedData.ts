@@ -614,8 +614,8 @@ export async function seedDatabase() {
   }
 }
 
-// Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run if executed directly (skip in bundled mode)
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   seedDatabase()
     .then(() => {
       console.log('\n✅ Seeding complete!');

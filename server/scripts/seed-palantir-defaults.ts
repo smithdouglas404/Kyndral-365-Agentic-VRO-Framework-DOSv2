@@ -542,7 +542,7 @@ export async function seedPalantirDefaults(): Promise<SeedResult> {
 }
 
 // Run if called directly as a script
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (!(globalThis as any).__BUNDLED__ && import.meta.url === `file://${process.argv[1]}`) {
   seedPalantirDefaults()
     .then((result) => {
       if (result.success) {
