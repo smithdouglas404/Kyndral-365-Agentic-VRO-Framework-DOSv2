@@ -33,14 +33,22 @@ import mcpAgentsRouter, { setMCPStorage } from '../routes/mcp-agents.js';
 
 /**
  * Initialize the agent integration layer
+ * MEMORY OPTIMIZATION: Set DISABLE_MASTRA=true to skip Mastra for low-memory environments
  */
 export async function initializeAgentIntegration(storage: IStorage): Promise<void> {
   console.log('[Integration] Initializing Mastra + A2A + MCP integration...');
 
-  // 1. Initialize Mastra with storage
-  await initializeMastra(storage);
-  const mastra = getMastra();
-  console.log(`[Integration] Mastra initialized with ${listAgentTypes().length} agent types`);
+  // MEMORY OPTIMIZATION: Skip Mastra in low-memory mode
+  const disableMastra = process.env.DISABLE_MASTRA === 'true';
+
+  if (disableMastra) {
+    console.log('[Integration] ⚠️  Mastra DISABLED (DISABLE_MASTRA=true) - using Deep Agents only');
+  } else {
+    // 1. Initialize Mastra with storage
+    await initializeMastra(storage);
+    const mastra = getMastra();
+    console.log(`[Integration] Mastra initialized with ${listAgentTypes().length} agent types`);
+  }
 
   // 2. Initialize A2A Registry
   await initializeA2ARegistry();

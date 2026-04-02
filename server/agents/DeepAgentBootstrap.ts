@@ -55,36 +55,54 @@ export class DeepAgentBootstrap {
     console.log('[DeepAgentBootstrap] Features: RAG, Mem0, Letta, Rules Engine, Policy-as-Code, A2A, MCP');
 
     try {
-      // Initialize all 10 deep agents with advanced capabilities
-      console.log('[DeepAgentBootstrap] Loading deep agents...');
+      // MEMORY OPTIMIZATION: LITE_MODE loads only 3 essential agents
+      const liteMode = process.env.LITE_MODE === 'true';
 
-      const deepFinOps = new DeepFinOpsAgent(this.storage);
-      const deepTMO = new DeepTMOAgent(this.storage);
-      const deepRisk = new DeepRiskAgent(this.storage);
-      const deepVRO = new DeepVROAgent(this.storage);
-      const deepPMO = new DeepPMOAgent(this.storage);
-      const deepOCM = new DeepOCMAgent(this.storage);
-      const deepGovernance = new DeepGovernanceAgent(this.storage);
-      const deepPlanning = new DeepPlanningAgent(this.storage);
-      const deepIntegrated = new DeepIntegratedMgmtAgent(this.storage);
-      const deepOKR = new DeepOKRInferenceAgent(this.storage);
-      const deepNotification = new DeepNotificationAgent(this.storage);
+      if (liteMode) {
+        console.log('[DeepAgentBootstrap] 🚀 LITE MODE - Loading 3 essential agents only');
 
-      this.agents.set('finops', deepFinOps);
-      this.agents.set('tmo', deepTMO);
-      this.agents.set('risk', deepRisk);
-      this.agents.set('vro', deepVRO);
-      this.agents.set('pmo', deepPMO);
-      this.agents.set('ocm', deepOCM);
-      this.agents.set('governance', deepGovernance);
-      this.agents.set('planning', deepPlanning);
-      this.agents.set('integrated', deepIntegrated);
-      this.agents.set('okr', deepOKR);
-      this.agents.set('notification', deepNotification);
+        const deepPMO = new DeepPMOAgent(this.storage);
+        const deepFinOps = new DeepFinOpsAgent(this.storage);
+        const deepRisk = new DeepRiskAgent(this.storage);
 
-      console.log(`[DeepAgentBootstrap] Loaded ${this.agents.size} agents:`);
-      console.log(`  - 10 Domain Agents: FinOps, TMO, Risk, VRO, PMO, OCM, Governance, Planning, Integrated, OKR`);
-      console.log(`  - 1 Notification Agent: Central gateway to Palantir (actions, HITL, broadcasts)`);
+        this.agents.set('pmo', deepPMO);
+        this.agents.set('finops', deepFinOps);
+        this.agents.set('risk', deepRisk);
+
+        console.log(`[DeepAgentBootstrap] Loaded ${this.agents.size} essential agents (PMO, FinOps, Risk)`);
+      } else {
+        // Full mode - all 11 agents
+        console.log('[DeepAgentBootstrap] Loading all deep agents...');
+
+        const deepFinOps = new DeepFinOpsAgent(this.storage);
+        const deepTMO = new DeepTMOAgent(this.storage);
+        const deepRisk = new DeepRiskAgent(this.storage);
+        const deepVRO = new DeepVROAgent(this.storage);
+        const deepPMO = new DeepPMOAgent(this.storage);
+        const deepOCM = new DeepOCMAgent(this.storage);
+        const deepGovernance = new DeepGovernanceAgent(this.storage);
+        const deepPlanning = new DeepPlanningAgent(this.storage);
+        const deepIntegrated = new DeepIntegratedMgmtAgent(this.storage);
+        const deepOKR = new DeepOKRInferenceAgent(this.storage);
+        const deepNotification = new DeepNotificationAgent(this.storage);
+
+        this.agents.set('finops', deepFinOps);
+        this.agents.set('tmo', deepTMO);
+        this.agents.set('risk', deepRisk);
+        this.agents.set('vro', deepVRO);
+        this.agents.set('pmo', deepPMO);
+        this.agents.set('ocm', deepOCM);
+        this.agents.set('governance', deepGovernance);
+        this.agents.set('planning', deepPlanning);
+        this.agents.set('integrated', deepIntegrated);
+        this.agents.set('okr', deepOKR);
+        this.agents.set('notification', deepNotification);
+
+        console.log(`[DeepAgentBootstrap] Loaded ${this.agents.size} agents:`);
+        console.log(`  - 10 Domain Agents: FinOps, TMO, Risk, VRO, PMO, OCM, Governance, Planning, Integrated, OKR`);
+        console.log(`  - 1 Notification Agent: Central gateway to Palantir (actions, HITL, broadcasts)`);
+      }
+
       console.log(`  - ✅ All agents upgraded to Deep Agent architecture`);
 
       // Initialize continuous orchestrator with A2A message bus
