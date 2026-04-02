@@ -2,19 +2,23 @@
  * TIMBR QUERY SERVICE
  *
  * Provides semantic query capabilities for the K360 ontology.
- * Can use Timbr.ai (if configured) or fall back to local PostgreSQL
- * with ontology-based query rewriting.
  *
- * This service enables cross-domain insights by translating semantic
- * queries into data queries against the underlying tables.
+ * ARCHITECTURE:
+ * - Palantir Foundry = Source of truth (stores all data, Actions execute there)
+ * - Timbr.ai = Semantic query layer (virtual knowledge graph on top of Palantir)
+ *
+ * The Flow:
+ * 1. Palantir provides the data (27 object types)
+ * 2. Timbr provides the connections (cross-domain queries in one shot)
+ * 3. Agent generates insight based on cross-domain correlation
+ * 4. Palantir records the result via atlas-create-insight action
  */
 
 import { ontologyService } from '../ontology/index.js';
-import { storage } from '../storage.js';
-import { db } from '../db/index.js';
-import { sql } from 'drizzle-orm';
+import { getPalantirDataProvider } from '../mcp/PalantirDataProvider.js';
+import { getPalantirService } from '../mcp/MCPServiceFactory.js';
 
-// Timbr.ai configuration
+// Timbr.ai configuration (sits on top of Palantir)
 interface TimbrConfig {
   endpoint: string;
   knowledgeGraph: string;
@@ -27,86 +31,77 @@ interface SemanticQueryResult {
   entities: Record<string, any>[];
   count: number;
   query: string;
-  source: 'timbr' | 'local';
+  source: 'timbr' | 'palantir';
   executionTime: number;
 }
 
 interface CrossDomainInsight {
   type: string;
-  severity: 'info' | 'warning' | 'critical';
+  severity: 'info' | 'warning' | 'critical' | 'high';
   title: string;
   description: string;
   affectedEntities: string[];
+  affectedDomains?: string[];
   recommendedActions: string[];
+  recommendation?: string;
+  relatedEntities?: any[];
   sourceAgents: string[];
   confidence: number;
+  details?: Record<string, any>;
 }
 
-// Concept to table mapping (derived from timbr-mapping.yaml)
-const CONCEPT_TABLE_MAP: Record<string, string> = {
-  // SAFe hierarchy
-  'safe:Portfolio': 'portfolios',
-  'safe:ValueStream': 'value_streams',
-  'safe:ART': 'arts',
-  'safe:Team': 'teams',
-  'safe:Division': 'divisions',
-  'safe:Epic': 'epics',
-  'safe:Feature': 'features',
-  'safe:Story': 'stories',
-  'safe:Task': 'tasks',
-  'safe:ProgramIncrement': 'program_increments',
-  'safe:Sprint': 'sprints',
+// K360 Concept to Palantir Object Type mapping
+const CONCEPT_PALANTIR_MAP: Record<string, string> = {
+  // SAFe hierarchy -> Palantir objects
+  'safe:Portfolio': 'AtlasPortfolio',
+  'safe:ValueStream': 'AtlasValueStream',
+  'safe:ART': 'AtlasART',
+  'safe:Team': 'AtlasTeam',
+  'safe:Epic': 'AtlasEpic',
+  'safe:Feature': 'AtlasFeature',
+  'safe:Story': 'AtlasStory',
+  'safe:Task': 'AtlasTask',
+  'safe:ProgramIncrement': 'AtlasProgramIncrement',
+  'safe:Sprint': 'AtlasSprint',
 
-  // K360 agent domains
-  'k360:Project': 'projects',
-  'k360:Program': 'programs',
-  'k360:Investment': 'investments',
-  'k360:Budget': 'budgets',
-  'k360:Risk': 'risks',
-  'k360:Policy': 'company_rules',
-  'k360:Objective': 'strategic_objectives',
-  'k360:KeyResult': 'key_results',
-  'k360:Stakeholder': 'stakeholders',
-  'k360:Resource': 'resources',
-  'k360:Notification': 'notifications',
-  'k360:AuditTrail': 'audit_logs',
-
-  // Computed concepts (semantic views)
-  'k360:OrphanedProject': 'v_orphaned_projects',
-  'k360:OverAllocatedResource': 'v_over_allocated_resources',
-  'k360:AtRiskProject': 'v_at_risk_projects',
-  'k360:UnmitigatedCriticalRisk': 'v_unmitigated_critical_risks',
-  'k360:DependencyBottleneck': 'v_dependency_bottlenecks',
-  'k360:BudgetScheduleCorrelation': 'v_budget_schedule_correlation',
-  'k360:LowVelocityTeam': 'v_low_velocity_projects',
-  'k360:AlignmentScore': 'v_strategic_alignment',
-  'k360:CrossDomainInsight': 'v_cross_domain_summary',
-  'k360:AgentDomainEntity': 'v_agent_domain_entities',
-
-  // Fallbacks
-  'k360:Entity': 'company_ontology_instances',
+  // K360 agent domains -> Palantir objects
+  'k360:Project': 'AtlasProject',
+  'k360:Transformation': 'AtlasTransformation',
+  'k360:Budget': 'AtlasBudget',
+  'k360:Risk': 'AtlasRisk',
+  'k360:Objective': 'AtlasObjective',
+  'k360:KeyResult': 'AtlasKeyResult',
+  'k360:Kpi': 'AtlasKpi',
+  'k360:Insight': 'AtlasInsight',
+  'k360:Resource': 'AtlasPerson',
+  'k360:Team': 'AtlasTeam',
+  'k360:Dependency': 'AtlasDependency',
+  'k360:GovernanceCheckpoint': 'AtlasGovernanceCheckpoint',
+  'k360:ReadinessMetric': 'AtlasReadinessMetric',
+  'k360:FinancialRecord': 'AtlasFinancialRecord',
+  'k360:Agent': 'AtlasAgent',
 };
 
-// Property to column mapping
-const PROPERTY_COLUMN_MAP: Record<string, string> = {
-  'rdfs:label': 'name',
+// Property to Palantir property mapping
+const PROPERTY_PALANTIR_MAP: Record<string, string> = {
+  'rdfs:label': 'title',
   'k360:projectStatus': 'status',
-  'k360:percentComplete': 'percent_complete',
-  'k360:budgetAmount': 'budget',
-  'k360:actualSpend': 'actual_spend',
-  'k360:budgetUtilization': 'utilization',
+  'k360:percentComplete': 'progressPercent',
+  'k360:budgetAmount': 'budgetTotal',
+  'k360:actualSpend': 'actualCost',
+  'k360:budgetUtilization': 'budgetVariance',
   'k360:riskSeverity': 'severity',
   'k360:riskProbability': 'probability',
   'k360:riskImpact': 'impact',
-  'k360:keyResultProgress': 'progress',
-  'k360:alignmentScoreValue': 'alignment_score',
-  'k360:adoptionRate': 'adoption_rate',
-  'k360:healthScore': 'health_score',
+  'k360:cpiValue': 'cpi',
+  'k360:spiValue': 'spi',
 };
 
 class TimbrQueryService {
   private config: TimbrConfig;
   private initialized = false;
+  private palantirProvider: ReturnType<typeof getPalantirDataProvider> | null = null;
+  private palantirService: ReturnType<typeof getPalantirService> | null = null;
 
   constructor() {
     this.config = {
@@ -120,22 +115,39 @@ class TimbrQueryService {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    // Ensure ontology is loaded
+    // Initialize Palantir connection (source of truth)
+    this.palantirProvider = getPalantirDataProvider();
+    this.palantirService = getPalantirService();
+
+    // Load ontology definitions
     await ontologyService.loadOntologies();
 
+    // Log initialization status
+    const palantirAvailable = this.palantirProvider?.isAvailable() || false;
+
     if (this.config.enabled) {
-      console.log('[TimbrQueryService] Timbr.ai integration enabled');
+      console.log('[TimbrQueryService] Timbr.ai enabled - semantic queries via Timbr → Palantir');
       console.log(`[TimbrQueryService] Endpoint: ${this.config.endpoint}`);
       console.log(`[TimbrQueryService] Knowledge Graph: ${this.config.knowledgeGraph}`);
+    } else if (palantirAvailable) {
+      console.log('[TimbrQueryService] Palantir direct mode - queries go straight to Foundry');
     } else {
-      console.log('[TimbrQueryService] Using local semantic query engine (Timbr not configured)');
+      console.warn('[TimbrQueryService] WARNING: Palantir not available - cross-domain queries will return empty results');
     }
 
     this.initialized = true;
   }
 
   /**
+   * Check if Palantir is available as source of truth
+   */
+  isPalantirAvailable(): boolean {
+    return this.palantirProvider?.isAvailable() || false;
+  }
+
+  /**
    * Execute a semantic query against the knowledge graph
+   * Priority: Timbr (if enabled) → Palantir direct
    */
   async query(
     concept: string,
@@ -144,15 +156,17 @@ class TimbrQueryService {
   ): Promise<SemanticQueryResult> {
     const startTime = Date.now();
 
+    // Priority 1: Use Timbr.ai if enabled (semantic layer on top of Palantir)
     if (this.config.enabled) {
       return this.executeTimbrQuery(concept, filters, limit, startTime);
-    } else {
-      return this.executeLocalQuery(concept, filters, limit, startTime);
     }
+
+    // Priority 2: Query Palantir directly
+    return this.executePalantirQuery(concept, filters, limit, startTime);
   }
 
   /**
-   * Execute query via Timbr.ai
+   * Execute query via Timbr.ai (semantic layer on top of Palantir)
    */
   private async executeTimbrQuery(
     concept: string,
@@ -200,103 +214,136 @@ class TimbrQueryService {
         executionTime: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('[TimbrQueryService] Timbr query failed, falling back to local:', error);
-      return this.executeLocalQuery(concept, filters, limit, startTime);
+      console.error('[TimbrQueryService] Timbr query failed, falling back to Palantir direct:', error);
+      return this.executePalantirQuery(concept, filters, limit, startTime);
     }
   }
 
   /**
-   * Execute query locally with ontology-based mapping
+   * Execute query directly against Palantir Foundry
    */
-  private async executeLocalQuery(
+  private async executePalantirQuery(
     concept: string,
     filters: Record<string, any> | undefined,
     limit: number,
     startTime: number
   ): Promise<SemanticQueryResult> {
-    // Map concept to table
-    const tableName = CONCEPT_TABLE_MAP[concept];
+    const palantirObjectType = CONCEPT_PALANTIR_MAP[concept];
 
-    if (!tableName) {
-      console.warn(`[TimbrQueryService] No table mapping for concept: ${concept}`);
+    if (!palantirObjectType) {
+      console.warn(`[TimbrQueryService] No Palantir mapping for concept: ${concept}`);
       return {
         entities: [],
         count: 0,
-        query: `SELECT * FROM ${concept} (unmapped)`,
-        source: 'local',
+        query: `Palantir: ${concept} (unmapped)`,
+        source: 'palantir',
         executionTime: Date.now() - startTime,
       };
     }
 
-    // Build SQL query
-    let query = `SELECT * FROM ${tableName}`;
-    const params: any[] = [];
-
-    if (filters && Object.keys(filters).length > 0) {
-      const conditions: string[] = [];
-      let paramIndex = 1;
-
-      for (const [key, value] of Object.entries(filters)) {
-        const columnName = PROPERTY_COLUMN_MAP[key] || key;
-        conditions.push(`${columnName} = $${paramIndex}`);
-        params.push(value);
-        paramIndex++;
-      }
-
-      query += ` WHERE ${conditions.join(' AND ')}`;
+    if (!this.palantirService) {
+      console.warn('[TimbrQueryService] Palantir service not available');
+      return {
+        entities: [],
+        count: 0,
+        query: `Palantir: ${palantirObjectType} (unavailable)`,
+        source: 'palantir',
+        executionTime: Date.now() - startTime,
+      };
     }
 
-    query += ` LIMIT ${limit}`;
-
     try {
-      const result = await db.execute(sql.raw(query));
-      const rows = Array.isArray(result) ? result : (result as any).rows || [];
+      let data: any;
+
+      if (filters && Object.keys(filters).length > 0) {
+        const palantirFilter = this.buildPalantirFilter(filters);
+        data = await this.palantirService.searchObjects(palantirObjectType, palantirFilter, {
+          pageSize: limit,
+        });
+      } else {
+        data = await this.palantirService.listObjects(palantirObjectType, {
+          pageSize: limit,
+        });
+      }
+
+      const objects = data.data || [];
 
       return {
-        entities: rows,
-        count: rows.length,
-        query,
-        source: 'local',
+        entities: objects,
+        count: objects.length,
+        query: `Palantir: ${palantirObjectType}`,
+        source: 'palantir',
         executionTime: Date.now() - startTime,
       };
     } catch (error) {
-      console.error(`[TimbrQueryService] Local query failed for ${tableName}:`, error);
+      console.error(`[TimbrQueryService] Palantir query failed for ${concept}:`, error);
       return {
         entities: [],
         count: 0,
-        query,
-        source: 'local',
+        query: `Palantir: ${palantirObjectType} (error)`,
+        source: 'palantir',
         executionTime: Date.now() - startTime,
       };
     }
   }
 
   /**
+   * Build Palantir filter from semantic filters
+   */
+  private buildPalantirFilter(filters: Record<string, any>): any {
+    const conditions = Object.entries(filters).map(([key, value]) => {
+      const palantirProperty = PROPERTY_PALANTIR_MAP[key] || key;
+      return {
+        type: 'eq',
+        field: palantirProperty,
+        value,
+      };
+    });
+
+    if (conditions.length === 1) {
+      return conditions[0];
+    }
+
+    return {
+      type: 'and',
+      conditions,
+    };
+  }
+
+  /**
    * Generate cross-domain insights by querying multiple agent domains
-   * This is the key function for multi-agent reasoning
+   * Reads from Palantir, correlates across domains, returns actionable insights
    */
   async generateCrossDomainInsights(): Promise<CrossDomainInsight[]> {
     const insights: CrossDomainInsight[] = [];
     const startTime = Date.now();
 
-    console.log('[TimbrQueryService] Generating cross-domain insights...');
+    if (!this.isPalantirAvailable() || !this.palantirService) {
+      console.warn('[TimbrQueryService] Palantir not available - cannot generate cross-domain insights');
+      return insights;
+    }
+
+    console.log('[TimbrQueryService] Generating cross-domain insights from Palantir...');
 
     // 1. Find orphaned projects (no OKR alignment)
     const orphanedProjects = await this.findOrphanedProjects();
     if (orphanedProjects.length > 0) {
       insights.push({
         type: 'orphaned_project',
-        severity: 'warning',
+        severity: orphanedProjects.length > 5 ? 'high' : 'warning',
         title: 'Projects Without Strategic Alignment',
         description: `${orphanedProjects.length} projects are not linked to any OKR or strategic objective`,
-        affectedEntities: orphanedProjects.map(p => p.name || p.id),
+        affectedEntities: orphanedProjects.map(p => p.title || p.name || p.id),
+        affectedDomains: ['VRO', 'OKR'],
         recommendedActions: [
           'Review project objectives and link to relevant OKRs',
           'Consider deprioritizing unaligned projects',
           'Engage VRO agent to assess value delivery'
         ],
+        recommendation: 'Review these projects for strategic alignment',
         sourceAgents: ['OKR', 'VRO', 'PMO'],
         confidence: 0.95,
+        relatedEntities: orphanedProjects.slice(0, 5),
       });
     }
 
@@ -307,15 +354,18 @@ class TimbrQueryService {
         type: 'budget_schedule_correlation',
         severity: 'critical',
         title: 'Budget Overruns with Schedule Delays',
-        description: `${budgetScheduleCorrelation.length} projects have both budget overruns and schedule delays`,
-        affectedEntities: budgetScheduleCorrelation.map(p => p.name || p.id),
+        description: `${budgetScheduleCorrelation.length} projects have both budget overruns (CPI < 0.9) and schedule delays (SPI < 0.9)`,
+        affectedEntities: budgetScheduleCorrelation.map(p => p.title || p.name || p.id),
+        affectedDomains: ['FinOps', 'PMO'],
         recommendedActions: [
           'Conduct root cause analysis for correlated issues',
           'Consider scope reduction or resource reallocation',
           'Escalate to governance for decision'
         ],
+        recommendation: 'Investigate root cause of correlated budget and schedule issues',
         sourceAgents: ['FinOps', 'PMO', 'Governance'],
         confidence: 0.90,
+        relatedEntities: budgetScheduleCorrelation.slice(0, 5),
       });
     }
 
@@ -327,37 +377,21 @@ class TimbrQueryService {
         severity: 'critical',
         title: 'High-Risk Projects with Low Change Readiness',
         description: `${highRiskLowReadiness.length} high-risk projects have stakeholder readiness below 50%`,
-        affectedEntities: highRiskLowReadiness.map(p => p.name || p.id),
+        affectedEntities: highRiskLowReadiness.map(p => p.title || p.name || p.id),
+        affectedDomains: ['Risk', 'OCM'],
         recommendedActions: [
           'Increase OCM engagement and communication',
           'Consider risk mitigation through phased rollout',
           'Assess training completion status'
         ],
+        recommendation: 'Address readiness gaps before proceeding',
         sourceAgents: ['Risk', 'OCM', 'TMO'],
         confidence: 0.85,
+        relatedEntities: highRiskLowReadiness.slice(0, 5),
       });
     }
 
-    // 4. Find transformation fatigue indicators
-    const fatigueIndicators = await this.findTransformationFatigue();
-    if (fatigueIndicators.length > 0) {
-      insights.push({
-        type: 'transformation_fatigue',
-        severity: 'warning',
-        title: 'Transformation Fatigue Detected',
-        description: `${fatigueIndicators.length} divisions showing signs of change fatigue`,
-        affectedEntities: fatigueIndicators.map(d => d.name || d.id),
-        recommendedActions: [
-          'Reduce concurrent initiatives in affected divisions',
-          'Prioritize quick wins to rebuild momentum',
-          'Increase leadership visibility and support'
-        ],
-        sourceAgents: ['TMO', 'OCM', 'Planning'],
-        confidence: 0.80,
-      });
-    }
-
-    // 5. Find unmitigated critical risks
+    // 4. Find unmitigated critical risks
     const unmitigatedRisks = await this.findUnmitigatedCriticalRisks();
     if (unmitigatedRisks.length > 0) {
       insights.push({
@@ -365,33 +399,61 @@ class TimbrQueryService {
         severity: 'critical',
         title: 'Critical Risks Without Mitigation',
         description: `${unmitigatedRisks.length} critical risks have no assigned mitigation plan`,
-        affectedEntities: unmitigatedRisks.map(r => r.name || r.id),
+        affectedEntities: unmitigatedRisks.map(r => r.title || r.name || r.id),
+        affectedDomains: ['Risk', 'Governance'],
         recommendedActions: [
           'Immediately assign risk owners',
           'Develop mitigation plans within 48 hours',
           'Escalate to governance board'
         ],
+        recommendation: 'Urgent: Create mitigation plans for critical risks',
         sourceAgents: ['Risk', 'Governance', 'PMO'],
         confidence: 0.95,
+        relatedEntities: unmitigatedRisks.slice(0, 5),
       });
     }
 
-    // 6. Find dependency bottlenecks
+    // 5. Find dependency bottlenecks
     const dependencyBottlenecks = await this.findDependencyBottlenecks();
     if (dependencyBottlenecks.length > 0) {
       insights.push({
         type: 'dependency_bottleneck',
-        severity: 'warning',
+        severity: dependencyBottlenecks.length > 3 ? 'high' : 'warning',
         title: 'Cross-Project Dependency Bottlenecks',
         description: `${dependencyBottlenecks.length} projects are blocking multiple downstream deliverables`,
-        affectedEntities: dependencyBottlenecks.map(p => p.name || p.id),
+        affectedEntities: dependencyBottlenecks.map(p => p.title || p.name || p.id),
+        affectedDomains: ['Planning', 'PMO'],
         recommendedActions: [
           'Prioritize blocking work items',
           'Consider parallel execution alternatives',
           'Communicate delays to downstream teams'
         ],
+        recommendation: 'Prioritize resolution of blocking dependencies',
         sourceAgents: ['PMO', 'Planning', 'Notification'],
         confidence: 0.85,
+        relatedEntities: dependencyBottlenecks.slice(0, 5),
+      });
+    }
+
+    // 6. Find resource contention
+    const resourceContention = await this.findResourceContention();
+    if (resourceContention.length > 0) {
+      insights.push({
+        type: 'resource_contention',
+        severity: 'warning',
+        title: 'Resource Over-Allocation Detected',
+        description: `${resourceContention.length} resources are allocated beyond 100% capacity`,
+        affectedEntities: resourceContention.map(r => r.title || r.name || r.id),
+        affectedDomains: ['PMO', 'Planning'],
+        recommendedActions: [
+          'Rebalance resource assignments',
+          'Prioritize critical projects',
+          'Consider hiring or contracting'
+        ],
+        recommendation: 'Rebalance workload to prevent burnout',
+        sourceAgents: ['PMO', 'Planning'],
+        confidence: 0.80,
+        relatedEntities: resourceContention.slice(0, 5),
       });
     }
 
@@ -400,108 +462,156 @@ class TimbrQueryService {
     return insights;
   }
 
-  // Cross-domain query implementations
+  // Cross-domain query implementations - All query Palantir
 
   private async findOrphanedProjects(): Promise<any[]> {
+    if (!this.palantirService) return [];
+
     try {
-      const result = await db.execute(sql`
-        SELECT p.id, p.name, p.status
-        FROM projects p
-        LEFT JOIN project_okr_alignments poa ON p.id = poa.project_id
-        WHERE poa.id IS NULL
-        AND p.status IN ('active', 'in_progress', 'planning')
-        LIMIT 50
-      `);
-      return Array.isArray(result) ? result : (result as any).rows || [];
-    } catch {
-      // Table might not exist, return empty
+      // Query Palantir for projects
+      const projectsResult = await this.palantirService.listObjects('AtlasProject', { pageSize: 100 });
+      const projects = projectsResult.data || [];
+
+      // Query for objectives
+      const objectivesResult = await this.palantirService.listObjects('AtlasObjective', { pageSize: 100 });
+      const objectives = objectivesResult.data || [];
+
+      // Find projects not linked to objectives
+      const linkedProjectIds = new Set(objectives.flatMap((o: any) => o.linkedProjectIds || []));
+      const orphaned = projects.filter((p: any) =>
+        !linkedProjectIds.has(p.id) &&
+        !p.objectiveId &&
+        p.status !== 'completed' &&
+        p.status !== 'cancelled'
+      );
+
+      return orphaned;
+    } catch (error) {
+      console.warn('[TimbrQueryService] Failed to find orphaned projects:', error);
       return [];
     }
   }
 
   private async findBudgetScheduleCorrelation(): Promise<any[]> {
+    if (!this.palantirService) return [];
+
     try {
-      const result = await db.execute(sql`
-        SELECT p.id, p.name, p.budget_utilization, p.schedule_variance
-        FROM projects p
-        WHERE p.budget_utilization > 1.0
-        AND p.schedule_variance < -0.1
-        AND p.status = 'active'
-        LIMIT 50
-      `);
-      return Array.isArray(result) ? result : (result as any).rows || [];
-    } catch {
+      const projectsResult = await this.palantirService.listObjects('AtlasProject', { pageSize: 100 });
+      const projects = projectsResult.data || [];
+
+      // Find projects with both CPI and SPI below threshold
+      return projects.filter((p: any) =>
+        (p.cpi !== undefined && p.cpi < 0.9) &&
+        (p.spi !== undefined && p.spi < 0.9) &&
+        p.status === 'active'
+      );
+    } catch (error) {
+      console.warn('[TimbrQueryService] Failed to find budget-schedule correlation:', error);
       return [];
     }
   }
 
   private async findHighRiskLowReadiness(): Promise<any[]> {
-    try {
-      const result = await db.execute(sql`
-        SELECT p.id, p.name, r.severity as risk_severity, ra.readiness_score
-        FROM projects p
-        JOIN risks r ON r.project_id = p.id
-        LEFT JOIN readiness_assessments ra ON ra.project_id = p.id
-        WHERE r.severity > 0.7
-        AND (ra.readiness_score IS NULL OR ra.readiness_score < 0.5)
-        AND r.status = 'open'
-        LIMIT 50
-      `);
-      return Array.isArray(result) ? result : (result as any).rows || [];
-    } catch {
-      return [];
-    }
-  }
+    if (!this.palantirService) return [];
 
-  private async findTransformationFatigue(): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
-        SELECT d.id, d.name, COUNT(i.id) as initiative_count
-        FROM divisions d
-        JOIN initiatives i ON i.division_id = d.id
-        WHERE i.status = 'active'
-        AND i.adoption_trend = 'declining'
-        GROUP BY d.id, d.name
-        HAVING COUNT(i.id) >= 3
-        LIMIT 20
-      `);
-      return Array.isArray(result) ? result : (result as any).rows || [];
-    } catch {
+      // Get risks
+      const risksResult = await this.palantirService.listObjects('AtlasRisk', { pageSize: 100 });
+      const risks = risksResult.data || [];
+
+      // Get readiness metrics
+      const readinessResult = await this.palantirService.listObjects('AtlasReadinessMetric', { pageSize: 100 });
+      const readiness = readinessResult.data || [];
+
+      // Create readiness lookup by project
+      const readinessMap = new Map(readiness.map((r: any) => [r.projectId, r]));
+
+      // Find high-risk projects with low readiness
+      const highRisks = risks.filter((r: any) =>
+        (r.severity === 'critical' || r.severity === 'high') &&
+        r.status !== 'resolved'
+      );
+
+      return highRisks.filter((r: any) => {
+        const projectReadiness = readinessMap.get(r.projectId);
+        return !projectReadiness || projectReadiness.score < 50;
+      });
+    } catch (error) {
+      console.warn('[TimbrQueryService] Failed to find high-risk/low-readiness:', error);
       return [];
     }
   }
 
   private async findUnmitigatedCriticalRisks(): Promise<any[]> {
+    if (!this.palantirService) return [];
+
     try {
-      const result = await db.execute(sql`
-        SELECT r.id, r.name, r.severity, r.probability, r.impact
-        FROM risks r
-        LEFT JOIN risk_mitigations rm ON rm.risk_id = r.id
-        WHERE r.severity > 0.7
-        AND r.status = 'open'
-        AND rm.id IS NULL
-        LIMIT 50
-      `);
-      return Array.isArray(result) ? result : (result as any).rows || [];
-    } catch {
+      const risksResult = await this.palantirService.listObjects('AtlasRisk', { pageSize: 100 });
+      const risks = risksResult.data || [];
+
+      return risks.filter((r: any) =>
+        (r.severity === 'critical' || r.severity === 'high') &&
+        r.status !== 'resolved' &&
+        !r.mitigationPlan &&
+        !r.mitigationStrategy
+      );
+    } catch (error) {
+      console.warn('[TimbrQueryService] Failed to find unmitigated risks:', error);
       return [];
     }
   }
 
   private async findDependencyBottlenecks(): Promise<any[]> {
+    if (!this.palantirService) return [];
+
     try {
-      const result = await db.execute(sql`
-        SELECT p.id, p.name, COUNT(d.id) as blocking_count
-        FROM projects p
-        JOIN dependencies d ON d.blocking_project_id = p.id
-        WHERE d.status = 'blocked'
-        GROUP BY p.id, p.name
-        HAVING COUNT(d.id) >= 2
-        ORDER BY blocking_count DESC
-        LIMIT 20
-      `);
-      return Array.isArray(result) ? result : (result as any).rows || [];
-    } catch {
+      const depsResult = await this.palantirService.listObjects('AtlasDependency', { pageSize: 100 });
+      const deps = depsResult.data || [];
+
+      // Count blocked dependencies per project
+      const blockingCount = new Map<string, { count: number; project: any }>();
+
+      for (const dep of deps) {
+        if (dep.status === 'blocked' || dep.status === 'at_risk') {
+          const sourceId = dep.sourceProjectId;
+          const existing = blockingCount.get(sourceId) || { count: 0, project: null };
+          existing.count++;
+          existing.project = dep;
+          blockingCount.set(sourceId, existing);
+        }
+      }
+
+      // Return projects blocking 2+ others
+      const bottlenecks: any[] = [];
+      for (const [id, data] of blockingCount) {
+        if (data.count >= 2) {
+          bottlenecks.push({
+            id,
+            title: data.project?.sourceProjectName || id,
+            blockingCount: data.count,
+          });
+        }
+      }
+
+      return bottlenecks;
+    } catch (error) {
+      console.warn('[TimbrQueryService] Failed to find dependency bottlenecks:', error);
+      return [];
+    }
+  }
+
+  private async findResourceContention(): Promise<any[]> {
+    if (!this.palantirService) return [];
+
+    try {
+      const personsResult = await this.palantirService.listObjects('AtlasPerson', { pageSize: 100 });
+      const persons = personsResult.data || [];
+
+      return persons.filter((p: any) =>
+        p.totalAllocation !== undefined && p.totalAllocation > 100
+      );
+    } catch (error) {
+      console.warn('[TimbrQueryService] Failed to find resource contention:', error);
       return [];
     }
   }
@@ -513,44 +623,78 @@ class TimbrQueryService {
     const allInsights = await this.generateCrossDomainInsights();
 
     // Filter insights relevant to this agent
+    const normalizedType = agentType.toLowerCase().replace(/agent$/i, '');
     return allInsights.filter(insight =>
       insight.sourceAgents.some(a =>
-        a.toLowerCase() === agentType.toLowerCase().replace(/agent$/i, '')
+        a.toLowerCase() === normalizedType
+      ) ||
+      insight.affectedDomains?.some(d =>
+        d.toLowerCase() === normalizedType
       )
     );
   }
 
   /**
-   * Execute a SPARQL-style query (for Timbr or future Neo4j integration)
+   * Write an insight back to Palantir via the Create Insight action
+   * This completes the read → reason → write cycle
    */
-  async executeSparql(sparql: string): Promise<any[]> {
-    if (this.config.enabled) {
-      try {
-        const response = await fetch(`${this.config.endpoint}/api/v1/sparql`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/sparql-query',
-            'Authorization': `Bearer ${this.config.apiKey}`,
-            'Accept': 'application/json',
-          },
-          body: sparql,
-        });
-
-        if (!response.ok) {
-          throw new Error(`SPARQL query failed: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return result.results?.bindings || [];
-      } catch (error) {
-        console.error('[TimbrQueryService] SPARQL query failed:', error);
-        return [];
-      }
+  async writeInsightToPalantir(insight: CrossDomainInsight): Promise<boolean> {
+    if (!this.palantirService) {
+      console.warn('[TimbrQueryService] Cannot write insight - Palantir not available');
+      return false;
     }
 
-    // Local SPARQL not implemented yet - would need a SPARQL engine
-    console.warn('[TimbrQueryService] Local SPARQL not available, use query() instead');
-    return [];
+    try {
+      await this.palantirService.executeAction('atlas-create-insight', {
+        title: insight.title,
+        description: insight.description,
+        insightType: insight.type,
+        severity: insight.severity,
+        sourceAgent: insight.sourceAgents.join(', '),
+        affectedEntities: insight.affectedEntities,
+        recommendation: insight.recommendedActions.join('; '),
+        confidence: insight.confidence,
+      });
+
+      console.log(`[TimbrQueryService] Wrote insight to Palantir: ${insight.title}`);
+      return true;
+    } catch (error) {
+      console.error('[TimbrQueryService] Failed to write insight to Palantir:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Execute a SPARQL-style query via Timbr
+   * Timbr provides SPARQL endpoint for complex relationship queries
+   */
+  async executeSparql(sparql: string): Promise<any[]> {
+    if (!this.config.enabled) {
+      console.warn('[TimbrQueryService] SPARQL requires Timbr.ai - use query() for direct Palantir access');
+      return [];
+    }
+
+    try {
+      const response = await fetch(`${this.config.endpoint}/api/v1/sparql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/sparql-query',
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Accept': 'application/json',
+        },
+        body: sparql,
+      });
+
+      if (!response.ok) {
+        throw new Error(`SPARQL query failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      return result.results?.bindings || [];
+    } catch (error) {
+      console.error('[TimbrQueryService] SPARQL query failed:', error);
+      return [];
+    }
   }
 
   /**
@@ -560,6 +704,8 @@ class TimbrQueryService {
     return {
       initialized: this.initialized,
       timbrEnabled: this.config.enabled,
+      palantirAvailable: this.isPalantirAvailable(),
+      dataSource: this.config.enabled ? 'timbr' : 'palantir',
       endpoint: this.config.enabled ? this.config.endpoint : null,
       knowledgeGraph: this.config.knowledgeGraph,
       ontologyStats: ontologyService.getStatistics(),
