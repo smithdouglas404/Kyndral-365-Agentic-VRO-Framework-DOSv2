@@ -173,8 +173,8 @@ export class MCPProtocolHandler {
       const mcpService = await getMCPService(serviceName);
 
       if (!mcpService) {
-        console.warn(`[MCP] Service ${serviceName} not configured - returning mock response`);
-        return this.mockServiceCall(serviceName, action, params);
+        // No mock/simulation - require real service configuration
+        throw new Error(`[MCP] Service ${serviceName} not configured. Configure credentials to use this service.`);
       }
 
       // Route action to appropriate service method
@@ -192,21 +192,6 @@ export class MCPProtocolHandler {
       console.error(`[MCP] Service call failed: ${serviceName}.${action}`, error.message);
       throw new Error(`MCP service call failed: ${error.message}`);
     }
-  }
-
-  /**
-   * Fallback mock response for unconfigured services
-   */
-  private mockServiceCall(serviceName: string, action: string, params: any): any {
-    return {
-      success: true,
-      service: serviceName,
-      action,
-      timestamp: new Date().toISOString(),
-      data: params,
-      _mock: true,
-      _message: 'Service not configured - this is a simulated response',
-    };
   }
 
   /**
