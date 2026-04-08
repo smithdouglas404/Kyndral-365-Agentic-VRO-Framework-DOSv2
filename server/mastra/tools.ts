@@ -10,6 +10,8 @@ import { z } from 'zod';
 import type { IStorage } from '../storage.js';
 import { getMastraMemory, createToolContext } from './memory.js';
 import { startTrace, endTrace, recordToolCall, recordToolResult, recordError } from '../services/AgentTracing.js';
+import { emitUIPacket, emitAgentAlert } from '../services/AgentUIEmitter.js';
+import type { UIBlock } from '../../shared/agentUIPacket.js';
 
 // Storage reference - set during initialization
 let storageRef: IStorage | null = null;
@@ -18,8 +20,182 @@ export function setToolStorage(storage: IStorage) {
   storageRef = storage;
 }
 
+// ============================================================================
+// Agent type → canvas agent ID mapping
+// ============================================================================
+
+const AGENT_ID_MAP: Record<string, string> = {
+  pmo: 'pmo-agent',
+  finops: 'finops-agent',
+  risk: 'risk-agent',
+  ocm: 'ocm-agent',
+  tmo: 'tmo-agent',
+  vro: 'vro-agent',
+  governance: 'governance-agent',
+  planning: 'planning-agent',
+};
+
+// ============================================================================
+// Result → UIBlock transformer
+//
+// Reads the structured output from an agent and builds appropriate UIBlocks.
+// The agent's result shape determines the suggested visualization.
+// ============================================================================
+
+function buildUIBlocksFromResult(
+  agentType: string,
+  result: any,
+  goal: string,
+  context: Record<string, any>
+): { title: string; blocks: UIBlock[]; priority: number } {
+  if (!result || typeof result === 'string') {
+    return {
+      title: goal.substring(0, 80),
+      blocks: [{
+        type: 'markdown',
+        content: typeof result === 'string' ? result : 'Agent completed analysis.',
+      }],
+      priority: 3,
+    };
+  }
+
+  const blocks: UIBlock[] = [];
+  let priority = 5;
+
+  // --- KPI row from numeric metrics ---
+  const kpiFields: { key: string; label: string; unit?: string; severity?: any }[] = [];
+
+  if (result.healthScore !== undefined) kpiFields.push({ key: 'healthScore', label: 'Health Score', severity: result.healthScore >= 80 ? 'success' : result.healthScore >= 60 ? 'warning' : 'critical' });
+  if (result.readinessScore !== undefined) kpiFields.push({ key: 'readinessScore', label: 'Readiness', unit: '%', severity: result.readinessScore >= 80 ? 'success' : result.readinessScore >= 50 ? 'warning' : 'critical' });
+  if (result.complianceScore !== undefined) kpiFields.push({ key: 'complianceScore', label: 'Compliance', unit: '%', severity: result.complianceScore >= 90 ? 'success' : result.complianceScore >= 70 ? 'warning' : 'critical' });
+  if (result.overallRiskScore !== undefined) kpiFields.push({ key: 'overallRiskScore', label: 'Risk Score', severity: result.overallRiskScore <= 30 ? 'success' : result.overallRiskScore <= 60 ? 'warning' : 'critical' });
+  if (result.variance !== undefined) kpiFields.push({ key: 'variance', label: 'Variance', unit: result.variancePercentage !== undefined ? '%' : undefined });
+  if (result.variancePercentage !== undefined && result.variance === undefined) kpiFields.push({ key: 'variancePercentage', label: 'Variance', unit: '%' });
+  if (result.roi !== undefined) kpiFields.push({ key: 'roi', label: 'ROI', unit: '%' });
+  if (result.utilization !== undefined) kpiFields.push({ key: 'utilization', label: 'Utilization', unit: '%' });
+  if (result.adoptionRate !== undefined) kpiFields.push({ key: 'adoptionRate', label: 'Adoption Rate', unit: '%' });
+  if (result.trainingCompletion !== undefined) kpiFields.push({ key: 'trainingCompletion', label: 'Training Complete', unit: '%' });
+  if (result.realizationPercentage !== undefined) kpiFields.push({ key: 'realizationPercentage', label: 'Value Realized', unit: '%' });
+  if (result.checklistCompletion !== undefined) kpiFields.push({ key: 'checklistCompletion', label: 'Checklist', unit: '%' });
+  if (result.flowEfficiency !== undefined) kpiFields.push({ key: 'flowEfficiency', label: 'Flow Efficiency', unit: '%' });
+  if (result.velocity !== undefined) kpiFields.push({ key: 'velocity', label: 'Velocity' });
+  if (result.alignmentScore !== undefined) kpiFields.push({ key: 'alignmentScore', label: 'OKR Alignment', unit: '%' });
+  if (result.cpi !== undefined) kpiFields.push({ key: 'cpi', label: 'CPI', severity: result.cpi >= 0.95 ? 'success' : result.cpi >= 0.85 ? 'warning' : 'critical' });
+  if (result.spi !== undefined) kpiFields.push({ key: 'spi', label: 'SPI', severity: result.spi >= 0.95 ? 'success' : result.spi >= 0.85 ? 'warning' : 'critical' });
+
+  // Portfolio health KPIs
+  if (result.greenProjects !== undefined || result.amberProjects !== undefined || result.redProjects !== undefined) {
+    kpiFields.push({ key: 'greenProjects', label: 'Green', severity: 'success' });
+    if (result.amberProjects !== undefined) kpiFields.push({ key: 'amberProjects', label: 'Amber', severity: 'warning' });
+    if (result.redProjects !== undefined) kpiFields.push({ key: 'redProjects', label: 'Red', severity: 'critical' });
+  }
+
+  if (kpiFields.length > 0) {
+    blocks.push({
+      type: 'kpi-row',
+      kpis: kpiFields.map(f => ({
+        type: 'kpi' as const,
+        label: f.label,
+        value: result[f.key] ?? '—',
+        unit: f.unit,
+        severity: f.severity,
+      })),
+    });
+  }
+
+  // --- Table blocks from arrays of objects ---
+  const arrayFields = ['risks', 'dependencies', 'impactedProjects', 'correlatedRisks',
+    'impactedGroups', 'emergingRisks', 'breaches', 'scenarios', 'capacityGaps',
+    'prioritizedItems', 'anomalies', 'topCategories', 'atRiskKeyResults'];
+
+  for (const field of arrayFields) {
+    if (Array.isArray(result[field]) && result[field].length > 0) {
+      const items = result[field];
+      const firstItem = items[0];
+      const keys = Object.keys(firstItem);
+      blocks.push({
+        type: 'table',
+        title: field.replace(/([A-Z])/g, ' $1').replace(/^./, (s: string) => s.toUpperCase()),
+        columns: keys.map(k => ({
+          key: k,
+          label: k.replace(/([A-Z])/g, ' $1').replace(/^./, (s: string) => s.toUpperCase()),
+          format: typeof firstItem[k] === 'number' ? 'number' as const : 'text' as const,
+        })),
+        rows: items,
+        sortable: true,
+        maxRows: 10,
+      });
+    }
+  }
+
+  // --- Status list from string arrays ---
+  const listFields = ['blockers', 'violations', 'gaps', 'overallocated',
+    'upcomingMilestones', 'cutoverSteps', 'exitCriteria', 'unrealizedBenefits',
+    'bottlenecks', 'sequencingIssues', 'hiringRecommendations', 'palantirActionsTriggered'];
+
+  for (const field of listFields) {
+    if (Array.isArray(result[field]) && result[field].length > 0) {
+      const statusMap: Record<string, 'critical' | 'warning' | 'ok' | 'pending'> = {
+        blockers: 'critical', violations: 'critical', gaps: 'warning',
+        overallocated: 'warning', bottlenecks: 'warning',
+      };
+      blocks.push({
+        type: 'status-list',
+        title: field.replace(/([A-Z])/g, ' $1').replace(/^./, (s: string) => s.toUpperCase()),
+        items: result[field].map((item: string) => ({
+          label: item,
+          status: statusMap[field] || 'pending',
+        })),
+      });
+      if (field === 'blockers' || field === 'violations') priority = Math.max(priority, 8);
+    }
+  }
+
+  // --- Recommendations as recommendation blocks ---
+  if (Array.isArray(result.recommendations) && result.recommendations.length > 0) {
+    result.recommendations.slice(0, 3).forEach((rec: string) => {
+      blocks.push({
+        type: 'recommendation',
+        title: rec.length > 80 ? rec.substring(0, 80) + '…' : rec,
+        body: rec,
+        impact: 'medium',
+        effort: 'medium',
+      });
+    });
+  }
+
+  // --- Analysis text as insight ---
+  if (result.analysis && typeof result.analysis === 'string' && result.analysis.length > 20) {
+    // Determine severity from result
+    let severity: 'info' | 'warning' | 'critical' | 'success' = 'info';
+    if (result.healthScore !== undefined && result.healthScore < 60) severity = 'critical';
+    else if (result.healthScore !== undefined && result.healthScore < 80) severity = 'warning';
+    else if (result.overallRiskScore !== undefined && result.overallRiskScore > 60) severity = 'critical';
+    else if (result.budgetAtRisk) severity = 'critical';
+    else if (result.compliant === false) severity = 'warning';
+
+    if (severity === 'critical') priority = Math.max(priority, 9);
+    else if (severity === 'warning') priority = Math.max(priority, 7);
+
+    blocks.push({
+      type: 'insight',
+      title: `${agentType.toUpperCase()} Analysis`,
+      body: result.analysis.substring(0, 500),
+      severity,
+      source: `${agentType} agent — ${goal.substring(0, 60)}`,
+    });
+  }
+
+  // Build title from goal
+  const entityName = context.projectId || context.initiativeId || context.valueStreamId || 'Portfolio';
+  const title = goal.length > 80 ? goal.substring(0, 77) + '…' : goal;
+
+  return { title, blocks, priority };
+}
+
 /**
- * Helper to execute a Deep Agent with memory context
+ * Helper to execute a Deep Agent with memory context.
+ * Automatically emits a UI packet to the agent's canvas with the results.
  */
 async function executeWithMemory(
   agentType: string,
@@ -60,6 +236,30 @@ async function executeWithMemory(
       }
       if (entityId && result.riskLevel) {
         await memory.broadcastFact(entityId, 'risk_level', result.riskLevel, 0.9);
+      }
+
+      // --- Emit UI packet to the agent's canvas ---
+      try {
+        const agentId = AGENT_ID_MAP[agentType] || `${agentType}-agent`;
+        const { title, blocks, priority } = buildUIBlocksFromResult(agentType, result, goal, context);
+
+        if (blocks.length > 0) {
+          emitUIPacket(agentId, title, blocks, {
+            entityType: context.projectId ? 'project' : context.initiativeId ? 'initiative' : undefined,
+            entityId: entityId,
+            entityName: entityId,
+            priority,
+            size: blocks.length > 3 ? 'large' : blocks.length > 1 ? 'medium' : 'small',
+            section: agentType,
+            refreshable: true,
+            reasoning: result.analysis?.substring(0, 300),
+            // Preserve source data so users can reshape the visualization via AI chat
+            sourceData: typeof result === 'object' ? result : undefined,
+          });
+        }
+      } catch (emitErr: any) {
+        // Don't fail the tool execution if UI emission fails
+        console.warn(`[executeWithMemory] Failed to emit UI packet for ${agentType}:`, emitErr.message);
       }
     }
 

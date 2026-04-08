@@ -69,6 +69,12 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           });
         }
 
+        // Agent UI packets are handled by LiquidCanvasContext (listens to lastMessage)
+        // Just invalidate relevant queries when packets arrive
+        if (message.type === 'agent:ui_packet' || message.type === 'agent:ui_packets') {
+          queryClient.invalidateQueries({ queryKey: ['liquid-canvas'] });
+        }
+
         if (message.type === 'notification') {
           queryClient.invalidateQueries({ queryKey: ['notifications'] });
           

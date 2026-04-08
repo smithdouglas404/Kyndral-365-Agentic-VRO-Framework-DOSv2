@@ -67,6 +67,7 @@ import { registerOKRRuleMappingRoutes } from "./routes/okr-rule-mappings.js";
 import { registerPermissionRoutes } from "./routes/admin/permissions.js";
 import { registerNotificationRoutes } from "./routes/notifications.js";
 import { registerDashboardConfigRoutes } from "./routes/dashboard-config.js";
+import shareRouter from "./routes/share.js";
 import { registerAgentExecutionRoutes } from "./routes/agents.js";
 import { registerAnalyticsRoutes } from "./routes/analytics.js";
 import { registerCustomFieldRoutes } from "./routes/admin/custom-fields.js";
@@ -93,6 +94,9 @@ import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
 import { createComplianceRoutes } from "./routes/compliance.js";
 import documentsRouter from "./routes/documents.js";
 import { registerDemoRoutes } from "./routes/demo.js";
+import packetRefineRouter from "./routes/packet-refine.js";
+import liquidCanvasRouter from "./routes/liquid-canvas.js";
+import openprojectWebhookRouter from "./routes/webhooks/openproject.js";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
@@ -384,6 +388,10 @@ export async function registerRoutes(
   // Register Dashboard Config routes (User dashboard layouts, custom widgets, app config)
   registerDashboardConfigRoutes(app);
 
+  // Register Share routes (Dashboard/widget sharing, cloning, access management)
+  app.use('/api/share', shareRouter);
+  console.log('[Share] Routes registered at /api/share');
+
   // Register Agent Execution routes (Execute agent requests with configured tools)
   registerAgentExecutionRoutes(app);
 
@@ -566,6 +574,15 @@ export async function registerRoutes(
 
   // Register AI CoPilot routes
   registerCoPilotRoutes(app);
+
+  // Packet refinement — collaborative agent-user visualization reshaping via OpenRouter
+  app.use('/api/copilot', packetRefineRouter);
+
+  // Liquid Canvas — agent canvases, attribute catalog
+  app.use('/api/liquid-canvas', liquidCanvasRouter);
+
+  // OpenProject webhooks — real-time event-driven sync
+  app.use('/api/webhooks/openproject', openprojectWebhookRouter);
 
   // Executive AI Insights endpoint
   app.get("/api/insights/executive", async (_req, res) => {

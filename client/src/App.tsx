@@ -7,7 +7,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageContextProvider } from "@/contexts/PageContext";
 import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
+import { LiquidCanvasProvider } from "@/contexts/LiquidCanvasContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
+import AppTheme from "@/theme/AppTheme";
+import CssBaseline from "@mui/material/CssBaseline";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -98,9 +101,14 @@ const PasswordResetPage = lazy(() => import("@/pages/PasswordResetPage"));
 const DemoPage = lazy(() => import("@/pages/DemoPage"));
 const PPMDashboard = lazy(() => import("@/pages/PPMDashboard"));
 const PPMExecutiveDashboard = lazy(() => import("@/pages/PPMExecutiveDashboard"));
+const PPMEnterprise = lazy(() => import("@/pages/PPMEnterprise"));
+const SharedDashboard = lazy(() => import("@/pages/SharedDashboard"));
+const MyShares = lazy(() => import("@/pages/MyShares"));
 const FeatureDetailPage = lazy(() => import("@/pages/FeatureDetailPage"));
 const StoryDetailPage = lazy(() => import("@/pages/StoryDetailPage"));
 const TaskBoardPage = lazy(() => import("@/pages/TaskBoardPage"));
+
+const LiquidWorkspace = lazy(() => import("@/pages/LiquidWorkspace"));
 
 const ExecutiveWorkspace = lazy(() => import("@/pages/workspaces/ExecutiveWorkspace"));
 const PMWorkspace = lazy(() => import("@/pages/workspaces/PMWorkspace"));
@@ -195,7 +203,13 @@ function Router() {
         <Route path="/dashboard/ocm" component={OCMDashboard} />
         <Route path="/dashboard/ppm" component={PPMDashboard} />
         <Route path="/ppm" component={PPMExecutiveDashboard} />
+        <Route path="/ppm-enterprise" component={PPMEnterprise} />
+        <Route path="/liquid" component={LiquidWorkspace} />
+        <Route path="/canvas" component={LiquidWorkspace} />
+        <Route path="/canvas/:agentId" component={LiquidWorkspace} />
         <Route path="/ppm-old" component={PPMDashboard} />
+        <Route path="/shared/:token" component={SharedDashboard} />
+        <Route path="/my-shares" component={MyShares} />
         <Route path="/feature/:id" component={FeatureDetailPage} />
         <Route path="/story/:id" component={StoryDetailPage} />
         <Route path="/tasks" component={TaskBoardPage} />
@@ -277,20 +291,25 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <WebSocketProvider>
-          <CompanyProfileProvider>
-            <UnifiedNotificationProvider>
-              <PageContextProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Router />
-                </TooltipProvider>
-              </PageContextProvider>
-            </UnifiedNotificationProvider>
-          </CompanyProfileProvider>
-        </WebSocketProvider>
-      </QueryClientProvider>
+      <AppTheme>
+        <CssBaseline enableColorScheme />
+        <QueryClientProvider client={queryClient}>
+          <WebSocketProvider>
+            <LiquidCanvasProvider>
+            <CompanyProfileProvider>
+              <UnifiedNotificationProvider>
+                <PageContextProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Router />
+                  </TooltipProvider>
+                </PageContextProvider>
+              </UnifiedNotificationProvider>
+            </CompanyProfileProvider>
+            </LiquidCanvasProvider>
+          </WebSocketProvider>
+        </QueryClientProvider>
+      </AppTheme>
     </ErrorBoundary>
   );
 }

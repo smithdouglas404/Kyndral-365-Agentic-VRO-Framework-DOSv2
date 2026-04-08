@@ -318,7 +318,7 @@ class PalantirSyncServiceClass {
 
       console.log(`[PalantirSync] Fetched ${workPackages.length} work packages from OpenProject`);
 
-      // Transform and push each work package to Palantir
+      // Transform and push each work package to Palantir + broadcast facts to agents
       for (const wp of workPackages) {
         try {
           const ontologyObject = this.mapOpenProjectToOntology(wp);
@@ -329,6 +329,34 @@ class PalantirSyncServiceClass {
             result.updated++;
           } else {
             result.created++;
+          }
+
+          // Broadcast facts to Mem0 so subscribed agents get notified
+          try {
+            const { getMem0Service } = await import('../lib/Mem0Service.js');
+            const mem0 = getMem0Service();
+            if (mem0) {
+              const entity = `project_op-${wp.id}`;
+              // Schedule variance: if dueDate exists, compute days from today
+              if (wp.dueDate) {
+                const daysUntilDue = Math.floor((new Date(wp.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                if (daysUntilDue < 0) {
+                  await mem0.writeFact(entity, 'schedule_variance', daysUntilDue, 'openproject-sync', 0.9);
+                }
+              }
+              // Health score from percentage done
+              if (wp.percentageDone !== undefined) {
+                await mem0.writeFact(entity, 'progress', wp.percentageDone, 'openproject-sync', 0.9);
+              }
+              // Status changes
+              const status = wp._links?.status?.title;
+              if (status) {
+                await mem0.writeFact(entity, 'status', status, 'openproject-sync', 0.9);
+              }
+            }
+          } catch (factErr: any) {
+            // Don't fail sync if fact broadcast fails
+            console.warn(`[PalantirSync] Fact broadcast failed for WP ${wp.id}: ${factErr.message}`);
           }
         } catch (err: any) {
           result.failed++;

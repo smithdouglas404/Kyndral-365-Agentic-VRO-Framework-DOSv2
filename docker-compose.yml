@@ -44,6 +44,49 @@ services:
       timeout: 10s
       retries: 5
 
+  # OpenProject Headless PPM (API-only, no UI exposed to end users)
+  openproject:
+    image: openproject/openproject:14-slim
+    container_name: nextera-openproject
+    environment:
+      OPENPROJECT_SECRET_KEY_BASE: ${OPENPROJECT_SECRET_KEY_BASE:-change-this-openproject-secret}
+      OPENPROJECT_HOST__NAME: openproject
+      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_DEFAULT__LANGUAGE: en
+      OPENPROJECT_SEED_ADMIN_USER_PASSWORD: ${OPENPROJECT_ADMIN_PASSWORD:-admin}
+      DATABASE_URL: postgresql://openproject:${OPENPROJECT_DB_PASSWORD:-openproject}@openproject-db:5432/openproject
+    ports:
+      - "8080:80"
+    depends_on:
+      openproject-db:
+        condition: service_healthy
+    volumes:
+      - openproject_data:/var/openproject/assets
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:80/api/v3 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    restart: unless-stopped
+
+  # OpenProject dedicated PostgreSQL
+  openproject-db:
+    image: postgres:16
+    container_name: nextera-openproject-db
+    environment:
+      POSTGRES_DB: openproject
+      POSTGRES_USER: openproject
+      POSTGRES_PASSWORD: ${OPENPROJECT_DB_PASSWORD:-openproject}
+    volumes:
+      - openproject_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openproject"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   # Application Server
   app:
     build:
@@ -84,10 +127,16 @@ services:
       AZURE_DEVOPS_ORG: ${AZURE_DEVOPS_ORG}
       AZURE_DEVOPS_PAT: ${AZURE_DEVOPS_PAT}
 
+      # OpenProject Headless PPM
+      OPENPROJECT_URL: http://openproject:80
+      OPENPROJECT_API_KEY: ${OPENPROJECT_API_KEY}
+
     depends_on:
       postgres:
         condition: service_healthy
       neo4j:
+        condition: service_healthy
+      openproject:
         condition: service_healthy
     restart: unless-stopped
     volumes:
@@ -105,6 +154,10 @@ volumes:
   neo4j_import:
     driver: local
   neo4j_plugins:
+    driver: local
+  openproject_data:
+    driver: local
+  openproject_db_data:
     driver: local
 
 networks:
