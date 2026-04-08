@@ -12,6 +12,12 @@ import { getMastraMemory, createToolContext } from './memory.js';
 import { startTrace, endTrace, recordToolCall, recordToolResult, recordError } from '../services/AgentTracing.js';
 import { emitUIPacket, emitAgentAlert } from '../services/AgentUIEmitter.js';
 import type { UIBlock } from '../../shared/agentUIPacket.js';
+import {
+  opGetProjectHealthTool, opGetGanttDataTool, opCreateWorkPackageTool,
+  opUpdateWorkPackageTool, opGetBudgetTool, opLogTimeTool, opCreateRiskTool,
+  opCreateVersionTool, opGetResourceCapacityTool, opAddRelationTool,
+  opCreateMeetingTool, opSendNotificationTool,
+} from '../agents/tools/OpenProjectAgentTools.js';
 
 // Storage reference - set during initialization
 let storageRef: IStorage | null = null;
@@ -1526,6 +1532,13 @@ export const pmoTools = {
   safePiPlanningTool,
   milestoneTrackingTool,
   flowMetricsTool,
+  opGetProjectHealthTool,
+  opGetGanttDataTool,
+  opCreateWorkPackageTool,
+  opUpdateWorkPackageTool,
+  opGetResourceCapacityTool,
+  opAddRelationTool,
+  opSendNotificationTool,
 };
 
 export const finopsTools = {
@@ -1536,6 +1549,10 @@ export const finopsTools = {
   earnedValueTool,
   spendAnalyticsTool,
   budgetForecastingTool,
+  opGetBudgetTool,
+  opLogTimeTool,
+  opCreateWorkPackageTool,
+  opSendNotificationTool,
 };
 
 export const riskTools = {
@@ -1543,6 +1560,10 @@ export const riskTools = {
   planMitigationTool,
   earlyWarningScanTool,
   riskCorrelationTool,
+  opCreateRiskTool,
+  opCreateWorkPackageTool,
+  opAddRelationTool,
+  opSendNotificationTool,
 };
 
 export const vroTools = {
@@ -1551,6 +1572,9 @@ export const vroTools = {
   benefitsRealizationTool,
   valueStreamMappingTool,
   investmentRecommendationsTool,
+  opGetProjectHealthTool,
+  opCreateWorkPackageTool,
+  opSendNotificationTool,
 };
 
 export const governanceTools = {
@@ -1560,12 +1584,17 @@ export const governanceTools = {
   evaluateRulesTool,
   policyValidationTool,
   auditTrailTool,
+  opCreateMeetingTool,
+  opCreateWorkPackageTool,
+  opSendNotificationTool,
 };
 
 export const ocmTools = {
   changeReadinessTool,
   stakeholderImpactTool,
   adoptionTrackingTool,
+  opCreateWorkPackageTool,
+  opSendNotificationTool,
 };
 
 export const tmoTools = {
@@ -1573,6 +1602,10 @@ export const tmoTools = {
   cutoverPlanningTool,
   hypercareTool,
   adoptionCurveTool,
+  opCreateVersionTool,
+  opGetGanttDataTool,
+  opCreateWorkPackageTool,
+  opSendNotificationTool,
 };
 
 export const planningTools = {
@@ -1580,6 +1613,11 @@ export const planningTools = {
   scenarioModelingTool,
   capacityForecastingTool,
   wsjfPrioritizationTool,
+  opGetGanttDataTool,
+  opGetResourceCapacityTool,
+  opCreateVersionTool,
+  opCreateWorkPackageTool,
+  opSendNotificationTool,
 };
 
 export const integratedTools = {
