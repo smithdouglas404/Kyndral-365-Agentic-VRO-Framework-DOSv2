@@ -148,7 +148,26 @@
       "WebFetch(domain:google.github.io)",
       "WebFetch(domain:a2a-protocol.org)",
       "Bash(npx mastra:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "WebFetch(domain:www.tremor.so)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:www.shadcn.io)",
+      "WebFetch(domain:www.shadcnblocks.com)",
+      "WebFetch(domain:designrevision.com)",
+      "WebFetch(domain:docs.copilotkit.ai)",
+      "Bash(/tmp/verify_routes.sh)",
+      "Bash(/tmp/verify_all_imports.sh)",
+      "Bash(/tmp/final_verification.sh)",
+      "WebFetch(domain:ej2.syncfusion.com)",
+      "WebFetch(domain:mui.com)",
+      "WebFetch(domain:saasable.io)",
+      "Bash(cp /tmp/mui-dashboard/docs/data/material/getting-started/templates/shared-theme/themePrimitives.ts /home/runner/workspace/client/src/theme/themePrimitives.ts)",
+      "Bash(cp /tmp/mui-dashboard/docs/data/material/getting-started/templates/shared-theme/AppTheme.tsx /home/runner/workspace/client/src/theme/AppTheme.tsx)",
+      "Bash(cp /tmp/mui-dashboard/docs/data/material/getting-started/templates/shared-theme/customizations/surfaces.ts /home/runner/workspace/client/src/theme/customizations/surfaces.ts)",
+      "Bash(cp /tmp/mui-dashboard/docs/data/material/getting-started/templates/shared-theme/customizations/navigation.tsx /home/runner/workspace/client/src/theme/customizations/navigation.tsx)",
+      "Bash(cp /tmp/mui-dashboard/docs/data/material/getting-started/templates/shared-theme/customizations/inputs.tsx /home/runner/workspace/client/src/theme/customizations/inputs.tsx)",
+      "WebFetch(domain:www.openproject.org)",
+      "Bash(npm ci:*)"
     ]
   }
 }
