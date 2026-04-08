@@ -12,8 +12,8 @@
 
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
-import { getOPToPalantirSync } from '../services/sync/OpenProjectToPalantirSync.js';
-import { broadcastNotification } from '../websocket.js';
+import { getOPToPalantirSync } from '../../services/sync/OpenProjectToPalantirSync.js';
+import { broadcastNotification } from '../../websocket.js';
 
 const router = Router();
 
