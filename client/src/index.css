@@ -100,6 +100,26 @@
   --chart-5: 0 0% 46%; /* Grey-500 */
 
   --radius: 4px;
+
+  /* Tremor Colors */
+  --tremor-brand: 205 100% 40%;
+  --tremor-brand-emphasis: 205 100% 35%;
+  --tremor-brand-muted: 205 100% 95%;
+  --tremor-brand-faint: 205 100% 98%;
+  --tremor-brand-inverted: 0 0% 100%;
+
+  --tremor-background: 0 0% 100%;
+  --tremor-background-muted: 0 0% 96%;
+  --tremor-background-subtle: 0 0% 92%;
+  --tremor-background-emphasis: 0 0% 88%;
+
+  --tremor-border: 0 0% 88%;
+  --tremor-ring: 205 100% 40%;
+
+  --tremor-content: 0 0% 26%;
+  --tremor-content-emphasis: 0 0% 0%;
+  --tremor-content-subtle: 0 0% 46%;
+  --tremor-content-inverted: 0 0% 100%;
 }
 
 .dark {
@@ -137,6 +157,26 @@
   --chart-3: 346 100% 60%;
   --chart-4: 51 100% 50%;
   --chart-5: 0 0% 60%;
+
+  /* Tremor Dark Mode Colors */
+  --tremor-brand: 205 100% 55%;
+  --tremor-brand-emphasis: 205 100% 60%;
+  --tremor-brand-muted: 205 50% 20%;
+  --tremor-brand-faint: 205 30% 15%;
+  --tremor-brand-inverted: 0 0% 0%;
+
+  --tremor-background: 0 0% 10%;
+  --tremor-background-muted: 0 0% 15%;
+  --tremor-background-subtle: 0 0% 20%;
+  --tremor-background-emphasis: 0 0% 25%;
+
+  --tremor-border: 0 0% 30%;
+  --tremor-ring: 205 100% 55%;
+
+  --tremor-content: 0 0% 70%;
+  --tremor-content-emphasis: 0 0% 96%;
+  --tremor-content-subtle: 0 0% 55%;
+  --tremor-content-inverted: 0 0% 0%;
 }
 
 @layer base {

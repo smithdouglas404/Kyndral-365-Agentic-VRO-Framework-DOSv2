@@ -702,3 +702,127 @@ export const companyOntologyInstancesRelations = relations(companyOntologyInstan
   relationshipsFrom: many(companyInstanceRelationships, { relationName: 'fromInstance' }),
   relationshipsTo: many(companyInstanceRelationships, { relationName: 'toInstance' })
 }));
+
+// ============================================================================
+// DASHBOARD SHARING & TEMPLATES
+// ============================================================================
+
+export const shareTypeEnum = pgEnum('share_type', ['widget', 'dashboard', 'template']);
+export const shareAccessLevelEnum = pgEnum('share_access_level', ['view', 'clone', 'collaborate']);
+
+// Dashboard Shares - enables sharing dashboards and widgets via URL
+export const dashboardShares = pgTable('dashboard_shares', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  // What's being shared
+  shareType: shareTypeEnum('share_type').notNull(),
+  sourceId: varchar('source_id', { length: 255 }).notNull(), // Widget ID or Dashboard Config ID
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  thumbnail: text('thumbnail'), // Base64 or URL
+
+  // Configuration snapshot (JSON)
+  configSnapshot: jsonb('config_snapshot').notNull(),
+
+  // Access control
+  shareToken: varchar('share_token', { length: 64 }).notNull().unique(),
+  accessLevel: shareAccessLevelEnum('access_level').default('view'),
+  password: varchar('password', { length: 255 }), // Optional password protection
+  expiresAt: timestamp('expires_at'),
+
+  // Role-based permissions
+  allowedRoles: jsonb('allowed_roles'), // Array of role slugs
+  allowedUserIds: jsonb('allowed_user_ids'), // Array of user IDs
+  isPublic: boolean('is_public').default(false),
+
+  // Ownership
+  ownerId: varchar('owner_id').notNull().references(() => users.id),
+  tenantId: varchar('tenant_id').references(() => tenants.id),
+
+  // Stats
+  viewCount: integer('view_count').default(0),
+  cloneCount: integer('clone_count').default(0),
+
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Share Access Logs - audit trail for shared dashboard access
+export const shareAccessLogs = pgTable('share_access_logs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  shareId: uuid('share_id').references(() => dashboardShares.id, { onDelete: 'cascade' }),
+  accessedBy: varchar('accessed_by').references(() => users.id),
+  accessType: varchar('access_type', { length: 20 }), // 'view' | 'clone' | 'export'
+  ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: text('user_agent'),
+  accessedAt: timestamp('accessed_at').defaultNow().notNull(),
+});
+
+// AI-Generated Widgets - stores widgets created by AI
+export const aiGeneratedWidgets = pgTable('ai_generated_widgets', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+
+  // Widget definition
+  widgetDefinition: jsonb('widget_definition').notNull(), // Full WidgetDefinition
+
+  // AI generation details
+  originalPrompt: text('original_prompt').notNull(),
+  generatedCode: text('generated_code').notNull(),
+  dependencies: jsonb('dependencies'), // Array of required libraries
+
+  // Refinement history
+  refinementHistory: jsonb('refinement_history'), // Array of { prompt, code, timestamp }
+
+  // Ownership
+  createdBy: varchar('created_by').notNull().references(() => users.id),
+  tenantId: varchar('tenant_id').references(() => tenants.id),
+
+  // Status
+  isPublished: boolean('is_published').default(false),
+  isShared: boolean('is_shared').default(false),
+
+  // Stats
+  useCount: integer('use_count').default(0),
+
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Relations for dashboard sharing tables
+export const dashboardSharesRelations = relations(dashboardShares, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [dashboardShares.ownerId],
+    references: [users.id]
+  }),
+  tenant: one(tenants, {
+    fields: [dashboardShares.tenantId],
+    references: [tenants.id]
+  }),
+  accessLogs: many(shareAccessLogs)
+}));
+
+export const shareAccessLogsRelations = relations(shareAccessLogs, ({ one }) => ({
+  share: one(dashboardShares, {
+    fields: [shareAccessLogs.shareId],
+    references: [dashboardShares.id]
+  }),
+  user: one(users, {
+    fields: [shareAccessLogs.accessedBy],
+    references: [users.id]
+  })
+}));
+
+export const aiGeneratedWidgetsRelations = relations(aiGeneratedWidgets, ({ one }) => ({
+  creator: one(users, {
+    fields: [aiGeneratedWidgets.createdBy],
+    references: [users.id]
+  }),
+  tenant: one(tenants, {
+    fields: [aiGeneratedWidgets.tenantId],
+    references: [tenants.id]
+  })
+}));

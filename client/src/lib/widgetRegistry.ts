@@ -2,16 +2,86 @@ import { ComponentType, lazy } from 'react';
 
 export type WidgetSize = 'small' | 'medium' | 'large' | 'full';
 
+export type WidgetCategory =
+  | 'insights'
+  | 'metrics'
+  | 'segments'
+  | 'agents'
+  | 'charts'
+  | 'financial'
+  | 'portfolio'
+  | 'risk'
+  | 'governance'
+  | 'analytics'
+  | 'agent-insights'
+  | 'safe'
+  | 'ocm'
+  | 'planning'
+  | 'custom';
+
+export type TremorComponentType =
+  | 'Card'
+  | 'AreaChart'
+  | 'BarChart'
+  | 'DonutChart'
+  | 'Tracker'
+  | 'ProgressBar'
+  | 'Metric'
+  | 'Table'
+  | 'Callout'
+  | 'LineChart'
+  | 'SparkChart'
+  | 'List'
+  | 'Grid'
+  | 'Custom';
+
+export type InsightPlacement = 'badge' | 'footer' | 'inline' | 'header' | 'none';
+
+export type WidgetSource = 'builtin' | 'user' | 'ai-generated' | 'template';
+
 export interface WidgetDefinition {
   id: string;
   name: string;
   description: string;
   defaultSize: WidgetSize;
   allowedSizes: WidgetSize[];
-  category: 'insights' | 'metrics' | 'segments' | 'agents' | 'charts';
+  category: WidgetCategory;
   defaultVisible: boolean;
   tabs: string[];
   minHeight?: number;
+
+  // Tremor integration
+  tremorType?: TremorComponentType;
+
+  // Sharing & permissions
+  shareable?: boolean;
+  shareConfig?: {
+    canEmbed: boolean;
+    canExport: boolean;
+    publicAccessible: boolean;
+  };
+
+  // AI insights integration
+  insightPlacement?: InsightPlacement;
+  insightAgents?: string[]; // Which agents provide insights for this widget
+
+  // Widget source
+  source?: WidgetSource;
+
+  // For AI-generated widgets
+  aiConfig?: {
+    prompt?: string; // Original prompt used to generate
+    generatedCode?: string; // Generated React code
+    dependencies?: string[]; // Required libraries
+    createdAt?: string;
+    lastModified?: string;
+  };
+
+  // Preview image for catalog
+  previewImage?: string;
+
+  // Tags for search
+  tags?: string[];
 }
 
 export interface WidgetLayout {
@@ -51,10 +121,16 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: 'Status distribution of all projects from Palantir (In Progress, At Risk, Planning, etc.)',
     defaultSize: 'full',
     allowedSizes: ['medium', 'large', 'full'],
-    category: 'metrics',
+    category: 'portfolio',
     defaultVisible: true,
     tabs: ['overview'],
     minHeight: 1,
+    tremorType: 'DonutChart',
+    shareable: true,
+    insightPlacement: 'badge',
+    insightAgents: ['pmo', 'risk'],
+    source: 'builtin',
+    tags: ['portfolio', 'status', 'distribution'],
   },
   {
     id: 'palantir-portfolio',
@@ -62,10 +138,16 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: 'Project cards from Palantir Ontology with status, dates, and descriptions',
     defaultSize: 'full',
     allowedSizes: ['large', 'full'],
-    category: 'insights',
+    category: 'portfolio',
     defaultVisible: true,
     tabs: ['overview', 'portfolios'],
     minHeight: 3,
+    tremorType: 'Card',
+    shareable: true,
+    insightPlacement: 'inline',
+    insightAgents: ['pmo', 'vro'],
+    source: 'builtin',
+    tags: ['portfolio', 'projects', 'palantir'],
   },
   {
     id: 'vro-metrics-summary',
@@ -77,6 +159,12 @@ export const widgetDefinitions: WidgetDefinition[] = [
     defaultVisible: true,
     tabs: ['overview'],
     minHeight: 2,
+    tremorType: 'Metric',
+    shareable: true,
+    insightPlacement: 'badge',
+    insightAgents: ['vro', 'finops'],
+    source: 'builtin',
+    tags: ['metrics', 'kpi', 'overview'],
   },
   {
     id: 'agent-action-queue',
@@ -414,10 +502,16 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: 'Key financial metrics including budget, spending, forecast, and EVM indicators',
     defaultSize: 'full',
     allowedSizes: ['large', 'full'],
-    category: 'metrics',
+    category: 'financial',
     defaultVisible: true,
     tabs: ['finops'],
     minHeight: 2,
+    tremorType: 'Metric',
+    shareable: true,
+    insightPlacement: 'header',
+    insightAgents: ['finops'],
+    source: 'builtin',
+    tags: ['budget', 'financial', 'evm', 'forecast'],
   },
   {
     id: 'finops-cost-categories',
@@ -425,10 +519,16 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: 'Cost breakdown by category with budget vs. actual comparison',
     defaultSize: 'large',
     allowedSizes: ['medium', 'large', 'full'],
-    category: 'metrics',
+    category: 'financial',
     defaultVisible: true,
     tabs: ['finops'],
     minHeight: 3,
+    tremorType: 'BarChart',
+    shareable: true,
+    insightPlacement: 'footer',
+    insightAgents: ['finops'],
+    source: 'builtin',
+    tags: ['cost', 'categories', 'breakdown'],
   },
   {
     id: 'finops-savings-opportunities',
@@ -436,10 +536,16 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: 'Identified cost savings opportunities with AI insights',
     defaultSize: 'large',
     allowedSizes: ['medium', 'large', 'full'],
-    category: 'insights',
+    category: 'agent-insights',
     defaultVisible: true,
     tabs: ['finops'],
     minHeight: 3,
+    tremorType: 'Callout',
+    shareable: true,
+    insightPlacement: 'inline',
+    insightAgents: ['finops', 'vro'],
+    source: 'builtin',
+    tags: ['savings', 'optimization', 'ai', 'recommendations'],
   },
   {
     id: 'finops-evm-metrics',
@@ -447,10 +553,16 @@ export const widgetDefinitions: WidgetDefinition[] = [
     description: 'Earned Value Management metrics (CPI, SPI, EAC, VAC)',
     defaultSize: 'medium',
     allowedSizes: ['small', 'medium', 'large'],
-    category: 'metrics',
+    category: 'financial',
     defaultVisible: true,
     tabs: ['finops'],
     minHeight: 2,
+    tremorType: 'Tracker',
+    shareable: true,
+    insightPlacement: 'badge',
+    insightAgents: ['finops', 'pmo'],
+    source: 'builtin',
+    tags: ['evm', 'cpi', 'spi', 'performance'],
   },
   // ============================================================================
   // Governance Dashboard Widgets
@@ -719,3 +831,101 @@ export function resetDashboardConfig(): DashboardConfig {
   localStorage.removeItem(STORAGE_KEY);
   return getDefaultConfig();
 }
+
+// ============================================================================
+// Widget Catalog & AI Widget Support
+// ============================================================================
+
+export function getWidgetsByCategory(category: WidgetCategory): WidgetDefinition[] {
+  return widgetDefinitions.filter(w => w.category === category);
+}
+
+export function getShareableWidgets(): WidgetDefinition[] {
+  return widgetDefinitions.filter(w => w.shareable);
+}
+
+export function searchWidgets(query: string): WidgetDefinition[] {
+  const lowerQuery = query.toLowerCase();
+  return widgetDefinitions.filter(w =>
+    w.name.toLowerCase().includes(lowerQuery) ||
+    w.description.toLowerCase().includes(lowerQuery) ||
+    w.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+  );
+}
+
+export function getWidgetsByTremorType(type: TremorComponentType): WidgetDefinition[] {
+  return widgetDefinitions.filter(w => w.tremorType === type);
+}
+
+export function getWidgetsByInsightAgent(agentId: string): WidgetDefinition[] {
+  return widgetDefinitions.filter(w => w.insightAgents?.includes(agentId));
+}
+
+// AI-Generated Widget Support
+const AI_WIDGETS_KEY = 'nextera-ai-widgets';
+
+export interface AIGeneratedWidget extends WidgetDefinition {
+  source: 'ai-generated';
+  aiConfig: {
+    prompt: string;
+    generatedCode: string;
+    dependencies: string[];
+    createdAt: string;
+    lastModified: string;
+  };
+}
+
+export function saveAIWidget(widget: AIGeneratedWidget): void {
+  const widgets = loadAIWidgets();
+  const existingIndex = widgets.findIndex(w => w.id === widget.id);
+
+  if (existingIndex >= 0) {
+    widgets[existingIndex] = widget;
+  } else {
+    widgets.push(widget);
+  }
+
+  localStorage.setItem(AI_WIDGETS_KEY, JSON.stringify(widgets));
+}
+
+export function loadAIWidgets(): AIGeneratedWidget[] {
+  try {
+    const stored = localStorage.getItem(AI_WIDGETS_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.warn('Failed to load AI widgets:', e);
+  }
+  return [];
+}
+
+export function deleteAIWidget(widgetId: string): void {
+  const widgets = loadAIWidgets().filter(w => w.id !== widgetId);
+  localStorage.setItem(AI_WIDGETS_KEY, JSON.stringify(widgets));
+}
+
+export function getAllWidgets(): WidgetDefinition[] {
+  return [...widgetDefinitions, ...loadAIWidgets()];
+}
+
+export function getAllWidgetsForTab(tab: string): WidgetDefinition[] {
+  return getAllWidgets().filter(w => w.tabs.includes(tab));
+}
+
+// Widget Categories for Catalog
+export const widgetCategories: { id: WidgetCategory; name: string; description: string; icon: string }[] = [
+  { id: 'portfolio', name: 'Portfolio', description: 'Project portfolio views', icon: 'Briefcase' },
+  { id: 'financial', name: 'Financial', description: 'Budget, EVM, cost tracking', icon: 'DollarSign' },
+  { id: 'risk', name: 'Risk', description: 'Risk analysis and mitigation', icon: 'AlertTriangle' },
+  { id: 'governance', name: 'Governance', description: 'Approvals, compliance, audit', icon: 'Shield' },
+  { id: 'analytics', name: 'Analytics', description: 'Charts, trends, forecasts', icon: 'TrendingUp' },
+  { id: 'agent-insights', name: 'AI Insights', description: 'AI recommendations and predictions', icon: 'Brain' },
+  { id: 'safe', name: 'SAFe', description: 'ART, PI, value stream metrics', icon: 'GitBranch' },
+  { id: 'ocm', name: 'OCM', description: 'Change readiness and adoption', icon: 'Users' },
+  { id: 'planning', name: 'Planning', description: 'Milestones, roadmap, resources', icon: 'Calendar' },
+  { id: 'metrics', name: 'Metrics', description: 'KPIs and numeric displays', icon: 'BarChart2' },
+  { id: 'charts', name: 'Charts', description: 'Data visualizations', icon: 'PieChart' },
+  { id: 'agents', name: 'Agents', description: 'Agent activity and status', icon: 'Bot' },
+  { id: 'custom', name: 'Custom', description: 'User-created widgets', icon: 'Sparkles' },
+];
