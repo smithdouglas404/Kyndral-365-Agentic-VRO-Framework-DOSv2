@@ -38,6 +38,7 @@ const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const DemoRequestPage = lazy(() => import("@/pages/DemoRequestPage"));
+const DemoIngestPage = lazy(() => import("@/pages/demo-ingest"));
 const PendingApprovalPage = lazy(() => import("@/pages/PendingApprovalPage"));
 const InvitationAcceptPage = lazy(() => import("@/pages/InvitationAcceptPage"));
 const SystemAdminPage = lazy(() => import("@/pages/SystemAdminPage"));
@@ -162,6 +163,7 @@ function Router() {
         <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/demo" component={DemoRequestPage} />
+        <Route path="/demo-ingest" component={DemoIngestPage} />
         <Route path="/demo/pending" component={PendingApprovalPage} />
         <Route path="/invite/:token" component={InvitationAcceptPage} />
         <Route path="/system-admin" component={SystemAdminPage} />

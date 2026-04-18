@@ -86,6 +86,92 @@ class OntologyDataProviderClass {
   private cache = new Map<string, CacheEntry<any>>();
   private defaultTTL = 5 * 60 * 1000; // 5 minutes
   private isInitialized = false;
+  // Local mirror: lets ingest service keep agent reads working even when
+  // Palantir writes are rejected (e.g. unmapped action params). Palantir
+  // remains the authoritative store; this is a transient overlay merged
+  // into query() results and getById() lookups.
+  private localMirror = new Map<string, any[]>(); // objectType -> records
+
+  /**
+   * Inject (or replace) a local mirror record for a given object type.
+   * Records are matched/replaced by their primary key field
+   * (projectId, riskId, featureId, etc — falls back to `id`).
+   */
+  injectLocal(objectType: string, record: Record<string, any>): void {
+    if (!record) return;
+    const list = this.localMirror.get(objectType) || [];
+    const pkField = this.primaryKeyField(objectType);
+    const pkVal = record[pkField] ?? record.id ?? record.__primaryKey;
+    if (pkVal != null) {
+      const idx = list.findIndex(
+        (r) => (r[pkField] ?? r.id ?? r.__primaryKey) === pkVal
+      );
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...record };
+      } else {
+        list.push(record);
+      }
+    } else {
+      list.push(record);
+    }
+    this.localMirror.set(objectType, list);
+    // Bust cache for this objectType so subsequent queries see the mirror
+    for (const key of Array.from(this.cache.keys())) {
+      if (key.startsWith(`${objectType}:`)) this.cache.delete(key);
+    }
+  }
+
+  /** Heuristic primary key field per object type */
+  private primaryKeyField(objectType: string): string {
+    const map: Record<string, string> = {
+      AtlasProject: 'projectId',
+      AtlasFeature: 'featureId',
+      AtlasStory: 'storyId',
+      AtlasTask: 'taskId',
+      AtlasRisk: 'riskId',
+      AtlasObjective: 'objectiveId',
+      AtlasKeyResult: 'keyResultId',
+      AtlasKpi: 'kpiId',
+      AtlasGovernanceCheckpoint: 'checkpointId',
+      AtlasDependency: 'dependencyId',
+    };
+    return map[objectType] || 'id';
+  }
+
+  /** Apply local-mirror entries on top of (possibly empty) Palantir results */
+  private mergeLocal(objectType: string, palantirData: any[], options: QueryOptions): any[] {
+    const local = this.localMirror.get(objectType);
+    if (!local || local.length === 0) return palantirData;
+    // Apply filters to local mirror entries
+    let filtered = local;
+    if (options.filters && options.filters.length > 0) {
+      filtered = local.filter((rec) =>
+        options.filters!.every((f) => {
+          const v = rec[f.field];
+          switch (f.operator) {
+            case 'eq': return v === f.value;
+            case 'neq': return v !== f.value;
+            case 'gt': return v > f.value;
+            case 'gte': return v >= f.value;
+            case 'lt': return v < f.value;
+            case 'lte': return v <= f.value;
+            case 'contains': return typeof v === 'string' && v.includes(f.value);
+            case 'startsWith': return typeof v === 'string' && v.startsWith(f.value);
+            default: return true;
+          }
+        })
+      );
+    }
+    // Dedupe: prefer Palantir if same primary key exists
+    const pkField = this.primaryKeyField(objectType);
+    const palantirKeys = new Set(
+      palantirData.map((r) => r?.[pkField] ?? r?.id ?? r?.__primaryKey).filter((v) => v != null)
+    );
+    const localOnly = filtered.filter(
+      (r) => !palantirKeys.has(r[pkField] ?? r.id ?? r.__primaryKey)
+    );
+    return [...palantirData, ...localOnly];
+  }
 
   /**
    * Initialize with Palantir service
@@ -114,8 +200,9 @@ class OntologyDataProviderClass {
     // Check cache
     const cached = this.getFromCache<T[]>(cacheKey);
     if (cached) {
+      const merged = this.mergeLocal(objectType, cached as any[], options);
       return {
-        data: cached,
+        data: merged as T[],
         source: 'cache',
         objectType,
         queriedAt: new Date(),
@@ -146,8 +233,9 @@ class OntologyDataProviderClass {
       // Cache result
       this.setCache(cacheKey, result.data);
 
+      const merged = this.mergeLocal(objectType, result.data, options);
       return {
-        data: result.data as T[],
+        data: merged as T[],
         nextPageToken: result.nextPageToken,
         source: 'palantir',
         objectType,
@@ -156,9 +244,9 @@ class OntologyDataProviderClass {
     } catch (error: any) {
       console.error(`[OntologyDataProvider] Query failed for ${objectType}: ${error.message}`);
 
-      // Return empty result on error
+      const merged = this.mergeLocal(objectType, [], options);
       return {
-        data: [],
+        data: merged as T[],
         source: 'fallback',
         objectType,
         queriedAt: new Date(),

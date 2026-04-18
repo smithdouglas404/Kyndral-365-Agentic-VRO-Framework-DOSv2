@@ -151,15 +151,53 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             if (progress < 50) healthScore -= 10;
             if (actualCost > budget * 1.15) healthScore -= 15;
 
-            const metrics = includeMetrics ? {
-              onTimeDeliveryRate: 85, // Mock - would calculate from milestones
-              teamVelocityTrend: -5,
-              qualityMetrics: 75,
-              deliveryPredictability: 80,
-              teamMoraleScore: 70,
-              scopeCreep: 12,
-              issueResolutionTime: 8,
-            } : undefined;
+            // Compute REAL metrics from Palantir data (no mocks)
+            let metrics: any = undefined;
+            if (includeMetrics) {
+              const [milestonesRaw, projectRisks, projectIssues] = await Promise.all([
+                this.getMilestones(projectId).catch(() => [] as any[]),
+                this.getProjectRisks(projectId).catch(() => [] as any[]),
+                this.getIssues(projectId).catch(() => [] as any[]),
+              ]);
+
+              // Embedded milestones (PalantirIngestService stores as JSON on project)
+              let embeddedMilestones: any[] = [];
+              if (typeof project.milestonesJson === 'string') {
+                try { embeddedMilestones = JSON.parse(project.milestonesJson); } catch {}
+              }
+              const milestones = milestonesRaw.length > 0 ? milestonesRaw : embeddedMilestones;
+
+              const completed = milestones.filter((m: any) => (m.status || '').toLowerCase() === 'completed');
+              const onTime = completed.filter((m: any) => {
+                const due = m.dueDate || m.date;
+                const done = m.completedDate || m.actualDate;
+                return !done || !due || done <= due;
+              }).length;
+              const onTimeDeliveryRate = completed.length > 0
+                ? Math.round((onTime / completed.length) * 100)
+                : 100;
+
+              const openRisks = projectRisks.filter((r: any) => (r.status || '').toLowerCase() === 'open').length;
+              const openIssues = projectIssues.filter((i: any) => (i.status || '').toLowerCase() !== 'closed').length;
+              const closedIssues = projectIssues.filter((i: any) => (i.status || '').toLowerCase() === 'closed').length;
+
+              const velocity = Number(project.velocity ?? 0);
+              const predictability = Number(project.predictability ?? 0);
+              const flowEfficiency = Number(project.flowEfficiency ?? 0);
+
+              metrics = {
+                onTimeDeliveryRate,
+                completedMilestones: completed.length,
+                totalMilestones: milestones.length,
+                openRisks,
+                openIssues,
+                closedIssues,
+                teamVelocity: velocity,
+                deliveryPredictability: Math.round(predictability * 100),
+                flowEfficiencyPercent: Math.round(flowEfficiency * 100),
+                budgetVariancePercent: parseFloat(budgetVariance.toFixed(2)),
+              };
+            }
 
             const finalHealthScore = Math.max(0, healthScore);
             const status = finalHealthScore >= 75 ? 'healthy' : finalHealthScore >= 50 ? 'at_risk' : 'critical';
@@ -251,21 +289,31 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             return { error: "Project not found" };
           }
 
-          // Mock milestone data - in production, would query from database
-          const milestones = [
-            { id: 'm1', name: 'Requirements Complete', status: 'completed', dueDate: '2026-01-15', completedDate: '2026-01-14' },
-            { id: 'm2', name: 'Design Approval', status: 'completed', dueDate: '2026-01-25', completedDate: '2026-01-26' },
-            { id: 'm3', name: 'Development Complete', status: 'in_progress', dueDate: '2026-02-15', expectedDate: '2026-02-20' },
-            { id: 'm4', name: 'Testing Complete', status: 'planned', dueDate: '2026-03-01', expectedDate: '2026-03-05' },
-            { id: 'm5', name: 'Production Launch', status: 'planned', dueDate: '2026-03-15', expectedDate: '2026-03-20' },
-          ];
+          // Read REAL milestones from Palantir (or embedded JSON fallback)
+          let milestones: any[] = await this.getMilestones(projectId).catch(() => [] as any[]);
+          if (milestones.length === 0 && typeof project.milestonesJson === 'string') {
+            try {
+              milestones = JSON.parse(project.milestonesJson) || [];
+            } catch {
+              milestones = [];
+            }
+          }
+          // Normalize milestone shape
+          milestones = milestones.map((m: any, idx: number) => ({
+            id: m.id || `m${idx + 1}`,
+            name: m.name,
+            status: (m.status || 'planned').toLowerCase(),
+            dueDate: m.dueDate || m.date || null,
+            completedDate: m.completedDate || m.actualDate || null,
+            expectedDate: m.expectedDate || null,
+          }));
 
-          const completedOnTime = milestones.filter(m => m.status === 'completed' && (!m.completedDate || m.completedDate <= m.dueDate)).length;
+          const completedOnTime = milestones.filter(m => m.status === 'completed' && (!m.completedDate || !m.dueDate || m.completedDate <= m.dueDate)).length;
           const totalCompleted = milestones.filter(m => m.status === 'completed').length;
           const onTimeRate = totalCompleted > 0 ? (completedOnTime / totalCompleted) * 100 : 100;
 
           const atRiskMilestones = predictDelays ?
-            milestones.filter(m => m.status !== 'completed' && m.expectedDate && m.expectedDate > m.dueDate) : [];
+            milestones.filter(m => m.status !== 'completed' && m.expectedDate && m.dueDate && m.expectedDate > m.dueDate) : [];
 
           // Broadcast milestone tracking facts
           await this.broadcastFact(
@@ -318,18 +366,56 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
         schema: z.object({
           portfolioView: z.boolean().optional().describe("Analyze entire portfolio (default true)"),
           threshold: z.number().optional().describe("Allocation threshold percentage (default 80)"),
+          projectId: z.string().optional().describe("If set, scope analysis to a single project (no portfolio fan-out)"),
         }),
-        func: async ({ portfolioView = true, threshold = 80 }) => {
-          const projects = await this.getProjects();
+        func: async ({ portfolioView = true, threshold = 80, projectId }) => {
+          // When projectId is provided OR portfolioView is false, only analyze
+          // that single project — avoids loading the entire portfolio (which
+          // can OOM on large Palantir tenants).
+          const projects = (projectId || portfolioView === false)
+            ? (projectId
+                ? [await this.getProject(projectId)].filter(Boolean)
+                : await this.getProjects({ pageSize: 25 }))
+            : await this.getProjects({ pageSize: 25 });
 
-          // Mock resource allocation data - in production, would query resource management system
-          const resources = [
-            { id: 'r1', name: 'John Doe', role: 'Developer', allocation: 120, projects: ['p1', 'p2', 'p3'] },
-            { id: 'r2', name: 'Jane Smith', role: 'Designer', allocation: 45, projects: ['p1'] },
-            { id: 'r3', name: 'Bob Johnson', role: 'QA', allocation: 95, projects: ['p2', 'p4'] },
-            { id: 'r4', name: 'Alice Williams', role: 'PM', allocation: 85, projects: ['p1', 'p2'] },
-            { id: 'r5', name: 'Charlie Brown', role: 'Developer', allocation: 30, projects: ['p3'] },
-          ];
+          // Read REAL resources from Palantir (or embedded JSON fallback per project)
+          // Aggregate the same person across projects (sum allocations)
+          const palantirResources = await this.getResourceAllocations(projectId).catch(() => [] as any[]);
+          const aggregated = new Map<string, { name: string; role: string; allocation: number; projects: string[] }>();
+
+          // Source 1: Palantir resource allocation objects
+          for (const r of palantirResources) {
+            const key = (r.name || r.resourceName || '').trim();
+            if (!key) continue;
+            const cur = aggregated.get(key) || { name: key, role: r.role || 'Member', allocation: 0, projects: [] as string[] };
+            cur.allocation += Number(r.allocation ?? 0);
+            if (r.projectId && !cur.projects.includes(r.projectId)) cur.projects.push(r.projectId);
+            aggregated.set(key, cur);
+          }
+
+          // Source 2: Embedded resourcesJson on each project
+          for (const p of projects) {
+            if (typeof p.resourcesJson !== 'string') continue;
+            let arr: any[] = [];
+            try { arr = JSON.parse(p.resourcesJson) || []; } catch { continue; }
+            for (const r of arr) {
+              const key = (r.name || '').trim();
+              if (!key) continue;
+              const cur = aggregated.get(key) || { name: key, role: r.role || 'Member', allocation: 0, projects: [] as string[] };
+              cur.allocation += Number(r.allocation ?? 0);
+              const pid = p.projectId || p.id;
+              if (pid && !cur.projects.includes(pid)) cur.projects.push(pid);
+              aggregated.set(key, cur);
+            }
+          }
+
+          const resources = Array.from(aggregated.values()).map((r, idx) => ({
+            id: `r${idx + 1}`,
+            name: r.name,
+            role: r.role,
+            allocation: Math.round(r.allocation),
+            projects: r.projects,
+          }));
 
           const overAllocated = resources.filter(r => r.allocation > 100);
           const underAllocated = resources.filter(r => r.allocation < threshold);
@@ -357,7 +443,9 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             }
           }
 
-          const utilizationRate = parseFloat((resources.reduce((sum, r) => sum + r.allocation, 0) / (resources.length * 100) * 100).toFixed(1));
+          const utilizationRate = resources.length > 0
+            ? parseFloat((resources.reduce((sum, r) => sum + r.allocation, 0) / (resources.length * 100) * 100).toFixed(1))
+            : 0;
 
           // Broadcast resource optimization facts (portfolio-level)
           await this.broadcastFact(
@@ -421,18 +509,34 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             return { error: "Project not found" };
           }
 
-          // Mock governance checks - in production, would query governance system
-          const checks = [
-            { gate: 'planning', rule: 'Business Case Approved', status: 'passed', required: true },
-            { gate: 'planning', rule: 'Budget Allocated', status: 'passed', required: true },
-            { gate: 'planning', rule: 'Resources Assigned', status: 'passed', required: true },
-            { gate: 'execution', rule: 'Kickoff Meeting Held', status: 'passed', required: true },
-            { gate: 'execution', rule: 'Status Reports Current', status: 'failed', required: true },
-            { gate: 'execution', rule: 'Risk Register Updated', status: 'warning', required: true },
-            { gate: 'execution', rule: 'Change Control Active', status: 'passed', required: true },
-            { gate: 'closure', rule: 'Deliverables Accepted', status: 'not_started', required: true },
-            { gate: 'closure', rule: 'Lessons Learned Captured', status: 'not_started', required: true },
-          ];
+          // Read REAL governance checkpoints from Palantir
+          const rawCheckpoints = await this.getGovernanceCheckpoints(projectId).catch(() => [] as any[]);
+          const checks = rawCheckpoints.length > 0
+            ? rawCheckpoints.map((c: any) => ({
+                gate: (c.gate || 'execution').toLowerCase(),
+                rule: c.rule || c.name || 'unnamed-check',
+                status: (c.status || 'not_started').toLowerCase(),
+                required: c.required ?? true,
+              }))
+            : [];
+
+          if (checks.length === 0) {
+            return {
+              projectId,
+              projectName: project.name,
+              gate: gateType || 'all',
+              complianceScore: '0',
+              status: 'no_checkpoints_defined',
+              totalChecks: 0,
+              passed: 0,
+              failed: 0,
+              warnings: 0,
+              notStarted: 0,
+              failedChecks: [],
+              warningChecks: [],
+              note: 'No governance checkpoints found in Palantir for this project',
+            };
+          }
 
           const relevantChecks = gateType ? checks.filter(c => c.gate === gateType) : checks;
           const passed = relevantChecks.filter(c => c.status === 'passed').length;
@@ -516,14 +620,61 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
             };
 
             if (format === 'detailed' || format === 'executive') {
+              // Compose REAL detail from Palantir
+              const [milestonesRaw, projectRisks, projectIssues, resAlloc] = await Promise.all([
+                this.getMilestones(projectId).catch(() => [] as any[]),
+                this.getProjectRisks(projectId).catch(() => [] as any[]),
+                this.getIssues(projectId).catch(() => [] as any[]),
+                this.getResourceAllocations(projectId).catch(() => [] as any[]),
+              ]);
+
+              let milestones = milestonesRaw;
+              if (milestones.length === 0 && typeof project.milestonesJson === 'string') {
+                try { milestones = JSON.parse(project.milestonesJson) || []; } catch { milestones = []; }
+              }
+              let resources = resAlloc;
+              if (resources.length === 0 && typeof project.resourcesJson === 'string') {
+                try { resources = JSON.parse(project.resourcesJson) || []; } catch { resources = []; }
+              }
+
+              const completedMs = milestones.filter((m: any) => (m.status || '').toLowerCase() === 'completed');
+              const onTrackMs = milestones.filter((m: any) => {
+                const s = (m.status || '').toLowerCase();
+                if (s === 'completed') return false;
+                if (!m.expectedDate || !m.dueDate) return s !== 'blocked';
+                return m.expectedDate <= m.dueDate;
+              });
+
+              const riskBucket = (impact: number, prob: number) => {
+                const score = (Number(impact) || 0) * (Number(prob) || 0);
+                if (score >= 16) return 'high';
+                if (score >= 8) return 'medium';
+                return 'low';
+              };
+              const riskCounts = { high: 0, medium: 0, low: 0 };
+              for (const r of projectRisks) {
+                const b = riskBucket(r.impact, r.probability);
+                riskCounts[b as 'high' | 'medium' | 'low']++;
+              }
+
+              const openIssues = projectIssues.filter((i: any) => (i.status || '').toLowerCase() !== 'closed').length;
+              const closedIssues = projectIssues.filter((i: any) => (i.status || '').toLowerCase() === 'closed').length;
+
+              const upcoming = milestones
+                .filter((m: any) => (m.status || '').toLowerCase() !== 'completed')
+                .slice(0, 3)
+                .map((m: any) => m.name);
+
+              const recentlyCompleted = completedMs.slice(-3).map((m: any) => m.name);
+
               return {
                 ...summary,
-                milestones: { completed: 2, total: 5, onTrack: 3 },
-                risks: { high: 1, medium: 3, low: 2 },
-                issues: { open: 4, closed: 12 },
-                teamSize: 8,
-                keyAccomplishments: ['Requirements approved', 'Design phase completed'],
-                upcomingMilestones: ['Development completion', 'Testing phase'],
+                milestones: { completed: completedMs.length, total: milestones.length, onTrack: onTrackMs.length },
+                risks: riskCounts,
+                issues: { open: openIssues, closed: closedIssues },
+                teamSize: resources.length,
+                keyAccomplishments: recentlyCompleted.length > 0 ? recentlyCompleted : ['No completed milestones yet'],
+                upcomingMilestones: upcoming.length > 0 ? upcoming : ['No upcoming milestones'],
                 executiveSummary: format === 'executive' ?
                   `Project ${project.name} is ${project.progress}% complete with ${budgetVariance > 0 ? 'budget overrun' : 'budget remaining'} of ${Math.abs(budgetVariance).toFixed(1)}%. ${budgetVariance > 15 ? 'Immediate attention required.' : 'On track.'}` :
                   undefined,

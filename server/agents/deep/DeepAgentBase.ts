@@ -264,7 +264,7 @@ export abstract class DeepAgentBase {
       const filters: QueryFilter[] = objectiveId
         ? [{ field: 'objectiveId', operator: 'eq', value: objectiveId }]
         : [];
-      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.OKR, { // Key Results are part of OKR
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.KEY_RESULT, {
         filters,
         pageSize: 100
       });
@@ -331,14 +331,28 @@ export abstract class DeepAgentBase {
    */
   protected async getMilestones(projectId?: string): Promise<any[]> {
     try {
+      // Milestones are embedded as JSON arrays on AtlasProject (no dedicated
+      // ontology object type). Extract milestonesJson from each project row,
+      // tagging each milestone with its parent projectId.
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, { // Milestones tracked on Projects
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
         filters,
         pageSize: 100
       });
-      return result.data;
+      const out: any[] = [];
+      for (const row of result.data || []) {
+        const raw = (row as any).milestonesJson ?? (row as any).milestones ?? [];
+        let arr: any[] = [];
+        if (Array.isArray(raw)) arr = raw;
+        else if (typeof raw === 'string') {
+          try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) arr = parsed; } catch {}
+        }
+        const pid = (row as any).projectId || (row as any).id;
+        for (const m of arr) out.push({ ...m, projectId: m.projectId || pid });
+      }
+      return out;
     } catch (error: any) {
       console.error(`[${this.config.agentName}] Failed to get milestones from Palantir:`, error.message);
       return [];
@@ -507,14 +521,28 @@ export abstract class DeepAgentBase {
    */
   protected async getResourceAllocations(projectId?: string): Promise<any[]> {
     try {
+      // Resources are embedded as JSON arrays on AtlasProject (no dedicated
+      // ontology object type). Extract resourcesJson from each project row,
+      // tagging each resource with its parent projectId.
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
-      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, { // Resource allocations on Projects
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
         filters,
         pageSize: 100
       });
-      return result.data;
+      const out: any[] = [];
+      for (const row of result.data || []) {
+        const raw = (row as any).resourcesJson ?? (row as any).resources ?? [];
+        let arr: any[] = [];
+        if (Array.isArray(raw)) arr = raw;
+        else if (typeof raw === 'string') {
+          try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) arr = parsed; } catch {}
+        }
+        const pid = (row as any).projectId || (row as any).id;
+        for (const r of arr) out.push({ ...r, projectId: r.projectId || pid });
+      }
+      return out;
     } catch (error: any) {
       console.error(`[${this.config.agentName}] Failed to get resource allocations from Palantir:`, error.message);
       return [];
@@ -546,6 +574,47 @@ export abstract class DeepAgentBase {
    * Subclasses must implement this
    */
   protected abstract defineTools(): AgentTool[];
+
+  /**
+   * PUBLIC: Run a single tool directly by name without LLM planning loop.
+   * Used by route handlers (e.g. /api/projects/ingest) to invoke a specific
+   * agent tool with concrete arguments and get its raw output back.
+   *
+   * Returns { ok, toolName, output, error } so callers can render results
+   * or surface errors per-tool without aborting the whole batch.
+   */
+  async runToolDirect(
+    toolName: string,
+    args: Record<string, any> = {}
+  ): Promise<{ ok: boolean; agent: string; toolName: string; output?: any; error?: string }> {
+    const tools = this.defineTools();
+    const tool = tools.find((t) => t.name === toolName);
+    if (!tool) {
+      return {
+        ok: false,
+        agent: this.config.agentName,
+        toolName,
+        error: `Tool '${toolName}' not found on agent ${this.config.agentName}`,
+      };
+    }
+
+    try {
+      const output = await tool.invoke(args);
+      this.actionCount++;
+      return { ok: true, agent: this.config.agentName, toolName, output };
+    } catch (err: any) {
+      console.error(
+        `[${this.config.agentName}] runToolDirect(${toolName}) failed:`,
+        err.message
+      );
+      return {
+        ok: false,
+        agent: this.config.agentName,
+        toolName,
+        error: err.message || String(err),
+      };
+    }
+  }
 
   /**
    * Get agent system prompt
@@ -604,24 +673,35 @@ export abstract class DeepAgentBase {
    * Agent learns and remembers a fact
    */
   protected async learn(key: string, value: any): Promise<void> {
-    await this.memoryInitPromise;
-    await this.memory.learn(key, value);
-    console.log(`[${this.config.agentName}] Learned: ${key}`);
+    try {
+      await this.memoryInitPromise;
+      await Promise.race([
+        this.memory.learn(key, value),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('learn timeout')), 1500)),
+      ]);
+      console.log(`[${this.config.agentName}] Learned: ${key}`);
+    } catch (err: any) {
+      console.warn(`[${this.config.agentName}] learn non-fatal failure for ${key}: ${err.message}`);
+    }
   }
 
   /**
    * Agent broadcasts a fact to other agents
    */
   protected async broadcastFact(entity: string, attribute: string, value: any, confidence: number = 1.0): Promise<void> {
-    await this.mem0.writeFact({
-      entity,
-      attribute,
-      value,
-      sourceAgent: this.config.agentName.toLowerCase(),
-      confidence,
-    });
-
-    console.log(`[${this.config.agentName}] Broadcast fact: ${entity}.${attribute} = ${JSON.stringify(value)}`);
+    try {
+      await this.mem0.writeFact({
+        entity,
+        attribute,
+        value,
+        sourceAgent: this.config.agentName.toLowerCase(),
+        confidence,
+      });
+      console.log(`[${this.config.agentName}] Broadcast fact: ${entity}.${attribute} = ${JSON.stringify(value)}`);
+    } catch (err: any) {
+      // Never let mem0 failures abort an agent tool — fact broadcast is best-effort
+      console.warn(`[${this.config.agentName}] broadcastFact non-fatal failure for ${entity}.${attribute}: ${err.message}`);
+    }
   }
 
   /**
@@ -840,7 +920,10 @@ export abstract class DeepAgentBase {
         tags: [this.config.agentType, 'agent-rule-check'],
       };
 
-      const result = await rules.checkRule(functionName, input, metadata);
+      const result = await Promise.race([
+        rules.checkRule(functionName, input, metadata),
+        new Promise<any>((_, rej) => setTimeout(() => rej(new Error('checkRule timeout')), 3000)),
+      ]);
       if (result.success) {
         console.log(`[${this.config.agentName}] Function "${functionName}" checked (${result.executionTime}ms)`);
 
@@ -954,12 +1037,19 @@ export abstract class DeepAgentBase {
    * Archive important context to long-term memory
    */
   protected async archiveContext(content: string, metadata: Record<string, any> = {}): Promise<void> {
-    await this.memoryInitPromise;
-    await this.memory.archive(content, {
-      ...metadata,
-      archivedAt: new Date().toISOString(),
-      source: 'deep-agent',
-    });
+    try {
+      await this.memoryInitPromise;
+      await Promise.race([
+        this.memory.archive(content, {
+          ...metadata,
+          archivedAt: new Date().toISOString(),
+          source: 'deep-agent',
+        }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('archive timeout')), 1500)),
+      ]);
+    } catch (err: any) {
+      console.warn(`[${this.config.agentName}] archiveContext non-fatal failure: ${err.message}`);
+    }
   }
 
   /**

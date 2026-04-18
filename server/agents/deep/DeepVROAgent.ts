@@ -87,41 +87,76 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               return { error: "Project not found", projectId };
             }
 
-            // Calculate value realization (would integrate with actual benefits tracking)
+            // REAL value realization from project + KPIs + linked OKR/KRs
             const budget = parseFloat(project.budget || '0');
             const progress = project.progress || 0;
-            const plannedValue = budget * 1.5; // Simulate 1.5x ROI target
-            const actualValue = (progress / 100) * plannedValue; // Value proportional to progress
+            const expectedRoi = Number(project.expectedRoi ?? 0); // percent
+            const roiValue = parseFloat(project.roiValue || '0'); // absolute target $
+            const actualCost = parseFloat(project.actualCost || '0');
 
-            const valueRealizationPercent = (actualValue / plannedValue) * 100;
+            // Planned value: prefer explicit roiValue; else derive from expectedRoi % * budget; else fall back to 1x budget
+            const plannedValue = roiValue > 0
+              ? roiValue
+              : expectedRoi > 0
+                ? budget * (1 + expectedRoi / 100)
+                : Math.max(budget, actualCost);
 
-            // Track by metric type
-            const metricBreakdown = {
-              revenue: {
-                planned: plannedValue * 0.4,
-                actual: actualValue * 0.35,
-                realizationPercent: 87.5,
-                status: "on_track",
-              },
-              cost_savings: {
-                planned: plannedValue * 0.3,
-                actual: actualValue * 0.32,
-                realizationPercent: 106.7,
-                status: "exceeding",
-              },
-              efficiency: {
-                planned: plannedValue * 0.2,
-                actual: actualValue * 0.18,
-                realizationPercent: 90.0,
-                status: "on_track",
-              },
-              customer_satisfaction: {
-                planned: plannedValue * 0.1,
-                actual: actualValue * 0.15,
-                realizationPercent: 150.0,
-                status: "exceeding",
-              },
+            // Read real KPIs and OKR/KR linked to this project
+            const [allKpis, allOkrs, allKrs] = await Promise.all([
+              this.getMetrics([{ field: 'projectId', operator: 'eq', value: projectId }]).catch(() => [] as any[]),
+              this.getObjectives().catch(() => [] as any[]),
+              this.getKeyResults().catch(() => [] as any[]),
+            ]);
+
+            const linkedOkrs = allOkrs.filter((o: any) => {
+              const links = o.linkedProjectIds || o.linkedProjects || [];
+              return Array.isArray(links) && links.includes(projectId);
+            });
+            const linkedKrs = allKrs.filter((kr: any) => kr.projectId === projectId
+              || linkedOkrs.some((o: any) => (o.objectiveId || o.id) === kr.objectiveId));
+
+            // Compute realization per KPI category
+            const categories = ['revenue', 'cost_savings', 'efficiency', 'customer_satisfaction'];
+            const computeBucket = (cat: string) => {
+              const matches = allKpis.filter((k: any) => {
+                const c = (k.category || '').toLowerCase();
+                const n = (k.name || '').toLowerCase();
+                return c.includes(cat.replace('_', ' ')) || n.includes(cat.replace('_', ' ')) || c.includes(cat) || n.includes(cat);
+              });
+              if (matches.length === 0) {
+                // No KPI evidence — use overall progress as proxy
+                return {
+                  planned: plannedValue * 0.25,
+                  actual: plannedValue * 0.25 * (progress / 100),
+                  realizationPercent: progress,
+                  status: progress >= 80 ? 'on_track' : progress >= 60 ? 'at_risk' : 'critical',
+                  source: 'progress_proxy',
+                };
+              }
+              const totalCur = matches.reduce((s: number, k: any) => s + Number(k.currentValue ?? 0), 0);
+              const totalTgt = matches.reduce((s: number, k: any) => s + Number(k.targetValue ?? 0), 0);
+              const pct = totalTgt > 0 ? (totalCur / totalTgt) * 100 : 0;
+              return {
+                planned: plannedValue * 0.25,
+                actual: plannedValue * 0.25 * (pct / 100),
+                realizationPercent: Math.round(pct * 10) / 10,
+                status: pct >= 100 ? 'exceeding' : pct >= 80 ? 'on_track' : pct >= 60 ? 'at_risk' : 'critical',
+                source: `${matches.length}_kpis`,
+              };
             };
+            const metricBreakdown: Record<string, any> = {};
+            for (const cat of categories) metricBreakdown[cat] = computeBucket(cat);
+
+            // Overall actual value: weight from KR progress where available, else fall back to project progress
+            const krProgress = linkedKrs.length > 0
+              ? linkedKrs.reduce((s: number, kr: any) => {
+                  const cur = Number(kr.currentValue ?? 0);
+                  const tgt = Number(kr.targetValue ?? 0);
+                  return s + (tgt > 0 ? Math.min(100, (cur / tgt) * 100) : 0);
+                }, 0) / linkedKrs.length
+              : progress;
+            const actualValue = plannedValue * (krProgress / 100);
+            const valueRealizationPercent = plannedValue > 0 ? (actualValue / plannedValue) * 100 : 0;
 
             // Determine overall status
             const overallStatus =
@@ -260,10 +295,22 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               return { error: "Project not found", projectId };
             }
 
-            // Calculate financial metrics
-            const totalInvestment = parseFloat(project.actualCost || '0');
+            // REAL financial metrics from Palantir project record
+            const totalInvestment = parseFloat(project.actualCost || project.budget || '0');
+            const budgetTotal = parseFloat(project.budget || '0');
             const progress = project.progress || 0;
-            const valueRealized = totalInvestment * (1 + (progress / 100) * 0.5); // Simulate value
+            const expectedRoi = Number(project.expectedRoi ?? 0); // percent target
+            const roiValueTarget = parseFloat(project.roiValue || '0'); // absolute target $
+
+            // Planned full-realized value: prefer explicit roiValue, else derive from expectedRoi
+            const plannedFullValue = roiValueTarget > 0
+              ? roiValueTarget
+              : expectedRoi > 0
+                ? budgetTotal * (1 + expectedRoi / 100)
+                : totalInvestment;
+
+            // Value realized so far: planned * project progress fraction (real progress, not multiplier)
+            const valueRealized = plannedFullValue * (progress / 100);
             const netValue = valueRealized - totalInvestment;
             const roi = totalInvestment > 0 ? (netValue / totalInvestment) * 100 : 0;
 
@@ -395,20 +442,55 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               return { error: "Project not found", projectId };
             }
 
-            // Calculate strategic alignment from actual project data and OKRs
-            const projectProgress = project.progress || 0;
-            const projectRoi = parseFloat(project.roiValue || '0') || 0;
-            const baseScore = Math.min(100, Math.max(0, (projectProgress + projectRoi) / 2));
+            // REAL strategic alignment: derived from linked OKRs + their KR progress
+            const allOkrs = await this.getObjectives().catch(() => [] as any[]);
+            const allKrs = await this.getKeyResults().catch(() => [] as any[]);
+            const linkedOkrs = allOkrs.filter((o: any) => {
+              const links = o.linkedProjectIds || o.linkedProjects || [];
+              return Array.isArray(links) && links.includes(projectId);
+            });
 
-            const alignmentScores = {
-              revenue_growth: Math.floor(baseScore * 1.1), // Weight by ROI
-              cost_reduction: Math.floor(baseScore * 0.9), // Slightly lower
-              digital_transformation: Math.floor(baseScore), // Standard
-              customer_experience: Math.floor(baseScore * 0.95),
-              operational_efficiency: Math.floor(baseScore * 1.05),
-              market_expansion: Math.floor(baseScore * 0.85),
-              innovation: Math.floor(baseScore * 1.1),
+            const themeOf = (text: string): keyof typeof alignmentScores | null => {
+              const t = (text || '').toLowerCase();
+              if (/revenue|sales|growth|market share/.test(t)) return 'revenue_growth';
+              if (/cost|saving|reduce spend|efficien/.test(t)) return 'cost_reduction';
+              if (/digital|cloud|platform|modern/.test(t)) return 'digital_transformation';
+              if (/customer|nps|experience|satisfaction|onboard/.test(t)) return 'customer_experience';
+              if (/operation|throughput|latency|reliability|sla/.test(t)) return 'operational_efficiency';
+              if (/expand|new market|geograph/.test(t)) return 'market_expansion';
+              if (/innovat|ai|ml|research/.test(t)) return 'innovation';
+              return null;
             };
+
+            const alignmentScores: Record<string, number> = {
+              revenue_growth: 0, cost_reduction: 0, digital_transformation: 0,
+              customer_experience: 0, operational_efficiency: 0, market_expansion: 0, innovation: 0,
+            };
+            const themeCounts: Record<string, number> = { ...alignmentScores };
+
+            for (const o of linkedOkrs) {
+              const theme = themeOf(`${o.name} ${o.description || ''}`) || themeOf(project.portfolioTheme || '');
+              if (!theme) continue;
+              const okrId = o.objectiveId || o.id;
+              const krs = allKrs.filter((kr: any) => kr.objectiveId === okrId);
+              const krProgress = krs.length > 0
+                ? krs.reduce((s: number, kr: any) => {
+                    const cur = Number(kr.currentValue ?? 0);
+                    const tgt = Number(kr.targetValue ?? 0);
+                    return s + (tgt > 0 ? Math.min(100, (cur / tgt) * 100) : 0);
+                  }, 0) / krs.length
+                : Number(o.progress ?? 0);
+              const strength = Number(o.alignmentStrength ?? 0.7);
+              alignmentScores[theme] += krProgress * strength;
+              themeCounts[theme] += 1;
+            }
+
+            // Average per theme; themes with no linked OKRs stay at 0
+            for (const k of Object.keys(alignmentScores)) {
+              if (themeCounts[k] > 0) {
+                alignmentScores[k] = Math.round(alignmentScores[k] / themeCounts[k]);
+              }
+            }
 
             // Calculate overall alignment score
             const scoresToConsider = strategicPriorities
@@ -544,10 +626,18 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               return { error: "Project not found", projectId };
             }
 
-            // Calculate current value velocity
+            // REAL current value: planned target * actual progress (no multiplier mock)
             const actualCost = parseFloat(project.actualCost || '0');
+            const budgetTotal = parseFloat(project.budget || '0');
             const progress = project.progress || 0;
-            const currentValue = actualCost * (1 + (progress / 100) * 0.5);
+            const expectedRoi = Number(project.expectedRoi ?? 0);
+            const roiValueTarget = parseFloat(project.roiValue || '0');
+            const plannedFullValue = roiValueTarget > 0
+              ? roiValueTarget
+              : expectedRoi > 0
+                ? budgetTotal * (1 + expectedRoi / 100)
+                : Math.max(budgetTotal, actualCost);
+            const currentValue = plannedFullValue * (progress / 100);
 
             // Calculate project age with validation
             let projectAgeMonths = 1; // Default to 1 month
@@ -580,10 +670,11 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               });
             }
 
-            // Calculate value realization milestones
-            const budget = parseFloat(project.budget || '0');
-            const targetValue = budget * 1.5; // 1.5x ROI target
-            const monthsToTarget = Math.ceil((targetValue - currentValue) / monthlyValueVelocity);
+            // Value realization target — use plannedFullValue from above (real ROI target)
+            const targetValue = plannedFullValue;
+            const monthsToTarget = monthlyValueVelocity > 0
+              ? Math.ceil(Math.max(0, targetValue - currentValue) / monthlyValueVelocity)
+              : Number.POSITIVE_INFINITY;
             const willAchieveTarget = monthsToTarget <= forecastMonths;
 
             // Trend analysis
@@ -592,7 +683,7 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
             if (project.status === "at_risk") {
               riskFactors.push("Project health issues may impact value delivery");
             }
-            if (actualCost > budget * 0.9) {
+            if (budgetTotal > 0 && actualCost > budgetTotal * 0.9) {
               riskFactors.push("Budget constraints may limit value capture");
             }
 
@@ -695,38 +786,66 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
               return { error: "Project not found", projectId };
             }
 
-            // Analyze current performance dimensions
+            // REAL performance dimensions from Palantir project + risks + dependencies + issues
             const projectProgress = project.progress || 0;
             const epicProgress = typeof project.epicProgress === 'number' ? project.epicProgress : parseFloat(project.epicProgress || '0');
             const projectActualCost = parseFloat(project.actualCost || '0');
             const projectBudget = parseFloat(project.budget || '0');
 
+            const [projectRisks, projectIssues] = await Promise.all([
+              this.getRisks([{ field: 'projectId', operator: 'eq', value: projectId }]).catch(() => [] as any[]),
+              (this as any).getIssues
+                ? (this as any).getIssues(projectId).catch(() => [] as any[])
+                : Promise.resolve([] as any[]),
+            ]);
+            const openRisks = projectRisks.filter((r: any) => (r.status || '').toLowerCase() === 'open');
+            const criticalRisks = openRisks.filter((r: any) => (Number(r.impact) || 0) * (Number(r.probability) || 0) >= 16);
+            const openIssues = projectIssues.filter((i: any) => (i.status || '').toLowerCase() !== 'closed');
+
+            const scheduleVariance = projectProgress - epicProgress; // positive = ahead
+            const speedScore = Math.max(0, Math.min(100, 80 + scheduleVariance));
+
+            // Quality from issue load (more open issues = lower quality score)
+            const qualityScore = Math.max(20, 100 - openIssues.length * 5);
+
+            // Scope from feature priority spread — proxy: predictability
+            const predictability = Number(project.predictability ?? 0);
+            const scopeScore = Math.round(Math.max(20, Math.min(100, predictability * 100 || 70)));
+
+            const budgetUtilization = projectBudget > 0 ? projectActualCost / projectBudget : 0;
+            const costScore = budgetUtilization <= 0.8
+              ? 95
+              : budgetUtilization <= 1.0
+                ? 75
+                : Math.max(20, 75 - (budgetUtilization - 1) * 100);
+
+            const riskScore = Math.max(15, 100 - openRisks.length * 8 - criticalRisks.length * 15);
+
             const performanceDimensions = {
               speed: {
-                current: projectProgress < epicProgress ? "slow" : "on_pace",
-                score: projectProgress >= epicProgress ? 85 : 60,
-                optimization: "Consider parallel workstreams or resource augmentation",
+                current: scheduleVariance >= 0 ? 'on_pace' : 'slow',
+                score: Math.round(speedScore),
+                optimization: 'Consider parallel workstreams or resource augmentation',
               },
               quality: {
-                current: "meeting_standards",
-                score: 80,
-                optimization: "Implement continuous quality reviews",
+                current: openIssues.length <= 2 ? 'meeting_standards' : 'degraded',
+                score: Math.round(qualityScore),
+                optimization: 'Implement continuous quality reviews and reduce open defect backlog',
               },
               scope: {
-                current: "aligned",
-                score: 90,
-                optimization: "Consider scope prioritization to deliver high-value features first",
+                current: predictability >= 0.8 ? 'aligned' : 'drifting',
+                score: scopeScore,
+                optimization: 'Re-prioritize backlog by WSJF and freeze low-value scope',
               },
               cost: {
-                current:
-                  projectActualCost > projectBudget * 0.9 ? "constrained" : "within_budget",
-                score: projectActualCost < projectBudget * 0.8 ? 95 : 70,
-                optimization: "Review resource efficiency and vendor contracts",
+                current: budgetUtilization > 0.9 ? 'constrained' : 'within_budget',
+                score: Math.round(costScore),
+                optimization: 'Review resource efficiency and vendor contracts',
               },
               risk: {
-                current: project.status === "at_risk" ? "elevated" : "managed",
-                score: project.status === "at_risk" ? 60 : 85,
-                optimization: "Implement proactive risk mitigation strategies",
+                current: criticalRisks.length > 0 ? 'elevated' : openRisks.length > 0 ? 'monitored' : 'managed',
+                score: Math.round(riskScore),
+                optimization: 'Mitigate critical unmitigated risks first',
               },
             };
 

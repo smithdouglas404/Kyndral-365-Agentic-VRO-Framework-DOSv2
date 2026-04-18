@@ -124,9 +124,22 @@ export class LettaAgentMemory {
     `);
 
     if (result.rows.length === 0) {
-      // Initialize with defaults
-      await this.initialize(`I am the ${this.agentId} agent.`);
-      return this.getCore();
+      // Initialize with defaults. Cache an in-memory default immediately to
+      // avoid infinite recursion when the underlying store is a no-op stub
+      // (Postgres removed) — initialize() may not actually persist anything.
+      this.coreCache = {
+        persona: `I am the ${this.agentId} agent.`,
+        policies: [],
+        learnedFacts: {},
+        currentContext: '',
+        pendingActions: [],
+      };
+      try {
+        await this.initialize(`I am the ${this.agentId} agent.`);
+      } catch {
+        // best-effort; cache already populated
+      }
+      return this.coreCache;
     }
 
     const row = result.rows[0] as any;

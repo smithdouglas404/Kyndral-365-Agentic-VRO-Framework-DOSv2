@@ -51,7 +51,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx tsx script/build-dev.ts && NODE_OPTIONS='--max-old-space-size=4096 --expose-gc' NODE_ENV=development node dist/index.mjs"
+args = "npx tsx script/build-dev.ts && NODE_OPTIONS=--max-old-space-size=1024 NODE_ENV=development node dist/index.mjs"
 waitForPort = 5000
 
 [agent]

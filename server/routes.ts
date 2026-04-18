@@ -1154,7 +1154,112 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (!projectData.name || !projectData.bu) {
         return res.status(400).json({ error: "Project name and business unit are required" });
       }
-      
+
+      // 1) Ingest into Palantir (single source of truth — no Postgres writes)
+      const { getPalantirIngestService } = await import('./services/PalantirIngestService.js');
+      const ingestService = getPalantirIngestService();
+
+      let ingestResult;
+      try {
+        ingestResult = await ingestService.ingest(projectData);
+      } catch (ingestErr: any) {
+        console.error('[ingest] Palantir ingest failed:', ingestErr);
+        return res.status(503).json({
+          error: 'Palantir ingest failed',
+          message: ingestErr.message,
+        });
+      }
+
+      const projectId = ingestResult.projectId;
+
+      // 2) Invoke REAL PMO + VRO agent tools against the freshly ingested project
+      const bootstrap = (global as any).__deepAgentBootstrap;
+      const agentResults: any[] = [];
+
+      if (bootstrap?.getAgent) {
+        const pmo = bootstrap.getAgent('pmo');
+        const vro = bootstrap.getAgent('vro');
+
+        // Demo path: keep tools scoped to this single project. We deliberately
+        // run the project-scoped tools first; portfolio-wide tools (e.g.
+        // optimize_resources) are run last so a memory issue there doesn't
+        // wipe out the project insights.
+        const pmoTools = [
+          { tool: 'analyze_project_health', args: { projectId, includeMetrics: true } },
+          { tool: 'track_milestones', args: { projectId, predictDelays: true } },
+          { tool: 'enforce_governance', args: { projectId } },
+          { tool: 'generate_status_report', args: { projectId, format: 'executive' } },
+          { tool: 'optimize_resources', args: { portfolioView: false, threshold: 80, projectId } },
+        ];
+        const vroTools = [
+          { tool: 'track_value_delivery', args: { projectId } },
+          { tool: 'calculate_roi_business_value', args: { projectId, includeProjections: true } },
+          { tool: 'assess_strategic_alignment', args: { projectId } },
+          { tool: 'forecast_value_trajectory', args: { projectId, forecastMonths: 12 } },
+          { tool: 'optimize_value_delivery', args: { projectId } },
+        ];
+
+        const runAll = async (agent: any, agentLabel: string, tools: typeof pmoTools) => {
+          if (!agent || typeof agent.runToolDirect !== 'function') {
+            agentResults.push({
+              agent: agentLabel,
+              status: 'unavailable',
+              error: `${agentLabel} agent not available (bootstrap missing or AI disabled)`,
+            });
+            return;
+          }
+          for (const { tool, args } of tools) {
+            try {
+              const result = await agent.runToolDirect(tool, args);
+              agentResults.push({
+                agent: agentLabel,
+                tool,
+                status: result.ok ? 'completed' : 'failed',
+                output: result.output,
+                error: result.error,
+              });
+            } catch (toolErr: any) {
+              agentResults.push({
+                agent: agentLabel,
+                tool,
+                status: 'failed',
+                error: toolErr.message,
+              });
+            }
+          }
+        };
+
+        await runAll(pmo, 'DeepPMO', pmoTools);
+        await runAll(vro, 'DeepVRO', vroTools);
+      } else {
+        agentResults.push({
+          agent: 'orchestrator',
+          status: 'unavailable',
+          error: 'Deep agent bootstrap not initialized — agent insights skipped',
+        });
+      }
+
+      return res.json({
+        success: true,
+        projectId,
+        message: `Project "${projectData.name}" ingested into Palantir`,
+        ingest: ingestResult,
+        agentActions: agentResults,
+      });
+    } catch (error: any) {
+      console.error("Project ingest error:", error);
+      return res.status(500).json({ error: "Failed to ingest project", message: error.message });
+    }
+  });
+
+  // Legacy Postgres ingest path — DEPRECATED, kept for reference only
+  app.post("/api/projects/ingest-legacy-postgres", async (req, res) => {
+    try {
+      const projectData = req.body;
+      if (!projectData.name || !projectData.bu) {
+        return res.status(400).json({ error: "Project name and business unit are required" });
+      }
+
       // Create project with full SAFe data
       const project = await storage.createProject({
         name: projectData.name,
