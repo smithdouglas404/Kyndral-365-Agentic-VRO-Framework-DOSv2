@@ -209,11 +209,13 @@ router.get('/search', async (req: Request, res: Response) => {
       includeEdges: false,
     });
 
-    // Filter nodes by search query
-    const matchingNodes = graph.nodes.filter(node =>
-      node.label.toLowerCase().includes(query.toLowerCase()) ||
-      node.id.toLowerCase().includes(query.toLowerCase())
-    );
+    // Filter nodes by search query (defensive: some nodes may have null labels)
+    const q = query.toLowerCase();
+    const matchingNodes = graph.nodes.filter(node => {
+      const label = (node.label || '').toString().toLowerCase();
+      const id = (node.id || '').toString().toLowerCase();
+      return label.includes(q) || id.includes(q);
+    });
 
     res.json({
       query,
