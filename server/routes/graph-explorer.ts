@@ -209,12 +209,19 @@ router.get('/search', async (req: Request, res: Response) => {
       includeEdges: false,
     });
 
-    // Filter nodes by search query (defensive: some nodes may have null labels)
+    // Filter nodes by search query (defensive: some nodes may have null labels).
+    // Also exclude task-shaped rows that the upstream data has indexed as
+    // AtlasProject (labels like "[Task] Design OAuth flow…") and similar
+    // sub-entity prefixes so the Node Explorer surfaces real top-level
+    // projects only.
     const q = query.toLowerCase();
+    const SUB_ENTITY_PREFIXES = ['[task]', '[story]', '[feature]', '[subtask]'];
     const matchingNodes = graph.nodes.filter(node => {
-      const label = (node.label || '').toString().toLowerCase();
-      const id = (node.id || '').toString().toLowerCase();
-      return label.includes(q) || id.includes(q);
+      const label = (node.label || '').toString();
+      const id = (node.id || '').toString();
+      const lower = label.toLowerCase();
+      if (SUB_ENTITY_PREFIXES.some(p => lower.startsWith(p))) return false;
+      return lower.includes(q) || id.toLowerCase().includes(q);
     });
 
     res.json({
