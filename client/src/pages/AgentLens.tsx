@@ -11,9 +11,11 @@ interface AgentMeta {
   tileCount: number; tiles: AgentTile[];
 }
 
-export default function AgentLens() {
+interface AgentLensProps { forceAgentId?: string }
+
+export default function AgentLens({ forceAgentId }: AgentLensProps = {}) {
   const [, params] = useRoute('/lens/:agentId');
-  const agentId = params?.agentId;
+  const agentId = forceAgentId ?? params?.agentId;
 
   const { data: agent, isLoading } = useQuery<AgentMeta>({
     queryKey: [`/api/agent-lens/agent/${agentId}`],

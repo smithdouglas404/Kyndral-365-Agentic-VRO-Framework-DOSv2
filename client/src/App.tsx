@@ -183,8 +183,8 @@ function Router() {
         <Route path="/workspace/ocm" component={OCMWorkspace} />
         <Route path="/workspace/admin" component={AdminWorkspace} />
 
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/dashboard/pmo" component={Dashboard} />
+        <Route path="/dashboard" component={() => <AgentLens forceAgentId="integrated" />} />
+        <Route path="/dashboard/pmo" component={() => <AgentLens forceAgentId="pmo" />} />
         <Route path="/dashboard/portfolio" component={PortfolioDashboard} />
         <Route path="/dashboard/art" component={ARTDashboard} />
         <Route path="/dashboard/value-stream" component={ValueStreamDashboard} />
@@ -201,12 +201,15 @@ function Router() {
         <Route path="/dashboard/dependencies" component={DependencyMapDashboard} />
         <Route path="/dashboard/decisions" component={DecisionBoardDashboard} />
         <Route path="/cop" component={COPDashboard} />
-        <Route path="/dashboard/tmo" component={TMODashboard} />
-        <Route path="/dashboard/finops" component={FinOpsDashboard} />
-        <Route path="/dashboard/okr" component={OKRDashboard} />
-        <Route path="/dashboard/governance" component={GovernanceDashboard} />
-        <Route path="/dashboard/planning" component={PlanningDashboard} />
-        <Route path="/dashboard/ocm" component={OCMDashboard} />
+        <Route path="/dashboard/tmo" component={() => <AgentLens forceAgentId="tmo" />} />
+        <Route path="/dashboard/finops" component={() => <AgentLens forceAgentId="finops" />} />
+        <Route path="/dashboard/okr" component={() => <AgentLens forceAgentId="okr" />} />
+        <Route path="/dashboard/governance" component={() => <AgentLens forceAgentId="governance" />} />
+        <Route path="/dashboard/planning" component={() => <AgentLens forceAgentId="planning" />} />
+        <Route path="/dashboard/ocm" component={() => <AgentLens forceAgentId="ocm" />} />
+        <Route path="/dashboard/risk" component={() => <AgentLens forceAgentId="risk" />} />
+        <Route path="/dashboard/vro" component={() => <AgentLens forceAgentId="vro" />} />
+        <Route path="/dashboard/integrated" component={() => <AgentLens forceAgentId="integrated" />} />
         <Route path="/dashboard/ppm" component={PPMDashboard} />
         <Route path="/ppm" component={PPMExecutiveDashboard} />
         <Route path="/ppm-enterprise" component={PPMEnterprise} />

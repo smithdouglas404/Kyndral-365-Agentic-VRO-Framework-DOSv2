@@ -40,19 +40,19 @@ interface Agent {
 const agents: Agent[] = [
   {
     id: 'integrated-management',
-    name: 'Integrated Management',
-    shortName: 'IMA',
+    name: 'All Agents',
+    shortName: 'ALL',
     icon: Sparkles,
-    href: '/dashboard',
+    href: '/lens',
     color: 'bg-gradient-to-r from-teal-500 to-blue-500',
-    description: 'Unified Value & Delivery'
+    description: 'Insight-first lens index'
   },
   {
     id: 'tmo',
     name: 'Transformation',
     shortName: 'TMO',
     icon: Repeat,
-    href: '/dashboard/tmo',
+    href: '/lens/tmo',
     color: 'bg-teal-500',
     description: 'Change & adoption'
   },
@@ -61,16 +61,16 @@ const agents: Agent[] = [
     name: 'FinOps',
     shortName: 'FIN',
     icon: Calculator,
-    href: '/dashboard/finops',
+    href: '/lens/finops',
     color: 'bg-green-500',
-    description: 'Cost optimization'
+    description: 'Cost, burn, reforecast'
   },
   {
     id: 'okr',
-    name: 'OKR Mapping',
+    name: 'OKR Alignment',
     shortName: 'OKR',
     icon: Target,
-    href: '/dashboard/okr',
+    href: '/lens/okr',
     color: 'bg-orange-500',
     description: 'Objectives & key results'
   },
@@ -79,7 +79,7 @@ const agents: Agent[] = [
     name: 'Governance',
     shortName: 'GOV',
     icon: Shield,
-    href: '/dashboard/governance',
+    href: '/lens/governance',
     color: 'bg-red-500',
     description: 'Compliance & controls'
   },
@@ -88,18 +88,18 @@ const agents: Agent[] = [
     name: 'Planning',
     shortName: 'PLN',
     icon: Calendar,
-    href: '/dashboard/planning',
+    href: '/lens/planning',
     color: 'bg-indigo-500',
-    description: 'Roadmap & milestones'
+    description: 'Critical path, dependencies'
   },
   {
     id: 'ocm',
     name: 'OCM',
     shortName: 'OCM',
     icon: Users,
-    href: '/dashboard/ocm',
+    href: '/lens/ocm',
     color: 'bg-pink-500',
-    description: 'Organizational change'
+    description: 'Change saturation, adoption'
   }
 ];
 
