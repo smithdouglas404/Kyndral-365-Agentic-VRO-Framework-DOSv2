@@ -13,7 +13,7 @@
  */
 
 import { AdminLayout } from '@/components/AdminLayout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Database,
@@ -29,7 +29,11 @@ import {
   Play,
   Layers,
   ExternalLink,
+  Save,
+  CalendarClock,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,6 +77,308 @@ interface SyncResult {
   failed: number;
   errors: string[];
   syncedAt: string;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Sync Schedule Editor
+// Lets admins edit cron expressions for both the in-memory PalantirSyncScheduler
+// jobs (Jira / OpenProject / Monday) and the DB-backed sync_jobs rows.
+// ──────────────────────────────────────────────────────────────────────────
+
+const CRON_PRESETS: { label: string; value: string }[] = [
+  { label: 'Every 15 minutes', value: '*/15 * * * *' },
+  { label: 'Every hour', value: '0 * * * *' },
+  { label: 'Every 4 hours', value: '0 */4 * * *' },
+  { label: 'Every 6 hours', value: '0 */6 * * *' },
+  { label: 'Every 12 hours', value: '0 */12 * * *' },
+  { label: 'Daily at midnight', value: '0 0 * * *' },
+  { label: 'Daily at 6 AM', value: '0 6 * * *' },
+  { label: 'Weekly (Sunday 2 AM)', value: '0 2 * * 0' },
+  { label: 'Custom', value: '__custom__' },
+];
+
+function describeCron(expr: string | null | undefined): string {
+  if (!expr) return 'No schedule';
+  const preset = CRON_PRESETS.find((p) => p.value === expr);
+  return preset && preset.value !== '__custom__' ? preset.label : expr;
+}
+
+interface PalantirJobRow {
+  id: string;
+  name: string;
+  system: string;
+  enabled: boolean;
+  cronSchedule: string;
+  nextRun?: string;
+}
+
+interface DbSyncJobRow {
+  id: string;
+  name: string;
+  cronExpression: string | null;
+  isEnabled: string | null;
+  lastRunAt: string | null;
+  nextRunAt: string | null;
+  lastRunStatus: string | null;
+}
+
+function ScheduleRow({
+  jobId,
+  name,
+  subtitle,
+  cron,
+  enabled,
+  nextRun,
+  lastStatus,
+  onSave,
+  isSaving,
+}: {
+  jobId: string;
+  name: string;
+  subtitle: string;
+  cron: string;
+  enabled: boolean;
+  nextRun?: string | null;
+  lastStatus?: string | null;
+  onSave: (next: { cron: string; enabled: boolean }) => void;
+  isSaving: boolean;
+}) {
+  const matchedPreset = CRON_PRESETS.find((p) => p.value === cron);
+  const initialPresetKey = matchedPreset ? matchedPreset.value : '__custom__';
+  const [presetKey, setPresetKey] = useState<string>(initialPresetKey);
+  const [cronValue, setCronValue] = useState<string>(cron);
+  const [isEnabled, setIsEnabled] = useState<boolean>(enabled);
+
+  // Re-sync local edit state when the parent receives fresh data from the server
+  // (e.g. after a successful save invalidates the query and refetches).
+  useEffect(() => {
+    setCronValue(cron);
+    const m = CRON_PRESETS.find((p) => p.value === cron);
+    setPresetKey(m ? m.value : '__custom__');
+  }, [cron]);
+  useEffect(() => {
+    setIsEnabled(enabled);
+  }, [enabled]);
+
+  const dirty = cronValue !== cron || isEnabled !== enabled;
+
+  return (
+    <div
+      className="flex flex-col md:flex-row md:items-center gap-3 p-3 border rounded-lg"
+      data-testid={`row-schedule-${jobId}`}
+    >
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-sm" data-testid={`text-schedule-name-${jobId}`}>
+          {name}
+        </div>
+        <div className="text-xs text-muted-foreground">{subtitle}</div>
+        {nextRun && (
+          <div className="text-xs text-muted-foreground mt-0.5">
+            Next run: {new Date(nextRun).toLocaleString()}
+            {lastStatus && (
+              <Badge
+                variant={lastStatus === 'success' || lastStatus === 'completed' ? 'default' : 'destructive'}
+                className="ml-2"
+              >
+                {lastStatus}
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+        <Select
+          value={presetKey}
+          onValueChange={(v) => {
+            setPresetKey(v);
+            if (v !== '__custom__') setCronValue(v);
+          }}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]" data-testid={`select-preset-${jobId}`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CRON_PRESETS.map((p) => (
+              <SelectItem key={p.value} value={p.value}>
+                {p.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Input
+          value={cronValue}
+          onChange={(e) => {
+            setCronValue(e.target.value);
+            const m = CRON_PRESETS.find((p) => p.value === e.target.value);
+            setPresetKey(m ? m.value : '__custom__');
+          }}
+          placeholder="* * * * *"
+          className="w-full sm:w-[160px] font-mono text-xs"
+          data-testid={`input-cron-${jobId}`}
+        />
+
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={setIsEnabled}
+            data-testid={`switch-enabled-${jobId}`}
+          />
+          <Label className="text-xs">{isEnabled ? 'Enabled' : 'Paused'}</Label>
+        </div>
+
+        <Button
+          size="sm"
+          disabled={!dirty || isSaving}
+          onClick={() => onSave({ cron: cronValue, enabled: isEnabled })}
+          data-testid={`button-save-schedule-${jobId}`}
+        >
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function SyncScheduleEditor() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const palantirJobsQuery = useQuery<{ jobs: PalantirJobRow[] }>({
+    queryKey: ['palantir-scheduler-jobs'],
+    queryFn: async () => {
+      const r = await fetch('/api/palantir/scheduler/jobs');
+      if (!r.ok) throw new Error('Failed to load Palantir scheduler jobs');
+      return r.json();
+    },
+  });
+
+  const dbJobsQuery = useQuery<{ syncJobs: DbSyncJobRow[] }>({
+    queryKey: ['mcp-sync-jobs'],
+    queryFn: async () => {
+      const r = await fetch('/api/mcp/sync-jobs');
+      if (!r.ok) throw new Error('Failed to load MCP sync jobs');
+      return r.json();
+    },
+  });
+
+  const palantirMutation = useMutation({
+    mutationFn: async (vars: { jobId: string; cron: string; enabled: boolean }) => {
+      const r = await fetch(`/api/palantir/scheduler/jobs/${vars.jobId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cronSchedule: vars.cron, enabled: vars.enabled }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['palantir-scheduler-jobs'] });
+      toast({ title: 'Schedule updated', description: 'Palantir sync schedule saved.' });
+    },
+    onError: (e: any) => toast({ title: 'Save failed', description: e.message, variant: 'destructive' }),
+  });
+
+  const dbMutation = useMutation({
+    mutationFn: async (vars: { jobId: string; cron: string; enabled: boolean }) => {
+      const r = await fetch(`/api/mcp/sync-jobs/${vars.jobId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cronExpression: vars.cron,
+          isEnabled: vars.enabled ? 'true' : 'false',
+        }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mcp-sync-jobs'] });
+      toast({ title: 'Schedule updated', description: 'Sync job schedule saved.' });
+    },
+    onError: (e: any) => toast({ title: 'Save failed', description: e.message, variant: 'destructive' }),
+  });
+
+  const palantirJobs = palantirJobsQuery.data?.jobs ?? [];
+  const dbJobs = dbJobsQuery.data?.syncJobs ?? [];
+  const loading = palantirJobsQuery.isLoading || dbJobsQuery.isLoading;
+
+  return (
+    <Card data-testid="card-sync-schedules">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarClock className="w-5 h-5" />
+          Sync Schedules
+        </CardTitle>
+        <CardDescription>
+          Edit how often each external system syncs into Palantir. Changes take effect immediately —
+          no restart required, and the values persist in the database (no <code>.env</code> edits needed).
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {loading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading schedules...
+          </div>
+        )}
+
+        {!loading && palantirJobs.length === 0 && dbJobs.length === 0 && (
+          <Alert>
+            <AlertCircle className="w-4 h-4" />
+            <AlertDescription>No sync jobs registered yet.</AlertDescription>
+          </Alert>
+        )}
+
+        {palantirJobs.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase text-muted-foreground">
+              Palantir → External Systems
+            </div>
+            {palantirJobs.map((job) => (
+              <ScheduleRow
+                key={job.id}
+                jobId={job.id}
+                name={job.name}
+                subtitle={`System: ${job.system} · ${describeCron(job.cronSchedule)}`}
+                cron={job.cronSchedule}
+                enabled={job.enabled}
+                nextRun={job.nextRun}
+                onSave={({ cron, enabled }) =>
+                  palantirMutation.mutate({ jobId: job.id, cron, enabled })
+                }
+                isSaving={palantirMutation.isPending}
+              />
+            ))}
+          </div>
+        )}
+
+        {dbJobs.length > 0 && (
+          <div className="space-y-2 pt-2">
+            <div className="text-xs font-semibold uppercase text-muted-foreground">
+              Scheduled MCP Sync Jobs
+            </div>
+            {dbJobs.map((job) => (
+              <ScheduleRow
+                key={job.id}
+                jobId={job.id}
+                name={job.name}
+                subtitle={describeCron(job.cronExpression)}
+                cron={job.cronExpression ?? '0 0 * * *'}
+                enabled={(job.isEnabled ?? 'true') === 'true'}
+                nextRun={job.nextRunAt}
+                lastStatus={job.lastRunStatus}
+                onSave={({ cron, enabled }) =>
+                  dbMutation.mutate({ jobId: job.id, cron, enabled })
+                }
+                isSaving={dbMutation.isPending}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function PalantirSyncManager() {
@@ -398,7 +704,7 @@ export default function PalantirSyncManager() {
                             <div>
                               <Label className="text-xs">Primary Key</Label>
                               <div className="flex gap-1 mt-1">
-                                {objType.primaryKey?.map((pk) => (
+                                {(Array.isArray(objType.primaryKey) ? objType.primaryKey : objType.primaryKey ? [objType.primaryKey as any] : []).map((pk: string) => (
                                   <Badge key={pk} variant="outline" className="text-xs">
                                     {pk}
                                   </Badge>
@@ -453,6 +759,8 @@ export default function PalantirSyncManager() {
 
           {/* Sync Tab */}
           <TabsContent value="sync" className="space-y-6">
+            <SyncScheduleEditor />
+
             <div className="grid grid-cols-3 gap-4">
               {/* Jira Sync Card */}
               <Card>
