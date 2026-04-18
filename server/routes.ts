@@ -1148,108 +1148,204 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
     }
   });
 
+  // Shared pipeline: ingest a SafeProjectInput into Palantir, then run PMO + VRO
+  // agent tools against it. Used by both the JSON ingest route and the
+  // Excel/CSV upload route below.
+  async function runProjectIngestPipeline(projectData: any): Promise<
+    | { ok: true; projectId: string; ingest: any; agentActions: any[] }
+    | { ok: false; status: number; error: string; message?: string }
+  > {
+    if (!projectData?.name || !projectData?.bu) {
+      return { ok: false, status: 400, error: 'Project name and business unit are required' };
+    }
+
+    const { getPalantirIngestService } = await import('./services/PalantirIngestService.js');
+    const ingestService = getPalantirIngestService();
+
+    let ingestResult;
+    try {
+      ingestResult = await ingestService.ingest(projectData);
+    } catch (ingestErr: any) {
+      console.error('[ingest] Palantir ingest failed:', ingestErr);
+      return {
+        ok: false,
+        status: 503,
+        error: 'Palantir ingest failed',
+        message: ingestErr.message,
+      };
+    }
+
+    const projectId = ingestResult.projectId;
+    const bootstrap = (global as any).__deepAgentBootstrap;
+    const agentResults: any[] = [];
+
+    if (bootstrap?.getAgent) {
+      const pmo = bootstrap.getAgent('pmo');
+      const vro = bootstrap.getAgent('vro');
+
+      const pmoTools = [
+        { tool: 'analyze_project_health', args: { projectId, includeMetrics: true } },
+        { tool: 'track_milestones', args: { projectId, predictDelays: true } },
+        { tool: 'enforce_governance', args: { projectId } },
+        { tool: 'generate_status_report', args: { projectId, format: 'executive' } },
+        { tool: 'optimize_resources', args: { portfolioView: true, threshold: 80 } },
+      ];
+      const vroTools = [
+        { tool: 'track_value_delivery', args: { projectId } },
+        { tool: 'calculate_roi_business_value', args: { projectId, includeProjections: true } },
+        { tool: 'assess_strategic_alignment', args: { projectId } },
+        { tool: 'forecast_value_trajectory', args: { projectId, forecastMonths: 12 } },
+        { tool: 'optimize_value_delivery', args: { projectId } },
+      ];
+
+      const runAll = async (agent: any, agentLabel: string, tools: typeof pmoTools) => {
+        if (!agent || typeof agent.runToolDirect !== 'function') {
+          agentResults.push({
+            agent: agentLabel,
+            status: 'unavailable',
+            error: `${agentLabel} agent not available (bootstrap missing or AI disabled)`,
+          });
+          return;
+        }
+        for (const { tool, args } of tools) {
+          try {
+            const result = await agent.runToolDirect(tool, args);
+            agentResults.push({
+              agent: agentLabel,
+              tool,
+              status: result.ok ? 'completed' : 'failed',
+              output: result.output,
+              error: result.error,
+            });
+          } catch (toolErr: any) {
+            agentResults.push({
+              agent: agentLabel,
+              tool,
+              status: 'failed',
+              error: toolErr.message,
+            });
+          }
+        }
+      };
+
+      await runAll(pmo, 'DeepPMO', pmoTools);
+      await runAll(vro, 'DeepVRO', vroTools);
+    } else {
+      agentResults.push({
+        agent: 'orchestrator',
+        status: 'unavailable',
+        error: 'Deep agent bootstrap not initialized — agent insights skipped',
+      });
+    }
+
+    return { ok: true, projectId, ingest: ingestResult, agentActions: agentResults };
+  }
+
   app.post("/api/projects/ingest", async (req, res) => {
     try {
       const projectData = req.body;
-      if (!projectData.name || !projectData.bu) {
-        return res.status(400).json({ error: "Project name and business unit are required" });
+      const result = await runProjectIngestPipeline(projectData);
+      if (!result.ok) {
+        return res.status(result.status).json({ error: result.error, message: result.message });
       }
-
-      // 1) Ingest into Palantir (single source of truth — no Postgres writes)
-      const { getPalantirIngestService } = await import('./services/PalantirIngestService.js');
-      const ingestService = getPalantirIngestService();
-
-      let ingestResult;
-      try {
-        ingestResult = await ingestService.ingest(projectData);
-      } catch (ingestErr: any) {
-        console.error('[ingest] Palantir ingest failed:', ingestErr);
-        return res.status(503).json({
-          error: 'Palantir ingest failed',
-          message: ingestErr.message,
-        });
-      }
-
-      const projectId = ingestResult.projectId;
-
-      // 2) Invoke REAL PMO + VRO agent tools against the freshly ingested project
-      const bootstrap = (global as any).__deepAgentBootstrap;
-      const agentResults: any[] = [];
-
-      if (bootstrap?.getAgent) {
-        const pmo = bootstrap.getAgent('pmo');
-        const vro = bootstrap.getAgent('vro');
-
-        // Project-specific PMO tools target the freshly ingested project.
-        // optimize_resources runs portfolio-wide across the entire Palantir
-        // portfolio so the user sees real cross-project resource conflicts.
-        const pmoTools = [
-          { tool: 'analyze_project_health', args: { projectId, includeMetrics: true } },
-          { tool: 'track_milestones', args: { projectId, predictDelays: true } },
-          { tool: 'enforce_governance', args: { projectId } },
-          { tool: 'generate_status_report', args: { projectId, format: 'executive' } },
-          { tool: 'optimize_resources', args: { portfolioView: true, threshold: 80 } },
-        ];
-        const vroTools = [
-          { tool: 'track_value_delivery', args: { projectId } },
-          { tool: 'calculate_roi_business_value', args: { projectId, includeProjections: true } },
-          { tool: 'assess_strategic_alignment', args: { projectId } },
-          { tool: 'forecast_value_trajectory', args: { projectId, forecastMonths: 12 } },
-          { tool: 'optimize_value_delivery', args: { projectId } },
-        ];
-
-        const runAll = async (agent: any, agentLabel: string, tools: typeof pmoTools) => {
-          if (!agent || typeof agent.runToolDirect !== 'function') {
-            agentResults.push({
-              agent: agentLabel,
-              status: 'unavailable',
-              error: `${agentLabel} agent not available (bootstrap missing or AI disabled)`,
-            });
-            return;
-          }
-          for (const { tool, args } of tools) {
-            try {
-              const result = await agent.runToolDirect(tool, args);
-              agentResults.push({
-                agent: agentLabel,
-                tool,
-                status: result.ok ? 'completed' : 'failed',
-                output: result.output,
-                error: result.error,
-              });
-            } catch (toolErr: any) {
-              agentResults.push({
-                agent: agentLabel,
-                tool,
-                status: 'failed',
-                error: toolErr.message,
-              });
-            }
-          }
-        };
-
-        await runAll(pmo, 'DeepPMO', pmoTools);
-        await runAll(vro, 'DeepVRO', vroTools);
-      } else {
-        agentResults.push({
-          agent: 'orchestrator',
-          status: 'unavailable',
-          error: 'Deep agent bootstrap not initialized — agent insights skipped',
-        });
-      }
-
       return res.json({
         success: true,
-        projectId,
+        projectId: result.projectId,
         message: `Project "${projectData.name}" ingested into Palantir`,
-        ingest: ingestResult,
-        agentActions: agentResults,
+        ingest: result.ingest,
+        agentActions: result.agentActions,
       });
     } catch (error: any) {
       console.error("Project ingest error:", error);
       return res.status(500).json({ error: "Failed to ingest project", message: error.message });
     }
   });
+
+  // ============================================================================
+  // EXCEL / CSV PROJECT IMPORT
+  // ============================================================================
+
+  const projectFileUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      const ok =
+        /\.(xlsx|xls|csv)$/i.test(file.originalname) ||
+        file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.mimetype === 'application/vnd.ms-excel' ||
+        file.mimetype === 'text/csv';
+      if (ok) cb(null, true);
+      else cb(new Error('Only .xlsx, .xls, or .csv files are allowed'));
+    },
+  });
+
+  // Download a starter template the user can fill in and re-upload
+  app.get("/api/projects/import/excel/template", async (_req, res) => {
+    try {
+      const { getExcelCsvProjectImporter } = await import('./services/ExcelCsvProjectImporter.js');
+      const buf = getExcelCsvProjectImporter().buildTemplateBuffer();
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="kyndryl-clarity-project-template.xlsx"'
+      );
+      res.send(buf);
+    } catch (err: any) {
+      console.error('[ImportTemplate] Failed to build template:', err);
+      res.status(500).json({ error: 'Failed to build template', message: err.message });
+    }
+  });
+
+  // Upload an Excel/CSV file → parse → ingest → run agents
+  app.post(
+    "/api/projects/import/excel",
+    projectFileUpload.single('file'),
+    async (req, res) => {
+      try {
+        const file = (req as any).file as { buffer: Buffer; originalname: string } | undefined;
+        if (!file) {
+          return res.status(400).json({ error: 'No file uploaded (expected field "file")' });
+        }
+        const fallbackName = (req.body?.name as string) || undefined;
+        const fallbackBu = (req.body?.bu as string) || undefined;
+
+        const { getExcelCsvProjectImporter } = await import('./services/ExcelCsvProjectImporter.js');
+        let parsed;
+        try {
+          parsed = getExcelCsvProjectImporter().parse(file.buffer, file.originalname, {
+            fallbackName,
+            fallbackBu,
+          });
+        } catch (parseErr: any) {
+          console.error('[ExcelImport] Parse failed:', parseErr);
+          return res.status(400).json({
+            error: 'Failed to parse file',
+            message: parseErr.message,
+          });
+        }
+
+        const result = await runProjectIngestPipeline(parsed);
+        if (!result.ok) {
+          return res.status(result.status).json({ error: result.error, message: result.message });
+        }
+        return res.json({
+          success: true,
+          source: file.originalname,
+          parsed,
+          projectId: result.projectId,
+          message: `Project "${parsed.name}" ingested into Palantir from ${file.originalname}`,
+          ingest: result.ingest,
+          agentActions: result.agentActions,
+        });
+      } catch (error: any) {
+        console.error('[ExcelImport] Unexpected error:', error);
+        return res.status(500).json({ error: 'Failed to import project', message: error.message });
+      }
+    }
+  );
 
   // Legacy Postgres ingest path — DEPRECATED, kept for reference only
   app.post("/api/projects/ingest-legacy-postgres", async (req, res) => {

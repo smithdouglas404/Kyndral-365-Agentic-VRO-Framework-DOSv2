@@ -195,6 +195,58 @@ export default function ProjectIngestionPage() {
     reader.readAsText(file);
   }, []);
 
+  // Excel / CSV path: send the file to the server, let it parse + ingest +
+  // run agents in one shot, then drop straight into the saving cascade.
+  // For flat CSV uploads (which lack a project metadata sheet), prompt the
+  // user for project name + business unit so the importer has the required
+  // fields.
+  const handleExcelCsvUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    let fallbackName: string | null = null;
+    let fallbackBu: string | null = null;
+    if (/\.csv$/i.test(file.name)) {
+      fallbackName = window.prompt(
+        'Project name for this CSV (CSV files have no project metadata sheet):',
+        file.name.replace(/\.csv$/i, '')
+      );
+      if (!fallbackName) {
+        event.target.value = '';
+        return;
+      }
+      fallbackBu = window.prompt('Business unit for this project (e.g. enterprise-it):', 'enterprise-it');
+      if (!fallbackBu) {
+        event.target.value = '';
+        return;
+      }
+    }
+
+    setIsProcessing(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      if (fallbackName) fd.append('name', fallbackName);
+      if (fallbackBu) fd.append('bu', fallbackBu);
+      const res = await fetch('/api/projects/import/excel', { method: 'POST', body: fd });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        toast.error(result.message || result.error || 'Failed to import file');
+        setIsProcessing(false);
+        return;
+      }
+      toast.success(`Imported "${result.parsed?.name}" — ${result.agentActions?.length || 0} agent insights generated`);
+      setProjectData(result.parsed);
+      setStep('saving');
+      setIsProcessing(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+      setIsProcessing(false);
+    }
+    // reset input so the same file can be re-uploaded
+    event.target.value = '';
+  }, []);
+
   const handleTemplateSelect = useCallback(async (templateName: string) => {
     if (!templateName) return;
     setSelectedTemplate(templateName);
@@ -322,7 +374,7 @@ export default function ProjectIngestionPage() {
                 <p className="text-muted-foreground">Select an existing project template or upload a new one</p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-3 gap-6">
                 <Card className="border-2 border-dashed hover:border-primary/50 transition-colors cursor-pointer">
                   <CardContent className="p-8 text-center">
                     <input
@@ -353,6 +405,47 @@ export default function ProjectIngestionPage() {
                         </div>
                       )}
                     </label>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-dashed hover:border-primary/50 transition-colors cursor-pointer">
+                  <CardContent className="p-8 text-center">
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleExcelCsvUpload}
+                      className="hidden"
+                      id="excel-csv-upload"
+                      data-testid="input-excel-csv-upload"
+                    />
+                    <label htmlFor="excel-csv-upload" className="cursor-pointer block">
+                      {isProcessing ? (
+                        <div className="space-y-4">
+                          <Loader2 className="h-16 w-16 mx-auto text-primary animate-spin" />
+                          <p className="text-lg font-medium">Importing...</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="h-16 w-16 mx-auto bg-emerald-500/10 rounded-full flex items-center justify-center">
+                            <Upload className="h-8 w-8 text-emerald-600" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-medium">Upload Excel / CSV</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              .xlsx, .xls, or .csv — parsed and ingested directly into Palantir
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </label>
+                    <a
+                      href="/api/projects/import/excel/template"
+                      className="mt-4 inline-block text-xs text-primary underline"
+                      data-testid="link-download-excel-template"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Download .xlsx template
+                    </a>
                   </CardContent>
                 </Card>
 
