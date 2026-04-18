@@ -369,14 +369,11 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           projectId: z.string().optional().describe("If set, scope analysis to a single project (no portfolio fan-out)"),
         }),
         func: async ({ portfolioView = true, threshold = 80, projectId }) => {
-          // When projectId is provided OR portfolioView is false, only analyze
-          // that single project — avoids loading the entire portfolio (which
-          // can OOM on large Palantir tenants).
-          const projects = (projectId || portfolioView === false)
-            ? (projectId
-                ? [await this.getProject(projectId)].filter(Boolean)
-                : await this.getProjects({ pageSize: 25 }))
-            : await this.getProjects({ pageSize: 25 });
+          // Pull the entire Palantir portfolio (default behaviour). Only scope
+          // to a single project if the caller explicitly asks for it.
+          const projects = projectId
+            ? [await this.getProject(projectId)].filter(Boolean)
+            : await this.getProjects();
 
           // Read REAL resources from Palantir (or embedded JSON fallback per project)
           // Aggregate the same person across projects (sum allocations)
@@ -474,6 +471,7 @@ When you identify critical issues, recommend collaboration with FinOps (budget),
           }
 
           return {
+            projectsAnalyzed: projects.length,
             totalResources: resources.length,
             overAllocated: overAllocated.length,
             underAllocated: underAllocated.length,

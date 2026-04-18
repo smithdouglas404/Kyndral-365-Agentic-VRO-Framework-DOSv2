@@ -1180,16 +1180,15 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         const pmo = bootstrap.getAgent('pmo');
         const vro = bootstrap.getAgent('vro');
 
-        // Demo path: keep tools scoped to this single project. We deliberately
-        // run the project-scoped tools first; portfolio-wide tools (e.g.
-        // optimize_resources) are run last so a memory issue there doesn't
-        // wipe out the project insights.
+        // Project-specific PMO tools target the freshly ingested project.
+        // optimize_resources runs portfolio-wide across the entire Palantir
+        // portfolio so the user sees real cross-project resource conflicts.
         const pmoTools = [
           { tool: 'analyze_project_health', args: { projectId, includeMetrics: true } },
           { tool: 'track_milestones', args: { projectId, predictDelays: true } },
           { tool: 'enforce_governance', args: { projectId } },
           { tool: 'generate_status_report', args: { projectId, format: 'executive' } },
-          { tool: 'optimize_resources', args: { portfolioView: false, threshold: 80, projectId } },
+          { tool: 'optimize_resources', args: { portfolioView: true, threshold: 80 } },
         ];
         const vroTools = [
           { tool: 'track_value_delivery', args: { projectId } },
