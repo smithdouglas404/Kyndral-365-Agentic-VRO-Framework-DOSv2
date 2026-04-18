@@ -1,5 +1,5 @@
-import { Component, Suspense, lazy, type ErrorInfo, type ReactNode } from "react";
-import { Switch, Route } from "wouter";
+import { Component, Suspense, lazy, type ErrorInfo, type ReactNode, useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageContextProvider } from "@/contexts/PageContext";
 import { CompanyProfileProvider } from "@/contexts/CompanyProfileContext";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
-import { LiquidCanvasProvider } from "@/contexts/LiquidCanvasContext";
 import { UnifiedNotificationProvider } from "@/contexts/UnifiedNotificationContext";
 import AppTheme from "@/theme/AppTheme";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -34,96 +33,43 @@ function PageLoading() {
   </div>;
 }
 
+// Redirect helper for legacy URLs → Agent Lens
+function Redirect({ to }: { to: string }) {
+  const [, setLocation] = useLocation();
+  useEffect(() => { setLocation(to, { replace: true }); }, [to, setLocation]);
+  return <PageLoading />;
+}
+
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
-const DemoRequestPage = lazy(() => import("@/pages/DemoRequestPage"));
-const DemoIngestPage = lazy(() => import("@/pages/demo-ingest"));
-const PendingApprovalPage = lazy(() => import("@/pages/PendingApprovalPage"));
-const InvitationAcceptPage = lazy(() => import("@/pages/InvitationAcceptPage"));
-const SystemAdminPage = lazy(() => import("@/pages/SystemAdminPage"));
-const DemoShowcase = lazy(() => import("@/pages/DemoShowcase"));
-const SetupWizard = lazy(() => import("@/pages/SetupWizard"));
-const Dashboard = lazy(() => import("@/pages/dashboard"));
-const PortfolioDashboard = lazy(() => import("@/pages/PortfolioDashboard"));
-const ARTDashboard = lazy(() => import("@/pages/ARTDashboard"));
-const ValueStreamDashboard = lazy(() => import("@/pages/ValueStreamDashboard"));
-const MCPDashboard = lazy(() => import("@/pages/MCPDashboard"));
-const PredictionHubDashboard = lazy(() => import("@/pages/PredictionHubDashboard"));
-const PredictiveAnalytics = lazy(() => import("@/pages/PredictiveAnalytics"));
-const ResourceOptimization = lazy(() => import("@/pages/ResourceOptimization"));
-const ChangeImpactSimulator = lazy(() => import("@/pages/ChangeImpactSimulator"));
-const AgentPerformance = lazy(() => import("@/pages/AgentPerformance"));
-const ComplianceAudit = lazy(() => import("@/pages/ComplianceAudit"));
-const StakeholderSentiment = lazy(() => import("@/pages/StakeholderSentiment"));
-const PortfolioInvestment = lazy(() => import("@/pages/PortfolioInvestment"));
-const DependencyHealth = lazy(() => import("@/pages/DependencyHealth"));
-const DependencyMapDashboard = lazy(() => import("@/pages/DependencyMapDashboard"));
-const DecisionBoardDashboard = lazy(() => import("@/pages/DecisionBoardDashboard"));
-const COPDashboard = lazy(() => import("@/pages/COPDashboard"));
-const TMODashboard = lazy(() => import("@/pages/dashboard-tmo"));
-const FinOpsDashboard = lazy(() => import("@/pages/dashboard-finops"));
-const OKRDashboard = lazy(() => import("@/pages/dashboard-okr"));
-const GovernanceDashboard = lazy(() => import("@/pages/dashboard-governance"));
-const PlanningDashboard = lazy(() => import("@/pages/dashboard-planning"));
-const OCMDashboard = lazy(() => import("@/pages/dashboard-ocm"));
-const ValueProposition = lazy(() => import("@/pages/value-proposition"));
-const SegmentPage = lazy(() => import("@/pages/SegmentPage"));
-const SustainabilityPage = lazy(() => import("@/pages/SustainabilityPage"));
-const RiskCenter = lazy(() => import("@/pages/RiskCenter"));
-const VROFramework = lazy(() => import("@/pages/vro-framework"));
-const ProjectDetailPage = lazy(() => import("@/pages/ProjectDetailPage"));
-const ProjectIngestionPage = lazy(() => import("@/pages/ProjectIngestionPage"));
-const GraphExplorer = lazy(() => import("@/pages/GraphExplorer"));
-const ClarityChat = lazy(() => import("@/pages/ClarityChat"));
-const AgentLensIndex = lazy(() => import("@/pages/AgentLensIndex"));
-const AgentLens = lazy(() => import("@/pages/AgentLens"));
-const AgentCommandCenterPage = lazy(() => import("@/pages/AgentCommandCenterPage"));
-const MCPConfigPage = lazy(() => import("@/pages/MCPConfigPage"));
-const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
-const DataQualityPage = lazy(() => import("@/pages/DataQualityPage"));
-const LiquidIntelligencePage = lazy(() => import("@/pages/LiquidIntelligencePage"));
-const OrchestrationMonitoringPage = lazy(() => import("@/pages/OrchestrationMonitoringPage"));
-const DeepAgentMonitoring = lazy(() => import("@/pages/DeepAgentMonitoring"));
-const IssueManagement = lazy(() => import("@/pages/IssueManagement"));
-const ChangeRequestManagement = lazy(() => import("@/pages/ChangeRequestManagement"));
-const ResourceManagementPage = lazy(() => import("@/pages/ResourceManagement"));
-const FinancialManagement = lazy(() => import("@/pages/FinancialManagement"));
-const DocumentManagement = lazy(() => import("@/pages/DocumentManagement"));
-const ProgramManagement = lazy(() => import("@/pages/ProgramManagement"));
-const ReportingAnalytics = lazy(() => import("@/pages/ReportingAnalytics"));
-const RiskManagement = lazy(() => import("@/pages/RiskManagement"));
-const CollaborationHub = lazy(() => import("@/pages/CollaborationHub"));
-const AgentCollaboration = lazy(() => import("@/pages/AgentCollaboration"));
-const AdvancedAnalytics = lazy(() => import("@/pages/AdvancedAnalytics"));
-const AdvancedFinancialManagement = lazy(() => import("@/pages/AdvancedFinancialManagement"));
-const CustomReportBuilder = lazy(() => import("@/pages/CustomReportBuilder"));
 const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
 const SignupPage = lazy(() => import("@/pages/SignupPage"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerificationPage"));
 const PasswordResetRequestPage = lazy(() => import("@/pages/PasswordResetRequestPage"));
 const PasswordResetPage = lazy(() => import("@/pages/PasswordResetPage"));
-const DemoPage = lazy(() => import("@/pages/DemoPage"));
-const PPMDashboard = lazy(() => import("@/pages/PPMDashboard"));
-const PPMExecutiveDashboard = lazy(() => import("@/pages/PPMExecutiveDashboard"));
-const PPMEnterprise = lazy(() => import("@/pages/PPMEnterprise"));
-const SharedDashboard = lazy(() => import("@/pages/SharedDashboard"));
-const MyShares = lazy(() => import("@/pages/MyShares"));
-const FeatureDetailPage = lazy(() => import("@/pages/FeatureDetailPage"));
-const StoryDetailPage = lazy(() => import("@/pages/StoryDetailPage"));
-const TaskBoardPage = lazy(() => import("@/pages/TaskBoardPage"));
+const DemoRequestPage = lazy(() => import("@/pages/DemoRequestPage"));
+const PendingApprovalPage = lazy(() => import("@/pages/PendingApprovalPage"));
+const InvitationAcceptPage = lazy(() => import("@/pages/InvitationAcceptPage"));
+const SystemAdminPage = lazy(() => import("@/pages/SystemAdminPage"));
+const SetupWizard = lazy(() => import("@/pages/SetupWizard"));
 
-const LiquidWorkspace = lazy(() => import("@/pages/LiquidWorkspace"));
+// New agent-first surface
+const AgentLensIndex = lazy(() => import("@/pages/AgentLensIndex"));
+const AgentLens = lazy(() => import("@/pages/AgentLens"));
+const ClarityChat = lazy(() => import("@/pages/ClarityChat"));
+const GraphExplorer = lazy(() => import("@/pages/GraphExplorer"));
+const DemoIngestPage = lazy(() => import("@/pages/demo-ingest"));
+const ProjectIngestionPage = lazy(() => import("@/pages/ProjectIngestionPage"));
+const ProjectDetailPage = lazy(() => import("@/pages/ProjectDetailPage"));
 
-const ExecutiveWorkspace = lazy(() => import("@/pages/workspaces/ExecutiveWorkspace"));
-const PMWorkspace = lazy(() => import("@/pages/workspaces/PMWorkspace"));
-const FinOpsWorkspace = lazy(() => import("@/pages/workspaces/FinOpsWorkspace"));
-const TMOWorkspace = lazy(() => import("@/pages/workspaces/TMOWorkspace"));
-const PlanningWorkspace = lazy(() => import("@/pages/workspaces/PlanningWorkspace"));
-const GovernanceWorkspace = lazy(() => import("@/pages/workspaces/GovernanceWorkspace"));
-const OCMWorkspace = lazy(() => import("@/pages/workspaces/OCMWorkspace"));
-const AdminWorkspace = lazy(() => import("@/pages/workspaces/AdminWorkspace"));
+// Operational
+const AgentCommandCenterPage = lazy(() => import("@/pages/AgentCommandCenterPage"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const OrchestrationMonitoringPage = lazy(() => import("@/pages/OrchestrationMonitoringPage"));
+const DeepAgentMonitoring = lazy(() => import("@/pages/DeepAgentMonitoring"));
 
+// Admin (full kept)
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const SystemConfiguration = lazy(() => import("@/pages/admin/SystemConfiguration"));
 const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
@@ -160,106 +106,67 @@ const RealTimeSubscriptions = lazy(() => import("@/pages/admin/RealTimeSubscript
 const WorkflowAutomation = lazy(() => import("@/pages/admin/WorkflowAutomation"));
 const DynamicAgentAdmin = lazy(() => import("@/pages/admin/DynamicAgentAdmin"));
 
+// Map legacy /dashboard/<slug> URLs to lens agentIds
+const LEGACY_DASHBOARD_REDIRECT: Record<string, string> = {
+  pmo: 'pmo', tmo: 'tmo', finops: 'finops', okr: 'okr',
+  governance: 'governance', planning: 'planning', ocm: 'ocm',
+  risk: 'risk', vro: 'vro', integrated: 'integrated', notification: 'notification',
+};
+
+function LegacyDashboardRedirect({ params }: { params: { slug?: string } }) {
+  const slug = params?.slug;
+  const target = (slug && LEGACY_DASHBOARD_REDIRECT[slug]) ? `/lens/${LEGACY_DASHBOARD_REDIRECT[slug]}` : '/lens';
+  return <Redirect to={target} />;
+}
+
 function Router() {
   return (
     <Suspense fallback={<PageLoading />}>
       <Switch>
+        {/* Public / auth */}
         <Route path="/" component={LandingPage} />
         <Route path="/login" component={LoginPage} />
-        <Route path="/demo" component={DemoRequestPage} />
-        <Route path="/demo-ingest" component={DemoIngestPage} />
-        <Route path="/demo/pending" component={PendingApprovalPage} />
-        <Route path="/invite/:token" component={InvitationAcceptPage} />
-        <Route path="/system-admin" component={SystemAdminPage} />
-        <Route path="/demo/showcase" component={DemoShowcase} />
-        <Route path="/setup" component={SetupWizard} />
-
-        <Route path="/workspace/executive" component={ExecutiveWorkspace} />
-        <Route path="/workspace/pm" component={PMWorkspace} />
-        <Route path="/workspace/finops" component={FinOpsWorkspace} />
-        <Route path="/workspace/tmo" component={TMOWorkspace} />
-        <Route path="/workspace/planning" component={PlanningWorkspace} />
-        <Route path="/workspace/governance" component={GovernanceWorkspace} />
-        <Route path="/workspace/ocm" component={OCMWorkspace} />
-        <Route path="/workspace/admin" component={AdminWorkspace} />
-
-        <Route path="/dashboard" component={() => <AgentLens forceAgentId="integrated" />} />
-        <Route path="/dashboard/pmo" component={() => <AgentLens forceAgentId="pmo" />} />
-        <Route path="/dashboard/portfolio" component={PortfolioDashboard} />
-        <Route path="/dashboard/art" component={ARTDashboard} />
-        <Route path="/dashboard/value-stream" component={ValueStreamDashboard} />
-        <Route path="/dashboard/mcp" component={MCPDashboard} />
-        <Route path="/dashboard/predictions" component={PredictionHubDashboard} />
-        <Route path="/dashboard/predictive-analytics" component={PredictiveAnalytics} />
-        <Route path="/dashboard/resource-optimization" component={ResourceOptimization} />
-        <Route path="/dashboard/impact-simulator" component={ChangeImpactSimulator} />
-        <Route path="/dashboard/agent-performance" component={AgentPerformance} />
-        <Route path="/dashboard/compliance-audit" component={ComplianceAudit} />
-        <Route path="/dashboard/stakeholder-sentiment" component={StakeholderSentiment} />
-        <Route path="/dashboard/portfolio-investment" component={PortfolioInvestment} />
-        <Route path="/dashboard/dependency-health" component={DependencyHealth} />
-        <Route path="/dashboard/dependencies" component={DependencyMapDashboard} />
-        <Route path="/dashboard/decisions" component={DecisionBoardDashboard} />
-        <Route path="/cop" component={COPDashboard} />
-        <Route path="/dashboard/tmo" component={() => <AgentLens forceAgentId="tmo" />} />
-        <Route path="/dashboard/finops" component={() => <AgentLens forceAgentId="finops" />} />
-        <Route path="/dashboard/okr" component={() => <AgentLens forceAgentId="okr" />} />
-        <Route path="/dashboard/governance" component={() => <AgentLens forceAgentId="governance" />} />
-        <Route path="/dashboard/planning" component={() => <AgentLens forceAgentId="planning" />} />
-        <Route path="/dashboard/ocm" component={() => <AgentLens forceAgentId="ocm" />} />
-        <Route path="/dashboard/risk" component={() => <AgentLens forceAgentId="risk" />} />
-        <Route path="/dashboard/vro" component={() => <AgentLens forceAgentId="vro" />} />
-        <Route path="/dashboard/integrated" component={() => <AgentLens forceAgentId="integrated" />} />
-        <Route path="/dashboard/ppm" component={PPMDashboard} />
-        <Route path="/ppm" component={PPMExecutiveDashboard} />
-        <Route path="/ppm-enterprise" component={PPMEnterprise} />
-        <Route path="/liquid" component={LiquidWorkspace} />
-        <Route path="/canvas" component={LiquidWorkspace} />
-        <Route path="/canvas/:agentId" component={LiquidWorkspace} />
-        <Route path="/ppm-old" component={PPMDashboard} />
-        <Route path="/shared/:token" component={SharedDashboard} />
-        <Route path="/my-shares" component={MyShares} />
-        <Route path="/feature/:id" component={FeatureDetailPage} />
-        <Route path="/story/:id" component={StoryDetailPage} />
-        <Route path="/tasks" component={TaskBoardPage} />
-        <Route path="/value-proposition" component={ValueProposition} />
-        <Route path="/segment/:id" component={SegmentPage} />
-        <Route path="/division/:id" component={SegmentPage} />
-        <Route path="/sustainability" component={SustainabilityPage} />
-        <Route path="/risk" component={RiskCenter} />
-        <Route path="/vro-framework" component={VROFramework} />
-        <Route path="/project/:id" component={ProjectDetailPage} />
-        <Route path="/ingestion" component={ProjectIngestionPage} />
-        <Route path="/graph" component={GraphExplorer} />
-        <Route path="/chat" component={ClarityChat} />
-        <Route path="/lens" component={AgentLensIndex} />
-        <Route path="/lens/:agentId" component={AgentLens} />
-        <Route path="/command-center" component={AgentCommandCenterPage} />
-        <Route path="/mcp-config" component={MCPConfigPage} />
-        <Route path="/settings" component={SettingsPage} />
-        <Route path="/data-quality" component={DataQualityPage} />
-        <Route path="/intelligence" component={LiquidIntelligencePage} />
-        <Route path="/monitoring" component={OrchestrationMonitoringPage} />
-        <Route path="/deep-agent-monitoring" component={DeepAgentMonitoring} />
-        <Route path="/issues" component={IssueManagement} />
-        <Route path="/change-requests" component={ChangeRequestManagement} />
-        <Route path="/resources" component={ResourceManagementPage} />
-        <Route path="/financial" component={FinancialManagement} />
-        <Route path="/documents" component={DocumentManagement} />
-        <Route path="/programs" component={ProgramManagement} />
-        <Route path="/reports" component={ReportingAnalytics} />
-        <Route path="/risks" component={RiskManagement} />
-        <Route path="/collaboration" component={CollaborationHub} />
-        <Route path="/agent-collaboration" component={AgentCollaboration} />
-        <Route path="/analytics" component={AdvancedAnalytics} />
-        <Route path="/financial-advanced" component={AdvancedFinancialManagement} />
-        <Route path="/report-builder" component={CustomReportBuilder} />
         <Route path="/register" component={RegisterPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/verify-email/:token" component={EmailVerificationPage} />
         <Route path="/password-reset" component={PasswordResetRequestPage} />
         <Route path="/password-reset/:token" component={PasswordResetPage} />
+        <Route path="/demo" component={DemoRequestPage} />
+        <Route path="/demo/pending" component={PendingApprovalPage} />
+        <Route path="/invite/:token" component={InvitationAcceptPage} />
+        <Route path="/system-admin" component={SystemAdminPage} />
+        <Route path="/setup" component={SetupWizard} />
 
+        {/* Agent-first surface (the new way) */}
+        <Route path="/lens" component={AgentLensIndex} />
+        <Route path="/lens/:agentId" component={AgentLens} />
+        <Route path="/chat" component={ClarityChat} />
+        <Route path="/graph" component={GraphExplorer} />
+
+        {/* Ingestion + project drill-down */}
+        <Route path="/demo-ingest" component={DemoIngestPage} />
+        <Route path="/ingestion" component={ProjectIngestionPage} />
+        <Route path="/project/:id" component={ProjectDetailPage} />
+
+        {/* Operational */}
+        <Route path="/command-center" component={AgentCommandCenterPage} />
+        <Route path="/settings" component={SettingsPage} />
+        <Route path="/monitoring" component={OrchestrationMonitoringPage} />
+        <Route path="/deep-agent-monitoring" component={DeepAgentMonitoring} />
+
+        {/* Legacy redirects → agent lens */}
+        <Route path="/dashboard"><Redirect to="/lens" /></Route>
+        <Route path="/dashboard/:slug" component={LegacyDashboardRedirect} />
+        <Route path="/canvas"><Redirect to="/lens" /></Route>
+        <Route path="/canvas/:agentId"><Redirect to="/lens" /></Route>
+        <Route path="/liquid"><Redirect to="/lens" /></Route>
+        <Route path="/ppm"><Redirect to="/lens" /></Route>
+        <Route path="/ppm-enterprise"><Redirect to="/lens" /></Route>
+        <Route path="/workspace/:slug*"><Redirect to="/lens" /></Route>
+        <Route path="/intelligence"><Redirect to="/lens" /></Route>
+        <Route path="/cop"><Redirect to="/lens" /></Route>
+
+        {/* Admin */}
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/company-profile" component={CompanyProfile} />
         <Route path="/admin/approval-center" component={ApprovalCenter} />
@@ -295,6 +202,7 @@ function Router() {
         <Route path="/admin/subscriptions" component={RealTimeSubscriptions} />
         <Route path="/admin/workflow-automation" component={WorkflowAutomation} />
         <Route path="/admin/dynamic-agents" component={DynamicAgentAdmin} />
+
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -308,7 +216,6 @@ function App() {
         <CssBaseline enableColorScheme />
         <QueryClientProvider client={queryClient}>
           <WebSocketProvider>
-            <LiquidCanvasProvider>
             <CompanyProfileProvider>
               <UnifiedNotificationProvider>
                 <PageContextProvider>
@@ -319,7 +226,6 @@ function App() {
                 </PageContextProvider>
               </UnifiedNotificationProvider>
             </CompanyProfileProvider>
-            </LiquidCanvasProvider>
           </WebSocketProvider>
         </QueryClientProvider>
       </AppTheme>

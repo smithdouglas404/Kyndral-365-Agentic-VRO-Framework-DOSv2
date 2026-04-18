@@ -11,7 +11,6 @@ import { generateExecutiveInsights, refreshInsights } from "./executiveInsights"
 import { registerAuthRoutes } from "./routes/auth.js";
 import { registerFirebaseAuthRoutes } from "./routes/firebase-auth.js";
 import { registerFinancialRoutes } from "./routes/financials.js";
-import { registerPredictiveRoutes } from "./routes/predictive.js";
 import { registerCrossProjectImpactRoutes } from "./routes/cross-project-impact.js";
 import { registerOrchestrationRoutes, getBootstrapInstance } from "./routes/orchestration.js";
 import { registerIssueRoutes } from "./routes/issues.js";
@@ -89,15 +88,11 @@ import { registerRecommendationsRoutes } from "./routes/recommendations.js";
 import { createLLMConfigRoutes } from "./routes/llm-config.js";
 import { createKnowledgeBaseRoutes } from "./routes/knowledge-base.js";
 import { createEnhancedKnowledgeBaseRoutes } from "./routes/admin/enhanced-knowledge-base.js";
-import { createBattleRhythmRoutes } from "./routes/battle-rhythm.js";
-import { createCommandersIntentRoutes } from "./routes/commanders-intent.js";
-import { createCOPRoutes } from "./routes/cop.js";
 import { createDataIngestionRoutes } from "./routes/data-ingestion.js";
 import { createComplianceRoutes } from "./routes/compliance.js";
 import documentsRouter from "./routes/documents.js";
 import { registerDemoRoutes } from "./routes/demo.js";
 import packetRefineRouter from "./routes/packet-refine.js";
-import liquidCanvasRouter from "./routes/liquid-canvas.js";
 import openprojectWebhookRouter from "./routes/webhooks/openproject.js";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
@@ -511,13 +506,10 @@ export async function registerRoutes(
   app.use("/api/admin/knowledge-base", createEnhancedKnowledgeBaseRoutes(storage));
 
   // Register Battle Rhythm routes (Military-inspired cadence-aware scheduling)
-  app.use("/api/battle-rhythm", createBattleRhythmRoutes(storage));
 
   // Register Commander's Intent routes (One-page project directive)
-  app.use("/api/commanders-intent", createCommandersIntentRoutes(storage));
 
   // Register Common Operational Picture routes (Three-layer view)
-  app.use("/api/cop", createCOPRoutes(storage));
 
   // Register Data Ingestion routes (Jira, Azure DevOps, MS Project sync)
   app.use("/api/data-ingestion", createDataIngestionRoutes(storage));
@@ -539,7 +531,6 @@ export async function registerRoutes(
   registerFinancialRoutes(app, storage);
 
   // Register Predictive Analytics routes (for risk prediction and forecasting)
-  registerPredictiveRoutes(app, storage);
 
   // Register VRO/PMO Trend Forecast routes (proactive portfolio analytics)
   const { createTrendForecastRoutes } = await import('./routes/trend-forecast.js');
@@ -547,22 +538,11 @@ export async function registerRoutes(
   console.log('[TrendForecast] Routes registered at /api/trend-forecast');
 
   // Register new analytics module routes
-  const { createAgentROIRoutes } = await import('./routes/agent-roi.js');
-  app.use('/api/agent-roi', createAgentROIRoutes(storage));
 
-  const { createComplianceAuditRoutes } = await import('./routes/compliance-audit.js');
-  app.use('/api/compliance-audit', createComplianceAuditRoutes(storage));
 
-  const { createStakeholderSentimentRoutes } = await import('./routes/stakeholder-sentiment.js');
-  app.use('/api/stakeholder-sentiment', createStakeholderSentimentRoutes(storage));
 
-  const { createPortfolioInvestmentRoutes } = await import('./routes/portfolio-investment.js');
-  app.use('/api/portfolio-investment', createPortfolioInvestmentRoutes(storage));
 
-  const { createDependencyHealthRoutes } = await import('./routes/dependency-health.js');
-  app.use('/api/dependency-health', createDependencyHealthRoutes(storage));
 
-  console.log('[Analytics] 5 new module routes registered (agent-roi, compliance-audit, stakeholder-sentiment, portfolio-investment, dependency-health)');
 
   // Register Cross-Project Impact routes (THE KILLER FEATURE - cascade impact analysis)
   registerCrossProjectImpactRoutes(app, storage);
@@ -583,7 +563,6 @@ export async function registerRoutes(
   app.use('/api/copilot', packetRefineRouter);
 
   // Liquid Canvas — agent canvases, attribute catalog
-  app.use('/api/liquid-canvas', liquidCanvasRouter);
 
   // OpenProject webhooks — real-time event-driven sync
   app.use('/api/webhooks/openproject', openprojectWebhookRouter);

@@ -342,25 +342,56 @@ When you identify value gaps or strategic misalignment, recommend collaboration 
                       ? "weak"
                       : "negative";
 
-            // Future projections
+            // Future projections — derived from actual cash flow:
+            // remaining planned value (plannedFullValue - valueRealized) is delivered linearly
+            // over the remaining project duration, then steady-state value continues at the
+            // realized annualized rate. ROI per year = (cumulative value - investment) / investment.
             let projections = null;
             if (includeProjections) {
+              const remainingValue = Math.max(0, plannedFullValue - valueRealized);
+              const remainingProgress = Math.max(0, 100 - progress);
+              const projectAgeMonths = (() => {
+                if (!project.startDate) return 1;
+                const s = new Date(project.startDate);
+                if (isNaN(s.getTime())) return 1;
+                return Math.max(1, (Date.now() - s.getTime()) / (1000 * 60 * 60 * 24 * 30));
+              })();
+              const observedVelocity = projectAgeMonths > 0
+                ? Math.max(0, valueRealized / projectAgeMonths)
+                : 0;
+              // If we have no observed velocity but there is remaining planned value,
+              // assume linear delivery of the remainder over the next 36 months.
+              const fallbackMonths = 36;
+              const effectiveVelocity = observedVelocity > 0
+                ? observedVelocity
+                : (remainingValue > 0 ? remainingValue / fallbackMonths : 0);
+              const monthsToFinish = effectiveVelocity > 0
+                ? remainingValue / effectiveVelocity
+                : 0;
+
+              // Project value forward; cap at plannedFullValue (no steady-state
+              // extrapolation past the plan to avoid inflated forecasts).
+              const valueAt = (months: number) => {
+                const projected = valueRealized + effectiveVelocity * Math.min(months, monthsToFinish);
+                return Math.min(plannedFullValue, projected);
+              };
+
+              const buildYear = (yearIdx: number) => {
+                const cumulative = valueAt(12 * yearIdx);
+                const yearValue = cumulative - valueAt(12 * (yearIdx - 1));
+                const yearRoi = totalInvestment > 0
+                  ? ((cumulative - totalInvestment) / totalInvestment) * 100
+                  : 0;
+                return {
+                  value: Math.round(yearValue),
+                  roi: parseFloat(yearRoi.toFixed(1)),
+                  cumulativeValue: Math.round(cumulative),
+                };
+              };
               projections = {
-                year1: {
-                  value: valueRealized * 1.1,
-                  roi: roi * 1.1,
-                  cumulativeValue: valueRealized * 1.1,
-                },
-                year2: {
-                  value: valueRealized * 1.25,
-                  roi: roi * 1.25,
-                  cumulativeValue: valueRealized * 2.35,
-                },
-                year3: {
-                  value: valueRealized * 1.4,
-                  roi: roi * 1.4,
-                  cumulativeValue: valueRealized * 3.75,
-                },
+                year1: buildYear(1),
+                year2: buildYear(2),
+                year3: buildYear(3),
               };
             }
 

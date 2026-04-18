@@ -55,14 +55,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import {
-  workspaces,
-  dashboards,
-  getWorkspaceFromPath,
-  getDashboardFromPath,
-  getAllNavigationItems,
-  type Workspace,
-} from '@/lib/navigationRegistry';
+// Navigation registry no longer used — sidebar driven by static navSections below.
 
 // ============================================================================
 // Drawer Styling
@@ -93,35 +86,33 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    id: 'workspaces',
-    label: 'Workspaces',
-    defaultOpen: true,
-    items: workspaces.map(w => ({ id: w.id, label: w.shortLabel, icon: w.icon as any, path: w.path })),
-  },
-  {
-    id: 'dashboards',
-    label: 'Dashboards',
-    defaultOpen: false,
-    items: dashboards.map(d => ({ id: d.id, label: d.label, icon: d.icon as any, path: d.path, isAI: d.isAI })),
-  },
-  {
     id: 'lenses',
     label: 'Agent Lens',
     defaultOpen: true,
     items: [
       { id: 'lens-all', label: 'All Agents', icon: LayoutDashboard, path: '/lens', isAI: true },
-      { id: 'lens-pmo', label: 'PMO Lens', icon: Brain, path: '/lens/pmo', isAI: true },
-      { id: 'lens-vro', label: 'VRO Lens', icon: Target, path: '/lens/vro', isAI: true },
-      { id: 'lens-finops', label: 'FinOps Lens', icon: DollarSign, path: '/lens/finops', isAI: true },
-      { id: 'lens-risk', label: 'Risk Lens', icon: Shield, path: '/lens/risk', isAI: true },
-      { id: 'lens-gov', label: 'Governance Lens', icon: Scale, path: '/lens/governance', isAI: true },
-      { id: 'lens-ocm', label: 'OCM Lens', icon: Users, path: '/lens/ocm', isAI: true },
-      { id: 'lens-tmo', label: 'TMO Lens', icon: ArrowRightLeft, path: '/lens/tmo', isAI: true },
-      { id: 'lens-plan', label: 'Planning Lens', icon: Map, path: '/lens/planning', isAI: true },
-      { id: 'lens-okr', label: 'OKR Lens', icon: Target, path: '/lens/okr', isAI: true },
-      { id: 'lens-int', label: 'Integrated Lens', icon: LayoutDashboard, path: '/lens/integrated', isAI: true },
-      { id: 'lens-notif', label: 'Notification Lens', icon: Activity, path: '/lens/notification', isAI: true },
-      { id: 'lens-chat', label: 'Ask Clarity (Chat)', icon: Brain, path: '/chat', isAI: true },
+      { id: 'lens-pmo', label: 'PMO', icon: Brain, path: '/lens/pmo', isAI: true },
+      { id: 'lens-vro', label: 'VRO', icon: Target, path: '/lens/vro', isAI: true },
+      { id: 'lens-finops', label: 'FinOps', icon: DollarSign, path: '/lens/finops', isAI: true },
+      { id: 'lens-risk', label: 'Risk', icon: Shield, path: '/lens/risk', isAI: true },
+      { id: 'lens-gov', label: 'Governance', icon: Scale, path: '/lens/governance', isAI: true },
+      { id: 'lens-ocm', label: 'OCM', icon: Users, path: '/lens/ocm', isAI: true },
+      { id: 'lens-tmo', label: 'TMO', icon: ArrowRightLeft, path: '/lens/tmo', isAI: true },
+      { id: 'lens-plan', label: 'Planning', icon: Map, path: '/lens/planning', isAI: true },
+      { id: 'lens-okr', label: 'OKR', icon: Target, path: '/lens/okr', isAI: true },
+      { id: 'lens-int', label: 'Integrated', icon: LayoutDashboard, path: '/lens/integrated', isAI: true },
+      { id: 'lens-notif', label: 'Notification', icon: Activity, path: '/lens/notification', isAI: true },
+    ],
+  },
+  {
+    id: 'work',
+    label: 'Work',
+    defaultOpen: true,
+    items: [
+      { id: 'w-chat', label: 'Ask Clarity', icon: Sparkles, path: '/chat', isAI: true },
+      { id: 'w-graph', label: 'Knowledge Graph', icon: GitBranch, path: '/graph' },
+      { id: 'w-ingest', label: 'Project Ingestion', icon: Database, path: '/ingestion' },
+      { id: 'w-demo', label: 'Demo Ingest', icon: Bot, path: '/demo-ingest' },
     ],
   },
   {
@@ -129,19 +120,9 @@ const navSections: NavSection[] = [
     label: 'Operations',
     defaultOpen: false,
     items: [
-      { id: 'op-programs', label: 'Programs', icon: FolderKanban, path: '/programs' },
-      { id: 'op-issues', label: 'Issues', icon: AlertTriangle, path: '/issues' },
-      { id: 'op-cr', label: 'Change Requests', icon: GitBranch, path: '/change-requests' },
-      { id: 'op-risks', label: 'Risk Management', icon: Shield, path: '/risks' },
-      { id: 'op-resources', label: 'Resources', icon: Users, path: '/resources' },
-      { id: 'op-financial', label: 'Financial', icon: DollarSign, path: '/financial' },
-      { id: 'op-docs', label: 'Documents', icon: FileText, path: '/documents' },
-      { id: 'op-reports', label: 'Reports', icon: BarChart3, path: '/reports' },
-      { id: 'op-collab', label: 'Collaboration', icon: Activity, path: '/collaboration' },
       { id: 'op-cmd', label: 'Agent Command', icon: Bot, path: '/command-center' },
       { id: 'op-orch', label: 'Orchestration', icon: Activity, path: '/monitoring' },
       { id: 'op-deep', label: 'Deep Agents', icon: Brain, path: '/deep-agent-monitoring' },
-      { id: 'op-analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
       { id: 'op-settings', label: 'Settings', icon: Settings, path: '/settings' },
     ],
   },
@@ -380,18 +361,21 @@ function SideMenu({ currentPath, onNavigate }: { currentPath: string; onNavigate
 
 function Header({ currentPath, onNavigate }: { currentPath: string; onNavigate: (path: string) => void }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const currentWorkspace = getWorkspaceFromPath(currentPath);
-  const currentDashboard = getDashboardFromPath(currentPath);
-  const pageTitle = currentWorkspace?.label || currentDashboard?.label || 'Dashboard';
+
+  const allItems = useMemo(() => navSections.flatMap(s => s.items), []);
+  const pageTitle = useMemo(() => {
+    const exact = allItems.find(i => i.path === currentPath);
+    if (exact) return exact.label;
+    const prefix = allItems.find(i => i.path !== '/' && currentPath.startsWith(i.path + '/'));
+    return prefix?.label || (currentPath.startsWith('/lens') ? 'Agent Lens' : 'Clarity');
+  }, [currentPath, allItems]);
 
   const searchResults = useMemo(() => {
     if (!searchQuery) return [];
-    const allItems = getAllNavigationItems();
     return allItems.filter(item =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      item.label.toLowerCase().includes(searchQuery.toLowerCase())
     ).slice(0, 6);
-  }, [searchQuery]);
+  }, [searchQuery, allItems]);
 
   return (
     <Box sx={{ position: 'sticky', top: 0, zIndex: 1100 }}>
@@ -412,11 +396,6 @@ function Header({ currentPath, onNavigate }: { currentPath: string; onNavigate: 
           <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
             {pageTitle}
           </Typography>
-          {currentWorkspace?.description && (
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              {currentWorkspace.description}
-            </Typography>
-          )}
         </Box>
 
         {/* Search */}
@@ -470,11 +449,7 @@ function Header({ currentPath, onNavigate }: { currentPath: string; onNavigate: 
                     </ListItemIcon>
                     <ListItemText
                       primary={item.label}
-                      secondary={item.description}
-                      slotProps={{
-                        primary: { sx: { fontSize: '0.8125rem' } },
-                        secondary: { sx: { fontSize: '0.7rem' } },
-                      }}
+                      slotProps={{ primary: { sx: { fontSize: '0.8125rem' } } }}
                     />
                     {item.isAI && (
                       <AutoAwesomeRoundedIcon sx={{ fontSize: 14, color: 'warning.main' }} />
@@ -511,11 +486,11 @@ function Header({ currentPath, onNavigate }: { currentPath: string; onNavigate: 
 }
 
 // ============================================================================
-// WorkspaceTabs (exported for page use)
+// WorkspaceTabs (legacy — kept as no-op for any straggler imports)
 // ============================================================================
 
 interface WorkspaceTabsProps {
-  workspace: Workspace;
+  workspace: { tabs: Array<{ id: string; label: string; icon: any }> };
   activeTab: string;
   onTabChange: (tabId: string) => void;
 }
