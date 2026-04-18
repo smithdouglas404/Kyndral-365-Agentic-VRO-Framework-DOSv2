@@ -19,6 +19,7 @@ import { PALANTIR_ACTIONS, PALANTIR_OBJECT_TYPES } from '../constants/palantirOn
 import { db } from '../db';
 import { integrations, projects, syncLogs } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { pushResourceFromAssignee, pushMilestoneFromWorkItem, isMilestoneLike, normalizeParentProjectId } from './sync/SyncOntologyMappers.js';
 
 // ============================================================================
 // VALIDATION & SAFE PARSING UTILITIES
@@ -252,6 +253,34 @@ class PalantirSyncServiceClass {
           } else {
             result.created++;
           }
+
+          // Backfill resource & milestone from issue (tie to PARENT project, not the issue itself)
+          const projectIdForChildren = normalizeParentProjectId('jira', ontologyObject.projectKey || ontologyObject.id);
+          if (ontologyObject.assignee) {
+            await pushResourceFromAssignee(this.palantirService, {
+              source: 'jira',
+              projectId: projectIdForChildren,
+              name: ontologyObject.assignee,
+              role: ontologyObject.issueType === 'Story' ? 'Engineer' : (ontologyObject.issueType || 'Member'),
+              externalId: ontologyObject.sourceId,
+              endDate: ontologyObject.dueDate,
+            });
+          }
+          if (isMilestoneLike(ontologyObject.issueType, ontologyObject.name, ontologyObject.labels)) {
+            const status = (ontologyObject.status || '').toLowerCase();
+            const isDone = status.includes('done') || status.includes('closed') || status.includes('resolved');
+            await pushMilestoneFromWorkItem(this.palantirService, {
+              source: 'jira',
+              projectId: projectIdForChildren,
+              name: ontologyObject.name,
+              status: isDone ? 'completed' : 'planned',
+              dueDate: ontologyObject.dueDate,
+              completedDate: isDone ? (ontologyObject.dueDate || ontologyObject.updated || null) : null,
+              owner: ontologyObject.assignee || '',
+              type: (ontologyObject.issueType || 'milestone').toLowerCase(),
+              externalId: ontologyObject.sourceId,
+            });
+          }
         } catch (err: any) {
           result.failed++;
           result.errors.push(`Issue ${issue.key}: ${err.message}`);
@@ -329,6 +358,34 @@ class PalantirSyncServiceClass {
             result.updated++;
           } else {
             result.created++;
+          }
+
+          // Backfill resource & milestone from work package (tie to PARENT project, not the WP itself)
+          const projectIdForChildren = normalizeParentProjectId('openproject', ontologyObject.projectId);
+          if (ontologyObject.assignee) {
+            await pushResourceFromAssignee(this.palantirService, {
+              source: 'openproject',
+              projectId: projectIdForChildren,
+              name: ontologyObject.assignee,
+              role: ontologyObject.type || 'Member',
+              externalId: ontologyObject.sourceId,
+              startDate: ontologyObject.startDate,
+              endDate: ontologyObject.dueDate,
+            });
+          }
+          if (isMilestoneLike(ontologyObject.type, ontologyObject.name)) {
+            const isDone = (ontologyObject.percentageDone || 0) >= 100;
+            await pushMilestoneFromWorkItem(this.palantirService, {
+              source: 'openproject',
+              projectId: projectIdForChildren,
+              name: ontologyObject.name,
+              status: isDone ? 'completed' : 'planned',
+              dueDate: ontologyObject.dueDate,
+              completedDate: isDone ? (ontologyObject.dueDate || null) : null,
+              owner: ontologyObject.assignee || '',
+              type: (ontologyObject.type || 'milestone').toLowerCase(),
+              externalId: ontologyObject.sourceId,
+            });
           }
 
           // Broadcast facts to Mem0 so subscribed agents get notified
@@ -429,6 +486,34 @@ class PalantirSyncServiceClass {
             result.updated++;
           } else {
             result.created++;
+          }
+
+          // Backfill resource & milestone from Monday item (tie to PARENT board, not the item itself)
+          const projectIdForChildren = normalizeParentProjectId('monday', ontologyObject.boardId);
+          if (ontologyObject.assignee) {
+            await pushResourceFromAssignee(this.palantirService, {
+              source: 'monday',
+              projectId: projectIdForChildren,
+              name: ontologyObject.assignee,
+              role: 'Member',
+              externalId: ontologyObject.sourceId,
+              endDate: ontologyObject.dueDate,
+            });
+          }
+          if (isMilestoneLike(undefined, ontologyObject.name)) {
+            const status = (ontologyObject.status || '').toLowerCase();
+            const isDone = status.includes('done') || status.includes('complete');
+            await pushMilestoneFromWorkItem(this.palantirService, {
+              source: 'monday',
+              projectId: projectIdForChildren,
+              name: ontologyObject.name,
+              status: isDone ? 'completed' : 'planned',
+              dueDate: ontologyObject.dueDate,
+              completedDate: isDone ? (ontologyObject.dueDate || null) : null,
+              owner: ontologyObject.assignee || '',
+              type: 'milestone',
+              externalId: ontologyObject.sourceId,
+            });
           }
         } catch (err: any) {
           result.failed++;

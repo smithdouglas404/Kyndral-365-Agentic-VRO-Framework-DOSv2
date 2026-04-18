@@ -18,6 +18,7 @@
 import { getOpenProjectClient } from '../openproject/OpenProjectClient.js';
 import { PALANTIR_ACTIONS, PALANTIR_OBJECT_TYPES } from '../../constants/palantirOntology.js';
 import type { OPWorkPackage, OPProject, OPVersion, OPRelation, OPTimeEntry } from '../openproject/types.js';
+import { pushResourceFromAssignee, pushMilestoneFromWorkItem, isMilestoneLike } from './SyncOntologyMappers.js';
 
 // ============================================================================
 // SAFe type mapping: OP WP type name → Palantir object type + action
@@ -288,6 +289,36 @@ export class OpenProjectToPalantirSync {
     }
 
     await this.pushToPalantir(mapping.action, properties);
+
+    // Backfill resource & milestone rows so cross-portfolio agents see them
+    const projectIdForChildren = properties.projectId || `op-wp-${wp.id}`;
+    const assigneeName = wp._links?.assignee?.title;
+    if (assigneeName) {
+      await pushResourceFromAssignee(this.palantirService, {
+        source: 'openproject',
+        projectId: projectIdForChildren,
+        name: assigneeName,
+        role: typeName === 'User Story' || typeName === 'Task' ? 'Engineer' : typeName,
+        externalId: String(wp.id),
+        startDate: wp.startDate || null,
+        endDate: wp.dueDate || null,
+      });
+    }
+    if (isMilestoneLike(typeName, wp.subject)) {
+      const isDone = (wp._links?.status?.title || '').toLowerCase().includes('closed') ||
+                     (wp.percentageDone || 0) >= 100;
+      await pushMilestoneFromWorkItem(this.palantirService, {
+        source: 'openproject',
+        projectId: projectIdForChildren,
+        name: wp.subject,
+        status: isDone ? 'completed' : 'planned',
+        dueDate: wp.dueDate || null,
+        completedDate: isDone ? (wp.dueDate || null) : null,
+        owner: assigneeName || '',
+        type: typeName.toLowerCase(),
+        externalId: String(wp.id),
+      });
+    }
   }
 
   private async syncVersion(version: OPVersion, project: OPProject): Promise<void> {
