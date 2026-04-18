@@ -75,6 +75,7 @@ const VROFramework = lazy(() => import("@/pages/vro-framework"));
 const ProjectDetailPage = lazy(() => import("@/pages/ProjectDetailPage"));
 const ProjectIngestionPage = lazy(() => import("@/pages/ProjectIngestionPage"));
 const GraphExplorer = lazy(() => import("@/pages/GraphExplorer"));
+const ClarityChat = lazy(() => import("@/pages/ClarityChat"));
 const AgentCommandCenterPage = lazy(() => import("@/pages/AgentCommandCenterPage"));
 const MCPConfigPage = lazy(() => import("@/pages/MCPConfigPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
@@ -225,6 +226,7 @@ function Router() {
         <Route path="/project/:id" component={ProjectDetailPage} />
         <Route path="/ingestion" component={ProjectIngestionPage} />
         <Route path="/graph" component={GraphExplorer} />
+        <Route path="/chat" component={ClarityChat} />
         <Route path="/command-center" component={AgentCommandCenterPage} />
         <Route path="/mcp-config" component={MCPConfigPage} />
         <Route path="/settings" component={SettingsPage} />

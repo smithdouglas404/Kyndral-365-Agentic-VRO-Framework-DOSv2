@@ -599,6 +599,73 @@ class PalantirGraphService {
         });
       }
 
+      // ─── Cross-project dependency analysis ─────────────────────────────
+      // Pull all dependencies once, then derive several signals:
+      //   1. Blocked dependencies that span two distinct projects
+      //   2. Long-aged unresolved dependencies (no completedDate, > 60d old)
+      //   3. Hotspot projects: projects on the receiving end of many open deps
+      const depsRes = await this.palantirService.listObjects('AtlasDependency', { pageSize: 200 });
+      const allDeps: any[] = depsRes.data || [];
+      const openDeps = allDeps.filter(d => d.status !== 'resolved' && d.status !== 'completed');
+      const crossProjectDeps = openDeps.filter(d =>
+        d.sourceProjectId && d.targetProjectId && d.sourceProjectId !== d.targetProjectId
+      );
+      const blockedCrossProject = crossProjectDeps.filter(d => d.status === 'blocked');
+
+      if (blockedCrossProject.length > 0) {
+        insights.push({
+          type: 'cross_project_dependencies',
+          severity: blockedCrossProject.length > 3 ? 'critical' : 'high',
+          title: `${blockedCrossProject.length} Blocked Cross-Project Dependencies`,
+          description: 'Dependencies between distinct projects are blocked and will cascade delays across the portfolio',
+          recommendation: 'Convene a dependency war room; identify owning teams and escalate blockers',
+          confidence: 0.92,
+          relatedNodes: blockedCrossProject.slice(0, 10).map(d => d.id || d.dependencyId),
+        });
+      }
+
+      // Aging open dependencies (>60d old, not resolved)
+      const SIXTY_DAYS = 60 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      // Use only true creation-style fields. dueDate is intentionally NOT a
+      // fallback — a recently-created dep with a past due date would otherwise
+      // be wrongly flagged as "aging".
+      const agingDeps = openDeps.filter(d => {
+        const created = d.createdAt || d.identifiedDate || d.createdDate;
+        if (!created) return false;
+        const t = new Date(created).getTime();
+        return !isNaN(t) && (now - t) > SIXTY_DAYS;
+      });
+      if (agingDeps.length > 0) {
+        insights.push({
+          type: 'cross_project_dependencies_aging',
+          severity: agingDeps.length > 5 ? 'high' : 'warning',
+          title: `${agingDeps.length} Aging Open Dependencies`,
+          description: 'Dependencies open longer than 60 days indicate unresolved hand-offs across teams',
+          recommendation: 'Review aged dependencies in the next portfolio sync; close, convert, or escalate',
+          confidence: 0.88,
+          relatedNodes: agingDeps.slice(0, 10).map(d => d.id || d.dependencyId),
+        });
+      }
+
+      // Hotspot projects (target of >=3 open dependencies)
+      const inboundCount = new Map<string, number>();
+      for (const d of openDeps) {
+        if (!d.targetProjectId) continue;
+        inboundCount.set(d.targetProjectId, (inboundCount.get(d.targetProjectId) || 0) + 1);
+      }
+      const hotspots = [...inboundCount.entries()].filter(([, c]) => c >= 3);
+      if (hotspots.length > 0) {
+        insights.push({
+          type: 'dependency_hotspots',
+          severity: hotspots.some(([, c]) => c >= 6) ? 'high' : 'warning',
+          title: `${hotspots.length} Dependency Hotspot Projects`,
+          description: 'Projects receiving many open dependencies become single points of failure for the portfolio',
+          recommendation: 'Boost capacity, parallelize work, or break the hotspot project into smaller deliveries',
+          confidence: 0.85,
+          relatedNodes: hotspots.slice(0, 10).map(([pid]) => pid),
+        });
+      }
     } catch (error) {
       console.error('[PalantirGraph] Failed to generate cross-domain insights:', error);
     }

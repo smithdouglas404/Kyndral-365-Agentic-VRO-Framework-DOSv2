@@ -104,6 +104,7 @@ export const PALANTIR_ACTIONS = {
 
   // Dependencies
   CREATE_DEPENDENCY: 'atlas-create-dependency',
+  FLAG_DEPENDENCY_RISK: 'atlas-flag-dependency-risk',
 
   // Readiness & Governance
   UPDATE_READINESS_SCORE: 'atlas-update-readiness-score',

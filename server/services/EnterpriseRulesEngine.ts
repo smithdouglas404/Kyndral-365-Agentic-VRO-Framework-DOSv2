@@ -119,6 +119,30 @@ const PALANTIR_ACTION_MAP: Record<string, { actionApiName: string; paramBuilder:
       generatedBy: 'vro-agent',
     }),
   },
+  'cross-project-dependency-blocked': {
+    actionApiName: 'atlas-flag-dependency-risk',
+    paramBuilder: (eval_, ctx) => ({
+      dependencyId: ctx.dependencyId || '',
+      sourceProjectId: ctx.sourceProjectId || '',
+      targetProjectId: ctx.targetProjectId || '',
+      riskType: 'blocked_cross_project',
+      severity: eval_.severity,
+      description: eval_.message,
+      detectedBy: 'planning-agent',
+    }),
+  },
+  'dependency-aging': {
+    actionApiName: 'atlas-flag-dependency-risk',
+    paramBuilder: (eval_, ctx) => ({
+      dependencyId: ctx.dependencyId || '',
+      sourceProjectId: ctx.sourceProjectId || '',
+      targetProjectId: ctx.targetProjectId || '',
+      riskType: 'dependency_aging',
+      severity: eval_.severity,
+      description: eval_.message,
+      detectedBy: 'planning-agent',
+    }),
+  },
   'readiness-score-low': {
     actionApiName: 'atlas-update-readiness-score',
     paramBuilder: (eval_, ctx) => ({

@@ -75,17 +75,23 @@ function metaFor(type: string) {
 // without server-side support are intentionally not listed here so the runner
 // never shows a misleading zero count for an un-implemented check.
 const PATTERN_META: Record<string, { label: string; desc: string }> = {
-  orphaned_projects:           { label: 'Orphaned Projects',         desc: 'Projects with no link to any strategic OKR.' },
-  unmitigated_risks:           { label: 'Unmitigated Critical Risks', desc: 'Critical or high-severity risks with no mitigation plan and not yet resolved.' },
-  budget_schedule_correlation: { label: 'Budget × Schedule At-Risk', desc: 'Projects where both CPI and SPI have fallen below 0.9.' },
+  orphaned_projects:                  { label: 'Orphaned Projects',         desc: 'Projects with no link to any strategic OKR.' },
+  unmitigated_risks:                  { label: 'Unmitigated Critical Risks', desc: 'Critical or high-severity risks with no mitigation plan and not yet resolved.' },
+  budget_schedule_correlation:        { label: 'Budget × Schedule At-Risk', desc: 'Projects where both CPI and SPI have fallen below 0.9.' },
+  cross_project_dependencies:         { label: 'Blocked Cross-Project Deps', desc: 'Dependencies between distinct projects that are blocked and will cascade delays.' },
+  cross_project_dependencies_aging:   { label: 'Aging Open Dependencies',    desc: 'Dependencies open longer than 60 days — likely unresolved hand-offs.' },
+  dependency_hotspots:                { label: 'Dependency Hotspots',        desc: 'Projects on the receiving end of many open dependencies; portfolio bottlenecks.' },
 };
 
 // Map insight `type` → friendly node type used in URLs. Lets us drill in to
 // the right kind of node without guessing.
 const INSIGHT_TYPE_TO_NODE_FRIENDLY: Record<string, string> = {
-  orphaned_projects:           'project',
-  unmitigated_risks:           'risk',
-  budget_schedule_correlation: 'project',
+  orphaned_projects:                  'project',
+  unmitigated_risks:                  'risk',
+  budget_schedule_correlation:        'project',
+  cross_project_dependencies:         'dependency',
+  cross_project_dependencies_aging:   'dependency',
+  dependency_hotspots:                'project',
 };
 
 const SEVERITY_STYLE: Record<Severity, { badge: string; border: string; dot: string; rank: number }> = {
