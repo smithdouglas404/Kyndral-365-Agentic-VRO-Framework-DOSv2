@@ -60,6 +60,7 @@ import ontologyExplorerRouter from "./routes/ontology-explorer.js";
 import ontologySubscriptionsRouter from "./routes/ontology-subscriptions.js";
 import graphExplorerRouter from "./routes/graph-explorer.js";
 import clarityChatRouter from "./routes/clarity-chat.js";
+import agentLensRouter from "./routes/agent-lens.js";
 import workflowAutomationRouter from "./routes/workflow-automation.js";
 import agentRegistryRouter from "./routes/agent-registry.js";
 import agentDataRouter from "./routes/agent-data.js";
@@ -430,6 +431,7 @@ export async function registerRoutes(
   app.use("/api/ontology-subscriptions", ontologySubscriptionsRouter);
   app.use("/api/graph", graphExplorerRouter);
   app.use("/api/clarity-chat", clarityChatRouter);
+  app.use("/api/agent-lens", agentLensRouter);
   app.use("/api/workflow-automation", workflowAutomationRouter);
   app.use("/api/agent-registry", agentRegistryRouter);
 
