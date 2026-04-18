@@ -330,18 +330,37 @@ export abstract class DeepAgentBase {
    * Get milestones from Palantir Ontology
    */
   protected async getMilestones(projectId?: string): Promise<any[]> {
+    const out: any[] = [];
+
+    // 1. Prefer the dedicated AtlasMilestone object type
     try {
-      // Milestones are embedded as JSON arrays on AtlasProject (no dedicated
-      // ontology object type). Extract milestonesJson from each project row,
-      // tagging each milestone with its parent projectId.
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.MILESTONE, {
+        filters,
+        pageSize: 100,
+      });
+      for (const m of result.data || []) out.push(m);
+    } catch (error: any) {
+      // AtlasMilestone may not yet be deployed in Palantir — fall through to embedded JSON
+      console.warn(`[${this.config.agentName}] AtlasMilestone query failed (${error.message}); falling back to embedded JSON.`);
+    }
+
+    // 2. Always merge in legacy milestonesJson embedded on AtlasProject rows
+    try {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
       const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
         filters,
-        pageSize: 100
+        pageSize: 100,
       });
-      const out: any[] = [];
+      // Normalise on (projectId|lowercased name) so standalone AtlasMilestone
+      // rows and embedded milestonesJson rows dedupe against each other.
+      const keyOf = (m: any, pid?: string) =>
+        `${pid || m.projectId || ''}|${(m.name || '').toLowerCase()}`;
+      const seen = new Set(out.map((m: any) => keyOf(m)));
       for (const row of result.data || []) {
         const raw = (row as any).milestonesJson ?? (row as any).milestones ?? [];
         let arr: any[] = [];
@@ -350,13 +369,18 @@ export abstract class DeepAgentBase {
           try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) arr = parsed; } catch {}
         }
         const pid = (row as any).projectId || (row as any).id;
-        for (const m of arr) out.push({ ...m, projectId: m.projectId || pid });
+        for (const m of arr) {
+          const k = keyOf(m, pid);
+          if (seen.has(k)) continue;
+          out.push({ ...m, projectId: m.projectId || pid });
+          seen.add(k);
+        }
       }
-      return out;
     } catch (error: any) {
-      console.error(`[${this.config.agentName}] Failed to get milestones from Palantir:`, error.message);
-      return [];
+      console.error(`[${this.config.agentName}] Failed to get embedded milestones:`, error.message);
     }
+
+    return out;
   }
 
   /**
@@ -520,18 +544,37 @@ export abstract class DeepAgentBase {
    * Get resource allocations from Palantir Ontology
    */
   protected async getResourceAllocations(projectId?: string): Promise<any[]> {
+    const out: any[] = [];
+
+    // 1. Prefer the dedicated AtlasResource object type
     try {
-      // Resources are embedded as JSON arrays on AtlasProject (no dedicated
-      // ontology object type). Extract resourcesJson from each project row,
-      // tagging each resource with its parent projectId.
+      const filters: QueryFilter[] = projectId
+        ? [{ field: 'projectId', operator: 'eq', value: projectId }]
+        : [];
+      const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.RESOURCE, {
+        filters,
+        pageSize: 100,
+      });
+      for (const r of result.data || []) out.push(r);
+    } catch (error: any) {
+      // AtlasResource may not yet be deployed in Palantir — fall through to embedded JSON
+      console.warn(`[${this.config.agentName}] AtlasResource query failed (${error.message}); falling back to embedded JSON.`);
+    }
+
+    // 2. Always merge in legacy resourcesJson embedded on AtlasProject rows
+    try {
       const filters: QueryFilter[] = projectId
         ? [{ field: 'projectId', operator: 'eq', value: projectId }]
         : [];
       const result = await OntologyDataProvider.query(PALANTIR_OBJECT_TYPES.PROJECT, {
         filters,
-        pageSize: 100
+        pageSize: 100,
       });
-      const out: any[] = [];
+      // Normalise on (projectId|lowercased name) so standalone AtlasResource
+      // rows and embedded resourcesJson rows dedupe against each other.
+      const keyOf = (r: any, pid?: string) =>
+        `${pid || r.projectId || ''}|${(r.name || '').toLowerCase()}`;
+      const seen = new Set(out.map((r: any) => keyOf(r)));
       for (const row of result.data || []) {
         const raw = (row as any).resourcesJson ?? (row as any).resources ?? [];
         let arr: any[] = [];
@@ -540,13 +583,18 @@ export abstract class DeepAgentBase {
           try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) arr = parsed; } catch {}
         }
         const pid = (row as any).projectId || (row as any).id;
-        for (const r of arr) out.push({ ...r, projectId: r.projectId || pid });
+        for (const r of arr) {
+          const k = keyOf(r, pid);
+          if (seen.has(k)) continue;
+          out.push({ ...r, projectId: r.projectId || pid });
+          seen.add(k);
+        }
       }
-      return out;
     } catch (error: any) {
-      console.error(`[${this.config.agentName}] Failed to get resource allocations from Palantir:`, error.message);
-      return [];
+      console.error(`[${this.config.agentName}] Failed to get embedded resources:`, error.message);
     }
+
+    return out;
   }
 
   // ============================================================================

@@ -16,11 +16,17 @@ export * from './AtlasFeature.js';
 export * from './AtlasStory.js';
 export * from './AtlasTask.js';
 
+// Resource & Schedule
+export * from './AtlasResource.js';
+export * from './AtlasMilestone.js';
+
 // Aggregated YAML for deployment
 import { AtlasDivisionYAML } from './AtlasDivision.js';
 import { AtlasFeatureYAML } from './AtlasFeature.js';
 import { AtlasStoryYAML } from './AtlasStory.js';
 import { AtlasTaskYAML } from './AtlasTask.js';
+import { AtlasResourceYAML } from './AtlasResource.js';
+import { AtlasMilestoneYAML } from './AtlasMilestone.js';
 
 export const FULL_ONTOLOGY_YAML = `
 # ============================================================================
@@ -35,6 +41,10 @@ ${AtlasFeatureYAML}
 ${AtlasStoryYAML}
 
 ${AtlasTaskYAML}
+
+${AtlasResourceYAML}
+
+${AtlasMilestoneYAML}
 `;
 
 // Object type registry for dynamic access
@@ -43,6 +53,8 @@ export const OBJECT_TYPE_REGISTRY = {
   AtlasFeature: 'AtlasFeature',
   AtlasStory: 'AtlasStory',
   AtlasTask: 'AtlasTask',
+  AtlasResource: 'AtlasResource',
+  AtlasMilestone: 'AtlasMilestone',
 } as const;
 
 export type OntologyObjectType = keyof typeof OBJECT_TYPE_REGISTRY;

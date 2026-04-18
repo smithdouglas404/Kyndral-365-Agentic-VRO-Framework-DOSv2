@@ -61,6 +61,10 @@ export const PALANTIR_OBJECT_TYPES = {
   DEPENDENCY: 'AtlasDependency',
   PERSON: 'AtlasPerson',
   CHECKPOINT: 'AtlasGovernanceCheckpoint',
+
+  // Resource & Schedule (dedicated object types — replace embedded JSON)
+  RESOURCE: 'AtlasResource',
+  MILESTONE: 'AtlasMilestone',
 } as const;
 
 // ============================================================================
@@ -109,6 +113,10 @@ export const PALANTIR_ACTIONS = {
   CREATE_FEATURE: 'atlas-create-feature',
   CREATE_STORY: 'atlas-create-story',
   CREATE_TASK: 'atlas-create-task',
+
+  // Resource & Schedule
+  CREATE_RESOURCE: 'atlas-create-resource',
+  CREATE_MILESTONE: 'atlas-create-milestone',
 
   // Aliases for convenience (map to existing actions)
   UPSERT_PROJECT: 'atlas-create-project',  // Palantir handles upsert automatically

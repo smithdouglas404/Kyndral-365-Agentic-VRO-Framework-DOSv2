@@ -153,6 +153,72 @@ export class PalantirIngestService {
     OntologyDataProvider.injectLocal?.(PALANTIR_OBJECT_TYPES.PROJECT, projectProps);
     counts.project = 1;
 
+    // ---- 1a. RESOURCES (dedicated AtlasResource objects + embedded JSON) ----
+    if (Array.isArray(input.resources)) {
+      for (let i = 0; i < input.resources.length; i++) {
+        const r = input.resources[i] || {};
+        const resourceId = r.id || `res-${slug(r.name || 'resource')}-${projectId}-${i}`;
+        const resourceProps: Record<string, any> = {
+          resourceId,
+          projectId,
+          name: r.name || 'Unnamed',
+          role: r.role || 'Member',
+          allocation: Math.round(Number(r.allocation ?? 0)),
+          email: r.email || '',
+          department: r.department || input.bu || '',
+          costRate: Number(r.costRate ?? 0),
+          startDate: r.startDate || input.timeline?.startDate || null,
+          endDate: r.endDate || input.timeline?.endDate || null,
+          skills: JSON.stringify(r.skills || []),
+          source: 'palantir-ingest-service',
+          externalId: r.externalId || '',
+          syncedAt: new Date().toISOString(),
+        };
+        await this.applyOrCreate(
+          palantir,
+          PALANTIR_ACTIONS.CREATE_RESOURCE,
+          PALANTIR_OBJECT_TYPES.RESOURCE,
+          resourceId,
+          resourceProps,
+          'resource'
+        );
+        OntologyDataProvider.injectLocal?.(PALANTIR_OBJECT_TYPES.RESOURCE, resourceProps);
+      }
+    }
+
+    // ---- 1b. MILESTONES (dedicated AtlasMilestone objects + embedded JSON) ----
+    if (Array.isArray(input.milestones)) {
+      for (let i = 0; i < input.milestones.length; i++) {
+        const m = input.milestones[i] || {};
+        const milestoneId = m.id || `ms-${slug(m.name || 'milestone')}-${projectId}-${i}`;
+        const milestoneProps: Record<string, any> = {
+          milestoneId,
+          projectId,
+          name: m.name || `Milestone ${i + 1}`,
+          description: m.description || '',
+          status: (m.status || 'planned').toLowerCase(),
+          dueDate: m.dueDate || null,
+          completedDate: m.completedDate || null,
+          expectedDate: m.expectedDate || null,
+          owner: m.owner || '',
+          gate: m.gate || '',
+          type: m.type || 'phase',
+          source: 'palantir-ingest-service',
+          externalId: m.externalId || '',
+          syncedAt: new Date().toISOString(),
+        };
+        await this.applyOrCreate(
+          palantir,
+          PALANTIR_ACTIONS.CREATE_MILESTONE,
+          PALANTIR_OBJECT_TYPES.MILESTONE,
+          milestoneId,
+          milestoneProps,
+          'milestone'
+        );
+        OntologyDataProvider.injectLocal?.(PALANTIR_OBJECT_TYPES.MILESTONE, milestoneProps);
+      }
+    }
+
     // ---- 2. FEATURES (and nested stories/tasks) ----
     if (Array.isArray(input.features)) {
       for (const feat of input.features) {
