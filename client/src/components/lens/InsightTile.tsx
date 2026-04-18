@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, TrendingUp, TrendingDown, Minus, Database, RefreshCw, Eye } from 'lucide-react';
+import { AlertCircle, Database, RefreshCw } from 'lucide-react';
 
 type Severity = 'critical' | 'high' | 'warning' | 'info' | 'good';
 type TileKind = 'metric' | 'list' | 'rank' | 'table' | 'heatmap' | 'narrative';
@@ -17,7 +17,7 @@ interface TilePayload {
   reason?: string;
   kind?: TileKind;
   metric?: { value: number | string; label: string; severity?: Severity; sublabel?: string };
-  items?: Array<{ id?: string; label: string; sublabel?: string; severity?: Severity; value?: string | number }>;
+  items?: Array<{ id?: string; label: string; sublabel?: string; severity?: Severity; value?: string | number; linkTo?: string }>;
   table?: { columns: string[]; rows: Array<Array<string | number>> };
   heatmap?: { x: string[]; y: string[]; values: number[][]; legend?: string };
   narrative?: string;
@@ -186,17 +186,20 @@ function TileBody({ data }: { data: TilePayload }) {
         <ul className="space-y-1.5" data-testid="tile-items">
           {data.items.map((it, i) => {
             const sev = it.severity ? SEV[it.severity] : null;
-            return (
-              <li key={i} className={`flex items-start gap-2 text-xs px-2 py-1.5 rounded ${sev ? `${sev.bg} border ${sev.border}` : 'bg-muted/30'}`}
+            const body = (
+              <li className={`flex items-start gap-2 text-xs px-2 py-1.5 rounded ${sev ? `${sev.bg} border ${sev.border}` : 'bg-muted/30'} ${it.linkTo ? 'cursor-pointer hover:bg-blue-100 transition-colors' : ''}`}
                   data-testid={`tile-item-${i}`}>
                 {sev && <div className={`w-1.5 h-1.5 rounded-full ${sev.dot} mt-1.5 shrink-0`} />}
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium truncate">{it.label}</div>
+                  <div className={`font-medium ${it.linkTo ? '' : 'truncate'}`}>{it.label}</div>
                   {it.sublabel && <div className="text-[10px] text-muted-foreground truncate">{it.sublabel}</div>}
                 </div>
                 {it.value !== undefined && <div className="text-xs font-mono shrink-0">{typeof it.value === 'number' ? it.value.toLocaleString() : it.value}</div>}
               </li>
             );
+            return it.linkTo
+              ? <Link key={i} href={it.linkTo}>{body}</Link>
+              : <div key={i}>{body}</div>;
           })}
         </ul>
       )}

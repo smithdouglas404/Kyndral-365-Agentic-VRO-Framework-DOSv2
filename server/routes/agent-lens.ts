@@ -24,7 +24,7 @@ interface TilePayload {
   reason?: string;
   kind?: TileKind;
   metric?: { value: number | string; label: string; severity?: Severity; sublabel?: string };
-  items?: Array<{ id?: string; label: string; sublabel?: string; severity?: Severity; value?: string | number }>;
+  items?: Array<{ id?: string; label: string; sublabel?: string; severity?: Severity; value?: string | number; linkTo?: string }>;
   table?: { columns: string[]; rows: Array<Array<string | number>> };
   heatmap?: { x: string[]; y: string[]; values: number[][]; legend?: string };
   narrative?: string;
@@ -191,6 +191,43 @@ def({
         severity: 'warning',
       })),
       context: 'Stale projects often hide ghost work or unresolved blockers.',
+    };
+  },
+});
+
+def({
+  id: 'schedule-slip-velocity',
+  title: 'Schedule Slip Velocity',
+  description: 'Projects whose schedule performance is eroding right now — early warning before SPI tanks.',
+  agentIds: ['pmo', 'planning'],
+  size: 'md',
+  compute: async () => {
+    const projects = (await listAll('AtlasProject')).filter(isRealProject);
+    const withSpi = projects.filter(p => typeof p.spi === 'number' && p.status !== 'Complete' && p.status !== 'completed');
+    if (withSpi.length === 0) return { available: false, reason: 'No SPI on AtlasProject records' };
+    // Without SPI history we approximate slip velocity by current SPI gap from 1.0,
+    // weighted by remaining work (1 - milestoneProgress) since slips on early-stage projects compound more.
+    const slipping = withSpi
+      .map(p => {
+        const gap = Math.max(0, 1 - p.spi);
+        const remaining = typeof p.milestoneProgress === 'number' ? Math.max(0.05, 1 - p.milestoneProgress) : 1;
+        const score = gap * remaining;
+        return { p, gap, score };
+      })
+      .filter(x => x.gap > 0.05)
+      .sort((a, b) => b.score - a.score);
+    return {
+      available: true,
+      kind: 'rank',
+      metric: { value: slipping.length, label: 'projects losing schedule float', severity: slipping.length > 10 ? 'critical' : slipping.length > 0 ? 'high' : 'good' },
+      items: slipping.slice(0, 10).map(({ p, gap }) => ({
+        id: p.id || p.projectId,
+        label: p.name || p.title,
+        sublabel: `SPI ${p.spi.toFixed(2)} · ${(gap * 100).toFixed(0)}% behind plan${typeof p.milestoneProgress === 'number' ? ` · ${(p.milestoneProgress * 100).toFixed(0)}% complete` : ''}`,
+        value: Number((gap * 100).toFixed(0)),
+        severity: p.spi < 0.8 ? 'critical' : p.spi < 0.9 ? 'high' : 'warning',
+      })),
+      context: 'Approximated from current SPI + remaining work. True slip velocity needs SPI history (not yet ingested).',
     };
   },
 });
@@ -856,7 +893,7 @@ def({
   id: 'critical-path',
   title: 'Critical Path Across Portfolio',
   description: 'Longest dependency chain — determines portfolio end date.',
-  agentIds: ['planning', 'tmo', 'integrated'],
+  agentIds: ['planning', 'tmo', 'pmo', 'integrated'],
   size: 'lg',
   compute: async () => {
     const deps = (await listAll('AtlasDependency')).filter(d =>
@@ -932,6 +969,134 @@ def({
         severity: 'warning',
       })),
       context: 'Spend without a stated strategic outcome.',
+    };
+  },
+});
+
+def({
+  id: 'early-warning-triplet',
+  title: 'Early-Warning Triplet',
+  description: 'Projects exhibiting all three pre-red warning signals simultaneously.',
+  agentIds: ['integrated', 'risk', 'pmo'],
+  size: 'md',
+  compute: async () => {
+    const [projects, risks] = await Promise.all([listAll('AtlasProject'), listAll('AtlasRisk')]);
+    const real = projects.filter(isRealProject);
+    if (real.length === 0) return { available: false, reason: 'No projects found' };
+    const criticalRiskByProject = new Map<string, number>();
+    for (const r of risks) {
+      if ((r.severity === 'critical' || r.severity === 'high') && r.status !== 'resolved' && r.projectId) {
+        criticalRiskByProject.set(r.projectId, (criticalRiskByProject.get(r.projectId) || 0) + 1);
+      }
+    }
+    // Triplet: CPI < 0.9 AND SPI < 0.9 AND ≥1 open critical/high risk
+    const triplets = real.filter(p => {
+      if (p.status === 'Complete' || p.status === 'completed') return false;
+      const id = p.id || p.projectId;
+      const hasRisk = (criticalRiskByProject.get(id) || 0) > 0;
+      const hasCpiSlip = typeof p.cpi === 'number' && p.cpi < 0.9;
+      const hasSpiSlip = typeof p.spi === 'number' && p.spi < 0.9;
+      return hasRisk && hasCpiSlip && hasSpiSlip;
+    });
+    if (triplets.length === 0 && (real.every(p => typeof p.cpi !== 'number' || typeof p.spi !== 'number'))) {
+      return { available: false, reason: 'Requires CPI + SPI on AtlasProject records (not present)' };
+    }
+    return {
+      available: true,
+      kind: 'list',
+      metric: { value: triplets.length, label: 'projects with all 3 warning signals', severity: triplets.length > 0 ? 'critical' : 'good' },
+      items: triplets.slice(0, 10).map(p => ({
+        id: p.id || p.projectId,
+        label: p.name || p.title,
+        sublabel: `CPI ${p.cpi.toFixed(2)} · SPI ${p.spi.toFixed(2)} · ${criticalRiskByProject.get(p.id || p.projectId)} open critical risk(s)`,
+        severity: 'critical',
+      })),
+      context: 'Cost slip + schedule slip + open critical risk = historically the strongest pre-red predictor.',
+    };
+  },
+});
+
+def({
+  id: 'what-if-scope-reduction',
+  title: 'What-if Scope Reduction',
+  description: 'If we cut the worst value-to-cost projects, how much budget is released vs value preserved?',
+  agentIds: ['vro', 'integrated', 'finops'],
+  size: 'lg',
+  compute: async () => {
+    const projects = (await listAll('AtlasProject')).filter(isRealProject);
+    const withMath = projects.filter(p =>
+      typeof p.budget === 'number' && p.budget > 0 &&
+      (typeof p.realizedValue === 'number' || typeof p.expectedValue === 'number') &&
+      p.status !== 'Complete' && p.status !== 'completed'
+    );
+    if (withMath.length === 0) return { available: false, reason: 'Need budget + realizedValue/expectedValue on active projects' };
+    // Rank by value-to-cost ratio ascending (worst first).
+    const ranked = withMath.map(p => {
+      const value = (p.realizedValue ?? p.expectedValue ?? 0);
+      const ratio = value / p.budget;
+      return { p, value, ratio };
+    }).sort((a, b) => a.ratio - b.ratio);
+    // Simulate cutting bottom 10% of projects by ratio
+    const cutCount = Math.max(1, Math.floor(ranked.length * 0.1));
+    const cuts = ranked.slice(0, cutCount);
+    const budgetReleased = cuts.reduce((s, x) => s + x.p.budget, 0);
+    const valueLost = cuts.reduce((s, x) => s + x.value, 0);
+    const totalBudget = withMath.reduce((s, p) => s + p.budget, 0);
+    const totalValue = withMath.reduce((s, p) => s + (p.realizedValue ?? p.expectedValue ?? 0), 0);
+    const fmt = (n: number) => `$${(n / 1_000_000).toFixed(1)}M`;
+    return {
+      available: true,
+      kind: 'list',
+      metric: {
+        value: fmt(budgetReleased - valueLost),
+        label: `net capacity released by cutting bottom ${cutCount} projects`,
+        severity: 'good',
+        sublabel: `${fmt(budgetReleased)} budget freed · ${fmt(valueLost)} value lost · ${((1 - valueLost / totalValue) * 100).toFixed(0)}% of portfolio value preserved`,
+      },
+      items: cuts.map(({ p, value, ratio }) => ({
+        id: p.id || p.projectId,
+        label: p.name || p.title,
+        sublabel: `${fmt(p.budget)} budget releasing · only ${fmt(value)} value (ratio ${ratio.toFixed(2)})`,
+        value: Math.round(p.budget),
+        severity: ratio < 0.3 ? 'critical' : 'high',
+      })),
+      context: `Simulator: cutting the bottom 10% by value-to-cost ratio. Of $${(totalBudget / 1_000_000).toFixed(1)}M total active budget, this releases ${((budgetReleased / totalBudget) * 100).toFixed(0)}% while losing only ${((valueLost / totalValue) * 100).toFixed(0)}% of portfolio value.`,
+    };
+  },
+});
+
+def({
+  id: 'chatbot-question-bank',
+  title: 'Executive Question Bank',
+  description: 'Pre-curated questions wired to the Clarity chatbot — click to ask.',
+  agentIds: ['notification', 'integrated'],
+  size: 'lg',
+  compute: async () => {
+    const questions = [
+      'What are the top 3 portfolio risks right now?',
+      'Which projects have blocked cross-project dependencies?',
+      'List the projects with the largest budget overruns.',
+      'Are there any old open dependencies we should escalate?',
+      'Which strategic objectives are not funded by any project?',
+      'Show me projects with critical unmitigated risks.',
+      'Which business units have the most concurrent change initiatives?',
+      'What dependencies need a human decision this week?',
+      'Which projects should we consider sunsetting based on value-to-cost?',
+      'Where are we losing the most schedule float across the portfolio?',
+      'Which PMs are overloaded with too many active projects?',
+      'Summarize what changed in the portfolio this week.',
+    ];
+    return {
+      available: true,
+      kind: 'list',
+      metric: { value: questions.length, label: 'curated executive questions', severity: 'info' },
+      items: questions.map((q, i) => ({
+        id: `q-${i}`,
+        label: q,
+        sublabel: 'click → ask Clarity',
+        linkTo: `/chat?q=${encodeURIComponent(q)}`,
+      })),
+      context: 'The chatbot grounds every answer in live Palantir data via tool-use.',
     };
   },
 });

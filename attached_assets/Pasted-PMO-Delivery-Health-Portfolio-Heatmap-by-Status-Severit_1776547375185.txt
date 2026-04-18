@@ -1,0 +1,48 @@
+PMO — Delivery & Health
+Portfolio Heatmap by Status × Severity — single grid, 300 projects colored by health, click to drill in. Most-asked exec view.
+At-Risk Cascade Analysis — "if Project X slips 30 days, which 12 downstream projects miss their dates?" Walks the dependency graph.
+Schedule Slip Velocity — projects that lost >X% of their float in the last 30 days (early warning, before SPI tanks).
+Critical Path Across Projects — longest path through the inter-project dependency graph; the one chain that determines the whole portfolio's end date.
+Stale Project Detector — projects with no status update / no commit / no fact broadcast in N days. At 300 projects, ghost projects are inevitable.
+Milestone Concentration Risk — which weeks have 20+ milestones due simultaneously (delivery cliff).
+Resource Conflict Map — same person/team allocated >100% across projects in the same sprint.
+PM Span-of-Control Analysis — which PMs/RTEs own >5 projects (overload signal).
+VRO — Value Realization
+Value-at-Risk Dashboard — sum of expectedValue × probability-of-realization, ranked by gap to plan. The single most important VRO number.
+Benefit Decay Tracker — projects where realized value is declining post go-live (most VROs miss this entirely).
+ROI Reality Check — actual ROI vs business-case ROI per project, with the variance attributed to: scope reduction / schedule slip / cost overrun / market change.
+Strategic Alignment Score — % of portfolio spend funding the top-3 strategic objectives. Boards care intensely; usually surprising.
+OKR Coverage Gap — Key Results that have no funded project pointing at them (strategy without delivery).
+Value Leakage Per Dollar — projects with the worst $-spent-to-$-value-delivered ratio, ranked.
+Time-to-Value Distribution — how long projects take from go-live to first measurable benefit; outliers indicate broken hand-offs.
+Sunset Candidate List — active projects whose value-to-cost ratio crossed below 1.0 — kill candidates.
+Financial / FinOps
+Burn Rate Anomaly Detection — projects spending >2σ above their planned monthly burn (already partially have this; extend to forecasting forward 90 days).
+Budget Reforecast Confidence — projects whose original budget is statistically unlikely to hold (based on current CPI trend).
+Vendor/Spend Concentration — which 5 vendors absorb 80% of project spend (single-supplier risk).
+Capex vs Opex Drift — projects classified one way that are actually behaving like the other (audit risk).
+Risk & Governance
+Risk Co-occurrence Patterns — risks that tend to appear together (e.g., "every project with a vendor risk also has a scope-creep risk"). Lets you predict downstream risks early.
+Risk Owner Workload — which risk owners hold >10 open mitigations (bandwidth signal).
+Compliance/Audit Drift — projects that haven't had a governance checkpoint in N days, by stage.
+Decision Latency — average days a decision sits in the approval queue, by approver — find the bottlenecks.
+Change-Request Velocity — projects accumulating CRs faster than they close them (scope-creep signal).
+OCM / Stakeholder
+Adoption Drop-off Heatmap — projects where post-go-live user adoption stalled below the target curve.
+Stakeholder Sentiment Trend — projects where sponsor sentiment has decayed (from notes/comments/surveys).
+Change-Saturation Index — business units receiving too many change initiatives in the same quarter (OCM red flag).
+Cross-Cutting / Predictive (the AI-native ones)
+Early-Warning Triplet Detector — projects exhibiting the same 3-signal pattern that historically preceded a red status (e.g., burn-up + open risks rising + velocity falling).
+What-if Scope Reduction — "if we cut X% of these 12 projects, what's the value preserved vs released capacity?" — full simulator.
+Dependency War Room — list of dependencies that need a human decision this week to keep the portfolio on track, ranked by impact.
+Lookalike Project Outcomes — given a new project, find the 5 most similar past projects and their actual outcomes (cost overrun %, slippage, ROI achieved). Brutal but accurate forecasting.
+Agent-Generated Narrative Brief — every Monday, a one-page exec summary of what changed in the portfolio last week, written by the agents.
+Question Bank for the Chatbot — pre-curated executive questions wired to the chat (you've already got the engine).
+How I'd prioritize for your client
+If I were the one demoing to a CIO, I'd pick 5 quick wins that are high-impact and reuse what you've already built:
+
+Portfolio Heatmap (visual gut-punch in 1 screen)
+At-Risk Cascade Analysis (uses the dependency graph you just built)
+Value-at-Risk Dashboard (the VRO money number)
+Strategic Alignment Score (boards love this)
+Stale Project Detector (proves the agents are actually watching)

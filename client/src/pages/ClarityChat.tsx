@@ -33,6 +33,18 @@ export default function ClarityChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
+  // Auto-send question from ?q= query param (e.g. clicked from Question Bank tile)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q && messages.length === 0) {
+      send(q);
+      // Clean URL so refresh doesn't re-send
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function send(text?: string) {
     const content = (text ?? input).trim();
     if (!content || loading) return;
