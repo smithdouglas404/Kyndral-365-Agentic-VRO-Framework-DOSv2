@@ -446,61 +446,79 @@ class PalantirGraphService {
    */
   async getNodeNeighbors(nodeType: string, nodeId: string): Promise<GraphNode[]> {
     await this.initialize();
-
     if (!this.palantirService) return [];
 
     const neighbors: GraphNode[] = [];
+    const seen = new Set<string>();
+    const push = (n: GraphNode) => {
+      const key = `${n.type}::${n.id}`;
+      if (seen.has(key) || !n.id) return;
+      seen.add(key);
+      neighbors.push(n);
+    };
+    const toNode = (type: string, raw: any, labelFallback?: string): GraphNode => ({
+      id: raw.id || raw.__primaryKey || raw[`${type.toLowerCase()}Id`],
+      type,
+      label: raw.title || raw.name || raw.__title || labelFallback || raw.id,
+      properties: raw,
+      severity: raw.severity,
+      status: raw.status,
+    });
+    const search = async (type: string, field: string, value: string, limit = 25) => {
+      try {
+        const r = await this.palantirService!.searchObjects(type, { type: 'eq', field, value }, { pageSize: limit });
+        return r.data || [];
+      } catch { return []; }
+    };
+    const fetch = async (type: string, id: string) => {
+      try { return await this.palantirService!.getObject(type, id); } catch { return null; }
+    };
 
     try {
-      // Get the node first
-      const node = await this.palantirService.getObject(nodeType, nodeId);
+      const node = await fetch(nodeType, nodeId);
       if (!node) return [];
 
-      // Find related objects based on node type
       if (nodeType === 'AtlasProject') {
-        // Get risks
-        const risks = await this.palantirService.searchObjects('AtlasRisk', {
-          type: 'eq', field: 'projectId', value: nodeId
-        }, { pageSize: 20 });
-        for (const risk of risks.data || []) {
-          neighbors.push({
-            id: risk.id,
-            type: 'AtlasRisk',
-            label: risk.title || risk.name,
-            properties: risk,
-            severity: risk.severity,
-            status: risk.status,
-          });
+        for (const r of await search('AtlasRisk', 'projectId', nodeId))      push(toNode('AtlasRisk', r, 'Risk'));
+        for (const d of await search('AtlasDependency', 'sourceProjectId', nodeId)) push(toNode('AtlasDependency', d, 'Dependency'));
+        for (const d of await search('AtlasDependency', 'targetProjectId', nodeId)) push(toNode('AtlasDependency', d, 'Dependency'));
+        for (const k of await search('AtlasKpi', 'projectId', nodeId))       push(toNode('AtlasKpi', k, 'KPI'));
+        for (const b of await search('AtlasBudget', 'projectId', nodeId))    push(toNode('AtlasBudget', b, 'Budget'));
+        for (const i of await search('AtlasInsight', 'projectId', nodeId, 10)) push(toNode('AtlasInsight', i, 'Insight'));
+        if (node.objectiveId) {
+          const o = await fetch('AtlasObjective', node.objectiveId);
+          if (o) push(toNode('AtlasObjective', o, 'Objective'));
         }
-
-        // Get dependencies
-        const deps = await this.palantirService.searchObjects('AtlasDependency', {
-          type: 'eq', field: 'sourceProjectId', value: nodeId
-        }, { pageSize: 20 });
-        for (const dep of deps.data || []) {
-          neighbors.push({
-            id: dep.id,
-            type: 'AtlasDependency',
-            label: dep.title || 'Dependency',
-            properties: dep,
-            status: dep.status,
-          });
+        if (node.teamId) {
+          const t = await fetch('AtlasTeam', node.teamId);
+          if (t) push(toNode('AtlasTeam', t, 'Team'));
         }
+      } else if (nodeType === 'AtlasRisk') {
+        if (node.projectId) {
+          const p = await fetch('AtlasProject', node.projectId);
+          if (p) push(toNode('AtlasProject', p));
+        }
+      } else if (nodeType === 'AtlasObjective') {
+        for (const kr of await search('AtlasKeyResult', 'objectiveId', nodeId)) push(toNode('AtlasKeyResult', kr, 'Key Result'));
+        for (const p of await search('AtlasProject', 'objectiveId', nodeId))    push(toNode('AtlasProject', p));
+      } else if (nodeType === 'AtlasKeyResult' && node.objectiveId) {
+        const o = await fetch('AtlasObjective', node.objectiveId);
+        if (o) push(toNode('AtlasObjective', o));
+      } else if (nodeType === 'AtlasDependency') {
+        if (node.sourceProjectId) { const p = await fetch('AtlasProject', node.sourceProjectId); if (p) push(toNode('AtlasProject', p)); }
+        if (node.targetProjectId) { const p = await fetch('AtlasProject', node.targetProjectId); if (p) push(toNode('AtlasProject', p)); }
+      } else if (nodeType === 'AtlasTeam') {
+        for (const m of await search('AtlasPerson', 'teamId', nodeId))     push(toNode('AtlasPerson', m, 'Member'));
+        for (const p of await search('AtlasProject', 'teamId', nodeId))    push(toNode('AtlasProject', p));
+      } else if (nodeType === 'AtlasBudget' && node.projectId) {
+        const p = await fetch('AtlasProject', node.projectId); if (p) push(toNode('AtlasProject', p));
+      } else if (nodeType === 'AtlasKpi' && node.projectId) {
+        const p = await fetch('AtlasProject', node.projectId); if (p) push(toNode('AtlasProject', p));
+      } else if (nodeType === 'AtlasInsight' && node.projectId) {
+        const p = await fetch('AtlasProject', node.projectId); if (p) push(toNode('AtlasProject', p));
+      } else if (nodeType === 'AtlasPerson' && node.teamId) {
+        const t = await fetch('AtlasTeam', node.teamId); if (t) push(toNode('AtlasTeam', t));
       }
-
-      if (nodeType === 'AtlasRisk' && node.projectId) {
-        const project = await this.palantirService.getObject('AtlasProject', node.projectId);
-        if (project) {
-          neighbors.push({
-            id: project.id,
-            type: 'AtlasProject',
-            label: project.title || project.name,
-            properties: project,
-            status: project.status,
-          });
-        }
-      }
-
     } catch (error) {
       console.error(`[PalantirGraph] Failed to get neighbors for ${nodeType}/${nodeId}:`, error);
     }

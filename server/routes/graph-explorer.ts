@@ -10,6 +10,31 @@ import { palantirGraphService, GRAPH_NODE_TYPES } from '../services/PalantirGrap
 
 const router = Router();
 
+// Single source of truth for friendly→Atlas type mapping. All routes use this
+// so the frontend's exposed types stay in lockstep with what we can resolve.
+const FRIENDLY_TO_ATLAS: Record<string, string> = {
+  project:        'AtlasProject',
+  risk:           'AtlasRisk',
+  objective:      'AtlasObjective',
+  keyResult:      'AtlasKeyResult',
+  keyresult:      'AtlasKeyResult',
+  dependency:     'AtlasDependency',
+  team:           'AtlasTeam',
+  person:         'AtlasPerson',
+  budget:         'AtlasBudget',
+  kpi:            'AtlasKpi',
+  insight:        'AtlasInsight',
+  checkpoint:     'AtlasGovernanceCheckpoint',
+  readiness:      'AtlasReadinessMetric',
+  transformation: 'AtlasTransformation',
+  epic:           'AtlasEpic',
+  feature:        'AtlasFeature',
+};
+
+function resolveAtlasType(friendlyOrAtlas: string): string {
+  return FRIENDLY_TO_ATLAS[friendlyOrAtlas] || friendlyOrAtlas;
+}
+
 /**
  * GET /api/graph/status
  * Get graph service status
@@ -48,22 +73,9 @@ router.get('/', async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 50;
     const includeEdges = req.query.includeEdges !== 'false';
 
-    // Map friendly names to Palantir types
-    const typeMapping: Record<string, string> = {
-      project: 'AtlasProject',
-      risk: 'AtlasRisk',
-      objective: 'AtlasObjective',
-      dependency: 'AtlasDependency',
-      team: 'AtlasTeam',
-      person: 'AtlasPerson',
-      budget: 'AtlasBudget',
-      kpi: 'AtlasKpi',
-      insight: 'AtlasInsight',
-    };
-
     let nodeTypes: string[];
     if (typesParam) {
-      nodeTypes = typesParam.split(',').map(t => typeMapping[t.trim()] || t.trim());
+      nodeTypes = typesParam.split(',').map(t => resolveAtlasType(t.trim()));
     } else {
       nodeTypes = ['AtlasProject', 'AtlasRisk', 'AtlasObjective', 'AtlasDependency'];
     }
@@ -87,16 +99,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/node/:type/:id', async (req: Request, res: Response) => {
   try {
     const { type, id } = req.params;
-
-    // Map friendly name to Palantir type
-    const typeMapping: Record<string, string> = {
-      project: 'AtlasProject',
-      risk: 'AtlasRisk',
-      objective: 'AtlasObjective',
-      dependency: 'AtlasDependency',
-    };
-
-    const nodeType = typeMapping[type] || type;
+    const nodeType = resolveAtlasType(type);
     const node = await palantirGraphService.getNode(nodeType, id);
 
     if (!node) {
@@ -117,15 +120,7 @@ router.get('/node/:type/:id', async (req: Request, res: Response) => {
 router.get('/node/:type/:id/insights', async (req: Request, res: Response) => {
   try {
     const { type, id } = req.params;
-
-    const typeMapping: Record<string, string> = {
-      project: 'AtlasProject',
-      risk: 'AtlasRisk',
-      objective: 'AtlasObjective',
-      dependency: 'AtlasDependency',
-    };
-
-    const nodeType = typeMapping[type] || type;
+    const nodeType = resolveAtlasType(type);
     const insights = await palantirGraphService.getNodeInsights(nodeType, id);
 
     res.json(insights);
@@ -141,15 +136,7 @@ router.get('/node/:type/:id/insights', async (req: Request, res: Response) => {
 router.get('/node/:type/:id/neighbors', async (req: Request, res: Response) => {
   try {
     const { type, id } = req.params;
-
-    const typeMapping: Record<string, string> = {
-      project: 'AtlasProject',
-      risk: 'AtlasRisk',
-      objective: 'AtlasObjective',
-      dependency: 'AtlasDependency',
-    };
-
-    const nodeType = typeMapping[type] || type;
+    const nodeType = resolveAtlasType(type);
     const neighbors = await palantirGraphService.getNodeNeighbors(nodeType, id);
 
     res.json({
@@ -193,15 +180,7 @@ router.get('/search', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Query must be at least 2 characters' });
     }
 
-    // Get graph and filter by search query
-    const typeMapping: Record<string, string> = {
-      project: 'AtlasProject',
-      risk: 'AtlasRisk',
-      objective: 'AtlasObjective',
-      dependency: 'AtlasDependency',
-    };
-
-    const nodeTypes = type ? [typeMapping[type] || type] : undefined;
+    const nodeTypes = type ? [resolveAtlasType(type)] : undefined;
 
     const graph = await palantirGraphService.getGraph({
       nodeTypes,
