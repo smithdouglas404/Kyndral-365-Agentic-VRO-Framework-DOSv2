@@ -4504,7 +4504,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           sourceSystemId: getSystemId("jira"),
           syncType: "incremental",
           syncDirection: "bidirectional",
-          cronExpression: "0 6 * * *", // Daily at 6 AM
+          cronExpression: "0 0 * * *", // Every 24 hours (midnight)
           isEnabled: "true",
           entityTypes: JSON.stringify(["epic", "feature", "story", "task", "sprint"]),
           conflictResolutionStrategy: "last_write_wins"
@@ -4516,7 +4516,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           sourceSystemId: getSystemId("azure-devops"),
           syncType: "incremental",
           syncDirection: "bidirectional",
-          cronExpression: "0 * * * *", // Every hour
+          cronExpression: "0 0 * * *", // Every 24 hours (midnight)
           isEnabled: "true",
           entityTypes: JSON.stringify(["epic", "feature", "story", "task"]),
           conflictResolutionStrategy: "last_write_wins"
@@ -4528,7 +4528,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
           sourceSystemId: getSystemId("servicenow"),
           syncType: "full",
           syncDirection: "inbound",
-          cronExpression: "0 2 * * 0", // Sundays at 2 AM
+          cronExpression: "0 0 * * *", // Every 24 hours (midnight)
           isEnabled: "true",
           entityTypes: JSON.stringify(["portfolio", "epic", "resource"]),
           conflictResolutionStrategy: "source_wins"

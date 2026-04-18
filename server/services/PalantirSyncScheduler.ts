@@ -131,9 +131,9 @@ export class PalantirSyncScheduler {
 
   // Default sync schedules
   private static readonly DEFAULT_SCHEDULES = {
-    jira: "0 */4 * * *",        // Every 4 hours
-    openproject: "0 */6 * * *",  // Every 6 hours
-    monday: "0 */2 * * *",       // Every 2 hours
+    jira: "0 0 * * *",        // Every 24 hours (midnight)
+    openproject: "0 0 * * *",  // Every 24 hours (midnight)
+    monday: "0 0 * * *",       // Every 24 hours (midnight)
   };
 
   constructor() {
