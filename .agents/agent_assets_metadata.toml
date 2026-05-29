@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Z3icNfzPkYWIFJu9rK2cV"
+uri = "file://Smith-Clarity-Ontology.zip"
+type = "unspecified"
+title = "Smith Clarity Enterprise PPM Ontology (zip)"
