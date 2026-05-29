@@ -171,7 +171,7 @@ export default function SignupPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+              <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -192,7 +192,7 @@ export default function SignupPage() {
                 Start Your Free Trial
               </h1>
               <p className="text-xl text-gray-600">
-                Get full access to Kyndryl Clarity for 14 days. No credit card required.
+                Get full access to Smith Clarity for 14 days. No credit card required.
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export default function SignupPage() {
 
             <div className="bg-gray-50 rounded-xl p-6">
               <p className="text-sm text-gray-600 italic">
-                "Kyndryl Clarity transformed how we manage our portfolio. The AI agents caught issues
+                "Smith Clarity transformed how we manage our portfolio. The AI agents caught issues
                 we would have missed, saving us millions in potential overruns."
               </p>
               <p className="text-sm font-semibold text-gray-900 mt-3">

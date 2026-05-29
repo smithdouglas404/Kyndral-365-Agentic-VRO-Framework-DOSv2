@@ -1,8 +1,8 @@
-# Kyndryl Clarity - Level 4 Autonomous System
+# Smith Clarity - Level 4 Autonomous System
 
 ## Overview
 
-Kyndryl Clarity is a Level 4 autonomous, self-learning multi-agent platform for enterprise transformation management. It utilizes 11 specialized Deep Agents for continuous monitoring, learning, communication, and action without human intervention, focusing on cost optimization through a 3-tier AI model approach. The system uses Palantir AIP as the primary data source (super-MCP) for all project data, with PostgreSQL reserved for authentication, configuration, and agent state. It leverages Rulebricks and Palantir Functions as its rules engine. The 11th Notification Agent manages all human-in-the-loop approvals and external notifications, acting as a single Application-to-Application (A2A) gateway.
+Smith Clarity is a Level 4 autonomous, self-learning multi-agent platform for enterprise transformation management. It utilizes 11 specialized Deep Agents for continuous monitoring, learning, communication, and action without human intervention, focusing on cost optimization through a 3-tier AI model approach. The system uses Palantir AIP as the primary data source (super-MCP) for all project data, with PostgreSQL reserved for authentication, configuration, and agent state. It leverages Rulebricks and Palantir Functions as its rules engine. The 11th Notification Agent manages all human-in-the-loop approvals and external notifications, acting as a single Application-to-Application (A2A) gateway.
 
 ## User Preferences
 

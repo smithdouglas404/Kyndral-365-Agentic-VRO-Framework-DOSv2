@@ -1,6 +1,6 @@
 /**
  * PUBLIC LANDING PAGE
- * Marketing page for Kyndryl Clarity
+ * Marketing page for Smith Clarity
  */
 
 import { useLocation } from 'wouter';
@@ -76,7 +76,7 @@ const AGENTS = [
 // Testimonials
 const TESTIMONIALS = [
   {
-    quote: "Kyndryl Clarity transformed how we manage our portfolio. The AI agents caught issues we would have missed, saving us millions in potential overruns.",
+    quote: "Smith Clarity transformed how we manage our portfolio. The AI agents caught issues we would have missed, saving us millions in potential overruns.",
     author: "VP of Technology",
     company: "Fortune 500 Energy Company",
   },
@@ -114,7 +114,7 @@ export default function LandingPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+              <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -184,7 +184,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-1 mx-4">
                   <div className="bg-white rounded px-3 py-1 text-xs text-gray-500 text-center">
-                    app.kyndryl-clarity.com/dashboard
+                    app.smith-clarity.com/dashboard
                   </div>
                 </div>
               </div>
@@ -548,7 +548,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-white font-bold">Kyndryl Clarity</span>
+                <span className="text-white font-bold">Smith Clarity</span>
               </div>
               <p className="text-sm">
                 AI-powered portfolio intelligence for enterprise PMOs. Detect risks earlier, save time, and drive better outcomes.
@@ -585,7 +585,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-            © 2026 Kyndryl Clarity. All rights reserved.
+            © 2026 Smith Clarity. All rights reserved.
           </div>
         </div>
       </footer>

@@ -122,7 +122,7 @@ export default function DemoRequestPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+              <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -140,7 +140,7 @@ export default function DemoRequestPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Experience Kyndryl Clarity
+            Experience Smith Clarity
             <br />
             <span className="text-blue-600">With Your Industry Data</span>
           </h1>

@@ -72,7 +72,7 @@ export default function EmailVerificationPage() {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+                <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function EmailVerificationPage() {
                 </p>
               )}
               <p className="text-gray-600 mb-8">
-                Your account is now active. You can sign in and start using Kyndryl Clarity.
+                Your account is now active. You can sign in and start using Smith Clarity.
               </p>
               <Button
                 onClick={() => navigate('/login')}
@@ -137,7 +137,7 @@ export default function EmailVerificationPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+              <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
             </div>
           </div>
         </div>

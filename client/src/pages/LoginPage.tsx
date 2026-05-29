@@ -123,7 +123,7 @@ export default function LoginPage() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+            <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
           </button>
           <Button variant="ghost" onClick={() => navigate('/')}>
             Back to Home

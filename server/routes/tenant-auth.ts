@@ -696,9 +696,9 @@ router.post('/signup', async (req: Request, res: Response) => {
     console.log('\n📧 EMAIL VERIFICATION REQUIRED:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`To: ${user.email}`);
-    console.log(`Subject: Verify your email - Kyndryl Clarity`);
+    console.log(`Subject: Verify your email - Smith Clarity`);
     console.log(`\nHi ${user.firstName},`);
-    console.log(`\nWelcome to Kyndryl Clarity! Please verify your email to activate your account.`);
+    console.log(`\nWelcome to Smith Clarity! Please verify your email to activate your account.`);
     console.log(`\nCompany: ${companyName}`);
     console.log(`Industry: ${industry || 'Not specified'}`);
     console.log(`\nClick this link to verify your email:`);

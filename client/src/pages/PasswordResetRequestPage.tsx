@@ -81,7 +81,7 @@ export default function PasswordResetRequestPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Kyndryl Clarity</h1>
+              <h1 className="text-xl font-bold text-gray-900">Smith Clarity</h1>
             </div>
           </div>
           <Button variant="ghost" onClick={() => navigate('/login')}>

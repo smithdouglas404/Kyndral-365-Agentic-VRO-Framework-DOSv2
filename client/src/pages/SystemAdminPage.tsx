@@ -283,7 +283,7 @@ export default function SystemAdminPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">System Admin Portal</h1>
-              <p className="text-xs text-gray-600">Kyndryl Clarity - Internal Admin</p>
+              <p className="text-xs text-gray-600">Smith Clarity - Internal Admin</p>
             </div>
           </div>
           <Button variant="outline" onClick={handleLogout}>

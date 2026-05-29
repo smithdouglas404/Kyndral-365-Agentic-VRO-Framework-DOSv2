@@ -1273,7 +1273,7 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       );
       res.setHeader(
         'Content-Disposition',
-        'attachment; filename="kyndryl-clarity-project-template.xlsx"'
+        'attachment; filename="smith-clarity-project-template.xlsx"'
       );
       res.send(buf);
     } catch (err: any) {

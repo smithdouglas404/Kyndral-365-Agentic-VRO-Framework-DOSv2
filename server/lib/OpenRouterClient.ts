@@ -177,7 +177,7 @@ class OpenRouterClient {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
           'HTTP-Referer': process.env.APP_URL || 'https://kyndryl365.ai',
-          'X-Title': 'Kyndryl Clarity',
+          'X-Title': 'Smith Clarity',
         },
         body: JSON.stringify({
           model,
