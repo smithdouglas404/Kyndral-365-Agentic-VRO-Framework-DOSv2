@@ -170,12 +170,29 @@ router.post('/sync/all', async (req: Request, res: Response) => {
  * Get current sync status
  */
 router.get('/sync/status', async (req: Request, res: Response) => {
+  // Report which ontology backend is active ('falkordb' when FALKORDB_URL is
+  // set, otherwise 'palantir') plus its connectivity details.
+  let ontologyProvider: {
+    backend: 'palantir' | 'falkordb';
+    ready: boolean;
+    details?: Record<string, any>;
+  } = {
+    backend: OntologyDataProvider.getActiveBackend(),
+    ready: OntologyDataProvider.isReady(),
+  };
+  try {
+    ontologyProvider = await OntologyDataProvider.getBackendStatus();
+  } catch {
+    // keep the basic status
+  }
+
   res.json({
     syncing: {
       jira: PalantirSyncService.isSyncing('jira'),
       openproject: PalantirSyncService.isSyncing('openproject'),
       monday: PalantirSyncService.isSyncing('monday'),
     },
+    ontologyProvider,
   });
 });
 
