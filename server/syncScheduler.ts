@@ -8,7 +8,7 @@ import { createSmartsheetClientFromAdapter } from "./smartsheetClient";
 import { createRallyClientFromAdapter } from "./rallyClient";
 import { createMondayClientFromAdapter } from "./mondayClient";
 import { createAsanaClientFromAdapter } from "./asanaClient";
-import { createOpenProjectClientFromAdapter, syncOpenProjectProjects } from "./openProjectClient";
+import { createOpenProjectClientFromAdapter } from "./openProjectClient";
 
 interface ScheduledJob {
   jobId: string;
@@ -350,11 +350,28 @@ async function executeSyncJob(jobId: string): Promise<void> {
           throw new Error("Failed to create OpenProject client - check adapter configuration (baseUrl, apiKey)");
         }
 
-        const result = await syncOpenProjectProjects(client);
-        recordsCreated = result.projectsCreated;
-        recordsProcessed = result.projectsCreated + result.projectsUpdated;
-        recordsFailed = result.errors?.length || 0;
-        errors.push(...(result.errors || []));
+        let config: { projectId?: string } = {};
+        try {
+          config = JSON.parse(job.filterCriteria || '{}');
+        } catch (e) {
+          throw new Error("Invalid filterCriteria JSON in sync job configuration");
+        }
+
+        const projectIds = config.projectId
+          ? [config.projectId]
+          : (await client.getProjects()).map(p => String(p.id));
+
+        for (const projectId of projectIds) {
+          const result = await client.syncProject(projectId, job.mcpAdapterId);
+          recordsCreated += (result.projectsCreated || 0) +
+                          (result.featuresCreated || 0) +
+                          (result.storiesCreated || 0) +
+                          (result.tasksCreated || 0) +
+                          (result.risksCreated || 0);
+          recordsFailed += result.errors?.length || 0;
+          errors.push(...(result.errors || []));
+        }
+        recordsProcessed = recordsCreated;
       } else {
         throw new Error(`Unsupported sync type: ${normalizedSyncType} (original: ${job.syncType}) - supported types: jira, servicenow, azure_devops, planview, msproject, smartsheet, rally, monday, asana, openproject`);
       }

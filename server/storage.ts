@@ -129,10 +129,14 @@ import {
   vroMetrics, benchmarks, appConfig, dashboardWidgets,
   notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail,
   ontologyEntities, ontologyMappings, obdaQueryCache, graphSyncLog,
-  userDashboardConfigs, userWidgets
+  userDashboardConfigs, userWidgets,
+  agentPredictions,
+  type AgentPrediction, type InsertAgentPrediction,
+  okrEntityContributions,
+  type OkrEntityContribution, type InsertOkrEntityContribution
 } from "@shared/schema";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, desc, and, inArray, isNull } from "drizzle-orm";
 import pkg from "pg";
 const { Pool } = pkg;
 
@@ -212,6 +216,11 @@ export interface IStorage {
   getKeyResults(okrId: string): Promise<KeyResult[]>;
   createKeyResult(kr: InsertKeyResult): Promise<KeyResult>;
   getOkrsWithKeyResults(): Promise<(Okr & { keyResults: KeyResult[] })[]>;
+  updateOkr(id: string, patch: Partial<InsertOkr>): Promise<Okr>;
+  updateKeyResult(id: string, patch: Partial<InsertKeyResult>): Promise<KeyResult>;
+  getOkrEntityContributions(keyResultId: string): Promise<OkrEntityContribution[]>;
+  upsertOkrEntityContribution(row: InsertOkrEntityContribution): Promise<OkrEntityContribution>;
+  getEntityProgress(entityType: string, entityId: string): Promise<number | null>;
   
   getKpis(projectId?: string, businessUnitId?: string): Promise<Kpi[]>;
   createKpi(kpi: InsertKpi): Promise<Kpi>;
@@ -462,6 +471,12 @@ export interface IStorage {
 
   // Raw Query Execution (for OBDA query rewriting)
   executeRawQuery?(sql: string): Promise<any[]>;
+
+  // Agent Prediction / Outcome Tracking Methods (grounding layer)
+  createAgentPrediction(prediction: InsertAgentPrediction): Promise<AgentPrediction>;
+  getOpenAgentPredictions(): Promise<AgentPrediction[]>;
+  getAgentPredictions(agentId: string, findingType?: string): Promise<AgentPrediction[]>;
+  resolveAgentPrediction(id: string, actualValue: unknown, accuracy: number): Promise<AgentPrediction | undefined>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -1879,6 +1894,103 @@ export class DatabaseStorage implements IStorage {
       }))
     );
     return result;
+  }
+
+  async updateOkr(id: string, patch: Partial<InsertOkr>): Promise<Okr> {
+    const result = await db.update(okrs)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(okrs.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateKeyResult(id: string, patch: Partial<InsertKeyResult>): Promise<KeyResult> {
+    const result = await db.update(keyResults)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(keyResults.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getOkrEntityContributions(keyResultId: string): Promise<OkrEntityContribution[]> {
+    return await db.select().from(okrEntityContributions)
+      .where(eq(okrEntityContributions.keyResultId, keyResultId));
+  }
+
+  async upsertOkrEntityContribution(row: InsertOkrEntityContribution): Promise<OkrEntityContribution> {
+    const result = await db.insert(okrEntityContributions)
+      .values(row)
+      .onConflictDoUpdate({
+        target: [
+          okrEntityContributions.keyResultId,
+          okrEntityContributions.entityType,
+          okrEntityContributions.entityId,
+        ],
+        set: {
+          okrId: row.okrId,
+          contributionPct: row.contributionPct,
+          weight: row.weight,
+          inferredBy: row.inferredBy,
+          confidence: row.confidence,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return result[0];
+  }
+
+  /**
+   * Normalized 0-100 progress for a polymorphic OKR contributor entity, or
+   * null when the entity is missing / has no measurable progress yet.
+   * - epic: epics.progress (text, "0"-"100")
+   * - project: projects.progress (integer), falling back to progressPercentage
+   * - feature: completedPoints / storyPoints x 100, falling back to status
+   * - story / task: status-based (done/completed = 100, otherwise 0)
+   */
+  async getEntityProgress(entityType: string, entityId: string): Promise<number | null> {
+    const clampPct = (v: number) => Math.min(100, Math.max(0, v));
+    const doneStatuses = ["done", "completed", "complete", "closed"];
+
+    switch (entityType) {
+      case "epic": {
+        const [row] = await db.select().from(epics).where(eq(epics.id, entityId)).limit(1);
+        if (!row) return null;
+        const n = row.progress == null ? NaN : parseFloat(row.progress);
+        if (Number.isFinite(n)) return clampPct(n);
+        return row.status && doneStatuses.includes(row.status) ? 100 : null;
+      }
+      case "project": {
+        const [row] = await db.select().from(projects).where(eq(projects.id, entityId)).limit(1);
+        if (!row) return null;
+        if (row.progress != null) return clampPct(row.progress);
+        if (row.progressPercentage != null) return clampPct(row.progressPercentage);
+        return null;
+      }
+      case "feature": {
+        const [row] = await db.select().from(features).where(eq(features.id, entityId)).limit(1);
+        if (!row) return null;
+        const total = row.storyPoints == null ? NaN : parseFloat(row.storyPoints);
+        const done = row.completedPoints == null ? NaN : parseFloat(row.completedPoints);
+        if (Number.isFinite(total) && total > 0 && Number.isFinite(done)) {
+          return clampPct((done / total) * 100);
+        }
+        return row.status && doneStatuses.includes(row.status) ? 100 : null;
+      }
+      case "story": {
+        const [row] = await db.select().from(stories).where(eq(stories.id, entityId)).limit(1);
+        if (!row) return null;
+        if (!row.status) return null;
+        return doneStatuses.includes(row.status) ? 100 : 0;
+      }
+      case "task": {
+        const [row] = await db.select().from(tasks).where(eq(tasks.id, entityId)).limit(1);
+        if (!row) return null;
+        if (!row.status) return null;
+        return doneStatuses.includes(row.status) ? 100 : 0;
+      }
+      default:
+        return null;
+    }
   }
 
   async getKpis(projectId?: string, businessUnitId?: string): Promise<Kpi[]> {
@@ -3337,6 +3449,33 @@ export class DatabaseStorage implements IStorage {
       console.error('[Storage] Raw query error:', error);
       throw error;
     }
+  }
+
+  // ============================================================================
+  // AGENT PREDICTION / OUTCOME TRACKING IMPLEMENTATIONS (grounding layer)
+  // ============================================================================
+
+  async createAgentPrediction(prediction: InsertAgentPrediction): Promise<AgentPrediction> {
+    const result = await db.insert(agentPredictions).values(prediction).returning();
+    return result[0];
+  }
+
+  async getOpenAgentPredictions(): Promise<AgentPrediction[]> {
+    return await db.select().from(agentPredictions).where(isNull(agentPredictions.resolvedAt));
+  }
+
+  async getAgentPredictions(agentId: string, findingType?: string): Promise<AgentPrediction[]> {
+    const conditions = [eq(agentPredictions.agentId, agentId)];
+    if (findingType) conditions.push(eq(agentPredictions.findingType, findingType));
+    return await db.select().from(agentPredictions).where(and(...conditions)).orderBy(desc(agentPredictions.predictedAt));
+  }
+
+  async resolveAgentPrediction(id: string, actualValue: unknown, accuracy: number): Promise<AgentPrediction | undefined> {
+    const result = await db.update(agentPredictions)
+      .set({ actualValue: actualValue as any, accuracy, resolvedAt: new Date() })
+      .where(eq(agentPredictions.id, id))
+      .returning();
+    return result[0];
   }
 }
 

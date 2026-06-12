@@ -280,6 +280,7 @@ function IntegrationWizard({ integration, onClose, onSuccess }: any) {
                   <option value="jira">Jira</option>
                   <option value="servicenow">ServiceNow</option>
                   <option value="planview">Planview</option>
+                  <option value="openproject">OpenProject</option>
                   <option value="azure-devops">Azure DevOps</option>
                   <option value="smartsheet">Smartsheet</option>
                 </select>

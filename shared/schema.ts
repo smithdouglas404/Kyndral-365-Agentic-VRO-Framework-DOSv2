@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, real, boolean, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, real, boolean, serial, decimal, date, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -627,6 +627,7 @@ export const features = pgTable("features", {
   targetPi: text("target_pi"),
   acceptanceCriteria: text("acceptance_criteria"),
   wsjfScore: text("wsjf_score"),
+  categoryId: varchar("category_id"), // FK to workPackageCategories (OpenProject category)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -650,6 +651,7 @@ export const stories = pgTable("stories", {
   sprint: text("sprint"),
   assignedTeam: text("assigned_team"),
   acceptanceCriteria: text("acceptance_criteria"),
+  categoryId: varchar("category_id"), // FK to workPackageCategories (OpenProject category)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -675,6 +677,9 @@ export const tasks = pgTable("tasks", {
   skills: text("skills"),
   priority: text("priority").default("medium"),
   dueDate: timestamp("due_date"),
+  startDate: date("start_date"), // OpenProject startDate (schedule variance)
+  completedDate: date("completed_date"), // set when status → done
+  categoryId: varchar("category_id"), // FK to workPackageCategories (OpenProject category)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1046,6 +1051,9 @@ export const customFields = pgTable("custom_fields", {
   validation: text("validation"), // JSON validation rules
   sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(true),
+  externalCustomFieldId: varchar("external_custom_field_id", { length: 64 }), // e.g. OpenProject "customField12"
+  syncDirection: varchar("sync_direction", { length: 16 }).default("inbound"), // inbound | outbound | bidirectional | none
+  transformScript: text("transform_script"), // optional value transform applied during sync
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1127,6 +1135,7 @@ export const timesheets = pgTable("timesheets", {
   description: text("description"),
   approvedBy: varchar("approved_by"),
   approvedAt: timestamp("approved_at"),
+  activityName: varchar("activity_name", { length: 128 }), // OpenProject time_entry.activity.name; joins activityCostRates.activityName
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -3632,3 +3641,193 @@ export const insertDynamicAgentSchema = createInsertSchema(dynamicAgents).omit({
 
 export type InsertDynamicAgent = z.infer<typeof insertDynamicAgentSchema>;
 export type DynamicAgent = typeof dynamicAgents.$inferSelect;
+
+// ============================================================================
+// GROUNDING & OUTCOME TRACKING (see kyndryl-connector docs/GROUNDING_AND_HALLUCINATION.md §3)
+// Stores agent predictions so they can later be joined to realized outcomes,
+// producing per-agent / per-finding-type accuracy used to weight confidence.
+// ============================================================================
+import { jsonb } from "drizzle-orm/pg-core";
+
+export const agentPredictions = pgTable("agent_predictions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  findingType: varchar("finding_type").notNull(),
+  projectId: varchar("project_id"),
+  entityId: varchar("entity_id"),
+  entityType: text("entity_type"),
+  predictedValue: jsonb("predicted_value").notNull(),
+  predictedAt: timestamp("predicted_at").defaultNow(),
+  dueAt: timestamp("due_at"),
+  actualValue: jsonb("actual_value"),
+  resolvedAt: timestamp("resolved_at"),
+  accuracy: real("accuracy"),
+});
+
+export const insertAgentPredictionSchema = createInsertSchema(agentPredictions).omit({
+  id: true,
+  predictedAt: true,
+  actualValue: true,
+  resolvedAt: true,
+  accuracy: true,
+});
+
+export type InsertAgentPrediction = z.infer<typeof insertAgentPredictionSchema>;
+export type AgentPrediction = typeof agentPredictions.$inferSelect;
+
+// ============================================================================
+// OPENPROJECT GAP TABLES — implements the "Gaps to add" table in
+// docs/SCHEMA_AND_OPENPROJECT_MAPPING.md (work-package relations, releases,
+// categories, OKR entity contributions, activity cost rates).
+// Polymorphic entity references (fromEntityType/entityType + varchar id)
+// deliberately have NO database FK — they can point at epics, features,
+// stories, tasks, issues or milestones. Integrity is enforced by the sync
+// layer, exactly like the existing okrLinkages childEntity pattern.
+// ============================================================================
+
+// ── work_package_relations — typed dependencies (OpenProject /relations) ─────
+// OpenProject relation types map onto relationType:
+//   blocks/blocked → "blocks", follows/precedes → "follows",
+//   relates → "relates_to", duplicates/duplicated → "duplicates".
+export const workPackageRelations = pgTable("work_package_relations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  /** Integration/adapter id that synced this relation (e.g. "openproject"). */
+  sourceSystemId: varchar("source_system_id", { length: 64 }),
+  /** epic | feature | story | task | issue | milestone — polymorphic, no DB FK. */
+  fromEntityType: varchar("from_entity_type", { length: 32 }).notNull(),
+  fromEntityId: varchar("from_entity_id").notNull(),
+  toEntityType: varchar("to_entity_type", { length: 32 }).notNull(),
+  toEntityId: varchar("to_entity_id").notNull(),
+  /** blocks | follows | relates_to | duplicates */
+  relationType: varchar("relation_type", { length: 32 }).notNull().default("relates_to"),
+  /** OpenProject relation id — the sync key for upserts. */
+  externalId: varchar("external_id", { length: 64 }),
+  description: text("description"),
+  /** Working-day lag for follows relations (OpenProject `lag`). */
+  lagDays: integer("lag_days"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWorkPackageRelationSchema = createInsertSchema(workPackageRelations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWorkPackageRelation = z.infer<typeof insertWorkPackageRelationSchema>;
+export type WorkPackageRelation = typeof workPackageRelations.$inferSelect;
+
+// ── releases — OpenProject versions/releases ─────────────────────────────────
+// OpenProject "versions" (used as releases/backlog buckets) land here.
+// Linking to milestones/PIs: a release is delivery-scoped, so when a synced
+// version has a releaseDate, create/refresh a `milestones` row named after the
+// release and, if the date falls inside a programIncrement window, stamp that
+// PI's id on the milestone — keeps the SAFe views aware of releases without a
+// hard FK from this table.
+export const releases = pgTable("releases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  /** open | locked | closed (OpenProject version status, verbatim). */
+  status: varchar("status", { length: 32 }).notNull().default("open"),
+  startDate: date("start_date"),
+  releaseDate: date("release_date"),
+  /** OpenProject version id — the sync key for upserts. */
+  externalId: varchar("external_id", { length: 64 }),
+  sourceSystemId: varchar("source_system_id", { length: 64 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertReleaseSchema = createInsertSchema(releases).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertRelease = z.infer<typeof insertReleaseSchema>;
+export type Release = typeof releases.$inferSelect;
+
+// ── work_package_categories — OpenProject categories ────────────────────────
+// tasks/stories/features carry a nullable categoryId pointing here so synced
+// work items can carry their OpenProject category.
+export const workPackageCategories = pgTable("work_package_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  /** OpenProject category id — the sync key for upserts. */
+  externalId: varchar("external_id", { length: 64 }),
+  sourceSystemId: varchar("source_system_id", { length: 64 }),
+});
+
+export const insertWorkPackageCategorySchema = createInsertSchema(workPackageCategories).omit({
+  id: true,
+});
+export type InsertWorkPackageCategory = z.infer<typeof insertWorkPackageCategorySchema>;
+export type WorkPackageCategory = typeof workPackageCategories.$inferSelect;
+
+// ── okr_entity_contributions — the OKR↔Epic↔Task glue ───────────────────────
+// `okrLinkages` records *that* an entity aligns to an OKR; this table records
+// *how much it contributes*, so entity progress can roll up into KR progress:
+//   KR.progress = Σ entity.progress × contributionPct/100
+// (see server/okrRollupService.ts). One entity may contribute to many KRs.
+// Agent-inferred rows (inferredBy="agent") are derived from okrLinkages
+// alignment scores; human rows (inferredBy="human") always win over agent
+// rows for the same KR.
+export const okrEntityContributions = pgTable(
+  "okr_entity_contributions",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    okrId: varchar("okr_id").notNull().references(() => okrs.id),
+    /** Null = contributes to the OKR as a whole rather than one KR. */
+    keyResultId: varchar("key_result_id").references(() => keyResults.id),
+    /** epic | feature | story | task | project — polymorphic, no DB FK. */
+    entityType: varchar("entity_type", { length: 32 }).notNull(),
+    entityId: varchar("entity_id").notNull(),
+    /** Share (0–100) of the key result this entity drives. */
+    contributionPct: decimal("contribution_pct", { precision: 5, scale: 2 }).notNull(),
+    /** Optional relative weight among contributors (default 1). */
+    weight: decimal("weight", { precision: 5, scale: 2 }).default("1"),
+    /** agent | human — human rows override agent rows in the rollup. */
+    inferredBy: varchar("inferred_by", { length: 16 }).notNull().default("agent"),
+    /** 0–1; for agent rows this is the okrLinkages alignmentScore. */
+    confidence: decimal("confidence", { precision: 4, scale: 3 }),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    contributionUnique: uniqueIndex("okr_entity_contrib_kr_entity_idx").on(
+      table.keyResultId,
+      table.entityType,
+      table.entityId,
+    ),
+  }),
+);
+
+export const insertOkrEntityContributionSchema = createInsertSchema(okrEntityContributions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertOkrEntityContribution = z.infer<typeof insertOkrEntityContributionSchema>;
+export type OkrEntityContribution = typeof okrEntityContributions.$inferSelect;
+
+// ── activity_cost_rates — turn spentTime into actual cost (EVM) ──────────────
+// OpenProject time entries carry an `activity` (Development, Management, …).
+// actualCost = Σ timesheets.hours × rate(timesheets.activityName, date) —
+// pick the row with the latest effectiveFrom ≤ the time entry's date.
+export const activityCostRates = pgTable("activity_cost_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  /** Matches timesheets.activityName. */
+  activityName: varchar("activity_name", { length: 128 }).notNull(),
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default("USD"),
+  effectiveFrom: date("effective_from").notNull(),
+  sourceSystemId: varchar("source_system_id", { length: 64 }),
+});
+
+export const insertActivityCostRateSchema = createInsertSchema(activityCostRates).omit({
+  id: true,
+});
+export type InsertActivityCostRate = z.infer<typeof insertActivityCostRateSchema>;
+export type ActivityCostRate = typeof activityCostRates.$inferSelect;

@@ -124,12 +124,24 @@ export class DeepAgentBootstrap {
       // Auto-start orchestration if OpenRouter is configured (cost-optimized)
       const shouldStart = settings.enabled || costStatus.openRouterEnabled;
 
-      if (shouldStart) {
+      // COST OPTIMIZATION: The continuous polling loop re-analyzes unchanged
+      // projects on a fixed interval (~95% of LLM cost). It is OFF by default;
+      // the EventDrivenOrchestrator (started in server/index.ts) triggers agents
+      // only when data actually changes. The ContinuousOrchestrator INSTANCE is
+      // still constructed above so the A2A bus and notifyExternalEvent() keep working.
+      const continuousPollingEnabled = process.env.ENABLE_CONTINUOUS_ORCHESTRATOR === 'true';
+
+      if (shouldStart && continuousPollingEnabled) {
         const interval = settings.interval || 300000; // Default 5 min
-        console.log('[DeepAgentBootstrap] ⚡ Orchestration ENABLED');
+        console.log('[DeepAgentBootstrap] ⚡ Orchestration mode: CONTINUOUS POLLING (ENABLE_CONTINUOUS_ORCHESTRATOR=true)');
         console.log(`[DeepAgentBootstrap] ✅ Using NVIDIA Nemotron 3 Super (FREE via OpenRouter)`);
         await this.orchestrator.start(interval);
         console.log(`[DeepAgentBootstrap] ✅ Continuous orchestration running (${interval / 1000}s interval)`);
+      } else if (shouldStart) {
+        console.log('[DeepAgentBootstrap] ⚡ Orchestration mode: EVENT-DRIVEN (polling loop disabled)');
+        console.log('[DeepAgentBootstrap]    Agents fire when data changes via EventDrivenOrchestrator');
+        console.log('[DeepAgentBootstrap]    A2A bus / external events remain active on the orchestrator instance');
+        console.log('[DeepAgentBootstrap] 💡 Set ENABLE_CONTINUOUS_ORCHESTRATOR=true to restore the polling loop');
       } else {
         // No LLM configured - cannot run
         console.log('[DeepAgentBootstrap] ⚠️  Continuous orchestration OFF (no LLM configured)');

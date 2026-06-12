@@ -124,6 +124,36 @@ export class Mem0Service extends EventEmitter {
   }
 
   /**
+   * Key/value-style fact storage adapter (used by EventDrivenOrchestrator and
+   * other callers that think in {key, value, category} terms).
+   *
+   * Delegates to writeFact(), which notifies the EventDrivenOrchestrator via
+   * registerMemoryChange() so memory updates can trigger the right agents.
+   */
+  async storeFact(fact: {
+    key: string;
+    value: string;
+    category?: string;
+    source?: string;
+    confidence?: number;
+    expiresAt?: Date;
+  }): Promise<Fact | null> {
+    try {
+      return await this.writeFact({
+        entity: fact.category || 'general',
+        attribute: fact.key,
+        value: fact.value,
+        sourceAgent: fact.source || 'system',
+        confidence: fact.confidence ?? 1.0,
+      });
+    } catch (error: any) {
+      // Never let memory bookkeeping break the caller
+      console.error('[Mem0] storeFact failed:', error?.message);
+      return null;
+    }
+  }
+
+  /**
    * Save fact to agent_memories with vector embedding for semantic search
    */
   private async saveToSemanticMemory(fact: Fact): Promise<void> {
@@ -466,6 +496,18 @@ export class Mem0Service extends EventEmitter {
    */
   private notifyOrchestratorOfChange(fact: Fact): void {
     try {
+      // Skip orchestrator-originated bookkeeping facts (change events and agent
+      // notes it stores via storeFact) to avoid an infinite feedback loop:
+      // registerChange → storeFact → writeFact → registerMemoryChange → registerChange
+      if (
+        fact.attribute?.startsWith('event:') ||
+        fact.attribute?.startsWith('agent_note:') ||
+        fact.entity === 'project_events' ||
+        fact.entity === 'agent_collaboration'
+      ) {
+        return;
+      }
+
       // Extract project ID from entity if present
       const projectIdMatch = fact.entity.match(/project[_-]?([a-f0-9-]+)/i);
       const projectId = projectIdMatch ? projectIdMatch[1] : fact.entity;
