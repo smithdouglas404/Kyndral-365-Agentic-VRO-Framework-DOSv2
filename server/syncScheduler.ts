@@ -8,6 +8,7 @@ import { createSmartsheetClientFromAdapter } from "./smartsheetClient";
 import { createRallyClientFromAdapter } from "./rallyClient";
 import { createMondayClientFromAdapter } from "./mondayClient";
 import { createAsanaClientFromAdapter } from "./asanaClient";
+import { createOpenProjectClientFromAdapter, syncOpenProjectProjects } from "./openProjectClient";
 
 interface ScheduledJob {
   jobId: string;
@@ -77,7 +78,7 @@ function getNextRunTime(cronExpression: string, from: Date = new Date()): Date {
 function normalizeSyncType(job: any): string {
   const syncType = (job.syncType || '').toLowerCase().trim();
 
-  if (['jira', 'servicenow', 'azure_devops', 'planview', 'msproject', 'smartsheet', 'rally', 'monday', 'asana'].includes(syncType)) {
+  if (['jira', 'servicenow', 'azure_devops', 'planview', 'msproject', 'smartsheet', 'rally', 'monday', 'asana', 'openproject'].includes(syncType)) {
     return syncType;
   }
 
@@ -343,8 +344,19 @@ async function executeSyncJob(jobId: string): Promise<void> {
         recordsProcessed = recordsCreated;
         recordsFailed = result.errors?.length || 0;
         errors.push(...(result.errors || []));
+      } else if (normalizedSyncType === 'openproject' && job.mcpAdapterId) {
+        const client = await createOpenProjectClientFromAdapter(job.mcpAdapterId);
+        if (!client) {
+          throw new Error("Failed to create OpenProject client - check adapter configuration (baseUrl, apiKey)");
+        }
+
+        const result = await syncOpenProjectProjects(client);
+        recordsCreated = result.projectsCreated;
+        recordsProcessed = result.projectsCreated + result.projectsUpdated;
+        recordsFailed = result.errors?.length || 0;
+        errors.push(...(result.errors || []));
       } else {
-        throw new Error(`Unsupported sync type: ${normalizedSyncType} (original: ${job.syncType}) - supported types: jira, servicenow, azure_devops, planview, msproject, smartsheet, rally, monday, asana`);
+        throw new Error(`Unsupported sync type: ${normalizedSyncType} (original: ${job.syncType}) - supported types: jira, servicenow, azure_devops, planview, msproject, smartsheet, rally, monday, asana, openproject`);
       }
 
       await storage.updateSyncJobRun(run.id, {
