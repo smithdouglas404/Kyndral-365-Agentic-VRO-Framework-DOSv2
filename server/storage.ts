@@ -129,10 +129,12 @@ import {
   vroMetrics, benchmarks, appConfig, dashboardWidgets,
   notifications, userRoles, scheduledReports, exportJobs, tutorialProgress, auditTrail,
   ontologyEntities, ontologyMappings, obdaQueryCache, graphSyncLog,
-  userDashboardConfigs, userWidgets
+  userDashboardConfigs, userWidgets,
+  agentPredictions,
+  type AgentPrediction, type InsertAgentPrediction
 } from "@shared/schema";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, desc, and, inArray, isNull } from "drizzle-orm";
 import pkg from "pg";
 const { Pool } = pkg;
 
@@ -462,6 +464,12 @@ export interface IStorage {
 
   // Raw Query Execution (for OBDA query rewriting)
   executeRawQuery?(sql: string): Promise<any[]>;
+
+  // Agent Prediction / Outcome Tracking Methods (grounding layer)
+  createAgentPrediction(prediction: InsertAgentPrediction): Promise<AgentPrediction>;
+  getOpenAgentPredictions(): Promise<AgentPrediction[]>;
+  getAgentPredictions(agentId: string, findingType?: string): Promise<AgentPrediction[]>;
+  resolveAgentPrediction(id: string, actualValue: unknown, accuracy: number): Promise<AgentPrediction | undefined>;
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -3337,6 +3345,33 @@ export class DatabaseStorage implements IStorage {
       console.error('[Storage] Raw query error:', error);
       throw error;
     }
+  }
+
+  // ============================================================================
+  // AGENT PREDICTION / OUTCOME TRACKING IMPLEMENTATIONS (grounding layer)
+  // ============================================================================
+
+  async createAgentPrediction(prediction: InsertAgentPrediction): Promise<AgentPrediction> {
+    const result = await db.insert(agentPredictions).values(prediction).returning();
+    return result[0];
+  }
+
+  async getOpenAgentPredictions(): Promise<AgentPrediction[]> {
+    return await db.select().from(agentPredictions).where(isNull(agentPredictions.resolvedAt));
+  }
+
+  async getAgentPredictions(agentId: string, findingType?: string): Promise<AgentPrediction[]> {
+    const conditions = [eq(agentPredictions.agentId, agentId)];
+    if (findingType) conditions.push(eq(agentPredictions.findingType, findingType));
+    return await db.select().from(agentPredictions).where(and(...conditions)).orderBy(desc(agentPredictions.predictedAt));
+  }
+
+  async resolveAgentPrediction(id: string, actualValue: unknown, accuracy: number): Promise<AgentPrediction | undefined> {
+    const result = await db.update(agentPredictions)
+      .set({ actualValue: actualValue as any, accuracy, resolvedAt: new Date() })
+      .where(eq(agentPredictions.id, id))
+      .returning();
+    return result[0];
   }
 }
 
