@@ -17,6 +17,78 @@ import { broadcastNotification } from '../../websocket.js';
 
 const router = Router();
 
+// Tag prepended to all agent-authored OP comments — used for loop prevention
+const AGENT_TAG = '[nextera-agent]';
+
+// ============================================================================
+// Agent event bus bridge + write-back
+// ============================================================================
+
+/** Route the event to the orchestrator's A2A bus so domain agents re-analyze */
+async function triggerAgentReanalysis(
+  targetAgents: string[],
+  eventType: string,
+  summary: string,
+  payload?: any,
+  projectId?: string,
+): Promise<void> {
+  try {
+    const { getAgentSchedulerInstance } = await import('../../agents/AgentScheduler.js');
+    const orchestrator = getAgentSchedulerInstance()?.getOrchestrator?.();
+    if (!orchestrator) {
+      console.log('[OPWebhook] Orchestrator not running — skipping agent re-analysis');
+      return;
+    }
+
+    await orchestrator.notifyExternalEvent({
+      source: 'openproject',
+      eventType,
+      summary,
+      targetAgents,
+      projectId,
+      payload,
+    });
+  } catch (err: any) {
+    console.warn('[OPWebhook] Agent re-analysis trigger failed:', err.message);
+  }
+}
+
+// Dedupe write-backs: don't re-comment the same WP within the cooldown window
+const writeBackTimestamps = new Map<number, number>();
+const WRITE_BACK_COOLDOWN_MS = 30 * 60 * 1000;
+
+/** Post an agent finding back to the OpenProject work package as a tagged comment */
+async function agentWriteBack(wpId: number, finding: string): Promise<void> {
+  const last = writeBackTimestamps.get(wpId);
+  if (last && Date.now() - last < WRITE_BACK_COOLDOWN_MS) return;
+
+  try {
+    const { getOpenProjectClient } = await import('../../services/openproject/OpenProjectClient.js');
+    await getOpenProjectClient().addWorkPackageComment(wpId, `${AGENT_TAG} ${finding}`);
+    writeBackTimestamps.set(wpId, Date.now());
+    console.log(`[OPWebhook] Agent write-back posted to WP #${wpId}`);
+  } catch (err: any) {
+    console.warn(`[OPWebhook] Agent write-back failed for WP #${wpId}:`, err.message);
+  }
+}
+
+/** Lightweight heuristics on the WP payload — flags worth surfacing immediately */
+function analyzeWorkPackage(wp: any): string | null {
+  const findings: string[] = [];
+  const statusTitle = wp?._links?.status?.title || wp?._embedded?.status?.name || '';
+  const closed = /closed|rejected/i.test(statusTitle);
+
+  if (!closed && wp?.dueDate && new Date(wp.dueDate) < new Date()) {
+    findings.push(`Work package is past its due date (${wp.dueDate}).`);
+  }
+  if (!closed && /in progress/i.test(statusTitle) && !wp?._links?.assignee?.href) {
+    findings.push('Work package is In Progress but has no assignee.');
+  }
+
+  if (findings.length === 0) return null;
+  return `Agent analysis: ${findings.join(' ')} Flagged for PMO/Risk review.`;
+}
+
 // ============================================================================
 // HMAC signature verification
 // ============================================================================
@@ -78,6 +150,24 @@ async function processEvent(event: OPWebhookEvent): Promise<void> {
           message: event.work_package?.subject || `WP #${wpId}`,
           severity: 'info',
         });
+
+        // Trigger agent re-analysis of the affected work package
+        const projectHref = event.work_package?._links?.project?.href || '';
+        const projectId = projectHref.split('/').pop();
+        await triggerAgentReanalysis(
+          ['pmo', 'planning', 'risk'],
+          action,
+          `${event.work_package?.subject || `WP #${wpId}`} changed in OpenProject`,
+          { workPackageId: wpId },
+          projectId,
+        );
+
+        // Immediate heuristic write-back (deeper agent findings flow through
+        // AgentNotificationPipeline on the next orchestration cycle)
+        const finding = analyzeWorkPackage(event.work_package);
+        if (finding) {
+          await agentWriteBack(wpId, finding);
+        }
       }
       break;
     }
@@ -104,6 +194,12 @@ async function processEvent(event: OPWebhookEvent): Promise<void> {
         message: `${event.time_entry?.hours || '?'} hours logged`,
         severity: 'info',
       });
+      await triggerAgentReanalysis(
+        ['finops'],
+        action,
+        `${event.time_entry?.hours || '?'} hours logged — recompute EVM actuals`,
+        { timeEntryId: event.time_entry?.id },
+      );
       break;
     }
 
@@ -111,6 +207,12 @@ async function processEvent(event: OPWebhookEvent): Promise<void> {
     case 'membership:updated': {
       // Membership changes affect resource capacity — notify PMO/Planning agents
       console.log(`[OPWebhook] Membership ${action}: ${event.membership?.id}`);
+      await triggerAgentReanalysis(
+        ['pmo', 'planning'],
+        action,
+        'Project membership changed — re-evaluate resource capacity',
+        { membershipId: event.membership?.id },
+      );
       break;
     }
 

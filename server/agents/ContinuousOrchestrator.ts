@@ -458,8 +458,16 @@ export class ContinuousOrchestrator {
   private registerMCPServicesSync(): void {
     const services: MCPService[] = [];
 
-    // Only register services that are actually configured with credentials
-    const activeServices = ['palantir', 'jira', 'openproject', 'monday'];
+    // Only register services that are actually configured with credentials.
+    // Palantir is always registered (ontology source of truth); external PM
+    // tools are gated on their env credentials so agents never call dead endpoints.
+    const serviceIsConfigured: Record<string, boolean> = {
+      palantir: true,
+      jira: !!(process.env.JIRA_DOMAIN && process.env.JIRA_EMAIL && process.env.JIRA_API_TOKEN),
+      openproject: !!(process.env.OPENPROJECT_URL && process.env.OPENPROJECT_API_KEY),
+      monday: !!(process.env.MONDAY_API_KEY || process.env.MONDAY_API_TOKEN),
+    };
+    const activeServices = Object.keys(serviceIsConfigured).filter(id => serviceIsConfigured[id]);
 
     for (const id of activeServices) {
       const server = MCP_SERVER_REGISTRY[id];
@@ -2543,6 +2551,39 @@ export class ContinuousOrchestrator {
    */
   getA2ABus(): A2AMessageBus {
     return this.a2aBus;
+  }
+
+  /**
+   * Notify agents of an external system event (e.g., OpenProject webhook).
+   * Queues an A2A message for each target agent so the next orchestration
+   * cycle re-analyzes the affected entity.
+   */
+  async notifyExternalEvent(event: {
+    source: string;
+    eventType: string;
+    summary: string;
+    targetAgents: string[];
+    projectId?: string;
+    severity?: 'critical' | 'high' | 'medium' | 'low';
+    payload?: any;
+  }): Promise<void> {
+    for (const agentId of event.targetAgents) {
+      if (!this.agents.has(agentId)) continue;
+
+      const message: AgentMessage = {
+        from: `external:${event.source}`,
+        to: agentId,
+        type: 'detection',
+        content: `[${event.source}] ${event.eventType}: ${event.summary}`,
+        projectId: event.projectId,
+        severity: event.severity || 'medium',
+        payload: { source: event.source, eventType: event.eventType, ...event.payload },
+      };
+
+      await this.a2aBus.send(message);
+    }
+
+    console.log(`[Orchestrator] External event ${event.source}/${event.eventType} routed to ${event.targetAgents.join(', ')}`);
   }
 
   /**
