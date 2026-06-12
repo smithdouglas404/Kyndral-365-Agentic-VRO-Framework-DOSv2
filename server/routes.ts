@@ -113,6 +113,8 @@ import documentsRouter from "./routes/documents.js";
 import { registerDemoRoutes } from "./routes/demo.js";
 import packetRefineRouter from "./routes/packet-refine.js";
 import openprojectWebhookRouter from "./routes/webhooks/openproject.js";
+import express from "express";
+import { initOkrRollupRoutes } from "./routes/okrRollup.routes.js";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
@@ -585,6 +587,30 @@ export async function registerRoutes(
 
   // OpenProject webhooks — real-time event-driven sync
   app.use('/api/webhooks/openproject', openprojectWebhookRouter);
+
+  // OKR roll-up — deterministic KR/OKR progress from okr_entity_contributions
+  // (GET /api/okrs/:id/rollup, POST /api/okrs/:okrId/key-results/:krId/contributions)
+  app.use(initOkrRollupRoutes(express.Router(), {
+    storage: {
+      getKeyResults: (okrId: string) => postgresStorage.getKeyResults(okrId),
+      getContributions: (keyResultId: string) => postgresStorage.getOkrEntityContributions(keyResultId),
+      getEntityProgress: (entityType: string, entityId: string) =>
+        postgresStorage.getEntityProgress(entityType, entityId),
+    },
+    // Upsert on the (keyResultId, entityType, entityId) unique index; decimal
+    // columns are stored as strings by Drizzle, so coerce numeric inputs.
+    upsertContribution: async (row) =>
+      postgresStorage.upsertOkrEntityContribution({
+        okrId: row.okrId,
+        keyResultId: row.keyResultId,
+        entityType: row.entityType,
+        entityId: row.entityId,
+        contributionPct: String(row.contributionPct ?? 0),
+        weight: row.weight == null ? undefined : String(row.weight),
+        inferredBy: row.inferredBy ?? "human",
+        confidence: row.confidence == null ? undefined : String(row.confidence),
+      }),
+  }));
 
   // Executive AI Insights endpoint
   app.get("/api/insights/executive", async (_req, res) => {
