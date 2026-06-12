@@ -22,6 +22,28 @@ interface CustomField {
   default_value?: any;
   is_active: boolean;
   created_at: string;
+  /** OpenProject mapping (stamped by the connector; optional until synced). */
+  externalCustomFieldId?: string | number | null;
+  external_custom_field_id?: string | number | null;
+  syncDirection?: string | null;
+  sync_direction?: string | null;
+}
+
+/** ⚡ chip shown when a field definition is mapped to an OpenProject custom field. */
+function OpenProjectFieldSyncChip({ field }: { field: CustomField }) {
+  const externalId = field.externalCustomFieldId ?? field.external_custom_field_id;
+  if (externalId === undefined || externalId === null || externalId === '') return null;
+  const direction = field.syncDirection ?? field.sync_direction;
+  return (
+    <span
+      title={`Mapped to OpenProject custom field ${externalId}${direction ? ` (${direction})` : ''}. Values flow via the connector sync.`}
+      className="ml-2 inline-flex items-center gap-1 rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium text-blue-600 dark:text-blue-300"
+    >
+      <span aria-hidden="true">⚡</span>
+      Synced with OpenProject
+      {direction ? <span className="text-blue-500/70">· {direction}</span> : null}
+    </span>
+  );
 }
 
 const ENTITY_TYPES = [
@@ -172,7 +194,10 @@ export default function CustomFieldManagement() {
                   <tr key={field.id} className="border-t dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                     <td className="p-4">
                       <div>
-                        <p className="font-medium">{field.label}</p>
+                        <p className="font-medium">
+                          {field.label}
+                          <OpenProjectFieldSyncChip field={field} />
+                        </p>
                         <p className="text-xs text-muted-foreground">{field.name}</p>
                       </div>
                     </td>
