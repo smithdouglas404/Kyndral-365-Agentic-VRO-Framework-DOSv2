@@ -1109,18 +1109,75 @@ export abstract class DeepAgentBase {
       return context;
     }
 
+    let enriched = context;
+
     try {
       // Get relevant data from Palantir based on agent type
       const dashboardMetrics = await this.getDashboardMetrics();
       if (dashboardMetrics) {
-        return {
-          ...context,
+        enriched = {
+          ...enriched,
           palantirMetrics: dashboardMetrics,
         };
       }
-      return context;
     } catch (error: any) {
       console.warn(`[${this.config.agentName}] Knowledge enrichment failed:`, error.message);
+    }
+
+    // Ground in live OpenProject state (PPM datastore of record) when the
+    // context references an OP project and credentials are configured
+    enriched = await this.groundWithOpenProject(enriched);
+
+    return enriched;
+  }
+
+  /**
+   * Attach a live OpenProject snapshot (status distribution, progress,
+   * overdue count) so the agent reasons over ground truth, not stale copies.
+   */
+  protected async groundWithOpenProject(context: any): Promise<any> {
+    const opProjectId = context?.openProjectId || context?.opProjectId || context?.payload?.openProjectId;
+    if (!opProjectId || !process.env.OPENPROJECT_API_KEY) {
+      return context;
+    }
+
+    try {
+      const { getOpenProjectClient } = await import('../../services/openproject/OpenProjectClient.js');
+      const client = getOpenProjectClient();
+
+      const [project, workPackages] = await Promise.all([
+        client.getProject(opProjectId),
+        client.listWorkPackages({ projectId: opProjectId }),
+      ]);
+
+      const statusDistribution: Record<string, number> = {};
+      let totalProgress = 0;
+      let overdueCount = 0;
+      const now = new Date();
+
+      for (const wp of workPackages) {
+        const status = wp._links?.status?.title || 'Unknown';
+        statusDistribution[status] = (statusDistribution[status] || 0) + 1;
+        totalProgress += wp.percentageDone || 0;
+        if (wp.dueDate && new Date(wp.dueDate) < now && !/closed|rejected/i.test(status)) {
+          overdueCount++;
+        }
+      }
+
+      return {
+        ...context,
+        openProjectGrounding: {
+          projectName: project.name,
+          projectActive: project.active,
+          totalWorkPackages: workPackages.length,
+          statusDistribution,
+          overallProgress: workPackages.length > 0 ? Math.round(totalProgress / workPackages.length) : 0,
+          overdueCount,
+          groundedAt: new Date().toISOString(),
+        },
+      };
+    } catch (error: any) {
+      console.warn(`[${this.config.agentName}] OpenProject grounding failed:`, error.message);
       return context;
     }
   }

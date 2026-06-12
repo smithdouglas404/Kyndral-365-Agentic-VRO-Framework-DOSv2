@@ -2,6 +2,7 @@
  * INTEGRATION SYNC SERVICE
  *
  * Implements real data synchronization for major PM tools:
+ * - OpenProject (APIv3 — headless PPM datastore of record)
  * - Jira (REST API)
  * - Azure DevOps (REST API)
  * - ServiceNow (REST API)
@@ -59,6 +60,8 @@ export class IntegrationSyncService {
       const credentials = decrypted.credentials as IntegrationCredentials;
 
       switch (integration.type) {
+        case 'openproject':
+          return await this.testOpenProjectConnection(credentials);
         case 'jira':
           return await this.testJiraConnection(credentials);
         case 'azure_devops':
@@ -110,6 +113,8 @@ export class IntegrationSyncService {
       const credentials = decrypted.credentials as IntegrationCredentials;
 
       switch (integration.type) {
+        case 'openproject':
+          return await this.syncOpenProject(integration, credentials);
         case 'jira':
           return await this.syncJira(integration, credentials);
         case 'azure_devops':
@@ -147,6 +152,75 @@ export class IntegrationSyncService {
         },
       };
     }
+  }
+
+  // ============================================================================
+  // OPENPROJECT SYNC (PPM datastore of record — bidirectional via ontology)
+  // ============================================================================
+
+  private async testOpenProjectConnection(credentials: IntegrationCredentials): Promise<SyncResult> {
+    const startTime = Date.now();
+
+    const { createOpenProjectClientFromIntegration } = await import('../openProjectClient.js');
+    const client = createOpenProjectClientFromIntegration(credentials);
+    const result = await client.testConnection();
+
+    if (!result.connected) {
+      throw new Error(`OpenProject connection failed: ${result.error}`);
+    }
+
+    return {
+      success: true,
+      message: `Connected to OpenProject ${result.version || ''} (${result.instanceName || 'instance'})`.trim(),
+      details: {
+        recordsImported: 0,
+        recordsUpdated: 0,
+        recordsSkipped: 0,
+        errors: 0,
+        duration: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  private async syncOpenProject(integration: Integration, credentials: IntegrationCredentials): Promise<SyncResult> {
+    const startTime = Date.now();
+
+    const { createOpenProjectClientFromIntegration, syncOpenProjectProjects } = await import('../openProjectClient.js');
+    const client = createOpenProjectClientFromIntegration(credentials);
+
+    // Pull OP projects + work-package roll-ups into Kyndral storage
+    const pull = await syncOpenProjectProjects(client, this.storage);
+
+    // Push the same change set into the Palantir ontology (best-effort) so
+    // MCP feeds and agents see the updated ground truth
+    let ontologyNote = '';
+    try {
+      const { getOPToPalantirSync } = await import('./sync/OpenProjectToPalantirSync.js');
+      const ontologyResult = await getOPToPalantirSync().syncIncremental();
+      ontologyNote = ` Ontology sync: ${ontologyResult.created} created, ${ontologyResult.updated} updated, ${ontologyResult.failed} failed.`;
+      if (ontologyResult.errors.length > 0) {
+        pull.errors.push(...ontologyResult.errors.map(e => `Ontology: ${e}`));
+      }
+    } catch (err: any) {
+      pull.errors.push(`Ontology sync failed: ${err.message}`);
+    }
+
+    return {
+      success: pull.errors.length === 0,
+      message: pull.errors.length === 0
+        ? `Successfully synced ${pull.projectsCreated + pull.projectsUpdated} projects (${pull.workPackagesProcessed} work packages) from OpenProject.${ontologyNote}`
+        : `Synced with ${pull.errors.length} errors`,
+      details: {
+        recordsImported: pull.projectsCreated,
+        recordsUpdated: pull.projectsUpdated,
+        recordsSkipped: 0,
+        errors: pull.errors.length,
+        errorMessages: pull.errors.length > 0 ? pull.errors : undefined,
+        duration: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
 
   // ============================================================================
