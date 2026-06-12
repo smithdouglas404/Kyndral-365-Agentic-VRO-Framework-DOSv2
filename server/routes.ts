@@ -115,6 +115,9 @@ import packetRefineRouter from "./routes/packet-refine.js";
 import openprojectWebhookRouter from "./routes/webhooks/openproject.js";
 import express from "express";
 import { initOkrRollupRoutes } from "./routes/okrRollup.routes.js";
+import { initOpenProjectRoutes } from "./routes/openproject.routes.js";
+import { initAgentFindingsRoutes } from "./routes/agentFindings.routes.js";
+import { createOpenProjectWritebackFromEnv } from "./openProjectWriteback";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
@@ -611,6 +614,20 @@ export async function registerRoutes(
         confidence: row.confidence == null ? undefined : String(row.confidence),
       }),
   }));
+
+  // OpenProject write-back — UI edits pushed back to the system of record
+  // (PATCH /api/openproject/entities/:entityType/:externalId,
+  //  POST /api/openproject/projects/:externalProjectId/work-packages,
+  //  GET /api/openproject/link/:entityType/:externalId, GET /api/openproject/status;
+  //  responds 503 when OPENPROJECT_BASE_URL/OPENPROJECT_URL + OPENPROJECT_API_KEY unset)
+  app.use(initOpenProjectRoutes(express.Router(), {
+    writeback: createOpenProjectWritebackFromEnv(),
+    storage: postgresStorage,
+  }));
+
+  // Agent-runtime findings/HITL proxy (/api/agent/* → AGENT_RUNTIME_URL with
+  // optional AGENT_RUNTIME_TOKEN bearer; 503 when AGENT_RUNTIME_URL unset)
+  app.use(initAgentFindingsRoutes(express.Router()));
 
   // Executive AI Insights endpoint
   app.get("/api/insights/executive", async (_req, res) => {

@@ -189,6 +189,9 @@ export class OpenProjectClient {
           name: opProject.name,
           description: opProject.description?.raw || `Imported from OpenProject`,
           status: this.mapStatusToHealth(opProject.active),
+          sourceSystem: "openproject",
+          externalId: String(opProject.id),
+          lastSyncedAt: new Date(),
         });
         result.projectsCreated++;
       }
@@ -207,6 +210,9 @@ export class OpenProjectClient {
             status: this.mapStatusToSafe(wp._links?.status?.title),
             priority: this.mapPriorityToSafe(wp._links?.priority?.title),
             storyPoints: wp.storyPoints?.toString(),
+            sourceSystem: "openproject",
+            externalId: String(wp.id),
+            lastSyncedAt: new Date(),
           });
           featureByOpId[String(wp.id)] = feature.id;
           result.featuresCreated++;
@@ -233,6 +239,9 @@ export class OpenProjectClient {
             status: this.mapStatusToSafe(wp._links?.status?.title),
             storyPoints: wp.storyPoints?.toString(),
             assignedTeam: wp._links?.assignee?.title,
+            sourceSystem: "openproject",
+            externalId: String(wp.id),
+            lastSyncedAt: new Date(),
           });
           storyByOpId[String(wp.id)] = story.id;
           result.storiesCreated++;
@@ -253,6 +262,9 @@ export class OpenProjectClient {
               name: wp.subject,
               probability: this.mapPriorityToSafe(wp._links?.priority?.title),
               impact: this.mapPriorityToSafe(wp._links?.priority?.title),
+              sourceSystem: "openproject",
+              externalId: String(wp.id),
+              lastSyncedAt: new Date(),
             });
             result.risksCreated++;
           } else {
@@ -269,6 +281,9 @@ export class OpenProjectClient {
               status: this.mapStatusToSafe(wp._links?.status?.title),
               priority: this.mapPriorityToSafe(wp._links?.priority?.title),
               assignee: wp._links?.assignee?.title,
+              sourceSystem: "openproject",
+              externalId: String(wp.id),
+              lastSyncedAt: new Date(),
             });
             result.tasksCreated++;
           }
