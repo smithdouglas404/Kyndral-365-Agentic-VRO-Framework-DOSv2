@@ -17,6 +17,7 @@
 import { PalantirAIPService, PalantirObject, PalantirSearchFilter } from '../mcp/PalantirAIPService';
 import { OntologySchemaService, OntologyObjectType } from './OntologySchemaService';
 import { PALANTIR_OBJECT_TYPES } from '../constants/palantirOntology.js';
+import { createFalkorOntologyDataProvider } from './FalkorOntologyDataProvider.js';
 
 export interface QueryOptions {
   pageSize?: number;
@@ -40,7 +41,7 @@ export interface QueryResult<T = any> {
   data: T[];
   totalCount?: number;
   nextPageToken?: string;
-  source: 'palantir' | 'cache' | 'fallback';
+  source: 'palantir' | 'falkordb' | 'cache' | 'fallback';
   objectType: string;
   queriedAt: Date;
 }
@@ -81,16 +82,16 @@ interface CacheEntry<T> {
   ttl: number;
 }
 
-class OntologyDataProviderClass {
-  private palantirService: PalantirAIPService | null = null;
-  private cache = new Map<string, CacheEntry<any>>();
-  private defaultTTL = 5 * 60 * 1000; // 5 minutes
-  private isInitialized = false;
+export class OntologyDataProviderClass {
+  protected palantirService: PalantirAIPService | null = null;
+  protected cache = new Map<string, CacheEntry<any>>();
+  protected defaultTTL = 5 * 60 * 1000; // 5 minutes
+  protected isInitialized = false;
   // Local mirror: lets ingest service keep agent reads working even when
   // Palantir writes are rejected (e.g. unmapped action params). Palantir
   // remains the authoritative store; this is a transient overlay merged
   // into query() results and getById() lookups.
-  private localMirror = new Map<string, any[]>(); // objectType -> records
+  protected localMirror = new Map<string, any[]>(); // objectType -> records
 
   /**
    * Inject (or replace) a local mirror record for a given object type.
@@ -122,7 +123,7 @@ class OntologyDataProviderClass {
   }
 
   /** Heuristic primary key field per object type */
-  private primaryKeyField(objectType: string): string {
+  protected primaryKeyField(objectType: string): string {
     const map: Record<string, string> = {
       AtlasProject: 'projectId',
       AtlasFeature: 'featureId',
@@ -139,7 +140,7 @@ class OntologyDataProviderClass {
   }
 
   /** Apply local-mirror entries on top of (possibly empty) Palantir results */
-  private mergeLocal(objectType: string, palantirData: any[], options: QueryOptions): any[] {
+  protected mergeLocal(objectType: string, palantirData: any[], options: QueryOptions): any[] {
     const local = this.localMirror.get(objectType);
     if (!local || local.length === 0) return palantirData;
     // Apply filters to local mirror entries
@@ -490,15 +491,34 @@ class OntologyDataProviderClass {
     return this.isInitialized;
   }
 
+  /**
+   * Which graph/ontology backend is actively serving reads.
+   * Overridden by the FalkorDB-backed provider.
+   */
+  getActiveBackend(): 'palantir' | 'falkordb' {
+    return 'palantir';
+  }
+
+  /**
+   * Status of the active ontology backend (for health/status surfaces).
+   */
+  async getBackendStatus(): Promise<{
+    backend: 'palantir' | 'falkordb';
+    ready: boolean;
+    details?: Record<string, any>;
+  }> {
+    return { backend: this.getActiveBackend(), ready: this.isReady() };
+  }
+
   // Private helpers
 
-  private ensureInitialized(): void {
+  protected ensureInitialized(): void {
     if (!this.isInitialized) {
       throw new Error('OntologyDataProvider not initialized - call initialize() first');
     }
   }
 
-  private buildCacheKey(objectType: string, options: QueryOptions): string {
+  protected buildCacheKey(objectType: string, options: QueryOptions): string {
     const parts = [objectType];
     if (options.pageSize) parts.push(`ps:${options.pageSize}`);
     if (options.pageToken) parts.push(`pt:${options.pageToken}`);
@@ -538,7 +558,7 @@ class OntologyDataProviderClass {
     };
   }
 
-  private getFromCache<T>(key: string): T | null {
+  protected getFromCache<T>(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
@@ -551,7 +571,7 @@ class OntologyDataProviderClass {
     return entry.data as T;
   }
 
-  private setCache<T>(key: string, data: T, ttl = this.defaultTTL): void {
+  protected setCache<T>(key: string, data: T, ttl = this.defaultTTL): void {
     this.cache.set(key, {
       data,
       timestamp: new Date(),
@@ -560,5 +580,10 @@ class OntologyDataProviderClass {
   }
 }
 
-// Singleton instance
-export const OntologyDataProvider = new OntologyDataProviderClass();
+// Singleton instance — env-gated backend selection (safe rollout):
+// When FALKORDB_URL is set, the singleton is the FalkorDB-backed provider
+// (same public interface; Palantir path is retained internally as fallback).
+// Otherwise the original Palantir-backed provider is used unchanged.
+export const OntologyDataProvider: OntologyDataProviderClass = process.env.FALKORDB_URL
+  ? createFalkorOntologyDataProvider()
+  : new OntologyDataProviderClass();
