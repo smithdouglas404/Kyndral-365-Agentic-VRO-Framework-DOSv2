@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { ApprovalQueue, SourceBadge } from "@/openproject";
 
 interface Intervention {
   interventionId: string;
@@ -392,6 +393,10 @@ export default function HITLApprovalCenter() {
               <Badge variant="secondary">{alerts.total}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="agent-queue" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            Agent Queue
+          </TabsTrigger>
         </TabsList>
 
         {/* Interventions Tab */}
@@ -435,6 +440,11 @@ export default function HITLApprovalCenter() {
                         Project: {intervention.projectId}
                       </>
                     )}
+                    {/* Self-gating: renders only when the target entity is OpenProject-sourced */}
+                    <SourceBadge
+                      entity={(intervention.metadata as Record<string, unknown> | undefined)?.targetEntity ?? intervention}
+                      entityType="project"
+                    />
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -522,6 +532,7 @@ export default function HITLApprovalCenter() {
                   <CardDescription className="flex items-center gap-2">
                     <Bot className="h-4 w-4" />
                     {alert.agentSource}
+                    <SourceBadge entity={alert} entityType="project" />
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -543,6 +554,19 @@ export default function HITLApprovalCenter() {
               </Card>
             ))
           )}
+        </TabsContent>
+
+        {/* Agent Queue Tab — agent findings/recommendations from the
+            agent-runtime proxy (/api/agent/*). Approve executes the gated
+            action (mirrored to OpenProject server-side) and trains the agent.
+            The component degrades gracefully (inline error + retry) while the
+            server routes are unavailable. */}
+        <TabsContent value="agent-queue">
+          <ApprovalQueue
+            onDecided={() => {
+              queryClient.invalidateQueries({ queryKey: ["hitl-summary"] });
+            }}
+          />
         </TabsContent>
       </Tabs>
 

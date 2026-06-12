@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, Sparkles, Wrench, Trash2, MessageSquare } from 'lucide-react';
+import { Loader2, Send, Sparkles, Wrench, Trash2, MessageSquare, Bot } from 'lucide-react';
+import AgenticChat from '@/ai-sdk/AgenticChat';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -27,6 +28,7 @@ export default function ClarityChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'clarity' | 'agentic'>('clarity');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,12 +91,38 @@ export default function ClarityChat() {
             <p className="text-xs text-muted-foreground">Ask anything about your portfolio — projects, dependencies, risks, KPIs.</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={clear} disabled={messages.length === 0} data-testid="button-clear-chat">
-          <Trash2 className="h-4 w-4 mr-2" /> Clear
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-md border bg-muted/30 p-0.5" data-testid="toggle-chat-mode">
+            <Button
+              variant={mode === 'clarity' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setMode('clarity')}
+              data-testid="button-mode-clarity"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" /> Clarity
+            </Button>
+            <Button
+              variant={mode === 'agentic' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setMode('agentic')}
+              data-testid="button-mode-agentic"
+            >
+              <Bot className="h-4 w-4 mr-2" /> Agentic
+            </Button>
+          </div>
+          <Button variant="outline" size="sm" onClick={clear} disabled={mode !== 'clarity' || messages.length === 0} data-testid="button-clear-chat">
+            <Trash2 className="h-4 w-4 mr-2" /> Clear
+          </Button>
+        </div>
       </header>
 
-      {/* Body */}
+      {mode === 'agentic' ? (
+        /* Agentic chat — Vercel AI SDK generative UI over the agent runtime */
+        <div className="flex-1 overflow-hidden" data-testid="panel-agentic-chat">
+          <AgenticChat />
+        </div>
+      ) : (
+      /* Body */
       <div className="flex-1 overflow-hidden grid grid-cols-[280px_1fr]">
         {/* Suggested prompts sidebar */}
         <aside className="border-r bg-muted/30 overflow-auto p-4">
@@ -202,6 +230,7 @@ export default function ClarityChat() {
           </div>
         </main>
       </div>
+      )}
     </div>
   );
 }

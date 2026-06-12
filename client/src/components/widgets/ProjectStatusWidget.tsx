@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { SourceBadge } from "@/openproject";
 import {
   Select,
   SelectContent,
@@ -133,6 +134,7 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="flex-1 space-y-1">
           <div className="flex items-center gap-2">
             <h4 className="font-medium leading-tight">{project.name}</h4>
+            <SourceBadge entity={project} entityType="project" />
             <Badge
               variant="outline"
               className={cn("shrink-0 text-xs", PRIORITY_BADGE[project.priority])}

@@ -11,8 +11,9 @@
 import { AdminLayout } from '@/components/AdminLayout';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Database, CheckCircle, XCircle, AlertCircle, Edit, Trash2, Play } from 'lucide-react';
+import { Plus, Database, CheckCircle, XCircle, AlertCircle, Edit, Trash2, Play, RefreshCw } from 'lucide-react';
 import { FieldMappingEditor } from '@/components/FieldMappingEditor';
+import { useOpenProjectStatus } from '@/openproject';
 
 interface Integration {
   id: string;
@@ -133,6 +134,41 @@ export default function IntegrationManagement() {
   );
 }
 
+/**
+ * Live connection pill for the 'openproject' adapter card — polls
+ * GET /api/openproject/status; "Test connection" re-checks on demand.
+ * Read-only: adapter config CRUD stays Kyndral-side (no write-back here).
+ */
+function OpenProjectLiveStatus() {
+  const { connected, instanceName, version, error, checking, refresh } = useOpenProjectStatus();
+  return (
+    <div className="mb-4 flex items-center justify-between gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
+      <span
+        className="inline-flex items-center gap-1.5 text-xs font-medium"
+        title={error || (instanceName ? `${instanceName}${version ? ` · v${version}` : ''}` : undefined)}
+      >
+        <span
+          className={`h-2 w-2 rounded-full ${
+            checking ? 'bg-amber-400 animate-pulse' : connected ? 'bg-emerald-500' : 'bg-red-500'
+          }`}
+        />
+        {checking
+          ? 'Checking OpenProject…'
+          : connected
+            ? `Connected${instanceName ? ` — ${instanceName}` : ''}`
+            : 'OpenProject unreachable'}
+      </span>
+      <button
+        onClick={refresh}
+        className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-500/10"
+      >
+        <RefreshCw className="w-3 h-3" />
+        Test connection
+      </button>
+    </div>
+  );
+}
+
 function IntegrationCard({ integration, onEdit, onDelete, onSync }: any) {
   const statusIcons = {
     connected: CheckCircle,
@@ -174,6 +210,8 @@ function IntegrationCard({ integration, onEdit, onDelete, onSync }: any) {
           </span>
         </div>
       </div>
+
+      {integration.type === 'openproject' && <OpenProjectLiveStatus />}
 
       <div className="flex gap-2">
         <button

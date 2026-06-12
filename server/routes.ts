@@ -115,6 +115,10 @@ import packetRefineRouter from "./routes/packet-refine.js";
 import openprojectWebhookRouter from "./routes/webhooks/openproject.js";
 import express from "express";
 import { initOkrRollupRoutes } from "./routes/okrRollup.routes.js";
+import { initOpenProjectRoutes } from "./routes/openproject.routes.js";
+import { initAgentFindingsRoutes } from "./routes/agentFindings.routes.js";
+import { createOpenProjectWritebackFromEnv } from "./openProjectWriteback";
+import { initAgentChatRoute } from "./routes/agentChat.route.js";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
@@ -588,6 +592,10 @@ export async function registerRoutes(
   // OpenProject webhooks — real-time event-driven sync
   app.use('/api/webhooks/openproject', openprojectWebhookRouter);
 
+  // Agentic chat — Vercel AI SDK streaming over the agent-runtime sidecar
+  // (POST /api/agent-chat; 503s cleanly when ANTHROPIC_API_KEY is unset)
+  app.use(initAgentChatRoute(express.Router()));
+
   // OKR roll-up — deterministic KR/OKR progress from okr_entity_contributions
   // (GET /api/okrs/:id/rollup, POST /api/okrs/:okrId/key-results/:krId/contributions)
   app.use(initOkrRollupRoutes(express.Router(), {
@@ -611,6 +619,20 @@ export async function registerRoutes(
         confidence: row.confidence == null ? undefined : String(row.confidence),
       }),
   }));
+
+  // OpenProject write-back — UI edits pushed back to the system of record
+  // (PATCH /api/openproject/entities/:entityType/:externalId,
+  //  POST /api/openproject/projects/:externalProjectId/work-packages,
+  //  GET /api/openproject/link/:entityType/:externalId, GET /api/openproject/status;
+  //  responds 503 when OPENPROJECT_BASE_URL/OPENPROJECT_URL + OPENPROJECT_API_KEY unset)
+  app.use(initOpenProjectRoutes(express.Router(), {
+    writeback: createOpenProjectWritebackFromEnv(),
+    storage: postgresStorage,
+  }));
+
+  // Agent-runtime findings/HITL proxy (/api/agent/* → AGENT_RUNTIME_URL with
+  // optional AGENT_RUNTIME_TOKEN bearer; 503 when AGENT_RUNTIME_URL unset)
+  app.use(initAgentFindingsRoutes(express.Router()));
 
   // Executive AI Insights endpoint
   app.get("/api/insights/executive", async (_req, res) => {

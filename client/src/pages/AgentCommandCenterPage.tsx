@@ -37,6 +37,7 @@ import {
   FileCheck,
   Leaf
 } from "lucide-react";
+import { SourceBadge } from "@/openproject";
 
 const NEE = {
   blue: "#0072CE",
@@ -65,6 +66,10 @@ interface RiskIntervention {
   triggerSource: 'metric_breach' | 'agent_detection' | 'agent_escalation' | 'manual';
   escalatedFromAgentId?: string;
   approvedBy?: string;
+  /** OpenProject provenance of the referenced entity (stamped by the connector when present). */
+  sourceSystem?: string | null;
+  externalId?: string | number | null;
+  lastSyncedAt?: string | null;
 }
 
 interface AgentMessage {
@@ -111,7 +116,11 @@ async function fetchInterventions(): Promise<RiskIntervention[]> {
       selfApproved: i.selfApproved === 'true' || i.selfApproved === true || i.title?.includes('[Agent Self Approved]'),
       triggerSource: i.triggerSource || 'manual',
       escalatedFromAgentId: i.escalatedFromAgentId,
-      approvedBy: i.approvedBy
+      approvedBy: i.approvedBy,
+      // OpenProject provenance passthrough (the self-gating SourceBadge consumes these)
+      sourceSystem: i.sourceSystem ?? null,
+      externalId: i.externalId ?? null,
+      lastSyncedAt: i.lastSyncedAt ?? null
     };
   });
 }
@@ -703,6 +712,7 @@ export default function AgentCommandCenterPage() {
                               <span>Source: {intervention.agentSource}</span>
                               <span className="mx-2">•</span>
                               <span>{intervention.projectName}</span>
+                              <SourceBadge entity={intervention} entityType="project" />
                               {intervention.selfApproved && intervention.approvedBy && (
                                 <>
                                   <span className="mx-2">•</span>

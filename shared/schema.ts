@@ -579,6 +579,10 @@ export const projects = pgTable("projects", {
   varianceAtCompletion: real("vac"), // VAC = BAC - EAC
   progress: integer("progress"),
   progressPercentage: real("progress_percentage"),
+  // External sync provenance (OpenProject bidirectional sync)
+  sourceSystem: varchar("source_system", { length: 32 }), // e.g. 'openproject'
+  externalId: varchar("external_id", { length: 64 }), // OpenProject project id
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -628,6 +632,10 @@ export const features = pgTable("features", {
   acceptanceCriteria: text("acceptance_criteria"),
   wsjfScore: text("wsjf_score"),
   categoryId: varchar("category_id"), // FK to workPackageCategories (OpenProject category)
+  // External sync provenance (OpenProject bidirectional sync)
+  sourceSystem: varchar("source_system", { length: 32 }), // e.g. 'openproject'
+  externalId: varchar("external_id", { length: 64 }), // OpenProject work-package id
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -652,6 +660,10 @@ export const stories = pgTable("stories", {
   assignedTeam: text("assigned_team"),
   acceptanceCriteria: text("acceptance_criteria"),
   categoryId: varchar("category_id"), // FK to workPackageCategories (OpenProject category)
+  // External sync provenance (OpenProject bidirectional sync)
+  sourceSystem: varchar("source_system", { length: 32 }), // e.g. 'openproject'
+  externalId: varchar("external_id", { length: 64 }), // OpenProject work-package id
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -680,6 +692,10 @@ export const tasks = pgTable("tasks", {
   startDate: date("start_date"), // OpenProject startDate (schedule variance)
   completedDate: date("completed_date"), // set when status → done
   categoryId: varchar("category_id"), // FK to workPackageCategories (OpenProject category)
+  // External sync provenance (OpenProject bidirectional sync)
+  sourceSystem: varchar("source_system", { length: 32 }), // e.g. 'openproject'
+  externalId: varchar("external_id", { length: 64 }), // OpenProject work-package id
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -785,6 +801,10 @@ export const risks = pgTable("risks", {
   identifiedDate: timestamp("identified_date"),
   probabilityNumeric: real("probability_numeric"), // 0.0-1.0 for Monte Carlo
   impactNumeric: real("impact_numeric"), // Dollar amount or percentage impact
+  // External sync provenance (OpenProject bidirectional sync)
+  sourceSystem: varchar("source_system", { length: 32 }), // e.g. 'openproject'
+  externalId: varchar("external_id", { length: 64 }), // OpenProject work-package id
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

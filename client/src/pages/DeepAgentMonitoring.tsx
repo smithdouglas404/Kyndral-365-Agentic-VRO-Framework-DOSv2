@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { OpenProjectStatusDot } from '@/openproject';
 
 export default function DeepAgentMonitoring() {
   const queryClient = useQueryClient();
@@ -110,8 +111,9 @@ export default function DeepAgentMonitoring() {
             <Brain className="h-8 w-8 text-purple-500" />
             Deep Agent Monitoring
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 flex items-center gap-3">
             Monitor agent planning, execution, reflection, and A2A collaboration
+            <OpenProjectStatusDot showLabel />
           </p>
         </div>
         <Button onClick={() => setShowRunDialog(true)}>

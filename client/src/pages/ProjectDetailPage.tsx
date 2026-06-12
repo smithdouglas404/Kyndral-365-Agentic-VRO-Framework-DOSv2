@@ -55,6 +55,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { OpenProjectPanel, PushStatus, SourceBadge, useBidirectionalSave } from "@/openproject";
+
+const AGENT_CONSOLE_URL: string | undefined =
+  (import.meta.env.VITE_AGENT_CONSOLE_URL as string | undefined) || undefined;
 
 // ============================================================================
 // TYPES & CONFIGS
@@ -626,13 +631,34 @@ function WorkBreakdownChart({
   );
 }
 
+/** OpenProject status names the connector PATCH endpoint accepts. */
+const OP_STATUS_OPTIONS = ['New', 'In progress', 'On hold', 'Closed'];
+
 function WorkItemCard({
   item,
   type,
+  onSaved,
 }: {
   item: { id: string; name: string; status: string; description?: string; priority?: string };
   type: 'feature' | 'story' | 'task';
+  /** Called after a successful OpenProject write-back (e.g. refetch). */
+  onSaved?: () => void;
 }) {
+  const { toast } = useToast();
+  // Bidirectional save: this page has no local work-item mutation (data is
+  // read via the project360 query and round-trips through the connector
+  // sync), so the local step is a no-op and the push is the save.
+  const { save, status: pushStatus, error: pushError, retry, isOpenProject } = useBidirectionalSave(item, {
+    entityType: type,
+    onLocalSave: async () => {},
+    onPushed: () => {
+      toast({ title: 'Synced to OpenProject', description: `${item.name} updated in the source of record.` });
+      onSaved?.();
+    },
+    onPushFailed: (e) =>
+      toast({ title: 'OpenProject push failed', description: e, variant: 'destructive' }),
+  });
+
   const statusLower = (item.status || '').toLowerCase();
   const isDone = ['done', 'complete', 'accepted', 'closed'].includes(statusLower);
   const isInProgress = ['in_progress', 'in progress', 'implementing', 'active'].includes(statusLower);
@@ -647,11 +673,35 @@ function WorkItemCard({
     <div className="flex items-start gap-3 p-3 rounded-lg border hover:border-blue-300 hover:bg-gray-50 transition-all cursor-pointer">
       <StatusIcon className={cn('h-5 w-5 mt-0.5 shrink-0', statusColor)} />
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900 truncate">{item.name}</p>
+        <p className="font-medium text-gray-900 truncate">
+          {item.name}
+          <SourceBadge entity={item} entityType={type} className="ml-2 align-middle" />
+        </p>
         {item.description && (
           <p className="text-sm text-gray-500 truncate">{item.description}</p>
         )}
+        <PushStatus status={pushStatus} error={pushError} onRetry={() => void retry()} className="mt-1" />
       </div>
+      {isOpenProject && !linkPath && (
+        <select
+          aria-label="Update status in OpenProject"
+          defaultValue=""
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            if (e.target.value) void save({ status: e.target.value });
+          }}
+          className="shrink-0 rounded-md border border-gray-200 bg-transparent px-2 py-1 text-xs text-gray-600 hover:border-blue-300"
+        >
+          <option value="" disabled>
+            Set status…
+          </option>
+          {OP_STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      )}
       {item.priority && <PriorityBadge priority={item.priority} />}
       {linkPath && <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />}
     </div>
@@ -755,6 +805,7 @@ export default function ProjectDetailPage() {
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+                  <SourceBadge entity={project} entityType="project" />
                   <StatusBadge status={project.status} />
                   <PriorityBadge priority={project.priority} />
                 </div>
@@ -782,6 +833,14 @@ export default function ProjectDetailPage() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* OpenProject system-of-work panel */}
+            <OpenProjectPanel
+              entity={project}
+              consoleUrl={AGENT_CONSOLE_URL}
+              defaultOpen
+              onWorkPackageCreated={() => refetch()}
+            />
+
             {/* EVM Indicators */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <EVMIndicator label="CPI (Cost Performance)" value={cpi} threshold={1} />
@@ -869,7 +928,7 @@ export default function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-3">
                     {features.map((f) => (
-                      <WorkItemCard key={f.id} item={f} type="feature" />
+                      <WorkItemCard key={f.id} item={f} type="feature" onSaved={() => refetch()} />
                     ))}
                   </div>
                 )}
@@ -894,7 +953,7 @@ export default function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-3">
                     {stories.map((s) => (
-                      <WorkItemCard key={s.id} item={s} type="story" />
+                      <WorkItemCard key={s.id} item={s} type="story" onSaved={() => refetch()} />
                     ))}
                   </div>
                 )}
@@ -927,7 +986,7 @@ export default function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-3">
                     {tasks.map((t) => (
-                      <WorkItemCard key={t.id} item={t} type="task" />
+                      <WorkItemCard key={t.id} item={t} type="task" onSaved={() => refetch()} />
                     ))}
                   </div>
                 )}

@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { responsive, touchFriendly } from '@/lib/mobileResponsive';
+import { OpenProjectStatusDot } from '@/openproject';
 
 /**
  * GLOBAL HEADER COMPONENT
@@ -203,6 +204,7 @@ export function GlobalHeader({
             </div>
             <div className="h-3 w-px bg-slate-300" />
             <ConnectionIndicator />
+            <OpenProjectStatusDot className="ml-2" />
           </div>
 
           {/* Notification Bell - Touch-friendly on mobile */}

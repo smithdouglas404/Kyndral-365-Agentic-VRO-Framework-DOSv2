@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { SourceBadge } from '@/openproject';
 import {
   Network, Search, Sparkles, AlertTriangle, ChevronRight, RefreshCw, Loader2,
   Briefcase, ShieldAlert, Target, Link2, Users, DollarSign, Activity, Lightbulb,
@@ -683,6 +684,12 @@ function ExplorerCanvas({ initialType, initialId }: ExplorerCanvasProps) {
                       )}
                     </div>
                   )}
+
+                  {/* OpenProject provenance (self-gates on sourceSystem/externalId) */}
+                  <SourceBadge
+                    entity={selectedNode.data}
+                    entityType={(selectedNode.data as CustomNodeData).atlasType?.replace(/^Atlas/, '').toLowerCase()}
+                  />
 
                   {/* Actions */}
                   <div className="flex gap-2">
