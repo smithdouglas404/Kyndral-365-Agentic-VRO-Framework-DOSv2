@@ -2583,6 +2583,29 @@ export class ContinuousOrchestrator {
       await this.a2aBus.send(message);
     }
 
+    // Route through the EventDrivenOrchestrator as well — with the polling
+    // loop disabled, this is what actually fires the agents on the change.
+    if (event.projectId) {
+      try {
+        const { getEventDrivenOrchestrator } = await import('../lib/EventDrivenOrchestrator.js');
+        const eventType = /time_entry|budget/.test(event.eventType) ? 'budget_change'
+          : /membership|resource/.test(event.eventType) ? 'resource_change'
+          : /risk/.test(event.eventType) ? 'risk_change'
+          : 'project_update';
+        getEventDrivenOrchestrator()?.registerChange({
+          type: eventType,
+          projectId: event.projectId,
+          field: event.eventType,
+          newValue: event.summary,
+          severity: event.severity || 'medium',
+          timestamp: new Date(),
+          source: `external:${event.source}`,
+        });
+      } catch (err: any) {
+        console.warn(`[Orchestrator] EventDrivenOrchestrator routing failed: ${err.message}`);
+      }
+    }
+
     console.log(`[Orchestrator] External event ${event.source}/${event.eventType} routed to ${event.targetAgents.join(', ')}`);
   }
 

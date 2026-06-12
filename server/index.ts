@@ -1,6 +1,13 @@
 import { config } from "dotenv";
 config(); // Load .env file FIRST before anything else
 
+// Railway's private network is IPv6-first; without this, Node may resolve
+// service hostnames (e.g. FalkorDB) to an unreachable A record.
+import dns from "node:dns";
+if (Object.keys(process.env).some((k) => k.startsWith("RAILWAY_"))) {
+  dns.setDefaultResultOrder("ipv6first");
+}
+
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
