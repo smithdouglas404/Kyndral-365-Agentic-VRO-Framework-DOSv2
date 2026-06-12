@@ -74,6 +74,31 @@ const THRESHOLD_CONFIGS: ThresholdConfig[] = [
   }
 ];
 
+async function pushStatusToOpenProject(
+  projectName: string,
+  statusCode: 'at_risk' | 'off_track',
+  explanation: string
+): Promise<void> {
+  try {
+    const adapters = await storage.getMcpAdapters();
+    const adapter = adapters.find(a => a.adapterType === 'openproject');
+    if (!adapter) return;
+
+    const { createOpenProjectClientFromAdapter } = await import('./openProjectClient');
+    const client = await createOpenProjectClientFromAdapter(adapter.id);
+    if (!client) return;
+
+    const opProjects = await client.getProjects();
+    const opProject = opProjects.find(p => p.name === projectName);
+    if (!opProject) return;
+
+    await client.updateProjectStatus(opProject.id, statusCode, explanation);
+    console.log(`[ReactiveWatcher] Pushed ${statusCode} status to OpenProject project ${opProject.id}`);
+  } catch (error: any) {
+    console.error(`[ReactiveWatcher] OpenProject status write-back failed (non-fatal): ${error.message}`);
+  }
+}
+
 interface MetricBreachResult {
   breached: boolean;
   severity: 'critical' | 'high' | 'medium' | null;
@@ -177,6 +202,14 @@ export async function updateMetricAndCheck(
 
   const intervention = await storage.createIntervention(interventionData);
   console.log(`[ReactiveWatcher] Intervention created: ${intervention.id}`);
+
+  // Best-effort bidirectional write-back: surface the verdict on OpenProject's
+  // native project status banner (no-op when no openproject adapter exists)
+  await pushStatusToOpenProject(
+    projectName,
+    breachResult.severity === 'critical' ? 'off_track' : 'at_risk',
+    interventionData.description ?? ''
+  );
 
   await storage.createAgentActivityLog({
     eventType: 'detection',
