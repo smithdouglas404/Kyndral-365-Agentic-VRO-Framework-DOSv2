@@ -118,6 +118,7 @@ import { initOkrRollupRoutes } from "./routes/okrRollup.routes.js";
 import { initOpenProjectRoutes } from "./routes/openproject.routes.js";
 import { initAgentFindingsRoutes } from "./routes/agentFindings.routes.js";
 import { createOpenProjectWritebackFromEnv } from "./openProjectWriteback";
+import { initAgentChatRoute } from "./routes/agentChat.route.js";
 import tenantAuthRouter from "./routes/tenant-auth";
 import systemAdminRouter from "./routes/system-admin";
 import { JiraClient, createJiraClientFromAdapter } from "./jiraClient";
@@ -590,6 +591,10 @@ export async function registerRoutes(
 
   // OpenProject webhooks — real-time event-driven sync
   app.use('/api/webhooks/openproject', openprojectWebhookRouter);
+
+  // Agentic chat — Vercel AI SDK streaming over the agent-runtime sidecar
+  // (POST /api/agent-chat; 503s cleanly when ANTHROPIC_API_KEY is unset)
+  app.use(initAgentChatRoute(express.Router()));
 
   // OKR roll-up — deterministic KR/OKR progress from okr_entity_contributions
   // (GET /api/okrs/:id/rollup, POST /api/okrs/:okrId/key-results/:krId/contributions)
