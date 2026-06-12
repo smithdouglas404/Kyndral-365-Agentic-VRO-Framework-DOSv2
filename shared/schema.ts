@@ -3632,3 +3632,36 @@ export const insertDynamicAgentSchema = createInsertSchema(dynamicAgents).omit({
 
 export type InsertDynamicAgent = z.infer<typeof insertDynamicAgentSchema>;
 export type DynamicAgent = typeof dynamicAgents.$inferSelect;
+
+// ============================================================================
+// GROUNDING & OUTCOME TRACKING (see kyndryl-connector docs/GROUNDING_AND_HALLUCINATION.md §3)
+// Stores agent predictions so they can later be joined to realized outcomes,
+// producing per-agent / per-finding-type accuracy used to weight confidence.
+// ============================================================================
+import { jsonb } from "drizzle-orm/pg-core";
+
+export const agentPredictions = pgTable("agent_predictions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  findingType: varchar("finding_type").notNull(),
+  projectId: varchar("project_id"),
+  entityId: varchar("entity_id"),
+  entityType: text("entity_type"),
+  predictedValue: jsonb("predicted_value").notNull(),
+  predictedAt: timestamp("predicted_at").defaultNow(),
+  dueAt: timestamp("due_at"),
+  actualValue: jsonb("actual_value"),
+  resolvedAt: timestamp("resolved_at"),
+  accuracy: real("accuracy"),
+});
+
+export const insertAgentPredictionSchema = createInsertSchema(agentPredictions).omit({
+  id: true,
+  predictedAt: true,
+  actualValue: true,
+  resolvedAt: true,
+  accuracy: true,
+});
+
+export type InsertAgentPrediction = z.infer<typeof insertAgentPredictionSchema>;
+export type AgentPrediction = typeof agentPredictions.$inferSelect;
