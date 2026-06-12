@@ -15,6 +15,7 @@ import crypto from 'crypto';
 import { getOPToPalantirSync } from '../../services/sync/OpenProjectToPalantirSync.js';
 import { broadcastNotification } from '../../websocket.js';
 import { getEventDrivenOrchestrator, type ChangeEvent } from '../../lib/EventDrivenOrchestrator.js';
+import { isOwnEcho } from '../../openProjectWriteback.js';
 
 const router = Router();
 
@@ -173,6 +174,14 @@ async function processEvent(event: OPWebhookEvent): Promise<void> {
                      event.work_package?._embedded?.customField_sync_source;
   if (syncSource === 'nextera-agent') {
     console.log(`[OPWebhook] Skipping agent-originated event for WP ${event.work_package?.id}`);
+    return;
+  }
+
+  // Echo prevention (write-back): skip events caused by our own outbound
+  // pushes — recentlyPushed registry + [sync:kyndral-365] marker
+  // (see server/openProjectWriteback.ts).
+  if (isOwnEcho(event)) {
+    console.log(`[OPWebhook] Skipping echo of our own write-back (${action})`);
     return;
   }
 
