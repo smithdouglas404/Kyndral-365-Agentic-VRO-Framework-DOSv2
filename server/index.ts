@@ -9,6 +9,8 @@ import { createServer } from "http";
 import { createAgentScheduler, type AgentScheduler } from "./agents/AgentScheduler.js";
 import { BattleRhythmOrchestrator } from "./lib/BattleRhythmOrchestrator.js";
 import { BattleRhythmTaskProcessor } from "./lib/BattleRhythmTaskProcessor.js";
+import { getEventDrivenOrchestrator } from "./lib/EventDrivenOrchestrator.js";
+import { getBootstrapInstance } from "./routes/orchestration.js";
 import { initializeMCPServices, getPalantirService } from "./mcp/MCPServiceFactory.js";
 import { OntologyDataProvider } from "./services/OntologyDataProvider.js";
 import { PalantirSyncService } from "./services/PalantirSyncService.js";
@@ -249,6 +251,64 @@ app.use((req, res, next) => {
       battleRhythmTaskProcessor.start();
       log("✅ Battle Rhythm Task Processor started - Processing synthesis tasks");
 
+      // ===================================================================
+      // Start Event-Driven Orchestrator (replaces 15s continuous polling)
+      // Agents fire ONLY when data changes (registerChange / registerMemoryChange)
+      // ~93% LLM cost reduction vs the fixed-interval polling loop
+      // ===================================================================
+      try {
+        log("⚡ Initializing Event-Driven Orchestrator...");
+        const eventOrchestrator = getEventDrivenOrchestrator(storage);
+        if (eventOrchestrator) {
+          // Map DeepAgentBootstrap agent keys → ids expected by
+          // EventDrivenOrchestrator.determineAgentsForEvents()
+          const AGENT_ID_MAP: Record<string, string> = {
+            finops: "deepfinops",
+            tmo: "deeptmo",
+            risk: "deeprisk",
+            vro: "deepvro",
+            pmo: "deeppmo",
+            ocm: "deepocm",
+            governance: "deepgovernance",
+            planning: "deepplanning",
+            integrated: "deepintegratedmgmt",
+            okr: "deepokrinference",
+            notification: "deepnotification",
+          };
+
+          // Deep agents are loaded asynchronously by DeepAgentBootstrap
+          // (see routes/orchestration.ts) - retry until they are available.
+          const registerDeepAgents = (): boolean => {
+            const bootstrap = getBootstrapInstance();
+            const agents = bootstrap?.getAgents();
+            if (!agents || agents.size === 0) return false;
+            for (const [id, agent] of agents.entries()) {
+              eventOrchestrator.registerAgent(AGENT_ID_MAP[id] || `deep${id}`, agent);
+            }
+            return true;
+          };
+
+          if (!registerDeepAgents()) {
+            let attempts = 0;
+            const retry = setInterval(() => {
+              attempts++;
+              if (registerDeepAgents()) {
+                clearInterval(retry);
+                log("✅ Deep agents registered with Event-Driven Orchestrator");
+              } else if (attempts >= 30) {
+                clearInterval(retry);
+                log("⚠️  Deep agents not available for Event-Driven Orchestrator after 30 attempts");
+              }
+            }, 5000);
+          }
+
+          eventOrchestrator.startListening(5000);
+          log("✅ Event-Driven Orchestrator listening - agents fire on data changes, not a timer");
+        }
+      } catch (error: any) {
+        log(`⚠️  Event-Driven Orchestrator initialization failed: ${error.message}`);
+      }
+
       // Start MCP sync scheduler for cron-based sync jobs
       startSyncScheduler().catch(err => {
         console.error("Failed to start sync scheduler:", err);
@@ -283,6 +343,12 @@ app.use((req, res, next) => {
           battleRhythmTaskProcessor?.stop();
         });
       }
+
+      // Add Event-Driven Orchestrator cleanup
+      cleanupCallbacks.push(async () => {
+        console.log('[Cleanup] Stopping Event-Driven Orchestrator...');
+        getEventDrivenOrchestrator()?.stopListening();
+      });
 
       // Add Palantir Sync Scheduler cleanup
       cleanupCallbacks.push(async () => {

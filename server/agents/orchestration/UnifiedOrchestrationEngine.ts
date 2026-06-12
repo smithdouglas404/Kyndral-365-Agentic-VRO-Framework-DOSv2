@@ -18,6 +18,15 @@ import { EventEmitter } from 'events';
 import { A2AMessageBus, MCPProtocolHandler, type AgentMessage } from '../ContinuousOrchestrator.js';
 
 // ============================================================================
+// CONFIGURABLE RULE THRESHOLDS
+// Tunable via environment without a deploy; defaults preserve prior
+// hardcoded values (CPI/SPI < 0.85 trigger workflow rules).
+// ============================================================================
+
+const RULE_CPI_CRITICAL = parseFloat(process.env.RULE_CPI_CRITICAL || '0.85');
+const RULE_SPI_CRITICAL = parseFloat(process.env.RULE_SPI_CRITICAL || '0.85');
+
+// ============================================================================
 // SHARED CONTEXT & MEMORY
 // ============================================================================
 
@@ -141,7 +150,7 @@ export class WorkflowEngine {
       trigger: {
         agent: 'finops',
         event: 'budget_overrun',
-        condition: (data) => data.cpi < 0.85,
+        condition: (data) => data.cpi < RULE_CPI_CRITICAL,
       },
       actions: [
         {
@@ -166,7 +175,7 @@ export class WorkflowEngine {
       trigger: {
         agent: 'tmo',
         event: 'schedule_delay',
-        condition: (data) => data.spi < 0.85,
+        condition: (data) => data.spi < RULE_SPI_CRITICAL,
       },
       actions: [
         {

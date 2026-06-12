@@ -5,6 +5,25 @@ import { getPalantirStorageAdapter } from "./services/PalantirStorageAdapter.js"
 import { parsePolicyDocument, extractPolicyMetadata, generateLifecycleInsight } from "./anthropic";
 
 const storage = getPalantirStorageAdapter(postgresStorage);
+import { getEventDrivenOrchestrator, type ChangeEvent } from "./lib/EventDrivenOrchestrator.js";
+
+/**
+ * Notify the EventDrivenOrchestrator of a data change so the relevant agents
+ * fire (event-driven, replaces 15s polling). Never throws - a failure to
+ * register an event must never break the API route that caused it.
+ */
+function emitChangeEvent(event: Omit<ChangeEvent, "timestamp" | "source"> & { source?: string }): void {
+  try {
+    const orchestrator = getEventDrivenOrchestrator();
+    orchestrator?.registerChange({
+      source: "api",
+      ...event,
+      timestamp: new Date(),
+    });
+  } catch (err: any) {
+    console.warn("[Routes] Failed to register change event:", err?.message);
+  }
+}
 import { registerCoPilotRoutes } from "./copilot";
 import { askPM } from "./askPM";
 import { generateExecutiveInsights, refreshInsights } from "./executiveInsights";
@@ -1231,6 +1250,18 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
       if (!result.ok) {
         return res.status(result.status).json({ error: result.error, message: result.message });
       }
+
+      // EVENT-DRIVEN: new/updated project → trigger relevant agents
+      if (result.projectId) {
+        emitChangeEvent({
+          type: "project_update",
+          projectId: result.projectId,
+          field: "ingest",
+          newValue: projectData?.name,
+          severity: "medium",
+        });
+      }
+
       return res.json({
         success: true,
         projectId: result.projectId,
@@ -2626,8 +2657,40 @@ Format the response with clear sections: Strategic Value, Current Status, Key Ri
         return res.status(400).json({ error: "Missing required fields: projectId, projectName, metricKey, value" });
       }
 
+      // Capture previous value so we only emit a change event when it actually changed
+      let previousValue: number | undefined;
+      try {
+        const existingMetrics = await storage.getProjectMetrics(projectId);
+        const existing = existingMetrics.find(m => m.metricKey === metricKey);
+        previousValue = existing ? parseFloat(existing.currentValue) : undefined;
+      } catch {
+        // Non-fatal - we just won't have a previous value for the event
+      }
+
       const result = await updateMetricAndCheck(projectId, projectName, metricKey, parseFloat(value));
-      
+
+      // EVENT-DRIVEN: metric changed → trigger the relevant agents
+      const newValue = parseFloat(value);
+      if (previousValue !== newValue) {
+        const key = String(metricKey).toLowerCase();
+        const eventType: ChangeEvent["type"] =
+          key.includes("cpi") || key.includes("budget") || key.includes("cost") || key.includes("spend")
+            ? "budget_change"
+            : key.includes("spi") || key.includes("schedule")
+              ? "schedule_change"
+              : key.includes("risk")
+                ? "risk_change"
+                : "project_update";
+        emitChangeEvent({
+          type: eventType,
+          projectId,
+          field: metricKey,
+          previousValue,
+          newValue,
+          severity: result.intervention ? "high" : "low",
+        });
+      }
+
       res.json({
         success: true,
         intervention: result.intervention,
