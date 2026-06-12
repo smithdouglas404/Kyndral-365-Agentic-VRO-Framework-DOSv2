@@ -17,6 +17,7 @@
 import type { IStorage } from '../storage.js';
 import type { Integration } from '../../shared/schema.js';
 import { decryptFields } from '../lib/encryption.js';
+import { OpenProjectClient } from '../openProjectClient.js';
 
 export interface SyncResult {
   success: boolean;
@@ -161,17 +162,24 @@ export class IntegrationSyncService {
   private async testOpenProjectConnection(credentials: IntegrationCredentials): Promise<SyncResult> {
     const startTime = Date.now();
 
-    const { createOpenProjectClientFromIntegration } = await import('../openProjectClient.js');
-    const client = createOpenProjectClientFromIntegration(credentials);
+    if (!credentials.baseUrl || !credentials.apiKey) {
+      throw new Error('Missing required OpenProject credentials: baseUrl, apiKey');
+    }
+
+    const client = new OpenProjectClient({
+      baseUrl: credentials.baseUrl,
+      apiKey: credentials.apiKey,
+      projectId: credentials.projectId,
+    });
     const result = await client.testConnection();
 
-    if (!result.connected) {
-      throw new Error(`OpenProject connection failed: ${result.error}`);
+    if (!result.success) {
+      throw new Error(`OpenProject connection failed: ${result.message}`);
     }
 
     return {
       success: true,
-      message: `Connected to OpenProject ${result.version || ''} (${result.instanceName || 'instance'})`.trim(),
+      message: result.message,
       details: {
         recordsImported: 0,
         recordsUpdated: 0,
@@ -186,37 +194,37 @@ export class IntegrationSyncService {
   private async syncOpenProject(integration: Integration, credentials: IntegrationCredentials): Promise<SyncResult> {
     const startTime = Date.now();
 
-    const { createOpenProjectClientFromIntegration, syncOpenProjectProjects } = await import('../openProjectClient.js');
-    const client = createOpenProjectClientFromIntegration(credentials);
+    if (!credentials.baseUrl || !credentials.apiKey) {
+      throw new Error('Missing required OpenProject credentials: baseUrl, apiKey');
+    }
 
-    // Pull OP projects + work-package roll-ups into Kyndral storage
-    const pull = await syncOpenProjectProjects(client, this.storage);
+    const client = new OpenProjectClient({
+      baseUrl: credentials.baseUrl,
+      apiKey: credentials.apiKey,
+      projectId: credentials.projectId,
+    });
 
-    // Push the same change set into the Palantir ontology (best-effort) so
-    // MCP feeds and agents see the updated ground truth
-    let ontologyNote = '';
-    try {
-      const { getOPToPalantirSync } = await import('./sync/OpenProjectToPalantirSync.js');
-      const ontologyResult = await getOPToPalantirSync().syncIncremental();
-      ontologyNote = ` Ontology sync: ${ontologyResult.created} created, ${ontologyResult.updated} updated, ${ontologyResult.failed} failed.`;
-      if (ontologyResult.errors.length > 0) {
-        pull.errors.push(...ontologyResult.errors.map(e => `Ontology: ${e}`));
-      }
-    } catch (err: any) {
-      pull.errors.push(`Ontology sync failed: ${err.message}`);
+    const projects = await client.getProjects();
+    let recordsImported = 0;
+    const errors: string[] = [];
+
+    for (const p of projects) {
+      const r = await client.syncProject(String(p.id), integration.id);
+      recordsImported += r.projectsCreated + r.featuresCreated + r.storiesCreated + r.tasksCreated + r.risksCreated;
+      errors.push(...r.errors);
     }
 
     return {
-      success: pull.errors.length === 0,
-      message: pull.errors.length === 0
-        ? `Successfully synced ${pull.projectsCreated + pull.projectsUpdated} projects (${pull.workPackagesProcessed} work packages) from OpenProject.${ontologyNote}`
-        : `Synced with ${pull.errors.length} errors`,
+      success: errors.length === 0,
+      message: errors.length === 0
+        ? `OpenProject sync: ${recordsImported} items from ${projects.length} projects`
+        : `Synced with ${errors.length} errors`,
       details: {
-        recordsImported: pull.projectsCreated,
-        recordsUpdated: pull.projectsUpdated,
+        recordsImported,
+        recordsUpdated: 0,
         recordsSkipped: 0,
-        errors: pull.errors.length,
-        errorMessages: pull.errors.length > 0 ? pull.errors : undefined,
+        errors: errors.length,
+        errorMessages: errors.length > 0 ? errors : undefined,
         duration: Date.now() - startTime,
         timestamp: new Date().toISOString(),
       },
