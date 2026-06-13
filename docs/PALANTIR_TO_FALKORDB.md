@@ -1,11 +1,19 @@
 # Palantir → FalkorDB migration plan (ontology backend swap)
 
-> ℹ️ **Status.** This migration is already realized in the **`agent-runtime/`
-> sidecar** (FalkorDB + Graphiti are the live graph). What remains is the `server/`
-> side: `/api/palantir/ontology/*` should be served by `FalkorOntologyDataProvider`
-> and the legacy Palantir services dropped (the Palantir boot in `server/index.ts`
-> is already off by default via `ENABLE_LEGACY_AGENTS`). Plan below is still the
-> reference for finishing the `server/` swap.
+> ℹ️ **Status.** Cutover is functionally complete:
+> - **agent-runtime/** runs entirely on FalkorDB + Graphiti.
+> - **server/** UI ontology route `/api/palantir/ontology/*` is now served by
+>   `FalkorOntologyDataProvider` (URL kept; the Foundry client is no longer used
+>   by it).
+> - The legacy in-process agent + Palantir-sync boot is off by default
+>   (`ENABLE_LEGACY_AGENTS`), so no live path calls Foundry when `PALANTIR_*`
+>   creds are unset.
+> - The dead `@palantir/pack.state.foundry` dependency was removed.
+>
+> Remaining is **dead-code deletion only** (the dormant `server/services/Palantir*.ts`,
+> `server/mcp/Palantir*.ts`, `server/ontology/palantir/*`, and null-guarded
+> `palantir*.ts` routes) — tracked as a follow-up that needs a compile/test pass to
+> do safely. Plan below remains the reference.
 
 Scope: Kyndral-365 DOSv2. The UI reads ontology objects (Project, Feature,
 Story, Task, Risk, …) through `/api/palantir/ontology/*` routes backed by
