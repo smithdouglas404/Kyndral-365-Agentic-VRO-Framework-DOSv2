@@ -725,7 +725,7 @@ export default function ProjectDetailPage() {
     queryKey: ["project-detail", params.id],
     queryFn: async () => {
       // Try project360 endpoint first
-      const res = await fetch(`/api/palantir/ontology/project360/${params.id}`);
+      const res = await fetch(`/api/ontology/project360/${params.id}`);
       if (res.ok) {
         const project360 = await res.json();
         return {
@@ -740,13 +740,13 @@ export default function ProjectDetailPage() {
       }
 
       // Fallback to individual project endpoint
-      const projectRes = await fetch(`/api/palantir/ontology/projects/${params.id}`);
+      const projectRes = await fetch(`/api/ontology/projects/${params.id}`);
       if (!projectRes.ok) throw new Error("Project not found");
       const project = await projectRes.json();
 
       // Fetch related data in parallel
       const [risksRes] = await Promise.all([
-        fetch(`/api/palantir/ontology/risks?projectId=${params.id}`).catch(() => null),
+        fetch(`/api/ontology/risks?projectId=${params.id}`).catch(() => null),
       ]);
 
       return {

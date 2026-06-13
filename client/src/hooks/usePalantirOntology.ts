@@ -168,7 +168,7 @@ export function useOntologySchema() {
   return useQuery<OntologySchema, Error>({
     queryKey: ["palantir", "schema"],
     queryFn: async () => {
-      const response = await fetch("/api/palantir/ontology/schema");
+      const response = await fetch("/api/ontology/schema");
       if (!response.ok) {
         throw new Error("Failed to fetch ontology schema");
       }
@@ -185,7 +185,7 @@ export function useDashboardMetrics() {
   return useQuery<DashboardMetrics, Error>({
     queryKey: ["palantir", "metrics"],
     queryFn: async () => {
-      const response = await fetch("/api/palantir/ontology/metrics");
+      const response = await fetch("/api/ontology/metrics");
       if (!response.ok) {
         throw new Error("Failed to fetch dashboard metrics");
       }
@@ -218,7 +218,7 @@ export function useOntologyProjects(filters?: {
   return useQuery<OntologyProject[], Error>({
     queryKey: ["palantir", "projects", filters],
     queryFn: async () => {
-      const url = `/api/palantir/ontology/projects${queryString ? `?${queryString}` : ""}`;
+      const url = `/api/ontology/projects${queryString ? `?${queryString}` : ""}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch projects from ontology");
@@ -236,7 +236,7 @@ export function useOntologyProject(projectId: string) {
   return useQuery<OntologyProject, Error>({
     queryKey: ["palantir", "project", projectId],
     queryFn: async () => {
-      const response = await fetch(`/api/palantir/ontology/projects/${projectId}`);
+      const response = await fetch(`/api/ontology/projects/${projectId}`);
       if (!response.ok) {
         throw new Error("Failed to fetch project from ontology");
       }
@@ -256,7 +256,7 @@ export function useOntologyProjectsByBU(businessUnit: string | string[]) {
   return useQuery<OntologyProject[], Error>({
     queryKey: ["palantir", "projects", "by-bu", buList],
     queryFn: async () => {
-      const response = await fetch(`/api/palantir/ontology/projects?businessUnits=${buList.join(",")}`);
+      const response = await fetch(`/api/ontology/projects?businessUnits=${buList.join(",")}`);
       if (!response.ok) {
         throw new Error("Failed to fetch projects by business unit");
       }
@@ -288,7 +288,7 @@ export function useOntologyRisks(filters?: {
   return useQuery<OntologyRisk[], Error>({
     queryKey: ["palantir", "risks", filters],
     queryFn: async () => {
-      const url = `/api/palantir/ontology/risks${queryString ? `?${queryString}` : ""}`;
+      const url = `/api/ontology/risks${queryString ? `?${queryString}` : ""}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch risks from ontology");
@@ -319,7 +319,7 @@ export function useOntologyOKRs(filters?: {
   return useQuery<OntologyOKR[], Error>({
     queryKey: ["palantir", "okrs", filters],
     queryFn: async () => {
-      const url = `/api/palantir/ontology/okrs${queryString ? `?${queryString}` : ""}`;
+      const url = `/api/ontology/okrs${queryString ? `?${queryString}` : ""}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch OKRs from ontology");
@@ -342,8 +342,8 @@ export function useOntologyFinancials(projectId?: string) {
     queryKey: ["palantir", "financials", projectId],
     queryFn: async () => {
       const url = projectId
-        ? `/api/palantir/ontology/financials?projectId=${projectId}`
-        : "/api/palantir/ontology/financials";
+        ? `/api/ontology/financials?projectId=${projectId}`
+        : "/api/ontology/financials";
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch financials from ontology");
@@ -377,7 +377,7 @@ export function useOntologyObjects<T = Record<string, unknown>>(
   return useQuery<T[], Error>({
     queryKey: ["palantir", "objects", objectType, filters],
     queryFn: async () => {
-      const url = `/api/palantir/ontology/${objectType}${queryString ? `?${queryString}` : ""}`;
+      const url = `/api/ontology/${objectType}${queryString ? `?${queryString}` : ""}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch ${objectType} from ontology`);
@@ -399,7 +399,7 @@ export function useOntologyObject<T = Record<string, unknown>>(
   return useQuery<T, Error>({
     queryKey: ["palantir", "object", objectType, objectId],
     queryFn: async () => {
-      const response = await fetch(`/api/palantir/ontology/${objectType}/${objectId}`);
+      const response = await fetch(`/api/ontology/${objectType}/${objectId}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch ${objectType} object from ontology`);
       }
@@ -425,7 +425,7 @@ export function useAgentOntologyData(agentType: string) {
   }, Error>({
     queryKey: ["palantir", "agent-data", agentType],
     queryFn: async () => {
-      const response = await fetch(`/api/palantir/ontology/agent/${agentType}`);
+      const response = await fetch(`/api/ontology/agent/${agentType}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch ontology data for agent: ${agentType}`);
       }

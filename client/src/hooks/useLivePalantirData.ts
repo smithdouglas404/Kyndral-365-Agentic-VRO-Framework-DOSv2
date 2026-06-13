@@ -82,7 +82,7 @@ export function useLivePalantirData<T = Record<string, unknown>>(
 
   // Default fetcher for Palantir ontology data
   const defaultFetcher = useCallback(async () => {
-    const response = await fetch(`/api/palantir/ontology/${dataType}`);
+    const response = await fetch(`/api/ontology/${dataType}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch ${dataType} from Palantir`);
     }

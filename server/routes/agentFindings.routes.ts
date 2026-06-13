@@ -119,5 +119,19 @@ export function initAgentFindingsRoutes(router: Router): Router {
   router.post("/api/agent/mapping", (req: Request, res: Response) =>
     void forward(res, "/api/mapping", { method: "POST", body: req.body }));
 
+  // --- Universal mapper: sources, generalized per-source schema, write-back ---
+  // The ontology is the hub; these let the UI list spokes, discover any source's
+  // schema, and push edits back through the source's adapter (bidirectional edit).
+  router.get("/api/agent/sources", (_req, res) => void forward(res, "/api/sources"));
+  router.get("/api/agent/schema", (req: Request, res: Response) => {
+    const source = typeof req.query.source === "string" ? req.query.source : "openproject";
+    void forward(res, `/api/schema?source=${encodeURIComponent(source)}`);
+  });
+  router.post("/api/agent/writeback", (req: Request, res: Response) =>
+    void forward(res, "/api/writeback", { method: "POST", body: req.body }));
+
+  // --- ML-suggested rule thresholds (read-only, advisory; rules stay in OpenProject) ---
+  router.get("/api/agent/rules/suggestions", (_req, res) => void forward(res, "/api/rules/suggestions"));
+
   return router;
 }

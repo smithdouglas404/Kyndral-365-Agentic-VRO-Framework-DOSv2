@@ -16,7 +16,7 @@
  * DROP-IN: copy to Kyndral `client/src/openproject/WidgetRenderer.tsx`.
  * Tailwind only; dark-mode friendly; no component-library dependency.
  */
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 /** The attribute/ontology value types the studio understands. */
 export type WidgetValueType =
@@ -294,13 +294,141 @@ export const WIDGET_RENDERERS: Record<string, WidgetRenderer> = {
 /** Stable fallback used for unknown widget ids. */
 export const FALLBACK_WIDGET = "labeled_field";
 
+/* --------------------------------------------------- bidirectional (editable) */
+
+/** Options for {@link renderWidget} — pass `editable` to get a write-back control. */
+export interface RenderOptions {
+  /** Render an editable control (bidirectional edit) instead of the read-only widget. */
+  editable?: boolean;
+  /** Called when the user commits a new value (blur for text/number/date, change for enum/boolean). */
+  onCommit?: (value: unknown) => void | Promise<void>;
+  /** Allowed values for enum types (renders a <select>). */
+  enumValues?: string[];
+}
+
 /**
- * Render a value with the chosen widget. Unknown ids fall back to
- * `labeled_field` so nothing renders blank.
+ * The WRITE half of a widget: a type-appropriate input that commits its value via
+ * `onCommit` (which a consumer wires to {@link commitWriteback}). Read mode uses
+ * the chosen display widget; edit mode is driven by the value's type.
  */
-export function renderWidget(widgetId: string | undefined, props: WidgetProps): ReactNode {
+export function EditableField({
+  label,
+  value,
+  type,
+  enumValues,
+  onCommit,
+}: WidgetProps & { enumValues?: string[]; onCommit?: (value: unknown) => void | Promise<void> }): ReactNode {
+  const [draft, setDraft] = useState<string>(value == null ? "" : String(value));
+  const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  const commit = async (next: unknown) => {
+    if (!onCommit) return;
+    setState("saving");
+    try {
+      await onCommit(next);
+      setState("saved");
+    } catch {
+      setState("error");
+    }
+  };
+
+  const inputCls = "w-full rounded-md border border-neutral-300 bg-transparent px-2 py-1 text-sm dark:border-neutral-700";
+  let control: ReactNode;
+
+  if (type === "boolean") {
+    const on = value === true || value === "true" || value === 1 || value === "yes";
+    control = (
+      <input
+        type="checkbox"
+        defaultChecked={on}
+        className="h-4 w-4 accent-emerald-600"
+        aria-label={label}
+        onChange={(e) => void commit(e.target.checked)}
+      />
+    );
+  } else if (type === "enum" && enumValues && enumValues.length > 0) {
+    control = (
+      <select className={inputCls} defaultValue={value == null ? "" : String(value)} onChange={(e) => void commit(e.target.value)}>
+        {enumValues.map((v) => (
+          <option key={v} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
+    );
+  } else {
+    const inputType =
+      type === "number" || type === "percentage" || type === "currency" || type === "duration"
+        ? "number"
+        : type === "date"
+          ? "date"
+          : "text";
+    control = (
+      <input
+        type={inputType}
+        className={inputCls}
+        value={draft}
+        aria-label={label}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => void commit(inputType === "number" ? (draft === "" ? null : Number(draft)) : draft)}
+      />
+    );
+  }
+
+  return (
+    <div className={FRAME}>
+      <div className={LABEL}>
+        {label}
+        {state === "saving" ? " · saving…" : state === "saved" ? " · saved ✓" : state === "error" ? " · failed ✕" : ""}
+      </div>
+      <div className="mt-1">{control}</div>
+    </div>
+  );
+}
+
+/**
+ * Render a value with the chosen widget (read-only), or — when
+ * `options.editable` — a type-appropriate editable control for bidirectional
+ * edit. Unknown widget ids fall back to `labeled_field` so nothing renders blank.
+ */
+export function renderWidget(widgetId: string | undefined, props: WidgetProps, options?: RenderOptions): ReactNode {
+  if (options?.editable) {
+    return <EditableField {...props} enumValues={options.enumValues} onCommit={options.onCommit} />;
+  }
   const renderer = (widgetId && WIDGET_RENDERERS[widgetId]) || WIDGET_RENDERERS[FALLBACK_WIDGET];
   return renderer(props);
+}
+
+/**
+ * Push an edited value back to its source THROUGH the ontology hub: POSTs to the
+ * /api/agent/writeback proxy → runtime → the source's adapter, which reverse-maps
+ * the ontology property to the source field and writes it (OpenProject writes are
+ * echo-guarded). Consumers speak ontology, never source field names. Never throws.
+ */
+export async function commitWriteback(input: {
+  source: string;
+  objectId: string | number;
+  ontologyProperty: string;
+  value: unknown;
+  apiBase?: string;
+}): Promise<{ ok: boolean; error?: string; detail?: string }> {
+  const base = (input.apiBase ?? "/api/agent").replace(/\/+$/, "");
+  try {
+    const res = await fetch(`${base}/writeback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        source: input.source,
+        objectId: input.objectId,
+        ontologyProperty: input.ontologyProperty,
+        value: input.value,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; detail?: string };
+    return { ok: res.ok && data.ok !== false, error: data.error, detail: data.detail };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 export default WIDGET_RENDERERS;

@@ -68,6 +68,15 @@ export interface WidgetDescriptor {
   appliesTo: AttributeType[];
 }
 
+/** A mappable source (a spoke on the ontology hub), as served by GET /sources. */
+export interface SourceInfo {
+  id: string;
+  label: string;
+  kind?: string;
+  /** False when the runtime has no creds/URL for this source yet. */
+  configured?: boolean;
+}
+
 /** A known value transform applied between source and ontology. */
 export type TransformId = "none" | "status_map" | "priority_map" | "iso_duration_hours";
 
@@ -141,6 +150,7 @@ export function MappingStudio({
   className = "",
 }: MappingStudioProps) {
   const [source, setSource] = useState("openproject");
+  const [sources, setSources] = useState<SourceInfo[]>([]);
   const [attributes, setAttributes] = useState<AttributeDescriptor[]>([]);
   const [properties, setProperties] = useState<OntologyProperty[]>([]);
   const [widgets, setWidgets] = useState<WidgetDescriptor[]>([]);
@@ -165,7 +175,7 @@ export function MappingStudio({
     setToast(null);
     try {
       const [schema, props, widgetsRes, mapping] = await Promise.all([
-        getJSON<AttributeDescriptor[]>(`${apiBase}/openproject/schema`),
+        getJSON<AttributeDescriptor[]>(`${apiBase}/schema?source=${encodeURIComponent(source)}`),
         getJSON<OntologyProperty[]>(`${apiBase}/ontology/properties`),
         getJSON<{ widgets: WidgetDescriptor[] }>(`${apiBase}/widgets`),
         getJSON<SourceMappingSet>(`${apiBase}/mapping?source=${encodeURIComponent(source)}`),
@@ -198,6 +208,13 @@ export function MappingStudio({
       setDiscovering(false);
     }
   }, [apiBase, source, fail]);
+
+  // Load the available sources (spokes) for the selector, once on mount.
+  useEffect(() => {
+    void getJSON<SourceInfo[]>(`${apiBase}/sources`).then((s) => {
+      if (Array.isArray(s) && s.length) setSources(s);
+    });
+  }, [apiBase]);
 
   // Discover once on mount and whenever the source changes.
   useEffect(() => {
@@ -266,8 +283,12 @@ export function MappingStudio({
               onChange={(e) => setSource(e.target.value)}
               className="rounded-md border border-neutral-300 bg-transparent px-2 py-1 text-xs dark:border-neutral-700"
             >
-              <option value="openproject">openproject</option>
-              {/* more sources plug in here as they map to the ontology */}
+              {(sources.length ? sources : [{ id: "openproject", label: "openproject", configured: true }]).map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                  {s.configured === false ? " (not configured)" : ""}
+                </option>
+              ))}
             </select>
           </label>
           {updatedAt && (
