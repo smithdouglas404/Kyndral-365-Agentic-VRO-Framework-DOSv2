@@ -135,7 +135,9 @@ lefthook-local.yml
 
 /.lefthook-local/
 
-frontend/package-lock.json
+# frontend/package-lock.json is committed in this fork: deterministic resolution
+# of theo's (old) transitive deps is required for the production Docker asset
+# build (precompile-assets.sh → tokens:generate). Do NOT re-ignore it.
 
 # Testing and nextcloud infrastructure
 acme.json
