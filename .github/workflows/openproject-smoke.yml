@@ -1,0 +1,76 @@
+name: OpenProject smoke test
+
+# Builds the FORKED OpenProject image and boots it against Postgres, then proves
+# the agentic_ppm plugin is loaded + migrated and that core pages don't 5xx.
+# This runs in an environment that has Docker + Ruby (unlike the sandbox where
+# the TS/agent code is developed), so it catches build/boot/view regressions
+# (missing tokens, unresolved deps, ng-build errors, plugin-not-loaded, bad
+# migrations) on the PR — before they reach Railway.
+
+on:
+  pull_request:
+    paths:
+      - 'openproject/**'
+      - '.github/workflows/openproject-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'openproject/**'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      # The image build is the single biggest regression catcher: it exercises
+      # npm ci (lockfile), tokens:generate (theo), and the Angular production
+      # build (assets:precompile) — i.e. everything #13/#18/#20/#21/#22/#23/#25 fixed.
+      - name: Build forked OpenProject image
+        run: docker compose build openproject
+
+      # First boot runs migrations + seeds (OPENPROJECT_SEED_ADMIN_USER_PASSWORD is
+      # set in docker-compose), so the agentic_ppm migrations apply here.
+      - name: Boot OpenProject + Postgres
+        run: docker compose up -d openproject-db openproject
+
+      - name: Wait for OpenProject to become healthy
+        run: |
+          for i in $(seq 1 80); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/v3 || true)
+            echo "attempt $i: GET /api/v3 -> ${code:-000}"
+            if [ "$code" = "200" ]; then echo "OpenProject is up"; exit 0; fi
+            sleep 15
+          done
+          echo "::error::OpenProject did not become healthy in 20 minutes"
+          exit 1
+
+      - name: Assert agentic_ppm plugin is loaded and migrated
+        run: |
+          docker compose exec -T openproject bundle exec rails runner '
+            raise "agentic_ppm gem not loaded" unless Gem.loaded_specs.key?("openproject-agentic_ppm")
+            conn = ActiveRecord::Base.connection
+            raise "agentic_ppm_agent_rules table missing (migrations did not run)" \
+              unless conn.table_exists?(:agentic_ppm_agent_rules)
+            raise "agentic_ppm_agent_recommendations table missing" \
+              unless conn.table_exists?(:agentic_ppm_agent_recommendations)
+            puts "agentic_ppm OK: gem loaded + migrations applied"
+          '
+
+      - name: Smoke core pages for 5xx
+        run: |
+          fail=0
+          for path in / /api/v3 /login /projects; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8080${path}" || echo 000)
+            echo "GET ${path} -> ${code}"
+            if [ "${code}" -ge 500 ] 2>/dev/null; then
+              echo "::error::5xx on ${path}"; fail=1
+            fi
+          done
+          exit $fail
+
+      - name: Dump OpenProject logs on failure
+        if: failure()
+        run: docker compose logs --tail=400 openproject openproject-db
