@@ -45,19 +45,26 @@ export interface FactFilter {
 
 export class Mem0Service extends EventEmitter {
   private static instance: Mem0Service;
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
 
   private constructor() {
     super();
     // Increase max listeners to support 10+ agents subscribing to fact events
     this.setMaxListeners(50);
 
-    // Initialize OpenAI for embeddings
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // OpenAI is OPTIONAL — used only for semantic-search embeddings. It is
+    // created lazily (see getOpenAI) so the app boots with only ANTHROPIC_API_KEY.
+    // Without an OpenAI key the fact ledger still works; semantic search no-ops.
+    const semantic = process.env.OPENAI_API_KEY ? 'with semantic search' : 'without semantic search (no OPENAI_API_KEY)';
+    console.log(`[Mem0] Shared fact ledger initialized ${semantic}`);
+  }
 
-    console.log('[Mem0] Shared fact ledger initialized with semantic search');
+  /** Lazily build the OpenAI client; returns null when no OPENAI_API_KEY is set. */
+  private getOpenAI(): OpenAI | null {
+    if (this.openai) return this.openai;
+    if (!process.env.OPENAI_API_KEY) return null;
+    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    return this.openai;
   }
 
   public static getInstance(): Mem0Service {
@@ -163,6 +170,7 @@ export class Mem0Service extends EventEmitter {
 
       // Generate embedding
       const embedding = await this.generateEmbedding(content);
+      if (embedding.length === 0) return; // semantic search disabled (no OpenAI key)
 
       // Save to agent_memories table
       await db.execute(sql`
@@ -216,7 +224,9 @@ export class Mem0Service extends EventEmitter {
    * Generate OpenAI embedding for text
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    const response = await this.openai.embeddings.create({
+    const openai = this.getOpenAI();
+    if (!openai) return []; // no OpenAI key → skip embeddings (semantic search disabled)
+    const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text,
       dimensions: 1536
@@ -291,6 +301,7 @@ export class Mem0Service extends EventEmitter {
 
       // Generate embedding for the search query
       const embedding = await this.generateEmbedding(query);
+      if (embedding.length === 0) return []; // semantic search disabled (no OpenAI key)
 
       // Build query with optional agent filter
       const agentFilter = agentId ? sql`AND agent_id = ${agentId}` : sql``;
