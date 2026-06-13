@@ -9,6 +9,9 @@ else
   echo "Assets need to be compiled"
   JOBS=8 npm install
 
+  # Generate design tokens from YAML sources before Angular build
+  cd frontend && npm run tokens:generate && cd ..
+
   SECRET_KEY_BASE=1 RAILS_ENV=production DATABASE_URL=nulldb://db \
     bin/rails openproject:plugins:register_frontend assets:precompile
 
