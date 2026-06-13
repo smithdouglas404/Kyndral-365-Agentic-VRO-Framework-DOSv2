@@ -101,15 +101,27 @@ async function loadIndustryProfilesFromDB(): Promise<IndustryProfile[]> {
  * Load all industry profiles from JSON file (fallback)
  */
 function loadIndustryProfilesFromJSON(): IndustryProfile[] {
-  try {
-    const filePath = path.join(__dirname, '../ontology/industries.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const data: IndustryData = JSON.parse(fileContent);
-    return data.industries;
-  } catch (error) {
-    console.error('[IndustryProfileLoader] Failed to load industries from JSON:', error);
-    return [];
+  // The bundled server (dist/index.cjs) resolves __dirname differently than in
+  // dev, and the Docker image ships both server/ontology (server/ is copied) and
+  // dist/ontology (copied by the build). Try every known location so this works
+  // in dev, in the bundle, and in the container regardless of cwd/__dirname.
+  const candidates = [
+    path.join(__dirname, '../ontology/industries.json'),        // dev: server/services -> server/ontology
+    path.join(__dirname, 'ontology/industries.json'),           // bundle: dist -> dist/ontology
+    path.join(process.cwd(), 'dist/ontology/industries.json'),  // container: /app/dist/ontology
+    path.join(process.cwd(), 'server/ontology/industries.json'),// container: /app/server/ontology
+  ];
+  for (const filePath of candidates) {
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const data: IndustryData = JSON.parse(fileContent);
+      return data.industries;
+    } catch {
+      // not at this path — try the next candidate
+    }
   }
+  console.error('[IndustryProfileLoader] industries.json not found at any known path:', candidates);
+  return [];
 }
 
 /**

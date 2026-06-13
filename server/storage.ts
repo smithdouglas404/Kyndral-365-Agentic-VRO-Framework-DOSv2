@@ -2905,17 +2905,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setAppConfig(key: string, value: string, description?: string, category?: string, tenantId?: string | null): Promise<AppConfig> {
-    const result = await db.insert(appConfig).values({
+    // app_config has no unique constraint on config_key, so INSERT ... ON CONFLICT
+    // (config_key) fails with 42P10. Do a manual upsert that mirrors getAppConfig's
+    // read semantics (global = config_key only; tenant-scoped = config_key+tenant).
+    const tid = tenantId ?? null;
+    const matches = await db.select().from(appConfig).where(
+      tid === null
+        ? eq(appConfig.configKey, key)
+        : and(eq(appConfig.configKey, key), eq(appConfig.tenantId, tid)),
+    );
+    if (matches.length > 0) {
+      const updated = await db.update(appConfig)
+        .set({ configValue: value, updatedAt: new Date() })
+        .where(eq(appConfig.id, matches[0].id))
+        .returning();
+      return updated[0];
+    }
+    const inserted = await db.insert(appConfig).values({
       configKey: key,
       configValue: value,
       description,
       category: category || 'general',
-      tenantId: tenantId || null
-    }).onConflictDoUpdate({
-      target: appConfig.configKey,
-      set: { configValue: value, updatedAt: new Date() }
+      tenantId: tid,
     }).returning();
-    return result[0];
+    return inserted[0];
   }
 
   // User Dashboard Config Methods
