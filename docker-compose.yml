@@ -1,10 +1,21 @@
-version: '3.8'
+# Kyndral-365 monorepo — one command boots the whole product:
+#   docker compose up -d
+#
+# Layout: /              Kyndral app (UI + server + agents)
+#         /openproject   the OpenProject FORK (Rails datastore of record) — built from source
+#         /agent-runtime the agentic sidecar (FalkorDB graph + reasoning agents)
+#
+# Services talk over the compose network with FIXED internal hostnames, so the
+# cross-system env-var wiring is gone. The only values to supply (in .env):
+#   OPENPROJECT_API_KEY        — generate in OpenProject (My Account → Access tokens)
+#   OPENPROJECT_WEBHOOK_SECRET — any string; set the same in OP Administration → Webhooks
+#   ANTHROPIC_API_KEY          — AI SDK chat route (optional)
 
 services:
-  # PostgreSQL Database (existing)
+  # Kyndral application database
   postgres:
     image: postgres:16
-    container_name: nextera-postgres
+    container_name: kyndral-postgres
     environment:
       POSTGRES_DB: nextera_eto
       POSTGRES_USER: postgres
@@ -19,38 +30,29 @@ services:
       timeout: 5s
       retries: 5
 
-  # Neo4j Knowledge Graph (new)
-  neo4j:
-    image: neo4j:5.15
-    container_name: nextera-neo4j
-    environment:
-      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
-      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
-      NEO4J_dbms_memory_heap_max__size: 2G
-      NEO4J_dbms_memory_pagecache_size: 1G
-      NEO4J_dbms_security_procedures_unrestricted: apoc.*,gds.*
-      NEO4J_dbms_security_procedures_allowlist: apoc.*,gds.*
+  # FalkorDB — the ontology graph + agent-runtime world model (replaces Neo4j/Palantir)
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: kyndral-falkordb
     ports:
-      - "7474:7474"  # Browser UI
-      - "7687:7687"  # Bolt protocol
+      - "6379:6379"
     volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-      - neo4j_import:/var/lib/neo4j/import
-      - neo4j_plugins:/plugins
+      - falkordb_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ${NEO4J_PASSWORD:-password} 'RETURN 1'"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
-  # OpenProject Headless PPM (API-only, no UI exposed to end users)
+  # OpenProject — built from OUR FORK in ./openproject (headless datastore of record)
   openproject:
-    image: openproject/openproject:14-slim
-    container_name: nextera-openproject
+    build:
+      context: ./openproject
+      dockerfile: docker/prod/Dockerfile
+    container_name: kyndral-openproject
     environment:
       OPENPROJECT_SECRET_KEY_BASE: ${OPENPROJECT_SECRET_KEY_BASE:-change-this-openproject-secret}
-      OPENPROJECT_HOST__NAME: openproject
+      OPENPROJECT_HOST__NAME: ${OPENPROJECT_HOST__NAME:-localhost:8080}
       OPENPROJECT_HTTPS: "false"
       OPENPROJECT_DEFAULT__LANGUAGE: en
       OPENPROJECT_SEED_ADMIN_USER_PASSWORD: ${OPENPROJECT_ADMIN_PASSWORD:-admin}
@@ -67,13 +69,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 120s
+      start_period: 180s
     restart: unless-stopped
 
   # OpenProject dedicated PostgreSQL
   openproject-db:
     image: postgres:16
-    container_name: nextera-openproject-db
+    container_name: kyndral-openproject-db
     environment:
       POSTGRES_DB: openproject
       POSTGRES_USER: openproject
@@ -87,79 +89,74 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # Application Server
+  # Agentic sidecar — syncs OpenProject into FalkorDB, runs the reasoning agents,
+  # owns the findings/HITL lifecycle (the /api/agent/* proxy target)
+  agent-runtime:
+    build: ./agent-runtime
+    container_name: kyndral-agent-runtime
+    environment:
+      OPENPROJECT_BASE_URL: http://openproject:80
+      OPENPROJECT_API_KEY: ${OPENPROJECT_API_KEY}
+      OPENPROJECT_WEBHOOK_SECRET: ${OPENPROJECT_WEBHOOK_SECRET}
+      FALKORDB_HOST: falkordb
+      FALKORDB_PORT: "6379"
+      PORT: "8745"
+      CONSOLE_TOKEN: ${AGENT_RUNTIME_TOKEN:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    ports:
+      - "8745:8745"
+    depends_on:
+      falkordb:
+        condition: service_healthy
+      openproject:
+        condition: service_started
+    restart: unless-stopped
+
+  # Kyndral application server (the only UI users see)
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: nextera-app
+      dockerfile: Dockerfile.production
+    container_name: kyndral-app
     ports:
       - "5000:5000"
     environment:
-      # Database
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/nextera_eto
 
-      # Neo4j
-      NEO4J_URI: neo4j://neo4j:7687
-      NEO4J_USER: neo4j
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-password}
+      # Internal hostnames — fixed by this file, never configured per-environment
+      OPENPROJECT_BASE_URL: http://openproject:80
+      OPENPROJECT_API_KEY: ${OPENPROJECT_API_KEY}
+      OPENPROJECT_WEBHOOK_SECRET: ${OPENPROJECT_WEBHOOK_SECRET}
+      AGENT_RUNTIME_URL: http://agent-runtime:8745
+      AGENT_RUNTIME_TOKEN: ${AGENT_RUNTIME_TOKEN:-}
+      FALKORDB_URL: redis://falkordb:6379
+      FALKORDB_HOST: falkordb
+      FALKORDB_PORT: "6379"
+      FALKORDB_GRAPH: kyndral_ontology
 
-      # Anthropic AI
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-
-      # LangChain/LangSmith (for agent observability)
-      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
-      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-nexus-ppm}
-      LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2:-true}
-      LANGCHAIN_ENDPOINT: https://api.smith.langchain.com
-
-      # Session
       SESSION_SECRET: ${SESSION_SECRET:-change-this-in-production}
-
-      # Node Environment
       NODE_ENV: ${NODE_ENV:-production}
 
-      # MCP Adapters (optional - configure as needed)
-      JIRA_DOMAIN: ${JIRA_DOMAIN}
-      JIRA_EMAIL: ${JIRA_EMAIL}
-      JIRA_API_TOKEN: ${JIRA_API_TOKEN}
-
-      AZURE_DEVOPS_ORG: ${AZURE_DEVOPS_ORG}
-      AZURE_DEVOPS_PAT: ${AZURE_DEVOPS_PAT}
-
-      # OpenProject Headless PPM
-      OPENPROJECT_URL: http://openproject:80
-      OPENPROJECT_API_KEY: ${OPENPROJECT_API_KEY}
-
+      # Optional external PM tools (legacy connectors)
+      JIRA_DOMAIN: ${JIRA_DOMAIN:-}
+      JIRA_EMAIL: ${JIRA_EMAIL:-}
+      JIRA_API_TOKEN: ${JIRA_API_TOKEN:-}
     depends_on:
       postgres:
         condition: service_healthy
-      neo4j:
+      falkordb:
         condition: service_healthy
       openproject:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
-    volumes:
-      - ./server:/app/server
-      - ./client:/app/client
-      - ./shared:/app/shared
 
 volumes:
   postgres_data:
-    driver: local
-  neo4j_data:
-    driver: local
-  neo4j_logs:
-    driver: local
-  neo4j_import:
-    driver: local
-  neo4j_plugins:
-    driver: local
+  falkordb_data:
   openproject_data:
-    driver: local
   openproject_db_data:
-    driver: local
 
 networks:
   default:
-    name: nextera-network
+    name: kyndral-network

@@ -1,0 +1,22 @@
+# Graphiti MCP — official combined image, patched to bind IPv6 for Railway.
+#
+# Why this exists: the upstream combined image (zepai/knowledge-graph-mcp) runs
+# the MCP HTTP server on 0.0.0.0:8000 — IPv4 ONLY. Railway's private network is
+# IPv6-only, so other services (the agent-runtime sidecar) get "fetch failed"
+# trying to reach graphiti-mcp-server.railway.internal:8000.
+#
+# This one-line patch flips the server bind to "::" (dual-stack), so it's
+# reachable over the IPv6 private network, while keeping everything that already
+# works in the combined image — the bundled FalkorDB on localhost (no external
+# DB hop), OpenAI LLM/embedder, and the /mcp/ HTTP endpoint.
+#
+# graphiti-mcp-server service config:
+#   - Source: build this Dockerfile (Root Directory = repo root)
+#   - Variables: OPENAI_API_KEY (required)
+#   - Do NOT set FALKORDB_URI — the bundled localhost FalkorDB is used.
+#   - Target port 8000, no healthcheck path. MCP endpoint: :8000/mcp/
+FROM zepai/knowledge-graph-mcp:1.0.2
+
+# Bind the MCP server to IPv6 (dual-stack) instead of IPv4-only 0.0.0.0.
+RUN sed -i -E 's/^([[:space:]]*host:[[:space:]]*).*/\1"::"/' /app/mcp/config/config.yaml \
+    && echo "Patched server host:" && grep -nE '^[[:space:]]*host:' /app/mcp/config/config.yaml

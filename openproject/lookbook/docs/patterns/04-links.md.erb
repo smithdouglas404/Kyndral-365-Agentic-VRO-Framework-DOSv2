@@ -1,0 +1,24 @@
+This document outlines our principles for using HTML links within OpenProject. These guidelines align with our [Primer Design System](https://primer.style/product/components/link/accessibility/#accessibility-and-usability-expectations) to ensure consistency, accessibility and a user-friendly experience.
+
+# Link Target Behavior
+
+By default, all links **open in the same browser tab**. This maintains user context and keeps the navigation seamless. It also gives more agency to the user; if they want to open the link in a new tab, they can choose to do so manually (for example, by Command-clicking on links or right-clicking on them to select the 'Open in a new tab' option).
+
+# Exceptions
+There are **two exceptions** where links may open in a new tab (`target="_blank"`):
+
+* The link points to an **external platform** (e.g., Nextcloud)
+* Opening the link in the same tab would **break the current user flow**, such as during form completion
+
+When a link opens in a new tab, the following must be implemented:
+
+* An **`aria-label`** must be added to inform screen reader users that the link opens in a new tab (e.g., `"Opens in a new tab"`).
+* The link must be followed by the `link-external` icon to visually indicate that a new tab will open.
+
+# Inline Link Styling
+
+Links that are part of a paragraph or continuous text must be **underlined**. This ensures they are clearly distinguishable from surrounding text, which is especially important for users with colour vision deficiencies.
+
+For links in form captions and PageHeader descriptions, this is done automatically. Otherwise, it has to be done [manually](https://primer.style/view-components/lookbook/inspect/primer/beta/link/default) by setting `underline: true`.
+
+<%= embed OpenProject::Common::LinkPreview, :inline %>
