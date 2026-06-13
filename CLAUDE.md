@@ -1,19 +1,22 @@
 # Kyndral-365 — project context for Claude
 
-## Architecture (three deployables, one product)
+## Architecture (ONE monorepo, three services, one product)
 
-- **This repo (Kyndral-365)** — THE application: React/Vite client (Tailwind,
+Everything lives in THIS repo; `docker compose up -d` boots the whole product.
+Services talk over fixed compose-internal hostnames — only secrets are env vars.
+
+- **`/` (Kyndral app)** — THE application: React/Vite client (Tailwind,
   shadcn/ui, Vercel AI SDK) + Express/Drizzle/Postgres server, Mastra agents,
-  a2a bus. This is the only UI users see.
-- **OpenProject** — the datastore / system of work. Projects and work packages
-  physically live there. Users never see its UI; we read/write via APIv3.
-- **agent-runtime** (sidecar service, lives in the `agenticopenproject` repo
-  under `agentic-ppm/agent-runtime/`, deployed separately) — syncs OpenProject
-  into a **FalkorDB** graph, runs 9 reasoning agents + deterministic detectors
-  over it, owns the findings/HITL lifecycle and the learning loop.
+  a2a bus. This is the only UI users see. Runs at `app:5000`.
+- **`/openproject`** — our OpenProject FORK (Rails), the datastore / system of
+  work. Projects and work packages physically live there. Users never see its
+  UI; we read/write via APIv3 at `http://openproject:80`.
+- **`/agent-runtime`** — the agentic sidecar: syncs OpenProject into a
+  **FalkorDB** graph, runs the reasoning agents + deterministic detectors,
+  owns the findings/HITL lifecycle and the learning loop. Runs at
+  `agent-runtime:8745`.
   HTTP API: `GET /api/findings|metrics|learning|roster|project-status`,
   `POST /api/findings/:id/approve|reject`, `POST /api/sweep`.
-  Env to reach it: `AGENT_RUNTIME_URL` (+ `AGENT_RUNTIME_TOKEN` bearer if set).
 
 The ontology layer: the UI reads ontology objects (Project/Feature/Story/Task/
 Risk) via `/api/palantir/ontology/*` routes backed by
@@ -78,14 +81,14 @@ FALKORDB_HOST/PORT/GRAPH/PASSWORD  # ontology graph
 ANTHROPIC_API_KEY / ANTHROPIC_MODEL # AI SDK chat route
 ```
 
-## Docs (vendored — this repo is self-contained)
+## Docs (this repo is fully self-contained)
 
-All connector strategy docs live in this repo under `docs/`:
+All strategy docs live under `docs/`:
 `GROUNDING_AND_HALLUCINATION.md`, `ORCHESTRATION_AND_RULES.md`,
 `UI_STRATEGY.md`, `SCHEMA_AND_OPENPROJECT_MAPPING.md`,
 `PALANTIR_TO_FALKORDB.md`, `UI_BIDIRECTIONAL_WIRING_MAP.md`,
 `MOCK_DATA_TO_REAL.md`, `OPENPROJECT_CONNECTOR_README.md`.
-The only external piece is the OPTIONAL agent-runtime sidecar
-(`agenticopenproject:agentic-ppm/agent-runtime/`); everything in this app
-degrades gracefully when it isn't deployed (ApprovalQueue and `/api/agent/*`
-return clear 503s).
+Nothing external remains: the OpenProject fork is `/openproject` and the
+agent-runtime sidecar is `/agent-runtime` in this repo. The app still degrades
+gracefully when sidecar/OpenProject services aren't running (clear 503s).
+The old `agenticopenproject` repo is retired as a source of truth.
