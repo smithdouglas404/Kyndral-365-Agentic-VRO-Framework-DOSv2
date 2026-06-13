@@ -38,7 +38,6 @@
     "@mui/x-charts": "^8.28.2",
     "@mui/x-data-grid": "^8.28.2",
     "@mui/x-date-pickers": "^8.27.2",
-    "@palantir/pack.state.foundry": "^0.6.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
