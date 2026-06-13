@@ -64,6 +64,7 @@ const FREE_MODEL_FALLBACKS = [
 
 class OpenRouterClient {
   private apiKey: string | undefined;
+  private anthropicApiKey: string | undefined;
   private baseUrl = process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1';
   private dailyTokenCount: number = 0;
   private dailyTokenResetDate: string = '';
@@ -73,6 +74,7 @@ class OpenRouterClient {
 
   constructor() {
     this.apiKey = process.env.OPENROUTER_API_KEY;
+    this.anthropicApiKey = process.env.ANTHROPIC_API_KEY;
     this.resetDailyCountersIfNeeded();
   }
 
@@ -81,7 +83,7 @@ class OpenRouterClient {
   }
 
   get hasAnthropicFallback(): boolean {
-    return false;
+    return !!this.anthropicApiKey;
   }
 
   private resetDailyCountersIfNeeded(): void {
@@ -156,7 +158,11 @@ class OpenRouterClient {
       return this.callOpenRouter(messages, { model, maxTokens, temperature });
     }
 
-    throw new Error('[OpenRouterClient] No OPENROUTER_API_KEY configured. Direct Anthropic fallback is disabled for cost safety.');
+    if (this.anthropicApiKey) {
+      return this.callAnthropicDirect(messages, { model, maxTokens, temperature });
+    }
+
+    throw new Error('[OpenRouterClient] No OPENROUTER_API_KEY or ANTHROPIC_API_KEY configured.');
   }
 
   /**
@@ -228,6 +234,64 @@ class OpenRouterClient {
       console.error('[OpenRouterClient] Request failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Call Anthropic API directly using ANTHROPIC_API_KEY (fallback when OpenRouter is not configured)
+   */
+  private async callAnthropicDirect(
+    messages: OpenRouterMessage[],
+    options: { model: string; maxTokens: number; temperature: number }
+  ): Promise<string> {
+    const { model, maxTokens, temperature } = options;
+
+    // Map OpenRouter-style model IDs to native Anthropic model IDs
+    const anthropicModel = this.mapToAnthropicModel(model);
+
+    console.log(`[OpenRouterClient] Using direct Anthropic fallback with model: ${anthropicModel}`);
+
+    const systemMessages = messages.filter(m => m.role === 'system');
+    const nonSystemMessages = messages.filter(m => m.role !== 'system');
+    const systemPrompt = systemMessages.map(m => m.content).join('\n\n');
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': this.anthropicApiKey!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: anthropicModel,
+        max_tokens: maxTokens,
+        temperature,
+        ...(systemPrompt ? { system: systemPrompt } : {}),
+        messages: nonSystemMessages.map(m => ({ role: m.role, content: m.content })),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`[OpenRouterClient] Anthropic direct API error (${response.status}): ${error}`);
+    }
+
+    const data = await response.json() as {
+      content: Array<{ type: string; text: string }>;
+      usage?: { input_tokens: number; output_tokens: number };
+    };
+
+    const content = data.content?.[0]?.text;
+    if (!content) {
+      throw new Error('[OpenRouterClient] Empty response from Anthropic direct API');
+    }
+
+    if (data.usage) {
+      const totalTokens = data.usage.input_tokens + data.usage.output_tokens;
+      this.trackUsage(totalTokens, anthropicModel);
+      console.log(`[OpenRouterClient] Anthropic direct: ${anthropicModel}: ${totalTokens} tokens | Daily: ${this.dailyCostEstimate.toFixed(3)}`);
+    }
+
+    return content;
   }
 
   /**
