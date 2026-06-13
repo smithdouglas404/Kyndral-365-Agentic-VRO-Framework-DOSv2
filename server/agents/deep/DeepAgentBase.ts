@@ -25,6 +25,7 @@ import { getSmartRouter, SmartModelRouter, ModelTier, type ProjectChangeEvent } 
 import { OntologyDataProvider, type QueryOptions, type QueryFilter } from "../../services/OntologyDataProvider.js";
 import { PALANTIR_OBJECT_TYPES } from "../../constants/palantirOntology.js";
 import { getPalantirActionsService, type CreateInterventionParams, type CreateAlertParams } from "../../services/PalantirActionsService.js";
+import { getAgentRuntimeClient, type AgentRuntimeClient } from "../../ai-sdk/agentRuntimeClient.js";
 type VectorDocument = { id: string; content: string; metadata?: Record<string, any> };
 
 /**
@@ -153,6 +154,30 @@ export abstract class DeepAgentBase {
   isEnabled(): boolean {
     return this.aiEnabled;
   }
+
+  /**
+   * The agent-runtime grounding client. The Mastra deep agents are the BRAIN;
+   * the agent-runtime is the GROUNDING / DATA layer (FalkorDB world-model +
+   * computed-not-generated metrics + the OpenProject-authored rules engine — it
+   * does NO LLM reasoning). Agents call it for grounded facts BEFORE reasoning
+   * and publish conclusions back AFTER. See docs/AGENT_CONSOLIDATION.md and
+   * docs/MASTRA_GROUNDING_INTEGRATION.md. Configured via AGENT_RUNTIME_URL
+   * (+ AGENT_RUNTIME_TOKEN / CONSOLE_TOKEN bearer).
+   */
+  protected get runtime(): AgentRuntimeClient {
+    return getAgentRuntimeClient();
+  }
+
+  /**
+   * Grounded facts captured on the last reasoning pass — the authoritative
+   * numbers the LLM was shown. Subclasses can read this to attach evidence
+   * (metric ids) when publishing a finding.
+   */
+  protected lastGrounding: {
+    metrics: { id: string; label: string; value: unknown; formula?: string }[];
+    rules: { id: string; name: string; metric?: string; operator?: string; threshold?: number | null; severity?: string }[];
+    status: { id: string; title: string; severity: string; projectName?: string }[];
+  } | null = null;
 
   // ============================================================================
   // PALANTIR ONTOLOGY DATA ACCESS METHODS
@@ -1290,6 +1315,138 @@ export abstract class DeepAgentBase {
     }
   }
 
+  // ============================================================================
+  // AGENT-RUNTIME GROUNDING (computed, not generated)
+  // Pull authoritative facts BEFORE reasoning; publish conclusions AFTER.
+  // ============================================================================
+
+  /**
+   * Pull grounded facts from the agent-runtime: computed metrics, the
+   * OpenProject-authored rules, per-project computed status, and — best-effort —
+   * a local graph slice. Returns null when the runtime isn't configured
+   * (AGENT_RUNTIME_URL unset) or is unreachable, so reasoning degrades to its
+   * prior behaviour instead of failing. Never throws.
+   */
+  protected async fetchRuntimeGrounding(
+    context: any,
+  ): Promise<{ text: string; metrics: any[]; rules: any[]; status: any[] } | null> {
+    if (!process.env.AGENT_RUNTIME_URL) return null; // not wired in this environment
+    try {
+      const [metricsRes, rules, status] = await Promise.all([
+        this.runtime.getMetrics().catch(() => ({ metrics: [] as any[] })),
+        this.runtime.getRules().catch(() => [] as any[]),
+        this.runtime.getProjectStatus().catch(() => [] as any[]),
+      ]);
+      const metrics = Array.isArray((metricsRes as any)?.metrics) ? (metricsRes as any).metrics : [];
+
+      // Optional local graph slice when the task references a node/project.
+      const nodeId = context?.nodeId || context?.entityId || context?.openProjectId || context?.projectId;
+      const graph = nodeId ? await this.runtime.getGraphSlice(String(nodeId)) : null;
+
+      this.lastGrounding = { metrics, rules, status };
+      return { text: this.formatGrounding(metrics, rules, status, graph), metrics, rules, status };
+    } catch (err: any) {
+      console.warn(`[${this.config.agentName}] runtime grounding unavailable: ${err?.message ?? err}`);
+      return null;
+    }
+  }
+
+  /**
+   * Format grounded facts as an explicit, cited block for the prompt. The model
+   * is instructed to use ONLY these numbers and to cite each metric id in
+   * brackets — the "computed, not generated" guarantee at the prompt boundary.
+   */
+  protected formatGrounding(metrics: any[], rules: any[], status: any[], graph: any): string {
+    const lines: string[] = [
+      "## GROUNDED FACTS (authoritative — do not recompute or invent numbers)",
+      "Every figure you state MUST cite one of these metric ids in [brackets],",
+      'e.g. "schedule variance is 14% [pm:scheduleVariance]". If a number you need',
+      "is not listed here, say so and request it — never estimate or fabricate one.",
+      "",
+      "### Metrics (computed by the runtime)",
+      ...(metrics.length
+        ? metrics.map(
+            (m) => `- [${m.id}] ${m.label} = ${m.value}` + (m.formula ? `  (formula: ${m.formula})` : ""),
+          )
+        : ["- (none available — graph still syncing)"]),
+      "",
+      "### Active rules (authored in OpenProject)",
+      ...(rules.length
+        ? rules.map(
+            (r) => `- ${r.name}: ${r.metric ?? "?"} ${r.operator ?? ""} ${r.threshold ?? ""} → ${r.severity ?? "?"}`,
+          )
+        : ["- (no active rules)"]),
+      "",
+      "### Project status (computed)",
+      ...(status.length
+        ? status.map((s) => `- ${s.projectName ?? s.title ?? s.id}: ${s.severity}`)
+        : ["- (no project assessments yet)"]),
+    ];
+    if (graph) lines.push("", "### Local graph slice", JSON.stringify(graph));
+    return lines.join("\n");
+  }
+
+  /**
+   * Publish an actionable conclusion to the agent-runtime's findings store, so
+   * it surfaces in the HITL surfaces (AgentConsole / ApprovalQueue) and, on
+   * human approval, mirrors back to OpenProject. Best-effort: never throws and
+   * never blocks the agent (mirrors broadcastFact's resilience). Carry evidence
+   * — the metric ids the conclusion rests on — and a confidence so reviewers can
+   * audit that it traces back to grounded numbers.
+   */
+  protected async publishFinding(input: {
+    type: string;
+    severity: "low" | "medium" | "high" | "critical" | string;
+    title: string;
+    body: string;
+    narrative?: string;
+    nodeId?: string;
+    projectId?: number;
+    projectName?: string;
+    evidence?: { entityId: string; metric: string; value: string }[] | string;
+    confidence?: number;
+  }): Promise<void> {
+    if (!process.env.AGENT_RUNTIME_URL) return; // runtime not configured here
+    const agentId =
+      this.config.agentName.toLowerCase().replace(/deep|agent/g, "").trim() || this.config.agentType;
+    try {
+      const finding = await this.runtime.publishFinding({ agentId, ...input });
+      console.log(`[${this.config.agentName}] 📤 Published finding to runtime: ${finding?.id ?? input.title}`);
+    } catch (err: any) {
+      // Never let a publish failure abort the agent — publishing is best-effort.
+      console.warn(`[${this.config.agentName}] publishFinding non-fatal failure: ${err?.message ?? err}`);
+    }
+  }
+
+  /**
+   * After a run, publish a finding IFF the agent produced an explicit, actionable
+   * conclusion. Intentionally opt-in (no auto-spray): a result is published only
+   * when it carries a structured `finding` object or is flagged `actionable`, so
+   * the HITL queue stays high-signal and every finding carries evidence.
+   */
+  protected async maybePublishConclusion(goal: string, context: any, result: any): Promise<void> {
+    const f = result?.finding ?? (result?.actionable ? result : null);
+    if (!f || typeof f !== "object" || !f.title) return;
+    const projectId =
+      typeof context?.openProjectId === "number"
+        ? context.openProjectId
+        : typeof context?.projectId === "number"
+          ? context.projectId
+          : undefined;
+    await this.publishFinding({
+      type: f.type ?? `${this.config.agentType}-insight`,
+      severity: f.severity ?? "medium",
+      title: String(f.title),
+      body: f.body ?? f.summary ?? String(goal),
+      narrative: f.narrative,
+      nodeId: f.nodeId ?? context?.nodeId ?? (typeof context?.projectId === "string" ? context.projectId : undefined),
+      projectId,
+      projectName: f.projectName ?? context?.projectName,
+      evidence: f.evidence,
+      confidence: typeof f.confidence === "number" ? f.confidence : undefined,
+    });
+  }
+
   /**
    * PHASE 1: PLANNING
    * Create a multi-step plan before executing
@@ -1299,6 +1456,19 @@ export abstract class DeepAgentBase {
 
     // Enrich context with knowledge from Retool Vectors (context already has facts from run())
     const enrichedContext = await this.enrichContextWithKnowledge(goal, context);
+
+    // GROUNDING: pull authoritative facts from the agent-runtime BEFORE any LLM
+    // call, so the model narrates over computed numbers instead of inventing
+    // them. Degrades silently when the runtime isn't configured/reachable.
+    const grounding = await this.fetchRuntimeGrounding(enrichedContext);
+    if (grounding) {
+      enrichedContext.runtimeGrounding = grounding.text;
+      enrichedContext.groundedFacts = {
+        metrics: grounding.metrics,
+        rules: grounding.rules,
+        status: grounding.status,
+      };
+    }
 
     const tools = this.defineTools();
     const toolDescriptions = tools.map(t => `- ${t.name}: ${t.description}`).join('\n');
@@ -1338,13 +1508,17 @@ IMPORTANT: When specifying toolInput, extract the required parameters from the c
 Example: If context has projectId: "proj_123", use {"projectId": "proj_123"} as toolInput.`;
 
     const priorKnowledge = enrichedContext.priorKnowledge || '## Prior Knowledge\nNo prior observations for this entity.';
-    const userPrompt = `${priorKnowledge}
+    // Surface the grounded facts block prominently; drop it (and the structured
+    // copy) from the JSON dump so the cited numbers aren't duplicated in-prompt.
+    const groundingBlock = enrichedContext.runtimeGrounding ? `${enrichedContext.runtimeGrounding}\n\n` : '';
+    const { runtimeGrounding: _rg, groundedFacts: _gf, ...contextForPrompt } = enrichedContext as any;
+    const userPrompt = `${groundingBlock}${priorKnowledge}
 
 ## Current Goal
 ${goal}
 
 ## Additional Context
-${JSON.stringify(enrichedContext, null, 2)}
+${JSON.stringify(contextForPrompt, null, 2)}
 
 Create a plan to achieve this goal. Consider the prior knowledge when planning to avoid duplicate work.`;
 
@@ -1793,6 +1967,11 @@ Reflect on this action.`;
           classification.tier
         );
       }
+
+      // Publish an actionable conclusion back to the runtime (HITL-gated). Opt-in
+      // and best-effort: only fires when the result carries a structured finding,
+      // so the HITL queue stays high-signal and findings always carry evidence.
+      await this.maybePublishConclusion(goal, context, result);
 
       console.log(`[${this.config.agentName}] Deep Agent run completed (${classification.tier} tier)`);
       return result;

@@ -37,7 +37,7 @@ import {
   FileCheck,
   Leaf
 } from "lucide-react";
-import { SourceBadge } from "@/openproject";
+import { SourceBadge, AgentConsole } from "@/openproject";
 
 const NEE = {
   blue: "#0072CE",
@@ -545,7 +545,7 @@ export default function AgentCommandCenterPage() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="interventions" className="flex items-center gap-2 py-3" data-testid="tab-interventions">
               <Sparkles className="h-4 w-4" />
               Agent Actions
@@ -569,7 +569,22 @@ export default function AgentCommandCenterPage() {
               <MessageSquare className="h-4 w-4" />
               Ask PM Assistant
             </TabsTrigger>
+            <TabsTrigger value="console" className="flex items-center gap-2 py-3" data-testid="tab-console">
+              <Zap className="h-4 w-4" />
+              Agent Console
+            </TabsTrigger>
           </TabsList>
+
+          {/* Agent-runtime console (health, signal sources, computed metrics,
+              project status, findings/HITL) embedded as a native surface, fed by
+              the /api/agent/* proxy. Numbers are the runtime's computed values. */}
+          <TabsContent value="console">
+            <Card>
+              <CardContent className="pt-6">
+                <AgentConsole />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="interventions">
             <Card>

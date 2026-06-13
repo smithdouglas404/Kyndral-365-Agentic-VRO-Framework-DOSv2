@@ -100,7 +100,24 @@ export function initAgentFindingsRoutes(router: Router): Router {
   router.get("/api/agent/learning", (_req, res) => void forward(res, "/api/learning"));
   router.get("/api/agent/metrics", (_req, res) => void forward(res, "/api/metrics"));
   router.get("/api/agent/roster", (_req, res) => void forward(res, "/api/roster"));
+  router.get("/api/agent/rules", (_req, res) => void forward(res, "/api/rules"));
+  router.get("/api/agent/status", (_req, res) => void forward(res, "/api/status"));
+  router.get("/api/agent/project-status", (_req, res) => void forward(res, "/api/project-status"));
   router.post("/api/agent/sweep", (_req, res) => void forward(res, "/api/sweep", { method: "POST" }));
+
+  // --- Ontology Mapping Studio (client/src/openproject/MappingStudio.tsx) ---
+  // The universal mapper's discover → map → publish surface, forwarded the same
+  // way (runtime token stays server-side). See docs/ONTOLOGY_MAPPING_STUDIO.md.
+  router.get("/api/agent/openproject/schema", (_req, res) => void forward(res, "/api/openproject/schema"));
+  router.get("/api/agent/ontology/properties", (_req, res) => void forward(res, "/api/ontology/properties"));
+  router.get("/api/agent/widgets", (_req, res) => void forward(res, "/api/widgets"));
+  router.get("/api/agent/mapping", (req: Request, res: Response) => {
+    const source = typeof req.query.source === "string" ? req.query.source : "openproject";
+    void forward(res, `/api/mapping?source=${encodeURIComponent(source)}`);
+  });
+  // Requires the global express.json() (mounted in server/index.ts) so req.body parses.
+  router.post("/api/agent/mapping", (req: Request, res: Response) =>
+    void forward(res, "/api/mapping", { method: "POST", body: req.body }));
 
   return router;
 }
