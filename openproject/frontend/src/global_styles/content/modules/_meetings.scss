@@ -71,11 +71,13 @@ div.tabular > div {
 
 #meeting_agenda_preview fieldset {
   margin-top: 1em;
-  background: url('../../../assets/images/draft.png');
+  /* draft watermark (assets/images/draft.png) dropped during migration — the
+     binary is not in the repo and Angular's css-resource resolver fails the
+     whole build on it. Cosmetic only; restore the asset + this rule to bring
+     the watermark back. */
 }
 
 #meeting_minutes_preview fieldset {
   margin-top: 1em;
-  background: url('../../../assets/images/draft.png');
 }
 
