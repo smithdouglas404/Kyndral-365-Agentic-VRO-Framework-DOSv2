@@ -138,6 +138,50 @@ export interface SweepResult {
 }
 
 /**
+ * A rule as authored in OpenProject and served by GET /api/rules. The runtime
+ * is the system of record for evaluation; this is the read-only shape agents
+ * cite when reasoning about thresholds (kept loose — rules carry extra fields).
+ */
+export interface RuntimeRule {
+  id: string;
+  name: string;
+  ontology_class?: string;
+  metric?: string;
+  operator?: string;
+  threshold?: number | null;
+  severity?: string;
+  enabled?: boolean;
+  [k: string]: unknown;
+}
+
+/** A slice of the FalkorDB world-model around a node (best-effort grounding). */
+export interface GraphSlice {
+  nodeId: string;
+  nodes: Array<{ id: string; labels?: string[]; props?: Record<string, unknown> }>;
+  edges: Array<{ from: string; to: string; type: string; props?: Record<string, unknown> }>;
+}
+
+/**
+ * What an agent publishes via POST /api/findings. The runtime assigns the id,
+ * timestamps and status, dedups by (type, nodeId), and stores the evidence/
+ * confidence so the HITL queue can render the citation trail. `evidence` may be
+ * the citation array or a pre-stringified JSON string — the runtime normalizes.
+ */
+export interface PublishFindingInput {
+  type: string;
+  agentId: string;
+  severity: string;
+  title: string;
+  body: string;
+  narrative?: string;
+  nodeId?: string;
+  projectId?: number;
+  projectName?: string;
+  evidence?: EvidenceItem[] | string;
+  confidence?: number;
+}
+
+/**
  * POST /api/findings/:id/{approve|reject} responds with the updated finding
  * spread at the top level plus `action` (the gated action executed on approve).
  * On error it responds { error } with a non-2xx code.
@@ -199,6 +243,8 @@ export class AgentRuntimeClient {
   private readonly baseUrl: string;
   private readonly token: string | undefined;
   private readonly timeoutMs: number;
+  /** Set once the runtime 404s on the graph-slice route, to stop retrying it. */
+  private graphSliceUnavailable = false;
 
   constructor(opts: AgentRuntimeClientOptions = {}) {
     this.baseUrl = (opts.baseUrl ?? process.env.AGENT_RUNTIME_URL ?? "http://localhost:8745").replace(/\/$/, "");
@@ -296,6 +342,42 @@ export class AgentRuntimeClient {
   /** POST /api/sweep — run the detector sweep on demand. */
   triggerSweep(): Promise<SweepResult> {
     return this.request<SweepResult>("/api/sweep", { method: "POST", body: {} });
+  }
+
+  /**
+   * GET /api/rules — the OpenProject-authored rules currently in force. The
+   * runtime responds { rules: [...] } (or [] with an error field when the rules
+   * source is unreachable); this normalizes both to an array.
+   */
+  async getRules(): Promise<RuntimeRule[]> {
+    const data = await this.request<{ rules?: RuntimeRule[] } | RuntimeRule[]>("/api/rules");
+    return Array.isArray(data) ? data : (data.rules ?? []);
+  }
+
+  /**
+   * GET /api/graph/:nodeId — a slice of the FalkorDB world-model around a node,
+   * for the agent to reason over local structure. Best-effort: resolves null
+   * when the runtime doesn't expose the route (and stops trying after the first
+   * 404 so agents don't repeatedly hit a missing endpoint).
+   */
+  async getGraphSlice(nodeId: string): Promise<GraphSlice | null> {
+    if (this.graphSliceUnavailable || !nodeId) return null;
+    try {
+      return await this.request<GraphSlice>(`/api/graph/${encodeURIComponent(nodeId)}`);
+    } catch (err) {
+      if (err instanceof AgentRuntimeError && err.status === 404) this.graphSliceUnavailable = true;
+      return null;
+    }
+  }
+
+  /**
+   * POST /api/findings — publish an agent's actionable conclusion into the
+   * runtime's findings store, so it surfaces in the HITL surfaces (AgentConsole
+   * / ApprovalQueue) and, on human approval, mirrors back to OpenProject. The
+   * runtime dedups by (type, nodeId) and keeps the evidence/confidence trail.
+   */
+  publishFinding(input: PublishFindingInput): Promise<Finding> {
+    return this.request<Finding>("/api/findings", { method: "POST", body: input });
   }
 }
 

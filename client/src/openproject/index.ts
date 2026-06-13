@@ -53,3 +53,47 @@ export {
   type ApprovalQueueProps,
   type AgentFinding,
 } from "./ApprovalQueue";
+
+// Agent-runtime console (health, signal sources, computed metrics, project
+// status, findings/HITL) embedded as a native Kyndral surface.
+export { AgentConsole, type AgentConsoleProps } from "./AgentConsole";
+
+// Ontology Mapping Studio (the universal mapper: source → ontology → widget).
+export { MappingStudio, type MappingStudioProps } from "./MappingStudio";
+
+// Widget registry that displays a mapped/ontology value with the chosen widget,
+// plus the editable (bidirectional) control + write-back helper.
+export {
+  renderWidget,
+  EditableField,
+  commitWriteback,
+  WIDGET_RENDERERS,
+  FALLBACK_WIDGET,
+  type WidgetProps,
+  type WidgetValueType,
+  type RenderOptions,
+} from "./WidgetRenderer";
+
+// Read-only view of the OpenProject-authored rules + recent breaches + the
+// ML-suggested thresholds learned from the HITL loop.
+export {
+  RulesPanel,
+  type RulesPanelProps,
+  type AgentRule,
+  type RuleBreachFinding,
+  type ThresholdSuggestion,
+} from "./RulesPanel";
+
+// Typed client the browser can use to reach the agent-runtime via the
+// /api/agent proxy (server keeps the runtime token). Server-side agents use
+// server/ai-sdk/agentRuntimeClient.ts instead.
+export {
+  AgentRuntimeClient,
+  createAgentRuntimeClient,
+  type AgentRuntimeClientOptions,
+  type RuntimeMetric,
+  type MetricsResult,
+  type RuntimeRule,
+  type RuntimeFinding,
+  type PublishFindingInput,
+} from "./agentRuntimeClient";

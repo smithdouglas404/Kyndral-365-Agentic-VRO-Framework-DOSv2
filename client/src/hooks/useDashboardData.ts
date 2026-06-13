@@ -17,7 +17,7 @@ export function useTMOAdoptionMetrics() {
     queryFn: async () => {
       // Try Palantir endpoint first, fallback to TMO endpoint
       try {
-        const res = await fetch("/api/palantir/ontology/metrics");
+        const res = await fetch("/api/ontology/metrics");
         if (res.ok) {
           const data = await res.json();
           // Transform Palantir metrics into adoption format
@@ -39,7 +39,7 @@ export function useTMOInitiatives() {
     queryFn: async () => {
       // Try Palantir projects as initiatives
       try {
-        const res = await fetch("/api/palantir/ontology/projects");
+        const res = await fetch("/api/ontology/projects");
         if (res.ok) {
           const projects = await res.json();
           return transformToInitiatives(projects);
@@ -63,7 +63,7 @@ export function useOKRObjectives() {
     queryKey: ["palantir", "okrs"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/okrs");
+        const res = await fetch("/api/ontology/okrs");
         if (res.ok) {
           return res.json();
         }
@@ -82,7 +82,7 @@ export function useOKRKeyResults() {
     queryKey: ["palantir", "okr-key-results"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/okrs");
+        const res = await fetch("/api/ontology/okrs");
         if (res.ok) {
           const okrs = await res.json();
           return okrs.flatMap((o: any) => o.keyResults || []);
@@ -106,7 +106,7 @@ export function usePlanningMilestones() {
     queryKey: ["palantir", "planning", "milestones"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/projects");
+        const res = await fetch("/api/ontology/projects");
         if (res.ok) {
           const projects = await res.json();
           return transformToMilestones(projects);
@@ -126,7 +126,7 @@ export function usePlanningRoadmap() {
     queryKey: ["palantir", "planning", "roadmap"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/projects");
+        const res = await fetch("/api/ontology/projects");
         if (res.ok) {
           const projects = await res.json();
           return transformToRoadmap(projects);
@@ -150,7 +150,7 @@ export function useOCMReadiness() {
     queryKey: ["palantir", "ocm", "readiness"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/metrics");
+        const res = await fetch("/api/ontology/metrics");
         if (res.ok) {
           const metrics = await res.json();
           return transformToReadinessMetrics(metrics);
@@ -170,7 +170,7 @@ export function useOCMStakeholders() {
     queryKey: ["palantir", "ocm", "stakeholders"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/projects");
+        const res = await fetch("/api/ontology/projects");
         if (res.ok) {
           const projects = await res.json();
           return transformToStakeholderGroups(projects);
@@ -194,7 +194,7 @@ export function useGovernanceItems() {
     queryKey: ["palantir", "governance", "items"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/risks");
+        const res = await fetch("/api/ontology/risks");
         if (res.ok) {
           const risks = await res.json();
           return transformToGovernanceItems(risks);
@@ -214,7 +214,7 @@ export function useGovernanceRiskMetrics() {
     queryKey: ["palantir", "governance", "risk-metrics"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/metrics");
+        const res = await fetch("/api/ontology/metrics");
         if (res.ok) {
           const metrics = await res.json();
           return {
@@ -270,7 +270,7 @@ export function useRiskCategories() {
     queryKey: ["palantir", "risk", "categories"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/risks");
+        const res = await fetch("/api/ontology/risks");
         if (res.ok) {
           const risks = await res.json();
           return categorizeRisks(risks);
@@ -290,7 +290,7 @@ export function useEmergingRisks() {
     queryKey: ["palantir", "risk", "emerging"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/risks");
+        const res = await fetch("/api/ontology/risks");
         if (res.ok) {
           const risks = await res.json();
           return risks.filter((r: any) => r.status === 'open').slice(0, 5);
@@ -314,7 +314,7 @@ export function useProjects() {
     queryKey: ["palantir", "projects"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/palantir/ontology/projects");
+        const res = await fetch("/api/ontology/projects");
         if (res.ok) {
           return res.json();
         }

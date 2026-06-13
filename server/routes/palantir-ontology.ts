@@ -1117,6 +1117,12 @@ router.get('/:objectType/:objectId', (async (req, res) => {
 // ============================================================================
 
 export function registerPalantirOntologyRoutes(app: express.Application): void {
+  // Canonical path: nothing Palantir runs behind this — FalkorDB is the ontology
+  // backend (see docs/ONTOLOGY_LAYER.md). The ontology (FalkorDB) is the hub every
+  // source maps into and every consumer reads from.
+  app.use('/api/ontology', router);
+  // Deprecated alias kept so any un-migrated caller keeps working; remove once all
+  // clients use /api/ontology.
   app.use('/api/palantir/ontology', router);
 }
 

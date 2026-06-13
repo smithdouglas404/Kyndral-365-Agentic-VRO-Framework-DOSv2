@@ -393,7 +393,7 @@ export default function PalantirSyncManager() {
   const { data: schema, isLoading: schemaLoading } = useQuery({
     queryKey: ['ontology-schema'],
     queryFn: async () => {
-      const res = await fetch('/api/palantir/ontology/schema');
+      const res = await fetch('/api/ontology/schema');
       if (!res.ok) throw new Error('Failed to fetch schema');
       return res.json();
     },
@@ -403,7 +403,7 @@ export default function PalantirSyncManager() {
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['ontology-metrics'],
     queryFn: async () => {
-      const res = await fetch('/api/palantir/ontology/metrics');
+      const res = await fetch('/api/ontology/metrics');
       if (!res.ok) throw new Error('Failed to fetch metrics');
       return res.json();
     },

@@ -100,7 +100,38 @@ export function initAgentFindingsRoutes(router: Router): Router {
   router.get("/api/agent/learning", (_req, res) => void forward(res, "/api/learning"));
   router.get("/api/agent/metrics", (_req, res) => void forward(res, "/api/metrics"));
   router.get("/api/agent/roster", (_req, res) => void forward(res, "/api/roster"));
+  router.get("/api/agent/rules", (_req, res) => void forward(res, "/api/rules"));
+  router.get("/api/agent/status", (_req, res) => void forward(res, "/api/status"));
+  router.get("/api/agent/project-status", (_req, res) => void forward(res, "/api/project-status"));
   router.post("/api/agent/sweep", (_req, res) => void forward(res, "/api/sweep", { method: "POST" }));
+
+  // --- Ontology Mapping Studio (client/src/openproject/MappingStudio.tsx) ---
+  // The universal mapper's discover → map → publish surface, forwarded the same
+  // way (runtime token stays server-side). See docs/ONTOLOGY_MAPPING_STUDIO.md.
+  router.get("/api/agent/openproject/schema", (_req, res) => void forward(res, "/api/openproject/schema"));
+  router.get("/api/agent/ontology/properties", (_req, res) => void forward(res, "/api/ontology/properties"));
+  router.get("/api/agent/widgets", (_req, res) => void forward(res, "/api/widgets"));
+  router.get("/api/agent/mapping", (req: Request, res: Response) => {
+    const source = typeof req.query.source === "string" ? req.query.source : "openproject";
+    void forward(res, `/api/mapping?source=${encodeURIComponent(source)}`);
+  });
+  // Requires the global express.json() (mounted in server/index.ts) so req.body parses.
+  router.post("/api/agent/mapping", (req: Request, res: Response) =>
+    void forward(res, "/api/mapping", { method: "POST", body: req.body }));
+
+  // --- Universal mapper: sources, generalized per-source schema, write-back ---
+  // The ontology is the hub; these let the UI list spokes, discover any source's
+  // schema, and push edits back through the source's adapter (bidirectional edit).
+  router.get("/api/agent/sources", (_req, res) => void forward(res, "/api/sources"));
+  router.get("/api/agent/schema", (req: Request, res: Response) => {
+    const source = typeof req.query.source === "string" ? req.query.source : "openproject";
+    void forward(res, `/api/schema?source=${encodeURIComponent(source)}`);
+  });
+  router.post("/api/agent/writeback", (req: Request, res: Response) =>
+    void forward(res, "/api/writeback", { method: "POST", body: req.body }));
+
+  // --- ML-suggested rule thresholds (read-only, advisory; rules stay in OpenProject) ---
+  router.get("/api/agent/rules/suggestions", (_req, res) => void forward(res, "/api/rules/suggestions"));
 
   return router;
 }

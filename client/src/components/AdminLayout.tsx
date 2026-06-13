@@ -69,6 +69,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/palantir-sync', icon: Cloud, label: 'Palantir Ontology' },
     { path: '/admin/rules-engine', icon: Code, label: 'Enterprise Rules' },
     { path: '/admin/ontology-explorer', icon: Layers, label: 'Ontology Explorer' },
+    { path: '/admin/mapping-studio', icon: Workflow, label: 'Mapping Studio' },
+    { path: '/admin/agentic-rules', icon: Zap, label: 'Agentic Rules' },
     { path: '/admin/subscriptions', icon: Radio, label: 'Real-Time Subscriptions' },
     { path: '/admin/workflow-automation', icon: Workflow, label: 'Workflow Automation' },
     { path: '/admin/agent-memory', icon: Brain, label: 'Agent Memory' },

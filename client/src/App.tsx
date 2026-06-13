@@ -105,6 +105,8 @@ const OntologyExplorer = lazy(() => import("@/pages/admin/OntologyExplorer"));
 const RealTimeSubscriptions = lazy(() => import("@/pages/admin/RealTimeSubscriptions"));
 const WorkflowAutomation = lazy(() => import("@/pages/admin/WorkflowAutomation"));
 const DynamicAgentAdmin = lazy(() => import("@/pages/admin/DynamicAgentAdmin"));
+const OntologyMappingStudio = lazy(() => import("@/pages/admin/OntologyMappingStudio"));
+const AgenticRules = lazy(() => import("@/pages/admin/AgenticRules"));
 
 // Map legacy /dashboard/<slug> URLs to lens agentIds
 const LEGACY_DASHBOARD_REDIRECT: Record<string, string> = {
@@ -199,6 +201,8 @@ function Router() {
         <Route path="/admin/palantir-sync" component={PalantirSyncManager} />
         <Route path="/admin/palantir-rules" component={PalantirRulesEngine} />
         <Route path="/admin/ontology-explorer" component={OntologyExplorer} />
+        <Route path="/admin/mapping-studio" component={OntologyMappingStudio} />
+        <Route path="/admin/agentic-rules" component={AgenticRules} />
         <Route path="/admin/subscriptions" component={RealTimeSubscriptions} />
         <Route path="/admin/workflow-automation" component={WorkflowAutomation} />
         <Route path="/admin/dynamic-agents" component={DynamicAgentAdmin} />
