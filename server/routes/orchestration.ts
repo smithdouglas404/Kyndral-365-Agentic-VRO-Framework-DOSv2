@@ -28,14 +28,22 @@ export function getBootstrapInstance(): DeepAgentBootstrap | null {
 }
 
 export function registerOrchestrationRoutes(app: Express, storage: IStorage): void {
-  // Initialize deep agent bootstrap
-  if (!bootstrapInstance) {
+  // Kyndral no longer runs agents. The agent-runtime sidecar is the single agent
+  // system (CLAUDE.md + agenticopenproject .../docs/AGENT_CONSOLIDATION.md): Kyndral
+  // DISPLAYS agent output via /api/agent/* (agentFindings.routes.ts) and routes
+  // human approve/reject back to the runtime — it does not load/run DeepAgentBootstrap
+  // or ContinuousOrchestrator. The /api/orchestration/* handlers below degrade to
+  // 503 while disabled. Set ENABLE_LEGACY_AGENTS=true ONLY to temporarily restore
+  // the in-process agents (double-spend + contradictory findings — not for prod).
+  if (process.env.ENABLE_LEGACY_AGENTS === 'true' && !bootstrapInstance) {
     bootstrapInstance = new DeepAgentBootstrap(storage);
     (global as any).__deepAgentBootstrap = bootstrapInstance;
     bootstrapInstance.initialize().catch((error) => {
       console.error('[DeepAgentBootstrap] Initialization failed:', error);
     });
-    console.log('[Orchestration] ✅ Deep agent system activated');
+    console.log('[Orchestration] ⚠️  LEGACY in-process deep-agent system activated (ENABLE_LEGACY_AGENTS=true)');
+  } else {
+    console.log('[Orchestration] Deep agents NOT run in Kyndral — agent-runtime sidecar is the agent system (read via /api/agent/*).');
   }
 
   /**
