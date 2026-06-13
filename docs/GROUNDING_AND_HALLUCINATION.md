@@ -1,5 +1,13 @@
 # Is the graph learning & grounding insights? — Honest assessment + how to stop "just an LLM"
 
+> ℹ️ **Principles current; implementation moved.** The grounding + learning ideas
+> here are live, but they now run in the **`agent-runtime/` sidecar**, not the
+> legacy `server/` Mastra/Palantir stack referenced below. See:
+> `agent-runtime/src/grounding/validate.ts` (entity-existence + evidence gate) and
+> `agent-runtime/src/learning/outcomes.ts` (predictions → HITL-label resolution →
+> per-agent accuracy → severity auto-tune). The ontology backend is **FalkorDB**,
+> not Palantir Foundry (CLAUDE.md "LIVE vs LEGACY").
+
 Scope: Kyndral-365 DOSv2 (Mastra + A2A, Palantir Foundry ontology as the data
 source). This answers two questions directly: (1) is it actually grounded/learning,
 or is it "feed data to an LLM and return the answer," and (2) how to reduce
