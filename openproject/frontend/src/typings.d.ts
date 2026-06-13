@@ -10,9 +10,10 @@ declare module 'dom-plane' {
   export function pointInside(point:any, el:Element|Window):any;
 }
 
-// Ambient declaration for the 'typing' module used internally by i18n-js
+// Ambient declaration for the 'typing' module used internally by i18n-js.
+// Use 'any' to accommodate the BigNumber class that i18n-js passes as Numeric.
 declare module 'typing' {
-  export type Numeric = number | string | bigint;
+  export type Numeric = any;
 }
 
 interface NodeModule {
