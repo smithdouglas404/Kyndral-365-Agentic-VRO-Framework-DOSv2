@@ -66,6 +66,15 @@ import { storage } from "./storage";
 /** Appended to outbound comments; webhook consumers skip activities carrying it. */
 export const SYNC_MARKER = "[sync:kyndral-365]";
 
+/**
+ * Master on/off switch for the whole OpenProject integration.
+ * Default ON; set OPENPROJECT_INTEGRATION_ENABLED=false to pause webhook
+ * processing and all outbound write-back without removing credentials.
+ */
+export function isOpenProjectIntegrationEnabled(): boolean {
+  return process.env.OPENPROJECT_INTEGRATION_ENABLED !== "false";
+}
+
 // ── recentlyPushed registry (echo prevention, layer 1) ───────────────────────
 
 const RECENTLY_PUSHED_TTL_MS = 30_000;

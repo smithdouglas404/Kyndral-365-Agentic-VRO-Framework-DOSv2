@@ -380,9 +380,9 @@ function loadMCPConfig(): MCPServiceConfig {
     };
   }
 
-  if (process.env.OPENPROJECT_URL && process.env.OPENPROJECT_API_KEY) {
+  if ((process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL) && process.env.OPENPROJECT_API_KEY) {
     config.openproject = {
-      baseUrl: process.env.OPENPROJECT_URL,
+      baseUrl: (process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL)!,
       apiKey: process.env.OPENPROJECT_API_KEY,
     };
   }

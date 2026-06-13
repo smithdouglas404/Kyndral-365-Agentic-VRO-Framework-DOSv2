@@ -464,7 +464,7 @@ export class ContinuousOrchestrator {
     const serviceIsConfigured: Record<string, boolean> = {
       palantir: true,
       jira: !!(process.env.JIRA_DOMAIN && process.env.JIRA_EMAIL && process.env.JIRA_API_TOKEN),
-      openproject: !!(process.env.OPENPROJECT_URL && process.env.OPENPROJECT_API_KEY),
+      openproject: !!((process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL) && process.env.OPENPROJECT_API_KEY),
       monday: !!(process.env.MONDAY_API_KEY || process.env.MONDAY_API_TOKEN),
     };
     const activeServices = Object.keys(serviceIsConfigured).filter(id => serviceIsConfigured[id]);
@@ -488,7 +488,7 @@ export class ContinuousOrchestrator {
             : 'https://jira.example.com';
           break;
         case 'openproject':
-          endpoint = process.env.OPENPROJECT_URL || 'https://openproject.example.com';
+          endpoint = process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL || 'https://openproject.example.com';
           break;
         case 'monday':
           endpoint = 'https://api.monday.com/v2';
