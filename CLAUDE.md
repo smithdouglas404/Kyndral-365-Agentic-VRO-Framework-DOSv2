@@ -1,3 +1,4 @@
+
 # Kyndral-365 — project context for Claude
 
 ## Architecture (three deployables, one product)
@@ -15,10 +16,13 @@
   `POST /api/findings/:id/approve|reject`, `POST /api/sweep`.
   Env to reach it: `AGENT_RUNTIME_URL` (+ `AGENT_RUNTIME_TOKEN` bearer if set).
 
-The ontology layer: the UI reads ontology objects (Project/Feature/Story/Task/
-Risk) via `/api/palantir/ontology/*` routes backed by
-`server/FalkorOntologyDataProvider.ts` (FalkorDB; Palantir has been replaced —
-keep the route URLs, never reintroduce Foundry).
+The ontology layer: **FalkorDB is the knowledge graph + ontology layer.** The
+UI reads ontology objects (Project/Feature/Story/Task/Risk) through
+`server/FalkorOntologyDataProvider.ts` (openCypher + native vector for
+GraphRAG). The current route stem `/api/palantir/ontology/*` is purely
+historical — nothing Palantir runs behind it. Optionally rename to
+`/api/ontology/*` (see `docs/ONTOLOGY_LAYER.md`). Never reintroduce an
+external ontology service: FalkorDB is the only ontology backend.
 
 ## OpenProject integration — how to do common things
 
@@ -35,6 +39,8 @@ All building blocks are already in this repo (originally authored in
 | Mark a UI element as OpenProject-backed | `client/src/openproject/SourceBadge.tsx`; detect with `isOpenProjectEntity(entity)` (`sourceSystem === 'openproject'` + `externalId`) |
 | Make any save bidirectional | wrap the save handler with `useBidirectionalSave` from `client/src/openproject/OpenProjectEditGuard.tsx` |
 | Agent insights + HITL approve/reject in the UI | `client/src/openproject/ApprovalQueue.tsx` + server proxy `server/routes/agentFindings.routes.ts` (`/api/agent/*`) |
+| Set a threshold rule | OpenProject → agentic_ppm module → Rules; runtime evaluates; breaches appear in both UIs (read-only view: `client/src/openproject/RulesPanel.tsx`, proxy `/api/agent/rules`; design: `docs/RULES_ENGINE.md`) |
+| Author a decision-table rule | GoRules JDM on AgentRule (kind='decision'); visual editor `DecisionEditor.tsx` (`@gorules/jdm-editor`); runtime evaluates via ZEN (design: `docs/DECISION_ENGINE_GORULES.md`) |
 | Agent chat with grounded widgets (Vercel AI SDK) | `ai-sdk/` — tools in `ai-sdk/server/tools.ts`, route `POST /api/agent-chat`, widgets + `AgenticChat` in `ai-sdk/client/` |
 | OKR progress from real delivery | `server/okrRollupService.ts` (KR progress = Σ entity progress × contribution%); routes in `server/routes/okrRollup.routes.ts` |
 
@@ -62,14 +68,43 @@ Per-page integration recipes: `docs/UI_BIDIRECTIONAL_WIRING_MAP.md`.
    `openProjectWriteback.ts`. Change them together or sync drifts.
 7. **No mock data.** Every UI number must trace to: OpenProject sync, a user
    setup screen, or a computed formula (see `docs/MOCK_DATA_TO_REAL.md`).
+8. **Rules are authored in OpenProject** (the agentic_ppm module is the system
+   of record for rules). The runtime evaluates them **event-driven** (on the
+   OpenProject webhook change, on the changed entity) **+ a periodic safety
+   sweep** — never a tight scan loop. On a breach, the fan-out must reach
+   **both UIs** (OpenProject native Agent Alert WP + comment + banner + the
+   alerts.json inbox, AND the Kyndral ApprovalQueue / RulesPanel). Kyndral's
+   rules view is read-only; don't move authoring out of OpenProject.
+
+## Rules engine
+
+Threshold/rules live in the forked OpenProject (`modules/agentic_ppm`, stored as
+`AgentRule` rows) — OpenProject is the **system of record for rules**. The
+agent-runtime (`agentic-ppm/agent-runtime/src/rules/`) pulls `rules.json`,
+evaluates each rule against the FalkorDB graph **event-driven on OpenProject
+webhook changes + a periodic safety sweep** (remembering previous values for
+`delta_*`/`changed`/`crossed_*`, respecting `cooldown_minutes`), and on a breach
+records a finding (→ Kyndral ApprovalQueue/RulesPanel + AI-SDK) AND notifies
+OpenProject (Agent Alert WP + comment + banner + `POST /agentic_ppm/api/alerts.json`)
+— so the same breach reaches both UIs. The Kyndral side is read-only
+(`client/src/openproject/RulesPanel.tsx`, via the `/api/agent/rules` proxy and
+`/api/agent/findings?type=RuleBreach`); the full contract is in
+`docs/RULES_ENGINE.md`.
+
+A rule has a `kind`: `'threshold'` (the single-metric `metric operator threshold`
+rule above) or `'decision'` (a GoRules **JDM** — a decision table / decision graph
+— carried in a `jdm` field on the AgentRule and evaluated in-process by the
+GoRules **ZEN** engine against the entity context, returning
+`{breach, severity?, message?, action_kind?, metric?, value?}`). Only the *decide*
+step differs; the event+sweep trigger, previous-value memory, cooldown/dedup, and
+dual-UI fan-out are reused unchanged. Decision rules are authored by pasting JDM
+JSON in OpenProject (Phase 1) or visually via `client/src/openproject/DecisionEditor.tsx`
+(the `@gorules/jdm-editor` wrapper, Phase 2). See `docs/DECISION_ENGINE_GORULES.md`.
 
 ## Env vars (integration)
 
-Env vars alone are sufficient — no MCP adapter registration is required to
-connect OpenProject (adapter config, when present, takes precedence).
-
 ```
-OPENPROJECT_BASE_URL=…        # the OpenProject instance (OPENPROJECT_URL also accepted)
+OPENPROJECT_BASE_URL=…        # the OpenProject instance
 OPENPROJECT_API_KEY=…         # basic auth: apikey:<key>
 OPENPROJECT_WEBHOOK_SECRET=…  # X-OP-Signature HMAC
 AGENT_RUNTIME_URL=…           # the sidecar
@@ -78,14 +113,10 @@ FALKORDB_HOST/PORT/GRAPH/PASSWORD  # ontology graph
 ANTHROPIC_API_KEY / ANTHROPIC_MODEL # AI SDK chat route
 ```
 
-## Docs (vendored — this repo is self-contained)
+## Cross-repo note
 
-All connector strategy docs live in this repo under `docs/`:
-`GROUNDING_AND_HALLUCINATION.md`, `ORCHESTRATION_AND_RULES.md`,
-`UI_STRATEGY.md`, `SCHEMA_AND_OPENPROJECT_MAPPING.md`,
-`PALANTIR_TO_FALKORDB.md`, `UI_BIDIRECTIONAL_WIRING_MAP.md`,
-`MOCK_DATA_TO_REAL.md`, `OPENPROJECT_CONNECTOR_README.md`.
-The only external piece is the OPTIONAL agent-runtime sidecar
-(`agenticopenproject:agentic-ppm/agent-runtime/`); everything in this app
-degrades gracefully when it isn't deployed (ApprovalQueue and `/api/agent/*`
-return clear 503s).
+The reference implementations and docs originate in the public repo
+`smithdouglas404/agenticopenproject` under `agentic-ppm/kyndryl-connector/`
+(strategy docs: `GROUNDING_AND_HALLUCINATION.md`, `ORCHESTRATION_AND_RULES.md`,
+`UI_STRATEGY.md`, `SCHEMA_AND_OPENPROJECT_MAPPING.md`, `ONTOLOGY_LAYER.md`).
+If something here seems missing or stale, read that folder's latest `main`.
