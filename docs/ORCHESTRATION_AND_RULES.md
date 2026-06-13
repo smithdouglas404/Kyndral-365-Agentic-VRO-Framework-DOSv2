@@ -1,5 +1,14 @@
 # Remove the orchestrator → event-driven, dynamic, learning agents (and ~93% cheaper)
 
+> ⚠️ **SUPERSEDED — historical.** This plans the *legacy* `server/` orchestrators
+> and is no longer the design. The agent system is the **`agent-runtime/` sidecar**;
+> orchestration is `agent-runtime/src/agents/sweep.ts` (periodic + throttled after
+> OpenProject webhooks — no per-second polling). The legacy `ContinuousOrchestrator`
+> / `BattleRhythm` / `AgentScheduler` / `EventDrivenOrchestrator` are **off by
+> default** (`ENABLE_LEGACY_AGENTS`; see CLAUDE.md "LIVE vs LEGACY"). **Ignore the
+> "activate EventDrivenOrchestrator" steps below** — they re-create the duplication
+> we removed. Kept only for the cost analysis.
+
 Scope: Kyndral-365 DOSv2. This answers #10: the orchestrator costs too much and
 stops agents from firing dynamically/learning. Good news — **the fix is small and
 the event-driven engine is already written, just not wired in.**

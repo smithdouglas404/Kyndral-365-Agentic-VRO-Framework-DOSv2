@@ -199,14 +199,31 @@ app.use((req, res, next) => {
       }
 
       // ===================================================================
+      // LEGACY AGENT STACK (off by default).
+      // The agent system is the /agent-runtime sidecar (see CLAUDE.md
+      // "LIVE vs LEGACY"); the UI reaches it via the /api/agent/* proxy.
+      // The in-process Battle Rhythm / AgentScheduler / EventDrivenOrchestrator
+      // / Palantir-sync stack below is the retired DOSv2 agent system and would
+      // otherwise DUPLICATE the sidecar. It only boots when ENABLE_LEGACY_AGENTS
+      // === "true" (kept solely so not-yet-migrated routes that import these
+      // symbols still resolve). Do not flip this on without removing the sidecar.
+      // ===================================================================
+      const ENABLE_LEGACY_AGENTS = process.env.ENABLE_LEGACY_AGENTS === "true";
+      if (!ENABLE_LEGACY_AGENTS) {
+        log("🛰️  Legacy in-process agent stack disabled — agent-runtime sidecar is the agent system (set ENABLE_LEGACY_AGENTS=true to override).");
+      }
+
+      // ===================================================================
       // Start Battle Rhythm Orchestrator (MILITARY-INSPIRED CADENCE)
       // Weekly decision-making rhythm: Sunday Recon → Mon-Fri events
       // Replaces continuous 15-second agent polling with scheduled synthesis
       // ===================================================================
-      log("🎖️  Initializing Battle Rhythm Orchestrator...");
-      battleRhythmOrchestrator = new BattleRhythmOrchestrator(storage);
-      await battleRhythmOrchestrator.start();
-      log("✅ Battle Rhythm Orchestrator started - Weekly cadence active");
+      if (ENABLE_LEGACY_AGENTS) {
+        log("🎖️  Initializing Battle Rhythm Orchestrator...");
+        battleRhythmOrchestrator = new BattleRhythmOrchestrator(storage);
+        await battleRhythmOrchestrator.start();
+        log("✅ Battle Rhythm Orchestrator started - Weekly cadence active");
+      }
 
       // ===================================================================
       // Initialize MCP Services (Jira, ServiceNow, Monday.com, etc.)
@@ -221,19 +238,21 @@ app.use((req, res, next) => {
       // All data flows through Palantir Foundry as source of truth
       // External systems (Jira, OpenProject, Monday) sync TO Palantir
       // ===================================================================
-      try {
-        const palantirService = getPalantirService();
-        if (palantirService) {
-          log("🎯 Initializing Ontology Data Provider (Palantir-first)...");
-          await OntologyDataProvider.initialize(palantirService);
-          PalantirSyncService.initialize(palantirService);
-          log("✅ Ontology Data Provider initialized - Palantir is source of truth");
-        } else {
-          log("⚠️  Palantir service not configured - ontology features disabled");
-          log("   Set PALANTIR_HOSTNAME and PALANTIR_TOKEN to enable");
+      if (ENABLE_LEGACY_AGENTS) {
+        try {
+          const palantirService = getPalantirService();
+          if (palantirService) {
+            log("🎯 Initializing Ontology Data Provider (Palantir-first)...");
+            await OntologyDataProvider.initialize(palantirService);
+            PalantirSyncService.initialize(palantirService);
+            log("✅ Ontology Data Provider initialized - Palantir is source of truth");
+          } else {
+            log("⚠️  Palantir service not configured - ontology features disabled");
+            log("   Set PALANTIR_HOSTNAME and PALANTIR_TOKEN to enable");
+          }
+        } catch (error: any) {
+          log(`⚠️  Ontology Data Provider initialization failed: ${error.message}`);
         }
-      } catch (error: any) {
-        log(`⚠️  Ontology Data Provider initialization failed: ${error.message}`);
       }
 
       // ===================================================================
@@ -241,29 +260,31 @@ app.use((req, res, next) => {
       // Agents now compile findings for weekly synthesis instead of continuous alerts
       // Agent runs triggered by Battle Rhythm events (Sun → Mon → Tue → Wed → Thu → Fri)
       // ===================================================================
-      log("🤖 Initializing Agent Scheduler...");
-      agentScheduler = createAgentScheduler(storage);
-      agentScheduler.startAll().catch(err => {
-        console.error("Failed to start agent scheduler:", err);
-      });
-      log("✅ Agent Scheduler started - Integrated with Battle Rhythm");
+      if (ENABLE_LEGACY_AGENTS) {
+        log("🤖 Initializing Agent Scheduler...");
+        agentScheduler = createAgentScheduler(storage);
+        agentScheduler.startAll().catch(err => {
+          console.error("Failed to start agent scheduler:", err);
+        });
+        log("✅ Agent Scheduler started - Integrated with Battle Rhythm");
 
-      // ===================================================================
-      // Start Battle Rhythm Task Processor
-      // Processes tasks from agent_task_queue (created by Sunday Recon)
-      // Executes agent synthesis and logs to agent_activity_log
-      // ===================================================================
-      log("⚙️  Initializing Battle Rhythm Task Processor...");
-      battleRhythmTaskProcessor = new BattleRhythmTaskProcessor(storage, agentScheduler);
-      battleRhythmTaskProcessor.start();
-      log("✅ Battle Rhythm Task Processor started - Processing synthesis tasks");
+        // =================================================================
+        // Start Battle Rhythm Task Processor
+        // Processes tasks from agent_task_queue (created by Sunday Recon)
+        // Executes agent synthesis and logs to agent_activity_log
+        // =================================================================
+        log("⚙️  Initializing Battle Rhythm Task Processor...");
+        battleRhythmTaskProcessor = new BattleRhythmTaskProcessor(storage, agentScheduler);
+        battleRhythmTaskProcessor.start();
+        log("✅ Battle Rhythm Task Processor started - Processing synthesis tasks");
+      }
 
       // ===================================================================
       // Start Event-Driven Orchestrator (replaces 15s continuous polling)
       // Agents fire ONLY when data changes (registerChange / registerMemoryChange)
       // ~93% LLM cost reduction vs the fixed-interval polling loop
       // ===================================================================
-      try {
+      if (ENABLE_LEGACY_AGENTS) try {
         log("⚡ Initializing Event-Driven Orchestrator...");
         const eventOrchestrator = getEventDrivenOrchestrator(storage);
         if (eventOrchestrator) {
@@ -326,9 +347,11 @@ app.use((req, res, next) => {
       // Syncs external systems (Jira, OpenProject, Monday) TO Palantir
       // Configured via environment variables (JIRA_SYNC_ENABLED, etc.)
       // ===================================================================
-      log("📡 Initializing Palantir Sync Scheduler...");
-      startPalantirSyncScheduler();
-      log("✅ Palantir Sync Scheduler started - External system sync jobs active");
+      if (ENABLE_LEGACY_AGENTS) {
+        log("📡 Initializing Palantir Sync Scheduler...");
+        startPalantirSyncScheduler();
+        log("✅ Palantir Sync Scheduler started - External system sync jobs active");
+      }
 
       // ===================================================================
       // Setup Process Management & Graceful Shutdown

@@ -1,5 +1,12 @@
 # Palantir → FalkorDB migration plan (ontology backend swap)
 
+> ℹ️ **Status.** This migration is already realized in the **`agent-runtime/`
+> sidecar** (FalkorDB + Graphiti are the live graph). What remains is the `server/`
+> side: `/api/palantir/ontology/*` should be served by `FalkorOntologyDataProvider`
+> and the legacy Palantir services dropped (the Palantir boot in `server/index.ts`
+> is already off by default via `ENABLE_LEGACY_AGENTS`). Plan below is still the
+> reference for finishing the `server/` swap.
+
 Scope: Kyndral-365 DOSv2. The UI reads ontology objects (Project, Feature,
 Story, Task, Risk, …) through `/api/palantir/ontology/*` routes backed by
 `OntologyDataProvider`, which persists to Postgres + **Palantir Foundry**. This

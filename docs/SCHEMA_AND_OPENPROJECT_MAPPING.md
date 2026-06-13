@@ -1,5 +1,10 @@
 # OpenProject → Kyndral-365 (v2) field mapping + schema additions
 
+> ℹ️ **Current — one correction.** The field/schema mapping is live. Where this doc
+> says the ontology layer persists to "Palantir", read **FalkorDB** — the
+> `/api/palantir/ontology/*` URLs are retained but backed by
+> `FalkorOntologyDataProvider`. See CLAUDE.md "LIVE vs LEGACY".
+
 Scope: Kyndral-365 DOSv2 (`shared/schema.ts`, 94 tables; Palantir ontology layer
 via `OntologyDataProvider` / `/api/palantir/ontology/*`). This answers #1: expose
 OpenProject PPM features and map Epics/Tasks/OKRs through the ontology.

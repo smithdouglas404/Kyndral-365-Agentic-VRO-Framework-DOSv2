@@ -1,5 +1,10 @@
 # UI bidirectional wiring map: OpenProject in every area of the Kyndral-365 UI
 
+> ℹ️ **Current.** Page-by-page wiring is live. Note only that agent/insight
+> surfaces (AgentLens, ClarityChat citations, monitoring pages) are fed by the
+> **`agent-runtime/` sidecar** via `/api/agent/*`, not the legacy `server/` agents.
+> See CLAUDE.md "LIVE vs LEGACY".
+
 Scope: Kyndral-365 DOSv2 client (~59 pages). This is the page-by-page map for
 making OpenProject visible — and writable — everywhere it should be, using the
 four drop-in files in `client/src/openproject/`:

@@ -1,5 +1,10 @@
 # UI strategy: OpenProject as datastore, Kyndral as the system of governance
 
+> ℹ️ **Current — one correction.** Strategy still holds. The `/api/palantir/ontology/*`
+> route URLs are kept, but the ontology backend is **FalkorDB** (`FalkorOntologyDataProvider`),
+> not Palantir Foundry. Agent insights come from the **`agent-runtime/` sidecar**
+> (`/api/agent/*`), not the legacy `server/` agents. See CLAUDE.md "LIVE vs LEGACY".
+
 Scope: Kyndral-365 DOSv2 UI (~59 pages, built on a Palantir-style ontology layer:
 `/api/palantir/ontology/*`). This answers #7: how to handle the UI when some data
 maps from OpenProject and other data must come from Kyndral's own setup screens.
