@@ -65,8 +65,11 @@ Per-page integration recipes: `docs/UI_BIDIRECTIONAL_WIRING_MAP.md`.
 
 ## Env vars (integration)
 
+Env vars alone are sufficient — no MCP adapter registration is required to
+connect OpenProject (adapter config, when present, takes precedence).
+
 ```
-OPENPROJECT_BASE_URL=…        # the OpenProject instance
+OPENPROJECT_BASE_URL=…        # the OpenProject instance (OPENPROJECT_URL also accepted)
 OPENPROJECT_API_KEY=…         # basic auth: apikey:<key>
 OPENPROJECT_WEBHOOK_SECRET=…  # X-OP-Signature HMAC
 AGENT_RUNTIME_URL=…           # the sidecar
@@ -75,10 +78,14 @@ FALKORDB_HOST/PORT/GRAPH/PASSWORD  # ontology graph
 ANTHROPIC_API_KEY / ANTHROPIC_MODEL # AI SDK chat route
 ```
 
-## Cross-repo note
+## Docs (vendored — this repo is self-contained)
 
-The reference implementations and docs originate in the public repo
-`smithdouglas404/agenticopenproject` under `agentic-ppm/kyndryl-connector/`
-(strategy docs: `GROUNDING_AND_HALLUCINATION.md`, `ORCHESTRATION_AND_RULES.md`,
-`UI_STRATEGY.md`, `SCHEMA_AND_OPENPROJECT_MAPPING.md`, `PALANTIR_TO_FALKORDB.md`).
-If something here seems missing or stale, read that folder's latest `main`.
+All connector strategy docs live in this repo under `docs/`:
+`GROUNDING_AND_HALLUCINATION.md`, `ORCHESTRATION_AND_RULES.md`,
+`UI_STRATEGY.md`, `SCHEMA_AND_OPENPROJECT_MAPPING.md`,
+`PALANTIR_TO_FALKORDB.md`, `UI_BIDIRECTIONAL_WIRING_MAP.md`,
+`MOCK_DATA_TO_REAL.md`, `OPENPROJECT_CONNECTOR_README.md`.
+The only external piece is the OPTIONAL agent-runtime sidecar
+(`agenticopenproject:agentic-ppm/agent-runtime/`); everything in this app
+degrades gracefully when it isn't deployed (ApprovalQueue and `/api/agent/*`
+return clear 503s).
