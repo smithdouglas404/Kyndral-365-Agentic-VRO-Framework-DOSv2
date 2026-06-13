@@ -1,0 +1,322 @@
+name: OpenProject Smoke Test
+
+on:
+  pull_request:
+    paths:
+      - "openproject/**"
+      - ".github/workflows/openproject-smoke-test.yml"
+
+jobs:
+  smoke-test:
+    name: Build & boot smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      IMAGE_TAG: openproject-smoke:${{ github.sha }}
+      OP_PORT: 3000
+      DB_NAME: openproject_smoke
+      DB_USER: openproject
+      DB_PASS: openproject
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # 2. Build the OpenProject Docker image (slim target)
+      #    Context is openproject/ so all COPY paths in the Dockerfile resolve.
+      # -----------------------------------------------------------------------
+      - name: Build OpenProject Docker image
+        run: |
+          echo "::group::docker build"
+          docker build \
+            --target slim \
+            --tag "$IMAGE_TAG" \
+            --file openproject/docker/prod/Dockerfile \
+            openproject/
+          echo "::endgroup::"
+
+      # -----------------------------------------------------------------------
+      # 3. Start Postgres 15
+      # -----------------------------------------------------------------------
+      - name: Start Postgres 15
+        run: |
+          docker network create op-smoke
+
+          docker run -d \
+            --name postgres \
+            --network op-smoke \
+            -e POSTGRES_DB="$DB_NAME" \
+            -e POSTGRES_USER="$DB_USER" \
+            -e POSTGRES_PASSWORD="$DB_PASS" \
+            postgres:15-alpine
+
+          # Wait until Postgres is ready to accept connections
+          echo "Waiting for Postgres to be ready..."
+          for i in $(seq 1 30); do
+            if docker exec postgres pg_isready -U "$DB_USER" -d "$DB_NAME" -q; then
+              echo "Postgres is ready."
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "ERROR: Postgres did not become ready in time."
+              docker logs postgres
+              exit 1
+            fi
+            sleep 2
+          done
+
+      # -----------------------------------------------------------------------
+      # 4. Run migrations and seed the database
+      #    We run these as one-off commands before starting the long-lived web
+      #    process so that boot errors surface cleanly in their own step.
+      # -----------------------------------------------------------------------
+      - name: Run database migrations
+        run: |
+          docker run --rm \
+            --network op-smoke \
+            -e DATABASE_URL="postgres://$DB_USER:$DB_PASS@postgres/$DB_NAME" \
+            -e SECRET_KEY_BASE=test-secret-key-smoke \
+            -e RAILS_ENV=production \
+            -e OPENPROJECT_HTTPS=false \
+            -e "OPENPROJECT_HOST__NAME=localhost:$OP_PORT" \
+            "$IMAGE_TAG" \
+            bundle exec rake db:migrate
+
+      - name: Seed database (creates default admin user)
+        run: |
+          docker run --rm \
+            --network op-smoke \
+            -e DATABASE_URL="postgres://$DB_USER:$DB_PASS@postgres/$DB_NAME" \
+            -e SECRET_KEY_BASE=test-secret-key-smoke \
+            -e RAILS_ENV=production \
+            -e OPENPROJECT_HTTPS=false \
+            -e "OPENPROJECT_HOST__NAME=localhost:$OP_PORT" \
+            "$IMAGE_TAG" \
+            bundle exec rake db:seed
+
+      # -----------------------------------------------------------------------
+      # 5. Register the agentic_ppm plugin frontend links
+      # -----------------------------------------------------------------------
+      - name: Register agentic_ppm plugin frontend
+        run: |
+          docker run --rm \
+            --network op-smoke \
+            -e DATABASE_URL="postgres://$DB_USER:$DB_PASS@postgres/$DB_NAME" \
+            -e SECRET_KEY_BASE=test-secret-key-smoke \
+            -e RAILS_ENV=production \
+            -e OPENPROJECT_HTTPS=false \
+            -e "OPENPROJECT_HOST__NAME=localhost:$OP_PORT" \
+            "$IMAGE_TAG" \
+            bundle exec rake openproject:plugins:register_frontend
+
+      # -----------------------------------------------------------------------
+      # 6. Create a smoke-test project and enable the agentic_ppm module on it
+      #    so that the project-scoped plugin routes are reachable.
+      # -----------------------------------------------------------------------
+      - name: Create smoke-test project with agentic_ppm module
+        run: |
+          docker run --rm \
+            --network op-smoke \
+            -e DATABASE_URL="postgres://$DB_USER:$DB_PASS@postgres/$DB_NAME" \
+            -e SECRET_KEY_BASE=test-secret-key-smoke \
+            -e RAILS_ENV=production \
+            -e OPENPROJECT_HTTPS=false \
+            -e "OPENPROJECT_HOST__NAME=localhost:$OP_PORT" \
+            "$IMAGE_TAG" \
+            bundle exec rails runner "
+              project = Project.find_or_create_by!(identifier: 'smoke-test') do |p|
+                p.name   = 'Smoke Test'
+                p.public = false
+              end
+              project.enabled_module_names |= ['agentic_ppm']
+              project.save!
+              puts \"Project id=#{project.id} identifier=#{project.identifier} modules=#{project.enabled_module_names.inspect}\"
+            "
+
+      # -----------------------------------------------------------------------
+      # 7. Start the OpenProject web process
+      # -----------------------------------------------------------------------
+      - name: Start OpenProject web server
+        run: |
+          docker run -d \
+            --name openproject \
+            --network op-smoke \
+            -p "$OP_PORT:8080" \
+            -e DATABASE_URL="postgres://$DB_USER:$DB_PASS@postgres/$DB_NAME" \
+            -e SECRET_KEY_BASE=test-secret-key-smoke \
+            -e RAILS_ENV=production \
+            -e OPENPROJECT_HTTPS=false \
+            -e "OPENPROJECT_HOST__NAME=localhost:$OP_PORT" \
+            -e RAILS_LOG_TO_STDOUT=1 \
+            -e RAILS_SERVE_STATIC_FILES=1 \
+            -e MIGRATE=false \
+            "$IMAGE_TAG"
+
+      # -----------------------------------------------------------------------
+      # 8. Wait for OpenProject to boot
+      #    /health_check is the OkComputer "web" check (app + database).
+      # -----------------------------------------------------------------------
+      - name: Wait for OpenProject to boot
+        run: |
+          BASE="http://localhost:$OP_PORT"
+          echo "Waiting for OpenProject to boot at $BASE ..."
+
+          for i in $(seq 1 60); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/health_check" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "OpenProject is up (HTTP $STATUS)."
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "ERROR: OpenProject did not become healthy within 120 seconds."
+              echo "--- Container logs ---"
+              docker logs openproject
+              exit 1
+            fi
+            echo "  attempt $i/60: HTTP $STATUS — retrying in 2s..."
+            sleep 2
+          done
+
+      # -----------------------------------------------------------------------
+      # 9. Authenticate and run smoke tests against critical endpoints
+      #
+      #    OpenProject seeds a default admin user (login: admin, password: admin).
+      #    We POST to /login to obtain a session cookie, then hit each endpoint.
+      #    curl -f (--fail) exits non-zero on HTTP 4xx/5xx, which fails the step.
+      # -----------------------------------------------------------------------
+      - name: Authenticate as admin
+        run: |
+          BASE="http://localhost:$OP_PORT"
+          COOKIE_JAR=/tmp/op-smoke-cookies.txt
+
+          # Fetch the login page to get the CSRF token
+          LOGIN_PAGE=$(curl -s -c "$COOKIE_JAR" "$BASE/login")
+          CSRF_TOKEN=$(echo "$LOGIN_PAGE" \
+            | grep -oP 'name="authenticity_token" value="\K[^"]+' \
+            | head -1)
+
+          if [ -z "$CSRF_TOKEN" ]; then
+            echo "ERROR: Could not extract CSRF token from login page."
+            echo "--- Login page excerpt ---"
+            echo "$LOGIN_PAGE" | head -40
+            echo "--- Container logs ---"
+            docker logs openproject
+            exit 1
+          fi
+
+          echo "CSRF token obtained (${#CSRF_TOKEN} chars)."
+
+          # POST credentials
+          HTTP_STATUS=$(curl -s -o /tmp/op-login-response.html -w "%{http_code}" \
+            -b "$COOKIE_JAR" -c "$COOKIE_JAR" \
+            -X POST "$BASE/login" \
+            --data-urlencode "username=admin" \
+            --data-urlencode "password=admin" \
+            --data-urlencode "authenticity_token=$CSRF_TOKEN" \
+            -L)
+
+          echo "Login response: HTTP $HTTP_STATUS"
+
+          # A successful login redirects to the dashboard (200 after redirect).
+          # A failed login stays on /login (also 200 but with an error message).
+          if grep -qi "invalid user" /tmp/op-login-response.html \
+            || grep -qi "Invalid credentials" /tmp/op-login-response.html; then
+            echo "ERROR: Login failed — invalid credentials."
+            cat /tmp/op-login-response.html | head -60
+            exit 1
+          fi
+
+          echo "Login successful."
+          # Persist cookie jar path for subsequent steps
+          echo "COOKIE_JAR=$COOKIE_JAR" >> "$GITHUB_ENV"
+
+      - name: "Smoke test: GET /admin/plugins (plugin list)"
+        run: |
+          BASE="http://localhost:$OP_PORT"
+          echo "Testing GET $BASE/admin/plugins ..."
+          HTTP_STATUS=$(curl -s -o /tmp/smoke-plugins.html -w "%{http_code}" \
+            -b "$COOKIE_JAR" \
+            "$BASE/admin/plugins")
+          echo "HTTP $HTTP_STATUS"
+          if [ "$HTTP_STATUS" = "500" ]; then
+            echo "FAIL: /admin/plugins returned HTTP 500"
+            echo "--- Response body ---"
+            cat /tmp/smoke-plugins.html | head -80
+            echo "--- Container logs (last 50 lines) ---"
+            docker logs --tail 50 openproject
+            exit 1
+          fi
+          echo "PASS: /admin/plugins returned HTTP $HTTP_STATUS"
+
+      - name: "Smoke test: GET /projects/smoke-test/agentic_ppm_recommendations (Insights)"
+        run: |
+          BASE="http://localhost:$OP_PORT"
+          ENDPOINT="$BASE/projects/smoke-test/agentic_ppm_recommendations"
+          echo "Testing GET $ENDPOINT ..."
+          HTTP_STATUS=$(curl -s -o /tmp/smoke-insights.html -w "%{http_code}" \
+            -b "$COOKIE_JAR" \
+            "$ENDPOINT")
+          echo "HTTP $HTTP_STATUS"
+          if [ "$HTTP_STATUS" = "500" ]; then
+            echo "FAIL: Insights page returned HTTP 500"
+            echo "--- Response body ---"
+            cat /tmp/smoke-insights.html | head -80
+            echo "--- Container logs (last 50 lines) ---"
+            docker logs --tail 50 openproject
+            exit 1
+          fi
+          echo "PASS: Insights page returned HTTP $HTTP_STATUS"
+
+      - name: "Smoke test: GET /projects/smoke-test/agentic_ppm_rules (Rules index)"
+        run: |
+          BASE="http://localhost:$OP_PORT"
+          ENDPOINT="$BASE/projects/smoke-test/agentic_ppm_rules"
+          echo "Testing GET $ENDPOINT ..."
+          HTTP_STATUS=$(curl -s -o /tmp/smoke-rules.html -w "%{http_code}" \
+            -b "$COOKIE_JAR" \
+            "$ENDPOINT")
+          echo "HTTP $HTTP_STATUS"
+          if [ "$HTTP_STATUS" = "500" ]; then
+            echo "FAIL: Rules index returned HTTP 500"
+            echo "--- Response body ---"
+            cat /tmp/smoke-rules.html | head -80
+            echo "--- Container logs (last 50 lines) ---"
+            docker logs --tail 50 openproject
+            exit 1
+          fi
+          echo "PASS: Rules index returned HTTP $HTTP_STATUS"
+
+      - name: "Smoke test: GET /projects/smoke-test/agentic_ppm_rules/new (New Rule)"
+        run: |
+          BASE="http://localhost:$OP_PORT"
+          ENDPOINT="$BASE/projects/smoke-test/agentic_ppm_rules/new"
+          echo "Testing GET $ENDPOINT ..."
+          HTTP_STATUS=$(curl -s -o /tmp/smoke-rules-new.html -w "%{http_code}" \
+            -b "$COOKIE_JAR" \
+            "$ENDPOINT")
+          echo "HTTP $HTTP_STATUS"
+          if [ "$HTTP_STATUS" = "500" ]; then
+            echo "FAIL: New Rule page returned HTTP 500"
+            echo "--- Response body ---"
+            cat /tmp/smoke-rules-new.html | head -80
+            echo "--- Container logs (last 50 lines) ---"
+            docker logs --tail 50 openproject
+            exit 1
+          fi
+          echo "PASS: New Rule page returned HTTP $HTTP_STATUS"
+
+      # -----------------------------------------------------------------------
+      # 10. Always dump container logs on failure for post-mortem debugging
+      # -----------------------------------------------------------------------
+      - name: Dump container logs on failure
+        if: failure()
+        run: |
+          echo "=== OpenProject container logs ==="
+          docker logs openproject || true
+          echo "=== Postgres container logs ==="
+          docker logs postgres || true
