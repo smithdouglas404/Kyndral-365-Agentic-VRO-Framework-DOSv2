@@ -1,5 +1,11 @@
 # OpenProject connector for Kyndral-365
 
+> ℹ️ **Current — one caveat.** The connector (sync, webhook, writeback) is live and
+> correct. Ignore the `eventDrivenBootstrap.ts` / `EventDrivenOrchestrator`
+> activation row: that legacy in-process orchestrator is **off by default**
+> (`ENABLE_LEGACY_AGENTS`); the agent system is the `agent-runtime/` sidecar.
+> See CLAUDE.md "LIVE vs LEGACY".
+
 Makes **OpenProject the datastore / system-of-record** for the Kyndral-365 platform,
 **bidirectionally**, mirroring the existing source-tool clients (Jira, Planview, …).
 Built by reading the Kyndral repo's exact patterns so it drops straight in.
