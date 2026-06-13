@@ -44,7 +44,10 @@ const customConfigPlugin:Plugin = {
 const externalAssetsPlugin:Plugin = {
   name: 'external-assets',
   setup(build) {
-    build.onResolve({ filter: /\/images\/.*\.png$/ }, (args) => ({
+    // jQuery UI theme CSS references icons as url("images/ui-icons_*.png") —
+    // a relative path with NO leading slash, so the previous /\/images\// filter
+    // never matched. Match an optional leading slash so these are externalized.
+    build.onResolve({ filter: /(^|\/)images\/.*\.png$/ }, (args) => ({
       path: args.path,
       external: true,
     }));
