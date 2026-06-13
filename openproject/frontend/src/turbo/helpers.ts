@@ -2,11 +2,11 @@ import * as Turbo from '@hotwired/turbo';
 
 export namespace TurboHelpers {
   export function showProgressBar() {
-    Turbo.session.adapter.formSubmissionStarted();
+    Turbo.session.adapter.formSubmissionStarted?.({} as any);
   }
 
   export function hideProgressBar() {
-    Turbo.session.adapter.formSubmissionFinished();
+    Turbo.session.adapter.formSubmissionFinished?.({} as any);
   }
 
   export function scrubScriptElements(element:HTMLElement|DocumentFragment) {

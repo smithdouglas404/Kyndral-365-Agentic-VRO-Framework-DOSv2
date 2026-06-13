@@ -39,4 +39,16 @@ const customConfigPlugin:Plugin = {
   }
 }
 
-export default [customConfigPlugin];
+// Marks jQuery UI icon sprite PNG references in CSS url() calls as external so
+// esbuild does not attempt to resolve image files that are not present in the repo.
+const externalAssetsPlugin:Plugin = {
+  name: 'external-assets',
+  setup(build) {
+    build.onResolve({ filter: /\/images\/.*\.png$/ }, (args) => ({
+      path: args.path,
+      external: true,
+    }));
+  },
+}
+
+export default [customConfigPlugin, externalAssetsPlugin];
