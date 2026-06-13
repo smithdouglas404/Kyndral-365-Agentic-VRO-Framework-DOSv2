@@ -39,7 +39,7 @@ export class MemoryManager {
   private agentId: string;
   private contextWindowSize: number;
   private maxHistorySize: number;
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
   private tableInitialized: boolean = false;
 
   constructor(config: MemoryManagerConfig) {
@@ -47,9 +47,8 @@ export class MemoryManager {
     this.contextWindowSize = config.contextWindowSize || 10;
     this.maxHistorySize = config.maxHistorySize || 100;
 
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // OpenAI is OPTIONAL (embeddings only) and created lazily so the app boots
+    // with only ANTHROPIC_API_KEY; see getOpenAI().
 
     console.log(`[MemoryManager] Initialized for agent: ${this.agentId}`);
   }
@@ -130,6 +129,7 @@ export class MemoryManager {
   private async searchSemanticFacts(query: string, limit: number = 5): Promise<SemanticFact[]> {
     try {
       const embedding = await this.generateEmbedding(query);
+      if (embedding.length === 0) return []; // semantic search disabled (no OpenAI key)
 
       const result = await db.execute(sql`
         SELECT
@@ -179,6 +179,7 @@ export class MemoryManager {
     const content = `User: ${userInput}\nAgent: ${agentOutput}`;
 
     const embedding = await this.generateEmbedding(content);
+    if (embedding.length === 0) return; // semantic memory disabled (no OpenAI key)
 
     await db.execute(sql`
       INSERT INTO agent_memories (agent_id, content, embedding, metadata)
@@ -193,8 +194,18 @@ export class MemoryManager {
     console.log(`[MemoryManager] Learned new fact for ${this.agentId}`);
   }
 
+  /** Lazily build the OpenAI client; returns null when no OPENAI_API_KEY is set. */
+  private getOpenAI(): OpenAI | null {
+    if (this.openai) return this.openai;
+    if (!process.env.OPENAI_API_KEY) return null;
+    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    return this.openai;
+  }
+
   private async generateEmbedding(text: string): Promise<number[]> {
-    const response = await this.openai.embeddings.create({
+    const openai = this.getOpenAI();
+    if (!openai) return []; // no OpenAI key → skip embeddings (semantic memory disabled)
+    const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text,
       dimensions: 1536
