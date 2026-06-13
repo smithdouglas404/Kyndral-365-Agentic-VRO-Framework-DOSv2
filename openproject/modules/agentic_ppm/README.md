@@ -48,6 +48,151 @@ reg.resolve_subject("safe:Feature/123")
    ```
 4. Enable the **Agentic PPM** module per project (Project settings → Modules).
 
+## Rules system
+
+A native rules/thresholds layer lets a human declare conditions ("alert me when
+an Epic's `percentageDone` drops below 40") that the **TypeScript agent runtime**
+pulls and **evaluates** against the knowledge graph. The Rails module is the
+*authoring* side only — it never evaluates anything. When the runtime detects a
+breach it POSTs back, and the breach is persisted as an `AgentRecommendation`
+(`finding_type: "rule_breach"`) so it surfaces in the native Insights inbox.
+
+| Concern | Where |
+|---|---|
+| **Rule store / authoring model** | `app/models/agentic_ppm/agent_rule.rb` + `db/migrate/20260610000001_create_agentic_ppm_agent_rules.rb` |
+| **CRUD UI** | `app/controllers/agentic_ppm/rules_controller.rb` + `app/views/agentic_ppm/rules/*` |
+| **Runtime pull API** | `app/controllers/agentic_ppm/api/rules_controller.rb` |
+| **Runtime breach ingestion API** | `app/controllers/agentic_ppm/api/alerts_controller.rb` |
+
+A rule with a `nil` `project_id` is **global** and applies to every project;
+otherwise it is scoped to its project.
+
+### Rule kinds: `threshold` vs `decision`
+
+Every rule has a `kind`:
+
+- **`threshold`** (default) — the original single comparison: a `metric`,
+  `operator` and `threshold`/`threshold2` (e.g. *Epic `percentageDone` `lt`
+  40*).
+- **`decision`** — carries a full **GoRules JDM** (JSON Decision Model) decision
+  graph in the `jdm` jsonb column. The runtime evaluates it with its **ZEN
+  engine** (see [`src/rules/zenEvaluator.ts`](../../src/rules/zenEvaluator.ts))
+  rather than the simple comparator. A decision rule has no
+  `metric`/`operator`/`threshold` of its own — that logic lives inside the JDM
+  graph. Design rationale and the graph schema are in
+  [`docs/DECISION_ENGINE_GORULES.md`](../../docs/DECISION_ENGINE_GORULES.md).
+
+The model validates that a `decision` rule's `jdm` looks like a JDM graph (a
+Hash with a `"nodes"` key). The authoring form takes the JDM as pretty-printed
+JSON text; the controller `JSON.parse`s it and rejects malformed JSON with a
+*"JDM is not valid JSON"* error. A minimal JDM looks like:
+
+```json
+{ "nodes": [{ "id": "in", "type": "inputNode" }], "edges": [] }
+```
+
+### Permissions
+
+Added to the `:agentic_ppm` project module:
+
+- `view_agent_rules` (`agentic_ppm/rules#index`)
+- `manage_agent_rules` (full CRUD)
+
+Both depend on `view_work_packages`.
+
+### API authentication
+
+The runtime is a service, not a logged-in user. Both API controllers
+authenticate it with a shared bearer token stored in the plugin setting
+`rules_api_token` (`Setting.plugin_openproject_agentic_ppm["rules_api_token"]`),
+presented via either header:
+
+```
+Authorization: Bearer <rules_api_token>
+X-OP-Rules-Token: <rules_api_token>
+```
+
+If the token is absent/blank they **fall back** to standard OpenProject request
+authentication (session or API key via the core `accept_key_auth` macro), so a
+logged-in user can also reach them. CSRF is skipped and `application/json` is
+treated as an API request, mirroring core `Webhooks::Incoming::HooksController`.
+
+### `rules.json` contract (runtime pulls this)
+
+```
+GET /projects/:project_id/agentic_ppm/api/rules.json
+```
+
+Returns the **enabled** global rules plus the project's enabled rules:
+
+```json
+{
+  "rules": [
+    {
+      "id": 12,
+      "project_id": 7,
+      "kind": "threshold",
+      "ontology_class": "safe:Epic",
+      "metric": "percentageDone",
+      "operator": "lt",
+      "threshold": 40.0,
+      "threshold2": null,
+      "severity": "warning",
+      "cooldown_minutes": 60,
+      "action_kind": "alert",
+      "notify_openproject": true,
+      "notify_kyndral": true,
+      "enabled": true,
+      "jdm": {}
+    }
+  ]
+}
+```
+
+`kind` is `"threshold"` or `"decision"`. `operator` is one of: `gt`, `gte`,
+`lt`, `lte`, `eq`, `ne`, `changed`, `delta_gt`, `delta_lt`, `outside_range`,
+`crossed_above`, `crossed_below`. `threshold2` is the upper bound for
+`outside_range` / delta comparisons. `jdm` carries the GoRules JDM decision
+graph for `decision` rules (evaluated by the runtime's ZEN engine,
+[`src/rules/zenEvaluator.ts`](../../src/rules/zenEvaluator.ts)) and is `{}` for
+`threshold` rules.
+
+Optionally the runtime can stamp evaluation progress:
+
+```
+PATCH /agentic_ppm/api/rules/:id/evaluated.json   -> 204 No Content
+```
+
+### Alerts contract (runtime POSTs a breach)
+
+```
+POST /agentic_ppm/api/alerts.json
+Content-Type: application/json
+```
+
+```json
+{
+  "agent": "RulesAgent",
+  "ontology_subject": "safe:Epic/123",
+  "title": "Epic 123 percentageDone fell below 40%",
+  "body": "Observed 32% against a threshold of 40%.",
+  "severity": "warning",
+  "confidence": 0.9,
+  "rule_id": 12,
+  "metric": "percentageDone",
+  "observed_value": 32,
+  "threshold": 40,
+  "operator": "lt"
+}
+```
+
+This creates an `AgentRecommendation` with `finding_type: "rule_breach"`. The
+`ontology_subject` (e.g. `"safe:Epic/123"`) is resolved through
+`OpenProject::AgenticPpm::Ontology` to attach the recommendation to the right
+work package / project. `evidence` is stored as
+`{ rule_id, metric, observed_value, threshold, operator }`. Response: `201` with
+`{ "id": <recommendation_id> }`.
+
 ## Not yet in this scaffold
 
 Default workflows, per-project templates, the RDF projector, the webhook
