@@ -1,31 +1,64 @@
 /**
- * PALANTIR ONTOLOGY API ROUTES
+ * ONTOLOGY API ROUTES (served at /api/palantir/ontology/* — URL kept for the
+ * 59-page Kyndral UI; the backend is FalkorDB, NOT Palantir Foundry).
  *
- * 100% Palantir Foundry — zero PostgreSQL for project data.
- * All reads: AtlasProject, AtlasBudget, AtlasRisk, AtlasObjective, AtlasKeyResult, AtlasDependency.
- *
- * These routes map to the usePalantirOntology.ts hooks on the frontend.
+ * All reads of ontology objects (AtlasProject, AtlasBudget, AtlasRisk,
+ * AtlasObjective, AtlasKeyResult, AtlasDependency, …) come from the FalkorDB
+ * graph via FalkorOntologyDataProvider. These routes map to the
+ * usePalantirOntology.ts hooks on the frontend.
  */
 
 import express, { type RequestHandler } from 'express';
-import { getPalantirService } from '../mcp/MCPServiceFactory.js';
+import { getOntologyProvider } from '../FalkorOntologyDataProvider.js';
 
 const router = express.Router();
 
-const ONTOLOGY_RID = process.env.PALANTIR_ONTOLOGY_RID || '';
+// Retained only so existing call sites that pass `{ ontologyRid: ONTOLOGY_RID }`
+// still resolve; the FalkorDB shim ignores it (no Foundry ontology RID exists).
+const ONTOLOGY_RID = '';
+
+// The Atlas object types the UI reads (FalkorDB has no schema registry, so the
+// /schema endpoint reports this fixed set rather than a Foundry ontology RID).
+const ATLAS_OBJECT_TYPES = [
+  'AtlasProject', 'AtlasBudget', 'AtlasRisk', 'AtlasObjective', 'AtlasKeyResult',
+  'AtlasDependency', 'AtlasKpi', 'AtlasTransformation', 'AtlasFeature', 'AtlasMilestone',
+] as const;
 
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
-function getPalantirOrFail(res: express.Response) {
-  const palantir = getPalantirService();
-  if (!palantir) {
-    console.error('[PalantirOntology] Palantir service not available - check PALANTIR_HOSTNAME and PALANTIR_TOKEN env vars');
-    res.status(503).json({ error: 'Palantir AIP not configured' });
+/**
+ * Thin read-shim that preserves the small surface the route used from the old
+ * Palantir AIP client (listObjects/getObject/listObjectTypes) but is backed by
+ * FalkorDB. Returns 503 (same graceful-degradation contract as before) when the
+ * graph isn't configured.
+ */
+interface OntologyReadShim {
+  listObjects(type: string, opts?: { pageSize?: number }): Promise<{ data: Array<Record<string, any>> }>;
+  getObject(type: string, id: string, opts?: unknown): Promise<Record<string, any> | null>;
+  listObjectTypes(rid?: string): Promise<Array<{ apiName: string }>>;
+}
+
+function getPalantirOrFail(res: express.Response): OntologyReadShim | null {
+  if (!process.env.FALKORDB_HOST && !process.env.FALKORDB_URL) {
+    console.error('[Ontology] FalkorDB not configured - set FALKORDB_HOST/FALKORDB_PORT/FALKORDB_GRAPH');
+    res.status(503).json({ error: 'Ontology graph (FalkorDB) not configured' });
     return null;
   }
-  return palantir;
+  const provider = getOntologyProvider();
+  return {
+    async listObjects(type, opts) {
+      const data = await provider.getObjects(type, undefined, opts?.pageSize ?? 500);
+      return { data: data as Array<Record<string, any>> };
+    },
+    async getObject(type, id) {
+      return (await provider.getObject(type, id)) as Record<string, any> | null;
+    },
+    async listObjectTypes() {
+      return ATLAS_OBJECT_TYPES.map((apiName) => ({ apiName }));
+    },
+  };
 }
 
 function mapStatusToColor(status: string): 'green' | 'amber' | 'red' {
