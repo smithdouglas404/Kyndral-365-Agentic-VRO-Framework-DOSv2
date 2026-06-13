@@ -2,15 +2,80 @@ en:
   project_module_agentic_ppm: "Agentic PPM"
   permission_view_agent_recommendations: "View agent recommendations"
   permission_manage_agent_recommendations: "Manage agent recommendations"
+  permission_view_agent_rules: "View agent rules"
+  permission_manage_agent_rules: "Manage agent rules"
 
   agentic_ppm:
     label_insights: "Insights"
     label_recommendations: "Agent recommendations"
     no_recommendations: "No recommendations yet."
 
+    label_rules: "Agent rules"
+    label_rule_new: "New rule"
+    label_rule_edit: "Edit rule"
+    label_global_rule: "Global rule"
+    no_rules: "No rules yet."
+
+    # Plain-language authoring form
+    form_intro: "Tell the agents what to watch for. Pick what to watch, what to measure, and the condition that should raise an alert — for example: an Epic's percent complete drops below 50."
+    placeholder_name: "e.g. Epic falling behind"
+    label_watch_what: "What to watch"
+    prompt_watch_what: "— Choose an item type —"
+    label_measure_what: "What to measure"
+    prompt_measure_what: "— Choose a measure —"
+    group_work_item_metrics: "For each item (Epic, Feature, Story, Task)"
+    group_project_metrics: "For the whole project"
+    label_condition: "Alert when it…"
+    prompt_condition: "— Choose a condition —"
+    label_value: "Value"
+    label_value2: "Upper value (only for \"is outside the range\")"
+    label_severity: "How serious is it?"
+    label_action: "What should happen?"
+    hint_ontology_class: "The kind of item this rule looks at. You don't need to know any codes — just pick from the list."
+    hint_metric: "The number this rule checks. \"For each item\" measures apply to every Epic/Feature/Story/Task; \"For the whole project\" measures look at the project overall."
+    hint_threshold: "The number to compare against (e.g. 50). Not needed for \"changes at all\"."
+    hint_threshold2: "Only used by \"is outside the range\" — the upper end of the allowed range."
+    hint_cooldown: "Wait at least this many minutes before re-alerting on the same item (avoids repeat noise). Default 60."
+    advanced_summary: "Advanced: combine several conditions (optional)"
+    advanced_intro: "Most rules are a single check (above). A decision rule lets you combine conditions — e.g. \"behind schedule AND over budget → critical\". Leave this closed unless you need it. A working example is pre-filled below that you can edit; it only takes effect if you switch the type to Decision."
+    hint_kind: "Keep \"Threshold\" for a single check. Choose \"Decision\" only if you've filled in the decision table below."
+    hint_jdm: "A decision table (GoRules format). The pre-filled example flags an item whose progress is below 50% as critical, below 70% as a warning. You can edit the numbers; a visual editor is coming in Kyndral."
+
+    kinds:
+      threshold: "Threshold"
+      decision: "Decision (GoRules JDM)"
+
+    errors:
+      jdm_invalid_json: "JDM is not valid JSON"
+
+    operators:
+      gt: "is greater than"
+      gte: "is greater than or equal to"
+      lt: "is less than"
+      lte: "is less than or equal to"
+      eq: "equals"
+      ne: "does not equal"
+      changed: "changed"
+      delta_gt: "change is greater than"
+      delta_lt: "change is less than"
+      outside_range: "is outside range"
+      crossed_above: "crossed above"
+      crossed_below: "crossed below"
+
+    severities:
+      info: "Info"
+      warning: "Warning"
+      critical: "Critical"
+
+    action_kinds:
+      alert: "Alert"
+      recommend: "Recommend"
+      escalate: "Escalate"
+
   activerecord:
     models:
       agentic_ppm/agent_recommendation: "Agent recommendation"
+      agentic_ppm/agent_rule: "Agent rule"
     attributes:
       agentic_ppm/agent_recommendation:
         title: "Title"
@@ -19,3 +84,20 @@ en:
         confidence: "Confidence"
         status: "Status"
         ontology_subject: "Subject"
+      agentic_ppm/agent_rule:
+        name: "Name"
+        description: "Description"
+        kind: "Rule kind"
+        jdm: "Decision graph (GoRules JDM)"
+        ontology_class: "Ontology class"
+        metric: "Metric"
+        operator: "Operator"
+        threshold: "Threshold"
+        threshold2: "Upper threshold"
+        severity: "Severity"
+        enabled: "Enabled"
+        notify_openproject: "Notify in OpenProject"
+        notify_kyndral: "Notify Kyndral"
+        cooldown_minutes: "Cooldown (minutes)"
+        action_kind: "Action"
+        last_evaluated_at: "Last evaluated at"
