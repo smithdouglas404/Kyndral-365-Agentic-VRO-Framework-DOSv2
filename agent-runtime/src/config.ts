@@ -22,7 +22,9 @@ export const config = {
   logLevel: process.env.LOG_LEVEL ?? 'info',
 
   openproject: {
-    baseUrl: process.env.OPENPROJECT_BASE_URL ?? 'http://localhost:8080',
+    // Accept OPENPROJECT_URL as a fallback for parity with the Kyndral app
+    // (which honors both); only defaults to localhost when neither is set.
+    baseUrl: process.env.OPENPROJECT_BASE_URL ?? process.env.OPENPROJECT_URL ?? 'http://localhost:8080',
     apiKey: process.env.OPENPROJECT_API_KEY ?? '',
     webhookSecret: process.env.OPENPROJECT_WEBHOOK_SECRET ?? '',
     alertsProject: process.env.OPENPROJECT_ALERTS_PROJECT ?? 'agent-alerts',
@@ -155,6 +157,16 @@ export const config = {
 
 /** Throw early if anything needed to actually run the pipeline is missing. */
 export function assertRuntimeConfig(): void {
+  // Loud warning when no OpenProject URL was provided: the silent localhost
+  // default means the health check (and all sync/write-back) will fail with a
+  // red "OpenProject ✕" pill, which is easy to misread as a code regression.
+  if (!process.env.OPENPROJECT_BASE_URL && !process.env.OPENPROJECT_URL) {
+    console.warn(
+      `[config] ⚠️  OPENPROJECT_BASE_URL is not set — defaulting to ${config.openproject.baseUrl}. ` +
+        `OpenProject will show as DOWN. Set OPENPROJECT_BASE_URL (and a valid OPENPROJECT_API_KEY ` +
+        `for that instance) on this service.`,
+    );
+  }
   required('OPENPROJECT_API_KEY');
   required('ANTHROPIC_API_KEY');
 }
