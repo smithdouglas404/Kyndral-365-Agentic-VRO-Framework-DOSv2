@@ -1,6 +1,6 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, cp } from "fs/promises";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -101,6 +101,14 @@ async function buildAll() {
     minify: true,
     external: externals,
     logLevel: "info",
+  });
+
+  // Copy runtime assets the bundled server reads from disk (industry profiles +
+  // ontology .ttl) into dist/ontology, so dist is self-contained and the loader
+  // finds them at dist/ontology/* in the container.
+  console.log("copying ontology assets...");
+  await cp("server/ontology", "dist/ontology", { recursive: true }).catch((err) => {
+    console.warn(`ontology asset copy skipped: ${err?.message ?? err}`);
   });
 }
 
