@@ -19,10 +19,15 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 --ingroup nodejs nodejs
 COPY package.json package-lock.json .npmrc ./
-RUN npm ci --omit=dev && npm cache clean --force
+# drizzle-kit is a devDependency (dropped by --omit=dev), but the Railway
+# preDeployCommand runs `drizzle-kit push`; install it (unsaved) so it's present.
+RUN npm ci --omit=dev && npm install --no-save drizzle-kit@^0.31.4 && npm cache clean --force
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/server ./server
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
+# drizzle-kit push reads drizzle.config.ts (which points at ./shared/schema.ts)
+# at deploy time, so it must be in the runtime image too.
+COPY --from=builder --chown=nodejs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 COPY --chown=nodejs:nodejs .env.example .env
 ENV NODE_ENV=production
 ENV PORT=5000
