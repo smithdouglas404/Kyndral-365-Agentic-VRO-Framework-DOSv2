@@ -217,12 +217,23 @@ export class OpenProjectClient {
   }
 
   async updateWorkPackage(id: number, updates: Partial<OPCreateWorkPackage>): Promise<OPWorkPackage> {
-    // Optimistic locking — get current lockVersion
-    const current = await this.getWorkPackage(id);
-    return this.request<OPWorkPackage>('PATCH', `/work_packages/${id}`, {
-      lockVersion: current.lockVersion,
-      ...updates,
-    });
+    // Optimistic locking — get current lockVersion; on 409 (someone wrote in
+    // between) refetch and retry once, same convention as openProjectWriteback.
+    const attempt = async (): Promise<OPWorkPackage> => {
+      const current = await this.getWorkPackage(id);
+      return this.request<OPWorkPackage>('PATCH', `/work_packages/${id}`, {
+        lockVersion: current.lockVersion,
+        ...updates,
+      });
+    };
+    try {
+      return await attempt();
+    } catch (e: any) {
+      if (typeof e?.message === 'string' && e.message.includes('(409)')) {
+        return await attempt();
+      }
+      throw e;
+    }
   }
 
   async deleteWorkPackage(id: number): Promise<void> {
@@ -512,7 +523,7 @@ let clientInstance: OpenProjectClient | null = null;
 
 export function getOpenProjectClient(): OpenProjectClient {
   if (!clientInstance) {
-    const baseUrl = process.env.OPENPROJECT_URL || 'http://localhost:8080';
+    const baseUrl = process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL || 'http://localhost:8080';
     const apiKey = process.env.OPENPROJECT_API_KEY || '';
 
     if (!apiKey) {

@@ -12,6 +12,7 @@
  */
 
 import { getOpenProjectClient } from './openproject/OpenProjectClient.js';
+import { SYNC_MARKER, markRecentlyPushed, isOpenProjectIntegrationEnabled } from '../openProjectWriteback.js';
 import { emitUIPacket, emitAgentAlert } from './AgentUIEmitter.js';
 import { broadcastNotification, broadcastCriticalAlert } from '../websocket.js';
 import type { UIBlock } from '../../shared/agentUIPacket.js';
@@ -71,6 +72,7 @@ export async function sendAgentNotification(notification: AgentNotification): Pr
 
   // --- 1. OpenProject: Create Agent Alert WP + comment ---
   try {
+    if (!isOpenProjectIntegrationEnabled()) throw new Error('openproject integration disabled');
     const client = getOpenProjectClient();
     const projectId = notification.opProjectId || 'nextera-agent-alerts';
 
@@ -84,6 +86,8 @@ export async function sendAgentNotification(notification: AgentNotification): Pr
           `**Severity:** ${notification.severity}`,
           notification.entityName ? `**Entity:** ${notification.entityName}` : '',
           `**Timestamp:** ${new Date().toISOString()}`,
+          '',
+          SYNC_MARKER,
         ].filter(Boolean).join('\n'),
       },
       customField_sync_source: 'nextera-agent',
@@ -91,13 +95,15 @@ export async function sendAgentNotification(notification: AgentNotification): Pr
       customField_agent_owner: notification.agentId,
     } as any);
 
+    markRecentlyPushed(wp.id); // echo prevention
     result.channels.openproject = { success: true, wpId: wp.id };
 
     // Add comment to related WP if specified
     if (notification.opRelatedWorkPackageId) {
+      markRecentlyPushed(notification.opRelatedWorkPackageId); // echo prevention
       await client.addWorkPackageComment(
         notification.opRelatedWorkPackageId,
-        `**${notification.agentName} Alert (${notification.severity}):** ${notification.title}\n\n${notification.body}`
+        `**${notification.agentName} Alert (${notification.severity}):** ${notification.title}\n\n${notification.body}\n\n${SYNC_MARKER}`
       );
     }
   } catch (err: any) {

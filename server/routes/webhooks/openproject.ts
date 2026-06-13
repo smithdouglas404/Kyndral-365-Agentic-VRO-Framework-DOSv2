@@ -15,7 +15,7 @@ import crypto from 'crypto';
 import { getOPToPalantirSync } from '../../services/sync/OpenProjectToPalantirSync.js';
 import { broadcastNotification } from '../../websocket.js';
 import { getEventDrivenOrchestrator, type ChangeEvent } from '../../lib/EventDrivenOrchestrator.js';
-import { isOwnEcho } from '../../openProjectWriteback.js';
+import { isOwnEcho, isOpenProjectIntegrationEnabled, markRecentlyPushed, SYNC_MARKER } from '../../openProjectWriteback.js';
 
 const router = Router();
 
@@ -66,7 +66,8 @@ async function agentWriteBack(wpId: number, finding: string): Promise<void> {
 
   try {
     const { getOpenProjectClient } = await import('../../services/openproject/OpenProjectClient.js');
-    await getOpenProjectClient().addWorkPackageComment(wpId, `${AGENT_TAG} ${finding}`);
+    markRecentlyPushed(wpId); // echo prevention: register BEFORE the write lands
+    await getOpenProjectClient().addWorkPackageComment(wpId, `${AGENT_TAG} ${finding} ${SYNC_MARKER}`);
     writeBackTimestamps.set(wpId, Date.now());
     console.log(`[OPWebhook] Agent write-back posted to WP #${wpId}`);
   } catch (err: any) {
@@ -138,8 +139,9 @@ function extractProjectId(entity: any): string | undefined {
 // ============================================================================
 
 function verifyWebhookSignature(req: Request, secret: string): boolean {
+  if (!secret) return true; // No secret configured — verification disabled
   const signature = req.headers['x-op-signature'] as string;
-  if (!signature || !secret) return true; // Skip if no secret configured
+  if (!signature) return false; // Secret configured but no signature — reject
 
   const body = JSON.stringify(req.body);
   const expected = crypto
@@ -147,10 +149,13 @@ function verifyWebhookSignature(req: Request, secret: string): boolean {
     .update(body)
     .digest('hex');
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  );
+  // OpenProject sends "sha1=..."/"sha256=..." style or bare hex depending on
+  // version; compare against the bare digest, tolerating a "sha256=" prefix.
+  const provided = signature.replace(/^sha\d+=/, '');
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false; // timingSafeEqual throws on length mismatch
+  return crypto.timingSafeEqual(a, b);
 }
 
 // ============================================================================
@@ -329,6 +334,11 @@ router.post('/:endpointId', async (req: Request, res: Response) => {
   const event: OPWebhookEvent = req.body;
   if (!event.action) {
     return res.status(400).json({ error: 'Missing action field' });
+  }
+
+  // Master kill switch — acknowledge so OpenProject doesn't retry, but skip processing
+  if (!isOpenProjectIntegrationEnabled()) {
+    return res.status(200).json({ received: true, skipped: 'openproject integration disabled' });
   }
 
   // Acknowledge immediately, process async

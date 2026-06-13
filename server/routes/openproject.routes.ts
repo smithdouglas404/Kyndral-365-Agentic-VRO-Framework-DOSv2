@@ -44,6 +44,7 @@ import express, { type Request, type Response, type Router } from "express";
 import { z } from "zod";
 import {
   OpenProjectApiError,
+  isOpenProjectIntegrationEnabled,
   type KyndralProjectChanges,
   type OpenProjectWriteback,
 } from "../openProjectWriteback";
@@ -222,11 +223,15 @@ export function initOpenProjectRoutes(router: Router, deps: OpenProjectRoutesDep
 
   // testConnection passthrough for the IntegrationManagement page.
   router.get("/api/openproject/status", async (_req: Request, res: Response) => {
+    const enabled = isOpenProjectIntegrationEnabled();
+    if (!enabled) {
+      return res.status(200).json({ success: false, enabled, message: "OpenProject integration disabled (OPENPROJECT_INTEGRATION_ENABLED=false)" });
+    }
     try {
       const result = await writeback.client.testConnection();
-      res.status(result.success ? 200 : 502).json(result);
+      res.status(result.success ? 200 : 502).json({ ...result, enabled });
     } catch (e: any) {
-      res.status(502).json({ success: false, message: e?.message ?? "connection test failed" });
+      res.status(502).json({ success: false, enabled, message: e?.message ?? "connection test failed" });
     }
   });
 
