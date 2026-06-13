@@ -162,13 +162,15 @@ export class IntegrationSyncService {
   private async testOpenProjectConnection(credentials: IntegrationCredentials): Promise<SyncResult> {
     const startTime = Date.now();
 
-    if (!credentials.baseUrl || !credentials.apiKey) {
-      throw new Error('Missing required OpenProject credentials: baseUrl, apiKey');
+    const baseUrl = credentials.baseUrl || process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL;
+    const apiKey = credentials.apiKey || credentials.apiToken || process.env.OPENPROJECT_API_KEY;
+    if (!baseUrl || !apiKey) {
+      throw new Error('Missing OpenProject credentials: set baseUrl/apiKey on the integration or OPENPROJECT_BASE_URL/OPENPROJECT_API_KEY in env');
     }
 
     const client = new OpenProjectClient({
-      baseUrl: credentials.baseUrl,
-      apiKey: credentials.apiKey,
+      baseUrl,
+      apiKey,
       projectId: credentials.projectId,
     });
     const result = await client.testConnection();
@@ -194,13 +196,15 @@ export class IntegrationSyncService {
   private async syncOpenProject(integration: Integration, credentials: IntegrationCredentials): Promise<SyncResult> {
     const startTime = Date.now();
 
-    if (!credentials.baseUrl || !credentials.apiKey) {
-      throw new Error('Missing required OpenProject credentials: baseUrl, apiKey');
+    const baseUrl = credentials.baseUrl || process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL;
+    const apiKey = credentials.apiKey || credentials.apiToken || process.env.OPENPROJECT_API_KEY;
+    if (!baseUrl || !apiKey) {
+      throw new Error('Missing OpenProject credentials: set baseUrl/apiKey on the integration or OPENPROJECT_BASE_URL/OPENPROJECT_API_KEY in env');
     }
 
     const client = new OpenProjectClient({
-      baseUrl: credentials.baseUrl,
-      apiKey: credentials.apiKey,
+      baseUrl,
+      apiKey,
       projectId: credentials.projectId,
     });
 

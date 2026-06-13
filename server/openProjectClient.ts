@@ -361,20 +361,37 @@ export class OpenProjectClient {
   }
 }
 
+/**
+ * Build a client from env vars alone — no MCP adapter registration needed.
+ * OPENPROJECT_BASE_URL (or OPENPROJECT_URL) + OPENPROJECT_API_KEY
+ * (+ optional OPENPROJECT_PROJECT_ID to scope the sync).
+ */
+export function createOpenProjectClientFromEnv(): OpenProjectClient | null {
+  const baseUrl = process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL;
+  const apiKey = process.env.OPENPROJECT_API_KEY;
+  if (!baseUrl || !apiKey) return null;
+  return new OpenProjectClient({ baseUrl, apiKey, projectId: process.env.OPENPROJECT_PROJECT_ID });
+}
+
 export async function createOpenProjectClientFromAdapter(adapterId: string): Promise<OpenProjectClient | null> {
   const adapters = await storage.getMcpAdapters();
   const adapter = adapters.find((a) => a.id === adapterId);
   if (!adapter || adapter.adapterType !== "openproject") {
+    // No adapter registered — fall back to env configuration if present.
+    const envClient = createOpenProjectClientFromEnv();
+    if (envClient) return envClient;
     console.error(`OpenProject adapter not found or wrong type: ${adapterId}`);
     return null;
   }
   try {
     const config = JSON.parse(adapter.configuration || "{}");
-    if (!config.baseUrl || !config.apiKey) {
-      console.error("OpenProject adapter missing baseUrl/apiKey");
+    const baseUrl = config.baseUrl || process.env.OPENPROJECT_BASE_URL || process.env.OPENPROJECT_URL;
+    const apiKey = config.apiKey || process.env.OPENPROJECT_API_KEY;
+    if (!baseUrl || !apiKey) {
+      console.error("OpenProject adapter missing baseUrl/apiKey (and no OPENPROJECT_* env fallback)");
       return null;
     }
-    return new OpenProjectClient({ baseUrl: config.baseUrl, apiKey: config.apiKey, projectId: config.projectId });
+    return new OpenProjectClient({ baseUrl, apiKey, projectId: config.projectId });
   } catch (e: any) {
     console.error(`OpenProject adapter config parse failed: ${e.message}`);
     return null;

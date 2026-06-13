@@ -80,12 +80,14 @@ async function pushStatusToOpenProject(
   explanation: string
 ): Promise<void> {
   try {
+    // Prefer an adapter if one is registered; otherwise env vars are enough
+    // (OPENPROJECT_BASE_URL/OPENPROJECT_URL + OPENPROJECT_API_KEY).
+    const { createOpenProjectClientFromAdapter, createOpenProjectClientFromEnv } = await import('./openProjectClient');
     const adapters = await storage.getMcpAdapters();
     const adapter = adapters.find(a => a.adapterType === 'openproject');
-    if (!adapter) return;
-
-    const { createOpenProjectClientFromAdapter } = await import('./openProjectClient');
-    const client = await createOpenProjectClientFromAdapter(adapter.id);
+    const client = adapter
+      ? await createOpenProjectClientFromAdapter(adapter.id)
+      : createOpenProjectClientFromEnv();
     if (!client) return;
 
     const opProjects = await client.getProjects();
